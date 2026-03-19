@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  --royal-plum: #2A0F24; /* Deepened for ultra-premium dark background */
+  --soft-plum: #4A2342;
+  --plum-light: #593053;
+  --pure-white: #FFFFFF;
+  --metallic-gold: #D4AF37;
+  --gold-glow: rgba(212, 175, 55, 0.4);
+  
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--royal-plum);
+  color: var(--pure-white);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--metallic-gold);
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+a {
+  color: var(--pure-white);
+  text-decoration: none;
+  transition: color 0.4s ease;
+}
+
+a:hover {
+  color: var(--metallic-gold);
+}
+
+/* Fluid Buttons */
+.btn-primary {
+  background: transparent;
+  color: var(--pure-white) !important;
+  font-family: var(--font-body);
+  padding: 16px 36px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 40px;
+  font-weight: 400;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.85rem;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--metallic-gold);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: -1;
+  border-radius: 40px;
+}
+
+.btn-primary:hover::before {
+  transform: scaleY(1);
+}
+
+.btn-primary:hover {
+  border-color: var(--metallic-gold);
+  color: var(--royal-plum) !important;
+  font-weight: 600;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--metallic-gold) !important;
+  border: none;
+  border-bottom: 1px solid var(--metallic-gold);
+  padding: 8px 0;
+  border-radius: 0;
+  font-family: var(--font-body);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.85rem;
+  transition: all 0.4s ease;
+}
+
+.btn-outline:hover {
+  color: var(--pure-white) !important;
+  border-bottom-color: var(--pure-white);
+}
+
+/* Fluid Layout Helpers */
+.container-fluid {
+  width: 100%;
+  padding: 0 5vw;
+}
+
+.section-fluid {
+  padding: 15vh 0;
+  position: relative;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Removing box utilities */
+/* Elements now rely on flex/grid without hard borders */
+.v2-text-mask-wrapper {
+  overflow: hidden;
+  display: inline-block;
+  line-height: 1.1;
+}
+
+.text-gold {
+  color: var(--metallic-gold);
+}

@@ -1,0 +1,110 @@
+.navbar-v2 {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  padding: 40px 5vw;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  background: transparent;
+}
+
+.navbar-v2.scrolled {
+  padding: 20px 5vw;
+  background: rgba(42, 15, 36, 0.85); /* rgba of --royal-plum */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.navbar-v2-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  height: 60px;
+}
+
+.nav-logo-img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.2));
+  transition: transform 0.4s ease;
+}
+
+.nav-logo-img:hover {
+  transform: scale(1.05);
+}
+
+.nav-links {
+  display: flex;
+  gap: 3vw;
+}
+
+.nav-links a {
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  position: relative;
+}
+
+.nav-links a:hover, .nav-links a.active {
+  color: var(--metallic-gold);
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--metallic-gold);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.nav-links a.active::after {
+  opacity: 1;
+}
+
+.mobile-menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 101;
+}
+
+.mobile-dropdown {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100vh;
+  background-color: var(--royal-plum);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  z-index: 99;
+}
+
+.mobile-dropdown a {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  color: var(--pure-white);
+}
+
+.mobile-dropdown a:hover {
+  color: var(--metallic-gold);
+}
+
+@media (max-width: 900px) {
+  .desktop-only { display: none !important; }
+  .mobile-only { display: block !important; }
+}

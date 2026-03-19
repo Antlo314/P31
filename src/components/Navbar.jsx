@@ -1,0 +1,63 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
+import './Navbar.css';
+
+import logoPath from '../assets/premium_logo_1_1773960265213.png';
+
+const Navbar = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 80);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  return (
+    <nav className={`navbar-v2 ${isScrolled ? 'scrolled' : ''}`}>
+      <div className="navbar-v2-inner">
+        <Link to="/" className="nav-brand">
+          <img src={logoPath} alt="Proverbs 31 Marketplace" className="nav-logo-img" />
+        </Link>
+
+        <div className="nav-links desktop-only">
+          <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Explore</Link>
+          <Link to="/about" className={location.pathname === '/about' ? 'active' : ''}>The Vision</Link>
+          <Link to="/directory" className={location.pathname === '/directory' ? 'active' : ''}>Curators</Link>
+          <Link to="/calendar" className={location.pathname === '/calendar' ? 'active' : ''}>Experience</Link>
+        </div>
+
+        <div className="nav-actions desktop-only">
+          <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="btn-outline" style={{ borderBottom: 'none' }}>
+            Apply
+          </a>
+        </div>
+
+        <button className="mobile-menu-btn mobile-only" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          {isMobileMenuOpen ? <X size={24} color="#D4AF37" /> : <Menu size={24} color="#D4AF37" />}
+        </button>
+
+        {isMobileMenuOpen && (
+          <div className="mobile-dropdown">
+            <Link to="/">Explore</Link>
+            <Link to="/about">The Vision</Link>
+            <Link to="/directory">Curators</Link>
+            <Link to="/calendar">Experience</Link>
+            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer">Apply</a>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;

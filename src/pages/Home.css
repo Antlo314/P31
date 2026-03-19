@@ -1,0 +1,224 @@
+.home-v2 {
+  background-color: var(--royal-plum);
+}
+
+.hero-v2 {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.hero-img-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 120%; /* For parallax */
+  z-index: 1;
+}
+
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 20%;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to top, var(--royal-plum) 0%, rgba(42, 15, 36, 0.4) 50%, rgba(42, 15, 36, 0.7) 100%);
+}
+
+.hero-content-v2 {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  padding-top: 10vh;
+}
+
+.hero-logo-container {
+  margin-bottom: 4vh;
+}
+
+.premium-logo-center {
+  height: 80px;
+  width: auto;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+}
+
+.hero-large-text {
+  font-size: clamp(3rem, 7vw, 7rem);
+  line-height: 1.05;
+  color: var(--pure-white);
+  font-weight: 400;
+  text-transform: uppercase;
+  margin-bottom: 5vh;
+}
+
+.block {
+  display: block;
+}
+
+.hero-cta-area {
+  display: flex;
+  gap: 20px;
+}
+
+/* Scripture Asymmetric */
+.scripture-grid-v2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8vw;
+  align-items: center;
+}
+
+.v2-scripture {
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 1.2;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--pure-white);
+  margin-bottom: 2rem;
+}
+
+.v2-scripture-ref {
+  font-family: var(--font-body);
+  color: var(--metallic-gold);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.v2-img-reveal {
+  width: 100%;
+  height: 70vh;
+  overflow: hidden;
+  border-radius: 4px; /* subtle softening */
+}
+
+.v2-img-reveal img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Statement */
+.statement-v2 {
+  background-color: var(--plum-light);
+}
+
+.statement-text {
+  font-size: clamp(1.5rem, 3vw, 3rem);
+  line-height: 1.5;
+  max-width: 1000px;
+  font-family: var(--font-body);
+  font-weight: 300;
+  color: var(--pure-white);
+}
+
+/* Featured */
+.featured-header {
+  text-align: center;
+  margin-bottom: 10vh;
+}
+
+.v2-overline {
+  font-family: var(--font-body);
+  color: var(--metallic-gold);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.featured-header h2 {
+  font-size: clamp(2.5rem, 5vw, 5rem);
+  color: var(--pure-white);
+}
+
+.featured-grid-v2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4vw;
+}
+
+.feat-block {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+}
+
+.feat-block img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.feat-info {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 40px;
+  background: linear-gradient(to top, rgba(42, 15, 36, 0.9), transparent);
+}
+
+.feat-info h5 {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+  color: var(--pure-white);
+}
+
+.feat-color-block {
+  width: 100%;
+  height: 100%;
+  background-color: var(--soft-plum);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px;
+  transition: background-color 0.4s ease;
+}
+
+.feat-color-block.outline-block {
+  background-color: transparent;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.feat-color-block h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--pure-white);
+}
+
+.hover-lift {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-10px);
+}
+
+.hover-lift:hover img {
+  transform: scale(1.05);
+}
+
+@media (max-width: 900px) {
+  .scripture-grid-v2, .featured-grid-v2 {
+    grid-template-columns: 1fr;
+    gap: 10vh;
+  }
+  .feat-col-right {
+    margin-top: 0 !important;
+  }
+}
