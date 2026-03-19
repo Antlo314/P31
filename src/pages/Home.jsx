@@ -5,7 +5,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Home.css';
 
 import premiumMarketLogo from '../assets/premium_logo_2_1773960279606.png';
-import vendor1 from '../assets/vendor_portrait_2_1773960279606.png'; // Wait, I meant vendor_portrait_2_1773958606609.png
 // Actually I will import the mock vendor images directly
 import heroImg from '../assets/vendor_portrait_1_1773958576935.png';
 import featImg1 from '../assets/vendor_portrait_2_1773958606609.png';
