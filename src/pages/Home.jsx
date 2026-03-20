@@ -9,7 +9,7 @@ import heroVid from '../assets/hero.mp4';
 import curatorVid from '../assets/curator.mp4';
 import productVid from '../assets/product.mp4';
 import faithVid from '../assets/faith.mp4';
-import launchImg from '../assets/fb_launch.png';
+import launchImg from '../assets/march29.jpg';
 gsap.registerPlugin(ScrollTrigger);
 
 const Home = () => {
