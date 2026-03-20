@@ -1,6 +1,5 @@
 import React from 'react';
 import './About.css';
-import premiumMarketLogo from '../assets/premium_logo_2_1773960279606.png';
 
 const About = () => {
   return (
@@ -9,7 +8,6 @@ const About = () => {
         <div className="about-hero-v2 flex-center">
           <div className="about-hero-content text-center">
             <h1 className="about-title-large">The Vision</h1>
-            <img src={premiumMarketLogo} alt="P31" className="about-hero-logo" />
             <p className="about-lead">
               The Proverbs 31 Marketplace is an elite, traveling collective of women creatives. 
               We are defying the standard pop-up formula to bring a majestic, high-end shopping 

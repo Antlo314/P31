@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook } from 'lucide-react';
 import './Footer.css';
-import footerLogo from '../assets/premium_logo_1_1773960265213.png';
 
 const Footer = () => {
   return (
@@ -11,7 +10,6 @@ const Footer = () => {
         <div className="footer-top-v2">
           
           <div className="footer-logo-area">
-            <img src={footerLogo} alt="Proverbs 31 Marketplace" />
             <p>
               A traveling sanctuary of creativity, empowering women to rise and build using their gifts.
             </p>

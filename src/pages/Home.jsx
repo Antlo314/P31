@@ -9,7 +9,7 @@ import heroVid from '../assets/hero.mp4';
 import curatorVid from '../assets/curator.mp4';
 import productVid from '../assets/product.mp4';
 import faithVid from '../assets/faith.mp4';
-import founderImg from '../assets/melanie.jpg';
+import launchImg from '../assets/fb_launch.png';
 gsap.registerPlugin(ScrollTrigger);
 
 const Home = () => {
@@ -128,37 +128,44 @@ const Home = () => {
         </div>
       </section>
 
-      {/* About The Founder Section */}
-      <section className="about-cinematic section-padded" id="about-founder">
+      {/* Grand Launch Section */}
+      <section className="launch-cinematic section-padded" id="launch-event">
         <div className="container-fluid flex-center column">
           <div className="about-grid">
-            <div className="about-img-container cinematic-reveal">
-              <div className="founder-img-wrapper">
-                <img src={founderImg} alt="Melanie Jeffers-Cameron" className="img-parallax cinematic-founder-img" />
-                <div className="founder-img-overlay"></div>
+            
+            <div className="about-text-container cinematic-reveal" style={{ order: 1 }}>
+              <h4 className="overline-gold">Grand Launch Event</h4>
+              <h2 className="margin-bottom-large" style={{marginBottom: "1rem"}}>Proverbs 31 Marketplace</h2>
+              <h3 style={{color: 'var(--metallic-gold)', letterSpacing: '2px', fontWeight: '300', marginBottom: '2rem'}}>
+                &quot;Where Her Gifts Make Room.&quot;
+              </h3>
+              
+              <div className="launch-details">
+                <p><strong>Date:</strong> Sunday, March 29th, 2026</p>
+                <p><strong>Time:</strong> Doors open at 3:30 PM</p>
+                <p><strong>Venue:</strong> Embassy Suites by Hilton Atlanta NE</p>
+                <p><strong>Address:</strong> 2029 Satellite Blvd, Duluth, GA 30097</p>
+                <p style={{opacity: 0.6, fontSize: '0.9rem', marginTop: '0.5rem'}}><em>(Located across from Gas South Arena)</em></p>
+              </div>
+
+              <div className="launch-description" style={{marginTop: '2rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.8'}}>
+                <p>A traveling marketplace honoring women creatives. We are bringing together Art, Beauty, Clothing, Food, Literature, Wellness, and Community. Join us and support a movement where women create, connect, and build legacy.</p>
+              </div>
+              
+              <div style={{marginTop: '3rem'}}>
+                <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="btn-cinematic-gold">
+                  Apply &amp; RSVP
+                </a>
               </div>
             </div>
-            
-            <div className="about-text-container cinematic-reveal">
-              <h4 className="overline-gold">The Visionary</h4>
-              <h2 className="margin-bottom-large" style={{marginBottom: "2rem"}}>Melanie Jeffers-Cameron</h2>
-              
-              <p className="about-lead">
-                A visionary leader, faith-driven mentor, and purpose-driven entrepreneur dedicated to guiding others toward healing, restoration, and divine alignment.
-              </p>
-              
-              <p>
-                In 2019, Melanie received a God-given assignment—to heal from her trauma and use her testimonies to become and create everything she once needed. She’s been obedient since. When asked why she kept building, her response is simple: <span className="quote-inline">“Purpose saved my life. God’s not done with me yet.”</span>
-              </p>
-              
-              <p>
-                As the founder of <a href="https://www.nebaministry.org/" target="_blank" rel="noreferrer" className="link-gold-inline">NEBA Ministry</a>, she has created a sacred space for deep mentorship, accountability, and breaking generational cycles alongside her team's outreach. She is also the CEO of <a href="https://www.nebaministry.org/ilcollection" target="_blank" rel="noreferrer" className="link-gold-inline">Incandescent Lily Collection</a>, a luxury boutique reflecting her passion for holistic wellness and the belief that self-care is an extension of self-worth.
-              </p>
-              
-              <p>
-                Through P31 Marketplace, her perspicacious leadership, and her ongoing ministry, Melanie is dedicated to helping individuals walk in their God-given gifts—healing, realigning, and rising into the fullness of their purpose.
-              </p>
+
+            <div className="about-img-container cinematic-reveal" style={{ order: 2 }}>
+              <div className="founder-img-wrapper" style={{boxShadow: '0 0 50px rgba(134, 59, 255, 0.3)', aspectRatio: 'auto', minHeight: '600px'}}>
+                <img src={launchImg} alt="Launch Event Flyer" className="img-parallax cinematic-launch-img" style={{ width: '100%', height: '120%', objectFit: 'cover', filter: 'contrast(105%) brightness(0.9)', transform: 'scale(1.05)' }} />
+                <div className="founder-img-overlay" style={{background: 'linear-gradient(to right, rgba(8,3,16,0.9) 0%, rgba(8,3,16,0) 30%, transparent 100%)'}}></div>
+              </div>
             </div>
+
           </div>
         </div>
       </section>

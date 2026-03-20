@@ -18,10 +18,6 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
-
   const isHomeTop = location.pathname === '/' && !isScrolled;
 
   return (
@@ -34,6 +30,7 @@ const Navbar = () => {
         <div className="nav-links desktop-only">
           <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Explore</Link>
           <Link to="/about" className={location.pathname === '/about' ? 'active' : ''}>The Vision</Link>
+          <Link to="/visionaries" className={location.pathname === '/visionaries' ? 'active' : ''}>Visionaries</Link>
           <Link to="/directory" className={location.pathname === '/directory' ? 'active' : ''}>Curators</Link>
           <Link to="/calendar" className={location.pathname === '/calendar' ? 'active' : ''}>Experience</Link>
         </div>
@@ -50,11 +47,12 @@ const Navbar = () => {
 
         {isMobileMenuOpen && (
           <div className="mobile-dropdown">
-            <Link to="/">Explore</Link>
-            <Link to="/about">The Vision</Link>
-            <Link to="/directory">Curators</Link>
-            <Link to="/calendar">Experience</Link>
-            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer">Apply</a>
+            <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Explore</Link>
+            <Link to="/about" onClick={() => setIsMobileMenuOpen(false)}>The Vision</Link>
+            <Link to="/visionaries" onClick={() => setIsMobileMenuOpen(false)}>Visionaries</Link>
+            <Link to="/directory" onClick={() => setIsMobileMenuOpen(false)}>Curators</Link>
+            <Link to="/calendar" onClick={() => setIsMobileMenuOpen(false)}>Experience</Link>
+            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" onClick={() => setIsMobileMenuOpen(false)}>Apply</a>
           </div>
         )}
       </div>
