@@ -1,6 +1,6 @@
 import React from 'react';
 import '../pages/Home.css';
-import founderImg from '../assets/melanie.jpg';
+import founderVid from '../assets/melanie.mp4';
 
 const Visionaries = () => {
   return (
@@ -17,7 +17,7 @@ const Visionaries = () => {
           <div className="about-grid">
             <div className="about-img-container cinematic-reveal">
               <div className="founder-img-wrapper">
-                <img src={founderImg} alt="Melanie Jeffers-Cameron" className="img-parallax cinematic-founder-img" />
+                <video src={founderVid} autoPlay loop muted playsInline className="img-parallax cinematic-founder-img" style={{ width: '100%', height: '120%', objectFit: 'cover' }} />
                 <div className="founder-img-overlay"></div>
               </div>
             </div>
