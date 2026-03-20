@@ -33,7 +33,7 @@ const Home = () => {
       // Hero Background Pan
       gsap.fromTo('.hero-bg-img',
         { scale: 1.15, opacity: 0 },
-        { scale: 1.05, opacity: 0.5, duration: 4, ease: 'power2.out' }
+        { scale: 1.05, opacity: 1, duration: 4, ease: 'power2.out' }
       );
 
       // Scroll Parallax for Hero Text
