@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Calendar from './pages/Calendar';
 import Directory from './pages/Directory';
+import CuratorProfile from './pages/CuratorProfile';
 import Register from './pages/Register';
 import Visionaries from './pages/Visionaries';
 
@@ -29,6 +30,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/directory" element={<Directory />} />
+            <Route path="/curator/:id" element={<CuratorProfile />} />
             <Route path="/visionaries" element={<Visionaries />} />
             <Route path="/register" element={<Register />} />
           </Routes>

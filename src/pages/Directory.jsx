@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import './Directory.css';
 import vendor1 from '../assets/vendor_candles.png';
@@ -86,9 +87,15 @@ const Directory = () => {
               <h4 className="v2-vendor-meta">{vendor.name} &mdash; {vendor.products}</h4>
               <h2 className="v2-vendor-biz">{vendor.businessName}</h2>
               <p className="v2-vendor-bio">{vendor.bio}</p>
-              <a href={vendor.social} target="_blank" rel="noreferrer" className="v2-vendor-link btn-outline">
-                Explore Collection
-              </a>
+              {vendor.id === 1 || vendor.id === 2 ? (
+                <Link to={`/curator/${vendor.id}`} className="v2-vendor-link btn-outline">
+                  Explore Collection
+                </Link>
+              ) : (
+                <a href={vendor.social} target="_blank" rel="noreferrer" className="v2-vendor-link btn-outline">
+                  Explore Details
+                </a>
+              )}
             </div>
           </div>
         ))}
