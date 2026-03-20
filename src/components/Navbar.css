@@ -5,14 +5,19 @@
   z-index: 100;
   padding: 40px 5vw;
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  background: transparent;
+  background-color: transparent;
+}
+
+.gold-plated-logo {
+  filter: sepia(1) saturate(3) hue-rotate(10deg) brightness(0.9) drop-shadow(0 2px 2px rgba(184, 134, 11, 0.8)) drop-shadow(0 0 15px rgba(212, 175, 55, 0.6)) !important;
+  transition: filter 0.5s ease, opacity 0.5s ease !important;
 }
 
 .navbar-v2.scrolled {
   padding: 20px 5vw;
   background: rgba(42, 15, 36, 0.85); /* rgba of --royal-plum */
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 

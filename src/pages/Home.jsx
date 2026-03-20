@@ -4,7 +4,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Home.css';
 
-import mainLogo from '../assets/logo_gold_highlights.png';
+import mainLogo from '../assets/23BC16A7-6829-41F2-9EC4-E6BA907BC9D0.png';
 import heroVid from '../assets/hero.mp4';
 import curatorVid from '../assets/curator.mp4';
 import productVid from '../assets/product.mp4';
@@ -19,11 +19,11 @@ const Home = () => {
     let ctx = gsap.context(() => {
       // Cinematic Logo Fade In
       gsap.fromTo('.cinematic-logo', 
-        { scale: 0.8, opacity: 0, filter: 'drop-shadow(0 0 0px rgba(212, 175, 55, 0))' },
+        { scale: 0.8, opacity: 0, filter: 'sepia(1) saturate(3) hue-rotate(10deg) brightness(0.9) drop-shadow(0 0 0px rgba(212, 175, 55, 0))' },
         { 
           scale: 1, 
           opacity: 1, 
-          filter: 'drop-shadow(0 0 40px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 80px rgba(212, 175, 55, 0.3))',
+          filter: 'sepia(1) saturate(3) hue-rotate(10deg) brightness(0.9) drop-shadow(0 0 40px rgba(212, 175, 55, 0.8)) drop-shadow(0 0 80px rgba(212, 175, 55, 0.4))',
           duration: 3, 
           ease: 'power3.out', 
           delay: 0.2 

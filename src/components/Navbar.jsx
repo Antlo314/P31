@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import './Navbar.css';
 
-import logoPath from '../assets/logo_gold_highlights.png';
+import logoPath from '../assets/23BC16A7-6829-41F2-9EC4-E6BA907BC9D0.png';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -24,7 +24,7 @@ const Navbar = () => {
     <nav className={`navbar-v2 ${isScrolled ? 'scrolled' : ''}`}>
       <div className="navbar-v2-inner">
         <Link to="/" className="nav-brand">
-          <img src={logoPath} alt="Proverbs 31 Marketplace" className="nav-logo-img" style={{ opacity: isHomeTop ? 0 : 1, transition: 'opacity 0.5s ease', mixBlendMode: 'screen', filter: 'drop-shadow(0 0 10px rgba(212, 175, 55, 0.4))' }} />
+          <img src={logoPath} alt="Proverbs 31 Marketplace" className="nav-logo-img gold-plated-logo" style={{ opacity: isHomeTop ? 0 : 1, mixBlendMode: 'screen' }} />
         </Link>
 
         <div className="nav-links desktop-only">
