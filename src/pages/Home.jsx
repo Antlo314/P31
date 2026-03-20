@@ -4,8 +4,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Home.css';
 
-import premiumMarketLogo from '../assets/premium_logo_2_1773960279606.png';
-// Actually I will import the mock vendor images directly
+import mainLogo from '../assets/23BC16A7-6829-41F2-9EC4-E6BA907BC9D0.png';
 import heroImg from '../assets/vendor_portrait_1_1773958576935.png';
 import featImg1 from '../assets/vendor_portrait_2_1773958606609.png';
 import featImg2 from '../assets/vendor_products_1_1773958590103.png';
@@ -17,42 +16,66 @@ const Home = () => {
 
   useEffect(() => {
     let ctx = gsap.context(() => {
-      // Fluid Hero Animation
-      gsap.fromTo('.hero-large-text .word', 
-        { yPercent: 120, opacity: 0 },
-        { yPercent: 0, opacity: 1, duration: 1.2, stagger: 0.1, ease: 'power4.out', delay: 0.5 }
+      // Cinematic Logo Fade In
+      gsap.fromTo('.cinematic-logo', 
+        { scale: 0.8, opacity: 0, filter: 'drop-shadow(0 0 0px rgba(212, 175, 55, 0))' },
+        { 
+          scale: 1, 
+          opacity: 1, 
+          filter: 'drop-shadow(0 0 40px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 80px rgba(212, 175, 55, 0.3))',
+          duration: 3, 
+          ease: 'power3.out', 
+          delay: 0.2 
+        }
       );
 
-      gsap.fromTo('.hero-img-wrapper',
-        { scale: 1.2, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 2, ease: 'expo.out' }
+      // Hero Background Pan
+      gsap.fromTo('.hero-bg-img',
+        { scale: 1.15, opacity: 0 },
+        { scale: 1.05, opacity: 0.5, duration: 4, ease: 'power2.out' }
       );
 
-      // Parallax scroll
-      gsap.to('.hero-img', {
-        yPercent: 30,
+      // Scroll Parallax for Hero Text
+      gsap.to('.hero-text-content', {
+        yPercent: 40,
+        opacity: 0,
         ease: 'none',
         scrollTrigger: {
-          trigger: '.hero-v2',
+          trigger: '.hero-cinematic',
           start: 'top top',
           end: 'bottom top',
           scrub: true,
         }
       });
 
-      // Section Reveals
-      const reveals = gsap.utils.toArray('.reveal-up');
+      // Section Reveals Cinematic
+      const reveals = gsap.utils.toArray('.cinematic-reveal');
       reveals.forEach(elem => {
         gsap.fromTo(elem, 
-          { y: 100, opacity: 0 },
+          { y: 50, opacity: 0, filter: 'blur(10px)' },
           { 
-            y: 0, opacity: 1, duration: 1.5, ease: 'power3.out',
+            y: 0, opacity: 1, filter: 'blur(0px)', duration: 2, ease: 'power2.out',
             scrollTrigger: {
               trigger: elem,
-              start: 'top 85%',
+              start: 'top 80%',
             }
           }
         );
+      });
+      
+      // Image Parallax Blocks
+      const parallaxImgs = gsap.utils.toArray('.img-parallax');
+      parallaxImgs.forEach(img => {
+        gsap.to(img, {
+          yPercent: 20,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: img.parentElement,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true,
+          }
+        });
       });
 
     }, containerRef);
@@ -60,91 +83,70 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="home-v2" ref={containerRef}>
+    <div className="home-cinematic-wrapper" ref={containerRef}>
       
-      {/* V2 Hero Section */}
-      <section className="hero-v2">
-        <div className="hero-img-wrapper">
-          <img src={heroImg} alt="Creative Woman" className="hero-img" />
-          <div className="hero-overlay"></div>
+      {/* Cinematic Hero Section */}
+      <section className="hero-cinematic flex-center">
+        <div className="hero-bg-wrapper">
+          <img src={heroImg} alt="Atmospheric Background" className="hero-bg-img" />
+          <div className="hero-gradient-overlay"></div>
         </div>
         
-        <div className="hero-content-v2 container-fluid">
-          <div className="hero-logo-container">
-             <img src={premiumMarketLogo} alt="P31" className="premium-logo-center" />
-          </div>
-          
-          <h1 className="hero-large-text">
-            <span className="v2-text-mask-wrapper"><span className="word block">Empower</span></span>
-            <span className="v2-text-mask-wrapper"><span className="word block">Women</span></span><br/>
-            <span className="v2-text-mask-wrapper"><span className="word block">To Rise &</span></span>
-            <span className="v2-text-mask-wrapper"><span className="word block">Build</span></span>
-          </h1>
-          
-          <div className="hero-cta-area">
-            <Link to="/directory" className="btn-primary">The Curators</Link>
+        <div className="hero-text-content flex-center column">
+          <img src={mainLogo} alt="P31 Original" className="cinematic-logo" />
+          <h2 className="hero-tagline">Proverbs 31 Marketplace</h2>
+          <div className="hero-enter-container">
+            <Link to="/directory" className="btn-cinematic-gold">Enter The Sanctuary</Link>
           </div>
         </div>
       </section>
 
-      {/* V2 Scripture Section - Asymmetric */}
-      <section className="scripture-v2 section-fluid container-fluid">
-        <div className="scripture-grid-v2">
-          <div className="scripture-quote-col reveal-up">
-            <h2 className="v2-scripture">
-              "Give her of the fruit of her hands; And let her own works praise her in the gates."
-            </h2>
-            <p className="v2-scripture-ref">Proverbs 31:31 KJV</p>
-          </div>
-          <div className="scripture-img-col reveal-up">
-             <div className="v2-img-reveal">
-               <img src={featImg2} alt="Premium Products" />
-             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* V2 Brand Statement */}
-      <section className="statement-v2 section-fluid">
-        <div className="container-fluid flex-center text-center">
-          <h3 className="statement-text reveal-up">
-            We are a traveling sanctuary of creativity.<br/>
-            Curating the finest in handmade, artisanal, and fashion luxury.<br/>
-            Where faith meets excellence.
+      {/* Cinematic Quote Section */}
+      <section className="quote-cinematic section-padded">
+        <div className="container-fluid text-center cinematic-reveal">
+          <h3 className="quote-text">
+            “Give her of the fruit of her hands;<br/>
+            And let her own works praise her in the gates.”
           </h3>
+          <p className="quote-ref">— Proverbs 31:31 —</p>
         </div>
       </section>
 
-      {/* V2 Featured Creators */}
-      <section className="featured-v2 section-fluid container-fluid">
-        <div className="featured-header reveal-up">
-          <h4 className="v2-overline">The Experience</h4>
+      {/* Full-bleed Immerse Section */}
+      <section className="immerse-section">
+        <div className="immerse-text cinematic-reveal">
+          <h4 className="overline-gold">The Experience</h4>
           <h2>Unparalleled Craftsmanship</h2>
+          <p>Discover independent visionaries redefining premium artistry. A traveling sanctuary of creativity, curating the finest in handmade, artisanal, and fashion luxury.</p>
+          <Link to="/about" className="link-gold">Explore The Vision</Link>
+        </div>
+        <div className="immerse-img-wrapper">
+           <img src={featImg2} alt="Premium Crafts" className="img-parallax" />
+           <div className="immerse-img-overlay"></div>
+        </div>
+      </section>
+
+      {/* The Curators Section */}
+      <section className="curators-cinematic section-padded">
+        <div className="container-fluid cinematic-reveal text-center">
+          <h4 className="overline-gold">The Curators</h4>
+          <h2 className="margin-bottom-large">Meet The Makers</h2>
         </div>
         
-        <div className="featured-grid-v2">
-          <div className="feat-col-left reveal-up">
-            <Link to="/directory" className="feat-block hover-lift">
-              <img src={featImg1} alt="Creator" />
-              <div className="feat-info">
-                <h5>Meet the Makers</h5>
-                <p>Discover independent visionaries.</p>
-              </div>
-            </Link>
-          </div>
-          <div className="feat-col-right reveal-up" style={{marginTop: '15vh'}}>
-             <Link to="/calendar" className="feat-block hover-lift">
-               <div className="feat-color-block">
-                 <h2>RSVP To The Next Show</h2>
-                 <p className="text-gold">Atlanta, GA</p>
-               </div>
-             </Link>
-             <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="feat-block hover-lift" style={{marginTop: '5vh'}}>
-               <div className="feat-color-block outline-block">
-                 <h2>Apply as a Vendor</h2>
-                 <p>Join the movement.</p>
-               </div>
-             </a>
+        <div className="curator-showcase-container">
+          <Link to="/directory" className="curator-card cinematic-reveal">
+            <div className="card-img-wrapper">
+              <img src={featImg1} alt="Creator Portrait" className="img-parallax" />
+            </div>
+            <div className="card-info">
+              <h3>Independent Visionaries</h3>
+              <p>Join the movement of excellence.</p>
+            </div>
+          </Link>
+          
+          <div className="curator-actions flex-center column cinematic-reveal mt-4">
+            <Link to="/calendar" className="btn-cinematic-outline">RSVP To The Next Show</Link>
+            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="link-underlined mt-4">Apply as a Vendor</a>
           </div>
         </div>
       </section>
