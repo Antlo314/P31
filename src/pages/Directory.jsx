@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import './Directory.css';
-import vendor1 from '../assets/vendor_portrait_1_1773958576935.png';
-import vendor2 from '../assets/vendor_portrait_2_1773958606609.png';
-import vendor3 from '../assets/vendor_portrait_3_1773958628616.png';
-import product1 from '../assets/vendor_products_1_1773958590103.png';
+import vendor1 from '../assets/vendor_candles.png';
+import vendor2 from '../assets/vendor_skincare.png';
+import vendor3 from '../assets/vendor_ceramics.png';
+import vendor4 from '../assets/vendor_jewelry.png';
 
 const vendors = [
   {
@@ -22,7 +22,7 @@ const vendors = [
     businessName: 'Royal Plum Beauty',
     bio: 'Handmade organic skincare goods crafted for sensitive skin targeting natural glow.',
     products: 'Organic Soaps, Body Butter',
-    image: product1,
+    image: vendor2,
     social: 'https://instagram.com/royalplum_beauty'
   },
   {
@@ -31,7 +31,7 @@ const vendors = [
     businessName: 'Monet Artistry',
     bio: 'Premium handmade crafts and home decor blending modern design with earthy tones.',
     products: 'Ceramics, Wall Art',
-    image: vendor2,
+    image: vendor3,
     social: 'https://instagram.com/monet_artistry'
   },
   {
@@ -40,7 +40,7 @@ const vendors = [
     businessName: 'Aurum Jewelry',
     bio: 'Fine bespoke jewelry designed for the modern woman using ethically sourced gold.',
     products: 'Gold Necklaces, Rings',
-    image: vendor3,
+    image: vendor4,
     social: 'https://instagram.com/aurum_jewelry'
   }
 ];
