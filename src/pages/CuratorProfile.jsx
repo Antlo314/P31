@@ -19,6 +19,17 @@ const curatorData = {
     tagline: 'Illuminating spaces with pure, non-toxic luxury.',
     bio: 'Serena James brings healing through the power of scent. Her hand-poured, artisanal candles are crafted in small batches to ensure environmentally flawless, therapeutic experiences. P31 is proud to showcase her mastery of light and fragrance.',
     heroImage: vendorCandles,
+    contact: {
+      email: 'inquiries@luminescentessentials.com',
+      phone: '+1 (404) 555-0812',
+      address: 'Atlanta, GA (Studio visits by appointment)',
+      website: 'luminescentessentials.com',
+      instagram: '@luminescent_essentials'
+    },
+    events: [
+      { id: 1, date: 'Mar 29', name: 'P31 Grand Launch Event', location: 'Embassy Suites, Duluth, GA' },
+      { id: 2, date: 'Apr 15', name: 'Spring Artisan Light Expo', location: 'Buckhead, GA' }
+    ],
     products: [
       { id: 101, name: 'Royal Plum Amber Diffuser', price: '$45.00' },
       { id: 102, name: 'Frankincense & Myrrh Candle', price: '$55.00' },
@@ -32,6 +43,17 @@ const curatorData = {
     tagline: 'Redefining organic radiance for the sensitive soul.',
     bio: 'Aaliyah Brown crafts skincare as a ritual of self-love. Formulated organically to breathe life back into worn skin, Royal Plum Beauty is a testimony to the earth’s natural restoring properties. Experience her exquisite body butters and glowing serums.',
     heroImage: vendorSkincare,
+    contact: {
+      email: 'hello@royalplumbeauty.com',
+      phone: '+1 (770) 555-0943',
+      address: 'Decatur, GA 30030',
+      website: 'royalplumbeauty.com',
+      instagram: '@royalplum_beauty'
+    },
+    events: [
+      { id: 1, date: 'Mar 29', name: 'P31 Grand Launch Event', location: 'Embassy Suites, Duluth, GA' },
+      { id: 2, date: 'May 02', name: 'Natural Beauty Summit', location: 'Atlanta Convention Center' }
+    ],
     products: [
       { id: 201, name: 'P31 Virtuous Glow Serum', price: '$75.00' },
       { id: 202, name: 'Whipped Shea & Plum Butter', price: '$40.00' },
@@ -83,11 +105,61 @@ const CuratorProfile = () => {
          </div>
       </section>
 
-      {/* Curator Bio & Story */}
+      {/* Curator Business & Bio Details */}
       <section className="cp-bio-section section-padded">
-        <div className="container-fluid text-center">
-            <h2 style={{color: 'var(--pure-white)', marginBottom: '2rem'}}>The Hands That Build</h2>
-            <p className="cp-bio-text">{curator.bio}</p>
+        <div className="container-fluid">
+            <h2 className="cp-section-title text-center">The Hands That Build</h2>
+            <div className="divider-gold"></div>
+            
+            <div className="cp-details-grid">
+               {/* Left Column: Bio & Events */}
+               <div className="cp-bio-column">
+                  <p className="cp-bio-text">{curator.bio}</p>
+                  
+                  <div className="cp-events-card">
+                     <h4 className="cp-card-title">Upcoming Appearances</h4>
+                     <ul className="cp-events-list">
+                       {curator.events.map(event => (
+                          <li key={event.id}>
+                             <div className="cp-event-date">{event.date}</div>
+                             <div className="cp-event-info">
+                                <strong>{event.name}</strong>
+                                <span>{event.location}</span>
+                             </div>
+                          </li>
+                       ))}
+                     </ul>
+                  </div>
+               </div>
+
+               {/* Right Column: Contact Info */}
+               <div className="cp-contact-column">
+                  <div className="cp-contact-card">
+                     <h4 className="cp-card-title">Direct Concierge</h4>
+                     
+                     <div className="cp-contact-row">
+                        <span className="cp-contact-label">Website</span>
+                        <a href={`https://${curator.contact.website}`} target="_blank" rel="noreferrer" className="cp-contact-val link-gold-inline">{curator.contact.website}</a>
+                     </div>
+                     <div className="cp-contact-row">
+                        <span className="cp-contact-label">Email</span>
+                        <a href={`mailto:${curator.contact.email}`} className="cp-contact-val link-no-style">{curator.contact.email}</a>
+                     </div>
+                     <div className="cp-contact-row">
+                        <span className="cp-contact-label">Phone</span>
+                        <a href={`tel:${curator.contact.phone}`} className="cp-contact-val link-no-style">{curator.contact.phone}</a>
+                     </div>
+                     <div className="cp-contact-row">
+                        <span className="cp-contact-label">Address</span>
+                        <span className="cp-contact-val">{curator.contact.address}</span>
+                     </div>
+                     <div className="cp-contact-row" style={{borderBottom: 'none'}}>
+                        <span className="cp-contact-label">Socials</span>
+                        <span className="cp-contact-val" style={{color: 'var(--metallic-gold)'}}>{curator.contact.instagram}</span>
+                     </div>
+                  </div>
+               </div>
+            </div>
         </div>
       </section>
 

@@ -55,15 +55,130 @@
 }
 
 .cp-bio-section {
-  background-color: #050505;
+  background: radial-gradient(circle at center, #080310 0%, #050505 100%);
+}
+
+.cp-section-title {
+  color: var(--pure-white);
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin-bottom: 1rem;
+}
+
+.cp-details-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 6vw;
+  margin-top: 4rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .cp-bio-text {
   font-size: 1.2rem;
-  line-height: 1.8;
-  color: rgba(255, 255, 255, 0.7);
-  max-width: 800px;
-  margin: 0 auto;
+  line-height: 1.9;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 3rem;
+}
+
+/* Event List Styling */
+.cp-events-card {
+  background: rgba(134, 59, 255, 0.03);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  padding: 2.5rem;
+  border-radius: 4px;
+}
+
+.cp-card-title {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--metallic-gold);
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  padding-bottom: 1rem;
+}
+
+.cp-events-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cp-events-list li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.cp-events-list li:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.cp-event-date {
+  min-width: 70px;
+  font-size: 0.9rem;
+  color: var(--metallic-gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.cp-event-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.cp-event-info strong {
+  font-weight: 500;
+  font-size: 1.1rem;
+  color: var(--pure-white);
+  margin-bottom: 0.25rem;
+}
+
+.cp-event-info span {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.5);
+}
+
+/* Contact Card Styling */
+.cp-contact-card {
+  background: #080310;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3rem 2.5rem;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.cp-contact-row {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding: 1.2rem 0;
+}
+
+.cp-contact-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 0.5rem;
+}
+
+.cp-contact-val {
+  font-size: 1rem;
+  color: var(--pure-white);
+  line-height: 1.4;
+}
+
+.link-no-style {
+  color: var(--pure-white);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.link-no-style:hover {
+  color: var(--metallic-gold);
 }
 
 .cp-products-section {
@@ -157,4 +272,11 @@
   color: var(--metallic-gold);
   font-weight: 300;
   letter-spacing: 1px;
+}
+
+@media (max-width: 900px) {
+  .cp-details-grid {
+    grid-template-columns: 1fr;
+    gap: 4rem;
+  }
 }
