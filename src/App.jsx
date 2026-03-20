@@ -8,7 +8,7 @@ import Calendar from './pages/Calendar';
 import Directory from './pages/Directory';
 import CuratorProfile from './pages/CuratorProfile';
 import Register from './pages/Register';
-import Visionaries from './pages/Visionaries';
+import Visionary from './pages/Visionary';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -31,7 +31,7 @@ function App() {
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/directory" element={<Directory />} />
             <Route path="/curator/:id" element={<CuratorProfile />} />
-            <Route path="/visionaries" element={<Visionaries />} />
+            <Route path="/visionary" element={<Visionary />} />
             <Route path="/register" element={<Register />} />
           </Routes>
         </main>

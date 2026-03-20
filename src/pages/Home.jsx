@@ -4,7 +4,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Home.css';
 
-import mainLogo from '../assets/23BC16A7-6829-41F2-9EC4-E6BA907BC9D0.png';
+import mainLogo from '../assets/logo_gold_highlights.png';
 import heroVid from '../assets/hero.mp4';
 import curatorVid from '../assets/curator.mp4';
 import productVid from '../assets/product.mp4';
