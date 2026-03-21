@@ -9,6 +9,7 @@ import Directory from './pages/Directory';
 import CuratorProfile from './pages/CuratorProfile';
 import Register from './pages/Register';
 import Visionary from './pages/Visionary';
+import Apply from './pages/Apply';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -33,6 +34,7 @@ function App() {
             <Route path="/curator/:id" element={<CuratorProfile />} />
             <Route path="/visionary" element={<Visionary />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/apply" element={<Apply />} />
           </Routes>
         </main>
         <Footer />

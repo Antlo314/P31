@@ -21,7 +21,7 @@ const Footer = () => {
                 <Facebook size={20} />
               </a>
               <a href="https://www.tiktok.com/@p31marketplace" target="_blank" rel="noreferrer" aria-label="TikTok">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><path d="m9 9 12-2"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5v3a8 8 0 0 1-5-1.5z"></path></svg>
               </a>
             </div>
           </div>
@@ -42,7 +42,7 @@ const Footer = () => {
               <ul>
                 <li><a href="mailto:proverbs31markets@gmail.com">proverbs31markets@gmail.com</a></li>
                 <li><a href="tel:14705622852">1 (470) 562-2852</a></li>
-                <li><a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="text-gold">Apply as Curator &rarr;</a></li>
+                <li><Link to="/apply" className="text-gold">Apply as Curator &rarr;</Link></li>
                 <li><a href="https://www.eventbrite.com/e/proverbs-31-marketplace-tickets-1984190041828" target="_blank" rel="noreferrer" className="text-gold">RSVP &rarr;</a></li>
                 <li style={{marginTop: '16px'}}>
                    <a href="https://www.paypal.com/donate/?hosted_button_id=WY2ZX3TXDMF5Y" target="_blank" rel="noreferrer" className="btn-outline">

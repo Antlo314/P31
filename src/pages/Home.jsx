@@ -116,9 +116,9 @@ const Home = () => {
               <a href="https://www.eventbrite.com/e/proverbs-31-marketplace-tickets-1984190041828" target="_blank" rel="noreferrer" className="btn-solid-gold">
                 Get Your Tickets
               </a>
-              <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="btn-outline-white">
+              <Link to="/apply" className="btn-outline-white">
                 Become a Vendor
-              </a>
+              </Link>
             </div>
           </div>
           
@@ -203,9 +203,9 @@ const Home = () => {
               <div className="category-item"><span className="material-symbols-outlined">diversity_1</span> Community</div>
             </div>
 
-            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" style={{color: 'var(--primary)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '8px'}}>
+            <Link to="/apply" style={{color: 'var(--primary)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '8px'}}>
               Become a Vendor <span className="material-symbols-outlined text-primary">arrow_forward</span>
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -239,9 +239,9 @@ const Home = () => {
             <p>
               Applications are now open for our March 29th Grand Launch and future markets. Join a community of over 50+ women-led brands.
             </p>
-            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="btn-solid-gold">
+            <Link to="/apply" className="btn-solid-gold" style={{display: 'inline-block'}}>
               Become a Vendor
-            </a>
+            </Link>
           </div>
           <video src={productVid} autoPlay loop muted playsInline className="cta-bg-img" />
         </div>
