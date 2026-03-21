@@ -39,9 +39,6 @@ const Navbar = () => {
           <a href="https://www.eventbrite.com/e/proverbs-31-marketplace-tickets-1984190041828" target="_blank" rel="noreferrer" className="btn-solid-gold">
             RSVP
           </a>
-          <Link to="/apply" className="btn-outline" style={{ borderBottom: 'none' }}>
-            Apply
-          </Link>
         </div>
 
         <button className="mobile-menu-btn mobile-only" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
@@ -55,7 +52,6 @@ const Navbar = () => {
             <Link to="/visionary" onClick={() => setIsMobileMenuOpen(false)}>Visionary</Link>
             <Link to="/directory" onClick={() => setIsMobileMenuOpen(false)}>Curators</Link>
             <Link to="/calendar" onClick={() => setIsMobileMenuOpen(false)}>Experience</Link>
-            <Link to="/apply" onClick={() => setIsMobileMenuOpen(false)}>Apply</Link>
           </div>
         )}
       </div>
