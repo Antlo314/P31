@@ -9,6 +9,15 @@ import vendor4 from '../assets/vendor_jewelry.png';
 
 const vendors = [
   {
+    id: 5,
+    name: 'Melanie',
+    businessName: 'Incandescent Lily Collection',
+    bio: 'Transforming the beauty industry by creating wellness and body care rooted in purity, purpose, and divine intention.',
+    products: 'Plant-Based Bodycare, Wellness',
+    image: 'https://static.wixstatic.com/media/a60154_732e513fd3594078b0b4c1d08679ba20~mv2.png',
+    social: 'https://instagram.com/ilcollection__'
+  },
+  {
     id: 1,
     name: 'Serena James',
     businessName: 'Luminescent Essentials',
@@ -87,7 +96,7 @@ const Directory = () => {
               <h4 className="v2-vendor-meta">{vendor.name} &mdash; {vendor.products}</h4>
               <h2 className="v2-vendor-biz">{vendor.businessName}</h2>
               <p className="v2-vendor-bio">{vendor.bio}</p>
-              {vendor.id === 1 || vendor.id === 2 ? (
+              {vendor.id === 5 || vendor.id === 1 || vendor.id === 2 ? (
                 <Link to={`/curator/${vendor.id}`} className="v2-vendor-link btn-outline">
                   Explore Collection
                 </Link>

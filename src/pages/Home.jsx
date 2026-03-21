@@ -6,7 +6,9 @@ import './Home.css';
 
 import heroVid from '../assets/hero.mp4';
 import curatorVid from '../assets/curator.mp4';
-import launchImg from '../assets/march29.jpg';
+import productVid from '../assets/product.mp4';
+import faithVid from '../assets/faith.mp4';
+import melanieVid from '../assets/melanie.mp4';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -130,13 +132,14 @@ const Home = () => {
       </section>
 
       {/* Scripture Section */}
-      <section className="scripture-section section-padded">
-        <div className="cinematic-reveal">
+      <section className="scripture-section section-padded" style={{position: 'relative', background: 'var(--primary)', overflow: 'hidden'}}>
+        <video src={faithVid} autoPlay loop muted playsInline className="img-parallax" style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '120%', objectFit: 'cover', opacity: 0.25}} />
+        <div className="cinematic-reveal" style={{position: 'relative', zIndex: 2}}>
           <span className="material-symbols-outlined text-gold mb-8" style={{fontSize: '2.5rem'}}>auto_awesome</span>
-          <h2 className="scripture-text">
+          <h2 className="scripture-text text-white" style={{color: 'white'}}>
             "Give her of the fruit of her hands; And let her own works praise her in the gates."
           </h2>
-          <p className="font-label text-primary" style={{marginTop: '2rem', opacity: 0.6}}>Proverbs 31:31 KJV</p>
+          <p className="font-label text-gold" style={{marginTop: '2rem', opacity: 0.8}}>Proverbs 31:31 KJV</p>
         </div>
       </section>
 
@@ -220,7 +223,7 @@ const Home = () => {
           </div>
           <div className="founder-img cinematic-reveal">
             <div className="founder-img-wrapper">
-              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC13UnDtBLM7zb8SdXtD25w7fhYw7V9mKcgpXLJdEa1OTAC2BQVTmmyblydJkjXl-T-lhhNXBYN3cZkwk_aCWGegZWUI-Oi65Z5JmA5J1J2z1AAGKgpOn2sIg0YvdbLUO-3Qzwyjs5xsiVJzJ9mA7WW-C0b5mx-m0evEKxSa4d3UZV27oUq3XP9vNckNpY6_jpoZ2-6aTrnMNgj5RxPDK7o3ISM2tLxkAQ8Z3NNlAjxRc3A0FMw3L6MbQgjK6x3M5hkf8JMHa9BIduv" alt="Founder" className="img-parallax" style={{width: '100%', height: '120%', objectFit: 'cover'}} />
+              <video src={melanieVid} autoPlay loop muted playsInline className="img-parallax" style={{width: '100%', height: '120%', objectFit: 'cover'}} />
             </div>
             <div className="founder-border-top"></div>
             <div className="founder-border-bottom"></div>
@@ -240,7 +243,7 @@ const Home = () => {
               Become a Vendor
             </a>
           </div>
-          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmPMeNC6FlFDLhDRgPVo9H0T114S6f7DvaPVc1m5oEC3Fb7W4HS2p5nXgJstd2odYerSFV3l5RCWEw-fzU9APTrwCijGvFnOAOhNMuEXzNfoeXiBQL5SAx-evpUaJ_X85a9YU1gQI_zT5XBjuI8NlWrwiI9-tPJxOKo0cGpBA2tGWq3vFUjMVTqlJyLJREpcED7vu04dz9Dd2BJ1LZUTXRKOUIKxrUGfKoLUm5I3wVB6PndjKdfxAaa21H-WI_-NDiSz1YqRjUjHid" alt="Products" className="cta-bg-img" />
+          <video src={productVid} autoPlay loop muted playsInline className="cta-bg-img" />
         </div>
       </section>
       

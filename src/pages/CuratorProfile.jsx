@@ -13,6 +13,45 @@ import placeholderProduct from '../assets/generic_p31_product.png';
 gsap.registerPlugin(ScrollTrigger);
 
 const curatorData = {
+  5: {
+    name: 'Melanie',
+    businessName: 'Incandescent Lily Collection',
+    tagline: 'Wellness and body care rooted in purity, purpose, and divine intention.',
+    bio: 'At Incandescent Lily, we are transforming the beauty industry by creating wellness and body care rooted in purity, purpose, and divine intention. Our collection consists of luxurious wellness and body care products crafted with pure ingredients derived from the plants given to us by God. We believe that true beauty and healing is experienced through the way we nurture our spirit mind and body.',
+    heroImage: 'https://static.wixstatic.com/media/a60154_732e513fd3594078b0b4c1d08679ba20~mv2.png',
+    contact: {
+      email: 'hello@nebaministry.org',
+      phone: '+1 (470) 562-2852',
+      address: 'Atlanta, GA',
+      website: 'nebaministry.org/ilcollection',
+      instagram: '@ilcollection__'
+    },
+    events: [
+      { id: 1, date: 'Mar 29', name: 'P31 Grand Launch Event', location: 'Embassy Suites, Duluth, GA' }
+    ],
+    products: [
+      { id: 501, name: 'Resolved™ A 30-Day Mentorship Devotional', price: '$17.99', imageUrl: 'https://static.wixstatic.com/media/023b68_cf305faf0edb4a439b635209757c2ee6~mv2.png' },
+      { id: 502, name: 'Illumine™ Brightening & Anti-aging Serum', price: '$59.98', imageUrl: 'https://static.wixstatic.com/media/023b68_89c240ffcf5f4259a294815ae126c41d~mv2.png' },
+      { id: 503, name: 'Enlighten Mist™ by IL Collection', price: '$17.98', imageUrl: 'https://static.wixstatic.com/media/023b68_2633224a4c7348daa15c904aa06772af~mv2.png' },
+      { id: 504, name: 'Garden Restore™ Teas by IL Collection', price: '$16.98', imageUrl: 'https://static.wixstatic.com/media/023b68_98d473ae7dd941d4b0c19b8f66218345~mv2.png' },
+      { id: 505, name: 'Restore™ Eye Cream', price: '$34.98', imageUrl: 'https://static.wixstatic.com/media/023b68_98de1d742a844fc3b5e3c9464daf6ed9~mv2.png' },
+      { id: 506, name: 'Lip Love™ Brightening Balm', price: '$14.98', imageUrl: 'https://static.wixstatic.com/media/023b68_e5e4a3a726b34b74a609aa66196f235d~mv2.jpg' },
+      { id: 507, name: 'Awaken™: A 30-Day Mentorship Devotional', price: '$17.99', imageUrl: 'https://static.wixstatic.com/media/a60154_d6d0c7e381034c38b7a10c3222fdbb8b~mv2.png' },
+      { id: 508, name: 'Lemongrass Growth & Refresher Mist™', price: '$37.98', imageUrl: 'https://static.wixstatic.com/media/a60154_bea567e6bc8d497a8b90b3bfd7fe637a~mv2.png' },
+      { id: 509, name: 'Awaken™ Healing Soy Candle', price: '$29.98', imageUrl: 'https://static.wixstatic.com/media/4ede06_cc29c619d0674c8da3f690014d15150a~mv2.png' },
+      { id: 510, name: 'Manuka Honey Exfoliant Mask & Scrub', price: '$27.98', imageUrl: 'https://static.wixstatic.com/media/a60154_d47a8fe5c9e9443bb05203a7b5f5e2a7~mv2.png' },
+      { id: 511, name: 'Woke™ Luxury Oil', price: '$27.98', imageUrl: 'https://static.wixstatic.com/media/a60154_2ec8d0a27e41440e8b1af6012cec4840~mv2.png' },
+      { id: 512, name: 'Brightstar™ Manuka Honey Cleanser', price: '$27.98', imageUrl: 'https://static.wixstatic.com/media/a60154_1b9bd3b2c5fc481e93c4345f06424f34~mv2.png' },
+      { id: 513, name: 'Reign Premium Plant-Based Sanitary Napkins', price: '$10.98', imageUrl: 'https://static.wixstatic.com/media/a60154_bfeb7ef5acfc4055b5f75f4120575dcd~mv2.jpg' },
+      { id: 514, name: 'Favor™ Brightening Youth Face Serum', price: '$49.99', imageUrl: 'https://static.wixstatic.com/media/a60154_f94875201f7e4860add6148a89649e73~mv2.png' },
+      { id: 515, name: 'Face & Body Healing Salve', price: '$54.98', imageUrl: 'https://static.wixstatic.com/media/a60154_3b623d2c73694d38b85067f772e21f33~mv2.png' },
+      { id: 516, name: 'Glow & Grow Duo', price: '$87.98', imageUrl: 'https://static.wixstatic.com/media/a60154_ab5fac8fc89640acabdebc69d15872ab~mv2.png' },
+      { id: 517, name: 'Blush & Bloom™ Collagen Rose Toner', price: '$25.98', imageUrl: 'https://static.wixstatic.com/media/4ede06_339efcba85de49ccb3b282be550e17df~mv2.jpg' },
+      { id: 518, name: 'Incandescent Luxe Box™', price: '$174.98', imageUrl: 'https://static.wixstatic.com/media/a60154_732e513fd3594078b0b4c1d08679ba20~mv2.png' },
+      { id: 519, name: 'Woke™ Oil & Scrub Bundle', price: '$49.98', imageUrl: 'https://static.wixstatic.com/media/a60154_49e4a5a0c74e4f1bb09676748c19b3a2~mv2.png' },
+      { id: 520, name: 'Bundle - Woke™ His & Hers Luxury Oil', price: '$98.99', imageUrl: 'https://static.wixstatic.com/media/4ede06_7dbe0de9f064472ea9cb7ac5336ff835~mv2.png' }
+    ]
+  },
   1: {
     name: 'Serena James',
     businessName: 'Luminescent Essentials',
@@ -174,8 +213,8 @@ const CuratorProfile = () => {
            <div className="cp-products-grid">
               {curator.products.map(product => (
                 <div key={product.id} className="cp-product-card">
-                   <div className="cp-product-img-wrapper">
-                      <img src={placeholderProduct} alt="P31 Generic Product Placeholder" className="cp-product-img" />
+                   <div className="cp-product-img-wrapper" style={{background: '#ffffff'}}>
+                      <img src={product.imageUrl || placeholderProduct} alt={product.name} className="cp-product-img" style={{objectFit: 'contain', padding: '1rem'}} />
                       <div className="cp-product-hover">
                          <span>View Details</span>
                       </div>
