@@ -4,12 +4,10 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Home.css';
 
-import mainLogo from '../assets/23BC16A7-6829-41F2-9EC4-E6BA907BC9D0.png';
 import heroVid from '../assets/hero.mp4';
 import curatorVid from '../assets/curator.mp4';
-import productVid from '../assets/product.mp4';
-import faithVid from '../assets/faith.mp4';
 import launchImg from '../assets/march29.jpg';
+
 gsap.registerPlugin(ScrollTrigger);
 
 const Home = () => {
@@ -17,28 +15,16 @@ const Home = () => {
 
   useEffect(() => {
     let ctx = gsap.context(() => {
-      // Cinematic Logo Fade In
-      gsap.fromTo('.cinematic-logo', 
-        { scale: 0.8, opacity: 0, filter: 'sepia(1) saturate(3) hue-rotate(10deg) brightness(0.9) drop-shadow(0 0 0px rgba(212, 175, 55, 0))' },
-        { 
-          scale: 1, 
-          opacity: 1, 
-          filter: 'sepia(1) saturate(3) hue-rotate(10deg) brightness(0.9) drop-shadow(0 0 40px rgba(212, 175, 55, 0.8)) drop-shadow(0 0 80px rgba(212, 175, 55, 0.4))',
-          duration: 3, 
-          ease: 'power3.out', 
-          delay: 0.2 
-        }
-      );
-
+      
       // Hero Background Pan
       gsap.fromTo('.hero-bg-img',
         { scale: 1.15, opacity: 0 },
-        { scale: 1.05, opacity: 1, duration: 4, ease: 'power2.out' }
+        { scale: 1.05, opacity: 0.3, duration: 4, ease: 'power2.out' }
       );
 
       // Scroll Parallax for Hero Text
       gsap.to('.hero-text-content', {
-        yPercent: 40,
+        yPercent: 30,
         opacity: 0,
         ease: 'none',
         scrollTrigger: {
@@ -55,10 +41,10 @@ const Home = () => {
         gsap.fromTo(elem, 
           { y: 50, opacity: 0, filter: 'blur(10px)' },
           { 
-            y: 0, opacity: 1, filter: 'blur(0px)', duration: 2, ease: 'power2.out',
+            y: 0, opacity: 1, filter: 'blur(0px)', duration: 1.5, ease: 'power2.out',
             scrollTrigger: {
               trigger: elem,
-              start: 'top 80%',
+              start: 'top 85%',
             }
           }
         );
@@ -68,7 +54,7 @@ const Home = () => {
       const parallaxImgs = gsap.utils.toArray('.img-parallax');
       parallaxImgs.forEach(img => {
         gsap.to(img, {
-          yPercent: 20,
+          yPercent: 15,
           ease: 'none',
           scrollTrigger: {
             trigger: img.parentElement,
@@ -84,114 +70,177 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="home-cinematic-wrapper" ref={containerRef}>
+    <div className="home-cinematic-wrapper font-body" ref={containerRef}>
       
-      {/* Cinematic Hero Section */}
-      <section className="hero-cinematic flex-center">
+      {/* Hero Section */}
+      <section className="hero-cinematic" id="events">
         <div className="hero-bg-wrapper">
-          <video src={heroVid} autoPlay loop muted playsInline className="hero-bg-img" />
+          <video src={heroVid} autoPlay loop muted playsInline className="hero-bg-img img-parallax" />
           <div className="hero-gradient-overlay"></div>
         </div>
         
-        <div className="hero-text-content flex-center column">
-          <img src={mainLogo} alt="P31 Original" className="cinematic-logo" />
-          <h2 className="hero-tagline">Proverbs 31 Marketplace</h2>
-          <div className="hero-enter-container">
-            <Link to="/directory" className="btn-cinematic-gold">Enter The Sanctuary</Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Cinematic Quote Section */}
-      <section className="quote-cinematic section-padded" style={{ position: 'relative', overflow: 'hidden' }}>
-        <video src={faithVid} autoPlay loop muted playsInline className="quote-bg-vid" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.4, zIndex: 1 }} />
-        <div className="container-fluid text-center cinematic-reveal" style={{ position: 'relative', zIndex: 2 }}>
-          <h3 className="quote-text">
-            “Give her of the fruit of her hands;<br/>
-            And let her own works praise her in the gates.”
-          </h3>
-          <p className="quote-ref">— Proverbs 31:31 —</p>
-        </div>
-      </section>
-
-      {/* Full-bleed Immerse Section */}
-      <section className="immerse-section">
-        <div className="immerse-text cinematic-reveal">
-          <h4 className="overline-gold">The Experience</h4>
-          <h2>Unparalleled Craftsmanship</h2>
-          <p>Discover independent visionaries redefining premium artistry. A traveling sanctuary of creativity, curating the finest in handmade, artisanal, and fashion luxury.</p>
-          <Link to="/about" className="link-gold">Explore The Vision</Link>
-        </div>
-        <div className="immerse-img-wrapper">
-           <video src={productVid} autoPlay loop muted playsInline className="img-parallax" style={{ width: '100%', height: '120%', objectFit: 'cover' }} />
-           <div className="immerse-img-overlay"></div>
-        </div>
-      </section>
-
-      {/* Grand Launch Section */}
-      <section className="launch-cinematic section-padded" id="launch-event">
-        <div className="container-fluid flex-center column">
-          <div className="about-grid">
+        <div className="hero-content-grid">
+          <div className="hero-text-content cinematic-reveal">
+            <div className="launch-badge">
+              <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>stars</span>
+              <span>Grand Launch Market</span>
+            </div>
             
-            <div className="about-text-container cinematic-reveal" style={{ order: 1 }}>
-              <h4 className="overline-gold">Grand Launch Event</h4>
-              <h2 className="margin-bottom-large" style={{marginBottom: "1rem"}}>Proverbs 31 Marketplace</h2>
-              <h3 style={{color: 'var(--metallic-gold)', letterSpacing: '2px', fontWeight: '300', marginBottom: '2rem'}}>
-                &quot;Where Her Gifts Make Room.&quot;
-              </h3>
-              
-              <div className="launch-details">
-                <p><strong>Date:</strong> Sunday, March 29th, 2026</p>
-                <p><strong>Time:</strong> Doors open at 3:30 PM</p>
-                <p><strong>Venue:</strong> Embassy Suites by Hilton Atlanta NE</p>
-                <p><strong>Address:</strong> 2029 Satellite Blvd, Duluth, GA 30097</p>
-                <p style={{opacity: 0.6, fontSize: '0.9rem', marginTop: '0.5rem'}}><em>(Located across from Gas South Arena)</em></p>
+            <h1 className="hero-title font-headline">
+              Where Her Gifts <br/> <span className="text-gold" style={{fontStyle: 'italic', fontWeight: 400}}>Make Room</span>
+            </h1>
+            
+            <div className="hero-details">
+              <div className="hero-detail-row">
+                <span className="material-symbols-outlined">calendar_month</span>
+                <div>
+                  <div className="font-headline" style={{fontStyle: 'italic', fontSize: '1.25rem'}}>Sunday, March 29th, 2026</div>
+                  <div style={{opacity: 0.7, fontSize: '0.9rem', marginTop: '4px'}}>Doors open at 3:30 PM</div>
+                </div>
               </div>
-
-              <div className="launch-description" style={{marginTop: '2rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.8'}}>
-                <p>A traveling marketplace honoring women creatives. We are bringing together Art, Beauty, Clothing, Food, Literature, Wellness, and Community. Join us and support a movement where women create, connect, and build legacy.</p>
+              <div className="hero-detail-row">
+                <span className="material-symbols-outlined">location_on</span>
+                <div style={{lineHeight: 1.5}}>
+                  Embassy Suites by Hilton<br/>
+                  Atlanta NE/Gwinnett Sugarloaf
+                </div>
               </div>
-              
-              <div style={{marginTop: '3rem'}}>
-                <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="btn-cinematic-gold">
-                  Apply &amp; RSVP
-                </a>
-              </div>
+              <p style={{color: 'rgba(255,255,255,0.7)', lineHeight: 1.6}}>
+                Join us for a curated celebration of women creatives, artisans, and visionaries. A traveling sanctuary for the modern matriarch.
+              </p>
             </div>
-
-            <div className="about-img-container cinematic-reveal" style={{ order: 2 }}>
-              <div className="founder-img-wrapper" style={{boxShadow: '0 0 50px rgba(134, 59, 255, 0.3)', aspectRatio: 'auto', minHeight: '600px'}}>
-                <img src={launchImg} alt="Launch Event Flyer" className="img-parallax cinematic-launch-img" style={{ width: '100%', height: '120%', objectFit: 'cover', filter: 'contrast(105%) brightness(0.9)', transform: 'scale(1.05)' }} />
-                <div className="founder-img-overlay" style={{background: 'linear-gradient(to right, rgba(8,3,16,0.9) 0%, rgba(8,3,16,0) 30%, transparent 100%)'}}></div>
-              </div>
+            
+            <div className="hero-buttons">
+              <a href="https://www.eventbrite.com/e/proverbs-31-marketplace-tickets-1984190041828" target="_blank" rel="noreferrer" className="btn-solid-gold">
+                Get Your Tickets
+              </a>
+              <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="btn-outline-white">
+                Become a Vendor
+              </a>
             </div>
-
+          </div>
+          
+          <div className="hero-flyer-container cinematic-reveal" style={{position: 'relative'}}>
+            <div className="hero-flyer-glow"></div>
+            <div className="hero-flyer-wrapper">
+              <img src="https://lh3.googleusercontent.com/aida/ADBb0ugo7BVMZZ2fDbxXw0_jm9mcFo0l7oSkONBUbhKfeYdGJJGruT0X_GiPVClSXR2OdK4QTD9dQm0jDe9oL3f5q2TMbTi2WeJUhJRvxo0lIAtIFoH-tHPcNTyuJTTrjUK8acByOCrvIE2y3Wr386teT_XQdIWIeiycCnRgp533uqgSS_nL1NSvwmRu-U-vgMwGXekpNSzC11omU_97ydtsgqad58ny0eOpjgvm3Wk4ETRh-Jf0E9imx6pGqj8ADskGbaNA-fK9wbixEf8" alt="Flyer" style={{width: '100%', height: 'auto', display: 'block'}} />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* The Curators Section */}
-      <section className="curators-cinematic section-padded">
-        <div className="container-fluid cinematic-reveal text-center">
-          <h4 className="overline-gold">The Curators</h4>
-          <h2 className="margin-bottom-large">Meet The Makers</h2>
+      {/* Scripture Section */}
+      <section className="scripture-section section-padded">
+        <div className="cinematic-reveal">
+          <span className="material-symbols-outlined text-gold mb-8" style={{fontSize: '2.5rem'}}>auto_awesome</span>
+          <h2 className="scripture-text">
+            "Give her of the fruit of her hands; And let her own works praise her in the gates."
+          </h2>
+          <p className="font-label text-primary" style={{marginTop: '2rem', opacity: 0.6}}>Proverbs 31:31 KJV</p>
         </div>
-        
-        <div className="curator-showcase-container">
-          <Link to="/directory" className="curator-card cinematic-reveal">
-            <div className="card-img-wrapper">
-              <video src={curatorVid} autoPlay loop muted playsInline className="img-parallax" style={{ width: '100%', height: '120%', objectFit: 'cover', transition: 'transform 1s cubic-bezier(0.16, 1, 0.3, 1)' }} />
+      </section>
+
+      {/* Map Section */}
+      <section className="map-section section-padded">
+        <div className="map-grid cinematic-reveal">
+          <div className="map-info">
+            <span className="font-label text-gold">Visit Us</span>
+            <h3 className="font-headline">Event Location</h3>
+            <div style={{display: 'flex', gap: '1rem', marginBottom: '2rem'}}>
+              <span className="material-symbols-outlined text-primary">pin_drop</span>
+              <p style={{color: 'var(--on-surface-variant)', lineHeight: 1.6, fontWeight: 500}}>
+                Embassy Suites by Hilton<br/>
+                Atlanta NE/Gwinnett Sugarloaf<br/>
+                2029 Satellite Blvd<br/>
+                Duluth, GA 30097
+              </p>
             </div>
-            <div className="card-info">
-              <h3>Independent Visionaries</h3>
-              <p>Join the movement of excellence.</p>
-            </div>
-          </Link>
-          
-          <div className="curator-actions flex-center column cinematic-reveal mt-4">
-            <Link to="/calendar" className="btn-cinematic-outline">RSVP To The Next Show</Link>
-            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="link-underlined mt-4">Apply as a Vendor</a>
+            <p style={{fontSize: '0.85rem', fontStyle: 'italic', color: 'var(--outline)', paddingLeft: '2.5rem', marginBottom: '2rem'}}>
+              (across from Gas South Arena)
+            </p>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=2029+Satellite+Blvd+Duluth+GA+30097" target="_blank" rel="noreferrer" className="btn-solid-gold" style={{background: 'var(--primary)', color: 'white'}}>
+              <span className="material-symbols-outlined" style={{verticalAlign: 'middle', marginRight: '8px', fontSize: '1.2rem', color: 'white'}}>directions</span>
+              Get Directions
+            </a>
           </div>
+          <div className="map-container">
+            <iframe 
+              src="https://maps.google.com/maps?q=2029%20Satellite%20Blvd%2C%20Duluth%2C%20GA%2030097&t=&z=15&ie=UTF8&iwloc=&output=embed"
+              width="100%" height="100%" frameBorder="0" scrolling="no" marginHeight="0" marginWidth="0" title="Map">
+            </iframe>
+          </div>
+        </div>
+      </section>
+
+      {/* Vision & Mission */}
+      <section className="vision-section section-padded" id="about">
+        <div className="vision-grid">
+          <div className="vision-img-container cinematic-reveal" style={{position: 'relative'}}>
+            <div className="vision-img-wrapper">
+              <video src={curatorVid} autoPlay loop muted playsInline className="img-parallax" style={{width: '100%', height: '120%', objectFit: 'cover'}} />
+            </div>
+            <div className="vision-badge">
+              <span>7+</span>
+              <span className="font-label">Categories<br/>of Excellence</span>
+            </div>
+          </div>
+          <div className="vision-text cinematic-reveal">
+            <span className="font-label text-gold">Our Mission</span>
+            <h3 className="font-headline">Empowering Women to Rise and Build</h3>
+            <p>
+              The Proverbs 31 Marketplace is more than a shopping event—it is a traveling sanctuary for creativity. We celebrate the modern matriarch by providing a premium platform for women to showcase their divine gifts.
+            </p>
+            
+            <div className="categories-grid">
+              <div className="category-item"><span className="material-symbols-outlined">palette</span> Art</div>
+              <div className="category-item"><span className="material-symbols-outlined">spa</span> Wellness</div>
+              <div className="category-item"><span className="material-symbols-outlined">styler</span> Clothing</div>
+              <div className="category-item"><span className="material-symbols-outlined">restaurant</span> Food</div>
+              <div className="category-item"><span className="material-symbols-outlined">menu_book</span> Literature</div>
+              <div className="category-item"><span className="material-symbols-outlined">diversity_1</span> Community</div>
+            </div>
+
+            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" style={{color: 'var(--primary)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '8px'}}>
+              Become a Vendor <span className="material-symbols-outlined text-primary">arrow_forward</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Founder Spotlight */}
+      <section className="founder-section section-padded">
+        <div className="founder-grid">
+          <div className="founder-text cinematic-reveal">
+            <span className="font-label" style={{color: 'var(--tertiary-fixed-dim)'}}>The Heart Behind the Market</span>
+            <h3 className="font-headline">Cultivating a Legacy of Purpose</h3>
+            <p className="founder-quote mt-8">
+              "I envisioned a space where faith and business coexist beautifully. A place where every woman's craft is recognized as a divine assignment."
+            </p>
+            <div style={{height: '1px', width: '100px', background: 'var(--metallic-gold)', marginTop: '2.5rem'}}></div>
+          </div>
+          <div className="founder-img cinematic-reveal">
+            <div className="founder-img-wrapper">
+              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC13UnDtBLM7zb8SdXtD25w7fhYw7V9mKcgpXLJdEa1OTAC2BQVTmmyblydJkjXl-T-lhhNXBYN3cZkwk_aCWGegZWUI-Oi65Z5JmA5J1J2z1AAGKgpOn2sIg0YvdbLUO-3Qzwyjs5xsiVJzJ9mA7WW-C0b5mx-m0evEKxSa4d3UZV27oUq3XP9vNckNpY6_jpoZ2-6aTrnMNgj5RxPDK7o3ISM2tLxkAQ8Z3NNlAjxRc3A0FMw3L6MbQgjK6x3M5hkf8JMHa9BIduv" alt="Founder" className="img-parallax" style={{width: '100%', height: '120%', objectFit: 'cover'}} />
+            </div>
+            <div className="founder-border-top"></div>
+            <div className="founder-border-bottom"></div>
+          </div>
+        </div>
+      </section>
+
+      {/* Vendor CTA */}
+      <section className="cta-section section-padded">
+        <div className="cta-card cinematic-reveal shadow-lg">
+          <div className="cta-text">
+            <h2 className="font-headline">Ready to showcase your talent?</h2>
+            <p>
+              Applications are now open for our March 29th Grand Launch and future markets. Join a community of over 50+ women-led brands.
+            </p>
+            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="btn-solid-gold">
+              Become a Vendor
+            </a>
+          </div>
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmPMeNC6FlFDLhDRgPVo9H0T114S6f7DvaPVc1m5oEC3Fb7W4HS2p5nXgJstd2odYerSFV3l5RCWEw-fzU9APTrwCijGvFnOAOhNMuEXzNfoeXiBQL5SAx-evpUaJ_X85a9YU1gQI_zT5XBjuI8NlWrwiI9-tPJxOKo0cGpBA2tGWq3vFUjMVTqlJyLJREpcED7vu04dz9Dd2BJ1LZUTXRKOUIKxrUGfKoLUm5I3wVB6PndjKdfxAaa21H-WI_-NDiSz1YqRjUjHid" alt="Products" className="cta-bg-img" />
         </div>
       </section>
       

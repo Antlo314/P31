@@ -1,15 +1,32 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Manrope:wght@300;400;600;800&display=swap');
 
 :root {
-  --royal-plum: #2A0F24; /* Deepened for ultra-premium dark background */
-  --soft-plum: #4A2342;
+  /* Modern Matriarch Core Palette */
+  --primary: #320E2C;
+  --primary-container: #4A2342;
+  --tertiary-container: #CBA72F;
+  --tertiary-fixed-dim: #E9C349;
+  --on-primary: #ffffff;
+  --on-tertiary-fixed: #241a00;
+  --surface: #fbf9fb;
+  --surface-container-low: #f5f3f5;
+  --surface-container: #efedef;
+  --surface-container-highest: #e3e2e4;
+  --on-surface: #1b1c1d;
+  --on-surface-variant: #4e444a;
+  --outline: #80747b;
+  --outline-variant: #d2c2ca;
+
+  /* Compatibility with existing GSAP layout */
+  --royal-plum: var(--primary);
+  --soft-plum: var(--primary-container);
   --plum-light: #593053;
   --pure-white: #FFFFFF;
-  --metallic-gold: #D4AF37;
-  --gold-glow: rgba(212, 175, 55, 0.4);
+  --metallic-gold: var(--tertiary-container);
+  --gold-glow: rgba(203, 167, 47, 0.4);
   
-  --font-heading: 'Playfair Display', serif;
-  --font-body: 'Inter', sans-serif;
+  --font-heading: 'Noto Serif', serif;
+  --font-body: 'Manrope', sans-serif;
 }
 
 * {
