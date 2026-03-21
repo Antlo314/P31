@@ -35,10 +35,13 @@ const Navbar = () => {
           <Link to="/calendar" className={location.pathname === '/calendar' ? 'active' : ''}>Experience</Link>
         </div>
 
-        <div className="nav-actions desktop-only">
-          <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="btn-outline" style={{ borderBottom: 'none' }}>
-            Apply
+        <div className="nav-actions">
+          <a href="https://www.eventbrite.com/e/proverbs-31-marketplace-tickets-1984190041828" target="_blank" rel="noreferrer" className="btn-solid-gold">
+            RSVP
           </a>
+          <Link to="/apply" className="btn-outline" style={{ borderBottom: 'none' }}>
+            Apply
+          </Link>
         </div>
 
         <button className="mobile-menu-btn mobile-only" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
@@ -52,7 +55,7 @@ const Navbar = () => {
             <Link to="/visionary" onClick={() => setIsMobileMenuOpen(false)}>Visionary</Link>
             <Link to="/directory" onClick={() => setIsMobileMenuOpen(false)}>Curators</Link>
             <Link to="/calendar" onClick={() => setIsMobileMenuOpen(false)}>Experience</Link>
-            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" onClick={() => setIsMobileMenuOpen(false)}>Apply</a>
+            <Link to="/apply" onClick={() => setIsMobileMenuOpen(false)}>Apply</Link>
           </div>
         )}
       </div>

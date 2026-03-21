@@ -12,10 +12,14 @@ const Register = () => {
           Submit your portfolio for consideration.
         </p>
         
-        <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="btn-primary">
-          Begin Curated Application
-        </a>
+      <div className="register-content" style={{textAlign:'center', marginTop: '4rem'}}>
+        <h2>Vendor Application</h2>
+        <p style={{marginBottom: '2rem'}}>Applications are now open for the March 29th, 2025 launch.</p>
+        <Link to="/apply" className="btn-primary">
+          Submit Application
+        </Link>
       </div>
+    </div>
     </div>
   );
 };

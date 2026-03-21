@@ -30,9 +30,9 @@ const About = () => {
               pinaccle of craftsmanship, beauty, and entrepreneurial excellence.
             </p>
             
-            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="btn-primary" style={{marginTop: '40px'}}>
-              Apply To Join Us
-            </a>
+            <Link to="/apply" className="btn-primary" style={{marginTop: '40px'}}>
+              Apply as a Curator
+            </Link>
           </div>
           
           <div className="story-contact">

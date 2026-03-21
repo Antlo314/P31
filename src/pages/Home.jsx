@@ -8,7 +8,6 @@ import heroVid from '../assets/hero.mp4';
 import curatorVid from '../assets/curator.mp4';
 import productVid from '../assets/product.mp4';
 import faithVid from '../assets/faith.mp4';
-import melanieVid from '../assets/melanie.mp4';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -206,27 +205,6 @@ const Home = () => {
             <Link to="/apply" style={{color: 'var(--primary)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '8px'}}>
               Become a Vendor <span className="material-symbols-outlined text-primary">arrow_forward</span>
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Founder Spotlight */}
-      <section className="founder-section section-padded">
-        <div className="founder-grid">
-          <div className="founder-text cinematic-reveal">
-            <span className="font-label" style={{color: 'var(--tertiary-fixed-dim)'}}>The Heart Behind the Market</span>
-            <h3 className="font-headline">Cultivating a Legacy of Purpose</h3>
-            <p className="founder-quote mt-8">
-              "I envisioned a space where faith and business coexist beautifully. A place where every woman's craft is recognized as a divine assignment."
-            </p>
-            <div style={{height: '1px', width: '100px', background: 'var(--metallic-gold)', marginTop: '2.5rem'}}></div>
-          </div>
-          <div className="founder-img cinematic-reveal">
-            <div className="founder-img-wrapper">
-              <video src={melanieVid} autoPlay loop muted playsInline className="img-parallax" style={{width: '100%', height: '120%', objectFit: 'cover'}} />
-            </div>
-            <div className="founder-border-top"></div>
-            <div className="founder-border-bottom"></div>
           </div>
         </div>
       </section>
