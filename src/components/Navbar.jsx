@@ -18,13 +18,11 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const isHomeTop = location.pathname === '/' && !isScrolled;
-
   return (
     <nav className={`navbar-v2 ${isScrolled ? 'scrolled' : ''}`}>
       <div className="navbar-v2-inner">
         <Link to="/" className="nav-brand">
-          <img src={logoPath} alt="Proverbs 31 Marketplace" className="nav-logo-img gold-plated-logo" style={{ opacity: isHomeTop ? 0 : 1, mixBlendMode: 'screen' }} />
+          <img src={logoPath} alt="Proverbs 31 Marketplace" className="nav-logo-img gold-plated-logo" />
         </Link>
 
         <div className="nav-links desktop-only">
