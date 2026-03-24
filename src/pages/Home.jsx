@@ -8,6 +8,7 @@ import heroVid from '../assets/hero.mp4';
 import curatorVid from '../assets/curator.mp4';
 import productVid from '../assets/product.mp4';
 import faithVid from '../assets/faith.mp4';
+import flyerImg from '../assets/march29.jpg';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -124,7 +125,7 @@ const Home = () => {
           <div className="hero-flyer-container cinematic-reveal" style={{position: 'relative'}}>
             <div className="hero-flyer-glow"></div>
             <div className="hero-flyer-wrapper">
-              <img src="https://lh3.googleusercontent.com/aida/ADBb0ugo7BVMZZ2fDbxXw0_jm9mcFo0l7oSkONBUbhKfeYdGJJGruT0X_GiPVClSXR2OdK4QTD9dQm0jDe9oL3f5q2TMbTi2WeJUhJRvxo0lIAtIFoH-tHPcNTyuJTTrjUK8acByOCrvIE2y3Wr386teT_XQdIWIeiycCnRgp533uqgSS_nL1NSvwmRu-U-vgMwGXekpNSzC11omU_97ydtsgqad58ny0eOpjgvm3Wk4ETRh-Jf0E9imx6pGqj8ADskGbaNA-fK9wbixEf8" alt="Flyer" style={{width: '100%', height: 'auto', display: 'block'}} />
+              <img src={flyerImg} alt="Flyer" style={{width: '100%', height: 'auto', display: 'block'}} />
             </div>
           </div>
         </div>
