@@ -106,10 +106,11 @@ const CuratorProfile = () => {
   const { id } = useParams();
   const containerRef = useRef(null);
   
-  // Fallback to curator 1 if invalid
-  const curator = curatorData[id] || curatorData[1];
+  const isUnderConstruction = id !== '5';
+  const curator = curatorData[id] || curatorData[5];
 
   useEffect(() => {
+    if (isUnderConstruction) return;
     let ctx = gsap.context(() => {
        gsap.fromTo('.cp-hero-text', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1.5, ease: 'power3.out' });
        
@@ -125,7 +126,18 @@ const CuratorProfile = () => {
        });
     }, containerRef);
     return () => ctx.revert();
-  }, [id]);
+  }, [id, isUnderConstruction]);
+
+  if (isUnderConstruction) {
+    return (
+      <div className="curator-profile-page" style={{minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--primary)', color: 'white', textAlign: 'center', padding: '2rem'}}>
+        <span className="material-symbols-outlined text-gold" style={{fontSize: '4rem', marginBottom: '1rem'}}>construction</span>
+        <h2 className="font-headline" style={{fontSize: '2.5rem', marginBottom: '1rem', color: 'var(--metallic-gold)'}}>Profile Under Construction</h2>
+        <p style={{color: 'rgba(255,255,255,0.7)', marginBottom: '2rem', fontSize: '1.2rem'}}>This curator's exquisite collection is currently being curated for the digital space.</p>
+        <Link to="/directory" className="btn-solid-gold">Return to Directory</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="curator-profile-page" ref={containerRef}>
@@ -212,18 +224,18 @@ const CuratorProfile = () => {
 
            <div className="cp-products-grid">
               {curator.products.map(product => (
-                <div key={product.id} className="cp-product-card">
+                <a key={product.id} href="https://www.nebaministry.org/ilcollection" target="_blank" rel="noreferrer" className="cp-product-card" style={{display: 'block', textDecoration: 'none'}}>
                    <div className="cp-product-img-wrapper" style={{background: '#ffffff'}}>
                       <img src={product.imageUrl || placeholderProduct} alt={product.name} className="cp-product-img" style={{objectFit: 'contain', padding: '1rem'}} />
-                      <div className="cp-product-hover">
-                         <span>View Details</span>
+                      <div className="cp-product-hover" style={{background: 'rgba(203, 167, 47, 0.9)'}}>
+                         <span style={{color: '#241a00', fontWeight: 'bold', letterSpacing: '1px'}}>Secure at Checkout</span>
                       </div>
                    </div>
                    <div className="cp-product-info">
                       <h4>{product.name}</h4>
                       <p className="cp-product-price">{product.price}</p>
                    </div>
-                </div>
+                </a>
               ))}
            </div>
         </div>

@@ -81,8 +81,11 @@ const Directory = () => {
 
   return (
     <div className="directory-v2" ref={containerRef}>
-      <div className="container-fluid dir-header-v2">
-        <h1 className="dir-header-title">The Curators.</h1>
+      <div className="container-fluid dir-header-v2" style={{position: 'relative'}}>
+        <div style={{position: 'absolute', top: 0, left: 0, width: '100%', background: 'linear-gradient(90deg, #320E2C 0%, #CBA72F 50%, #320E2C 100%)', color: 'white', textAlign: 'center', padding: '10px 0', fontSize: '0.85rem', letterSpacing: '2px', fontWeight: 600, textTransform: 'uppercase'}}>
+          Curators Directory Currently Under Construction
+        </div>
+        <h1 className="dir-header-title" style={{marginTop: '40px'}}>The Curators.</h1>
         <p className="dir-header-sub">Discover the women defining excellence at P31 Marketplace.</p>
       </div>
 
@@ -96,14 +99,14 @@ const Directory = () => {
               <h4 className="v2-vendor-meta">{vendor.name} &mdash; {vendor.products}</h4>
               <h2 className="v2-vendor-biz">{vendor.businessName}</h2>
               <p className="v2-vendor-bio">{vendor.bio}</p>
-              {vendor.id === 5 || vendor.id === 1 || vendor.id === 2 ? (
+              {vendor.id === 5 ? (
                 <Link to={`/curator/${vendor.id}`} className="v2-vendor-link btn-outline">
                   Explore Collection
                 </Link>
               ) : (
-                <a href={vendor.social} target="_blank" rel="noreferrer" className="v2-vendor-link btn-outline">
-                  Explore Details
-                </a>
+                <span className="v2-vendor-link btn-outline" style={{opacity: 0.5, cursor: 'not-allowed', borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.4)', pointerEvents: 'none'}}>
+                  Profile Coming Soon
+                </span>
               )}
             </div>
           </div>
