@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Home.css';
+import EventPopup from '../components/EventPopup';
 
 import heroVid from '../assets/hero.mp4';
 import curatorVid from '../assets/curator.mp4';
@@ -175,6 +176,35 @@ const Home = () => {
         </div>
       </section>
 
+      {/* What to Expect (Value Addition) */}
+      <section className="value-section section-padded" style={{background: 'var(--surface-container-low)'}}>
+        <div className="value-grid" style={{maxWidth: '1400px', margin: '0 auto'}}>
+          <div className="text-center mb-8 cinematic-reveal">
+            <span className="font-label text-gold">The Experience</span>
+            <h2 className="font-headline" style={{color: 'var(--primary)', fontSize: '2.5rem', marginTop: '1rem', marginBottom: '3rem'}}>
+              Beyond a Marketplace
+            </h2>
+          </div>
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem'}}>
+            <div className="value-card cinematic-reveal" style={{padding: '3rem', background: 'var(--pure-white)', borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)'}}>
+              <span className="material-symbols-outlined text-gold" style={{fontSize: '3rem', marginBottom: '1.5rem'}}>diamond</span>
+              <h3 className="font-headline" style={{color: 'var(--primary)', marginBottom: '1rem'}}>Artisan Crafted</h3>
+              <p style={{color: 'var(--on-surface)', lineHeight: 1.6}}>Discover elite, hand-selected curators representing the pinnacle of craftsmanship and beauty.</p>
+            </div>
+            <div className="value-card cinematic-reveal" style={{padding: '3rem', background: 'var(--pure-white)', borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)'}}>
+              <span className="material-symbols-outlined text-gold" style={{fontSize: '3rem', marginBottom: '1.5rem'}}>diversity_3</span>
+              <h3 className="font-headline" style={{color: 'var(--primary)', marginBottom: '1rem'}}>Divine Networking</h3>
+              <p style={{color: 'var(--on-surface)', lineHeight: 1.6}}>Immerse yourself in a community of visionary women, cultivating powerful, faith-driven connections.</p>
+            </div>
+            <div className="value-card cinematic-reveal" style={{padding: '3rem', background: 'var(--pure-white)', borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)'}}>
+              <span className="material-symbols-outlined text-gold" style={{fontSize: '3rem', marginBottom: '1.5rem'}}>nightlife</span>
+              <h3 className="font-headline" style={{color: 'var(--primary)', marginBottom: '1rem'}}>Exclusive Ambiance</h3>
+              <p style={{color: 'var(--on-surface)', lineHeight: 1.6}}>Enjoy a majestic, high-end shopping atmosphere elevated by curated aesthetics and live music.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Vision & Mission */}
       <section className="vision-section section-padded" id="about">
         <div className="vision-grid">
@@ -192,6 +222,7 @@ const Home = () => {
             <h3 className="font-headline">Empowering Women to Rise and Build</h3>
             <p>
               The Proverbs 31 Marketplace is more than a shopping event—it is a traveling sanctuary for creativity. We celebrate the modern matriarch by providing a premium platform for women to showcase their divine gifts.
+              Every curator is hand-selected, representing the pinnacle of craftsmanship, beauty, and entrepreneurial excellence. Rooted in purpose, we curate spaces where faith and luxury converge.
             </p>
             
             <div className="categories-grid">
@@ -206,6 +237,45 @@ const Home = () => {
             <Link to="/apply" style={{color: 'var(--primary)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '8px'}}>
               Become a Vendor <span className="material-symbols-outlined text-primary">arrow_forward</span>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Tour Dates */}
+      <section className="tour-section section-padded" style={{background: 'var(--primary)', color: 'white'}}>
+        <div className="tour-container cinematic-reveal" style={{maxWidth: '1000px', margin: '0 auto'}}>
+          <div className="text-center mb-8">
+            <span className="font-label text-gold">Upcoming Dates</span>
+            <h2 className="font-headline" style={{fontSize: '3rem', marginTop: '1rem', color: 'white', marginBottom: '3rem'}}>The Tour Continues</h2>
+          </div>
+          <div style={{borderTop: '1px solid rgba(255,255,255,0.1)'}}>
+            <div style={{display: 'flex', flexWrap: 'wrap', gap: '2rem', padding: '3rem 0', borderBottom: '1px solid rgba(255,255,255,0.1)', alignItems: 'center'}}>
+              <div style={{flex: '1', minWidth: '150px'}}>
+                <span className="font-headline text-gold" style={{fontSize: '2rem', display: 'block'}}>28</span>
+                <span style={{textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.85rem'}}>August '26</span>
+              </div>
+              <div style={{flex: '3', minWidth: '250px'}}>
+                <h3 className="font-headline" style={{fontSize: '1.5rem', marginBottom: '0.5rem', color: 'white'}}>Atlanta Summer Pop-Up</h3>
+                <p style={{color: 'rgba(255,255,255,0.7)', lineHeight: 1.6}}>An exclusive outdoor sanctuary featuring 30+ elite women creatives.</p>
+              </div>
+              <div style={{flex: '1', textAlign: 'right', minWidth: '150px'}}>
+                 <a href="https://www.eventbrite.com/e/proverbs-31-marketplace-tickets-1984190041828" target="_blank" rel="noreferrer" className="btn-outline-white" style={{padding: '12px 24px', fontSize: '0.9rem'}}>RSVP</a>
+              </div>
+            </div>
+            
+            <div style={{display: 'flex', flexWrap: 'wrap', gap: '2rem', padding: '3rem 0', borderBottom: '1px solid rgba(255,255,255,0.1)', alignItems: 'center'}}>
+              <div style={{flex: '1', minWidth: '150px'}}>
+                <span className="font-headline text-gold" style={{fontSize: '2rem', display: 'block'}}>TBA</span>
+                <span style={{textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.85rem'}}>Fall '26</span>
+              </div>
+              <div style={{flex: '3', minWidth: '250px'}}>
+                <h3 className="font-headline" style={{fontSize: '1.5rem', marginBottom: '0.5rem', color: 'white'}}>Fall Collection Showcase</h3>
+                <p style={{color: 'rgba(255,255,255,0.7)', lineHeight: 1.6}}>Highlighting seasonal apparel, rich fragrances, and luxury homeware for autumn.</p>
+              </div>
+              <div style={{flex: '1', textAlign: 'right', minWidth: '150px'}}>
+                 <span style={{color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.85rem'}}>Incoming</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -226,6 +296,7 @@ const Home = () => {
         </div>
       </section>
       
+      <EventPopup />
     </div>
   );
 };

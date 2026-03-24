@@ -26,11 +26,8 @@ const Navbar = () => {
         </Link>
 
         <div className="nav-links desktop-only">
-          <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Explore</Link>
-          <Link to="/about" className={location.pathname === '/about' ? 'active' : ''}>The Vision</Link>
           <Link to="/visionary" className={location.pathname === '/visionary' ? 'active' : ''}>Visionary</Link>
           <Link to="/directory" className={location.pathname === '/directory' ? 'active' : ''}>Curators</Link>
-          <Link to="/calendar" className={location.pathname === '/calendar' ? 'active' : ''}>Experience</Link>
         </div>
 
         <div className="nav-actions">
@@ -45,11 +42,9 @@ const Navbar = () => {
 
         {isMobileMenuOpen && (
           <div className="mobile-dropdown">
-            <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Explore</Link>
-            <Link to="/about" onClick={() => setIsMobileMenuOpen(false)}>The Vision</Link>
+            <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
             <Link to="/visionary" onClick={() => setIsMobileMenuOpen(false)}>Visionary</Link>
             <Link to="/directory" onClick={() => setIsMobileMenuOpen(false)}>Curators</Link>
-            <Link to="/calendar" onClick={() => setIsMobileMenuOpen(false)}>Experience</Link>
           </div>
         )}
       </div>
