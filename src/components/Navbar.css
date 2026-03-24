@@ -1,11 +1,10 @@
 .navbar-v2 {
-  position: fixed;
-  top: 0;
+  position: static;
   width: 100%;
   z-index: 100;
-  padding: 40px 5vw;
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  background-color: transparent;
+  padding: 20px 5vw;
+  background-color: var(--primary);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.1);
 }
 
 .gold-plated-logo {
@@ -13,14 +12,7 @@
   transition: filter 0.5s ease, opacity 0.5s ease !important;
 }
 
-.navbar-v2.scrolled {
-  padding: 20px 5vw;
-  background: rgba(10, 5, 8, 0.65);
-  -webkit-backdrop-filter: blur(24px);
-  backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(255, 215, 0, 0.15);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
+/* navbar-v2.scrolled removed to keep static style */
 
 .navbar-v2-inner {
   display: flex;
@@ -117,6 +109,8 @@
 .mobile-dropdown a:hover {
   color: var(--metallic-gold);
 }
+
+.mobile-only { display: none; }
 
 @media (max-width: 900px) {
   .desktop-only { display: none !important; }
