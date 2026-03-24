@@ -151,14 +151,14 @@ const Home = () => {
             <h3 className="font-headline">Event Location</h3>
             <div style={{display: 'flex', gap: '1rem', marginBottom: '2rem'}}>
               <span className="material-symbols-outlined text-primary">pin_drop</span>
-              <p style={{color: 'var(--on-surface-variant)', lineHeight: 1.6, fontWeight: 500}}>
+              <p style={{color: 'var(--on-surface)', lineHeight: 1.6, fontWeight: 500}}>
                 Embassy Suites by Hilton<br/>
                 Atlanta NE/Gwinnett Sugarloaf<br/>
                 2029 Satellite Blvd<br/>
                 Duluth, GA 30097
               </p>
             </div>
-            <p style={{fontSize: '0.85rem', fontStyle: 'italic', color: 'var(--outline)', paddingLeft: '2.5rem', marginBottom: '2rem'}}>
+            <p style={{fontSize: '0.85rem', fontStyle: 'italic', color: 'var(--on-surface)', paddingLeft: '2.5rem', marginBottom: '2rem'}}>
               (across from Gas South Arena)
             </p>
             <a href="https://www.google.com/maps/dir/?api=1&destination=2029+Satellite+Blvd+Duluth+GA+30097" target="_blank" rel="noreferrer" className="btn-solid-gold" style={{background: 'var(--primary)', color: 'white'}}>
