@@ -1,6 +1,6 @@
 import React from 'react';
 import '../pages/Home.css';
-import melanieVid from '../assets/melanie.mp4';
+import melanieNewImg from '../assets/melanie23_rm.png';
 
 const Visionaries = () => {
   return (
@@ -45,7 +45,7 @@ const Visionaries = () => {
         <div className="container-fluid" style={{maxWidth: '1200px', margin: '0 auto'}}>
           <div className="visionary-content-wrapper">
             <div className="visionary-video-float cinematic-reveal">
-              <video src={melanieVid} autoPlay loop muted playsInline />
+              <img src={melanieNewImg} alt="Melanie Jeffers-Cameron" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             
             <div className="visionary-text-content cinematic-reveal" style={{paddingTop: '1rem'}}>
