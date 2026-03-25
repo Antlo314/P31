@@ -26,7 +26,7 @@ const Navbar = () => {
         </Link>
 
         <div className="nav-links desktop-only">
-          <Link to="/visionary" className={location.pathname === '/visionary' ? 'active' : ''}>Visionary</Link>
+          <a href="/#visionary">Visionary</a>
           <Link to="/directory" className={location.pathname === '/directory' ? 'active' : ''}>Curators</Link>
         </div>
 
@@ -43,7 +43,7 @@ const Navbar = () => {
         {isMobileMenuOpen && (
           <div className="mobile-dropdown">
             <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
-            <Link to="/visionary" onClick={() => setIsMobileMenuOpen(false)}>Visionary</Link>
+            <a href="/#visionary" onClick={() => setIsMobileMenuOpen(false)}>Visionary</a>
             <Link to="/directory" onClick={() => setIsMobileMenuOpen(false)}>Curators</Link>
           </div>
         )}

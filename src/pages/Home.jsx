@@ -7,9 +7,9 @@ import EventPopup from '../components/EventPopup';
 
 import heroVid from '../assets/hero.mp4';
 import curatorVid from '../assets/curator.mp4';
-import productVid from '../assets/product.mp4';
 import faithVid from '../assets/faith.mp4';
-import flyerImg from '../assets/march29.jpg';
+import flyerImg from '../assets/flyer.png';
+import melanieVid from '../assets/melanie.mp4';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -220,9 +220,8 @@ const Home = () => {
           <div className="vision-text cinematic-reveal">
             <span className="font-label text-gold">Our Mission</span>
             <h3 className="font-headline">Empowering Women to Rise and Build</h3>
-            <p>
-              The Proverbs 31 Marketplace is more than a shopping event—it is a traveling sanctuary for creativity. We celebrate the modern matriarch by providing a premium platform for women to showcase their divine gifts.
-              Every curator is hand-selected, representing the pinnacle of craftsmanship, beauty, and entrepreneurial excellence. Rooted in purpose, we curate spaces where faith and luxury converge.
+            <p style={{lineHeight: 1.8, marginBottom: '2rem'}}>
+              Proverbs 31 Marketplace is more than a shopping event, it is a traveling sanctuary for creativity. We honor the modern woman of influence by providing a premium platform to showcase her divine gifts. Every curator is hand-selected, representing the pinnacle of craftsmanship, beauty, and entrepreneurial excellence. Rooted in purpose, we create spaces where faith and luxury converge.
             </p>
             
             <div className="categories-grid">
@@ -280,6 +279,61 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Visionary Section */}
+      <section id="visionary" className="about-cinematic section-padded" style={{display: 'block', backgroundColor: '#050505', color: 'white'}}>
+        <style>{`
+          .visionary-video-float {
+            float: left;
+            width: 350px;
+            aspect-ratio: 9/16;
+            margin-right: 3rem;
+            margin-bottom: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            overflow: hidden;
+            background: #111;
+          }
+          @media (max-width: 900px) {
+            .visionary-video-float {
+              float: none;
+              width: 100%;
+              max-width: 400px;
+              margin: 0 auto 3rem auto;
+            }
+          }
+        `}</style>
+        <div className="container-fluid" style={{maxWidth: '1200px', margin: '0 auto'}}>
+          <div className="visionary-content-wrapper">
+            <div className="visionary-video-float cinematic-reveal">
+              <video src={melanieVid} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            
+            <div className="visionary-text-content cinematic-reveal" style={{paddingTop: '1rem'}}>
+              <h4 className="overline-gold" style={{color: 'var(--metallic-gold)', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.85rem'}}>The Visionary</h4>
+              <h2 className="margin-bottom-large font-headline" style={{marginBottom: "2rem", fontSize: '2.5rem', color: 'white'}}>Melanie Jeffers-Cameron</h2>
+              
+              <p className="about-lead" style={{fontSize: '1.25rem', color: 'rgba(255,255,255,0.9)', marginBottom: '1.5rem', lineHeight: 1.6}}>
+                A visionary leader, faith-driven mentor, and purpose-driven entrepreneur dedicated to guiding others toward healing, restoration, and divine alignment.
+              </p>
+              
+              <p style={{marginBottom: '1.5rem', lineHeight: 1.8, color: 'rgba(255,255,255,0.7)'}}>
+                In 2019, Melanie received a God-given assignment—to heal from her trauma and use her testimonies to become and create everything she once needed. She’s been obedient since. When asked why she kept building, her response is simple: <span className="quote-inline" style={{fontStyle: 'italic', color: 'var(--metallic-gold)'}}>“Purpose saved my life. God’s not done with me yet.”</span>
+              </p>
+              
+              <p style={{marginBottom: '1.5rem', lineHeight: 1.8, color: 'rgba(255,255,255,0.7)'}}>
+                As the founder of <a href="https://www.nebaministry.org/" target="_blank" rel="noreferrer" className="link-gold-inline" style={{color: 'var(--metallic-gold)', textDecoration: 'underline'}}>NEBA Ministry</a>, she has created a sacred space for deep mentorship, accountability, and breaking generational cycles alongside her team's outreach. She is also the CEO of <a href="https://www.nebaministry.org/ilcollection" target="_blank" rel="noreferrer" className="link-gold-inline" style={{color: 'var(--metallic-gold)', textDecoration: 'underline'}}>Incandescent Lily Collection</a>, a luxury boutique reflecting her passion for holistic wellness and the belief that self-care is an extension of self-worth.
+              </p>
+              
+              <p style={{marginBottom: '1.5rem', lineHeight: 1.8, color: 'rgba(255,255,255,0.7)'}}>
+                Through P31 Marketplace, her perspicacious leadership, and her ongoing ministry, Melanie is dedicated to helping individuals walk in their God-given gifts—healing, realigning, and rising into the fullness of their purpose.
+              </p>
+            </div>
+            
+            <div style={{clear: 'both'}}></div>
+          </div>
+        </div>
+      </section>
+
       {/* Vendor CTA */}
       <section className="cta-section section-padded">
         <div className="cta-card cinematic-reveal shadow-lg">
@@ -292,7 +346,7 @@ const Home = () => {
               Become a Vendor
             </Link>
           </div>
-          <video src={productVid} autoPlay loop muted playsInline className="cta-bg-img" />
+          <video src={melanieVid} autoPlay loop muted playsInline className="cta-bg-img" />
         </div>
       </section>
       
