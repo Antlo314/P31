@@ -10,7 +10,7 @@ import curatorVid from '../assets/curator.mp4';
 import faithVid from '../assets/faith.mp4';
 import flyerImg from '../assets/flyer.png';
 import melanieVid from '../assets/melanie.mp4';
-import melanie2Img from '../assets/melanie2.png';
+import visionaryVid from '../assets/visionary.mp4';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -211,7 +211,7 @@ const Home = () => {
         <div className="vision-grid">
           <div className="vision-img-container cinematic-reveal" style={{position: 'relative'}}>
             <div className="vision-img-wrapper">
-              <img src={melanie2Img} className="img-parallax" style={{width: '100%', height: '120%', objectFit: 'cover'}} alt="Mission Visionary" />
+              <video src={visionaryVid} autoPlay loop muted playsInline className="img-parallax" style={{width: '100%', height: '120%', objectFit: 'cover'}} />
             </div>
             <div className="vision-badge">
               <span>7+</span>
