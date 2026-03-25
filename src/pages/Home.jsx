@@ -11,6 +11,7 @@ import faithVid from '../assets/faith.mp4';
 import flyerImg from '../assets/flyer.png';
 import melanieVid from '../assets/melanie.mp4';
 import visionaryVid from '../assets/visionary.mp4';
+import melanieNewImg from '../assets/melanie_rm_1.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -306,7 +307,7 @@ const Home = () => {
         <div className="container-fluid" style={{maxWidth: '1200px', margin: '0 auto'}}>
           <div className="visionary-content-wrapper">
             <div className="visionary-video-float cinematic-reveal">
-              <video src={melanieVid} autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={melanieNewImg} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Melanie Jeffers-Cameron" />
             </div>
             
             <div className="visionary-text-content cinematic-reveal" style={{paddingTop: '1rem'}}>
