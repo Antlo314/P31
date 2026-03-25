@@ -123,10 +123,11 @@
 }
 
 .hero-title {
-  font-size: clamp(3rem, 5vw, 4.5rem);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
   line-height: 1.1;
   font-weight: 700;
   margin-bottom: 2rem;
+  word-wrap: break-word;
 }
 
 .hero-details {
@@ -201,7 +202,7 @@
   text-align: center;
 }
 .scripture-text {
-  font-size: clamp(2rem, 3vw, 2.5rem);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
   line-height: 1.5;
   color: var(--primary);
   font-style: italic;
@@ -222,7 +223,7 @@
   align-items: center;
 }
 .map-info h3 {
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 5vw, 2.5rem);
   color: var(--primary);
   margin-top: 1rem;
   margin-bottom: 2rem;
@@ -258,10 +259,10 @@
 }
 .vision-badge {
   position: absolute;
-  bottom: -30px;
-  right: -30px;
-  width: 150px;
-  height: 150px;
+  bottom: -20px;
+  right: 20px;
+  width: 120px;
+  height: 120px;
   background: var(--metallic-gold);
   border-radius: 16px;
   display: flex;
@@ -272,15 +273,16 @@
   box-shadow: 0 10px 20px rgba(203, 167, 47, 0.3);
   z-index: 2;
 }
-.vision-badge span:first-child { font-size: 3rem; font-weight: 700; font-family: var(--font-heading); }
+.vision-badge span:first-child { font-size: 2.5rem; font-weight: 700; font-family: var(--font-heading); }
 .vision-badge span:last-child { font-size: 0.6rem; text-align: center; }
 
 .vision-text h3 {
-  font-size: clamp(2.5rem, 4vw, 3.5rem);
+  font-size: clamp(2rem, 5vw, 3.5rem);
   color: var(--primary);
   margin-top: 1rem;
   margin-bottom: 1.5rem;
   font-weight: 700;
+  word-wrap: break-word;
 }
 .vision-text p {
   font-size: 1.1rem;

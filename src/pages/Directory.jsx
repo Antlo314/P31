@@ -82,10 +82,10 @@ const Directory = () => {
   return (
     <div className="directory-v2" ref={containerRef}>
       <div className="container-fluid dir-header-v2" style={{position: 'relative'}}>
-        <div style={{position: 'absolute', top: 0, left: 0, width: '100%', background: 'linear-gradient(90deg, #320E2C 0%, #CBA72F 50%, #320E2C 100%)', color: 'white', textAlign: 'center', padding: '10px 0', fontSize: '0.85rem', letterSpacing: '2px', fontWeight: 600, textTransform: 'uppercase'}}>
+        <div style={{width: '100%', background: 'linear-gradient(90deg, #320E2C 0%, #CBA72F 50%, #320E2C 100%)', color: 'white', textAlign: 'center', padding: '15px 10px', fontSize: '0.85rem', letterSpacing: '2px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '2rem'}}>
           Curators Directory Currently Under Construction
         </div>
-        <h1 className="dir-header-title" style={{marginTop: '40px'}}>The Curators.</h1>
+        <h1 className="dir-header-title">The Curators.</h1>
         <p className="dir-header-sub">Discover the women defining excellence at P31 Marketplace.</p>
       </div>
 

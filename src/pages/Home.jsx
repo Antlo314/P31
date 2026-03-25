@@ -207,6 +207,10 @@ const Home = () => {
 
       {/* Vision & Mission */}
       <section className="vision-section section-padded" id="about">
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }} className="cinematic-reveal">
+          <h2 className="font-headline text-primary" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', margin: 0 }}>Melanie JC</h2>
+          <p className="font-label text-gold" style={{ marginTop: '0.5rem', letterSpacing: '3px' }}>The Matriarch of P31 Marketplace</p>
+        </div>
         <div className="vision-grid">
           <div className="vision-img-container cinematic-reveal" style={{position: 'relative'}}>
             <div className="vision-img-wrapper">
@@ -245,7 +249,7 @@ const Home = () => {
         <div className="tour-container cinematic-reveal" style={{maxWidth: '1000px', margin: '0 auto'}}>
           <div className="text-center mb-8">
             <span className="font-label text-gold">Upcoming Dates</span>
-            <h2 className="font-headline" style={{fontSize: '3rem', marginTop: '1rem', color: 'white', marginBottom: '3rem'}}>The Tour Continues</h2>
+            <h2 className="font-headline" style={{fontSize: 'clamp(2.5rem, 5vw, 3rem)', marginTop: '1rem', color: 'white', marginBottom: '3rem'}}>The Tour Continues</h2>
           </div>
           <div style={{borderTop: '1px solid rgba(255,255,255,0.1)'}}>
             <div style={{display: 'flex', flexWrap: 'wrap', gap: '2rem', padding: '3rem 0', borderBottom: '1px solid rgba(255,255,255,0.1)', alignItems: 'center'}}>
