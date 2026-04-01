@@ -1,11 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Sparkles } from 'lucide-react';
 import './Directory.css';
+
 import vendor1 from '../assets/vendor_candles.png';
 import vendor2 from '../assets/vendor_skincare.png';
 import vendor3 from '../assets/vendor_ceramics.png';
 import vendor4 from '../assets/vendor_jewelry.png';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const vendors = [
   {
@@ -60,58 +65,89 @@ const Directory = () => {
 
   useEffect(() => {
     let ctx = gsap.context(() => {
+      // Stagger initial items
       gsap.from('.v2-vendor-item', {
         opacity: 0,
-        y: 80,
+        y: 60,
         duration: 1.2,
-        stagger: 0.2,
+        stagger: 0.15,
         ease: 'power3.out',
         scrollTrigger: {
           trigger: '.directory-list-v2',
-          start: 'top 80%',
+          start: 'top 85%',
         }
       });
       
       gsap.from('.dir-header-title', {
-        opacity: 0, x: -50, duration: 1, ease: 'power3.out', delay: 0.2
+        opacity: 0, y: 30, duration: 1, ease: 'power3.out', delay: 0.1
+      });
+      
+      gsap.from('.dir-header-sub', {
+        opacity: 0, y: 20, duration: 1, ease: 'power3.out', delay: 0.2
       });
     }, containerRef);
     return () => ctx.revert();
   }, []);
 
   return (
-    <div className="directory-v2" ref={containerRef}>
-      <div className="container-fluid dir-header-v2" style={{position: 'relative'}}>
-        <div style={{width: '100%', background: 'linear-gradient(90deg, #320E2C 0%, #CBA72F 50%, #320E2C 100%)', color: 'white', textAlign: 'center', padding: '15px 10px', fontSize: '0.85rem', letterSpacing: '2px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '2rem'}}>
-          Curators Directory Currently Under Construction
+    <div className="directory-v2 font-body" ref={containerRef}>
+      
+      {/* Directory Header Section */}
+      <section className="dir-header-v2 text-center" style={{ padding: '15vh 5vw 10vh' }}>
+        
+        {/* Elegant "Under Construction" Badge */}
+        <div className="glass-card flex-center" style={{ display: 'inline-flex', padding: '10px 24px', borderRadius: '40px', marginBottom: '3rem', border: '1px solid var(--outline-variant)' }}>
+          <Sparkles className="text-gold" size={16} style={{ marginRight: '8px' }} />
+          <span className="font-label text-primary" style={{ letterSpacing: '2px', fontSize: '0.75rem' }}>Directory Profiles Are Under Construction</span>
         </div>
-        <h1 className="dir-header-title">The Curators.</h1>
-        <p className="dir-header-sub">Discover the women defining excellence at P31 Marketplace.</p>
-      </div>
+        
+        <h1 className="dir-header-title font-headline text-primary" style={{ fontSize: 'clamp(3.5rem, 8vw, 6rem)', lineHeight: 1.1, marginBottom: '1.5rem' }}>
+          The Curators.
+        </h1>
+        <p className="dir-header-sub" style={{ fontSize: '1.25rem', color: 'var(--on-surface-variant)', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>
+          Discover the women defining excellence at P31 Marketplace. From organic botanicals to fine jewelry, explore the pinnacle of craftsmanship.
+        </p>
+      </section>
 
-      <div className="directory-list-v2 container-fluid">
+      {/* Directory List Container */}
+      <section className="directory-list-v2 container-fluid" style={{ paddingBottom: '15vh', maxWidth: '1400px', margin: '0 auto' }}>
         {vendors.map((vendor, index) => (
-          <div key={vendor.id} className={`v2-vendor-item ${index % 2 !== 0 ? 'vendor-reverse' : ''}`}>
-            <div className="v2-vendor-img-wrap">
-              <img src={vendor.image} alt={vendor.businessName} className="v2-vendor-img" />
+          <div key={vendor.id} className={`v2-vendor-item ${index % 2 !== 0 ? 'vendor-reverse' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '6vw', marginBottom: '12vh' }}>
+            
+            {/* Vendor Image Wrap with Glass Border */}
+            <div className="v2-vendor-img-wrap glass-border" style={{ flex: 1, position: 'relative', aspectRatio: '4/5', overflow: 'hidden' }}>
+              <img src={vendor.image} alt={vendor.businessName} className="v2-vendor-img" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
-            <div className="v2-vendor-content">
-              <h4 className="v2-vendor-meta">{vendor.name} &mdash; {vendor.products}</h4>
-              <h2 className="v2-vendor-biz">{vendor.businessName}</h2>
-              <p className="v2-vendor-bio">{vendor.bio}</p>
-              {vendor.id === 5 ? (
-                <Link to={`/curator/${vendor.id}`} className="v2-vendor-link btn-outline">
-                  Explore Collection
-                </Link>
-              ) : (
-                <span className="v2-vendor-link btn-outline" style={{opacity: 0.5, cursor: 'not-allowed', borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.4)', pointerEvents: 'none'}}>
-                  Profile Coming Soon
-                </span>
-              )}
+            
+            {/* Vendor Info Glass Card */}
+            <div className="v2-vendor-content glass-card shadow-lg" style={{ flex: 1, padding: '4rem 3rem' }}>
+              <h4 className="v2-vendor-meta font-label text-gold" style={{ marginBottom: '1.5rem', letterSpacing: '2px' }}>
+                {vendor.name} &mdash; {vendor.products}
+              </h4>
+              <h2 className="v2-vendor-biz font-headline text-primary" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1.1, marginBottom: '1.5rem' }}>
+                {vendor.businessName}
+              </h2>
+              <p className="v2-vendor-bio" style={{ fontSize: '1.15rem', color: 'var(--on-surface-variant)', lineHeight: 1.7, marginBottom: '2.5rem', maxWidth: '500px' }}>
+                {vendor.bio}
+              </p>
+              
+              <div className="vendor-actions">
+                {vendor.id === 5 ? (
+                  <Link to={`/curator/${vendor.id}`} className="btn-solid-gold">
+                    Explore Collection
+                  </Link>
+                ) : (
+                  <span className="btn-outline-primary" style={{ opacity: 0.6, cursor: 'not-allowed', pointerEvents: 'none' }}>
+                    Profile Coming Soon
+                  </span>
+                )}
+              </div>
             </div>
+            
           </div>
         ))}
-      </div>
+      </section>
+      
     </div>
   );
 };

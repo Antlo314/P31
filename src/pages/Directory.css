@@ -1,97 +1,32 @@
+/* Directory.css - Upscale Light Aesthetic */
+
 .directory-v2 {
-  padding-top: 15vh;
-  padding-bottom: 15vh;
-  background-color: var(--royal-plum);
-}
-
-.dir-header-v2 {
-  margin-bottom: 10vh;
-}
-
-.dir-header-title {
-  font-size: clamp(2.5rem, 6vw, 6rem);
-  color: var(--metallic-gold);
-  line-height: 1.1;
-  margin-bottom: 1rem;
-  word-wrap: break-word;
-}
-
-.dir-header-sub {
-  font-size: clamp(1.1rem, 2vw, 1.5rem);
-  color: rgba(255,255,255,0.7);
-  max-width: 600px;
-}
-
-.directory-list-v2 {
-  display: flex;
-  flex-direction: column;
-  gap: 15vh;
-}
-
-.v2-vendor-item {
-  display: flex;
-  align-items: center;
-  gap: 6vw;
-}
-
-.v2-vendor-item.vendor-reverse {
-  flex-direction: row-reverse;
-}
-
-.v2-vendor-img-wrap {
-  flex: 1;
-  aspect-ratio: 4/5;
-  overflow: hidden;
-  position: relative;
+  background-color: var(--surface);
+  color: var(--on-surface);
+  min-height: 100vh;
 }
 
 .v2-vendor-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .v2-vendor-item:hover .v2-vendor-img {
-  transform: scale(1.05);
-}
-
-.v2-vendor-content {
-  flex: 1;
-  padding: 40px 0;
-}
-
-.v2-vendor-meta {
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--metallic-gold);
-  margin-bottom: 24px;
-}
-
-.v2-vendor-biz {
-  font-size: clamp(2rem, 4vw, 4rem);
-  color: var(--pure-white);
-  line-height: 1.1;
-  margin-bottom: 32px;
-  word-wrap: break-word;
-}
-
-.v2-vendor-bio {
-  font-size: 1.25rem;
-  line-height: 1.6;
-  color: rgba(255,255,255,0.8);
-  margin-bottom: 40px;
-  max-width: 500px;
+  transform: scale(1.04);
 }
 
 @media (max-width: 900px) {
-  .v2-vendor-item, .v2-vendor-item.vendor-reverse {
-    flex-direction: column;
-    gap: 30px;
+  .v2-vendor-item {
+    flex-direction: column !important;
+    gap: 3rem !important;
+    margin-bottom: 8vh !important;
   }
+  
   .v2-vendor-img-wrap {
     width: 100%;
+    aspect-ratio: 1/1 !important;
+  }
+
+  .v2-vendor-content {
+    padding: 2.5rem 2rem !important;
   }
 }
