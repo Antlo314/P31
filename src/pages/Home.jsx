@@ -90,7 +90,7 @@ const Home = () => {
         </div>
         
         <div className="hero-content-grid text-center">
-          <div className="hero-text-content cinematic-reveal" style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div className="hero-text-content cinematic-reveal glass-card shadow-lg" style={{ maxWidth: '800px', margin: '0 auto', padding: '4rem 2rem' }}>
             <span className="material-symbols-outlined text-gold" style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>auto_awesome</span>
             <h1 className="hero-title font-headline text-primary">
               Where Her Gifts <br/> <span className="text-gold" style={{fontStyle: 'italic', fontWeight: 400}}>Make Room</span>
@@ -114,12 +114,14 @@ const Home = () => {
 
       {/* Scripture Section */}
       <section className="scripture-section section-padded" style={{position: 'relative', overflow: 'hidden'}}>
-        <video src={faithVid} autoPlay loop muted playsInline className="img-parallax" style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '120%', objectFit: 'cover', opacity: 0.05}} />
-        <div className="cinematic-reveal" style={{position: 'relative', zIndex: 2}}>
-          <h2 className="scripture-text text-primary">
-            "Give her of the fruit of her hands; And let her own works praise her in the gates."
-          </h2>
-          <p className="font-label text-gold" style={{marginTop: '2rem', letterSpacing: '2px'}}>Proverbs 31:31 KJV</p>
+        <video src={faithVid} autoPlay loop muted playsInline className="img-parallax" style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '120%', objectFit: 'cover', opacity: 0.4}} />
+        <div className="cinematic-reveal" style={{position: 'relative', zIndex: 2, padding: '4rem 2rem'}}>
+          <div className="glass-card shadow-lg" style={{ maxWidth: '1000px', margin: '0 auto', padding: '4rem 2rem' }}>
+            <h2 className="scripture-text text-primary">
+              "Give her of the fruit of her hands; And let her own works praise her in the gates."
+            </h2>
+            <p className="font-label text-gold" style={{marginTop: '2rem', letterSpacing: '2px'}}>Proverbs 31:31 KJV</p>
+          </div>
         </div>
       </section>
 

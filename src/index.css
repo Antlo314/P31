@@ -13,9 +13,9 @@
   --surface-container: #efedef;
   --surface-container-highest: #e3e2e4;
   --on-surface: #1b1c1d;
-  --on-surface-variant: #e6e0e9;
+  --on-surface-variant: #4A3543;
   --outline: #80747b;
-  --outline-variant: #d2c2ca;
+  --outline-variant: #D2C2CA;
 
   /* Compatibility with existing GSAP layout */
   --royal-plum: var(--primary);
