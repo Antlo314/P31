@@ -10,8 +10,9 @@ const Footer = () => {
         <div className="footer-top-v2">
           
           <div className="footer-logo-area">
+            <h2 className="font-headline text-gold" style={{ fontSize: '2rem', marginBottom: '1.5rem', color: 'var(--metallic-gold)' }}>P31.</h2>
             <p>
-              A traveling sanctuary of creativity, empowering women to rise and build using their gifts.
+              A traveling collective of creativity, empowering women to rise and build using their gifts.
             </p>
             <div className="socials-v2" style={{marginTop: '24px'}}>
               <a href="https://www.instagram.com/proverbs31market" target="_blank" rel="noreferrer" aria-label="Instagram">
