@@ -230,7 +230,7 @@ const Home = () => {
       <section className="newsletter-section section-padded" id="newsletter">
         <div className="newsletter-card cinematic-reveal glass-card shadow-lg text-center" style={{ padding: '6rem 2rem', maxWidth: '800px', margin: '0 auto' }}>
           <Sparkles className="text-gold" size={48} style={{ margin: '0 auto 1.5rem auto' }} />
-          <h2 className="font-headline text-primary" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', marginBottom: '1rem' }}>Join the Sanctum</h2>
+          <h2 className="font-headline text-primary" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', marginBottom: '1rem' }}>Join the Collective</h2>
           <p style={{ color: 'var(--on-surface-variant)', fontSize: '1.1rem', marginBottom: '3rem', maxWidth: '500px', margin: '0 auto 3rem auto', lineHeight: '1.6' }}>
             Subscribe to our newsletter to receive exclusive invitations, tour updates, and highlights from our community of visionary women.
           </p>

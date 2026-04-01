@@ -53,7 +53,7 @@ Phone: ${formData.phone || 'Not provided'}
         
         <div className="lead-popup-header">
           <span className="material-symbols-outlined text-gold" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>auto_awesome</span>
-          <h2 className="font-headline text-primary" style={{ fontSize: '2.2rem', margin: '0 0 0.5rem 0' }}>Join the Sanctum</h2>
+          <h2 className="font-headline text-primary" style={{ fontSize: '2.2rem', margin: '0 0 0.5rem 0' }}>Join the Collective</h2>
           <p style={{ color: 'var(--on-surface)', marginBottom: '2rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
             Enter your details below to stay updated on our upcoming markets, exclusive events, and the latest from Proverbs 31 Marketplace.
           </p>
