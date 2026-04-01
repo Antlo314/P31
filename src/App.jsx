@@ -10,6 +10,7 @@ import CuratorProfile from './pages/CuratorProfile';
 import Register from './pages/Register';
 import Visionary from './pages/Visionary';
 import Apply from './pages/Apply';
+import LeadPopup from './components/LeadPopup';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -38,6 +39,7 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        <LeadPopup />
       </div>
     </Router>
   );

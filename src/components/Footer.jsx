@@ -43,7 +43,6 @@ const Footer = () => {
                 <li><a href="mailto:proverbs31markets@gmail.com">proverbs31markets@gmail.com</a></li>
                 <li><a href="tel:14705622852">1 (470) 562-2852</a></li>
                 <li><Link to="/apply" className="text-gold">Apply as Curator &rarr;</Link></li>
-                <li><a href="https://www.eventbrite.com/e/proverbs-31-marketplace-tickets-1984190041828" target="_blank" rel="noreferrer" className="text-gold">RSVP &rarr;</a></li>
                 <li style={{marginTop: '16px'}}>
                    <a href="https://www.paypal.com/donate/?hosted_button_id=WY2ZX3TXDMF5Y" target="_blank" rel="noreferrer" className="btn-outline">
                      Sow (Donate)

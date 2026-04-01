@@ -31,8 +31,8 @@ const Navbar = () => {
         </div>
 
         <div className="nav-actions">
-          <a href="https://www.eventbrite.com/e/proverbs-31-marketplace-tickets-1984190041828" target="_blank" rel="noreferrer" className="btn-solid-gold">
-            RSVP
+          <a href="#newsletter" className="btn-solid-gold">
+            Join Us
           </a>
         </div>
 
