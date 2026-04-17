@@ -29,7 +29,7 @@ const Navbar = () => {
           <Link to="/visionary" className={location.pathname === '/visionary' ? 'active' : ''}>Visionary</Link>
           <Link to="/directory" className={location.pathname === '/directory' ? 'active' : ''}>Curators</Link>
           <Link to="/community" className={location.pathname === '/community' ? 'active' : ''}>Community</Link>
-          <Link to="/apply" className={location.pathname === '/apply' ? 'active' : ''}>Storefront Application</Link>
+          <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noopener noreferrer">Storefront Application</a>
         </div>
 
         <div className="nav-actions">

@@ -1,0 +1,56 @@
+.onboarding-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--surface);
+  padding: 2rem;
+  text-align: center;
+}
+
+.onboarding-container {
+  max-width: 440px;
+  width: 100%;
+  padding: 4rem 3rem !important;
+}
+
+.onboarding-step-1 img, .onboarding-step-1 svg {
+  margin: 0 auto;
+}
+
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mt-4 { margin-top: 1rem; }
+
+.error-text {
+  color: #ff4d4d;
+  font-size: 0.85rem;
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+.onboarding-page .form-group label {
+  text-align: left;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-icon svg {
+  position: absolute;
+  left: 1rem;
+  color: var(--amethyst);
+}
+
+.onboarding-page input {
+  padding-left: 2.8rem !important;
+}
+
+@media (max-width: 768px) {
+  .onboarding-container {
+    padding: 3rem 1.5rem !important;
+  }
+}

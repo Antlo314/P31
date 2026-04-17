@@ -1,17 +1,33 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Sparkles, ArrowRight } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+import { Mail, Lock, ShieldCheck, ArrowRight } from 'lucide-react';
 import './Login.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // For now, this is a visual flow - we'll simulate a successful login
-    console.log('Login attempt:', formData);
-    navigate('/dashboard');
+    setLoading(true);
+    setError('');
+
+    try {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password
+      });
+
+      if (authError) throw authError;
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -19,9 +35,9 @@ const Login = () => {
       <div className="login-container">
         <div className="login-card glass-card shadow-lg">
           <div className="login-header">
-            <span className="material-symbols-outlined text-gold" style={{ fontSize: '3rem', marginBottom: '1rem' }}>key</span>
-            <h1 className="font-headline text-primary">Curator <span className="text-gold">Portal</span></h1>
-            <p className="login-subtitle">Access your traveling sanctuary dashboard.</p>
+            <ShieldCheck size={48} className="text-gold mb-4" style={{margin: '0 auto 1.5rem auto'}} />
+            <h1 className="font-headline text-primary">Curator <span className="text-gold">Studio</span></h1>
+            <p className="login-subtitle">Sign in to your professional sanctuary.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="premium-form">
@@ -32,7 +48,7 @@ const Login = () => {
                 <input 
                   type="email" 
                   required 
-                  placeholder="name@proverbs31.com"
+                  placeholder="name@example.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
@@ -53,22 +69,20 @@ const Login = () => {
               </div>
             </div>
 
+            {error && <p className="error-text text-center mt-2" style={{color: '#ff4b4b', fontWeight: '600', fontSize: '0.85rem'}}>{error}</p>}
+
             <div className="login-actions">
-              <button type="submit" className="btn-solid-gold full-width-btn">
-                Sign In to Sanctuary <span className="material-symbols-outlined">login</span>
+              <button type="submit" className="btn-solid-gold full-width-btn" disabled={loading}>
+                {loading ? 'Verifying...' : 'Unlock Studio'} <ArrowRight size={18} />
               </button>
             </div>
 
-            <div className="login-footer">
-              <p>Approved curators only. <a href="/apply" className="text-gold">Not yet a curator? Apply here.</a></p>
+            <div className="login-footer mt-6">
+              <p>Not yet a curator? <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noreferrer" className="text-gold font-bold">Apply via the Google Form.</a></p>
             </div>
           </form>
         </div>
       </div>
-      
-      {/* Decorative background elements */}
-      <div className="login-bg-blob blob-1"></div>
-      <div className="login-bg-blob blob-2"></div>
     </div>
   );
 };

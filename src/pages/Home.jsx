@@ -90,7 +90,7 @@ const Home = () => {
           </p>
           <div className="hero-ctas">
             <a href="#newsletter" className="btn-gold-pill">Join the Inner Circle</a>
-            <Link to="/apply" className="btn-ghost-pill">Become a Curator</Link>
+            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noopener noreferrer" className="btn-ghost-pill">Become a Curator</a>
           </div>
         </div>
 
@@ -184,9 +184,9 @@ const Home = () => {
             })}
           </div>
 
-          <Link to="/apply" className="btn-gold-pill mt-cta">
+          <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noopener noreferrer" className="btn-gold-pill mt-cta">
             Become a Curator →
-          </Link>
+          </a>
         </div>
       </section>
 

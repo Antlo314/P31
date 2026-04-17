@@ -13,7 +13,9 @@ import Apply from './pages/Apply';
 import Community from './pages/Community';
 import Login from './pages/Login';
 import CuratorDashboard from './pages/CuratorDashboard';
+import Onboarding from './pages/Onboarding';
 import LeadPopup from './components/LeadPopup';
+import OfferTicker from './components/OfferTicker';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -28,6 +30,7 @@ function App() {
     <Router>
       <ScrollToTop />
       <div className="app-container">
+        <OfferTicker />
         <Navbar />
         <main>
           <Routes>
@@ -36,12 +39,12 @@ function App() {
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/directory" element={<Directory />} />
             <Route path="/visionary" element={<Visionary />} />
-            <Route path="/curator/:id" element={<CuratorProfile />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/apply" element={<Apply />} />
             <Route path="/community" element={<Community />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<CuratorDashboard />} />
+            <Route path="/onboarding-exclusive" element={<Onboarding />} />
+            {/* Vanity URL Catch-all: /popcorn or /id */}
+            <Route path="/:id" element={<CuratorProfile />} />
           </Routes>
         </main>
         <Footer />
