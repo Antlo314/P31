@@ -7,15 +7,17 @@
 
 /* Sidebar Styling */
 .dashboard-sidebar {
-  width: 260px;
-  background-color: var(--primary);
+  width: 280px;
+  background-color: var(--cal-poly-green);
   color: var(--pure-white);
-  padding: 2rem 0;
+  padding: 2.5rem 0;
   display: flex;
   flex-direction: column;
   position: sticky;
   top: 0;
   height: 100vh;
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .sidebar-brand {
@@ -35,23 +37,31 @@
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 2rem;
-  color: rgba(255, 255, 255, 0.6);
+  gap: 14px;
+  padding: 14px 2.5rem;
+  color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: all 0.4s var(--ease-fluid);
   font-weight: 500;
   background: transparent;
   border: none;
   width: 100%;
   cursor: pointer;
   text-align: left;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
 }
 
 .nav-item:hover, .nav-item.active {
   color: var(--pure-white);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
+  background: linear-gradient(90deg, rgba(255,255,255,0.06) 0%, transparent 100%);
   border-left: 4px solid var(--metallic-gold);
+}
+
+.nav-item.active {
+  color: var(--gold-light);
+  font-weight: 600;
 }
 
 .sidebar-footer {
@@ -107,18 +117,22 @@
 }
 
 .dashboard-card {
-  padding: 3rem !important;
+  padding: 3.5rem !important;
   background: var(--pure-white) !important;
+  border: 1px solid var(--outline-variant);
+  box-shadow: 0 20px 50px rgba(39, 52, 27, 0.06);
 }
 
 .card-title {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   font-family: var(--font-heading);
-  font-size: 1.5rem;
-  margin-bottom: 2rem;
+  font-size: 1.75rem;
+  margin-bottom: 2.5rem;
   color: var(--primary);
+  border-bottom: 1px solid var(--outline-subtle);
+  padding-bottom: 1rem;
 }
 
 /* Dashboard Form Profile Styling */
@@ -195,14 +209,16 @@
 }
 
 .status-dot.active {
-  background: #4caf50;
-  box-shadow: 0 0 10px rgba(76, 175, 80, 0.4);
+  background: #6D8B11; /* Olive success */
+  box-shadow: 0 0 12px rgba(109, 139, 17, 0.5);
 }
 
 .status-text {
   font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--primary);
+  font-size: 0.95rem;
+  color: var(--cal-poly-green);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .status-sub {
@@ -231,6 +247,23 @@
   font-weight: 800;
   font-size: 1.2rem;
   color: var(--primary);
+}
+
+.text-forest { color: var(--cal-poly-green); }
+
+.early-bird-badge.botanical-badge {
+  background: rgba(109, 139, 17, 0.1);
+  color: #5D7A0E;
+  border: 1px solid rgba(109, 139, 17, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .tip-text {

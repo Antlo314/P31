@@ -6,48 +6,50 @@
    ============================================================ */
 :root {
   /* === Core Brand Palette === */
-  --dark-plum:       #3A1C36;
-  --amethyst:        #9B71B2;
-  --thistle:         #E3D0EA;
-  --olive:           #6C6D11;
-  --cal-poly-green:  #374126;
+  --cal-poly-green:  #27341B;           /* Deep Forest Lead */
+  --olive:           #6C6D11;           /* Earthy Secondary */
+  --emerald-deep:    #1C2513;           /* Ultra Dark Forest */
+  --dark-plum:       #3A1C36;           /* Midnight Accent (Legacy lead) */
+  --amethyst:        #9B71B2;           /* Soft Purple Accent */
+  --thistle:         #E3D0EA;           /* Lavender Contrast */
   --metallic-gold:   #CBA72F;
   --gold-light:      #E9C349;
   --gold-glow:       rgba(203, 167, 47, 0.35);
 
   /* === Semantic Roles === */
-  --primary:                var(--dark-plum);
-  --primary-container:      rgba(58, 28, 54, 0.08);
-  --secondary:              var(--amethyst);
-  --secondary-light:        var(--thistle);
+  --primary:                var(--cal-poly-green);
+  --primary-container:      rgba(39, 52, 27, 0.08);
+  --secondary:              var(--olive);
+  --secondary-light:        #8B8C3E;
   --accent-earth:           var(--olive);
-  --accent-deep:            var(--cal-poly-green);
+  --accent-deep:            var(--emerald-deep);
+  --accent-royal:           var(--dark-plum);
 
-  /* === Surfaces (light-toned, botanical, never stark white) === */
-  --surface:                #FAF7F5;           /* warm parchment */
-  --surface-alt:            #F3EDF6;           /* thistle-washed */
-  --surface-container-low:  #EDE5F0;           /* slightly deeper lavender */
-  --surface-container:      #E3D0EA;           /* thistle itself */
-  --surface-dark:           #2A1228;           /* near-black plum for contrast sections */
+  /* === Surfaces (botanical/warm, never stark white) === */
+  --surface:                #FAF9F6;           /* linen white */
+  --surface-alt:            #F2F4ED;           /* sage-washed white */
+  --surface-container-low:  #E9EDE1;           /* subtle moss white */
+  --surface-container:      #DFE5D4;           /* sage-tinted */
+  --surface-dark:           #1A1F14;           /* obsidian forest */
 
   /* === Text === */
-  --on-surface:             #1A0D18;           /* almost black plum */
-  --on-surface-variant:     #5A3D56;           /* muted plum for secondary text */
-  --on-surface-muted:       #8E7489;           /* placeholder / tertiary */
+  --on-surface:             #13170E;           /* deep moss black */
+  --on-surface-variant:     #3D4435;           /* muted forest */
+  --on-surface-muted:       #7B8370;           /* sage-grey */
   --on-primary:             #FFFFFF;
   --on-tertiary-fixed:      #241a00;
 
   /* === Borders / Outlines === */
-  --outline:                #B8A0C0;
-  --outline-variant:        #DDD0E4;
-  --outline-subtle:         rgba(155, 113, 178, 0.2);
+  --outline:                #B5BEA8;
+  --outline-variant:        #DDE2D5;
+  --outline-subtle:         rgba(108, 109, 17, 0.15);
 
   /* === Legacy compat aliases === */
   --royal-plum:      var(--dark-plum);
   --soft-plum:       var(--amethyst);
   --plum-light:      var(--thistle);
   --pure-white:      #FFFFFF;
-  --primary-container-legacy: #4A2342;
+  --primary-container-legacy: #27341B;
 
   /* === Typography === */
   --font-heading:    'Noto Serif', Georgia, serif;
@@ -169,18 +171,18 @@ a:hover {
 .glass-card {
   -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(227, 208, 234, 0.6);
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--outline-variant);
   border-radius: 20px;
   padding: 3.5rem;
   transition: all 0.55s var(--ease-fluid);
-  box-shadow: 0 8px 32px rgba(58, 28, 54, 0.06), 0 1px 0 rgba(255,255,255,0.8) inset;
+  box-shadow: 0 8px 32px rgba(39, 52, 27, 0.04), 0 1px 0 rgba(255,255,255,0.8) inset;
 }
 
 .glass-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 24px 52px rgba(58, 28, 54, 0.1), 0 1px 0 rgba(255,255,255,0.8) inset;
-  border-color: rgba(203, 167, 47, 0.4);
+  box-shadow: 0 24px 52px rgba(39, 52, 27, 0.08), 0 1px 0 rgba(255,255,255,0.8) inset;
+  border-color: var(--olive);
 }
 
 /* Darker glass for hero overlays */
@@ -249,7 +251,7 @@ a:hover {
 }
 
 .btn-solid-plum {
-  background: linear-gradient(135deg, var(--dark-plum) 0%, #5a2a56 100%);
+  background: linear-gradient(135deg, var(--cal-poly-green) 0%, var(--olive) 100%);
   color: var(--pure-white) !important;
   padding: 14px 36px;
   border-radius: 60px;
@@ -264,13 +266,13 @@ a:hover {
   justify-content: center;
   gap: 8px;
   transition: all 0.4s var(--ease-fluid);
-  box-shadow: 0 8px 24px rgba(58, 28, 54, 0.3);
+  box-shadow: 0 8px 24px rgba(39, 52, 27, 0.3);
   font-family: var(--font-body);
 }
 
 .btn-solid-plum:hover {
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 16px 36px rgba(58, 28, 54, 0.45);
+  box-shadow: 0 16px 36px rgba(39, 52, 27, 0.45);
 }
 
 .btn-outline-primary {
@@ -378,8 +380,8 @@ a:hover {
    ============================================================ */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--surface); }
-::-webkit-scrollbar-thumb { background: var(--amethyst); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--dark-plum); }
+::-webkit-scrollbar-thumb { background: var(--olive); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cal-poly-green); }
 
 /* ============================================================
    SELECTION HIGHLIGHT

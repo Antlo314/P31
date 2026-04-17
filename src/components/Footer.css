@@ -4,7 +4,7 @@
    ========================================================== */
 
 .footer-v2 {
-  background: linear-gradient(160deg, var(--dark-plum) 0%, #260e22 60%, #1a0d18 100%);
+  background: linear-gradient(160deg, var(--cal-poly-green) 0%, #151d0f 60%, var(--surface-dark) 100%);
   color: rgba(255, 255, 255, 0.88);
   font-family: var(--font-body);
   padding: 10vh 5vw 5vh;
@@ -33,7 +33,7 @@
   width: 35vw;
   height: 35vw;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(155, 113, 178, 0.07) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(108, 109, 17, 0.07) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -72,7 +72,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1px solid rgba(155, 113, 178, 0.3);
+  border: 1px solid rgba(139, 140, 62, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -111,7 +111,7 @@
   display: block;
   width: 32px;
   height: 1px;
-  background: var(--amethyst);
+  background: var(--olive);
   opacity: 0.4;
   margin-top: 0.6rem;
 }
@@ -146,7 +146,7 @@
   flex-wrap: wrap;
   gap: 1rem;
   padding-top: 3rem;
-  border-top: 1px solid rgba(155, 113, 178, 0.15);
+  border-top: 1px solid rgba(108, 109, 17, 0.15);
   font-size: 0.82rem;
   color: rgba(255, 255, 255, 0.38);
   position: relative;

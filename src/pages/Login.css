@@ -19,8 +19,9 @@
 .login-card {
   padding: 4rem 3rem !important;
   text-align: center;
-  background: rgba(255, 255, 255, 0.82) !important;
-  border: 1px solid rgba(227, 208, 234, 0.6) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid var(--outline-variant) !important;
+  box-shadow: 0 30px 60px rgba(39, 52, 27, 0.08) !important;
 }
 
 .login-header {
@@ -46,7 +47,7 @@
 .input-icon {
   position: absolute;
   left: 1rem;
-  color: var(--amethyst);
+  color: var(--olive);
 }
 
 .login-page .premium-form input {
@@ -81,7 +82,7 @@
 .blob-1 {
   width: 400px;
   height: 400px;
-  background-color: var(--thistle);
+  background-color: var(--surface-container);
   top: -100px;
   right: -100px;
 }

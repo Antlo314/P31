@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Community from './Community'; // Nested import
-import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert } from 'lucide-react';
+import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles } from 'lucide-react';
 import './CuratorDashboard.css';
 
 const CuratorDashboard = () => {
@@ -88,6 +88,7 @@ const CuratorDashboard = () => {
       {/* Sidebar Navigation */}
       <aside className="dashboard-sidebar">
         <div className="sidebar-brand">
+          <Leaf className="text-gold" size={24} />
           <span className="font-headline text-gold">P31 Studio</span>
         </div>
         
@@ -139,7 +140,7 @@ const CuratorDashboard = () => {
                   <div className="form-group">
                     <label>Vanity URL (p31market.com/your-slug)</label>
                     <div className="input-with-prefix">
-                      <span className="url-prefix">p31market.com/</span>
+                      <span className="url-prefix text-olive">p31market.com/</span>
                       <input 
                         type="text" 
                         placeholder="e.g. luxe-candles"
@@ -183,14 +184,17 @@ const CuratorDashboard = () => {
 
               <div className="dashboard-sidebar-panels">
                 <section className="dashboard-card status-card glass-card">
-                  <h3 className="card-title">Collective Status</h3>
+                  <h3 className="card-title text-forest"><Sparkles size={18} /> Collective Status</h3>
                   <div className="status-indicator">
                     <span className="status-dot active"></span>
                     <span className="status-text">Elite Member</span>
                   </div>
                   <p className="status-sub">Your sanctuary is established in the June Market.</p>
+                  <div className="divider-thistle"></div>
                   {curatorData?.is_early_bird && (
-                    <div className="early-bird-badge">June Early Bird • Free Store</div>
+                    <div className="early-bird-badge botanical-badge">
+                      <Leaf size={12} /> June Early Bird • Free Store
+                    </div>
                   )}
                 </section>
               </div>
