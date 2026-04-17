@@ -1,16 +1,18 @@
-/* About.css - Upscale Light Aesthetic */
+/* ==========================================================
+   About.css — P31 Brand Kit
+   ========================================================== */
 
 .about-cinematic-wrapper {
   background-color: var(--surface);
   color: var(--on-surface);
   min-height: 100vh;
-  padding-top: 10vh;
-  padding-bottom: 10vh;
+  padding-top: 12vh;
+  padding-bottom: 12vh;
 }
 
 .about-hero-section {
-  min-height: 40vh;
-  margin-bottom: 10vh;
+  min-height: 36vh;
+  margin-bottom: 8vh;
 }
 
 .about-hero-content {
@@ -19,7 +21,7 @@
 }
 
 .about-story-section {
-  padding-bottom: 15vh;
+  padding-bottom: 12vh;
 }
 
 .about-grid {
@@ -31,22 +33,48 @@
   align-items: start;
 }
 
+/* Gold gradient divider (same as global) */
 .divider-gold {
-  width: 60px;
+  width: 52px;
   height: 2px;
-  background-color: var(--metallic-gold);
+  background: linear-gradient(90deg, var(--metallic-gold), var(--gold-light));
+  border-radius: 2px;
 }
 
 .mb-4 { margin-bottom: 1rem; }
 .mb-6 { margin-bottom: 1.5rem; }
 
-.contact-list a:hover {
-  color: var(--metallic-gold);
+.contact-list a:hover { color: var(--metallic-gold); }
+
+/* Thistle background on sidebar / detail card */
+.about-sidebar-card {
+  background: var(--surface-alt);
+  border: 1px solid var(--outline-variant);
+  border-radius: 16px;
+  padding: 2.5rem;
+}
+
+/* Amethyst label accent */
+.about-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--amethyst);
+  margin-bottom: 0.8rem;
+  display: block;
 }
 
 @media (max-width: 900px) {
   .about-grid {
     grid-template-columns: 1fr;
-    gap: 4rem;
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-cinematic-wrapper {
+    padding-top: 10vh;
+    padding-bottom: 8vh;
   }
 }

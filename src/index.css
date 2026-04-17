@@ -1,40 +1,74 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Manrope:wght@300;400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Manrope:wght@300;400;500;600;800&display=swap');
 
+/* ============================================================
+   P31 Design System — Brand Kit
+   Purple leads. Gold accents. Earth grounds.
+   ============================================================ */
 :root {
-  /* Modern Matriarch Core Palette */
-  --primary: #3A1C36; /* Dark Plum (updated) */
-  --primary-container: #9B71B2; /* Amethyst (updated) */
-  --tertiary-container: #CBA72F;
-  --tertiary-fixed-dim: #E9C349;
-  --on-primary: #ffffff;
-  --on-tertiary-fixed: #241a00;
-  --surface: #fbf9fb;
-  --surface-container-low: #f5f3f5;
-  --surface-container: #efedef;
-  --surface-container-highest: #e3e2e4;
-  --on-surface: #1b1c1d;
-  --on-surface-variant: #3A1C36;
-  --outline: #80747b;
-  --outline-variant: #D2C2CA;
+  /* === Core Brand Palette === */
+  --dark-plum:       #3A1C36;
+  --amethyst:        #9B71B2;
+  --thistle:         #E3D0EA;
+  --olive:           #6C6D11;
+  --cal-poly-green:  #374126;
+  --metallic-gold:   #CBA72F;
+  --gold-light:      #E9C349;
+  --gold-glow:       rgba(203, 167, 47, 0.35);
 
-  /* Supplemental Brand Colors */
-  --thistle: #E3D0EA;
-  --olive: #6C6D11;
-  --cal-poly-green: #374126;
+  /* === Semantic Roles === */
+  --primary:                var(--dark-plum);
+  --primary-container:      rgba(58, 28, 54, 0.08);
+  --secondary:              var(--amethyst);
+  --secondary-light:        var(--thistle);
+  --accent-earth:           var(--olive);
+  --accent-deep:            var(--cal-poly-green);
 
-  /* Compatibility with existing GSAP layout */
-  --royal-plum: var(--primary);
-  --soft-plum: var(--primary-container);
-  --plum-light: #593053;
-  --pure-white: #FFFFFF;
-  --metallic-gold: var(--tertiary-container);
-  --gold-glow: rgba(203, 167, 47, 0.4);
-  
-  --font-heading: 'Noto Serif', serif;
-  --font-body: 'Manrope', sans-serif;
+  /* === Surfaces (light-toned, botanical, never stark white) === */
+  --surface:                #FAF7F5;           /* warm parchment */
+  --surface-alt:            #F3EDF6;           /* thistle-washed */
+  --surface-container-low:  #EDE5F0;           /* slightly deeper lavender */
+  --surface-container:      #E3D0EA;           /* thistle itself */
+  --surface-dark:           #2A1228;           /* near-black plum for contrast sections */
+
+  /* === Text === */
+  --on-surface:             #1A0D18;           /* almost black plum */
+  --on-surface-variant:     #5A3D56;           /* muted plum for secondary text */
+  --on-surface-muted:       #8E7489;           /* placeholder / tertiary */
+  --on-primary:             #FFFFFF;
+  --on-tertiary-fixed:      #241a00;
+
+  /* === Borders / Outlines === */
+  --outline:                #B8A0C0;
+  --outline-variant:        #DDD0E4;
+  --outline-subtle:         rgba(155, 113, 178, 0.2);
+
+  /* === Legacy compat aliases === */
+  --royal-plum:      var(--dark-plum);
+  --soft-plum:       var(--amethyst);
+  --plum-light:      var(--thistle);
+  --pure-white:      #FFFFFF;
+  --primary-container-legacy: #4A2342;
+
+  /* === Typography === */
+  --font-heading:    'Noto Serif', Georgia, serif;
+  --font-body:       'Manrope', system-ui, sans-serif;
+
+  /* === Spacing rhythm === */
+  --space-xs:  0.5rem;
+  --space-sm:  1rem;
+  --space-md:  2rem;
+  --space-lg:  4rem;
+  --space-xl:  8rem;
+
+  /* === Motion === */
+  --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft:  cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-* {
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -42,6 +76,7 @@
 
 html {
   scroll-behavior: smooth;
+  font-size: 16px;
 }
 
 body {
@@ -51,91 +86,38 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
 }
 
-/* Typography */
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   color: var(--primary);
   font-weight: 400;
-  letter-spacing: 0.5px;
+  line-height: 1.15;
+  letter-spacing: 0.3px;
+}
+
+p {
+  color: var(--on-surface-variant);
+  line-height: 1.75;
 }
 
 a {
   color: var(--primary);
   text-decoration: none;
-  transition: color 0.4s ease;
+  transition: color 0.35s var(--ease-soft);
 }
 
 a:hover {
   color: var(--metallic-gold);
 }
 
-/* Fluid Buttons */
-.btn-primary {
-  background: transparent;
-  color: var(--primary) !important;
-  font-family: var(--font-body);
-  padding: 16px 36px;
-  border: 1px solid var(--primary);
-  border-radius: 40px;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  font-size: 0.85rem;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
-}
-
-.btn-primary::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: var(--metallic-gold);
-  transform: scaleY(0);
-  transform-origin: bottom;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: -1;
-  border-radius: 40px;
-}
-
-.btn-primary:hover::before {
-  transform: scaleY(1);
-}
-
-.btn-primary:hover {
-  border-color: var(--metallic-gold);
-  color: var(--on-tertiary-fixed) !important;
-  font-weight: 700;
-}
-
-.btn-outline {
-  background: transparent;
-  color: var(--metallic-gold) !important;
-  border: none;
-  border-bottom: 1px solid var(--metallic-gold);
-  padding: 8px 0;
-  border-radius: 0;
-  font-family: var(--font-body);
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  font-size: 0.85rem;
-  transition: all 0.4s ease;
-}
-
-.btn-outline:hover {
-  color: var(--pure-white) !important;
-  border-bottom-color: var(--pure-white);
-}
-
-/* Fluid Layout Helpers */
+/* ============================================================
+   LAYOUT UTILITIES
+   ============================================================ */
 .container-fluid {
   width: 100%;
   padding: 0 5vw;
@@ -146,37 +128,274 @@ a:hover {
   position: relative;
 }
 
+.section-padded {
+  padding: 14vh 5vw;
+}
+
 .flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Removing box utilities */
-/* Elements now rely on flex/grid without hard borders */
-.v2-text-mask-wrapper {
+.text-center { text-align: center; }
+.font-headline { font-family: var(--font-heading); }
+.font-label {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 0.78rem;
+  font-family: var(--font-body);
+}
+.font-body { font-family: var(--font-body); }
+
+/* Color helpers */
+.text-primary   { color: var(--primary); }
+.text-gold      { color: var(--metallic-gold); }
+.text-amethyst  { color: var(--amethyst); }
+.text-thistle   { color: var(--thistle); }
+.text-white     { color: var(--pure-white); }
+.text-muted     { color: var(--on-surface-muted); }
+
+/* Spacing utilities */
+.mt-4  { margin-top: 1rem; }    .mb-4  { margin-bottom: 1rem; }
+.mt-6  { margin-top: 1.5rem; }  .mb-6  { margin-bottom: 1.5rem; }
+.mt-8  { margin-top: 2rem; }    .mb-8  { margin-bottom: 2rem; }
+.mt-12 { margin-top: 3rem; }    .mb-12 { margin-bottom: 3rem; }
+
+/* ============================================================
+   GLASSMORPHISM & CARD SYSTEM
+   ============================================================ */
+.glass-card {
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(227, 208, 234, 0.6);
+  border-radius: 20px;
+  padding: 3.5rem;
+  transition: all 0.55s var(--ease-fluid);
+  box-shadow: 0 8px 32px rgba(58, 28, 54, 0.06), 0 1px 0 rgba(255,255,255,0.8) inset;
+}
+
+.glass-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 52px rgba(58, 28, 54, 0.1), 0 1px 0 rgba(255,255,255,0.8) inset;
+  border-color: rgba(203, 167, 47, 0.4);
+}
+
+/* Darker glass for hero overlays */
+.glass-card-dark {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  background: rgba(42, 18, 40, 0.82);
+  border: 1px solid rgba(155, 113, 178, 0.25);
+  border-radius: 20px;
+  padding: 3.5rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+.glass-border {
+  border: 3px solid rgba(227, 208, 234, 0.5);
+  box-shadow: 0 24px 48px rgba(58, 28, 54, 0.12);
+  border-radius: 20px;
   overflow: hidden;
+  position: relative;
+}
+
+.shadow-lg {
+  box-shadow: 0 20px 60px rgba(58, 28, 54, 0.12);
+}
+
+/* Divider */
+.divider-gold {
+  width: 52px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--metallic-gold), var(--gold-light));
+  border-radius: 2px;
+  margin: 1.25rem 0;
+}
+
+.divider-gold.centered {
+  margin: 1.25rem auto;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn-solid-gold {
+  background: linear-gradient(135deg, var(--metallic-gold) 0%, var(--gold-light) 100%);
+  color: #1a1000 !important;
+  padding: 14px 36px;
+  border-radius: 60px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.4s var(--ease-fluid);
+  box-shadow: 0 8px 24px rgba(203, 167, 47, 0.3);
+  font-family: var(--font-body);
+}
+
+.btn-solid-gold:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 16px 36px rgba(203, 167, 47, 0.45);
+  color: #1a1000 !important;
+}
+
+.btn-solid-plum {
+  background: linear-gradient(135deg, var(--dark-plum) 0%, #5a2a56 100%);
+  color: var(--pure-white) !important;
+  padding: 14px 36px;
+  border-radius: 60px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.4s var(--ease-fluid);
+  box-shadow: 0 8px 24px rgba(58, 28, 54, 0.3);
+  font-family: var(--font-body);
+}
+
+.btn-solid-plum:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 16px 36px rgba(58, 28, 54, 0.45);
+}
+
+.btn-outline-primary {
+  background: transparent;
+  color: var(--primary) !important;
+  border: 1.5px solid var(--primary);
+  padding: 14px 36px;
+  border-radius: 60px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.35s var(--ease-soft);
+  font-family: var(--font-body);
+}
+
+.btn-outline-primary:hover {
+  background: var(--primary);
+  color: var(--pure-white) !important;
+  box-shadow: 0 8px 24px rgba(58, 28, 54, 0.25);
+}
+
+.btn-outline-gold {
+  background: transparent;
+  color: var(--metallic-gold) !important;
+  border: 1.5px solid var(--metallic-gold);
+  padding: 14px 36px;
+  border-radius: 60px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.35s var(--ease-soft);
+  font-family: var(--font-body);
+}
+
+.btn-outline-gold:hover {
+  background: var(--metallic-gold);
+  color: #1a1000 !important;
+}
+
+/* Legacy alias — keep older pages working */
+.btn-primary {
+  background: transparent;
+  color: var(--primary) !important;
+  font-family: var(--font-body);
+  padding: 14px 36px;
+  border: 1.5px solid var(--primary);
+  border-radius: 60px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.88rem;
+  transition: all 0.4s var(--ease-fluid);
+}
+
+.btn-primary:hover {
+  background: var(--primary);
+  color: var(--pure-white) !important;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--metallic-gold) !important;
+  border: none;
+  border-bottom: 1.5px solid var(--metallic-gold);
+  padding: 8px 0;
+  border-radius: 0;
+  font-family: var(--font-body);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.82rem;
+  transition: all 0.4s ease;
+}
+
+.btn-outline:hover {
+  color: var(--on-surface) !important;
+  border-bottom-color: var(--on-surface);
+}
+
+/* ============================================================
+   MATERIAL SYMBOLS
+   ============================================================ */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   display: inline-block;
-  line-height: 1.1;
 }
 
-.text-gold {
-  color: var(--metallic-gold);
+/* ============================================================
+   SCROLLBAR — branded
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--amethyst); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--dark-plum); }
+
+/* ============================================================
+   SELECTION HIGHLIGHT
+   ============================================================ */
+::selection {
+  background: var(--thistle);
+  color: var(--dark-plum);
 }
 
-/* Mobile Global Optimizations & Fluid Scaling */
+/* ============================================================
+   MOBILE GLOBAL BASE
+   ============================================================ */
 @media (max-width: 768px) {
-  .container-fluid {
-    padding: 0 4vw;
-  }
-  
-  .section-fluid {
-    padding: 8vh 0;
-  }
+  .container-fluid { padding: 0 5vw; }
+  .section-padded  { padding: 8vh 5vw; }
+  .glass-card      { padding: 2rem 1.5rem; border-radius: 16px; }
 
-  /* Make typography slightly softer on mobile so it doesn't shout */
-  h1, h2, h3 {
-    letter-spacing: 0px;
-  }
+  h1, h2, h3 { letter-spacing: 0; }
 }
-

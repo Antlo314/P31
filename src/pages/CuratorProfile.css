@@ -1,22 +1,28 @@
-/* Curator Profile Styles */
+/* ==========================================================
+   CuratorProfile.css — P31 Brand Kit
+   Dark editorial commerce page.
+   ========================================================== */
 
 .curator-profile-page {
-  background-color: #050505;
+  background-color: #0e0512;   /* near-black with plum undertone */
   color: var(--pure-white);
   min-height: 100vh;
 }
 
+/* ── Hero ──────────────────────────────────────────────── */
 .cp-hero-section {
   position: relative;
   height: 80vh;
+  min-height: 440px;
   display: flex;
   align-items: flex-end;
-  padding-bottom: 10vh;
+  padding-bottom: 8vh;
+  overflow: hidden;
 }
 
 .cp-hero-bg {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  inset: 0;
   z-index: 1;
 }
 
@@ -25,13 +31,27 @@
   height: 100%;
   object-fit: cover;
   object-position: top;
-  filter: grayscale(20%) brightness(0.8);
+  filter: brightness(0.75) saturate(0.9);
 }
 
+/* Plum-to-dark gradient overlay — prevents image from competing */
 .cp-hero-gradient {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(to bottom, rgba(5,5,5,0) 0%, rgba(8,3,16,0.9) 70%, #050505 100%);
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(14, 5, 18, 0) 0%,
+    rgba(14, 5, 18, 0.5) 50%,
+    #0e0512 100%
+  );
+}
+
+/* Amethyst tint overlay — very subtle purple cast */
+.cp-hero-gradient::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(50deg, rgba(58, 28, 54, 0.3) 0%, transparent 60%);
 }
 
 .cp-hero-text {
@@ -40,63 +60,99 @@
   width: 100%;
 }
 
+/* Back link */
+.link-gold-inline {
+  color: var(--metallic-gold);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: opacity 0.3s ease;
+}
+
+.link-gold-inline:hover { opacity: 0.75; color: var(--gold-light); }
+
+.overline-gold {
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--amethyst);
+  font-family: var(--font-body);
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
 .cp-biz-name {
-  font-size: clamp(3rem, 6vw, 5rem);
-  line-height: 1.1;
-  margin-bottom: 1rem;
-  letter-spacing: -1px;
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  line-height: 1.05;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.5px;
+  color: var(--pure-white);
 }
 
 .cp-biz-tagline {
-  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-size: clamp(1rem, 1.8vw, 1.3rem);
   color: var(--metallic-gold);
   font-weight: 300;
-  letter-spacing: 1px;
+  letter-spacing: 0.03em;
 }
 
+/* ── Bio Section ───────────────────────────────────────── */
 .cp-bio-section {
-  background: radial-gradient(circle at center, #080310 0%, #050505 100%);
+  background: radial-gradient(ellipse at 20% 50%, rgba(58, 28, 54, 0.25) 0%, #0e0512 60%);
 }
 
 .cp-section-title {
   color: var(--pure-white);
-  font-size: clamp(2rem, 4vw, 3rem);
-  margin-bottom: 1rem;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  margin-bottom: 0.5rem;
 }
 
 .cp-details-grid {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
-  gap: 6vw;
-  margin-top: 4rem;
+  gap: 5vw;
+  margin-top: 3.5rem;
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
 }
 
 .cp-bio-text {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   line-height: 1.9;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 3rem;
+  color: rgba(255, 255, 255, 0.72);
+  margin-bottom: 2.5rem;
 }
 
-/* Event List Styling */
+/* Divider */
+.divider-gold {
+  height: 2px;
+  width: 52px;
+  background: linear-gradient(90deg, var(--metallic-gold), var(--gold-light));
+  border-radius: 2px;
+  margin: 0 auto 2rem auto;
+}
+
+/* Event List */
 .cp-events-card {
-  background: rgba(134, 59, 255, 0.03);
-  border: 1px solid rgba(212, 175, 55, 0.15);
-  padding: 2.5rem;
-  border-radius: 4px;
+  background: rgba(155, 113, 178, 0.06);
+  border: 1px solid rgba(155, 113, 178, 0.18);
+  border-radius: 14px;
+  padding: 2rem;
 }
 
 .cp-card-title {
-  font-size: 1.1rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
-  letter-spacing: 3px;
+  letter-spacing: 0.2em;
   color: var(--metallic-gold);
-  margin-bottom: 2rem;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(203, 167, 47, 0.15);
+  padding-bottom: 0.75rem;
+  font-family: var(--font-body);
+  font-weight: 700;
 }
 
 .cp-events-list {
@@ -108,10 +164,12 @@
 .cp-events-list li {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
+
 .cp-events-list li:last-child {
   border-bottom: none;
   margin-bottom: 0;
@@ -119,196 +177,196 @@
 }
 
 .cp-event-date {
-  min-width: 70px;
-  font-size: 0.9rem;
-  color: var(--metallic-gold);
+  min-width: 56px;
+  font-size: 0.78rem;
+  color: var(--amethyst);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  padding-top: 2px;
 }
 
-.cp-event-info {
-  display: flex;
-  flex-direction: column;
-}
+.cp-event-info { display: flex; flex-direction: column; }
 
 .cp-event-info strong {
   font-weight: 500;
-  font-size: 1.1rem;
-  color: var(--pure-white);
-  margin-bottom: 0.25rem;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.2rem;
 }
 
 .cp-event-info span {
-  font-size: 0.9rem;
-  color: rgba(255,255,255,0.5);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.45);
 }
 
-/* Contact Card Styling */
+/* Contact Card */
 .cp-contact-card {
-  background: #080310;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 3rem 2.5rem;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  background: rgba(14, 5, 18, 0.8);
+  border: 1px solid rgba(155, 113, 178, 0.18);
+  border-radius: 14px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
 .cp-contact-row {
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  padding: 1.2rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 1rem 0;
 }
 
 .cp-contact-label {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  color: rgba(255,255,255,0.4);
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 0.4rem;
+  font-weight: 700;
 }
 
 .cp-contact-val {
-  font-size: 1rem;
-  color: var(--pure-white);
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
   line-height: 1.4;
 }
 
 .link-no-style {
-  color: var(--pure-white);
+  color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
   transition: color 0.3s ease;
 }
-.link-no-style:hover {
-  color: var(--metallic-gold);
-}
 
+.link-no-style:hover { color: var(--gold-light); }
+
+/* ── Products Section ─────────────────────────────────── */
 .cp-products-section {
-  background-color: #080310;
-  border-top: 1px solid rgba(134, 59, 255, 0.1);
+  background: linear-gradient(180deg, #0e0512 0%, #130a20 100%);
+  border-top: 1px solid rgba(155, 113, 178, 0.1);
 }
 
 .cp-products-header {
   text-align: center;
-  margin-bottom: 5rem;
+  margin-bottom: 4rem;
 }
 
 .cp-products-header h3 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  color: var(--pure-white);
+  margin-bottom: 0.75rem;
 }
 
-.divider-gold {
-  height: 2px;
-  width: 60px;
-  background-color: var(--metallic-gold);
-  margin: 0 auto;
-}
-
+/* 2-col on desktop, shrinks on mobile */
 .cp-products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 3rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 2.5rem;
 }
 
 .cp-product-card {
   cursor: pointer;
-  transition: transform 0.4s ease;
+  transition: transform 0.45s var(--ease-fluid);
 }
 
-.cp-product-card:hover {
-  transform: translateY(-10px);
-}
+.cp-product-card:hover { transform: translateY(-10px); }
 
 .cp-product-img-wrapper {
   position: relative;
   aspect-ratio: 4/5;
   overflow: hidden;
-  border-radius: 4px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
-  margin-bottom: 1.5rem;
+  border-radius: 14px;   /* softer — not square */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  margin-bottom: 1.25rem;
+  background: #fff;
 }
 
 .cp-product-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.65s var(--ease-fluid);
 }
 
-.cp-product-card:hover .cp-product-img {
-  transform: scale(1.1);
-}
+.cp-product-card:hover .cp-product-img { transform: scale(1.08); }
 
+/* Amethyst-to-olive hover overlay */
 .cp-product-hover {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(8, 3, 16, 0.6);
+  inset: 0;
+  background: linear-gradient(150deg, rgba(58,28,54,0.82) 0%, rgba(203,167,47,0.85) 100%);
   display: flex;
   justify-content: center;
   align-items: center;
   opacity: 0;
   transition: opacity 0.4s ease;
+  border-radius: 14px;
 }
 
-.cp-product-card:hover .cp-product-hover {
-  opacity: 1;
-}
+.cp-product-card:hover .cp-product-hover { opacity: 1; }
 
 .cp-product-hover span {
   color: var(--pure-white);
-  border: 1px solid var(--metallic-gold);
-  padding: 10px 20px;
+  border: 1px solid rgba(255,255,255,0.5);
+  padding: 10px 22px;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  font-size: 0.78rem;
+  border-radius: 60px;
+  font-weight: 700;
 }
 
 .cp-product-info h4 {
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
-  letter-spacing: 1px;
+  font-size: 1.05rem;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.35;
 }
 
 .cp-product-price {
   color: var(--metallic-gold);
-  font-weight: 300;
-  letter-spacing: 1px;
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
+/* Responsive */
 @media (max-width: 900px) {
   .cp-details-grid {
     grid-template-columns: 1fr;
-    gap: 4rem;
+    gap: 3rem;
   }
 }
 
 @media (max-width: 768px) {
+  .cp-hero-section { height: 65vh; min-height: 380px; }
+
   .cp-biz-name {
-    font-size: clamp(2.5rem, 8vw, 3.5rem);
+    font-size: clamp(2.2rem, 9vw, 3rem);
   }
-  
+
+  /* 2-column compact grid */
   .cp-products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
   }
 
-  /* Maintaining stylized card aesthetics despite tight grid */
   .cp-product-img-wrapper {
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    aspect-ratio: 1/1; /* Switch to true square on mobile to keep things compact and neat */
+    border-radius: 10px;
+    aspect-ratio: 1/1;
+    margin-bottom: 0.75rem;
   }
 
-  .cp-product-info h4 {
-    font-size: 1rem;
-    line-height: 1.3;
-  }
-  
-  .cp-product-price {
-    font-size: 0.9rem;
-  }
-  
+  .cp-product-info h4  { font-size: 0.88rem; }
+  .cp-product-price    { font-size: 0.82rem; }
+
   .cp-product-hover span {
-    padding: 6px 12px;
+    padding: 6px 14px;
     font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .cp-products-grid {
+    gap: 0.75rem;
   }
 }

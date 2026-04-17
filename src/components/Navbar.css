@@ -1,128 +1,175 @@
+/* ==========================================================
+   Navbar.css — P31 Brand Kit
+   ========================================================== */
+
 .navbar-v2 {
   position: sticky;
   top: 0;
   width: 100%;
-  z-index: 100;
-  padding: 20px 5vw;
-  background-color: rgba(251, 249, 251, 0.85);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
+  z-index: 200;
+  padding: 14px 5vw;
+  background: rgba(250, 247, 245, 0.88);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
   border-bottom: 1px solid var(--outline-variant);
+  transition: background 0.4s ease, box-shadow 0.4s ease;
 }
 
-.gold-plated-logo {
-  filter: drop-shadow(0 4px 6px rgba(50, 14, 44, 0.1)) !important;
-  transition: transform 0.5s ease, opacity 0.5s ease !important;
+.navbar-v2.scrolled {
+  background: rgba(250, 247, 245, 0.97);
+  box-shadow: 0 4px 30px rgba(58, 28, 54, 0.08);
 }
-
-/* navbar-v2.scrolled removed to keep static style */
 
 .navbar-v2-inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
+/* Logo */
 .nav-brand {
   display: flex;
   align-items: center;
-  height: 60px;
+  height: 56px;
 }
 
 .nav-logo-img {
   height: 100%;
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.2));
-  transition: transform 0.4s ease;
+  filter: drop-shadow(0 2px 8px rgba(58, 28, 54, 0.15));
+  transition: transform 0.4s var(--ease-fluid);
 }
 
-.nav-logo-img:hover {
-  transform: scale(1.05);
+.nav-logo-img:hover { transform: scale(1.04); }
+
+.gold-plated-logo {
+  filter: drop-shadow(0 4px 8px rgba(203, 167, 47, 0.18)) !important;
 }
 
+/* Desktop Nav Links */
 .nav-links {
   display: flex;
-  gap: 3vw;
+  align-items: center;
+  gap: clamp(1.5rem, 2.5vw, 3rem);
 }
 
 .nav-links a {
-  font-size: 0.85rem;
-  letter-spacing: 0.15em;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--on-surface-variant);
   font-weight: 700;
+  color: var(--on-surface-variant);
   position: relative;
-  transition: all 0.4s ease;
+  transition: color 0.3s ease;
+  white-space: nowrap;
 }
 
-.nav-links a:hover, .nav-links a.active {
+.nav-links a:hover,
+.nav-links a.active {
   color: var(--primary);
 }
 
+/* Animated gold dot indicator */
 .nav-links a::after {
   content: '';
   position: absolute;
-  bottom: -6px;
+  bottom: -8px;
   left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background-color: var(--metallic-gold);
+  transform: translateX(-50%) scaleX(0);
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--metallic-gold), var(--gold-light));
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: all 0.35s var(--ease-fluid);
 }
 
-.nav-links a.active::after {
+.nav-links a.active::after,
+.nav-links a:hover::after {
   opacity: 1;
+  transform: translateX(-50%) scaleX(1);
 }
 
+/* Nav actions */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Mobile hamburger */
 .mobile-menu-btn {
   background: none;
   border: none;
   cursor: pointer;
-  z-index: 101;
+  z-index: 201;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
 }
 
+.mobile-menu-btn:hover {
+  background: var(--surface-container-low);
+}
+
+/* Mobile dropdown — full screen lateral reveal */
 .mobile-dropdown {
   position: fixed;
-  top: 0; left: 0; width: 100%; height: 100vh;
-  background-color: rgba(251, 249, 251, 0.98);
-  -webkit-backdrop-filter: blur(30px);
-  backdrop-filter: blur(30px);
+  inset: 0;
+  /* Plum to Amethyst diagonal — beautiful on phone */
+  background: linear-gradient(150deg, var(--dark-plum) 0%, #5a2a56 50%, var(--amethyst) 140%);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 40px;
-  z-index: 99;
-  transition: all 0.4s ease;
+  gap: 2rem;
+  z-index: 199;
+  animation: menuFadeIn 0.35s var(--ease-fluid) both;
+}
+
+@keyframes menuFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 .mobile-dropdown a {
   font-family: var(--font-heading);
-  font-size: 2.25rem;
+  font-size: clamp(2rem, 6vw, 2.8rem);
   font-weight: 400;
-  letter-spacing: 2px;
-  color: var(--primary);
-  transition: color 0.3s ease;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.9);
+  transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .mobile-dropdown a:hover {
-  color: var(--metallic-gold);
+  color: var(--gold-light);
+  transform: translateX(8px);
 }
 
+/* Thistle horizontal rule between mobile links */
+.mobile-dropdown a + a {
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(227, 208, 234, 0.12);
+  width: 60%;
+  text-align: center;
+}
+
+/* Visibility toggles */
 .mobile-only { display: none; }
 
 @media (max-width: 1024px) {
   .desktop-only { display: none !important; }
-  .mobile-only { display: block !important; }
+  .mobile-only  { display: block !important; }
 }
 
 @media (max-width: 768px) {
+  .navbar-v2 { padding: 12px 5vw; }
+  .nav-brand  { height: 48px; }
+
   .mobile-dropdown a {
-    font-size: 1.8rem;
+    font-size: clamp(1.8rem, 7vw, 2.4rem);
   }
 }
-

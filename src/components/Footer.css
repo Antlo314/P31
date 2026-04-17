@@ -1,44 +1,119 @@
-/* Footer.css - Premium Update */
+/* ==========================================================
+   Footer.css — P31 Brand Kit
+   Deep plum base. Gold & amethyst accents.
+   ========================================================== */
 
 .footer-v2 {
-  padding: 10vh 5vw 5vh;
-  background-color: var(--primary);
-  color: var(--pure-white);
+  background: linear-gradient(160deg, var(--dark-plum) 0%, #260e22 60%, #1a0d18 100%);
+  color: rgba(255, 255, 255, 0.88);
   font-family: var(--font-body);
+  padding: 10vh 5vw 5vh;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Subtle botanical radial behind footer */
+.footer-v2::before {
+  content: '';
+  position: absolute;
+  bottom: -5vw;
+  right: -5vw;
+  width: 40vw;
+  height: 40vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(108, 109, 17, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.footer-v2::after {
+  content: '';
+  position: absolute;
+  top: -8vw;
+  left: -6vw;
+  width: 35vw;
+  height: 35vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(155, 113, 178, 0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Top Zone */
 .footer-top-v2 {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8vh;
   flex-wrap: wrap;
-  gap: 50px;
+  gap: 4rem;
+  margin-bottom: 8vh;
+  position: relative;
+  z-index: 1;
 }
 
 .footer-logo-area {
   flex: 1;
-  min-width: 250px;
+  min-width: 240px;
+  max-width: 380px;
 }
 
 .footer-logo-area p {
-  color: rgba(255,255,255,0.7);
-  max-width: 350px;
-  line-height: 1.7;
-  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1.8;
+  font-size: 1rem;
+  margin-top: 1rem;
 }
 
+/* Social icons */
+.socials-v2 {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+
+.socials-v2 a {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(155, 113, 178, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.35s var(--ease-fluid);
+}
+
+.socials-v2 a:hover {
+  background: rgba(203, 167, 47, 0.15);
+  border-color: var(--metallic-gold);
+  color: var(--gold-light);
+  transform: translateY(-3px);
+}
+
+/* Link columns */
 .footer-links-v2 {
   display: flex;
-  gap: 120px;
+  gap: 5rem;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
 }
 
 .link-col h4 {
   font-family: var(--font-heading);
-  font-size: 1.5rem;
-  margin-bottom: 24px;
+  font-size: 1.15rem;
+  font-weight: 400;
   letter-spacing: 0.5px;
   color: var(--metallic-gold);
+  margin-bottom: 1.5rem;
+}
+
+/* Thistle rule under column headers */
+.link-col h4::after {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 1px;
+  background: var(--amethyst);
+  opacity: 0.4;
+  margin-top: 0.6rem;
 }
 
 .link-col ul {
@@ -48,48 +123,39 @@
 }
 
 .link-col li {
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .link-col a {
-  color: rgba(255,255,255,0.8);
-  font-family: var(--font-body);
-  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.95rem;
   transition: all 0.3s ease;
   text-decoration: none;
 }
 
 .link-col a:hover {
-  color: var(--metallic-gold);
+  color: var(--gold-light);
+  padding-left: 4px;
 }
 
+/* Bottom Bar */
 .footer-bottom-v2 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 40px;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  font-size: 0.9rem;
-  color: rgba(255,255,255,0.5);
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 3rem;
+  border-top: 1px solid rgba(155, 113, 178, 0.15);
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.38);
+  position: relative;
+  z-index: 1;
 }
 
-.socials-v2 {
-  display: flex;
-  gap: 20px;
-}
-
-.socials-v2 a {
-  color: var(--pure-white);
-  transition: all 0.3s ease;
-}
-
-.socials-v2 a:hover {
-  color: var(--metallic-gold);
-  transform: translateY(-2px);
-}
-
-@media (max-width: 900px) {
-  .footer-links-v2 {
-    gap: 60px;
-  }
+/* Responsive */
+@media (max-width: 768px) {
+  .footer-top-v2  { gap: 2.5rem; }
+  .footer-links-v2 { gap: 2.5rem; }
+  .footer-bottom-v2 { flex-direction: column; text-align: center; }
 }
