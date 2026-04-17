@@ -33,9 +33,9 @@ const Navbar = () => {
         </div>
 
         <div className="nav-actions">
-          <a href="#newsletter" className="btn-solid-gold">
-            Join Us
-          </a>
+          <Link to="/login" className="btn-solid-gold">
+            Curator Portal
+          </Link>
         </div>
 
         <button className="mobile-menu-btn mobile-only" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
@@ -49,6 +49,8 @@ const Navbar = () => {
             <Link to="/directory" onClick={() => setIsMobileMenuOpen(false)}>Curators</Link>
             <Link to="/community" onClick={() => setIsMobileMenuOpen(false)}>Community</Link>
             <Link to="/apply" onClick={() => setIsMobileMenuOpen(false)}>Storefront App</Link>
+            <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>Curator Portal</Link>
+            <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
           </div>
         )}
       </div>

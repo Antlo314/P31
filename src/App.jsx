@@ -11,6 +11,8 @@ import Register from './pages/Register';
 import Visionary from './pages/Visionary';
 import Apply from './pages/Apply';
 import Community from './pages/Community';
+import Login from './pages/Login';
+import CuratorDashboard from './pages/CuratorDashboard';
 import LeadPopup from './components/LeadPopup';
 
 const ScrollToTop = () => {
@@ -38,6 +40,8 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/apply" element={<Apply />} />
             <Route path="/community" element={<Community />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<CuratorDashboard />} />
           </Routes>
         </main>
         <Footer />

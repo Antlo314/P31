@@ -1,0 +1,101 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--surface);
+  position: relative;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+.login-container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 480px;
+}
+
+.login-card {
+  padding: 4rem 3rem !important;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.82) !important;
+  border: 1px solid rgba(227, 208, 234, 0.6) !important;
+}
+
+.login-header {
+  margin-bottom: 3rem;
+}
+
+.login-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.login-subtitle {
+  color: var(--on-surface-variant);
+  font-size: 1rem;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--amethyst);
+}
+
+.login-page .premium-form input {
+  padding-left: 3rem !important;
+  width: 100%;
+}
+
+.login-actions {
+  margin-top: 2rem;
+}
+
+.login-footer {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: var(--on-surface-muted);
+}
+
+.login-footer a {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* Background blobs for that artistic feel */
+.login-bg-blob {
+  position: absolute;
+  filter: blur(80px);
+  z-index: 1;
+  border-radius: 50%;
+  opacity: 0.4;
+}
+
+.blob-1 {
+  width: 400px;
+  height: 400px;
+  background-color: var(--thistle);
+  top: -100px;
+  right: -100px;
+}
+
+.blob-2 {
+  width: 300px;
+  height: 300px;
+  background-color: var(--gold-glow);
+  bottom: -50px;
+  left: -50px;
+}
+
+@media (max-width: 768px) {
+  .login-card {
+    padding: 3rem 1.5rem !important;
+  }
+}
