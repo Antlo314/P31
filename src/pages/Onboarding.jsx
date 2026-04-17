@@ -9,6 +9,7 @@ const Onboarding = () => {
   const [accessPassword, setAccessPassword] = useState('');
   const [formData, setFormData] = useState({ fullName: '', email: '', password: '' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handlePasswordCheck = (e) => {
@@ -59,8 +60,6 @@ const Onboarding = () => {
       setLoading(false);
     }
   };
-
-  const [loading, setLoading] = useState(false);
 
   return (
     <div className="onboarding-page">
