@@ -19,6 +19,8 @@ const Community = () => {
 
   // Fetch initial messages and subscribe to real-time
   useEffect(() => {
+    if (!supabase) return;
+    
     fetchMessages();
 
     // REAL-TIME SUBSCRIPTION

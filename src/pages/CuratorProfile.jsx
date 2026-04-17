@@ -21,6 +21,10 @@ const CuratorProfile = () => {
 
   useEffect(() => {
     const fetchCurator = async () => {
+      if (!supabase) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         // Try to fetch by slug or by profile ID
