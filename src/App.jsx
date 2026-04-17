@@ -37,7 +37,6 @@ function App() {
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/directory" element={<Directory />} />
             <Route path="/visionary" element={<Visionary />} />
-            <Route path="/community" element={<Community />} />
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<CuratorDashboard />} />
             <Route path="/onboarding-exclusive" element={<Onboarding />} />

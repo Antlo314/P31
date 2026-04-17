@@ -41,6 +41,11 @@
   text-decoration: none;
   transition: all 0.3s ease;
   font-weight: 500;
+  background: transparent;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
 }
 
 .nav-item:hover, .nav-item.active {
