@@ -42,19 +42,25 @@ Phone: ${formData.phone || 'Not provided'}
     setIsVisible(false); // Close after submit
   };
 
+  const handleOverlayClick = (e) => {
+    if (e.target.className.includes('lead-popup-overlay')) {
+      setIsVisible(false);
+    }
+  };
+
   if (!isVisible) return null;
 
   return (
-    <div className="lead-popup-overlay">
+    <div className="lead-popup-overlay" onClick={handleOverlayClick}>
       <div className="lead-popup-content shadow-lg">
         <button className="lead-popup-close-btn" onClick={() => setIsVisible(false)}>
           <X size={24} />
         </button>
         
         <div className="lead-popup-header">
-          <span className="material-symbols-outlined text-gold" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>auto_awesome</span>
-          <h2 className="font-headline text-primary" style={{ fontSize: '2.2rem', margin: '0 0 0.5rem 0' }}>Join the Collective</h2>
-          <p style={{ color: 'var(--on-surface)', marginBottom: '2rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
+          <span className="material-symbols-outlined text-gold" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>auto_awesome</span>
+          <h2 className="font-headline text-primary" style={{ fontSize: '1.8rem', margin: '0 0 0.5rem 0' }}>Join the Collective</h2>
+          <p style={{ color: 'var(--on-surface)', marginBottom: '1.5rem', fontSize: '0.85rem', lineHeight: '1.5' }}>
             Enter your details below to stay updated on our upcoming markets, exclusive events, and the latest from Proverbs 31 Marketplace.
           </p>
         </div>

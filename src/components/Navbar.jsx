@@ -28,6 +28,8 @@ const Navbar = () => {
         <div className="nav-links desktop-only">
           <Link to="/visionary" className={location.pathname === '/visionary' ? 'active' : ''}>Visionary</Link>
           <Link to="/directory" className={location.pathname === '/directory' ? 'active' : ''}>Curators</Link>
+          <Link to="/community" className={location.pathname === '/community' ? 'active' : ''}>Community</Link>
+          <Link to="/apply" className={location.pathname === '/apply' ? 'active' : ''}>Storefront Application</Link>
         </div>
 
         <div className="nav-actions">
@@ -45,6 +47,8 @@ const Navbar = () => {
             <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
             <Link to="/visionary" onClick={() => setIsMobileMenuOpen(false)}>Visionary</Link>
             <Link to="/directory" onClick={() => setIsMobileMenuOpen(false)}>Curators</Link>
+            <Link to="/community" onClick={() => setIsMobileMenuOpen(false)}>Community</Link>
+            <Link to="/apply" onClick={() => setIsMobileMenuOpen(false)}>Storefront App</Link>
           </div>
         )}
       </div>

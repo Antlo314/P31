@@ -10,6 +10,7 @@ import CuratorProfile from './pages/CuratorProfile';
 import Register from './pages/Register';
 import Visionary from './pages/Visionary';
 import Apply from './pages/Apply';
+import Community from './pages/Community';
 import LeadPopup from './components/LeadPopup';
 
 const ScrollToTop = () => {
@@ -36,6 +37,7 @@ function App() {
             <Route path="/curator/:id" element={<CuratorProfile />} />
             <Route path="/register" element={<Register />} />
             <Route path="/apply" element={<Apply />} />
+            <Route path="/community" element={<Community />} />
           </Routes>
         </main>
         <Footer />

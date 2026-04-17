@@ -194,17 +194,17 @@ const Home = () => {
         <div className="tour-container cinematic-reveal" style={{maxWidth: '1000px', margin: '0 auto'}}>
           <div className="text-center mb-8">
             <span className="font-label text-gold">Upcoming Dates</span>
-            <h2 className="font-headline text-primary" style={{fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', marginTop: '1rem', marginBottom: '3rem'}}>The Tour Continues</h2>
+            <h2 className="font-headline text-primary" style={{fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', marginTop: '1rem', marginBottom: '3rem'}}>Upcoming Market Dates</h2>
           </div>
           <div style={{borderTop: '1px solid var(--outline-variant)'}}>
             <div className="tour-row">
               <div className="tour-date">
                 <span className="font-headline text-gold" style={{fontSize: '2.5rem', display: 'block'}}>28</span>
-                <span className="font-label text-primary" style={{fontSize: '0.85rem'}}>August '26</span>
+                <span className="font-label text-primary" style={{fontSize: '0.85rem'}}>Jun '26</span>
               </div>
               <div className="tour-info">
-                <h3 className="font-headline text-primary" style={{fontSize: '1.8rem', marginBottom: '0.5rem'}}>Atlanta Summer Pop-Up</h3>
-                <p style={{color: 'var(--on-surface-variant)', lineHeight: 1.6}}>An exclusive outdoor sanctuary featuring elite women creatives.</p>
+                <h3 className="font-headline text-primary" style={{fontSize: '1.8rem', marginBottom: '0.5rem'}}>Summer Showcase</h3>
+                <p style={{color: 'var(--on-surface-variant)', lineHeight: 1.6}}>3:30 PM • Experience our curated mid-year collection.</p>
               </div>
               <div className="tour-action">
                  <a href="#newsletter" className="btn-outline-primary" style={{padding: '12px 24px', fontSize: '0.9rem'}}>Notify Me</a>
@@ -213,12 +213,40 @@ const Home = () => {
             
             <div className="tour-row">
               <div className="tour-date">
-                <span className="font-headline text-gold" style={{fontSize: '2.5rem', display: 'block'}}>TBA</span>
-                <span className="font-label text-primary" style={{fontSize: '0.85rem'}}>Fall '26</span>
+                <span className="font-headline text-gold" style={{fontSize: '2.5rem', display: 'block'}}>27</span>
+                <span className="font-label text-primary" style={{fontSize: '0.85rem'}}>Sep '26</span>
               </div>
               <div className="tour-info">
-                <h3 className="font-headline text-primary" style={{fontSize: '1.8rem', marginBottom: '0.5rem'}}>Fall Collection Showcase</h3>
-                <p style={{color: 'var(--on-surface-variant)', lineHeight: 1.6}}>Highlighting seasonal apparel, rich fragrances, and luxury homeware.</p>
+                <h3 className="font-headline text-primary" style={{fontSize: '1.8rem', marginBottom: '0.5rem'}}>Autumn Gathering</h3>
+                <p style={{color: 'var(--on-surface-variant)', lineHeight: 1.6}}>3:30 PM • Transitioning into the rich colors of fall.</p>
+              </div>
+              <div className="tour-action">
+                 <span style={{color: 'var(--outline)', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.85rem', fontWeight: 700}}>Notify Me</span>
+              </div>
+            </div>
+
+            <div className="tour-row">
+              <div className="tour-date">
+                <span className="font-headline text-gold" style={{fontSize: '2.5rem', display: 'block'}}>27</span>
+                <span className="font-label text-primary" style={{fontSize: '0.85rem'}}>Dec '26</span>
+              </div>
+              <div className="tour-info">
+                <h3 className="font-headline text-primary" style={{fontSize: '1.8rem', marginBottom: '0.5rem'}}>Winter Gala</h3>
+                <p style={{color: 'var(--on-surface-variant)', lineHeight: 1.6}}>3:30 PM • An exclusive end-of-year artisan celebration.</p>
+              </div>
+              <div className="tour-action">
+                 <span style={{color: 'var(--outline)', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.85rem', fontWeight: 700}}>Incoming</span>
+              </div>
+            </div>
+
+            <div className="tour-row">
+              <div className="tour-date">
+                <span className="font-headline text-gold" style={{fontSize: '2.5rem', display: 'block'}}>28</span>
+                <span className="font-label text-primary" style={{fontSize: '0.85rem'}}>Mar '27</span>
+              </div>
+              <div className="tour-info">
+                <h3 className="font-headline text-primary" style={{fontSize: '1.8rem', marginBottom: '0.5rem'}}>Spring Renewal</h3>
+                <p style={{color: 'var(--on-surface-variant)', lineHeight: 1.6}}>3:30 PM • Welcoming the fresh bloom of new creators.</p>
               </div>
               <div className="tour-action">
                  <span style={{color: 'var(--outline)', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.85rem', fontWeight: 700}}>Incoming</span>

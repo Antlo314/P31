@@ -279,6 +279,30 @@
   .tour-action { text-align: left; }
 }
 
+@media (max-width: 768px) {
+  .section-padded {
+    padding: 8vh 5vw;
+  }
+  
+  .glass-card {
+    padding: 2.5rem 1.5rem;
+    border-radius: 20px;
+  }
+
+  .value-grid {
+    gap: 1.5rem;
+  }
+  
+  .hero-title {
+    font-size: clamp(2.5rem, 10vw, 4rem);
+    margin-bottom: 1.5rem;
+  }
+
+  .scripture-text {
+    font-size: clamp(1.5rem, 6vw, 2.2rem);
+  }
+}
+
 @media (min-width: 1025px) {
   .vision-grid {
     grid-template-columns: 1fr 1.2fr;

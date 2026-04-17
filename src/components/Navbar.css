@@ -115,7 +115,14 @@
 
 .mobile-only { display: none; }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .desktop-only { display: none !important; }
   .mobile-only { display: block !important; }
 }
+
+@media (max-width: 768px) {
+  .mobile-dropdown a {
+    font-size: 1.8rem;
+  }
+}
+
