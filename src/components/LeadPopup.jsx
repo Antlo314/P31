@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles, CheckCircle, Leaf } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import './LeadPopup.css';
 
 const LeadPopup = () => {
+  const { user } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -61,7 +63,8 @@ const LeadPopup = () => {
     }
   };
 
-  if (!isVisible) return null;
+  // Never show for logged-in users
+  if (!isVisible || user) return null;
 
   return (
     <div className="lead-popup-overlay" onClick={handleOverlayClick}>

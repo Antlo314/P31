@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Community from './Community'; // Nested import
-import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Users, Trash2 } from 'lucide-react';
+import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Users, Trash2, Plus, ShoppingCart, Loader2 } from 'lucide-react';
 import './CuratorDashboard.css';
 
 const CuratorDashboard = () => {
@@ -15,6 +15,12 @@ const CuratorDashboard = () => {
   const [announcementForm, setAnnouncementForm] = useState({ title: '', content: '', type: 'info' });
   const [announcements, setAnnouncements] = useState([]);
   const [leads, setLeads] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [productForm, setProductForm] = useState({ name: '', description: '', price: '', image_url: '' });
+  const [productImageLoading, setProductImageLoading] = useState(false);
+  const [pendingApprovals, setPendingApprovals] = useState([]);
   
   const [formLoading, setFormLoading] = useState(false);
   const [editData, setEditData] = useState({
@@ -46,20 +52,30 @@ const CuratorDashboard = () => {
     }
   }, [curatorData]);
 
-  const fetchAnnouncements = async () => {
-    const { data } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
-    if (data) setAnnouncements(data);
-  };
-
   const fetchLeads = async () => {
     const { data } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
     if (data) setLeads(data);
   };
 
+  const fetchProducts = async () => {
+    const { data } = await supabase.from('products').select('*').eq('curator_id', user.id).order('created_at', { ascending: false });
+    if (data) setProducts(data);
+  };
+
+  const fetchPendingApprovals = async () => {
+    const { data } = await supabase.from('curator_data').select('*, profiles(full_name, email)').eq('status', 'pending');
+    if (data) setPendingApprovals(data);
+  };
+
+  useEffect(() => {
+    if (user) fetchProducts();
+  }, [user]);
+
   useEffect(() => {
     if (isAdmin && activeTab === 'governance') {
       fetchAnnouncements();
       fetchLeads();
+      fetchPendingApprovals();
     }
   }, [isAdmin, activeTab]);
 
@@ -157,6 +173,70 @@ const CuratorDashboard = () => {
     }
   };
 
+  const handleProductImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setProductImageLoading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+      await supabase.storage.from('products').upload(filePath, file);
+      const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(filePath);
+      setProductForm({ ...productForm, image_url: publicUrl });
+    } catch (err) {
+      alert('Upload error: ' + err.message);
+    } finally {
+      setProductImageLoading(false);
+    }
+  };
+
+  const saveProduct = async (e) => {
+    e.preventDefault();
+    if (products.length >= 10 && !editingProduct) {
+      alert('Initial collections are limited to 10 products.');
+      return;
+    }
+    setFormLoading(true);
+    try {
+      if (editingProduct) {
+        await supabase.from('products').update(productForm).eq('id', editingProduct.id);
+      } else {
+        await supabase.from('products').insert([{ ...productForm, curator_id: user.id }]);
+      }
+      setIsProductModalOpen(false);
+      setEditingProduct(null);
+      setProductForm({ name: '', description: '', price: '', image_url: '' });
+      fetchProducts();
+    } catch (err) {
+      alert('Error saving product: ' + err.message);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const deleteProduct = async (id) => {
+    if (window.confirm('Remove this artisan item from your boutique?')) {
+      await supabase.from('products').delete().eq('id', id);
+      fetchProducts();
+    }
+  };
+
+  const submitForApproval = async () => {
+    try {
+      await supabase.from('curator_data').update({ status: 'pending' }).eq('id', user.id);
+      await fetchUserData(user.id);
+      alert('Sanctuary submitted for architectural review.');
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  };
+
+  const approveVendor = async (id) => {
+    await supabase.from('curator_data').update({ status: 'approved', is_published: true }).eq('id', id);
+    fetchPendingApprovals();
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
@@ -206,6 +286,12 @@ const CuratorDashboard = () => {
             className={`nav-item ${activeTab === 'community' ? 'active' : ''}`}
           >
             <MessageSquare size={20} /> Collective Chat
+          </button>
+          <button 
+            onClick={() => setActiveTab('storefront')} 
+            className={`nav-item ${activeTab === 'storefront' ? 'active' : ''}`}
+          >
+            <ShoppingBag size={20} /> Storefront
           </button>
 
           {isAdmin && (
@@ -375,17 +461,26 @@ const CuratorDashboard = () => {
 
               <div className="dashboard-sidebar-panels">
                 <section className="dashboard-card status-card glass-card">
-                  <h3 className="card-title text-forest"><Sparkles size={18} /> Collective Status</h3>
+                  <h3 className="card-title text-forest"><Sparkles size={18} /> Market Status</h3>
                   <div className="status-indicator">
-                    <span className="status-dot active"></span>
-                    <span className="status-text">{isAdmin ? 'Master Architect' : 'Elite Member'}</span>
+                    <span className={`status-dot ${curatorData?.status === 'approved' ? 'active' : ''}`}></span>
+                    <span className="status-text">{curatorData?.status === 'approved' ? 'Market Approved' : 'Awaiting Review'}</span>
                   </div>
                   <p className="status-sub">
-                    {isAdmin 
-                      ? "You have ultimate administrative authority over the collective." 
-                      : "Your sanctuary is established in the June Market."}
+                    {curatorData?.status === 'approved' 
+                      ? "Your sanctuary is approved for the June Marketplace." 
+                      : "Submission pending architectural review."}
                   </p>
                   <div className="divider-thistle"></div>
+                  {curatorData?.status === 'pending' && (
+                    <div className="botanical-badge text-gold animate-pulse">
+                      <ShieldAlert size={12} /> Under Review
+                    </div>
+                  )}
+                  {(!curatorData?.status || curatorData?.status === 'rejected') && (
+                    <button onClick={submitForApproval} className="btn-solid-gold w-full mt-4">Submit for Review</button>
+                  )}
+                  <div className="divider-thistle mt-4"></div>
                   {(curatorData?.is_early_bird || isAdmin) && (
                     <div className="early-bird-badge botanical-badge">
                       <Leaf size={12} /> {isAdmin ? 'Foundation Founder' : 'June Early Bird • Free Store'}
@@ -394,6 +489,94 @@ const CuratorDashboard = () => {
                 </section>
               </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === 'storefront' && (
+          <div className="dashboard-view boutique-studio">
+            <header className="dashboard-header flex-between">
+              <div>
+                <h1 className="font-headline text-primary">Artisan <span className="text-gold">Studio</span></h1>
+                <p>Curate your botanical collection. Limit: 10 artifacts.</p>
+              </div>
+              <button 
+                onClick={() => {
+                  setEditingProduct(null);
+                  setProductForm({ name: '', description: '', price: '', image_url: '' });
+                  setIsProductModalOpen(true);
+                }} 
+                className="btn-solid-gold flex-center gap-2"
+                disabled={products.length >= 10}
+              >
+                <Plus size={18} /> Add Artifact
+              </button>
+            </header>
+
+            <div className="products-grid">
+              {products.map(p => (
+                <div key={p.id} className="product-card glass-card">
+                  <div className="product-img-frame">
+                    <img src={p.image_url || 'https://via.placeholder.com/400x500?text=Artifact'} alt={p.name} />
+                  </div>
+                  <div className="product-info">
+                    <h3 className="font-headline">{p.name}</h3>
+                    <p className="product-price text-gold">${p.price}</p>
+                    <div className="product-actions flex-center gap-4 mt-4">
+                      <button onClick={() => {
+                        setEditingProduct(p);
+                        setProductForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url });
+                        setIsProductModalOpen(true);
+                      }} className="icon-btn"><Settings size={16} /></button>
+                      <button onClick={() => deleteProduct(p.id)} className="icon-btn text-red"><Trash2 size={16} /></button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {products.length === 0 && (
+                <div className="empty-boutique text-center py-20 opacity-50">
+                  <ShoppingCart size={48} className="mx-auto mb-4" />
+                  <p className="font-headline">Your collection is empty.</p>
+                  <p className="text-sm">Begin by adding your first artisan artifact above.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Product Modal */}
+            {isProductModalOpen && (
+              <div className="modal-overlay flex-center">
+                <div className="modal-content glass-card shadow-2xl p-8 max-w-lg w-full">
+                  <h2 className="font-headline text-primary mb-6">{editingProduct ? 'Refine Artifact' : 'New Artisan Item'}</h2>
+                  <form onSubmit={saveProduct} className="premium-form">
+                    <div className="product-image-uploader mb-6">
+                      <div className="image-dropzone" onClick={() => document.getElementById('prod-img-input').click()}>
+                        {productImageLoading ? <Loader2 className="animate-spin" /> : (
+                          productForm.image_url ? <img src={productForm.image_url} alt="Preview" /> : <><Camera size={32} /> <p className="text-xs mt-2">Upload Photo</p></>
+                        )}
+                      </div>
+                      <input type="file" id="prod-img-input" hidden accept="image/*" onChange={handleProductImageUpload} />
+                    </div>
+                    <div className="form-group">
+                      <label>Artifact Name</label>
+                      <input type="text" value={productForm.name} onChange={e => setProductForm({...productForm, name: e.target.value})} required />
+                    </div>
+                    <div className="form-row-grid">
+                      <div className="form-group">
+                        <label>Price (USD)</label>
+                        <input type="number" step="0.01" value={productForm.price} onChange={e => setProductForm({...productForm, price: e.target.value})} required />
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label>Description</label>
+                      <textarea rows="3" value={productForm.description} onChange={e => setProductForm({...productForm, description: e.target.value})}></textarea>
+                    </div>
+                    <div className="flex-center gap-4 mt-8">
+                      <button type="button" onClick={() => setIsProductModalOpen(false)} className="btn-outline-primary flex-1">Cancel</button>
+                      <button type="submit" className="btn-solid-gold flex-1">Save Artifact</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -463,6 +646,25 @@ const CuratorDashboard = () => {
                       </div>
                     ))}
                     {announcements.length === 0 && <p className="opacity-50 italic text-sm">No active proclamations.</p>}
+                  </div>
+                </section>
+              </div>
+
+              {/* Vendor Approvals Section */}
+              <div className="mb-12">
+                <section className="dashboard-card glass-card">
+                  <h2 className="card-title text-gold"><ShieldAlert size={20} /> Vendor Approvals</h2>
+                  <div className="admin-announcements-list">
+                    {pendingApprovals.map(p => (
+                      <div key={p.id} className="admin-announcement-item glass-border flex-between">
+                        <div className="a-item-text">
+                          <strong>{p.profiles?.full_name || 'Anonymous'} ({p.business_name})</strong>
+                          <p className="text-xs opacity-60">Identity: {p.profiles?.email}</p>
+                        </div>
+                        <button onClick={() => approveVendor(p.id)} className="btn-solid-gold btn-xs">Grant Market Access</button>
+                      </div>
+                    ))}
+                    {pendingApprovals.length === 0 && <p className="opacity-50 italic text-sm">No curators awaiting review.</p>}
                   </div>
                 </section>
               </div>

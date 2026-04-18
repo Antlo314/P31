@@ -16,6 +16,7 @@ gsap.registerPlugin(ScrollTrigger);
 const CuratorProfile = () => {
   const { id: slug } = useParams();
   const [curator, setCurator] = useState(null);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const containerRef = useRef(null);
@@ -40,6 +41,15 @@ const CuratorProfile = () => {
 
         if (dbError) throw dbError;
         setCurator(data);
+
+        // Fetch products for this curator
+        const { data: prodData } = await supabase
+          .from('products')
+          .select('*')
+          .eq('curator_id', data.id)
+          .order('created_at', { ascending: false });
+        
+        if (prodData) setProducts(prodData);
       } catch (err) {
         console.error('Curator fetch error:', err);
         setError('Curator not found');
@@ -179,10 +189,25 @@ const CuratorProfile = () => {
            </div>
 
            <div className="cp-products-grid">
-             {/* For now, we display a placeholder message or empty grid */}
-             <div className="text-center" style={{gridColumn: '1 / -1', padding: '4rem 0'}}>
-                <p style={{color: 'rgba(255,255,255,0.5)', fontStyle: 'italic'}}>Product catalog integration in progress.</p>
-             </div>
+             {products.map(p => (
+               <div key={p.id} className="cp-product-card">
+                 <div className="cp-product-img-wrapper">
+                    <img src={p.image_url || 'https://via.placeholder.com/400x500?text=Artifact'} alt={p.name} className="cp-product-img" />
+                    <div className="cp-product-hover">
+                       <span>Inquiry Only</span>
+                    </div>
+                 </div>
+                 <div className="cp-product-info">
+                    <h4>{p.name}</h4>
+                    <p className="cp-product-price">${p.price}</p>
+                 </div>
+               </div>
+             ))}
+             {products.length === 0 && (
+               <div className="text-center" style={{gridColumn: '1 / -1', padding: '4rem 0'}}>
+                  <p style={{color: 'rgba(255,255,255,0.5)', fontStyle: 'italic'}}>Product catalog integration in progress.</p>
+               </div>
+             )}
            </div>
         </div>
       </section>
