@@ -20,6 +20,7 @@ const Community = () => {
   const [inputText, setInputText] = useState('');
   const [curators, setCurators] = useState([]);
   const [isLoadingCurators, setIsLoadingCurators] = useState(false);
+  const [chatError, setChatError] = useState(null);
   const messagesStartRef = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -84,25 +85,55 @@ const Community = () => {
   }, [user, activeChannelId, activeDmRecipient]);
 
   const fetchMessages = async () => {
-    let query = supabase
-      .from('messages')
-      .select(`
-        *,
-        profiles (full_name, avatar_url, email),
-        curator_data:profile_id (is_early_bird)
-      `)
-      .order('created_at', { ascending: true });
+    try {
+      setChatError(null);
+      let query = supabase
+        .from('messages')
+        .select(`
+          *,
+          profiles (full_name, avatar_url, email),
+          curator_data:profile_id (is_early_bird)
+        `)
+        .order('created_at', { ascending: true });
 
-    if (activeDmRecipient) {
-      // DM Query: Messages between Me and Recipient
-      query = query.or(`and(profile_id.eq.${user.id},recipient_id.eq.${activeDmRecipient.id}),and(profile_id.eq.${activeDmRecipient.id},recipient_id.eq.${user.id})`);
-    } else {
-      // Channel Query
-      query = query.eq('channel_id', activeChannelId).is('recipient_id', null);
+      if (activeDmRecipient) {
+        // DM Query: Messages between Me and Recipient
+        query = query.or(`and(profile_id.eq.${user.id},recipient_id.eq.${activeDmRecipient.id}),and(profile_id.eq.${activeDmRecipient.id},recipient_id.eq.${user.id})`);
+      } else {
+        // Channel Query
+        query = query.eq('channel_id', activeChannelId);
+        
+        // Attempt to filter by recipient_id if the column exists
+        // We use a try-style approach or check schema if possible, but here we'll just handle the catch
+        query = query.is('recipient_id', null);
+      }
+
+      const { data, error } = await query;
+      
+      if (error) {
+        // Detect missing column error
+        if (error.message.includes('column') && error.message.includes('recipient_id')) {
+          console.warn('Chat: recipient_id column missing. Attempting legacy fetch...');
+          setChatError('Architectural Upgrade Required: Please run private_messaging_migration.sql for full features.');
+          
+          // Legacy Fallback (No recipient_id filter)
+          const legacyQuery = await supabase
+            .from('messages')
+            .select('*, profiles(full_name, avatar_url, email), curator_data:profile_id(is_early_bird)')
+            .eq('channel_id', activeChannelId)
+            .order('created_at', { ascending: true });
+          
+          if (legacyQuery.data) setMessages(legacyQuery.data);
+        } else {
+          throw error;
+        }
+      } else {
+        setMessages(data || []);
+      }
+    } catch (err) {
+      console.error('Chat fetch error:', err.message);
+      setChatError('Sanctuary Connectivity Error: ' + err.message);
     }
-
-    const { data, error } = await query;
-    if (!error) setMessages(data);
   };
 
   const fetchNewMessage = async (id) => {
@@ -278,6 +309,11 @@ const Community = () => {
 
         <div className="chat-feed">
           <div ref={messagesStartRef} />
+          {chatError && (
+            <div className="chat-error-banner glass-card">
+               <ShieldCheck size={16} /> {chatError}
+            </div>
+          )}
           <div className="messages-list">
             {messages.map((msg) => {
               const msgIsAdmin = ['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'].includes(msg.profiles?.email?.toLowerCase());

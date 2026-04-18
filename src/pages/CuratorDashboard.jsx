@@ -205,16 +205,46 @@ const CuratorDashboard = () => {
   const handleProductImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // 1. Client-side Validation (Supabase Free Tier Optimization)
+    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_SIZE) {
+      alert('Artifact portraits must be under 5MB to maintain sanctuary performance.');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      alert('Only visual artifacts (images) can be uploaded to the boutique.');
+      return;
+    }
+
     setProductImageLoading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-      const filePath = `products/${fileName}`;
-      await supabase.storage.from('products').upload(filePath, file);
+      const fileName = `${user.id}-${Date.now()}-${Math.floor(Math.random() * 1000)}.${fileExt}`;
+      const filePath = fileName; // Clean path in the 'products' bucket
+
+      const { data, error: uploadError } = await supabase.storage
+        .from('products')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        if (uploadError.message.includes('bucket not found')) {
+          throw new Error('The products repository has not been initialized. Please contact the Master Architect.');
+        }
+        throw uploadError;
+      }
+
       const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(filePath);
-      setProductForm({ ...productForm, image_url: publicUrl });
+      
+      setProductForm(prev => ({ ...prev, image_url: publicUrl }));
+      alert('Portrait successfully uploaded to the collective.');
     } catch (err) {
-      alert('Upload error: ' + err.message);
+      console.error('Upload failure:', err);
+      alert('Architectural Error: ' + err.message);
     } finally {
       setProductImageLoading(false);
     }

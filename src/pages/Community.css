@@ -477,6 +477,22 @@
   text-transform: uppercase;
 }
 
+/* Error Banner */
+.chat-error-banner {
+  background: rgba(155, 113, 178, 0.05);
+  border: 1px solid var(--metallic-gold);
+  color: var(--primary);
+  padding: 12px 20px;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  backdrop-filter: blur(8px);
+}
+
 /* Scrollbar for chat feed */
 .chat-feed::-webkit-scrollbar { width: 6px; }
 .chat-feed::-webkit-scrollbar-track { background: transparent; }

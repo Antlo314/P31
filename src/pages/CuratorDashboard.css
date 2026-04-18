@@ -221,6 +221,13 @@
   opacity: 0.7;
 }
 
+.dashboard-chat-view {
+  margin: -4rem -6vw; /* Negative margins to override dashboard-main padding */
+  height: calc(100vh - 0px);
+  width: calc(100% + 12vw);
+  background: var(--surface-alt);
+}
+
 /* Boutique Studio & Product Grid */
 .products-grid {
   display: grid;
