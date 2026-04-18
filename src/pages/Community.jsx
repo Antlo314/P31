@@ -91,8 +91,12 @@ const Community = () => {
         .from('messages')
         .select(`
           *,
-          profiles!profile_id (full_name, avatar_url, email),
-          curator_data:profile_id (is_early_bird)
+          profiles!profile_id (
+            full_name, 
+            avatar_url, 
+            email,
+            curator_data (is_early_bird)
+          )
         `)
         .order('created_at', { ascending: true });
 
@@ -119,7 +123,7 @@ const Community = () => {
           // Legacy Fallback (No recipient_id filter)
           const legacyQuery = await supabase
             .from('messages')
-            .select('*, profiles!profile_id(full_name, avatar_url, email), curator_data:profile_id(is_early_bird)')
+            .select('*, profiles!profile_id(full_name, avatar_url, email, curator_data(is_early_bird))')
             .eq('channel_id', activeChannelId)
             .order('created_at', { ascending: true });
           
@@ -139,7 +143,7 @@ const Community = () => {
   const fetchNewMessage = async (id) => {
     const { data, error } = await supabase
       .from('messages')
-      .select('*, profiles!profile_id(full_name, avatar_url, email), curator_data:profile_id(is_early_bird)')
+      .select('*, profiles!profile_id(full_name, avatar_url, email, curator_data(is_early_bird))')
       .eq('id', id)
       .single();
     
@@ -317,7 +321,7 @@ const Community = () => {
           <div className="messages-list">
             {messages.map((msg) => {
               const msgIsAdmin = ['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'].includes(msg.profiles?.email?.toLowerCase());
-              const msgIsFounder = msg.curator_data?.[0]?.is_early_bird;
+              const msgIsFounder = msg.profiles?.curator_data?.[0]?.is_early_bird;
               const isMine = msg.profile_id === user?.id;
               const canDelete = isMine || isAdmin;
 
