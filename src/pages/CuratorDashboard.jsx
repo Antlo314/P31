@@ -443,6 +443,9 @@ const CuratorDashboard = () => {
                       type="url" 
                       placeholder="https://yourbrand.com"
                       value={editData.website}
+                      onFocus={(e) => {
+                        if (!e.target.value) setEditData({...editData, website: 'https://'});
+                      }}
                       onChange={(e) => setEditData({...editData, website: e.target.value})}
                     />
                   </div>
