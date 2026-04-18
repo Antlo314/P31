@@ -190,6 +190,20 @@ const Home = () => {
         </div>
       </section>
 
+      {/* ── PARTNER TEASER — Plum / Gold ─────────────────── */}
+      <section className="home-partner py-24">
+        <div className="partner-content container reveal">
+          <div className="partner-text-wrapper text-center">
+             <span className="eyebrow-label eyebrow-gold">Collaboration</span>
+             <h2 className="partner-headline font-headline text-white">Partner with the Movement</h2>
+             <p className="partner-body max-w-2xl mx-auto opacity-80 mt-6 mb-10">
+               Proverbs 31 Marketplace is more than an event—it is a movement. Join us in cultivating spaces where faith, purpose, and community converge.
+             </p>
+             <Link to="/partner" className="btn-solid-gold">Explore Partnerships</Link>
+          </div>
+        </div>
+      </section>
+
       {/* ── MARKET DATES — Olive / Deep Earth ──────────────── */}
       <section className="home-dates" id="dates">
         <div className="dates-header reveal">

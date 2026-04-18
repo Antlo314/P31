@@ -7,7 +7,7 @@ import About from './pages/About';
 import Calendar from './pages/Calendar';
 import Directory from './pages/Directory';
 import CuratorProfile from './pages/CuratorProfile';
-import Visionary from './pages/Visionary';
+import Partner from './pages/Partner';
 import Community from './pages/Community';
 import Login from './pages/Login';
 import CuratorDashboard from './pages/CuratorDashboard';
@@ -38,7 +38,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/directory" element={<Directory />} />
-            <Route path="/visionary" element={<Visionary />} />
+            <Route path="/partner" element={<Partner />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Login />} />
             <Route path="/dashboard/*" element={<CuratorDashboard />} />

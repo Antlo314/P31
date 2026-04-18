@@ -26,6 +26,7 @@ const CuratorDashboard = () => {
   const [productForm, setProductForm] = useState({ name: '', description: '', price: '', image_url: '' });
   const [productImageLoading, setProductImageLoading] = useState(false);
   const [pendingApprovals, setPendingApprovals] = useState([]);
+  const [partnershipInquiries, setPartnershipInquiries] = useState([]);
   const [adminError, setAdminError] = useState(null);
   const [adminFeedbackMap, setAdminFeedbackMap] = useState({}); // state to hold feedback input per vendor
   
@@ -101,15 +102,28 @@ const CuratorDashboard = () => {
     }
   };
 
+  const fetchPartnershipInquiries = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('partnerships')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setPartnershipInquiries(data || []);
+    } catch (err) {
+      console.warn('Partnership fetch error:', err.message);
+    }
+  };
+
   useEffect(() => {
     if (user) fetchProducts();
   }, [user]);
-
   useEffect(() => {
     if (isAdmin && activeTab === 'governance') {
       fetchAnnouncements();
       fetchLeads();
       fetchPendingApprovals();
+      fetchPartnershipInquiries();
     }
   }, [isAdmin, activeTab]);
 
@@ -315,6 +329,13 @@ const CuratorDashboard = () => {
       admin_feedback: feedback 
     }).eq('id', id);
     fetchPendingApprovals();
+  };
+
+  const deletePartnershipInquiry = async (id) => {
+    if (window.confirm('Archive this partnership inquiry?')) {
+      await supabase.from('partnerships').delete().eq('id', id);
+      fetchPartnershipInquiries();
+    }
   };
 
   const handleSignOut = async () => {
@@ -870,6 +891,37 @@ const CuratorDashboard = () => {
                         )}
                       </tbody>
                     </table>
+                  </div>
+                </section>
+              </div>
+
+              {/* Partnership Inquiries Section */}
+              <div className="mb-12">
+                <section className="dashboard-card glass-card">
+                  <h2 className="card-title text-gold"><Users size={20} /> Partnership Inquiries</h2>
+                  <div className="admin-announcements-list">
+                    {partnershipInquiries.map(p => (
+                      <div key={p.id} className="admin-governance-item glass-border p-6 mb-4">
+                        <div className="flex-between mb-4">
+                          <div className="a-item-text">
+                            <strong className="text-primary">{p.full_name}</strong>
+                            <p className="text-xs opacity-60">{p.email} • {p.phone}</p>
+                            <span className="early-bird-badge botanical-badge mt-2" style={{display: 'inline-block'}}>
+                              {p.partnership_type} Alignment
+                            </span>
+                          </div>
+                          <button onClick={() => deletePartnershipInquiry(p.id)} className="icon-btn text-red">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                        <div className="p-4 bg-muted rounded-md text-sm italic opacity-80" style={{background: 'rgba(58, 28, 54, 0.03)'}}>
+                          "{p.message}"
+                        </div>
+                      </div>
+                    ))}
+                    {partnershipInquiries.length === 0 && (
+                      <p className="opacity-50 italic text-sm text-center py-8">No partnership inquiries yet.</p>
+                    )}
                   </div>
                 </section>
               </div>

@@ -29,7 +29,7 @@ const Navbar = () => {
         </Link>
 
         <div className="nav-links desktop-only">
-          <Link to="/visionary" className={location.pathname === '/visionary' ? 'active' : ''}>Visionary</Link>
+          <Link to="/partner" className={location.pathname === '/partner' ? 'active' : ''}>Partner</Link>
           <Link to="/directory" className={location.pathname === '/directory' ? 'active' : ''}>Curators</Link>
           <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noopener noreferrer">Storefront Application</a>
         </div>
@@ -69,7 +69,7 @@ const Navbar = () => {
         {isMobileMenuOpen && (
           <div className="mobile-dropdown">
             <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
-            <Link to="/visionary" onClick={() => setIsMobileMenuOpen(false)}>Visionary</Link>
+            <Link to="/partner" onClick={() => setIsMobileMenuOpen(false)}>Partner</Link>
             <Link to="/directory" onClick={() => setIsMobileMenuOpen(false)}>Curators</Link>
             <Link to="/apply" onClick={() => setIsMobileMenuOpen(false)}>Storefront App</Link>
             <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>Curator Portal</Link>
