@@ -47,10 +47,21 @@
 .ptr-vision-block {
   max-width: 600px;
   padding: 3rem;
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
+  background: rgba(35, 12, 33, 0.92); /* Deeper Plum for peak contrast */
+  backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(212, 175, 55, 0.5); /* Stronger Gold frame */
+  border-radius: 4px;
+}
+
+.ptr-vision-block h3, 
+.ptr-vision-block p,
+.ptr-vision-block .ptr-lead { 
+  color: white !important; 
+}
+
+.ptr-vision-block .ptr-lead {
+  color: var(--gold-light) !important;
+  font-weight: 700;
 }
 
 .ptr-vision-block h3 { color: white !important; }

@@ -5,6 +5,9 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Partner.css';
 
+import heroImg from '../assets/p31_partner_hero_editorial_1776544063235.png';
+import groupImg from '../assets/p31_community_impact_editorial_1776544076592.png';
+
 gsap.registerPlugin(ScrollTrigger);
 
 const Partner = () => {
@@ -64,7 +67,7 @@ const Partner = () => {
   return (
     <div className="partner-page" ref={containerRef}>
       {/* SECTION 1: THE VISION (HERO) */}
-      <section className="ptr-hero">
+      <section className="ptr-hero" style={{ backgroundImage: `url(${heroImg})` }}>
         <div className="ptr-hero-overlay" />
         <div className="ptr-hero-content container">
           <span className="ptr-eyebrow animate-in">A Holy Movement</span>
@@ -105,7 +108,7 @@ const Partner = () => {
           </div>
           <div className="ptr-why-visual glass-border">
              <div className="ptr-visual-overlay" />
-             <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800" alt="Excellence" />
+             <img src={groupImg} alt="Excellence" />
           </div>
         </div>
       </section>
