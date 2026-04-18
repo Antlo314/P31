@@ -165,12 +165,16 @@ const Partner = () => {
 
             <div className="ptr-contact-details">
               <div className="ptr-contact-item">
-                <Mail className="text-gold" />
-                <span>proverbs31markets@gmail.com</span>
+                <a href="mailto:proverbs31markets@gmail.com" className="ptr-contact-link">
+                  <Mail className="text-gold" />
+                  <span>proverbs31markets@gmail.com</span>
+                </a>
               </div>
               <div className="ptr-contact-item">
-                <Phone className="text-gold" />
-                <span>Inquiry Inquiry Console Ready</span>
+                <a href="tel:14705622852" className="ptr-contact-link">
+                  <Phone className="text-gold" />
+                  <span>1 (470) 562-2852</span>
+                </a>
               </div>
             </div>
           </div>
