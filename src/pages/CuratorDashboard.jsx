@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Community from './Community'; // Nested import
@@ -9,7 +9,12 @@ import './CuratorDashboard.css';
 const CuratorDashboard = () => {
   const { user, profile, curatorData, isAdmin, signOut, fetchUserData } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('identity'); // 'identity', 'community', or 'governance'
+  const location = useLocation();
+  
+  // Deriving activeTab from the URL path instead of local state
+  const activeTab = location.pathname.split('/').pop() || 'identity';
+  const setActiveTab = (tab) => navigate(`/dashboard/${tab}`);
+
   const [profileImage, setProfileImage] = useState(null);
   
   const [announcementForm, setAnnouncementForm] = useState({ title: '', content: '', type: 'info' });
@@ -388,8 +393,10 @@ const CuratorDashboard = () => {
 
       {/* Main Content Area */}
       <main className="dashboard-main">
-        {activeTab === 'identity' && (
-          <div className="dashboard-view">
+        <Routes>
+          <Route path="/" element={<Navigate to="identity" replace />} />
+          <Route path="identity" element={
+            <div className="dashboard-view">
             <header className="dashboard-header">
               <h1 className="font-headline text-primary">Curator <span className="text-gold">Studio</span></h1>
               <p>Welcome back, {profile?.full_name}. Refine your sanctuary’s professional presence.</p>
@@ -606,11 +613,11 @@ const CuratorDashboard = () => {
                 </section>
               </div>
             </div>
-          </div>
-        )}
+            </div>
+          } />
 
-        {activeTab === 'storefront' && (
-          <div className="dashboard-view boutique-studio">
+          <Route path="storefront" element={
+            <div className="dashboard-view boutique-studio">
             <header className="dashboard-header flex-between">
               <div>
                 <h1 className="font-headline text-primary">Artisan <span className="text-gold">Studio</span></h1>
@@ -694,17 +701,18 @@ const CuratorDashboard = () => {
                 </div>
               </div>
             )}
-          </div>
-        )}
+            </div>
+          } />
 
-        {activeTab === 'community' && (
-          <div className="dashboard-chat-view">
-             <Community />
-          </div>
-        )}
+          <Route path="community" element={
+            <div className="dashboard-chat-view">
+               <Community />
+            </div>
+          } />
 
-        {activeTab === 'governance' && isAdmin && (
-          <div className="dashboard-view">
+          <Route path="governance" element={
+            isAdmin ? (
+              <div className="dashboard-view">
             <header className="dashboard-header">
               <h1 className="font-headline text-primary">Master <span className="text-gold">Governance</span></h1>
               <p>Ultimate architectural authority at your fingertips.</p>
@@ -866,8 +874,10 @@ const CuratorDashboard = () => {
                 </section>
               </div>
             </div>
-          </div>
-        )}
+              </div>
+            ) : <Navigate to="identity" replace />
+          } />
+        </Routes>
       </main>
     </div>
   );

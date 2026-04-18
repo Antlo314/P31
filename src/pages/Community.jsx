@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, Link, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Send, Hash, Users, Bell, Search, Settings, Crown, Leaf, Trash2, MessageCircle, UserPlus, ShieldCheck } from 'lucide-react';
@@ -77,7 +78,9 @@ const Community = () => {
             fetchNewMessage(newMsg.id);
           }
         } else if (payload.eventType === 'DELETE') {
-          setMessages(prev => prev.filter(m => m.id !== payload.old.id));
+          // Robust comparison using String conversion for BIGINT safety
+          const deletedId = String(payload.old.id);
+          setMessages(prev => prev.filter(m => String(m.id) !== deletedId));
         }
       })
       .subscribe();
@@ -216,12 +219,20 @@ const Community = () => {
   const handleDeleteMessage = async (msgId) => {
     if (!window.confirm('Withdraw this message from the collective?')) return;
     
+    // Optimistic UI Update: Remove instantly from screen
+    const deletedIdStr = String(msgId);
+    setMessages(prev => prev.filter(m => String(m.id) !== deletedIdStr));
+
     const { error } = await supabase
       .from('messages')
       .delete()
       .eq('id', msgId);
-
-    if (error) alert('Error deleting: ' + error.message);
+      
+    if (error) {
+      alert('Error deleting: ' + error.message);
+      // Rollback if failed
+      fetchMessages();
+    }
   };
 
   const selectChannel = (id) => {
