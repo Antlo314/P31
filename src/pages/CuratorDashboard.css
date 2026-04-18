@@ -20,13 +20,24 @@
   border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.sidebar-brand {
-  padding: 0 2rem 2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
 .sidebar-brand span {
   font-size: 1.5rem;
+}
+
+.admin-status-pill {
+  background: rgba(203, 167, 47, 0.15);
+  color: var(--metallic-gold);
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  border: 1px solid rgba(203, 167, 47, 0.2);
+  width: fit-content;
 }
 
 .sidebar-nav {
@@ -140,6 +151,31 @@
   gap: 2rem !important;
 }
 
+.form-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.form-divider-label {
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: var(--olive);
+  margin: 2.5rem 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-divider-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--outline-variant);
+}
+
 .avatar-upload-container {
   display: flex;
   align-items: center;
@@ -178,8 +214,16 @@
   transition: transform 0.3s ease;
 }
 
-.avatar-upload-btn:hover {
-  transform: scale(1.1);
+.premium-form label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  color: var(--on-surface-variant);
+}
+
+.premium-form label svg {
+  color: var(--olive);
 }
 
 .upload-help {

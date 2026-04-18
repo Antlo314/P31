@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import './Navbar.css';
 
-import logoPath from '../assets/p31_botanical_logo.png';
+import logoPath from '../assets/p31_logo_botanical.png';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);

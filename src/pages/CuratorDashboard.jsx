@@ -3,11 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Community from './Community'; // Nested import
-import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles } from 'lucide-react';
+import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown } from 'lucide-react';
 import './CuratorDashboard.css';
 
 const CuratorDashboard = () => {
-  const { user, profile, curatorData, signOut, fetchUserData } = useAuth();
+  const { user, profile, curatorData, isAdmin, signOut, fetchUserData } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('identity'); // 'identity' or 'community'
   
@@ -16,7 +16,13 @@ const CuratorDashboard = () => {
     businessName: '',
     tagline: '',
     bio: '',
-    slug: ''
+    slug: '',
+    location: '',
+    instagram: '',
+    facebook: '',
+    website: '',
+    phone: '',
+    publicEmail: ''
   });
 
   useEffect(() => {
@@ -25,7 +31,13 @@ const CuratorDashboard = () => {
         businessName: curatorData.business_name || '',
         tagline: curatorData.tagline || '',
         bio: curatorData.bio || '',
-        slug: curatorData.slug || ''
+        slug: curatorData.slug || '',
+        location: curatorData.location || '',
+        instagram: curatorData.instagram || '',
+        facebook: curatorData.facebook || '',
+        website: curatorData.website || '',
+        phone: curatorData.phone || '',
+        publicEmail: curatorData.public_email || ''
       });
     }
   }, [curatorData]);
@@ -41,6 +53,12 @@ const CuratorDashboard = () => {
           business_name: editData.businessName,
           tagline: editData.tagline,
           bio: editData.bio,
+          location: editData.location,
+          instagram: editData.instagram,
+          facebook: editData.facebook,
+          website: editData.website,
+          phone: editData.phone,
+          public_email: editData.publicEmail,
           slug: editData.slug.toLowerCase().replace(/[^a-z0-9-]/g, '')
         })
         .eq('id', user.id);
@@ -65,8 +83,8 @@ const CuratorDashboard = () => {
     return <div className="dashboard-container flex-center">Redirecting to Login...</div>;
   }
 
-  // PAYMENT GATING Logic
-  if (curatorData && !curatorData.is_paid) {
+  // PAYMENT GATING Logic (Bypassed for Admins)
+  if (curatorData && !curatorData.is_paid && !isAdmin) {
     return (
       <div className="dashboard-container payment-gate">
         <div className="gate-content glass-card shadow-lg text-center">
@@ -90,6 +108,7 @@ const CuratorDashboard = () => {
         <div className="sidebar-brand">
           <Leaf className="text-gold" size={24} />
           <span className="font-headline text-gold">P31 Studio</span>
+          {isAdmin && <span className="admin-status-pill"><Crown size={12} /> Architect</span>}
         </div>
         
         <nav className="sidebar-nav">
@@ -164,10 +183,74 @@ const CuratorDashboard = () => {
                   <div className="form-group">
                     <label>The Story (Bio)</label>
                     <textarea 
-                      rows="5" 
+                      rows="4" 
                       value={editData.bio}
                       onChange={(e) => setEditData({...editData, bio: e.target.value})}
                     ></textarea>
+                  </div>
+
+                  <div className="form-row-grid">
+                    <div className="form-group">
+                      <label><MapPin size={14} /> Studio Location</label>
+                      <input 
+                        type="text" 
+                        placeholder="City, State"
+                        value={editData.location}
+                        onChange={(e) => setEditData({...editData, location: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label><Phone size={14} /> Concierge Phone</label>
+                      <input 
+                        type="text" 
+                        placeholder="(000) 000-0000"
+                        value={editData.phone}
+                        onChange={(e) => setEditData({...editData, phone: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label><Mail size={14} /> Business Concierge Email</label>
+                    <input 
+                      type="email" 
+                      placeholder="concierge@yourbrand.com"
+                      value={editData.publicEmail}
+                      onChange={(e) => setEditData({...editData, publicEmail: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-divider-label">Connectivity (Icons)</div>
+
+                  <div className="form-row-grid">
+                    <div className="form-group">
+                      <label><Instagram size={14} /> Instagram</label>
+                      <input 
+                        type="text" 
+                        placeholder="@username"
+                        value={editData.instagram}
+                        onChange={(e) => setEditData({...editData, instagram: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label><Facebook size={14} /> Facebook</label>
+                      <input 
+                        type="text" 
+                        placeholder="facebook.com/page"
+                        value={editData.facebook}
+                        onChange={(e) => setEditData({...editData, facebook: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label><Globe size={14} /> Brand Website</label>
+                    <input 
+                      type="url" 
+                      placeholder="https://yourbrand.com"
+                      value={editData.website}
+                      onChange={(e) => setEditData({...editData, website: e.target.value})}
+                    />
                   </div>
 
                   <button type="submit" className="btn-solid-gold" disabled={formLoading}>
@@ -187,13 +270,17 @@ const CuratorDashboard = () => {
                   <h3 className="card-title text-forest"><Sparkles size={18} /> Collective Status</h3>
                   <div className="status-indicator">
                     <span className="status-dot active"></span>
-                    <span className="status-text">Elite Member</span>
+                    <span className="status-text">{isAdmin ? 'Master Architect' : 'Elite Member'}</span>
                   </div>
-                  <p className="status-sub">Your sanctuary is established in the June Market.</p>
+                  <p className="status-sub">
+                    {isAdmin 
+                      ? "You have ultimate administrative authority over the collective." 
+                      : "Your sanctuary is established in the June Market."}
+                  </p>
                   <div className="divider-thistle"></div>
-                  {curatorData?.is_early_bird && (
+                  {(curatorData?.is_early_bird || isAdmin) && (
                     <div className="early-bird-badge botanical-badge">
-                      <Leaf size={12} /> June Early Bird • Free Store
+                      <Leaf size={12} /> {isAdmin ? 'Foundation Founder' : 'June Early Bird • Free Store'}
                     </div>
                   )}
                 </section>

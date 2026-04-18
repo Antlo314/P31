@@ -7,7 +7,10 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [curatorData, setCuratorData] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const adminEmails = ['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'];
 
   useEffect(() => {
     if (!supabase) {
@@ -18,17 +21,24 @@ export const AuthProvider = ({ children }) => {
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchUserData(session.user.id);
+      if (session?.user) {
+        setIsAdmin(adminEmails.includes(session.user.email?.toLowerCase()));
+        fetchUserData(session.user.id);
+      }
       else setLoading(false);
     });
 
     // Listen for changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchUserData(session.user.id);
+      if (session?.user) {
+        setIsAdmin(adminEmails.includes(session.user.email?.toLowerCase()));
+        fetchUserData(session.user.id);
+      }
       else {
         setProfile(null);
         setCuratorData(null);
+        setIsAdmin(false);
         setLoading(false);
       }
     });
@@ -64,7 +74,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, curatorData, loading, signOut, fetchUserData }}>
+    <AuthContext.Provider value={{ user, profile, curatorData, isAdmin, loading, signOut, fetchUserData }}>
       {children}
     </AuthContext.Provider>
   );
