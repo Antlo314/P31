@@ -21,6 +21,7 @@ const CuratorDashboard = () => {
   const [productForm, setProductForm] = useState({ name: '', description: '', price: '', image_url: '' });
   const [productImageLoading, setProductImageLoading] = useState(false);
   const [pendingApprovals, setPendingApprovals] = useState([]);
+  const [adminError, setAdminError] = useState(null);
   
   const [formLoading, setFormLoading] = useState(false);
   const [editData, setEditData] = useState({
@@ -53,18 +54,35 @@ const CuratorDashboard = () => {
   }, [curatorData]);
 
   const fetchLeads = async () => {
-    const { data } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
-    if (data) setLeads(data);
+    try {
+      const { data, error } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data) setLeads(data);
+    } catch (err) {
+      console.warn('Leads fetch error:', err.message);
+    }
   };
 
   const fetchProducts = async () => {
-    const { data } = await supabase.from('products').select('*').eq('curator_id', user.id).order('created_at', { ascending: false });
-    if (data) setProducts(data);
+    try {
+      const { data, error } = await supabase.from('products').select('*').eq('curator_id', user.id).order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data) setProducts(data);
+    } catch (err) {
+      console.warn('Products fetch error:', err.message);
+    }
   };
 
   const fetchPendingApprovals = async () => {
-    const { data } = await supabase.from('curator_data').select('*, profiles(full_name, email)').eq('status', 'pending');
-    if (data) setPendingApprovals(data);
+    try {
+      setAdminError(null);
+      const { data, error } = await supabase.from('curator_data').select('*, profiles(full_name, email)').eq('status', 'pending');
+      if (error) throw error;
+      if (data) setPendingApprovals(data);
+    } catch (err) {
+      console.error('Governance fetch error:', err.message);
+      setAdminError('Architectural Maintenance Req: ' + err.message);
+    }
   };
 
   useEffect(() => {
@@ -595,6 +613,13 @@ const CuratorDashboard = () => {
               <h1 className="font-headline text-primary">Master <span className="text-gold">Governance</span></h1>
               <p>Ultimate architectural authority at your fingertips.</p>
             </header>
+
+            {adminError && (
+              <div className="admin-error-banner glass-card mb-8" style={{borderColor: '#ff4b4b', color: '#ff4b4b'}}>
+                <strong>⚠️ {adminError}</strong>
+                <p className="text-sm mt-1">Please ensure standard database migrations (SQL Editor) are applied to the sanctuary.</p>
+              </div>
+            )}
 
             <div className="governance-sections">
               {/* Announcements Section */}

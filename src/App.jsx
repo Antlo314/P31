@@ -40,6 +40,7 @@ function App() {
             <Route path="/directory" element={<Directory />} />
             <Route path="/visionary" element={<Visionary />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Login />} />
             <Route path="/dashboard" element={<CuratorDashboard />} />
             <Route path="/onboarding-exclusive" element={<Onboarding />} />
             {/* Vanity URL Catch-all: /popcorn or /id */}
