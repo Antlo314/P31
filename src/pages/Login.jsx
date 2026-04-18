@@ -16,15 +16,49 @@ const Login = () => {
     setError('');
 
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      // 1. Attempt standard login
+      const { data: signInData, error: authError } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password
       });
 
+      // 2. Admin Auto-Provisioning Fallback
+      // If login fails for a designated admin email, attempt to auto-register them
+      const adminEmails = ['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'];
+      if (authError && adminEmails.includes(formData.email.toLowerCase()) && formData.password === '123456') {
+        const { data: signUpData, error: regError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        if (regError) throw regError;
+
+        // Create associated profile and curator entries
+        if (signUpData.user) {
+          const userId = signUpData.user.id;
+          await supabase.from('profiles').insert([{ 
+            id: userId, 
+            full_name: 'Master Architect', 
+            email: formData.email 
+          }]);
+          
+          await supabase.from('curator_data').insert([{ 
+            id: userId, 
+            business_name: 'P31 Foundation', 
+            is_paid: true 
+          }]);
+        }
+        
+        navigate('/dashboard');
+        return;
+      }
+
       if (authError) throw authError;
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message);
+      setError(err.message === 'Invalid login credentials' 
+        ? 'Verification failed. Please check your credentials.' 
+        : err.message);
     } finally {
       setLoading(false);
     }
