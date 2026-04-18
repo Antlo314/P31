@@ -63,6 +63,16 @@ const CuratorDashboard = () => {
     }
   };
 
+  const fetchAnnouncements = async () => {
+    try {
+      const { data, error } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data) setAnnouncements(data);
+    } catch (err) {
+      console.warn('Announcements fetch error:', err.message);
+    }
+  };
+
   const fetchProducts = async () => {
     try {
       const { data, error } = await supabase.from('products').select('*').eq('curator_id', user.id).order('created_at', { ascending: false });
