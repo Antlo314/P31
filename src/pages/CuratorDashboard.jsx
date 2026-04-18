@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Community from './Community'; // Nested import
-import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown } from 'lucide-react';
+import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Users, Trash2 } from 'lucide-react';
 import './CuratorDashboard.css';
 
 const CuratorDashboard = () => {
@@ -14,6 +14,7 @@ const CuratorDashboard = () => {
   
   const [announcementForm, setAnnouncementForm] = useState({ title: '', content: '', type: 'info' });
   const [announcements, setAnnouncements] = useState([]);
+  const [leads, setLeads] = useState([]);
   
   const [formLoading, setFormLoading] = useState(false);
   const [editData, setEditData] = useState({
@@ -45,14 +46,22 @@ const CuratorDashboard = () => {
     }
   }, [curatorData]);
 
-  useEffect(() => {
-    if (isAdmin) fetchAnnouncements();
-  }, [isAdmin]);
-
   const fetchAnnouncements = async () => {
     const { data } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
     if (data) setAnnouncements(data);
   };
+
+  const fetchLeads = async () => {
+    const { data } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
+    if (data) setLeads(data);
+  };
+
+  useEffect(() => {
+    if (isAdmin && activeTab === 'governance') {
+      fetchAnnouncements();
+      fetchLeads();
+    }
+  }, [isAdmin, activeTab]);
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -139,6 +148,13 @@ const CuratorDashboard = () => {
   const deleteAnnouncement = async (id) => {
     await supabase.from('announcements').delete().eq('id', id);
     fetchAnnouncements();
+  };
+
+  const deleteLead = async (id) => {
+    if (window.confirm('Are you sure you want to remove this lead?')) {
+      await supabase.from('leads').delete().eq('id', id);
+      fetchLeads();
+    }
   };
 
   const handleSignOut = async () => {
@@ -394,59 +410,106 @@ const CuratorDashboard = () => {
               <p>Ultimate architectural authority at your fingertips.</p>
             </header>
 
-            <div className="dashboard-grid admin-grid">
-              <section className="dashboard-card glass-card">
-                <h2 className="card-title text-gold"><Bell size={20} /> Global Announcement Console</h2>
-                <form onSubmit={handlePostAnnouncement} className="premium-form">
-                  <div className="form-group">
-                    <label>Announcement Title</label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. June Market Updates"
-                      value={announcementForm.title}
-                      onChange={(e) => setAnnouncementForm({...announcementForm, title: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Content</label>
-                    <textarea 
-                      rows="3" 
-                      placeholder="Sow the message to the collective..."
-                      value={announcementForm.content}
-                      onChange={(e) => setAnnouncementForm({...announcementForm, content: e.target.value})}
-                      required
-                    ></textarea>
-                  </div>
-                  <div className="form-group">
-                    <label>Priority Type</label>
-                    <select 
-                      value={announcementForm.type}
-                      onChange={(e) => setAnnouncementForm({...announcementForm, type: e.target.value})}
-                    >
-                      <option value="info">Informational (Botanical Green)</option>
-                      <option value="urgent">Urgent (Royal Red/Gold)</option>
-                    </select>
-                  </div>
-                  <button type="submit" className="btn-solid-gold">Publish Globally</button>
-                </form>
-              </section>
-
-              <section className="dashboard-card glass-card">
-                <h2 className="card-title text-gold">Active Proclamations</h2>
-                <div className="admin-announcements-list">
-                  {announcements.map(a => (
-                    <div key={a.id} className="admin-announcement-item glass-border">
-                      <div className="a-item-text">
-                        <strong>{a.title}</strong>
-                        <p>{a.content}</p>
-                      </div>
-                      <button onClick={() => deleteAnnouncement(a.id)} className="text-xs text-red opacity-60 hover:opacity-100">Withdraw</button>
+            <div className="governance-sections">
+              {/* Announcements Section */}
+              <div className="dashboard-grid admin-grid mb-12">
+                <section className="dashboard-card glass-card">
+                  <h2 className="card-title text-gold"><Bell size={20} /> Global Announcement Console</h2>
+                  <form onSubmit={handlePostAnnouncement} className="premium-form">
+                    <div className="form-group">
+                      <label>Announcement Title</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. June Market Updates"
+                        value={announcementForm.title}
+                        onChange={(e) => setAnnouncementForm({...announcementForm, title: e.target.value})}
+                        required
+                      />
                     </div>
-                  ))}
-                  {announcements.length === 0 && <p className="opacity-50 italic text-sm">No active proclamations.</p>}
-                </div>
-              </section>
+                    <div className="form-group">
+                      <label>Content</label>
+                      <textarea 
+                        rows="3" 
+                        placeholder="Sow the message to the collective..."
+                        value={announcementForm.content}
+                        onChange={(e) => setAnnouncementForm({...announcementForm, content: e.target.value})}
+                        required
+                      ></textarea>
+                    </div>
+                    <div className="form-group">
+                      <label>Priority Type</label>
+                      <select 
+                        value={announcementForm.type}
+                        onChange={(e) => setAnnouncementForm({...announcementForm, type: e.target.value})}
+                      >
+                        <option value="info">Informational (Botanical Green)</option>
+                        <option value="urgent">Urgent (Royal Red/Gold)</option>
+                      </select>
+                    </div>
+                    <button type="submit" className="btn-solid-gold">Publish Globally</button>
+                  </form>
+                </section>
+
+                <section className="dashboard-card glass-card">
+                  <h2 className="card-title text-gold">Active Proclamations</h2>
+                  <div className="admin-announcements-list">
+                    {announcements.map(a => (
+                      <div key={a.id} className="admin-announcement-item glass-border">
+                        <div className="a-item-text">
+                          <strong>{a.title}</strong>
+                          <p>{a.content}</p>
+                        </div>
+                        <button onClick={() => deleteAnnouncement(a.id)} className="text-xs text-red opacity-60 hover:opacity-100">Withdraw</button>
+                      </div>
+                    ))}
+                    {announcements.length === 0 && <p className="opacity-50 italic text-sm">No active proclamations.</p>}
+                  </div>
+                </section>
+              </div>
+
+              {/* Lead Management Section */}
+              <div className="leads-management-section">
+                <section className="dashboard-card glass-card">
+                  <header className="flex-between mb-6">
+                    <h2 className="card-title text-gold"><Users size={20} /> Subscriber & Lead Console</h2>
+                    <span className="text-xs opacity-50 uppercase letter-spacing-2">{leads.length} Total Captured</span>
+                  </header>
+                  
+                  <div className="leads-table-container">
+                    <table className="leads-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Full Name</th>
+                          <th>Email</th>
+                          <th>Phone</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {leads.map(lead => (
+                          <tr key={lead.id} className="lead-row">
+                            <td className="text-xs">{new Date(lead.created_at).toLocaleDateString()}</td>
+                            <td className="font-bold">{lead.full_name}</td>
+                            <td><a href={`mailto:${lead.email}`} className="text-olive">{lead.email}</a></td>
+                            <td className="opacity-70">{lead.phone || '—'}</td>
+                            <td>
+                              <button onClick={() => deleteLead(lead.id)} className="icon-btn-delete">
+                                <Trash2 size={16} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {leads.length === 0 && (
+                          <tr>
+                            <td colSpan="5" className="text-center py-8 opacity-50">No leads captured yet. Keep building.</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              </div>
             </div>
           </div>
         )}
