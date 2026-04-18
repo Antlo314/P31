@@ -8,7 +8,7 @@
 /* Sidebar Styling */
 .dashboard-sidebar {
   width: 280px;
-  background-color: var(--cal-poly-green);
+  background-color: var(--dark-plum);
   color: var(--pure-white);
   padding: 2.5rem 0;
   display: flex;
@@ -281,7 +281,7 @@
 }
 
 .icon-btn:hover {
-  background: var(--cal-poly-green);
+  background: var(--dark-plum);
   color: white;
 }
 
@@ -296,7 +296,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(39, 52, 27, 0.4);
+  background: rgba(58, 28, 54, 0.4);
   backdrop-filter: blur(8px);
   z-index: 2000;
   padding: 2rem;
@@ -584,14 +584,14 @@
 }
 
 .status-dot.active {
-  background: #6D8B11; /* Olive success */
-  box-shadow: 0 0 12px rgba(109, 139, 17, 0.5);
+  background: var(--dark-plum); /* Royal Plum success */
+  box-shadow: 0 0 12px rgba(58, 28, 54, 0.5);
 }
 
 .status-text {
   font-weight: 700;
   font-size: 0.95rem;
-  color: var(--cal-poly-green);
+  color: var(--dark-plum);
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
@@ -624,7 +624,7 @@
   color: var(--primary);
 }
 
-.text-forest { color: var(--cal-poly-green); }
+.text-forest { color: var(--dark-plum); }
 
 .early-bird-badge.botanical-badge {
   background: rgba(109, 139, 17, 0.1);
@@ -646,6 +646,57 @@
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--on-surface-variant);
+}
+
+/* Submission Checklist */
+.submission-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.check-item {
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.check-item.pending {
+  color: rgba(58, 28, 54, 0.4);
+}
+
+.check-item.success {
+  color: var(--dark-plum);
+}
+
+/* Admin Feedback */
+.admin-feedback-alert {
+  border-left: 4px solid var(--metallic-gold) !important;
+}
+
+.feedback-input {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--outline-variant);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  min-height: 80px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.feedback-input:focus {
+  border-color: var(--metallic-gold);
+}
+
+.admin-governance-item {
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 @media (max-width: 1024px) {

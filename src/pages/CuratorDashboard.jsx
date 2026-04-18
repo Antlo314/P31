@@ -22,6 +22,7 @@ const CuratorDashboard = () => {
   const [productImageLoading, setProductImageLoading] = useState(false);
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [adminError, setAdminError] = useState(null);
+  const [adminFeedbackMap, setAdminFeedbackMap] = useState({}); // state to hold feedback input per vendor
   
   const [formLoading, setFormLoading] = useState(false);
   const [editData, setEditData] = useState({
@@ -260,8 +261,24 @@ const CuratorDashboard = () => {
     }
   };
 
-  const approveVendor = async (id) => {
-    await supabase.from('curator_data').update({ status: 'approved', is_published: true }).eq('id', id);
+  const approveVendor = async (id, feedback = '') => {
+    await supabase.from('curator_data').update({ 
+      status: 'approved', 
+      is_published: true,
+      admin_feedback: feedback 
+    }).eq('id', id);
+    fetchPendingApprovals();
+  };
+
+  const rejectVendor = async (id, feedback) => {
+    if (!feedback) {
+      alert('Please provide architectural guidance for the curator to improve their sanctuary.');
+      return;
+    }
+    await supabase.from('curator_data').update({ 
+      status: 'rejected', 
+      admin_feedback: feedback 
+    }).eq('id', id);
     fetchPendingApprovals();
   };
 
@@ -488,6 +505,19 @@ const CuratorDashboard = () => {
                     </Link>
                   )}
                 </form>
+
+                {/* Architectural Guidance Alert */}
+                {curatorData?.admin_feedback && curatorData?.status !== 'approved' && (
+                  <div className="admin-feedback-alert glass-card mt-8" style={{ background: 'rgba(58, 28, 54, 0.05)', borderColor: 'var(--metallic-gold)' }}>
+                    <div className="flex items-start gap-3">
+                      <ShieldAlert className="text-gold mt-1" size={20} />
+                      <div>
+                        <h4 className="font-bold text-primary">Architectural Guidance</h4>
+                        <p className="text-sm italic mt-1 opacity-80">"{curatorData.admin_feedback}"</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </section>
 
               <div className="dashboard-sidebar-panels">
@@ -495,21 +525,47 @@ const CuratorDashboard = () => {
                   <h3 className="card-title text-forest"><Sparkles size={18} /> Market Status</h3>
                   <div className="status-indicator">
                     <span className={`status-dot ${curatorData?.status === 'approved' ? 'active' : ''}`}></span>
-                    <span className="status-text">{curatorData?.status === 'approved' ? 'Market Approved' : 'Awaiting Review'}</span>
+                    <span className="status-text">{
+                      curatorData?.status === 'approved' ? 'Market Approved' : 
+                      curatorData?.status === 'pending' ? 'Reviewing' : 
+                      curatorData?.status === 'rejected' ? 'Fix Requested' : 'Draft Mode'
+                    }</span>
                   </div>
                   <p className="status-sub">
                     {curatorData?.status === 'approved' 
                       ? "Your sanctuary is approved for the June Marketplace." 
-                      : "Submission pending architectural review."}
+                      : curatorData?.status === 'pending'
+                      ? "Your artifacts are currently under architectural review."
+                      : curatorData?.status === 'rejected'
+                      ? "Adjustments required. See guidance above."
+                      : "Refine your boutique to request market placement."}
                   </p>
                   <div className="divider-thistle"></div>
+                  
+                  {/* Submission Checklist */}
+                  <div className="submission-checklist mb-4">
+                    <div className={`check-item ${editData.businessName ? 'success' : 'pending'}`}>
+                      {editData.businessName ? '✓' : '○'} Business Identity Set
+                    </div>
+                    <div className={`check-item ${products.length >= 1 ? 'success' : 'pending'}`}>
+                      {products.length >= 1 ? '✓' : '○'} At least 1 Artifact Uploaded
+                    </div>
+                  </div>
+
                   {curatorData?.status === 'pending' && (
                     <div className="botanical-badge text-gold animate-pulse">
                       <ShieldAlert size={12} /> Under Review
                     </div>
                   )}
-                  {(!curatorData?.status || curatorData?.status === 'rejected') && (
-                    <button onClick={submitForApproval} className="btn-solid-gold w-full mt-4">Submit for Review</button>
+
+                  {(curatorData?.status === 'draft' || curatorData?.status === 'rejected' || !curatorData?.status) && (
+                    <button 
+                      onClick={submitForApproval} 
+                      className={`btn-solid-gold w-full mt-2 ${(products.length < 1 || !editData.businessName) ? 'opacity-40 cursor-not-allowed' : ''}`}
+                      disabled={products.length < 1 || !editData.businessName}
+                    >
+                      {curatorData?.status === 'rejected' ? 'Resubmit Sanctuary' : 'Submit for Review'}
+                    </button>
                   )}
                   <div className="divider-thistle mt-4"></div>
                   {(curatorData?.is_early_bird || isAdmin) && (
@@ -694,15 +750,44 @@ const CuratorDashboard = () => {
                   <h2 className="card-title text-gold"><ShieldAlert size={20} /> Vendor Approvals</h2>
                   <div className="admin-announcements-list">
                     {pendingApprovals.map(p => (
-                      <div key={p.id} className="admin-announcement-item glass-border flex-between">
-                        <div className="a-item-text">
-                          <strong>{p.profiles?.full_name || 'Anonymous'} ({p.business_name})</strong>
-                          <p className="text-xs opacity-60">Identity: {p.profiles?.email}</p>
+                      <div key={p.id} className="admin-governance-item glass-border p-6 mb-4">
+                        <div className="flex-between mb-4">
+                          <div className="a-item-text">
+                            <strong>{p.profiles?.full_name || 'Anonymous'} ({p.business_name || 'Unnamed Biz'})</strong>
+                            <p className="text-xs opacity-60">Identity: {p.profiles?.email}</p>
+                          </div>
+                          <div className="vendor-quick-stats font-label text-gold text-xs">
+                            Artifacts: {p.products?.length || '0'}
+                          </div>
                         </div>
-                        <button onClick={() => approveVendor(p.id)} className="btn-solid-gold btn-xs">Grant Market Access</button>
+
+                        <div className="governance-actions-area">
+                          <textarea 
+                            placeholder="Provide architectural feedback or adjustment requirements..."
+                            className="feedback-input mb-4"
+                            value={adminFeedbackMap[p.id] || ''}
+                            onChange={(e) => setAdminFeedbackMap({...adminFeedbackMap, [p.id]: e.target.value})}
+                          ></textarea>
+                          
+                          <div className="flex gap-4">
+                            <button 
+                              onClick={() => approveVendor(p.id, adminFeedbackMap[p.id])} 
+                              className="btn-solid-gold btn-xs flex-1"
+                            >
+                              Grant Market Access
+                            </button>
+                            <button 
+                              onClick={() => rejectVendor(p.id, adminFeedbackMap[p.id])} 
+                              className="btn-outline-primary btn-xs flex-1"
+                              style={{ color: '#ff4b4b', borderColor: '#ff4b4b' }}
+                            >
+                              Request Fixes
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     ))}
-                    {pendingApprovals.length === 0 && <p className="opacity-50 italic text-sm">No curators awaiting review.</p>}
+                    {pendingApprovals.length === 0 && <p className="opacity-50 italic text-sm text-center py-8">All sanctuaries currently align with architectural standards.</p>}
                   </div>
                 </section>
               </div>

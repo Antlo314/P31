@@ -147,12 +147,24 @@ const Community = () => {
       messagePayload.recipient_id = null;
     }
 
-    const { error } = await supabase
-      .from('messages')
-      .insert([messagePayload]);
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .insert([messagePayload]);
 
-    if (!error) setInputText('');
-    else alert('Error sending message: ' + error.message);
+      if (error) {
+        if (error.message.includes('column "recipient_id" does not exist')) {
+          alert('Database Upgrade Required: Please run the private_messaging_migration.sql in your Supabase SQL Editor to enable this feature.');
+        } else {
+          throw error;
+        }
+      } else {
+        setInputText('');
+      }
+    } catch (err) {
+      console.error('Chat error:', err.message);
+      alert('Architectural Maintenance: ' + err.message);
+    }
   };
 
   const handleDeleteMessage = async (msgId) => {
