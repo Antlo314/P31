@@ -21,6 +21,7 @@ const Community = () => {
   const [curators, setCurators] = useState([]);
   const [isLoadingCurators, setIsLoadingCurators] = useState(false);
   const [chatError, setChatError] = useState(null);
+  const [replyingTo, setReplyingTo] = useState(null);
   const messagesStartRef = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -96,6 +97,11 @@ const Community = () => {
             avatar_url, 
             email,
             curator_data (is_early_bird)
+          ),
+          parent:parent_id (
+            id,
+            text,
+            profiles!profile_id (full_name)
           )
         `)
         .order('created_at', { ascending: true });
@@ -143,7 +149,7 @@ const Community = () => {
   const fetchNewMessage = async (id) => {
     const { data, error } = await supabase
       .from('messages')
-      .select('*, profiles!profile_id(full_name, avatar_url, email, curator_data(is_early_bird))')
+      .select('*, profiles!profile_id(full_name, avatar_url, email, curator_data(is_early_bird)), parent:parent_id(id, text, profiles!profile_id(full_name))')
       .eq('id', id)
       .single();
     
@@ -176,10 +182,14 @@ const Community = () => {
 
     if (activeDmRecipient) {
       messagePayload.recipient_id = activeDmRecipient.id;
-      messagePayload.channel_id = 'dm'; // Placeholder for consistency
+      messagePayload.channel_id = 'dm';
     } else {
       messagePayload.channel_id = activeChannelId;
       messagePayload.recipient_id = null;
+    }
+
+    if (replyingTo) {
+      messagePayload.parent_id = replyingTo.id;
     }
 
     try {
@@ -195,6 +205,7 @@ const Community = () => {
         }
       } else {
         setInputText('');
+        setReplyingTo(null);
       }
     } catch (err) {
       console.error('Chat error:', err.message);
@@ -335,22 +346,48 @@ const Community = () => {
                   
                   <div className={`message-bubble-container ${isMine ? 'current-user' : ''}`}>
                     <div className="message-meta">
-                      <span className="message-author">
+                      {!isMine && <span className="message-author">
                         {msg.profiles?.full_name}
                         {msgIsAdmin && <Crown size={12} className="meta-prestige text-gold" />}
                         {msgIsFounder && !msgIsAdmin && <Leaf size={12} className="meta-prestige text-olive" />}
-                      </span>
-                      <span className="message-time">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                      {canDelete && (
-                        <button onClick={() => handleDeleteMessage(msg.id)} className="msg-delete-btn" title="Delete Message">
-                          <Trash2 size={12} />
+                      </span>}
+                      {isMine && <span className="message-time">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>}
+                      
+                      <div className="message-actions">
+                        <button onClick={() => setReplyingTo(msg)} className="msg-action-btn" title="Reply">
+                          <MessageCircle size={12} />
                         </button>
-                      )}
+                        {canDelete && (
+                          <button onClick={() => handleDeleteMessage(msg.id)} className="msg-action-btn delete" title="Delete Message">
+                            <Trash2 size={12} />
+                          </button>
+                        )}
+                      </div>
+
+                      {!isMine && <span className="message-time">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>}
+                      {isMine && <span className="message-author">
+                        {msg.profiles?.full_name}
+                        {msgIsAdmin && <Crown size={12} className="meta-prestige text-gold" />}
+                        {msgIsFounder && !msgIsAdmin && <Leaf size={12} className="meta-prestige text-olive" />}
+                      </span>}
                     </div>
-                    <div className={`message-bubble ${isMine ? 'bubble-gold' : 'bubble-plum'}`}>
-                      {msg.text}
+
+                    <div className={`message-bubble ${isMine ? 'bubble-gold' : 'bubble-plum'} ${msg.parent ? 'has-reply' : ''}`}>
+                      {msg.parent && (
+                        <div className="reply-quote">
+                          <span className="reply-author">{msg.parent.profiles?.full_name}</span>
+                          <p className="reply-text-preview">{msg.parent.text}</p>
+                        </div>
+                      )}
+                      <div className="message-text">{msg.text}</div>
                     </div>
                   </div>
+
+                  {isMine && (
+                    <div className="message-avatar">
+                      <img src={msg.profiles?.avatar_url || 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=100'} alt={msg.profiles?.full_name} />
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -365,6 +402,18 @@ const Community = () => {
         </div>
 
         <div className="chat-input-area">
+          {replyingTo && (
+            <div className="reply-preview-bar animate-in">
+              <div className="reply-preview-info">
+                <MessageCircle size={14} className="text-gold" />
+                <span>Replying to <strong>{replyingTo.profiles?.full_name}</strong></span>
+                <p className="reply-preview-text">{replyingTo.text}</p>
+              </div>
+              <button onClick={() => setReplyingTo(null)} className="reply-cancel-btn">
+                <Trash2 size={14} />
+              </button>
+            </div>
+          )}
           <form onSubmit={handleSendMessage} className="chat-input-form glass-card">
             <input 
               type="text" 
