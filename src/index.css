@@ -6,21 +6,20 @@
    ============================================================ */
 :root {
   /* === Core Brand Palette === */
-  --cal-poly-green:  #27341B;           /* Deep Forest Lead */
-  --olive:           #6C6D11;           /* Earthy Secondary */
-  --emerald-deep:    #1C2513;           /* Ultra Dark Forest */
-  --dark-plum:       #3A1C36;           /* Midnight Accent (Legacy lead) */
+  --dark-plum:       #3A1C36;           /* Royal Plum Lead (Restored) */
   --amethyst:        #9B71B2;           /* Soft Purple Accent */
   --thistle:         #E3D0EA;           /* Lavender Contrast */
+  --cal-poly-green:  #27341B;           /* Deep Forest Accent */
+  --olive:           #6C6D11;           /* Earthy Accent */
   --metallic-gold:   #CBA72F;
   --gold-light:      #E9C349;
   --gold-glow:       rgba(203, 167, 47, 0.35);
 
   /* === Semantic Roles === */
-  --primary:                var(--cal-poly-green);
-  --primary-container:      rgba(39, 52, 27, 0.08);
-  --secondary:              var(--olive);
-  --secondary-light:        #8B8C3E;
+  --primary:                var(--dark-plum);
+  --primary-container:      rgba(58, 28, 54, 0.08);
+  --secondary:              var(--cal-poly-green);
+  --secondary-light:        #3D4A32;
   --accent-earth:           var(--olive);
   --accent-deep:            var(--emerald-deep);
   --accent-royal:           var(--dark-plum);

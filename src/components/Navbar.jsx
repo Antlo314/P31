@@ -4,7 +4,7 @@ import { Menu, X, Crown, Leaf, User, LogOut, Layout } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
-import logoPath from '../assets/p31_logo_botanical.png';
+import logoPath from '../assets/p31_logo_legacy_transparent.png';
 
 const Navbar = () => {
   const { user, profile, curatorData, isAdmin, signOut } = useAuth();

@@ -150,17 +150,16 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
-/* Scrolling keyword ticker */
 .hero-ticker {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 3;
-  background: var(--cal-poly-green);   /* ← GREEN APPEARS HERE */
+  background: var(--dark-plum);   /* ← RESTORED PLUM FOUNDATION */
   padding: 14px 0;
   overflow: hidden;
-  border-top: 1px solid rgba(203, 167, 47, 0.2);
+  border-top: 1px solid rgba(203, 167, 47, 0.4);
 }
 
 .hero-ticker__track {
@@ -387,11 +386,12 @@
 }
 
 .mission-text-col {
-  background: var(--cal-poly-green);   /* ← CAL POLY GREEN SECTION */
+  background: var(--dark-plum);   /* ← RESTORED PLUM FOUNDATION */
   padding: 8vh 6vw;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  border-left: 1px solid var(--outline-variant);
 }
 
 .mission-headline {
@@ -462,7 +462,7 @@
    Dark olive. White text. Gold headings.
    ─────────────────────────────────────────────────────── */
 .home-dates {
-  background: var(--olive);            /* ← OLIVE SECTION */
+  background: #1A0D18;            /* ← DEEP NIGHT PLUM */
   padding: 12vh 6vw;
 }
 
@@ -575,7 +575,7 @@
    Soft. Inviting. Dark plum text.
    ─────────────────────────────────────────────────────── */
 .home-newsletter {
-  background: var(--surface-alt);          /* ← SAGE-WASHED SECTION */
+  background: var(--surface);          /* ← CLEAN LINEN FOUNDATION */
   padding: 14vh 6vw;
   position: relative;
   overflow: hidden;

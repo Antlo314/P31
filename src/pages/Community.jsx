@@ -5,8 +5,8 @@ import { Send, Hash, Users, Bell, Search, Settings, Crown, Leaf, Trash2, Message
 import './Community.css';
 
 const PUBLIC_CHANNELS = [
-  { id: 'general', name: 'General Collective', description: 'The main gathering place for P31 Curators.' },
-  { id: 'market-logistics', name: 'Market Logistics', description: 'Logistics, scheduling, and infrastructure updates.' },
+  { id: 'general', name: 'P31 General Chat', description: 'The official gathering place of the P31 Collective.' },
+  { id: 'market-logistics', name: 'Market Logistics', description: 'Institutional updates and architectural logistics.' },
   { id: 'wellness', name: 'Wellness & Prayer', description: 'Spiritual support and communal well-being.' },
 ];
 
@@ -20,6 +20,7 @@ const Community = () => {
   const [inputText, setInputText] = useState('');
   const [curators, setCurators] = useState([]);
   const [isLoadingCurators, setIsLoadingCurators] = useState(false);
+  const messagesStartRef = useRef(null);
   const messagesEndRef = useRef(null);
 
   // Fetch curators for DM selection
@@ -121,7 +122,7 @@ const Community = () => {
   };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesStartRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSendMessage = async (e) => {
@@ -264,6 +265,7 @@ const Community = () => {
         </header>
 
         <div className="chat-feed">
+          <div ref={messagesStartRef} />
           <div className="messages-list">
             {messages.map((msg) => {
               const msgIsAdmin = ['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'].includes(msg.profiles?.email?.toLowerCase());
