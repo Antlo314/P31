@@ -91,7 +91,7 @@ const Community = () => {
         .from('messages')
         .select(`
           *,
-          profiles (full_name, avatar_url, email),
+          profiles!profile_id (full_name, avatar_url, email),
           curator_data:profile_id (is_early_bird)
         `)
         .order('created_at', { ascending: true });
@@ -119,7 +119,7 @@ const Community = () => {
           // Legacy Fallback (No recipient_id filter)
           const legacyQuery = await supabase
             .from('messages')
-            .select('*, profiles(full_name, avatar_url, email), curator_data:profile_id(is_early_bird)')
+            .select('*, profiles!profile_id(full_name, avatar_url, email), curator_data:profile_id(is_early_bird)')
             .eq('channel_id', activeChannelId)
             .order('created_at', { ascending: true });
           
@@ -139,7 +139,7 @@ const Community = () => {
   const fetchNewMessage = async (id) => {
     const { data, error } = await supabase
       .from('messages')
-      .select('*, profiles(full_name, avatar_url, email), curator_data:profile_id(is_early_bird)')
+      .select('*, profiles!profile_id(full_name, avatar_url, email), curator_data:profile_id(is_early_bird)')
       .eq('id', id)
       .single();
     
