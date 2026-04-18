@@ -1,0 +1,80 @@
+.announcement-banner {
+  background: var(--cal-poly-green);
+  color: #FFFFFF;
+  padding: 10px 0;
+  position: relative;
+  z-index: 1000;
+  border-bottom: 3px solid var(--metallic-gold);
+  overflow: hidden;
+}
+
+.announcement-banner.urgent {
+  background: linear-gradient(90deg, #374126 0%, #a82e2e 50%, #374126 100%);
+}
+
+.banner-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4rem;
+  gap: 1.5rem;
+}
+
+.banner-icon {
+  color: var(--metallic-gold);
+}
+
+.banner-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+}
+
+.banner-title {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.7rem;
+  color: var(--metallic-gold);
+}
+
+.banner-desc {
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+.banner-close {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.3s ease;
+  position: absolute;
+  right: 1.5rem;
+}
+
+.banner-close:hover {
+  color: #FFFFFF;
+}
+
+@media (max-width: 768px) {
+  .banner-content {
+    padding: 0 1.5rem;
+    flex-wrap: wrap;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  .banner-text {
+    flex-direction: column;
+    gap: 2px;
+  }
+  .banner-close {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}

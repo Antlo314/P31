@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Send, Hash, Users, Bell, Search, Settings } from 'lucide-react';
+import { Send, Hash, Users, Bell, Search, Settings, Crown, Leaf } from 'lucide-react';
 import './Community.css';
 
 const MOCK_CHANNELS = [
@@ -46,7 +46,8 @@ const Community = () => {
       .from('messages')
       .select(`
         *,
-        profiles (full_name, avatar_url)
+        profiles (full_name, avatar_url, email),
+        curator_data:profile_id (is_early_bird)
       `)
       .eq('channel_id', activeChannel)
       .order('created_at', { ascending: true });
@@ -57,7 +58,7 @@ const Community = () => {
   const fetchNewMessage = async (id) => {
     const { data, error } = await supabase
       .from('messages')
-      .select('*, profiles(full_name, avatar_url)')
+      .select('*, profiles(full_name, avatar_url, email), curator_data:profile_id(is_early_bird)')
       .eq('id', id)
       .single();
     
@@ -139,25 +140,34 @@ const Community = () => {
 
         <div className="chat-feed">
           <div className="messages-list">
-            {messages.map((msg) => (
-              <div key={msg.id} className={`message-row ${msg.profile_id === user?.id ? 'current-user-row' : ''}`}>
-                {msg.profile_id !== user?.id && (
-                  <div className="message-avatar">
-                    <img src={msg.profiles?.avatar_url || 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=100'} alt={msg.profiles?.full_name} />
-                  </div>
-                )}
-                
-                <div className={`message-bubble-container ${msg.profile_id === user?.id ? 'current-user' : ''}`}>
-                  <div className="message-meta">
-                    <span className="message-author">{msg.profiles?.full_name}</span>
-                    <span className="message-time">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                  </div>
-                  <div className={`message-bubble ${msg.profile_id === user?.id ? 'bubble-gold' : 'bubble-plum'}`}>
-                    {msg.text}
+            {messages.map((msg) => {
+              const msgIsAdmin = ['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'].includes(msg.profiles?.email?.toLowerCase());
+              const msgIsFounder = msg.curator_data?.[0]?.is_early_bird;
+
+              return (
+                <div key={msg.id} className={`message-row ${msg.profile_id === user?.id ? 'current-user-row' : ''}`}>
+                  {msg.profile_id !== user?.id && (
+                    <div className="message-avatar">
+                      <img src={msg.profiles?.avatar_url || 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=100'} alt={msg.profiles?.full_name} />
+                    </div>
+                  )}
+                  
+                  <div className={`message-bubble-container ${msg.profile_id === user?.id ? 'current-user' : ''}`}>
+                    <div className="message-meta">
+                      <span className="message-author">
+                        {msg.profiles?.full_name}
+                        {msgIsAdmin && <Crown size={12} className="meta-prestige text-gold" />}
+                        {msgIsFounder && !msgIsAdmin && <Leaf size={12} className="meta-prestige text-olive" />}
+                      </span>
+                      <span className="message-time">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                    </div>
+                    <div className={`message-bubble ${msg.profile_id === user?.id ? 'bubble-gold' : 'bubble-plum'}`}>
+                      {msg.text}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             <div ref={messagesEndRef} />
           </div>
         </div>

@@ -14,6 +14,7 @@ import CuratorDashboard from './pages/CuratorDashboard';
 import Onboarding from './pages/Onboarding';
 import LeadPopup from './components/LeadPopup';
 import OfferTicker from './components/OfferTicker';
+import AnnouncementBanner from './components/AnnouncementBanner';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -28,6 +29,7 @@ function App() {
     <Router>
       <ScrollToTop />
       <div className="app-container">
+        <AnnouncementBanner />
         <OfferTicker />
         <Navbar />
         <main>

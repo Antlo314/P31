@@ -13,6 +13,45 @@
   transition: transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.v2-vendor-img-wrap {
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.vendor-prestige-corner {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 10;
+}
+
+.p-badge {
+  width: 44px;
+  height: 44px;
+  background: var(--cal-poly-green);
+  border: 2px solid var(--metallic-gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--metallic-gold);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+}
+
+.founder-badge {
+  color: var(--olive);
+  border-color: var(--olive);
+}
+
+.v2-vendor-item {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .v2-vendor-item:hover .v2-vendor-img {
   transform: scale(1.05);
 }

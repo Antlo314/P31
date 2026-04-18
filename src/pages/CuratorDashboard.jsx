@@ -9,7 +9,11 @@ import './CuratorDashboard.css';
 const CuratorDashboard = () => {
   const { user, profile, curatorData, isAdmin, signOut, fetchUserData } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('identity'); // 'identity' or 'community'
+  const [activeTab, setActiveTab] = useState('identity'); // 'identity', 'community', or 'governance'
+  const [profileImage, setProfileImage] = useState(null);
+  
+  const [announcementForm, setAnnouncementForm] = useState({ title: '', content: '', type: 'info' });
+  const [announcements, setAnnouncements] = useState([]);
   
   const [formLoading, setFormLoading] = useState(false);
   const [editData, setEditData] = useState({
@@ -24,7 +28,6 @@ const CuratorDashboard = () => {
     phone: '',
     publicEmail: ''
   });
-
   useEffect(() => {
     if (curatorData) {
       setEditData({
@@ -41,6 +44,15 @@ const CuratorDashboard = () => {
       });
     }
   }, [curatorData]);
+
+  useEffect(() => {
+    if (isAdmin) fetchAnnouncements();
+  }, [isAdmin]);
+
+  const fetchAnnouncements = async () => {
+    const { data } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
+    if (data) setAnnouncements(data);
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -72,6 +84,61 @@ const CuratorDashboard = () => {
     } finally {
       setFormLoading(false);
     }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setFormLoading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+      
+      await fetchUserData(user.id);
+      alert('Digital Portrait Updated.');
+    } catch (err) {
+      alert('Error uploading image: ' + err.message);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handlePostAnnouncement = async (e) => {
+    e.preventDefault();
+    try {
+      const { error } = await supabase.from('announcements').insert([{
+        ...announcementForm,
+        created_by: user.id
+      }]);
+      if (error) throw error;
+      setAnnouncementForm({ title: '', content: '', type: 'info' });
+      fetchAnnouncements();
+      alert('Global Announcement Published.');
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  };
+
+  const deleteAnnouncement = async (id) => {
+    await supabase.from('announcements').delete().eq('id', id);
+    fetchAnnouncements();
   };
 
   const handleSignOut = async () => {
@@ -124,6 +191,16 @@ const CuratorDashboard = () => {
           >
             <MessageSquare size={20} /> Collective Chat
           </button>
+
+          {isAdmin && (
+            <button 
+              onClick={() => setActiveTab('governance')} 
+              className={`nav-item ${activeTab === 'governance' ? 'active' : ''}`}
+            >
+              <Crown size={20} /> Governance
+            </button>
+          )}
+
           <Link to="/directory" className="nav-item"><ExternalLink size={20} /> View Directory</Link>
         </nav>
 
@@ -144,6 +221,21 @@ const CuratorDashboard = () => {
             <div className="dashboard-grid">
               <section className="dashboard-card glass-card">
                 <h2 className="card-title text-gold"><User size={20} /> Professional Identity</h2>
+
+                {/* Digital Portrait Section */}
+                <div className="avatar-upload-section">
+                  <div className="avatar-preview-wrapper" onClick={() => document.getElementById('avatar-input').click()}>
+                    <img src={profile?.avatar_url || 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200'} alt="Profile" />
+                    <div className="avatar-overlay">
+                      <Camera size={24} />
+                    </div>
+                  </div>
+                  <input type="file" id="avatar-input" hidden accept="image/*" onChange={handleImageUpload} />
+                  <div className="avatar-meta">
+                    <h4 className="text-primary font-bold">{profile?.full_name}</h4>
+                    <p className="text-xs opacity-60">Architect of {editData.businessName || 'New Sanctuary'}</p>
+                  </div>
+                </div>
                 
                 <form onSubmit={handleSave} className="premium-form dashboard-form">
                   <div className="form-group">
@@ -292,6 +384,70 @@ const CuratorDashboard = () => {
         {activeTab === 'community' && (
           <div className="dashboard-chat-view">
              <Community />
+          </div>
+        )}
+
+        {activeTab === 'governance' && isAdmin && (
+          <div className="dashboard-view">
+            <header className="dashboard-header">
+              <h1 className="font-headline text-primary">Master <span className="text-gold">Governance</span></h1>
+              <p>Ultimate architectural authority at your fingertips.</p>
+            </header>
+
+            <div className="dashboard-grid admin-grid">
+              <section className="dashboard-card glass-card">
+                <h2 className="card-title text-gold"><Bell size={20} /> Global Announcement Console</h2>
+                <form onSubmit={handlePostAnnouncement} className="premium-form">
+                  <div className="form-group">
+                    <label>Announcement Title</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. June Market Updates"
+                      value={announcementForm.title}
+                      onChange={(e) => setAnnouncementForm({...announcementForm, title: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Content</label>
+                    <textarea 
+                      rows="3" 
+                      placeholder="Sow the message to the collective..."
+                      value={announcementForm.content}
+                      onChange={(e) => setAnnouncementForm({...announcementForm, content: e.target.value})}
+                      required
+                    ></textarea>
+                  </div>
+                  <div className="form-group">
+                    <label>Priority Type</label>
+                    <select 
+                      value={announcementForm.type}
+                      onChange={(e) => setAnnouncementForm({...announcementForm, type: e.target.value})}
+                    >
+                      <option value="info">Informational (Botanical Green)</option>
+                      <option value="urgent">Urgent (Royal Red/Gold)</option>
+                    </select>
+                  </div>
+                  <button type="submit" className="btn-solid-gold">Publish Globally</button>
+                </form>
+              </section>
+
+              <section className="dashboard-card glass-card">
+                <h2 className="card-title text-gold">Active Proclamations</h2>
+                <div className="admin-announcements-list">
+                  {announcements.map(a => (
+                    <div key={a.id} className="admin-announcement-item glass-border">
+                      <div className="a-item-text">
+                        <strong>{a.title}</strong>
+                        <p>{a.content}</p>
+                      </div>
+                      <button onClick={() => deleteAnnouncement(a.id)} className="text-xs text-red opacity-60 hover:opacity-100">Withdraw</button>
+                    </div>
+                  ))}
+                  {announcements.length === 0 && <p className="opacity-50 italic text-sm">No active proclamations.</p>}
+                </div>
+              </section>
+            </div>
           </div>
         )}
       </main>

@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Leaf, Crown } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import './Directory.css';
 
 import vendor1 from '../assets/vendor_candles.png';
@@ -11,7 +12,6 @@ import vendor3 from '../assets/vendor_ceramics.png';
 import vendor4 from '../assets/vendor_jewelry.png';
 
 gsap.registerPlugin(ScrollTrigger);
-
 const vendors = [
   {
     id: 5,
@@ -20,7 +20,8 @@ const vendors = [
     bio: 'Transforming the beauty industry by creating wellness and body care rooted in purity, purpose, and divine intention.',
     products: 'Plant-Based Bodycare, Wellness',
     image: 'https://static.wixstatic.com/media/a60154_732e513fd3594078b0b4c1d08679ba20~mv2.png',
-    social: 'https://instagram.com/ilcollection__'
+    social: 'https://instagram.com/ilcollection__',
+    isFounder: true
   },
   {
     id: 1,
@@ -62,7 +63,36 @@ const vendors = [
 
 const Directory = () => {
   const containerRef = useRef(null);
+  const [activeVendors, setActiveVendors] = useState(vendors);
 
+  useEffect(() => {
+    fetchRealCurators();
+  }, []);
+
+  const fetchRealCurators = async () => {
+    const { data } = await supabase
+      .from('curator_data')
+      .select('*, profiles(full_name, avatar_url, email)');
+    
+    if (data && data.length > 0) {
+      // Merge real data with static mockups for visual excellence
+      const realVendors = data.map(d => ({
+        id: d.id,
+        name: d.profiles.full_name,
+        businessName: d.business_name,
+        bio: d.bio,
+        products: d.tagline || 'P31 Collective',
+        image: d.profiles.avatar_url || vendor1,
+        slug: d.slug,
+        isFounder: d.is_early_bird,
+        isAdmin: ['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'].includes(d.profiles?.email?.toLowerCase())
+      }));
+      
+      // Filter out those who haven't set up a business name yet
+      const filtered = realVendors.filter(v => v.businessName);
+      if (filtered.length > 0) setActiveVendors([...filtered, ...vendors.filter(v => v.id !== 5)]);
+    }
+  };
   useEffect(() => {
     let ctx = gsap.context(() => {
       // Stagger initial items
@@ -87,7 +117,7 @@ const Directory = () => {
       });
     }, containerRef);
     return () => ctx.revert();
-  }, []);
+  }, [activeVendors]);
 
   return (
     <div className="directory-v2 font-body" ref={containerRef}>
@@ -95,10 +125,10 @@ const Directory = () => {
       {/* Directory Header Section */}
       <section className="dir-header-v2 text-center" style={{ padding: '15vh 5vw 10vh' }}>
         
-        {/* Elegant "Under Construction" Badge */}
+        {/* Elegant "Foundation" Badge */}
         <div className="glass-card flex-center" style={{ display: 'inline-flex', padding: '10px 24px', borderRadius: '40px', marginBottom: '3rem', border: '1px solid var(--outline-variant)' }}>
-          <Sparkles className="text-gold" size={16} style={{ marginRight: '8px' }} />
-          <span className="font-label text-primary" style={{ letterSpacing: '2px', fontSize: '0.75rem' }}>Directory Profiles Are Under Construction</span>
+          <Leaf className="text-gold" size={16} style={{ marginRight: '8px' }} />
+          <span className="font-label text-primary" style={{ letterSpacing: '2px', fontSize: '0.75rem' }}>The Foundation Founders</span>
         </div>
         
         <h1 className="dir-header-title font-headline text-primary" style={{ fontSize: 'clamp(3.5rem, 8vw, 6rem)', lineHeight: 1.1, marginBottom: '1.5rem' }}>
@@ -111,12 +141,18 @@ const Directory = () => {
 
       {/* Directory List Container */}
       <section className="directory-list-v2 container-fluid" style={{ paddingBottom: '15vh', maxWidth: '1400px', margin: '0 auto' }}>
-        {vendors.map((vendor, index) => (
+        {activeVendors.map((vendor, index) => (
           <div key={vendor.id} className={`v2-vendor-item ${index % 2 !== 0 ? 'vendor-reverse' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '6vw', marginBottom: '12vh' }}>
             
             {/* Vendor Image Wrap with Glass Border */}
             <div className="v2-vendor-img-wrap glass-border" style={{ flex: 1, position: 'relative', aspectRatio: '4/5', overflow: 'hidden' }}>
               <img src={vendor.image} alt={vendor.businessName} className="v2-vendor-img" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              
+              {/* Prestige Corner Badge */}
+              <div className="vendor-prestige-corner">
+                {vendor.isAdmin && <div className="p-badge admin-badge"><Crown size={18} /></div>}
+                {vendor.isFounder && !vendor.isAdmin && <div className="p-badge founder-badge"><Leaf size={18} /></div>}
+              </div>
             </div>
             
             {/* Vendor Info Glass Card */}
@@ -132,8 +168,8 @@ const Directory = () => {
               </p>
               
               <div className="vendor-actions">
-                {vendor.id === 5 ? (
-                  <Link to={`/curator/${vendor.id}`} className="btn-solid-gold">
+                {vendor.slug || vendor.id === 5 ? (
+                  <Link to={vendor.slug ? `/${vendor.slug}` : `/curator/${vendor.id}`} className="btn-solid-gold">
                     Explore Collection
                   </Link>
                 ) : (

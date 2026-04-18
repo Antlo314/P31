@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Crown, Leaf, User, LogOut, Layout } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 import logoPath from '../assets/p31_logo_botanical.png';
 
 const Navbar = () => {
+  const { user, profile, curatorData, isAdmin, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -32,9 +35,31 @@ const Navbar = () => {
         </div>
 
         <div className="nav-actions">
-          <Link to="/login" className="btn-solid-gold">
-            Curator Portal
-          </Link>
+          {user ? (
+            <div className="user-nav-wrapper">
+              <button className="user-nav-btn" onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}>
+                <div className="user-nav-avatar">
+                  <img src={profile?.avatar_url || 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=50'} alt="Me" />
+                  {isAdmin && <Crown size={12} className="prestige-icon admin-crown" />}
+                  {curatorData?.is_early_bird && !isAdmin && <Leaf size={12} className="prestige-icon founder-leaf" />}
+                </div>
+                <span className="user-nav-name desktop-only">{profile?.full_name?.split(' ')[0]}</span>
+              </button>
+              
+              {isUserMenuOpen && (
+                <div className="user-dropdown glass-card shadow-lg">
+                  <Link to="/dashboard" onClick={() => setIsUserMenuOpen(false)}><Layout size={16} /> Studio Dashboard</Link>
+                  <button onClick={() => { signOut(); setIsUserMenuOpen(false); }} className="nav-logout-btn">
+                    <LogOut size={16} /> Exit Studio
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link to="/login" className="btn-solid-gold">
+              Curator Portal
+            </Link>
+          )}
         </div>
 
         <button className="mobile-menu-btn mobile-only" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>

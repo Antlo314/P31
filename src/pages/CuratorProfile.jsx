@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Crown, Leaf, MapPin, Instagram, Facebook, Globe, Calendar } from 'lucide-react';
 import './CuratorProfile.css';
 
 // Mock images fallback
@@ -93,12 +94,44 @@ const CuratorProfile = () => {
             />
             <div className="cp-hero-gradient"></div>
          </div>
-         <div className="cp-hero-text container-fluid">
+          <div className="cp-hero-text container-fluid">
             <Link to="/directory" className="link-gold-inline" style={{marginBottom: '2rem', display: 'inline-block'}}>&larr; Back to Directory</Link>
+            
+            <div className="cp-prestige-row">
+              {['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'].includes(curator.profiles?.email?.toLowerCase()) ? (
+                <div className="cp-prestige-badge admin-badge">
+                  <Crown size={16} /> Master Architect
+                </div>
+              ) : curator.is_early_bird ? (
+                <div className="cp-prestige-badge founder-badge">
+                  <Leaf size={16} /> Foundation Founder
+                </div>
+              ) : null}
+              {curator.location && <span className="cp-location-pill"><MapPin size={12} /> {curator.location}</span>}
+            </div>
+
             <h4 className="overline-gold">{curator.profiles?.full_name}</h4>
             <h1 className="cp-biz-name">{curator.business_name}</h1>
             <p className="cp-biz-tagline">{curator.tagline}</p>
-         </div>
+
+            <div className="cp-social-strip">
+              {curator.instagram && (
+                <a href={`https://instagram.com/${curator.instagram.replace('@', '')}`} target="_blank" rel="noreferrer">
+                  <Instagram size={20} />
+                </a>
+              )}
+              {curator.facebook && (
+                <a href={curator.facebook} target="_blank" rel="noreferrer">
+                  <Facebook size={20} />
+                </a>
+              )}
+              {curator.website && (
+                <a href={curator.website} target="_blank" rel="noreferrer">
+                  <Globe size={20} />
+                </a>
+              )}
+            </div>
+          </div>
       </section>
 
       {/* Curator Business & Bio Details */}
@@ -111,11 +144,13 @@ const CuratorProfile = () => {
                <div className="cp-bio-column">
                   <p className="cp-bio-text">{curator.bio}</p>
                   
-                  <div className="cp-events-card">
-                     <h4 className="cp-card-title">Connect with Creator</h4>
-                     <p style={{color: 'rgba(255,255,255,0.7)'}}>Vetted P31 Curator since {new Date(curator.created_at).toLocaleDateString()}</p>
-                     {curator.is_early_bird && <span className="admin-badge mt-2" style={{display: 'inline-block'}}>Early Bird Member</span>}
-                  </div>
+                   <div className="cp-events-card">
+                      <h4 className="cp-card-title"><Calendar size={18} /> Established</h4>
+                      <p style={{color: 'rgba(255,255,255,0.7)'}}>Vetted P31 Curator since {new Date(curator.created_at).toLocaleDateString()}</p>
+                      <div className="mt-4 pt-4 border-t border-white/10">
+                        <p className="text-sm opacity-60 italic">"She considers a field and buys it; out of her earnings she plants a vineyard." &mdash; Prov. 31:16</p>
+                      </div>
+                   </div>
                </div>
 
                <div className="cp-contact-column">

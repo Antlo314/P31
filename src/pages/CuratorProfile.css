@@ -10,6 +10,61 @@
 }
 
 /* ── Hero ──────────────────────────────────────────────── */
+.cp-prestige-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.cp-prestige-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 40px;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border: 1px solid var(--metallic-gold);
+  background: rgba(203, 167, 47, 0.1);
+  color: var(--metallic-gold);
+}
+
+.founder-badge {
+  border-color: var(--olive);
+  color: var(--olive);
+  background: rgba(108, 109, 17, 0.1);
+}
+
+.cp-location-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+}
+
+.cp-social-strip {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.cp-social-strip a {
+  color: rgba(255, 255, 255, 0.5);
+  transition: all 0.3s;
+}
+
+.cp-social-strip a:hover {
+  color: var(--metallic-gold);
+  transform: translateY(-3px);
+}
+
 .cp-hero-section {
   position: relative;
   height: 80vh;
