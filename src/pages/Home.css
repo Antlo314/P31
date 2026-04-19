@@ -166,7 +166,7 @@
   display: flex;
   gap: 3rem;
   white-space: nowrap;
-  animation: tickerScroll 30s linear infinite;
+  animation: tickerScroll 12s linear infinite;
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.22em;

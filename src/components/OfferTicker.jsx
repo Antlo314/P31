@@ -5,8 +5,8 @@ const OfferTicker = () => {
   const [timeLeft, setTimeLeft] = useState('');
   const [isOfferActive, setIsOfferActive] = useState(true);
 
-  // Target Date: May 1st, 2026 00:00:00
-  const deadline = new Date('2026-05-01T00:00:00').getTime();
+  // Target Date: 15 days from April 19th -> May 4, 2026
+  const deadline = new Date('2026-05-04T13:15:00').getTime();
 
   useEffect(() => {
     const timer = setInterval(() => {

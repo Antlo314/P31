@@ -6,6 +6,7 @@ import './Home.css';
 
 import heroVid     from '../assets/hero.mp4';
 import faithVid    from '../assets/faith.mp4';
+import melaniePhoto from '../assets/melanie23_rm.png';
 import visionaryVid from '../assets/visionary.mp4';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -153,10 +154,10 @@ const Home = () => {
       <section className="home-mission" id="about">
         <div className="mission-img-col reveal">
           <div className="mission-img-frame">
-            <video
-              src={visionaryVid}
-              autoPlay loop muted playsInline
-              className="mission-img-video img-parallax"
+            <img 
+              src={melaniePhoto} 
+              alt="Melanie Jeffers-Cameron" 
+              className="mission-img-video img-parallax" 
             />
           </div>
         </div>
@@ -174,7 +175,7 @@ const Home = () => {
           </p>
 
           <div className="mission-tags">
-            {['palette|Art', 'spa|Wellness', 'styler|Clothing', 'restaurant|Food', 'menu_book|Literature', 'diversity_1|Community'].map(t => {
+            {['palette|Art', 'spa|Wellness', 'styler|Clothing', 'restaurant|Food', 'menu_book|Literature', 'diversity_1|Community', 'design_services|Services'].map(t => {
               const [icon, label] = t.split('|');
               return (
                 <span className="mission-tag" key={label}>
