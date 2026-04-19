@@ -275,42 +275,89 @@
 .mobile-dropdown {
   position: fixed;
   inset: 0;
-  /* Botanical Forest reveal */
-  background: linear-gradient(150deg, var(--cal-poly-green) 0%, var(--emerald-deep) 60%, var(--olive) 140%);
+  background: var(--dark-plum);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
-  z-index: 199;
-  animation: menuFadeIn 0.35s var(--ease-fluid) both;
+  padding: 3rem 2rem;
+  z-index: 999;
+  overflow-y: auto;
 }
 
-@keyframes menuFadeIn {
-  from { opacity: 0; transform: scale(0.98); }
-  to   { opacity: 1; transform: scale(1); }
+.animate-nav-in {
+  animation: navIn 0.5s var(--ease-fluid) forwards;
 }
 
-.mobile-dropdown a {
-  font-family: var(--font-heading);
-  font-size: clamp(2rem, 6vw, 2.8rem);
-  font-weight: 400;
-  letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.9);
-  transition: color 0.3s ease, transform 0.3s ease;
+@keyframes navIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
 
-.mobile-dropdown a:hover {
+.mobile-close-btn {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  background: transparent;
+  border: none;
   color: var(--gold-light);
-  transform: translateX(8px);
+  cursor: pointer;
 }
 
-/* Thistle horizontal rule between mobile links */
-.mobile-dropdown a + a {
-  padding-top: 0.5rem;
-  border-top: 1px solid rgba(181, 190, 168, 0.2);
-  width: 60%;
+.mobile-menu-brand {
+  margin-bottom: 4rem;
   text-align: center;
+}
+
+.mobile-brand-logo {
+  height: 60px;
+  filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(340deg); /* Gold plating */
+}
+
+.mobile-menu-links {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  flex: 1;
+}
+
+.mobile-menu-links a, .mobile-link-text {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.mobile-menu-links a:active {
+  color: var(--gold-light);
+}
+
+.mobile-nav-link-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mobile-construction-badge {
+  font-size: 0.75rem;
+  color: var(--gold-light);
+  font-family: var(--font-body);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.mobile-nav-link-badge.disabled {
+  opacity: 0.3;
+}
+
+.mobile-menu-footer {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.w-full {
+  width: 100%;
 }
 
 /* Visibility toggles */

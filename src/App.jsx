@@ -12,6 +12,7 @@ import Community from './pages/Community';
 import Login from './pages/Login';
 import CuratorDashboard from './pages/CuratorDashboard';
 import Onboarding from './pages/Onboarding';
+import Services from './pages/Services';
 import LeadPopup from './components/LeadPopup';
 import OfferTicker from './components/OfferTicker';
 import AnnouncementBanner from './components/AnnouncementBanner';
@@ -41,6 +42,7 @@ function App() {
             <Route path="/partner" element={<Partner />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Login />} />
+            <Route path="/services" element={<Services />} />
             <Route path="/dashboard/*" element={<CuratorDashboard />} />
             <Route path="/onboarding-exclusive" element={<Onboarding />} />
             {/* Vanity URL Catch-all: /popcorn or /id */}

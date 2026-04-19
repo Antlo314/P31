@@ -1,0 +1,120 @@
+.services-page {
+  background: var(--surface);
+  color: var(--on-surface);
+  min-height: 100vh;
+}
+
+.services-hero {
+  position: relative;
+  height: 60vh;
+  min-height: 450px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: var(--dark-plum);
+  overflow: hidden;
+}
+
+.services-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(58, 28, 54, 0.4) 0%, var(--dark-plum) 100%);
+  z-index: 1;
+}
+
+.services-hero__content {
+  position: relative;
+  z-index: 2;
+  padding: 0 6vw;
+  max-width: 900px;
+}
+
+.services-headline {
+  font-family: var(--font-heading);
+  font-size: clamp(2.8rem, 7vw, 5rem);
+  color: white;
+  margin: 1.5rem 0;
+  line-height: 1.1;
+}
+
+.services-headline em {
+  color: var(--gold-light);
+  font-style: italic;
+}
+
+.services-sub {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.8;
+}
+
+.services-intro {
+  padding: 10vh 0;
+  margin-top: -5vh;
+  position: relative;
+  z-index: 5;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 5vw;
+}
+
+.service-card {
+  padding: 3rem !important;
+  text-align: center;
+  transition: transform 0.4s var(--ease-fluid);
+}
+
+.service-card:hover {
+  transform: translateY(-10px);
+  border-color: var(--metallic-gold);
+}
+
+.service-icon {
+  font-size: 3rem;
+  color: var(--metallic-gold);
+  margin-bottom: 2rem;
+}
+
+.service-title {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+}
+
+.service-desc {
+  font-size: 0.95rem;
+  color: var(--on-surface-variant);
+  line-height: 1.8;
+}
+
+.cta-headline {
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.cta-body {
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 768px) {
+  .services-hero {
+    height: 50vh;
+  }
+  .services-headline {
+    font-size: 2.5rem;
+  }
+  .service-card {
+    padding: 2rem !important;
+  }
+}
