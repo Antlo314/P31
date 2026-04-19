@@ -454,7 +454,45 @@
 }
 
 .dashboard-header p {
-  color: var(--on-surface-variant);
+  color: var(--primary); /* Royal Plum for high visibility */
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+/* Sidebar Construction Badges */
+.nav-item-with-badge {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-item.disabled-tab {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.tab-badge-soon {
+  font-size: 0.6rem;
+  background: var(--metallic-gold);
+  color: #1a1000;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 800;
+  margin-left: auto;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-construction-tag {
+  font-size: 0.55rem;
+  color: var(--metallic-gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  margin-left: 2.5rem;
+  margin-top: -8px;
+  margin-bottom: 12px;
+  opacity: 0.7;
 }
 
 /* Grid Layout */

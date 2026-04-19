@@ -30,8 +30,14 @@ const Navbar = () => {
 
         <div className="nav-links desktop-only">
           <Link to="/partner" className={location.pathname === '/partner' ? 'active' : ''}>Partner</Link>
-          <Link to="/directory" className={location.pathname === '/directory' ? 'active' : ''}>Curators</Link>
-          <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noopener noreferrer">Storefront Application</a>
+          <div className="nav-link-with-badge">
+            <Link to="/directory" className={location.pathname === '/directory' ? 'active' : ''}>Curators</Link>
+            <span className="construction-badge">Soon</span>
+          </div>
+          <div className="nav-link-with-badge disabled-nav-link">
+            <a href="#" className="disabled">Storefront App</a>
+            <span className="construction-badge">Refining</span>
+          </div>
         </div>
 
         <div className="nav-actions">
@@ -70,8 +76,14 @@ const Navbar = () => {
           <div className="mobile-dropdown">
             <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
             <Link to="/partner" onClick={() => setIsMobileMenuOpen(false)}>Partner</Link>
-            <Link to="/directory" onClick={() => setIsMobileMenuOpen(false)}>Curators</Link>
-            <Link to="/apply" onClick={() => setIsMobileMenuOpen(false)}>Storefront App</Link>
+            <div className="mobile-nav-link-badge">
+              <Link to="/directory" onClick={() => setIsMobileMenuOpen(false)}>Curators</Link>
+              <span className="mobile-construction-badge">Under Construction</span>
+            </div>
+            <div className="mobile-nav-link-badge disabled">
+              <span className="mobile-link-text">Storefront App</span>
+              <span className="mobile-construction-badge">Coming Soon</span>
+            </div>
             <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>Curator Portal</Link>
             <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
           </div>

@@ -407,10 +407,10 @@ const CuratorDashboard = () => {
             <MessageSquare size={20} /> Collective Chat
           </button>
           <button 
-            onClick={() => setActiveTab('storefront')} 
-            className={`nav-item ${activeTab === 'storefront' ? 'active' : ''}`}
+            disabled
+            className="nav-item disabled-tab"
           >
-            <ShoppingBag size={20} /> Storefront
+            <ShoppingBag size={20} /> Storefront <span className="tab-badge-soon">Soon</span>
           </button>
 
           {isAdmin && (
@@ -422,7 +422,10 @@ const CuratorDashboard = () => {
             </button>
           )}
 
-          <Link to="/directory" className="nav-item"><ExternalLink size={20} /> View Directory</Link>
+          <div className="nav-item-with-badge">
+            <Link to="/directory" className="nav-item"><ExternalLink size={20} /> View Directory</Link>
+            <span className="sidebar-construction-tag">Under Construction</span>
+          </div>
         </nav>
 
         <div className="sidebar-footer">

@@ -11,8 +11,63 @@
   background: rgba(250, 247, 245, 0.88);
   -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
-  border-bottom: 1px solid var(--outline-variant);
+  border-bottom: 2px solid var(--metallic-gold);
   transition: background 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* Under Construction Badges */
+.nav-link-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.construction-badge {
+  font-size: 0.55rem;
+  background: var(--metallic-gold);
+  color: #1a1000;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.disabled-nav-link {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.disabled-nav-link a {
+  pointer-events: none;
+}
+
+.mobile-nav-link-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.mobile-construction-badge {
+  font-size: 0.6rem;
+  color: var(--gold-light);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 800;
+  opacity: 0.8;
+}
+
+.mobile-nav-link-badge.disabled {
+  opacity: 0.4;
+}
+
+.mobile-nav-link-badge.disabled .mobile-link-text {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 6vw, 2.8rem);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .navbar-v2.scrolled {
