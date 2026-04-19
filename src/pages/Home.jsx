@@ -6,7 +6,7 @@ import './Home.css';
 
 import heroVid     from '../assets/hero.mp4';
 import faithVid    from '../assets/faith.mp4';
-import melaniePhoto from '../assets/melanie23_rm.png';
+import missionVid  from '../assets/p31market.mp4';
 import visionaryVid from '../assets/visionary.mp4';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -154,10 +154,10 @@ const Home = () => {
       <section className="home-mission" id="about">
         <div className="mission-img-col reveal">
           <div className="mission-img-frame">
-            <img 
-              src={melaniePhoto} 
-              alt="Melanie Jeffers-Cameron" 
-              className="mission-img-video img-parallax" 
+            <video
+              src={missionVid}
+              autoPlay loop muted playsInline
+              className="mission-img-video img-parallax"
             />
           </div>
         </div>
