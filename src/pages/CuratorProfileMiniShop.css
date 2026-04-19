@@ -1,0 +1,136 @@
+.mini-shop-theme {
+  --shop-bg: #F5F2EA;
+  --shop-accent: #7B3F61; /* Amethyst / Deep Rose */
+  --shop-text: #2D241E;
+  --shop-card-bg: #FFFFFF;
+}
+
+.curator-profile-page.il-mini-shop {
+  background-color: var(--shop-bg);
+  color: var(--shop-text);
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Accent Banner Section */
+.cp-accent-banner {
+  height: 60vh;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 4rem;
+}
+
+.cp-accent-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cp-accent-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, var(--shop-bg));
+}
+
+/* Category Sections */
+.cp-category-group {
+  margin-bottom: 6rem;
+}
+
+.cp-category-title {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: var(--shop-accent);
+  position: relative;
+}
+
+.cp-category-title::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 2px;
+  background: var(--shop-accent);
+  margin: 1rem auto;
+}
+
+/* Spotlight Card */
+.cp-spotlight-section {
+  max-width: 1200px;
+  margin: -8rem auto 6rem;
+  position: relative;
+  z-index: 10;
+  padding: 0 2rem;
+}
+
+.cp-spotlight-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--shop-card-bg);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.05);
+  border: 1px solid rgba(123, 63, 97, 0.1);
+}
+
+.cp-spotlight-img {
+  height: 100%;
+  object-fit: cover;
+}
+
+.cp-spotlight-info {
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.cp-spotlight-info h2 {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  color: var(--shop-accent);
+}
+
+.cp-spotlight-info p {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  color: rgba(45, 36, 30, 0.7);
+  margin-bottom: 2.5rem;
+}
+
+/* Product Cards Overrides */
+.il-mini-shop .cp-product-card {
+  background: var(--shop-card-bg);
+  border: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.il-mini-shop .cp-product-card:hover {
+  transform: translateY(-10px);
+}
+
+.il-mini-shop .cp-product-info h4 {
+  color: var(--shop-text);
+  font-family: var(--font-heading);
+}
+
+.il-mini-shop .cp-product-price {
+  color: var(--shop-accent);
+  font-weight: 700;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 991px) {
+  .cp-spotlight-card {
+    grid-template-columns: 1fr;
+  }
+  
+  .cp-spotlight-info {
+    padding: 2.5rem;
+  }
+  
+  .cp-spotlight-info h2 {
+    font-size: 2.2rem;
+  }
+}

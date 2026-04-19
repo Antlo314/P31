@@ -3,14 +3,16 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Crown, Leaf, MapPin, Instagram, Facebook, Globe, Calendar } from 'lucide-react';
+import { Crown, Leaf, MapPin, Instagram, Facebook, Globe, Calendar, ArrowRight, ShoppingBag } from 'lucide-react';
 import './CuratorProfile.css';
+import './CuratorProfileMiniShop.css';
 
 // Mock images fallback
 import vendorCandles from '../assets/vendor_candles.png';
 import vendorSkincare from '../assets/vendor_skincare.png';
 import mistImg from '../assets/curators/ilcollection/mist.png';
 import oilImg from '../assets/curators/ilcollection/oil.png';
+import bathroomAccent from '../assets/curators/ilcollection/bathroom_accent.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,6 +20,7 @@ const IL_COLLECTION_PRODUCTS = [
   {
     id: 'il-1',
     name: 'Enlighten Hydrating Face & Hair Mist',
+    category: 'Essentials',
     price: 42.00,
     description: 'A divine hydrating mist for face and hair, rooted in purity and purpose.',
     image_url: mistImg,
@@ -26,6 +29,7 @@ const IL_COLLECTION_PRODUCTS = [
   {
     id: 'il-2',
     name: 'The Soul Glow Hydrating Oil',
+    category: 'Essentials',
     price: 62.00,
     description: 'Hand-crafted organic oil designed to radiate your divine inner glow.',
     image_url: oilImg,
@@ -34,10 +38,56 @@ const IL_COLLECTION_PRODUCTS = [
   {
     id: 'il-3',
     name: 'The IL Collection Set',
+    category: 'Essentials',
     price: 114.00,
-    description: 'The complete set for the Proverbs 31 woman of influence.',
-    image_url: mistImg, // Fallback
+    description: 'The complete sanctuary experience for the Proverbs 31 woman.',
+    image_url: mistImg,
     external_url: 'https://www.nebaministry.org/product-page/the-il-collection'
+  },
+  {
+    id: 'il-4',
+    name: 'Awaken Healing Soy Candle',
+    category: 'Atmosphere',
+    price: 28.00,
+    description: 'Hand-poured soy candle infused with healing scents to awaken your spirit.',
+    image_url: 'https://static.wixstatic.com/media/4ede06_2633224a4c7348daa15c904aa06772af~mv2.png',
+    external_url: 'https://www.nebaministry.org/product-page/awaken-healing-soy-candle'
+  },
+  {
+    id: 'il-5',
+    name: 'Restore Eye Cream',
+    category: 'Skincare',
+    price: 54.00,
+    description: 'Potent botanical eye cream designed to restore and brighten tired eyes.',
+    image_url: 'https://static.wixstatic.com/media/4ede06_73ec5408a0d04c2e8979ba208979ba20~mv2.png',
+    external_url: 'https://www.nebaministry.org/product-page/restore-eye-cream'
+  },
+  {
+    id: 'il-6',
+    name: 'Awaken 30-Day Mentorship',
+    category: 'Spiritual',
+    price: 97.00,
+    description: 'A transformative 30-day spiritual mentorship and devotional journey.',
+    image_url: 'https://static.wixstatic.com/media/4ede06_0669ba2089fc41d08679ba2089fc41d08679ba20~mv2.png',
+    external_url: 'https://www.nebaministry.org/product-page/awaken-mentorship'
+  },
+  {
+    id: 'il-7',
+    name: 'Garden Restore Tea',
+    category: 'Wellness',
+    price: 24.00,
+    description: 'Organic herbal tea blend harvested from the sanctuary garden for deep restoration.',
+    image_url: 'https://static.wixstatic.com/media/4ede06_4eb45ce289fc4808a3d4ac2e41d1867a~mv2.png',
+    external_url: 'https://www.nebaministry.org/product-page/garden-restore-tea'
+  },
+  {
+    id: 'il-10',
+    name: 'Manuka Honey Exfoliant',
+    category: 'Skincare',
+    price: 48.00,
+    description: 'Luxury Manuka honey exfoliant for a smooth, radiant complexion.',
+    image_url: 'https://static.wixstatic.com/media/4ede06_1062b8e309fc4d098e986079930f7608~mv2.png',
+    external_url: 'https://www.nebaministry.org/product-page/manuka-honey-exfoliant'
   }
 ];
 
@@ -48,6 +98,7 @@ const MELANIE_CURATOR_DATA = {
   bio: 'Transforming the beauty industry by creating wellness and body care rooted in purity, purpose, and divine intention. Built for the Proverbs 31 woman.',
   instagram: 'ilcollection__',
   website: 'https://www.nebaministry.org/ilcollection',
+  slug: 'ilcollection',
   location: 'Atlanta, GA',
   is_early_bird: true,
   is_paid: true,
@@ -75,8 +126,15 @@ const CuratorProfile = () => {
       }
       setLoading(true);
       try {
-        // Try to fetch by slug or by profile ID
-        // Safely determine if slug is a UUID before querying id column
+        // High-priority vanity bypass for Matriarch Storefront
+        if (slug === 'ilcollection') {
+          setCurator(MELANIE_CURATOR_DATA);
+          setProducts(IL_COLLECTION_PRODUCTS);
+          setLoading(false);
+          return;
+        }
+
+        // Try to fetch others by slug or by profile ID
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
         
         let query = supabase
@@ -156,8 +214,17 @@ const CuratorProfile = () => {
      return <div className="curator-profile-page error-state">This sanctuary is currently awaiting verification.</div>;
   }
 
+  const productsByCategory = products.reduce((acc, p) => {
+    const cat = p.category || 'Collection';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(p);
+    return acc;
+  }, {});
+
+  const isILShop = slug === 'ilcollection' || (curator?.business_name && curator.business_name.includes('Incandescent Lily'));
+
   return (
-    <div className="curator-profile-page" ref={containerRef}>
+    <div className={`curator-profile-page ${isILShop ? 'il-mini-shop' : ''}`} ref={containerRef}>
       
       {/* Curator Hero Header */}
       <section className="cp-hero-section">
@@ -209,6 +276,30 @@ const CuratorProfile = () => {
           </div>
       </section>
 
+      {/* Mini-Shop Accent Banner & Spotlight (New Template Logic) */}
+      {isILShop && (
+        <>
+          <section className="cp-accent-banner">
+            <img src={bathroomAccent} alt="Luxury Sanctuary" />
+            <div className="cp-accent-overlay"></div>
+          </section>
+
+          <section className="cp-spotlight-section">
+            <div className="cp-spotlight-card">
+              <img src={IL_COLLECTION_PRODUCTS[2].image_url} alt="The Collection Set" className="cp-spotlight-img" />
+              <div className="cp-spotlight-info">
+                <span className="overline-gold">Master Architect Selection</span>
+                <h2>The Complete Sanctuary Set</h2>
+                <p>The ultimate botanical ritual designed for the Proverbs 31 woman who prioritizes her physical and spiritual well-being.</p>
+                <a href={IL_COLLECTION_PRODUCTS[2].external_url} target="_blank" rel="noreferrer" className="btn-solid-gold">
+                  Explore The Set <ArrowRight size={18} />
+                </a>
+              </div>
+            </div>
+          </section>
+        </>
+      )}
+
       {/* Curator Business & Bio Details */}
       <section className="cp-bio-section section-padded">
         <div className="container-fluid">
@@ -245,35 +336,37 @@ const CuratorProfile = () => {
         </div>
       </section>
 
-      {/* Products Showcase (Mocked or from DB later) */}
+      {/* Categorized Products Showcase */}
       <section className="cp-products-section section-padded">
         <div className="container-fluid">
-           <div className="cp-products-header">
-              <h3>The Collection</h3>
-              <div className="divider-gold"></div>
-           </div>
-
-           <div className="cp-products-grid">
-             {products.map(p => (
-               <div key={p.id} className="cp-product-card" onClick={() => p.external_url && window.open(p.external_url, '_blank')}>
-                 <div className="cp-product-img-wrapper">
-                    <img src={p.image_url || 'https://via.placeholder.com/400x500?text=Artifact'} alt={p.name} className="cp-product-img" />
-                    <div className="cp-product-hover">
-                       <span>{p.external_url ? 'Buy Now' : 'Inquiry Only'}</span>
+           
+           {Object.keys(productsByCategory).map(category => (
+             <div key={category} className="cp-category-group">
+                <h2 className="cp-category-title">{category}</h2>
+                <div className="cp-products-grid">
+                  {productsByCategory[category].map(p => (
+                    <div key={p.id} className="cp-product-card" onClick={() => p.external_url && window.open(p.external_url, '_blank')}>
+                      <div className="cp-product-img-wrapper">
+                         <img src={p.image_url || 'https://via.placeholder.com/400x500?text=Artifact'} alt={p.name} className="cp-product-img" />
+                         <div className="cp-product-hover">
+                            <span>{p.external_url ? 'Buy Now' : 'Inquiry Only'}</span>
+                         </div>
+                      </div>
+                      <div className="cp-product-info">
+                         <h4>{p.name}</h4>
+                         <p className="cp-product-price">${p.price}</p>
+                      </div>
                     </div>
-                 </div>
-                 <div className="cp-product-info">
-                    <h4>{p.name}</h4>
-                    <p className="cp-product-price">${p.price}</p>
-                 </div>
-               </div>
-             ))}
-             {products.length === 0 && (
-               <div className="text-center" style={{gridColumn: '1 / -1', padding: '4rem 0'}}>
-                  <p style={{color: 'rgba(255,255,255,0.5)', fontStyle: 'italic'}}>Product catalog integration in progress.</p>
-               </div>
-             )}
-           </div>
+                  ))}
+                </div>
+             </div>
+           ))}
+
+           {products.length === 0 && (
+             <div className="text-center" style={{padding: '4rem 0'}}>
+                <p style={{color: 'rgba(255,255,255,0.5)', fontStyle: 'italic'}}>Product catalog integration in progress.</p>
+             </div>
+           )}
         </div>
       </section>
 
