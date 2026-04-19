@@ -14,14 +14,16 @@ import vendor4 from '../assets/vendor_jewelry.png';
 gsap.registerPlugin(ScrollTrigger);
 const vendors = [
   {
-    id: 5,
-    name: 'Melanie',
+    id: '545b1f22-6780-49a8-a3c6-408812815fb0',
+    name: 'Melanie JC',
     businessName: 'Incandescent Lily Collection',
-    bio: 'Transforming the beauty industry by creating wellness and body care rooted in purity, purpose, and divine intention.',
-    products: 'Plant-Based Bodycare, Wellness',
+    bio: 'Transforming the beauty industry by creating wellness and body care rooted in purity, purpose, and divine intention. Built for the Proverbs 31 woman.',
+    products: 'Bespoke Wellness, Bodycare',
     image: 'https://static.wixstatic.com/media/a60154_732e513fd3594078b0b4c1d08679ba20~mv2.png',
     social: 'https://instagram.com/ilcollection__',
-    isFounder: true
+    slug: 'ilcollection',
+    isFounder: true,
+    isAdmin: true
   },
   {
     id: 1,
@@ -75,8 +77,12 @@ const Directory = () => {
       .select('*, profiles(full_name, avatar_url, email)')
       .eq('status', 'approved'); // Only show approved sanctuaries
     
-    // Pick exactly 2 examples as requested
-    const examples = vendors.filter(v => v.id === 1 || v.id === 4);
+    // Pick Melanie (Matriarch) and 2 examples as requested
+    const examples = vendors.filter(v => 
+      v.id === '545b1f22-6780-49a8-a3c6-408812815fb0' || 
+      v.id === 1 || 
+      v.id === 4
+    );
     
     if (data && data.length > 0) {
       const realVendors = data.map(d => ({
@@ -173,8 +179,8 @@ const Directory = () => {
               </p>
               
               <div className="vendor-actions">
-                {vendor.slug || vendor.id === 5 ? (
-                  <Link to={vendor.slug ? `/${vendor.slug}` : `/curator/${vendor.id}`} className="btn-solid-gold">
+                {vendor.slug || vendor.id ? (
+                  <Link to={vendor.slug ? `/${vendor.slug}` : `/${vendor.id}`} className="btn-solid-gold">
                     Explore Collection
                   </Link>
                 ) : (

@@ -26,12 +26,14 @@
 
 .home-hero__video {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 120%;
+  height: 100%;
   object-fit: cover;
-  object-position: center;
-  will-change: transform;
+  object-position: center 10%; /* "Shins Up" crop focus refined */
+  z-index: 0;
+  filter: brightness(0.7) contrast(1.1);
 }
 
 /* Gradient: transparent top → rich dark plum bottom */

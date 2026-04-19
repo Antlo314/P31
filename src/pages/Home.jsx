@@ -8,6 +8,7 @@ import heroVid     from '../assets/hero.mp4';
 import faithVid    from '../assets/faith.mp4';
 import missionVid  from '../assets/p31market.mp4';
 import visionaryVid from '../assets/visionary.mp4';
+import FeaturedCurator from '../components/FeaturedCurator';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -70,12 +71,17 @@ const Home = () => {
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="home-hero">
-        {/* Full-bleed video */}
-        <video
-          src={heroVid}
-          autoPlay loop muted playsInline
-          className="home-hero__video img-parallax"
-        />
+        {/* Hero Video Element — Optimized for "Shins Up" crop in CSS */}
+        <video 
+          key={missionVid}
+          autoPlay 
+          muted 
+          loop 
+          playsInline 
+          className="home-hero__video"
+        >
+          <source src={missionVid} type="video/mp4" />
+        </video>
         <div className="home-hero__overlay" />
 
         {/* Bottom-left editorial text — like a luxury magazine cover */}
@@ -190,6 +196,9 @@ const Home = () => {
           </a>
         </div>
       </section>
+
+      {/* ── FEATURED CURATOR — IL Collection — Melanie ─────── */}
+      <FeaturedCurator />
 
       {/* ── PARTNER TEASER — Plum / Gold ─────────────────── */}
       <section className="home-partner py-24">

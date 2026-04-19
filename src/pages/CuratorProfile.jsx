@@ -9,9 +9,55 @@ import './CuratorProfile.css';
 // Mock images fallback
 import vendorCandles from '../assets/vendor_candles.png';
 import vendorSkincare from '../assets/vendor_skincare.png';
-import placeholderProduct from '../assets/generic_p31_product.png';
+import mistImg from '../assets/curators/ilcollection/mist.png';
+import oilImg from '../assets/curators/ilcollection/oil.png';
 
 gsap.registerPlugin(ScrollTrigger);
+
+const IL_COLLECTION_PRODUCTS = [
+  {
+    id: 'il-1',
+    name: 'Enlighten Hydrating Face & Hair Mist',
+    price: 42.00,
+    description: 'A divine hydrating mist for face and hair, rooted in purity and purpose.',
+    image_url: mistImg,
+    external_url: 'https://www.nebaministry.org/product-page/enlighten-hydrating-face-hair-mist'
+  },
+  {
+    id: 'il-2',
+    name: 'The Soul Glow Hydrating Oil',
+    price: 62.00,
+    description: 'Hand-crafted organic oil designed to radiate your divine inner glow.',
+    image_url: oilImg,
+    external_url: 'https://www.nebaministry.org/product-page/the-soul-glow-hydrating-oil'
+  },
+  {
+    id: 'il-3',
+    name: 'The IL Collection Set',
+    price: 114.00,
+    description: 'The complete set for the Proverbs 31 woman of influence.',
+    image_url: mistImg, // Fallback
+    external_url: 'https://www.nebaministry.org/product-page/the-il-collection'
+  }
+];
+
+const MELANIE_CURATOR_DATA = {
+  id: '545b1f22-6780-49a8-a3c6-408812815fb0',
+  business_name: 'Incandescent Lily Collection',
+  tagline: 'Wellness and body care rooted in purity and divine intention.',
+  bio: 'Transforming the beauty industry by creating wellness and body care rooted in purity, purpose, and divine intention. Built for the Proverbs 31 woman.',
+  instagram: 'ilcollection__',
+  website: 'https://www.nebaministry.org/ilcollection',
+  location: 'Atlanta, GA',
+  is_early_bird: true,
+  is_paid: true,
+  profiles: {
+    full_name: 'Melanie JC',
+    email: 'proverbs31markets@gmail.com',
+    avatar_url: 'https://static.wixstatic.com/media/a60154_732e513fd3594078b0b4c1d08679ba20~mv2.png'
+  },
+  created_at: '2026-04-19'
+};
 
 const CuratorProfile = () => {
   const { id: slug } = useParams();
@@ -39,7 +85,16 @@ const CuratorProfile = () => {
           .or(`slug.eq.${slug},id.eq.${slug}`)
           .single();
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          if (slug === 'ilcollection' || slug === MELANIE_CURATOR_DATA.id) {
+             setCurator(MELANIE_CURATOR_DATA);
+             setProducts(IL_COLLECTION_PRODUCTS);
+             setLoading(false);
+             return;
+          }
+          throw dbError;
+        }
+
         setCurator(data);
 
         // Fetch products for this curator
@@ -49,7 +104,11 @@ const CuratorProfile = () => {
           .eq('curator_id', data.id)
           .order('created_at', { ascending: false });
         
-        if (prodData) setProducts(prodData);
+        if (prodData && prodData.length > 0) {
+          setProducts(prodData);
+        } else if (slug === MELANIE_CURATOR_DATA.id || slug === 'ilcollection' || data.business_name?.includes('Incandescent Lily')) {
+          setProducts(IL_COLLECTION_PRODUCTS);
+        }
       } catch (err) {
         console.error('Curator fetch error:', err);
         setError('Curator not found');
@@ -190,11 +249,11 @@ const CuratorProfile = () => {
 
            <div className="cp-products-grid">
              {products.map(p => (
-               <div key={p.id} className="cp-product-card">
+               <div key={p.id} className="cp-product-card" onClick={() => p.external_url && window.open(p.external_url, '_blank')}>
                  <div className="cp-product-img-wrapper">
                     <img src={p.image_url || 'https://via.placeholder.com/400x500?text=Artifact'} alt={p.name} className="cp-product-img" />
                     <div className="cp-product-hover">
-                       <span>Inquiry Only</span>
+                       <span>{p.external_url ? 'Buy Now' : 'Inquiry Only'}</span>
                     </div>
                  </div>
                  <div className="cp-product-info">
