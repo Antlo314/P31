@@ -73,14 +73,14 @@ const Home = () => {
       <section className="home-hero">
         {/* Hero Video Element — Optimized for "Shins Up" crop in CSS */}
         <video 
-          key={missionVid}
+          key={heroVid}
           autoPlay 
           muted 
           loop 
           playsInline 
           className="home-hero__video"
         >
-          <source src={missionVid} type="video/mp4" />
+          <source src={heroVid} type="video/mp4" />
         </video>
         <div className="home-hero__overlay" />
 
