@@ -76,14 +76,20 @@ const CuratorProfile = () => {
       setLoading(true);
       try {
         // Try to fetch by slug or by profile ID
-        const { data, error: dbError } = await supabase
+        // Safely determine if slug is a UUID before querying id column
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+        
+        let query = supabase
           .from('curator_data')
-          .select(`
-            *,
-            profiles (*)
-          `)
-          .or(`slug.eq.${slug},id.eq.${slug}`)
-          .single();
+          .select('*, profiles (*)');
+
+        if (isUuid) {
+          query = query.or(`slug.eq.${slug},id.eq.${slug}`);
+        } else {
+          query = query.eq('slug', slug);
+        }
+
+        const { data, error: dbError } = await query.single();
 
         if (dbError) {
           if (slug === 'ilcollection' || slug === MELANIE_CURATOR_DATA.id) {

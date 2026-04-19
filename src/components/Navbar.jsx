@@ -36,10 +36,7 @@ const Navbar = () => {
             <Link to="/directory" className={location.pathname === '/directory' ? 'active' : ''}>Curators</Link>
             <span className="construction-badge">Soon</span>
           </div>
-          <div className="nav-link-with-badge disabled-nav-link">
-            <a href="#" className="disabled">Storefront App</a>
-            <span className="construction-badge">Refining</span>
-          </div>
+          <Link to="/directory" className={location.pathname === '/directory' ? 'active' : ''}>Marketplace</Link>
         </div>
 
         <div className="nav-actions desktop-only">
