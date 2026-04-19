@@ -41,7 +41,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        <div className="nav-actions">
+        <div className="nav-actions desktop-only">
           {user ? (
             <div className="user-nav-wrapper">
               <button className="user-nav-btn" onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}>
@@ -72,45 +72,45 @@ const Navbar = () => {
         <button className="mobile-menu-btn mobile-only" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X size={24} color="#D4AF37" /> : <Menu size={24} color="#D4AF37" />}
         </button>
+      </div>
 
-        {isMobileMenuOpen && (
-          <div className="mobile-dropdown animate-nav-in">
-            <button className="mobile-close-btn" onClick={() => setIsMobileMenuOpen(false)}>
-              <X size={32} />
-            </button>
-            
-            <div className="mobile-menu-brand">
-              <img src={logoPath} alt="P31" className="mobile-brand-logo" />
+      {isMobileMenuOpen && (
+        <div className="mobile-dropdown animate-nav-in">
+          <button className="mobile-close-btn" onClick={() => setIsMobileMenuOpen(false)}>
+            <X size={32} />
+          </button>
+          
+          <div className="mobile-menu-brand">
+            <img src={logoPath} alt="P31" className="mobile-brand-logo" />
+          </div>
+
+          <div className="mobile-menu-links">
+            <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
+            <Link to="/partner" onClick={() => setIsMobileMenuOpen(false)}>Partner</Link>
+            <Link to="/services" onClick={() => setIsMobileMenuOpen(false)}>Services</Link>
+            <div className="mobile-nav-link-badge">
+              <Link to="/directory" onClick={() => setIsMobileMenuOpen(false)}>Curators</Link>
+              <span className="mobile-construction-badge">Soon</span>
             </div>
-
-            <div className="mobile-menu-links">
-              <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
-              <Link to="/partner" onClick={() => setIsMobileMenuOpen(false)}>Partner</Link>
-              <Link to="/services" onClick={() => setIsMobileMenuOpen(false)}>Services</Link>
-              <div className="mobile-nav-link-badge">
-                <Link to="/directory" onClick={() => setIsMobileMenuOpen(false)}>Curators</Link>
-                <span className="mobile-construction-badge">Under Construction</span>
-              </div>
-              <div className="mobile-nav-link-badge disabled">
-                <span className="mobile-link-text">Storefront App</span>
-                <span className="mobile-construction-badge">Coming Soon</span>
-              </div>
-            </div>
-
-            <div className="mobile-menu-footer">
-              {!user ? (
-                <Link to="/login" className="btn-solid-gold w-full" onClick={() => setIsMobileMenuOpen(false)}>
-                  Curator Portal
-                </Link>
-              ) : (
-                <Link to="/dashboard" className="btn-solid-gold w-full" onClick={() => setIsMobileMenuOpen(false)}>
-                  Go to Studio
-                </Link>
-              )}
+            <div className="mobile-nav-link-badge disabled">
+              <span className="mobile-link-text">Storefront App</span>
+              <span className="mobile-construction-badge">Coming Soon</span>
             </div>
           </div>
-        )}
-      </div>
+
+          <div className="mobile-menu-footer">
+            {!user ? (
+              <Link to="/login" className="btn-solid-gold w-full" onClick={() => setIsMobileMenuOpen(false)}>
+                Curator Portal
+              </Link>
+            ) : (
+              <Link to="/dashboard" className="btn-solid-gold w-full" onClick={() => setIsMobileMenuOpen(false)}>
+                Go to Studio
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
