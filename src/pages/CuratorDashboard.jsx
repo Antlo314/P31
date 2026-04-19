@@ -27,6 +27,8 @@ const CuratorDashboard = () => {
   const [productImageLoading, setProductImageLoading] = useState(false);
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [partnershipInquiries, setPartnershipInquiries] = useState([]);
+  const [reviewingCurator, setReviewingCurator] = useState(null);
+  const [reviewingCuratorProducts, setReviewingCuratorProducts] = useState([]);
   const [adminError, setAdminError] = useState(null);
   const [adminFeedbackMap, setAdminFeedbackMap] = useState({}); // state to hold feedback input per vendor
   
@@ -112,6 +114,22 @@ const CuratorDashboard = () => {
       setPartnershipInquiries(data || []);
     } catch (err) {
       console.warn('Partnership fetch error:', err.message);
+    }
+  };
+
+  const openReviewer = async (curator) => {
+    setReviewingCurator(curator);
+    setReviewingCuratorProducts([]); 
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('curator_id', curator.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setReviewingCuratorProducts(data || []);
+    } catch (err) {
+      console.warn('Review product fetch error:', err.message);
     }
   };
 
@@ -595,9 +613,20 @@ const CuratorDashboard = () => {
                       : curatorData?.status === 'pending'
                       ? "Your artifacts are currently under architectural review."
                       : curatorData?.status === 'rejected'
-                      ? "Adjustments required. See guidance above."
+                      ? "Adjustments required. See guidance below."
                       : "Refine your boutique to request market placement."}
                   </p>
+
+                  {curatorData?.status === 'rejected' && curatorData?.admin_feedback && (
+                    <div className="admin-feedback-box glass-border mt-4 p-4" style={{borderColor: 'rgba(255, 75, 75, 0.3)', background: 'rgba(255, 75, 75, 0.03)'}}>
+                       <div className="flex items-center gap-2 text-red-500 font-bold text-xs uppercase mb-2">
+                         <ShieldAlert size={14} /> Architect's Guidance
+                       </div>
+                       <p className="text-sm italic opacity-80" style={{color: 'var(--on-surface)'}}>
+                         "{curatorData.admin_feedback}"
+                       </p>
+                    </div>
+                  )}
                   <div className="divider-thistle"></div>
                   
                   {/* Submission Checklist */}
@@ -821,28 +850,12 @@ const CuratorDashboard = () => {
                         </div>
 
                         <div className="governance-actions-area">
-                          <textarea 
-                            placeholder="Provide architectural feedback or adjustment requirements..."
-                            className="feedback-input mb-4"
-                            value={adminFeedbackMap[p.id] || ''}
-                            onChange={(e) => setAdminFeedbackMap({...adminFeedbackMap, [p.id]: e.target.value})}
-                          ></textarea>
-                          
-                          <div className="flex gap-4">
-                            <button 
-                              onClick={() => approveVendor(p.id, adminFeedbackMap[p.id])} 
-                              className="btn-solid-gold btn-xs flex-1"
-                            >
-                              Grant Market Access
-                            </button>
-                            <button 
-                              onClick={() => rejectVendor(p.id, adminFeedbackMap[p.id])} 
-                              className="btn-outline-primary btn-xs flex-1"
-                              style={{ color: '#ff4b4b', borderColor: '#ff4b4b' }}
-                            >
-                              Request Fixes
-                            </button>
-                          </div>
+                          <button 
+                            onClick={() => openReviewer(p)} 
+                            className="btn-solid-gold w-full flex-center gap-2"
+                          >
+                            <Layout size={16} /> Review Sanctuary Boutique
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -925,6 +938,77 @@ const CuratorDashboard = () => {
                   </div>
                 </section>
               </div>
+
+              {/* MASTER REVIEWER MODAL */}
+              {reviewingCurator && (
+                <div className="modal-overlay flex-center" style={{zIndex: 2000}}>
+                  <div className="modal-content glass-card shadow-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <header className="flex-between mb-8 border-b border-thistle pb-4">
+                      <div>
+                        <h2 className="font-headline text-primary">{reviewingCurator.business_name || 'Project: Anonymous'}</h2>
+                        <p className="text-sm opacity-60">Architectural Review for {reviewingCurator.profiles?.full_name}</p>
+                      </div>
+                      <button onClick={() => setReviewingCurator(null)} className="icon-btn"><LogOut size={20} /></button>
+                    </header>
+
+                    <div className="review-grid" style={{display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 1fr', gap: '3rem'}}>
+                      {/* Left: Identity Audit */}
+                      <div className="audit-identity">
+                        <h4 className="font-label text-gold mb-4">Boutique Identity</h4>
+                        <div className="p-6 bg-surface rounded-xl mb-6">
+                          <p className="font-headline text-lg mb-2">{reviewingCurator.tagline || 'No Tagline Set'}</p>
+                          <p className="text-sm italic opacity-80 mb-4">"{reviewingCurator.bio || 'No Bio Provided'}"</p>
+                          <div className="flex gap-4 text-xs opacity-60">
+                             <span><MapPin size={12} /> {reviewingCurator.location || 'Remote'}</span>
+                             <span><Globe size={12} /> {reviewingCurator.website ? 'Web Presence Verified' : 'No External Link'}</span>
+                          </div>
+                        </div>
+
+                        <h4 className="font-label text-gold mb-4">Architect's Decision</h4>
+                        <textarea 
+                          className="feedback-input h-32 mb-4"
+                          placeholder="Provide corrections or architectural guidance..."
+                          value={adminFeedbackMap[reviewingCurator.id] || ''}
+                          onChange={(e) => setAdminFeedbackMap({...adminFeedbackMap, [reviewingCurator.id]: e.target.value})}
+                        ></textarea>
+                        <div className="flex gap-4">
+                          <button 
+                            onClick={() => { approveVendor(reviewingCurator.id, adminFeedbackMap[reviewingCurator.id]); setReviewingCurator(null); }}
+                            className="btn-solid-gold flex-1"
+                          >Approve Sanctuary</button>
+                          <button 
+                            onClick={() => { rejectVendor(reviewingCurator.id, adminFeedbackMap[reviewingCurator.id]); setReviewingCurator(null); }}
+                            className="btn-outline-primary flex-1"
+                            style={{color: '#ff4b4b', borderColor: '#ff4b4b'}}
+                          >Reject Artifacts</button>
+                        </div>
+                      </div>
+
+                      {/* Right: Artifact Audit */}
+                      <div className="audit-artifacts">
+                         <h4 className="font-label text-gold mb-4">Artisan Collection ({reviewingCuratorProducts.length})</h4>
+                         <div className="review-product-list" style={{display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '10px'}}>
+                            {reviewingCuratorProducts.map(prod => (
+                              <div key={prod.id} className="review-prod-item flex gap-4 p-3 glass-card" style={{padding: '0.75rem', transform: 'none'}}>
+                                 <img src={prod.image_url} alt="" style={{width: '60px', height: '60px', borderRadius: '8px', objectFit: 'cover'}} />
+                                 <div style={{flex: 1}}>
+                                    <p className="font-bold text-sm">{prod.name}</p>
+                                    <p className="text-xs text-gold">${prod.price}</p>
+                                    <p className="text-[10px] opacity-60 line-clamp-2">{prod.description}</p>
+                                 </div>
+                              </div>
+                            ))}
+                            {reviewingCuratorProducts.length === 0 && (
+                              <div className="text-center py-10 opacity-40 italic text-sm">
+                                 No artifacts have been uploaded to this sanctuary.
+                              </div>
+                            )}
+                         </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
               </div>
             ) : <Navigate to="identity" replace />

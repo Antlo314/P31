@@ -72,25 +72,30 @@ const Directory = () => {
   const fetchRealCurators = async () => {
     const { data } = await supabase
       .from('curator_data')
-      .select('*, profiles(full_name, avatar_url, email)');
+      .select('*, profiles(full_name, avatar_url, email)')
+      .eq('status', 'approved'); // Only show approved sanctuaries
+    
+    // Pick exactly 2 examples as requested
+    const examples = vendors.filter(v => v.id === 1 || v.id === 4);
     
     if (data && data.length > 0) {
-      // Merge real data with static mockups for visual excellence
       const realVendors = data.map(d => ({
         id: d.id,
-        name: d.profiles.full_name,
+        name: d.profiles?.full_name || 'Artisan',
         businessName: d.business_name,
         bio: d.bio,
         products: d.tagline || 'P31 Collective',
-        image: d.profiles.avatar_url || vendor1,
+        image: d.profiles?.avatar_url || vendor1,
         slug: d.slug,
         isFounder: d.is_early_bird,
         isAdmin: ['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'].includes(d.profiles?.email?.toLowerCase())
       }));
       
-      // Filter out those who haven't set up a business name yet
+      // Filter out those who haven't set up a business name yet (sanity check)
       const filtered = realVendors.filter(v => v.businessName);
-      if (filtered.length > 0) setActiveVendors([...filtered, ...vendors.filter(v => v.id !== 5)]);
+      setActiveVendors([...filtered, ...examples]);
+    } else {
+      setActiveVendors(examples);
     }
   };
   useEffect(() => {
