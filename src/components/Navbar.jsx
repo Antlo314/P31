@@ -4,7 +4,8 @@ import { Menu, X, Crown, Leaf, User, LogOut, Layout } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
-import logoPath from '../assets/p31_logo_legacy_transparent.png';
+import logoPath from '../assets/logo.png';
+import logo2Path from '../assets/logo2.png';
 
 const Navbar = () => {
   const { user, profile, curatorData, isAdmin, signOut } = useAuth();
@@ -81,7 +82,7 @@ const Navbar = () => {
           </button>
           
           <div className="mobile-menu-brand">
-            <img src={logoPath} alt="P31" className="mobile-brand-logo" />
+            <img src={logo2Path} alt="P31" className="mobile-brand-logo" />
           </div>
 
           <div className="mobile-menu-links">

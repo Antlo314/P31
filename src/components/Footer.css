@@ -61,6 +61,14 @@
   margin-top: 1rem;
 }
 
+.footer-logo-img {
+  height: 72px;
+  width: auto;
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.4));
+}
+
 /* Social icons */
 .socials-v2 {
   display: flex;

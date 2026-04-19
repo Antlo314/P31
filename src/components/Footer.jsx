@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook } from 'lucide-react';
+import logo2Path from '../assets/logo2.png';
 import './Footer.css';
 
 const Footer = () => {
@@ -10,7 +11,7 @@ const Footer = () => {
         <div className="footer-top-v2">
           
           <div className="footer-logo-area">
-            <h2 className="font-headline text-gold" style={{ fontSize: '2rem', marginBottom: '1.5rem', color: 'var(--metallic-gold)' }}>P31.</h2>
+            <img src={logo2Path} alt="P31 Marketplace" className="footer-logo-img" />
             <p>
               A traveling collective of creativity, empowering women to rise and build using their gifts.
             </p>
