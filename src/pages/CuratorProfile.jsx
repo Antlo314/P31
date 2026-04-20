@@ -8,93 +8,62 @@ import './CuratorProfile.css';
 import './CuratorProfileMiniShop.css';
 
 // Mock images fallback
-import vendorCandles from '../assets/vendor_candles.png';
-import vendorSkincare from '../assets/vendor_skincare.png';
-import mistImg from '../assets/curators/ilcollection/mist.png';
-import oilImg from '../assets/curators/ilcollection/oil.png';
-import bathroomAccent from '../assets/curators/ilcollection/bathroom_accent.png';
+import serumImg from '../assets/curators/ilcollection/serum_official.png';
+import oilImg from '../assets/curators/ilcollection/oil_official.png';
+import eyeCreamImg from '../assets/curators/ilcollection/eye_cream_official.png';
+import cleanserImg from '../assets/curators/ilcollection/cleanser_official.png';
+import collectionSetImg from '../assets/curators/ilcollection/luxe_box_official.png';
 import heroUltra from '../assets/curators/ilcollection/hero_ultra.png';
 import portraitUltra from '../assets/curators/ilcollection/portrait_ultra.png';
-import candleUltra from '../assets/curators/ilcollection/candle.png';
-import eyeCreamUltra from '../assets/curators/ilcollection/eye_cream_ultra.png';
-import mentorshipUltra from '../assets/curators/ilcollection/mentorship_ultra.png';
-import teaUltra from '../assets/curators/ilcollection/tea_ultra.png';
-import exfoliantUltra from '../assets/curators/ilcollection/exfoliant_ultra.png';
+import bathroomAccent from '../assets/curators/ilcollection/bathroom_accent.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const IL_COLLECTION_PRODUCTS = [
   {
-    id: 'il-1',
-    name: 'Enlighten Hydrating Face & Hair Mist',
-    category: 'Essentials',
-    price: 42.00,
-    description: 'A divine hydrating mist for face and hair, rooted in purity and purpose.',
-    image_url: mistImg,
-    external_url: 'https://www.nebaministry.org/product-page/enlighten-hydrating-face-hair-mist'
+    id: 'il-serum',
+    name: 'Illumine™ Brightening & Anti-aging Serum',
+    category: 'Skin',
+    price: 59.98,
+    description: 'A powerful anti-aging and brightening serum rooted in pure botanical power.',
+    image_url: serumImg,
+    external_url: 'https://www.nebaministry.org/product-page/illumine-brightening-anti-aging-serum'
   },
   {
-    id: 'il-2',
-    name: 'The Soul Glow Hydrating Oil',
-    category: 'Essentials',
-    price: 62.00,
-    description: 'Hand-crafted organic oil designed to radiate your divine inner glow.',
+    id: 'il-woke-oil',
+    name: 'Woke™ Luxury Oil',
+    category: 'Skin',
+    price: 27.98,
+    description: 'A divine hydrating oil that radiates beauty and purpose.',
     image_url: oilImg,
-    external_url: 'https://www.nebaministry.org/product-page/the-soul-glow-hydrating-oil'
+    external_url: 'https://www.nebaministry.org/product-page/awaken-glow-oil'
   },
   {
-    id: 'il-3',
-    name: 'The IL Collection Set',
-    category: 'Essentials',
-    price: 114.00,
-    description: 'The complete sanctuary experience for the Proverbs 31 woman.',
-    image_url: mistImg,
-    external_url: 'https://www.nebaministry.org/product-page/the-il-collection'
-  },
-  {
-    id: 'il-4',
-    name: 'Awaken Healing Soy Candle',
-    category: 'Atmosphere',
-    price: 28.00,
-    description: 'Hand-poured soy candle infused with healing scents to awaken your spirit.',
-    image_url: candleUltra,
-    external_url: 'https://www.nebaministry.org/product-page/awaken-healing-soy-candle'
-  },
-  {
-    id: 'il-5',
-    name: 'Restore Eye Cream',
-    category: 'Skincare',
-    price: 54.00,
-    description: 'Potent botanical eye cream designed to restore and brighten tired eyes.',
-    image_url: eyeCreamUltra,
+    id: 'il-restore-eye',
+    name: 'Restore™ Eye Cream',
+    category: 'Skin',
+    price: 34.98,
+    description: 'Bespoke eye restoration to illuminate and refresh.',
+    image_url: eyeCreamImg,
     external_url: 'https://www.nebaministry.org/product-page/restore-eye-cream'
   },
   {
-    id: 'il-6',
-    name: 'Awaken 30-Day Mentorship',
-    category: 'Spiritual',
-    price: 97.00,
-    description: 'A transformative 30-day spiritual mentorship and devotional journey.',
-    image_url: mentorshipUltra,
-    external_url: 'https://www.nebaministry.org/product-page/awaken-mentorship'
+    id: 'il-brightstar',
+    name: 'Brightstar™ Manuka Honey Cleanser',
+    category: 'Skin',
+    price: 27.98,
+    description: 'A gentle, honey-based cleanser for deep purity.',
+    image_url: cleanserImg,
+    external_url: 'https://www.nebaministry.org/product-page/brightstar-manuka-honey-cleanser'
   },
   {
-    id: 'il-7',
-    name: 'Garden Restore Tea',
+    id: 'il-luxe-box',
+    name: 'Incandescent Luxe Box™',
     category: 'Wellness',
-    price: 24.00,
-    description: 'Organic herbal tea blend harvested from the sanctuary garden for deep restoration.',
-    image_url: teaUltra,
-    external_url: 'https://www.nebaministry.org/product-page/garden-restore-tea'
-  },
-  {
-    id: 'il-10',
-    name: 'Manuka Honey Exfoliant',
-    category: 'Skincare',
-    price: 48.00,
-    description: 'Luxury Manuka honey exfoliant for a smooth, radiant complexion.',
-    image_url: exfoliantUltra,
-    external_url: 'https://www.nebaministry.org/product-page/manuka-honey-exfoliant'
+    price: 174.98,
+    description: 'The ultimate botanical collection set for the complete sanctuary experience.',
+    image_url: collectionSetImg,
+    external_url: 'https://www.nebaministry.org/product-page/the-il-collection'
   }
 ];
 
@@ -301,13 +270,13 @@ const CuratorProfile = () => {
 
           <section className="cp-spotlight-section">
             <div className="cp-spotlight-card">
-              <img src={IL_COLLECTION_PRODUCTS[2].image_url} alt="The Collection Set" className="cp-spotlight-img" />
+              <img src={IL_COLLECTION_PRODUCTS[0].image_url} alt={IL_COLLECTION_PRODUCTS[0].name} className="cp-spotlight-img" />
               <div className="cp-spotlight-info">
-                <span className="overline-gold">Master Architect Selection</span>
-                <h2>The Complete Sanctuary Set</h2>
-                <p>The ultimate botanical ritual designed for the Proverbs 31 woman who prioritizes her physical and spiritual well-being.</p>
-                <a href={IL_COLLECTION_PRODUCTS[2].external_url} target="_blank" rel="noreferrer" className="btn-solid-gold">
-                  Explore The Set <ArrowRight size={18} />
+                <span className="overline-gold">Matriarch Spotlight</span>
+                <h2>{IL_COLLECTION_PRODUCTS[0].name}</h2>
+                <p>{IL_COLLECTION_PRODUCTS[0].description}</p>
+                <a href={IL_COLLECTION_PRODUCTS[0].external_url} target="_blank" rel="noreferrer" className="btn-solid-gold">
+                  Explore The Serum <ArrowRight size={18} />
                 </a>
               </div>
             </div>

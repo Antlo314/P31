@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { MapPin } from 'lucide-react';
 import './Home.css';
 
 import heroVid     from '../assets/hero.mp4';
@@ -98,6 +99,25 @@ const Home = () => {
           <div className="hero-ctas">
             <a href="#newsletter" className="btn-gold-pill">Join the Inner Circle</a>
             <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noopener noreferrer" className="btn-ghost-pill">Become a Curator</a>
+          </div>
+        </div>
+
+        {/* ── LOCATION CARD ──────────────────────────────────── */}
+        <div className="hero-location-card glass-card reveal">
+          <div className="location-card-header">
+            <MapPin size={18} className="text-gold" />
+            <span className="location-label">Location</span>
+          </div>
+          <div className="location-card-content">
+            <h4 className="location-venue">Embassy Suites</h4>
+            <p className="location-address">
+              2029 Satellite Blvd<br />
+              Duluth, GA 30097
+            </p>
+          </div>
+          <div className="location-card-indicator">
+            <div className="pulse-dot" />
+            <span>Market in Session</span>
           </div>
         </div>
 

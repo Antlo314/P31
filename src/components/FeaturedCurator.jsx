@@ -5,9 +5,10 @@ import { Sparkles, Crown, ArrowRight } from 'lucide-react';
 import './FeaturedCurator.css';
 
 import melanieAvatar from '../assets/melanie_rm_1.png';
-import mistImg from '../assets/curators/ilcollection/mist.png';
 import oilImg from '../assets/curators/ilcollection/oil.png';
 import logoImg from '../assets/curators/ilcollection/logo.png';
+
+const MIST_WIX_URL = 'https://static.wixstatic.com/media/a60154_6mzv95gw89fc41d08679ba2089fc41d08679ba20~mv2.png';
 
 const FeaturedCurator = () => {
   const sectionRef = useRef(null);
@@ -83,7 +84,7 @@ const FeaturedCurator = () => {
               <img src={logoImg} alt="IL Collection" className="fc-logo" />
               <div className="fc-product-glance">
                 <div className="fc-product-mini">
-                  <img src={mistImg} alt="Enlighten Mist" />
+                  <img src={MIST_WIX_URL} alt="Enlighten Mist" />
                   <span>Enlighten Mist</span>
                 </div>
                 <div className="fc-product-mini">

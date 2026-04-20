@@ -141,4 +141,14 @@
   .cp-spotlight-info h2 {
     font-size: 2.2rem;
   }
+
+  /* Force 1-column grid for mini-shop catalog on mobile */
+  .il-mini-shop .cp-products-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .il-mini-shop .cp-product-img-wrapper {
+    aspect-ratio: 4/5;
+  }
 }
