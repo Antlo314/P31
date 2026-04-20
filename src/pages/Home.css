@@ -753,11 +753,13 @@
   }
 
   .mission-img-frame {
-    min-height: 350px;
-    max-height: 50vw;
+    min-height: 480px; /* Increased for better cinematic fit on mobile */
+    max-height: 70vh;
   }
 
-  .mission-text-col { padding: 6vh 5vw; }
+  .mission-text-col { 
+    padding: 10vh 8vw; /* Slightly more breathable padding */
+  }
 
   .date-row {
     grid-template-columns: 80px 1fr auto;
@@ -775,7 +777,9 @@
   }
 
   .hero-headline {
-    font-size: clamp(2.6rem, 11vw, 4rem);
+    font-size: clamp(2.8rem, 12vw, 4.2rem);
+    line-height: 1.1;
+    letter-spacing: -0.5px;
   }
 
   .home-scripture__body {
@@ -792,7 +796,9 @@
   }
 
   .scripture-quote {
-    font-size: clamp(1.4rem, 6vw, 2rem);
+    font-size: clamp(1.4rem, 5.5vw, 1.8rem);
+    line-height: 1.6;
+    margin-bottom: 2rem;
   }
 
   .home-pillars { padding: 8vh 5vw; }
@@ -831,9 +837,35 @@
   }
 
   .location-box {
-    padding: 30px 20px;
+    padding: 32px 24px;
     flex-direction: column;
     align-items: center;
     text-align: center;
+    border-radius: 20px;
+    background: var(--surface-alt);
+  }
+
+  .home-mission {
+    border-bottom: 1px solid var(--outline-variant);
+    overflow: hidden;
+  }
+
+  .mission-text-col {
+    padding: 8vh 6vw;
+    align-items: center;
+    text-align: center;
+  }
+
+  .mission-body {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .mission-tags {
+    justify-content: center;
+  }
+
+  .mt-cta {
+    align-self: center;
   }
 }

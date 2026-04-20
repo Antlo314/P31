@@ -7,9 +7,8 @@ import './Home.css';
 
 import heroVid     from '../assets/hero.mp4';
 import faithVid    from '../assets/faith.mp4';
-import missionVid  from '../assets/p31market.mp4';
+import missionVid  from '../assets/p31market2.mp4';
 import visionaryVid from '../assets/visionary.mp4';
-import FeaturedCurator from '../components/FeaturedCurator';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -199,10 +198,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── FEATURED CURATOR — IL Collection — Melanie ─────── */}
-      <FeaturedCurator />
 
-      {/* ── PARTNER TEASER — Plum / Gold ─────────────────── */}
+      {/* ── PARTNER TEASER ── */}
       <section className="home-partner py-24">
         <div className="partner-content container reveal">
           <div className="section-header reveal text-center mb-5">
