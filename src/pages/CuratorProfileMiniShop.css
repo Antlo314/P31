@@ -142,13 +142,46 @@
     font-size: 2.2rem;
   }
 
-  /* Force 1-column grid for mini-shop catalog on mobile */
+  /* Strict Uniformity for Mini-Shop Products on Mobile */
   .il-mini-shop .cp-products-grid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Tight 2-column grid */
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+
+  .il-mini-shop .cp-product-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 1rem;
   }
 
   .il-mini-shop .cp-product-img-wrapper {
-    aspect-ratio: 4/5;
+    aspect-ratio: 1/1; /* Force square for uniformity */
+    margin-bottom: 0.75rem;
+    border-radius: 12px;
+  }
+
+  .il-mini-shop .cp-product-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+  }
+
+  .il-mini-shop .cp-product-info h4 {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    min-height: 2.4em; /* Ensure titles take up same exact space */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .il-mini-shop .cp-product-price {
+    font-size: 0.9rem;
+    margin-top: auto;
   }
 }

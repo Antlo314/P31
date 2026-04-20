@@ -17,7 +17,7 @@ const vendors = [
     id: '545b1f22-6780-49a8-a3c6-408812815fb0',
     name: 'Melanie JC',
     businessName: 'Incandescent Lily Collection',
-    bio: 'Transforming the beauty industry by creating wellness and body care rooted in purity, purpose, and divine intention. Built for the Proverbs 31 woman.',
+    bio: 'Transforming the beauty industry by creating wellness and body care rooted in purity and purpose. Built for the Proverbs 31 woman.',
     products: 'Bespoke Wellness, Bodycare',
     image: 'https://static.wixstatic.com/media/a60154_732e513fd3594078b0b4c1d08679ba20~mv2.png',
     social: 'https://instagram.com/ilcollection__',

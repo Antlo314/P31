@@ -94,7 +94,7 @@ const Home = () => {
             <em>Make Room.</em>
           </h1>
           <p className="hero-body">
-            A traveling sanctuary for women creatives, artisans, and visionaries.
+            A premium curated marketplace for women creatives, artisans, and visionaries.
           </p>
           <div className="hero-ctas">
             <a href="#newsletter" className="btn-gold-pill">Join the Inner Circle</a>
@@ -102,24 +102,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* ── LOCATION CARD ──────────────────────────────────── */}
-        <div className="hero-location-card glass-card reveal">
-          <div className="location-card-header">
-            <MapPin size={18} className="text-gold" />
-            <span className="location-label">Location</span>
-          </div>
-          <div className="location-card-content">
-            <h4 className="location-venue">Embassy Suites</h4>
-            <p className="location-address">
-              2029 Satellite Blvd<br />
-              Duluth, GA 30097
-            </p>
-          </div>
-          <div className="location-card-indicator">
-            <div className="pulse-dot" />
-            <span>Market in Session</span>
-          </div>
-        </div>
 
         {/* Scrolling ticker at bottom */}
         <div className="hero-ticker">
@@ -163,7 +145,7 @@ const Home = () => {
         <div className="pillars-grid">
           {[
             { num: '01', icon: 'diamond',    title: 'Artisan Crafted',   body: 'Elite, hand-selected curators representing the pinnacle of craftsmanship and true beauty.' },
-            { num: '02', icon: 'diversity_3', title: 'Divine Networking', body: 'A community of visionary women cultivating powerful, faith-driven connections.' },
+            { num: '02', icon: 'diversity_3', title: 'Strategic Networking', body: 'A community of visionary women cultivating powerful, faith-driven connections.' },
             { num: '03', icon: 'nightlife',  title: 'Exclusive Ambiance', body: 'A majestic, high-end atmosphere elevated by curated aesthetics and live music.' },
           ].map(p => (
             <div className="pillar-item reveal" key={p.num}>
@@ -193,10 +175,10 @@ const Home = () => {
           <h2 className="mission-headline">Melanie Jeffers-Cameron</h2>
           <p className="mission-sub">The Matriarch of P31 Marketplace</p>
           <p className="mission-body">
-            Proverbs 31 Marketplace is a traveling sanctuary for creativity.
+            Proverbs 31 Marketplace is a global marketplace for creativity.
             We honor the modern woman of influence by providing a premium
-            platform to showcase her divine gifts. Every curator is hand-selected,
-            representing entrepreneurial excellence. Rooted in purpose, we create
+            platform to showcase her unique gifts. Every curator is hand-selected,
+            representing entrepreneurial excellence. Rooted in purposeful elegance, we create
             spaces where faith and luxury converge.
           </p>
 
@@ -223,9 +205,9 @@ const Home = () => {
       {/* ── PARTNER TEASER — Plum / Gold ─────────────────── */}
       <section className="home-partner py-24">
         <div className="partner-content container reveal">
-          <div className="partner-text-wrapper text-center">
-             <span className="eyebrow-label eyebrow-gold">Collaboration</span>
-             <h2 className="partner-headline font-headline text-white">Partner with the Movement</h2>
+          <div className="section-header reveal text-center mb-5">
+          <span className="eyebrow-label text-gold">Bespoke Offerings</span>
+          <h1 className="display-3 font-headline text-white mb-4">Elevate Your Presence</h1>
              <p className="partner-body max-w-2xl mx-auto opacity-80 mt-6 mb-10">
                Proverbs 31 Marketplace is more than an event—it is a movement. Join us in cultivating spaces where faith, purpose, and community converge.
              </p>
@@ -261,6 +243,34 @@ const Home = () => {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ── VISIT US — Dedicated Location Section ───────────── */}
+      <section className="home-location-section reveal">
+        <div className="location-inner">
+          <div className="location-text">
+            <span className="eyebrow-label eyebrow-plum">Visit Us</span>
+            <h2 className="location-title">Our Next Market Location</h2>
+            <p className="location-desc">
+              Join us for a day of discovery and community at the heart of Duluth.
+            </p>
+          </div>
+          <div className="location-box glass-card">
+            <div className="location-icon">
+              <MapPin size={32} className="text-gold" />
+            </div>
+            <div className="location-details">
+              <h3 className="location-venue">Embassy Suites</h3>
+              <p className="location-address">
+                2029 Satellite Blvd<br />
+                Duluth, GA 30097
+              </p>
+              <div className="location-market-date">
+                <span>June 28, 2026</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -58,8 +58,8 @@ const FeaturedCurator = () => {
             </div>
             
             <h2 className="fc-headline font-headline">
-              The Divine <br />
-              <em>Sanctuary.</em>
+              The Botanical <br />
+              <em>Exhibition.</em>
             </h2>
             
             <p className="fc-subline">
@@ -74,7 +74,7 @@ const FeaturedCurator = () => {
 
             <div className="fc-actions">
               <Link to="/ilcollection" className="btn-solid-gold">
-                Visit Sanctuary <ArrowRight size={18} />
+                Explore Collection <ArrowRight size={18} />
               </Link>
             </div>
           </div>

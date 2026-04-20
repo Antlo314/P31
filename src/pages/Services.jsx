@@ -37,13 +37,13 @@ const Services = () => {
       icon: "diversity_3"
     },
     {
-      title: "Sanctuary Design",
+      title: "Bespoke Design",
       desc: "Architectural consultation for physical market spaces and digital storefronts. We create atmospheres where luxury and purpose converge.",
       icon: "architecture"
     },
     {
       title: "Curator Coaching",
-      desc: "One-on-one mentorship for the Proverbs 31 woman of influence. Mastering the balance of entrepreneurial excellence and divine purpose.",
+      desc: "One-on-one mentorship for the Proverbs 31 woman of influence. Mastering the balance of entrepreneurial excellence and purposeful elegance.",
       icon: "auto_awesome"
     }
   ];
@@ -53,7 +53,7 @@ const Services = () => {
       <section className="services-hero">
         <div className="services-hero__overlay" />
         <div className="services-hero__content">
-          <span className="eyebrow-label text-gold">Divine Offerings</span>
+          <span className="eyebrow-label text-gold">Elite Offerings</span>
           <h1 className="services-headline">Services & <br /><em>Strategic Curation.</em></h1>
           <p className="services-sub">
             Tailored experiences and strategic support for the modern woman of influence. 

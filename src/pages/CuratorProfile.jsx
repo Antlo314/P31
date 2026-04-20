@@ -34,7 +34,7 @@ const IL_COLLECTION_PRODUCTS = [
     name: 'Woke™ Luxury Oil',
     category: 'Skin',
     price: 27.98,
-    description: 'A divine hydrating oil that radiates beauty and purpose.',
+    description: 'A premium hydrating oil that radiates beauty and purpose.',
     image_url: oilImg,
     external_url: 'https://www.nebaministry.org/product-page/awaken-glow-oil'
   },
@@ -61,7 +61,7 @@ const IL_COLLECTION_PRODUCTS = [
     name: 'Incandescent Luxe Box™',
     category: 'Wellness',
     price: 174.98,
-    description: 'The ultimate botanical collection set for the complete sanctuary experience.',
+    description: 'The ultimate botanical collection set for the complete artisan experience.',
     image_url: collectionSetImg,
     external_url: 'https://www.nebaministry.org/product-page/the-il-collection'
   }
@@ -70,8 +70,8 @@ const IL_COLLECTION_PRODUCTS = [
 const MELANIE_CURATOR_DATA = {
   id: '545b1f22-6780-49a8-a3c6-408812815fb0',
   business_name: 'Incandescent Lily Collection',
-  tagline: 'Wellness and body care rooted in purity and divine intention.',
-  bio: 'Transforming the beauty industry by creating wellness and body care rooted in purity, purpose, and divine intention. Built for the Proverbs 31 woman.',
+  tagline: 'Wellness and body care rooted in purity and intentional design.',
+  bio: 'Transforming the beauty industry by creating wellness and body care rooted in purity and purpose. Built for the Proverbs 31 woman.',
   instagram: 'ilcollection__',
   website: 'https://www.nebaministry.org/ilcollection',
   slug: 'ilcollection',
