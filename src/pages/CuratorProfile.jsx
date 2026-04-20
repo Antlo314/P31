@@ -13,6 +13,13 @@ import vendorSkincare from '../assets/vendor_skincare.png';
 import mistImg from '../assets/curators/ilcollection/mist.png';
 import oilImg from '../assets/curators/ilcollection/oil.png';
 import bathroomAccent from '../assets/curators/ilcollection/bathroom_accent.png';
+import heroUltra from '../assets/curators/ilcollection/hero_ultra.png';
+import portraitUltra from '../assets/curators/ilcollection/portrait_ultra.png';
+import candleUltra from '../assets/curators/ilcollection/candle.png';
+import eyeCreamUltra from '../assets/curators/ilcollection/eye_cream_ultra.png';
+import mentorshipUltra from '../assets/curators/ilcollection/mentorship_ultra.png';
+import teaUltra from '../assets/curators/ilcollection/tea_ultra.png';
+import exfoliantUltra from '../assets/curators/ilcollection/exfoliant_ultra.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -50,7 +57,7 @@ const IL_COLLECTION_PRODUCTS = [
     category: 'Atmosphere',
     price: 28.00,
     description: 'Hand-poured soy candle infused with healing scents to awaken your spirit.',
-    image_url: 'https://static.wixstatic.com/media/4ede06_2633224a4c7348daa15c904aa06772af~mv2.png',
+    image_url: candleUltra,
     external_url: 'https://www.nebaministry.org/product-page/awaken-healing-soy-candle'
   },
   {
@@ -59,7 +66,7 @@ const IL_COLLECTION_PRODUCTS = [
     category: 'Skincare',
     price: 54.00,
     description: 'Potent botanical eye cream designed to restore and brighten tired eyes.',
-    image_url: 'https://static.wixstatic.com/media/4ede06_73ec5408a0d04c2e8979ba208979ba20~mv2.png',
+    image_url: eyeCreamUltra,
     external_url: 'https://www.nebaministry.org/product-page/restore-eye-cream'
   },
   {
@@ -68,7 +75,7 @@ const IL_COLLECTION_PRODUCTS = [
     category: 'Spiritual',
     price: 97.00,
     description: 'A transformative 30-day spiritual mentorship and devotional journey.',
-    image_url: 'https://static.wixstatic.com/media/4ede06_0669ba2089fc41d08679ba2089fc41d08679ba20~mv2.png',
+    image_url: mentorshipUltra,
     external_url: 'https://www.nebaministry.org/product-page/awaken-mentorship'
   },
   {
@@ -77,7 +84,7 @@ const IL_COLLECTION_PRODUCTS = [
     category: 'Wellness',
     price: 24.00,
     description: 'Organic herbal tea blend harvested from the sanctuary garden for deep restoration.',
-    image_url: 'https://static.wixstatic.com/media/4ede06_4eb45ce289fc4808a3d4ac2e41d1867a~mv2.png',
+    image_url: teaUltra,
     external_url: 'https://www.nebaministry.org/product-page/garden-restore-tea'
   },
   {
@@ -86,7 +93,7 @@ const IL_COLLECTION_PRODUCTS = [
     category: 'Skincare',
     price: 48.00,
     description: 'Luxury Manuka honey exfoliant for a smooth, radiant complexion.',
-    image_url: 'https://static.wixstatic.com/media/4ede06_1062b8e309fc4d098e986079930f7608~mv2.png',
+    image_url: exfoliantUltra,
     external_url: 'https://www.nebaministry.org/product-page/manuka-honey-exfoliant'
   }
 ];
@@ -105,7 +112,7 @@ const MELANIE_CURATOR_DATA = {
   profiles: {
     full_name: 'Melanie JC',
     email: 'proverbs31markets@gmail.com',
-    avatar_url: 'https://static.wixstatic.com/media/a60154_732e513fd3594078b0b4c1d08679ba20~mv2.png'
+    avatar_url: portraitUltra
   },
   created_at: '2026-04-19'
 };
@@ -230,11 +237,12 @@ const CuratorProfile = () => {
       <section className="cp-hero-section">
          <div className="cp-hero-bg">
             <img 
-              src={curator.profiles?.avatar_url || 'https://images.unsplash.com/photo-1531123897727-8f129e1bfa82?auto=format&fit=crop&w=1200'} 
+              src={curator.slug === 'ilcollection' ? heroUltra : (curator.profiles?.avatar_url || 'https://images.unsplash.com/photo-1531123897727-8f129e1bfa82?auto=format&fit=crop&w=1200')} 
               alt={curator.business_name} 
               className="cp-hero-img" 
             />
             <div className="cp-hero-gradient"></div>
+            <div className="cp-hero-legibility"></div>
          </div>
           <div className="cp-hero-text container-fluid">
             <Link to="/directory" className="link-gold-inline" style={{marginBottom: '2rem', display: 'inline-block'}}>&larr; Back to Directory</Link>
@@ -252,9 +260,16 @@ const CuratorProfile = () => {
               {curator.location && <span className="cp-location-pill"><MapPin size={12} /> {curator.location}</span>}
             </div>
 
-            <h4 className="overline-gold">{curator.profiles?.full_name}</h4>
-            <h1 className="cp-biz-name">{curator.business_name}</h1>
-            <p className="cp-biz-tagline">{curator.tagline}</p>
+            <div className="cp-hero-branding-row">
+               <div className="cp-hero-avatar-wrapper">
+                 <img src={curator.profiles?.avatar_url} alt={curator.profiles?.full_name} className="cp-hero-avatar" />
+               </div>
+               <div className="cp-hero-branding-info">
+                 <h4 className="overline-gold">{curator.profiles?.full_name}</h4>
+                 <h1 className="cp-biz-name">{curator.business_name}</h1>
+                 <p className="cp-biz-tagline">{curator.tagline}</p>
+               </div>
+            </div>
 
             <div className="cp-social-strip">
               {curator.instagram && (

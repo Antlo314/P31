@@ -96,9 +96,16 @@
   background: linear-gradient(
     to bottom,
     rgba(14, 5, 18, 0) 0%,
-    rgba(14, 5, 18, 0.5) 50%,
     #0e0512 100%
   );
+}
+
+/* Legibility Layer — subtle dark vignette for text clarity */
+.cp-hero-legibility {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 70%, rgba(14, 5, 18, 0.4), transparent 70%);
+  z-index: 1;
 }
 
 /* Amethyst tint overlay — very subtle purple cast */
@@ -144,13 +151,15 @@
   margin-bottom: 0.75rem;
   letter-spacing: -0.5px;
   color: var(--pure-white);
+  text-shadow: 0 4px 20px rgba(0,0,0,0.6);
 }
 
 .cp-biz-tagline {
   font-size: clamp(1rem, 1.8vw, 1.3rem);
   color: var(--metallic-gold);
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: 0.03em;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
 }
 
 /* ── Bio Section ───────────────────────────────────────── */
