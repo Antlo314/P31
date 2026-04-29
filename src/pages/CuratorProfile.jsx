@@ -206,7 +206,7 @@ const CuratorProfile = () => {
       <section className="cp-hero-section">
          <div className="cp-hero-bg">
             <img 
-              src={curator.slug === 'ilcollection' ? heroUltra : (curator.profiles?.avatar_url || 'https://images.unsplash.com/photo-1531123897727-8f129e1bfa82?auto=format&fit=crop&w=1200')} 
+              src={curator.slug === 'ilcollection' ? heroUltra : (curator.banner_url || curator.profiles?.avatar_url || 'https://images.unsplash.com/photo-1531123897727-8f129e1bfa82?auto=format&fit=crop&w=1200')} 
               alt={curator.business_name} 
               className="cp-hero-img" 
             />
@@ -231,7 +231,7 @@ const CuratorProfile = () => {
 
             <div className="cp-hero-branding-row">
                <div className="cp-hero-avatar-wrapper">
-                 <img src={curator.profiles?.avatar_url} alt={curator.profiles?.full_name} className="cp-hero-avatar" />
+                 <img src={curator.logo_url || curator.profiles?.avatar_url} alt={curator.business_name} className="cp-hero-avatar" />
                </div>
                <div className="cp-hero-branding-info">
                  <h4 className="overline-gold">{curator.profiles?.full_name}</h4>

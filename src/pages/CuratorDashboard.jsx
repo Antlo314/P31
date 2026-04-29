@@ -23,7 +23,7 @@ const CuratorDashboard = () => {
   const [products, setProducts] = useState([]);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [productForm, setProductForm] = useState({ name: '', description: '', price: '', image_url: '' });
+  const [productForm, setProductForm] = useState({ name: '', description: '', price: '', image_url: '', category: 'Collection', external_url: '' });
   const [productImageLoading, setProductImageLoading] = useState(false);
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [partnershipInquiries, setPartnershipInquiries] = useState([]);
@@ -43,7 +43,9 @@ const CuratorDashboard = () => {
     facebook: '',
     website: '',
     phone: '',
-    publicEmail: ''
+    publicEmail: '',
+    bannerUrl: '',
+    logoUrl: ''
   });
   useEffect(() => {
     if (curatorData) {
@@ -57,7 +59,9 @@ const CuratorDashboard = () => {
         facebook: curatorData.facebook || '',
         website: curatorData.website || '',
         phone: curatorData.phone || '',
-        publicEmail: curatorData.public_email || ''
+        publicEmail: curatorData.public_email || '',
+        bannerUrl: curatorData.banner_url || '',
+        logoUrl: curatorData.logo_url || ''
       });
     }
   }, [curatorData]);
@@ -162,6 +166,8 @@ const CuratorDashboard = () => {
           website: editData.website,
           phone: editData.phone,
           public_email: editData.publicEmail,
+          banner_url: editData.bannerUrl,
+          logo_url: editData.logoUrl,
           slug: editData.slug.toLowerCase().replace(/[^a-z0-9-]/g, '')
         })
         .eq('id', user.id);
@@ -206,6 +212,76 @@ const CuratorDashboard = () => {
       alert('Digital Portrait Updated.');
     } catch (err) {
       alert('Error uploading image: ' + err.message);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleBannerUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setFormLoading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `banner-${user.id}-${Math.random()}.${fileExt}`;
+      const filePath = fileName;
+
+      const { error: uploadError } = await supabase.storage
+        .from('banners')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from('banners').getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from('curator_data')
+        .update({ banner_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+      
+      await fetchUserData(user.id);
+      setEditData(prev => ({ ...prev, bannerUrl: publicUrl }));
+      alert('Sanctuary Banner Updated.');
+    } catch (err) {
+      alert('Error uploading banner: ' + err.message);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setFormLoading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `logo-${user.id}-${Math.random()}.${fileExt}`;
+      const filePath = fileName;
+
+      const { error: uploadError } = await supabase.storage
+        .from('logos')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from('logos').getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from('curator_data')
+        .update({ logo_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+      
+      await fetchUserData(user.id);
+      setEditData(prev => ({ ...prev, logoUrl: publicUrl }));
+      alert('Boutique Logo Updated.');
+    } catch (err) {
+      alert('Error uploading logo: ' + err.message);
     } finally {
       setFormLoading(false);
     }
@@ -302,7 +378,7 @@ const CuratorDashboard = () => {
       }
       setIsProductModalOpen(false);
       setEditingProduct(null);
-      setProductForm({ name: '', description: '', price: '', image_url: '' });
+      setProductForm({ name: '', description: '', price: '', image_url: '', category: 'Collection', external_url: '' });
       fetchProducts();
     } catch (err) {
       alert('Error saving product: ' + err.message);
@@ -407,10 +483,10 @@ const CuratorDashboard = () => {
             <MessageSquare size={20} /> Collective Chat
           </button>
           <button 
-            disabled
-            className="nav-item disabled-tab"
+            onClick={() => setActiveTab('storefront')} 
+            className={`nav-item ${activeTab === 'storefront' ? 'active' : ''}`}
           >
-            <ShoppingBag size={20} /> Storefront <span className="tab-badge-soon">Soon</span>
+            <ShoppingBag size={20} /> Storefront
           </button>
 
           {isAdmin && (
@@ -673,21 +749,51 @@ const CuratorDashboard = () => {
             <div className="dashboard-view boutique-studio">
             <header className="dashboard-header flex-between">
               <div>
-                <h1 className="font-headline text-primary">Artisan <span className="text-gold">Studio</span></h1>
-                <p>Curate your botanical collection. Limit: 10 artifacts.</p>
+                <h1 className="font-headline text-primary">Marketplace <span className="text-gold">Studio</span></h1>
+                <p>Curate your botanical collection and shop aesthetics.</p>
               </div>
-              <button 
-                onClick={() => {
-                  setEditingProduct(null);
-                  setProductForm({ name: '', description: '', price: '', image_url: '' });
-                  setIsProductModalOpen(true);
-                }} 
-                className="btn-solid-gold flex-center gap-2"
-                disabled={products.length >= 10}
-              >
-                <Plus size={18} /> Add Artifact
-              </button>
+              <div className="flex-center gap-4">
+                {editData.slug && (
+                  <Link to={`/${editData.slug}`} target="_blank" className="btn-outline-primary flex-center gap-2">
+                    <ExternalLink size={16} /> View Store
+                  </Link>
+                )}
+                <button 
+                  onClick={() => {
+                    setEditingProduct(null);
+                    setProductForm({ name: '', description: '', price: '', image_url: '', category: 'Collection', external_url: '' });
+                    setIsProductModalOpen(true);
+                  }} 
+                  className="btn-solid-gold flex-center gap-2"
+                  disabled={products.length >= 10}
+                >
+                  <Plus size={18} /> Add Artifact
+                </button>
+              </div>
             </header>
+
+            {/* Storefront Aesthetic Manager */}
+            <section className="storefront-aesthetics glass-card mb-8">
+              <h2 className="card-title text-gold"><Sparkles size={20} /> Shop Aesthetics</h2>
+              <div className="aesthetics-grid">
+                <div className="aesthetic-upload">
+                  <label className="text-xs font-bold uppercase tracking-wider opacity-60 mb-2 block">Shop Banner</label>
+                  <div className="banner-preview-wrapper" onClick={() => document.getElementById('banner-input').click()}>
+                    {editData.bannerUrl ? <img src={editData.bannerUrl} alt="Banner" /> : <div className="banner-placeholder"><Camera size={32} /><p>Upload Banner</p></div>}
+                    <div className="upload-overlay"><Camera size={24} /></div>
+                  </div>
+                  <input type="file" id="banner-input" hidden accept="image/*" onChange={handleBannerUpload} />
+                </div>
+                <div className="aesthetic-upload logo-upload">
+                  <label className="text-xs font-bold uppercase tracking-wider opacity-60 mb-2 block">Shop Logo</label>
+                  <div className="logo-preview-wrapper" onClick={() => document.getElementById('logo-input').click()}>
+                    {editData.logoUrl ? <img src={editData.logoUrl} alt="Logo" /> : <div className="logo-placeholder"><Sparkles size={24} /></div>}
+                    <div className="upload-overlay"><Camera size={18} /></div>
+                  </div>
+                  <input type="file" id="logo-input" hidden accept="image/*" onChange={handleLogoUpload} />
+                </div>
+              </div>
+            </section>
 
             <div className="products-grid">
               {products.map(p => (
@@ -701,7 +807,7 @@ const CuratorDashboard = () => {
                     <div className="product-actions flex-center gap-4 mt-4">
                       <button onClick={() => {
                         setEditingProduct(p);
-                        setProductForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url });
+                        setProductForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url, category: p.category || 'Collection', external_url: p.external_url || '' });
                         setIsProductModalOpen(true);
                       }} className="icon-btn"><Settings size={16} /></button>
                       <button onClick={() => deleteProduct(p.id)} className="icon-btn text-red"><Trash2 size={16} /></button>
@@ -741,6 +847,31 @@ const CuratorDashboard = () => {
                         <label>Price (USD)</label>
                         <input type="number" step="0.01" value={productForm.price} onChange={e => setProductForm({...productForm, price: e.target.value})} required />
                       </div>
+                      <div className="form-group">
+                        <label>Category</label>
+                        <select 
+                          value={productForm.category} 
+                          onChange={e => setProductForm({...productForm, category: e.target.value})}
+                          className="premium-select"
+                        >
+                          <option value="Collection">Collection</option>
+                          <option value="Skin">Skin</option>
+                          <option value="Wellness">Wellness</option>
+                          <option value="Home">Home</option>
+                          <option value="Art">Art</option>
+                          <option value="Apparel">Apparel</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label>Direct Purchase URL (External Website)</label>
+                      <input 
+                        type="url" 
+                        placeholder="https://yourwebsite.com/product"
+                        value={productForm.external_url} 
+                        onChange={e => setProductForm({...productForm, external_url: e.target.value})} 
+                      />
+                      <p className="help-text">Link where customers can actually buy this artifact.</p>
                     </div>
                     <div className="form-group">
                       <label>Description</label>

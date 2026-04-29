@@ -11,6 +11,29 @@
   font-family: 'Outfit', sans-serif;
 }
 
+.il-mini-shop .cp-hero-section {
+  background-color: #2D241E; /* Dark fallback */
+}
+
+.il-mini-shop .cp-hero-gradient {
+  background: linear-gradient(to bottom, rgba(45, 36, 30, 0) 0%, rgba(45, 36, 30, 0.8) 100%);
+}
+
+.il-mini-shop .cp-biz-name {
+  color: white;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.8);
+}
+
+.il-mini-shop .cp-biz-tagline {
+  color: var(--metallic-gold);
+}
+
+.il-mini-shop .link-gold-inline {
+  color: var(--shop-accent);
+  font-weight: 800;
+}
+
+
 /* Accent Banner Section */
 .cp-accent-banner {
   height: 60vh;
@@ -82,18 +105,50 @@
 }
 
 /* Spotlight Card Overrides */
+.cp-spotlight-section {
+  padding: 8rem 5vw;
+  background: var(--shop-bg);
+}
+
+.cp-spotlight-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  padding: 3rem;
+  border-radius: 24px;
+  box-shadow: 0 30px 60px rgba(45, 36, 30, 0.08);
+}
+
+.cp-spotlight-img {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
 .cp-spotlight-info h2 {
-  font-size: 3rem;
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
   margin-bottom: 1.5rem;
   color: var(--shop-accent);
   font-family: var(--font-heading);
+  line-height: 1.1;
 }
 
 .cp-spotlight-info p {
   font-size: 1.2rem;
   line-height: 1.7;
-  color: rgba(45, 36, 30, 0.7);
+  color: var(--shop-text); /* Fixed from rgba opacity for visibility */
   margin-bottom: 2.5rem;
+  opacity: 0.8;
+}
+
+.cp-spotlight-info .overline-gold {
+  color: var(--metallic-gold);
+  margin-bottom: 1rem;
 }
 
 /* Product Cards Overrides */
@@ -118,6 +173,45 @@
   font-weight: 700;
 }
 
+.il-mini-shop .cp-products-section {
+  background: var(--shop-bg);
+  border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+.il-mini-shop .cp-product-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(45, 36, 30, 0.05);
+}
+
+.il-mini-shop .cp-product-img-wrapper {
+  background: transparent;
+  box-shadow: none;
+  margin-bottom: 1rem;
+}
+
+.il-mini-shop .cp-product-info h4 {
+  color: var(--shop-text);
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.il-mini-shop .cp-bio-section {
+  background: var(--shop-bg);
+  border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+.il-mini-shop .cp-section-title {
+  color: var(--shop-accent);
+}
+
+.il-mini-shop .cp-bio-text {
+  color: var(--shop-text);
+}
+
+
+
 @media (max-width: 991px) {
   .cp-hero-branding-row {
     flex-direction: column;
@@ -132,10 +226,12 @@
 
   .cp-spotlight-card {
     grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 2rem;
   }
   
   .cp-spotlight-info {
-    padding: 2.5rem;
+    padding: 0;
   }
   
   .cp-spotlight-info h2 {
@@ -185,3 +281,4 @@
     margin-top: auto;
   }
 }
+
