@@ -90,9 +90,8 @@ const Navbar = () => {
               <Link to="/directory" onClick={() => setIsMobileMenuOpen(false)}>Curators</Link>
               <span className="mobile-construction-badge">Soon</span>
             </div>
-            <div className="mobile-nav-link-badge disabled">
-              <span className="mobile-link-text">Storefront App</span>
-              <span className="mobile-construction-badge">Coming Soon</span>
+            <div className="mobile-nav-link-badge">
+              <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>Storefront App</Link>
             </div>
           </div>
 

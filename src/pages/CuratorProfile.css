@@ -429,6 +429,57 @@
   }
 }
 
+/* ── Payments ─────────────────────────────────────────── */
+.cp-payment-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cp-payment-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-family: var(--font-label);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.cp-payment-btn.stripe {
+  background: #635bff;
+  color: white;
+}
+
+.cp-payment-btn.cashapp {
+  background: #00d632;
+  color: white;
+}
+
+.cp-payment-btn.venmo {
+  background: #008cff;
+  color: white;
+}
+
+.cp-payment-btn.other {
+  background: transparent;
+  border-color: var(--metallic-gold);
+  color: var(--metallic-gold);
+}
+
+.cp-payment-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
 @media (max-width: 400px) {
   .cp-products-grid {
     gap: 0.75rem;

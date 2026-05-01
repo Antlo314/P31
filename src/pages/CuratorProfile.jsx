@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Crown, Leaf, MapPin, Instagram, Facebook, Globe, Calendar, ArrowRight, ShoppingBag } from 'lucide-react';
+import { Crown, Leaf, MapPin, Instagram, Facebook, Globe, Calendar, ArrowRight, ShoppingBag, CreditCard, DollarSign, Send } from 'lucide-react';
 import './CuratorProfile.css';
 import './CuratorProfileMiniShop.css';
 
@@ -185,9 +185,16 @@ const CuratorProfile = () => {
     );
   }
 
-  // If curator hasn't paid, they shouldn't be publicly visible (optional logic)
-  if (!curator.is_paid && slug !== curator.id) {
-     return <div className="curator-profile-page error-state">This sanctuary is currently awaiting verification.</div>;
+  // If curator hasn't been approved, they shouldn't be publicly visible (except to themselves)
+  if (curator.status !== 'approved' && slug !== curator.id) {
+     return (
+       <div className="curator-profile-page error-state">
+         <ShieldAlert size={48} className="text-gold mb-4" />
+         <h2 className="font-headline">Sanctuary Under Review</h2>
+         <p>This boutique is currently being vetted by the Master Architects for the June Marketplace.</p>
+         <Link to="/directory" className="btn-solid-gold mt-6">Return to Directory</Link>
+       </div>
+     );
   }
 
   const productsByCategory = products.reduce((acc, p) => {
@@ -303,7 +310,7 @@ const CuratorProfile = () => {
                    </div>
                </div>
 
-               <div className="cp-contact-column">
+                <div className="cp-contact-column">
                   <div className="cp-contact-card">
                      <h4 className="cp-card-title">Direct Concierge</h4>
                      <div className="cp-contact-row">
@@ -315,7 +322,35 @@ const CuratorProfile = () => {
                         <span className="cp-contact-val" style={{color: 'var(--metallic-gold)'}}>p31market.com/{curator.slug || curator.id.slice(0, 8)}</span>
                      </div>
                   </div>
-               </div>
+
+                  {(curator.stripe_link || curator.cashapp_tag || curator.venmo_handle || curator.other_payment_link) && (
+                    <div className="cp-contact-card mt-6">
+                      <h4 className="cp-card-title">Secure Payments</h4>
+                      <div className="cp-payment-buttons mt-4">
+                        {curator.stripe_link && (
+                          <a href={curator.stripe_link} target="_blank" rel="noreferrer" className="cp-payment-btn stripe">
+                            <CreditCard size={18} /> Pay with Card
+                          </a>
+                        )}
+                        {curator.cashapp_tag && (
+                          <a href={`https://cash.app/$${curator.cashapp_tag.replace('$', '')}`} target="_blank" rel="noreferrer" className="cp-payment-btn cashapp">
+                            <DollarSign size={18} /> CashApp ${curator.cashapp_tag.replace('$', '')}
+                          </a>
+                        )}
+                        {curator.venmo_handle && (
+                          <a href={`https://venmo.com/${curator.venmo_handle.replace('@', '')}`} target="_blank" rel="noreferrer" className="cp-payment-btn venmo">
+                            <Send size={18} /> Venmo @{curator.venmo_handle.replace('@', '')}
+                          </a>
+                        )}
+                        {curator.other_payment_link && (
+                          <a href={curator.other_payment_link.startsWith('http') ? curator.other_payment_link : `mailto:${curator.other_payment_link}`} target="_blank" rel="noreferrer" className="cp-payment-btn other">
+                            <ShoppingBag size={18} /> {curator.other_payment_label || 'Direct Payment'}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
             </div>
         </div>
       </section>

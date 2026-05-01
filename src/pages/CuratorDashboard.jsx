@@ -3,7 +3,7 @@ import { useNavigate, Link, useLocation, Routes, Route, Navigate } from 'react-r
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Community from './Community'; // Nested import
-import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Users, Trash2, Plus, ShoppingCart, Loader2 } from 'lucide-react';
+import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Users, Trash2, Plus, ShoppingCart, Loader2, CreditCard } from 'lucide-react';
 import './CuratorDashboard.css';
 
 const CuratorDashboard = () => {
@@ -45,7 +45,12 @@ const CuratorDashboard = () => {
     phone: '',
     publicEmail: '',
     bannerUrl: '',
-    logoUrl: ''
+    logoUrl: '',
+    stripeLink: '',
+    cashappTag: '',
+    venmoHandle: '',
+    otherPaymentLink: '',
+    otherPaymentLabel: ''
   });
   useEffect(() => {
     if (curatorData) {
@@ -61,7 +66,12 @@ const CuratorDashboard = () => {
         phone: curatorData.phone || '',
         publicEmail: curatorData.public_email || '',
         bannerUrl: curatorData.banner_url || '',
-        logoUrl: curatorData.logo_url || ''
+        logoUrl: curatorData.logo_url || '',
+        stripeLink: curatorData.stripe_link || '',
+        cashappTag: curatorData.cashapp_tag || '',
+        venmoHandle: curatorData.venmo_handle || '',
+        otherPaymentLink: curatorData.other_payment_link || '',
+        otherPaymentLabel: curatorData.other_payment_label || ''
       });
     }
   }, [curatorData]);
@@ -168,6 +178,11 @@ const CuratorDashboard = () => {
           public_email: editData.publicEmail,
           banner_url: editData.bannerUrl,
           logo_url: editData.logoUrl,
+          stripe_link: editData.stripeLink,
+          cashapp_tag: editData.cashappTag,
+          venmo_handle: editData.venmoHandle,
+          other_payment_link: editData.otherPaymentLink,
+          other_payment_label: editData.otherPaymentLabel,
           slug: editData.slug.toLowerCase().replace(/[^a-z0-9-]/g, '')
         })
         .eq('id', user.id);
@@ -772,10 +787,16 @@ const CuratorDashboard = () => {
               </div>
             </header>
 
-            {/* Storefront Aesthetic Manager */}
+            {/* Storefront Aesthetic & Payment Manager */}
             <section className="storefront-aesthetics glass-card mb-8">
-              <h2 className="card-title text-gold"><Sparkles size={20} /> Shop Aesthetics</h2>
-              <div className="aesthetics-grid">
+              <div className="flex-between mb-6">
+                <h2 className="card-title text-gold m-0"><Sparkles size={20} /> Shop Aesthetics & Payments</h2>
+                <button onClick={handleSave} className="btn-solid-gold btn-sm" disabled={formLoading}>
+                  <Save size={14} /> {formLoading ? 'Saving...' : 'Save Settings'}
+                </button>
+              </div>
+
+              <div className="aesthetics-grid mb-8">
                 <div className="aesthetic-upload">
                   <label className="text-xs font-bold uppercase tracking-wider opacity-60 mb-2 block">Shop Banner</label>
                   <div className="banner-preview-wrapper" onClick={() => document.getElementById('banner-input').click()}>
@@ -791,6 +812,69 @@ const CuratorDashboard = () => {
                     <div className="upload-overlay"><Camera size={18} /></div>
                   </div>
                   <input type="file" id="logo-input" hidden accept="image/*" onChange={handleLogoUpload} />
+                </div>
+              </div>
+
+              <div className="divider-thistle mb-6"></div>
+
+              <div className="payment-config-grid">
+                <div className="form-group">
+                  <label><CreditCard size={14} /> Stripe Payment Link</label>
+                  <input 
+                    type="url" 
+                    placeholder="https://buy.stripe.com/..." 
+                    value={editData.stripeLink}
+                    onChange={(e) => setEditData({...editData, stripeLink: e.target.value})}
+                  />
+                  <p className="help-text">Direct Stripe Checkout or Payment Link.</p>
+                </div>
+
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>CashApp Tag</label>
+                    <div className="input-with-prefix">
+                      <span className="url-prefix">$</span>
+                      <input 
+                        type="text" 
+                        placeholder="YourTag" 
+                        value={editData.cashappTag}
+                        onChange={(e) => setEditData({...editData, cashappTag: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Venmo Handle</label>
+                    <div className="input-with-prefix">
+                      <span className="url-prefix">@</span>
+                      <input 
+                        type="text" 
+                        placeholder="YourUsername" 
+                        value={editData.venmoHandle}
+                        onChange={(e) => setEditData({...editData, venmoHandle: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>Other Payment Label</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Zelle, PayPal" 
+                      value={editData.otherPaymentLabel}
+                      onChange={(e) => setEditData({...editData, otherPaymentLabel: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Other Payment Link/ID</label>
+                    <input 
+                      type="text" 
+                      placeholder="Email or URL" 
+                      value={editData.otherPaymentLink}
+                      onChange={(e) => setEditData({...editData, otherPaymentLink: e.target.value})}
+                    />
+                  </div>
                 </div>
               </div>
             </section>
