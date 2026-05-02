@@ -775,7 +775,7 @@ const CuratorDashboard = () => {
       {/* Main Content Area */}
       <main className="dashboard-main">
         <Routes>
-          <Route path="/" element={<Navigate to="identity" replace />} />
+          <Route index element={<Navigate to="identity" replace />} />
           <Route path="identity" element={
             <div className="dashboard-view">
             <header className="dashboard-header">
@@ -1816,7 +1816,7 @@ const CuratorDashboard = () => {
                 <div className="concierge-chat glass-card flex flex-col h-[600px]">
                   <div className="chat-header p-6 border-b border-thistle flex-between">
                     <h3 className="font-label text-primary m-0">
-                      {isAdmin ? (selectedRecipient ? `Chatting with ${allCurators.find(c => c.id === selectedRecipient)?.profiles?.full_name}` : 'Select a Curator') : 'Master Architect Concierge'}
+                      {isAdmin ? (selectedRecipient ? `Chatting with ${(allCurators || []).find(c => c.id === selectedRecipient)?.profiles?.full_name || 'Artisan'}` : 'Select a Curator') : 'Master Architect Concierge'}
                     </h3>
                     {isAdmin && (
                       <button 

@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        setIsAdmin(adminEmails.includes(session.user.email?.toLowerCase()));
+        setIsAdmin(adminEmails.includes(session.user.email?.toLowerCase() || ''));
         fetchUserData(session.user.id);
       }
       else setLoading(false);
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        setIsAdmin(adminEmails.includes(session.user.email?.toLowerCase()));
+        setIsAdmin(adminEmails.includes(session.user.email?.toLowerCase() || ''));
         fetchUserData(session.user.id);
       }
       else {
