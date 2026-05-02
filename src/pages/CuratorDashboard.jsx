@@ -467,6 +467,11 @@ const CuratorDashboard = () => {
     }
   };
 
+  const approveVendor = async (id, feedback = '') => {
+    await supabase.from('curator_data').update({ 
+      status: 'approved', 
+      is_published: true,
+      admin_feedback: feedback 
     }).eq('id', id);
     fetchPendingApprovals();
   };
