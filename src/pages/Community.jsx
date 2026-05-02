@@ -219,7 +219,7 @@ const Community = () => {
   const handleDeleteMessage = async (msgId) => {
     if (!window.confirm('Withdraw this message from the collective?')) return;
     
-    // Optimistic UI Update: Remove instantly from screen
+    // Optimistic UI Update
     const deletedIdStr = String(msgId);
     setMessages(prev => prev.filter(m => String(m.id) !== deletedIdStr));
 
@@ -230,8 +230,22 @@ const Community = () => {
       
     if (error) {
       alert('Error deleting: ' + error.message);
-      // Rollback if failed
       fetchMessages();
+    }
+  };
+
+  const clearChannel = async () => {
+    if (!window.confirm('ARCHITECTURAL ACTION: Are you sure you want to purge all history in this channel? This is irreversible.')) return;
+    
+    const { error } = await supabase
+      .from('messages')
+      .delete()
+      .eq('channel_id', activeChannelId);
+      
+    if (error) {
+      alert('Purge failed: ' + error.message);
+    } else {
+      setMessages([]);
     }
   };
 
@@ -330,6 +344,11 @@ const Community = () => {
           </div>
           <div className="chat-header-actions">
              {activeDmRecipient && <div className="botanical-badge text-gold"><ShieldCheck size={12} /> Encrypted</div>}
+             {isAdmin && !activeDmRecipient && (
+               <button onClick={clearChannel} className="btn-outline-primary btn-sm flex items-center gap-2" style={{borderColor: 'rgba(255,0,0,0.3)', color: 'rgba(255,0,0,0.7)'}}>
+                 <Trash2 size={14} /> Purge Channel
+               </button>
+             )}
           </div>
         </header>
 
