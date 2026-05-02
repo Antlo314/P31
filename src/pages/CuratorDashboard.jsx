@@ -12,8 +12,8 @@ const CuratorDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Deriving activeTab from the URL path instead of local state
-  const activeTab = location.pathname.split('/').pop() || 'identity';
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const activeTab = pathParts.length > 1 ? pathParts.pop() : 'identity';
   const setActiveTab = (tab) => navigate(`/dashboard/${tab}`);
 
   const [profileImage, setProfileImage] = useState(null);
@@ -144,8 +144,8 @@ const CuratorDashboard = () => {
     try {
       const { data, error } = await supabase.from('announcements').select('*');
       if (error) {
-        if (error.message.includes('406')) {
-          console.warn('Announcements table missing or inaccessible.');
+        if (error.code === 'PGRST116' || error.message.includes('406')) {
+          console.warn('Announcements table issues.');
           return;
         }
         throw error;
@@ -1044,7 +1044,6 @@ const CuratorDashboard = () => {
                 </section>
               </div>
             </div>
-            </div>
           } />
 
           <Route path="storefront" element={
@@ -1673,7 +1672,7 @@ const CuratorDashboard = () => {
                   <div className="concierge-sidebar glass-card p-6">
                     <h4 className="font-label text-gold mb-4">Active Curators</h4>
                     <div className="curator-list flex flex-col gap-2">
-                      {allCurators.map(c => (
+                      {(allCurators || []).map(c => (
                         <button 
                           key={c.id} 
                           onClick={() => setSelectedRecipient(c.id)}
