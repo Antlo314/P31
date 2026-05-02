@@ -219,18 +219,29 @@ const CuratorDashboard = () => {
     if (user) fetchProducts();
   }, [user]);
   useEffect(() => {
-    if (isAdmin && activeTab === 'governance') {
-      fetchAnnouncements();
-      fetchLeads();
-      fetchPendingApprovals();
-      fetchPartnershipInquiries();
-      fetchAllCurators(); // For messaging
-    }
-    if (user) {
-      fetchTestimonials();
-      fetchPrivateMessages();
-      fetchEvents();
-    }
+    const initData = async () => {
+      try {
+        if (isAdmin && activeTab === 'governance') {
+          await Promise.allSettled([
+            fetchAnnouncements(),
+            fetchLeads(),
+            fetchPendingApprovals(),
+            fetchPartnershipInquiries(),
+            fetchAllCurators()
+          ]);
+        }
+        if (user) {
+          await Promise.allSettled([
+            fetchTestimonials(),
+            fetchPrivateMessages(),
+            fetchEvents()
+          ]);
+        }
+      } catch (err) {
+        console.warn('Dashboard background fetch error:', err.message);
+      }
+    };
+    initData();
   }, [isAdmin, activeTab, user]);
 
   const fetchEvents = async () => {
@@ -673,8 +684,9 @@ const CuratorDashboard = () => {
 
   if (loading) {
     return (
-      <div className="dashboard-container flex-center">
-        <Loader2 className="animate-spin text-gold" size={48} />
+      <div className="dashboard-loading flex-center">
+        <div className="loader-ring"></div>
+        <p className="font-label text-gold animate-pulse mt-4">Initializing Studio...</p>
       </div>
     );
   }
@@ -1856,7 +1868,6 @@ const CuratorDashboard = () => {
                     </form>
                   )}
                 </div>
-              </div>
             </div>
           } />
           <Route path="analytics" element={

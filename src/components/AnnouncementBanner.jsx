@@ -11,16 +11,20 @@ const AnnouncementBanner = () => {
     if (!supabase) return;
     
     const fetchLatest = async () => {
-      const { data, error } = await supabase
-        .from('announcements')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-      
-      if (!error && data) {
-        setAnnouncement(data);
+      try {
+        const { data, error } = await supabase
+          .from('announcements')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (!error && data) {
+          setAnnouncement(data);
+        }
+      } catch (err) {
+        console.warn('Announcement fetch failed:', err.message);
       }
     };
 
