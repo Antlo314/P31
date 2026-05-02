@@ -1044,6 +1044,7 @@ const CuratorDashboard = () => {
                 </section>
               </div>
             </div>
+            </div>
           } />
 
           <Route path="storefront" element={
