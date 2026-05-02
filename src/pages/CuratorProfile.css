@@ -509,6 +509,48 @@
   color: white;
 }
 
+.stock-badge.pre_order {
+  background: #008cff;
+  color: white;
+}
+
+/* Verification Badges */
+.cp-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 1rem 0;
+}
+
+.cp-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(203, 167, 47, 0.1);
+  border: 1px solid rgba(203, 167, 47, 0.3);
+  border-radius: 4px;
+  color: var(--metallic-gold);
+  font-family: var(--font-label);
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+/* Themes */
+.curator-profile-page.theme-midnight_obsidian {
+  --surface: #0a050c;
+  --on-surface: #ffffff;
+  --metallic-gold: #D4AF37;
+}
+
+.curator-profile-page.theme-botanical_green {
+  --surface: #1e2a1e;
+  --on-surface: #f0f4f0;
+  --metallic-gold: #c3a343;
+}
+
 @media (max-width: 400px) {
   .cp-products-grid {
     gap: 0.75rem;

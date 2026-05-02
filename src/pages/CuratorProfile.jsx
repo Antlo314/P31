@@ -222,46 +222,46 @@ const CuratorProfile = () => {
   const isILShop = slug === 'ilcollection' || (curator?.business_name && curator.business_name.includes('Incandescent Lily'));
 
   return (
-    <div className={`curator-profile-page ${isILShop ? 'il-mini-shop' : ''}`} ref={containerRef}>
+    <div className={`curator-profile-page theme-${curator.theme_preference || 'classic'}`} ref={containerRef}>
       
-      {/* Curator Hero Header */}
+      {/* Luxury Parallax Hero */}
       <section className="cp-hero-section">
-         <div className="cp-hero-bg">
-            <img 
-              src={curator.slug === 'ilcollection' ? heroUltra : (curator.banner_url || curator.profiles?.avatar_url || 'https://images.unsplash.com/photo-1531123897727-8f129e1bfa82?auto=format&fit=crop&w=1200')} 
-              alt={curator.business_name} 
-              className="cp-hero-img" 
-            />
-            <div className="cp-hero-gradient"></div>
-            <div className="cp-hero-legibility"></div>
-         </div>
-          <div className="cp-hero-text container-fluid">
-            <Link to="/directory" className="link-gold-inline" style={{marginBottom: '2rem', display: 'inline-block'}}>&larr; Back to Directory</Link>
+        <div className="cp-hero-banner-wrap">
+          <img 
+            src={curator.banner_url || heroUltra} 
+            alt="Sanctuary Banner" 
+            className="cp-hero-banner"
+          />
+          <div className="cp-hero-overlay"></div>
+        </div>
+        
+        <div className="cp-hero-content container-fluid">
+          <div className="cp-logo-frame">
+            <img src={curator.logo_url || portraitUltra} alt="Brand Logo" className="cp-brand-logo" />
+            {curator.is_featured && (
+              <div className="cp-featured-ring">
+                <Sparkles size={24} className="text-gold" />
+              </div>
+            )}
+          </div>
+          
+          <div className="cp-curator-info mt-8">
+            <Link to="/directory" className="link-gold-inline" style={{marginBottom: '1rem', display: 'inline-block'}}>&larr; Back to Directory</Link>
+            <h1 className="cp-business-name font-headline">{curator.business_name}</h1>
             
-            <div className="cp-prestige-row">
-              {['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'].includes(curator.profiles?.email?.toLowerCase()) ? (
-                <div className="cp-prestige-badge admin-badge">
-                  <Crown size={16} /> Master Architect
-                </div>
-              ) : curator.is_early_bird ? (
-                <div className="cp-prestige-badge founder-badge">
-                  <Leaf size={16} /> Foundation Founder
-                </div>
-              ) : null}
-              {curator.location && <span className="cp-location-pill"><MapPin size={12} /> {curator.location}</span>}
-            </div>
+            {/* Verification Badges */}
+            {curator.verification_badges && curator.verification_badges.length > 0 && (
+              <div className="cp-badges-row">
+                {curator.verification_badges.map(badge => (
+                  <span key={badge} className="cp-badge-pill">
+                    <ShieldAlert size={12} /> {badge}
+                  </span>
+                ))}
+              </div>
+            )}
 
-            <div className="cp-hero-branding-row">
-               <div className="cp-hero-avatar-wrapper">
-                 <img src={curator.logo_url || curator.profiles?.avatar_url} alt={curator.business_name} className="cp-hero-avatar" />
-               </div>
-               <div className="cp-hero-branding-info">
-                 <h4 className="overline-gold">{curator.profiles?.full_name}</h4>
-                 <h1 className="cp-biz-name">{curator.business_name}</h1>
-                 <p className="cp-biz-tagline">{curator.tagline}</p>
-               </div>
-            </div>
-
+            <p className="cp-tagline text-gold font-label">{curator.tagline}</p>
+            
             <div className="cp-social-strip">
               {curator.instagram && (
                 <a href={`https://instagram.com/${curator.instagram.replace('@', '')}`} target="_blank" rel="noreferrer">
@@ -280,6 +280,7 @@ const CuratorProfile = () => {
               )}
             </div>
           </div>
+        </div>
       </section>
 
       {/* Mini-Shop Accent Banner & Spotlight (New Template Logic) */}

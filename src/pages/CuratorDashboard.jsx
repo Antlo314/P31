@@ -52,8 +52,9 @@ const CuratorDashboard = () => {
     stripeLink: '',
     cashappTag: '',
     venmoHandle: '',
-    otherPaymentLink: '',
-    otherPaymentLabel: ''
+    otherPaymentLabel: '',
+    themePreference: 'classic_gold',
+    shopAnnouncement: ''
   });
   useEffect(() => {
     if (curatorData) {
@@ -74,7 +75,9 @@ const CuratorDashboard = () => {
         cashappTag: curatorData.cashapp_tag || '',
         venmoHandle: curatorData.venmo_handle || '',
         otherPaymentLink: curatorData.other_payment_link || '',
-        otherPaymentLabel: curatorData.other_payment_label || ''
+        otherPaymentLabel: curatorData.other_payment_label || '',
+        themePreference: curatorData.theme_preference || 'classic_gold',
+        shopAnnouncement: curatorData.shop_announcement || ''
       });
     }
   }, [curatorData]);
@@ -193,6 +196,8 @@ const CuratorDashboard = () => {
           venmo_handle: editData.venmoHandle,
           other_payment_link: editData.otherPaymentLink,
           other_payment_label: editData.otherPaymentLabel,
+          theme_preference: editData.themePreference,
+          shop_announcement: editData.shopAnnouncement,
           slug: editData.slug.toLowerCase().replace(/[^a-z0-9-]/g, '')
         })
         .eq('id', user.id);
@@ -451,6 +456,13 @@ const CuratorDashboard = () => {
     fetchPendingApprovals();
   };
 
+  const updateBadges = async (id, badgesString) => {
+    const badgesArray = badgesString.split(',').map(s => s.trim()).filter(s => s !== '');
+    await supabase.from('curator_data').update({ verification_badges: badgesArray }).eq('id', id);
+    if (reviewingCurator) setReviewingCurator(prev => ({ ...prev, verification_badges: badgesArray }));
+    fetchPendingApprovals();
+  };
+
   const deletePartnershipInquiry = async (id) => {
     if (window.confirm('Archive this partnership inquiry?')) {
       await supabase.from('partnerships').delete().eq('id', id);
@@ -692,9 +704,37 @@ const CuratorDashboard = () => {
                     />
                   </div>
 
-                  <button type="submit" className="btn-solid-gold" disabled={formLoading}>
-                    <Save size={18} /> {formLoading ? 'Synchronizing...' : 'Update Identity'}
-                  </button>
+                <div className="form-divider-label">
+                  <Sparkles size={16} /> Sanctuary Atmosphere & Themes
+                </div>
+
+                <div className="form-group">
+                  <label>Shop Theme Aesthetic</label>
+                  <select 
+                    value={editData.themePreference}
+                    onChange={(e) => setEditData({...editData, themePreference: e.target.value})}
+                    className="premium-select"
+                  >
+                    <option value="classic_gold">Classic P31 Gold</option>
+                    <option value="midnight_obsidian">Midnight Obsidian (High Contrast)</option>
+                    <option value="botanical_green">Botanical Forest (Green Accent)</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Global Shop Announcement</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. Free shipping on orders over $100!" 
+                    value={editData.shopAnnouncement}
+                    onChange={(e) => setEditData({...editData, shopAnnouncement: e.target.value})}
+                  />
+                  <p className="help-text">Appears as a prominent banner at the top of your shop.</p>
+                </div>
+
+                <button type="submit" className="btn-solid-gold mt-8" disabled={formLoading}>
+                  {formLoading ? 'Synchronizing...' : 'Save Sanctuary Settings'}
+                </button>
                   
                   {editData.slug && (
                     <Link to={`/${editData.slug}`} target="_blank" className="view-live-link text-gold">
@@ -1264,6 +1304,18 @@ const CuratorDashboard = () => {
                              <Sparkles size={16} /> {reviewingCurator.is_featured ? 'Curator Featured' : 'Feature this Curator'}
                            </button>
                            <p className="text-[10px] opacity-50 mt-2">Featured curators appear at the top of the P31 Directory.</p>
+                        </div>
+
+                        <div className="mt-8 pt-8 border-t border-thistle">
+                           <h4 className="font-label text-gold mb-4">Verification Badges</h4>
+                           <input 
+                             type="text" 
+                             className="feedback-input"
+                             placeholder="Handmade, Organic, Black-Owned..."
+                             defaultValue={reviewingCurator.verification_badges?.join(', ')}
+                             onBlur={(e) => updateBadges(reviewingCurator.id, e.target.value)}
+                           />
+                           <p className="text-[10px] opacity-50 mt-2">Enter badges separated by commas.</p>
                         </div>
                       </div>
 

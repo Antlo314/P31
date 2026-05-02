@@ -75,7 +75,9 @@ const Directory = () => {
     const { data } = await supabase
       .from('curator_data')
       .select('*, profiles(full_name, avatar_url, email)')
-      .eq('status', 'approved'); // Only show approved sanctuaries
+      .eq('status', 'approved')
+      .order('is_featured', { ascending: false })
+      .order('is_early_bird', { ascending: false }); // Only show approved sanctuaries
     
     // Pick Melanie (Matriarch) and 2 examples as requested
     const examples = vendors.filter(v => 
@@ -94,6 +96,7 @@ const Directory = () => {
         image: d.profiles?.avatar_url || vendor1,
         slug: d.slug,
         isFounder: d.is_early_bird,
+        isFeatured: d.is_featured,
         isAdmin: ['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'].includes(d.profiles?.email?.toLowerCase())
       }));
       
@@ -153,7 +156,7 @@ const Directory = () => {
       {/* Directory List Container */}
       <section className="directory-list-v2 container-fluid" style={{ paddingBottom: '15vh', maxWidth: '1400px', margin: '0 auto' }}>
         {activeVendors.map((vendor, index) => (
-          <div key={vendor.id} className={`v2-vendor-item ${index % 2 !== 0 ? 'vendor-reverse' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '6vw', marginBottom: '12vh' }}>
+          <div key={vendor.id} className={`v2-vendor-item ${index % 2 !== 0 ? 'vendor-reverse' : ''} ${vendor.isFeatured ? 'featured-sanctuary' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '6vw', marginBottom: '12vh' }}>
             
             {/* Vendor Image Wrap with Glass Border */}
             <div className="v2-vendor-img-wrap glass-border" style={{ flex: 1, position: 'relative', aspectRatio: '4/5', overflow: 'hidden' }}>
@@ -162,7 +165,8 @@ const Directory = () => {
               {/* Prestige Corner Badge */}
               <div className="vendor-prestige-corner">
                 {vendor.isAdmin && <div className="p-badge admin-badge"><Crown size={18} /></div>}
-                {vendor.isFounder && !vendor.isAdmin && <div className="p-badge founder-badge"><Leaf size={18} /></div>}
+                {vendor.isFeatured && <div className="p-badge featured-badge"><Sparkles size={18} /></div>}
+                {vendor.isFounder && !vendor.isAdmin && !vendor.isFeatured && <div className="p-badge founder-badge"><Leaf size={18} /></div>}
               </div>
             </div>
             
