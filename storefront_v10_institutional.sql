@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS analytics_snapshots (
 -- 3. RLS for RSVPs
 ALTER TABLE market_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE event_rsvps ENABLE ROW LEVEL SECURITY;
+ALTER TABLE analytics_snapshots ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Public events are viewable by all" 
 ON market_events FOR SELECT USING (is_active = TRUE);
@@ -46,8 +47,20 @@ TO authenticated
 USING (curator_id = auth.uid())
 WITH CHECK (curator_id = auth.uid());
 
-CREATE POLICY "Admins can manage all events" 
+CREATE POLICY "Curators can view their own analytics" 
+ON analytics_snapshots FOR SELECT 
+TO authenticated 
+USING (curator_id = auth.uid());
+
+CREATE POLICY "Admins can manage all institutional data" 
 ON market_events FOR ALL 
+TO authenticated 
+USING (EXISTS (
+  SELECT 1 FROM profiles WHERE id = auth.uid() AND email IN ('info@lumenlabsatl.com', 'proverbs31markets@gmail.com')
+));
+
+CREATE POLICY "Admins can manage all analytics" 
+ON analytics_snapshots FOR ALL 
 TO authenticated 
 USING (EXISTS (
   SELECT 1 FROM profiles WHERE id = auth.uid() AND email IN ('info@lumenlabsatl.com', 'proverbs31markets@gmail.com')

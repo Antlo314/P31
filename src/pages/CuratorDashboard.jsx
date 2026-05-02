@@ -1083,8 +1083,8 @@ const CuratorDashboard = () => {
                 <section className="dashboard-card glass-card">
                   <h3 className="card-title text-gold"><Calendar size={18} /> Market Invitations</h3>
                   <div className="event-invites-list flex flex-col gap-4 mt-4">
-                    {allEvents.map(event => {
-                      const rsvp = rsvps.find(r => r.event_id === event.id);
+                    {(allEvents || []).map(event => {
+                      const rsvp = (rsvps || []).find(r => r.event_id === event.id);
                       return (
                         <div key={event.id} className="event-invite-item glass-border p-4 rounded-lg">
                           <p className="text-xs font-bold text-primary mb-1">{event.title}</p>
@@ -1108,7 +1108,7 @@ const CuratorDashboard = () => {
                         </div>
                       );
                     })}
-                    {allEvents.length === 0 && <p className="text-xs opacity-50 italic text-center py-4">No invitations currently active.</p>}
+                    {(!allEvents || allEvents.length === 0) && <p className="text-xs opacity-50 italic text-center py-4">No invitations currently active.</p>}
                   </div>
                 </section>
 
