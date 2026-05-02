@@ -714,7 +714,7 @@ const CuratorDashboard = () => {
   }
 
   return (
-    <div className="dashboard-container">
+    <div className={`dashboard-container ${editData.themePreference || 'classic_gold'}`}>
       {/* Sidebar Navigation */}
       <aside className="dashboard-sidebar">
         <div className="sidebar-brand">
@@ -762,6 +762,13 @@ const CuratorDashboard = () => {
             className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`}
           >
             <Sparkles size={20} /> Intelligence
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('toolkit')} 
+            className={`nav-item ${activeTab === 'toolkit' ? 'active' : ''}`}
+          >
+            <Download size={20} /> Toolkit
           </button>
 
           {isAdmin && (
@@ -1093,6 +1100,26 @@ const CuratorDashboard = () => {
                 </section>
 
                 <section className="dashboard-card glass-card">
+                  <h3 className="card-title text-gold"><Sparkles size={18} /> Activity Pulse</h3>
+                  <div className="pulse-feed flex flex-col gap-3 mt-4 max-h-[300px] overflow-y-auto pr-2">
+                    {[
+                      { type: 'view', text: 'Someone from Atlanta viewed your Profile', time: '2m ago' },
+                      { type: 'click', text: 'External Purchase Link clicked by visitor', time: '14m ago' },
+                      { type: 'rsvp', text: 'Curator "Heritage" RSVP\'d for Market', time: '1h ago' },
+                      { type: 'broadcast', text: 'Architect Broadcast: Market Layout V2', time: '3h ago' }
+                    ].map((log, i) => (
+                      <div key={i} className="pulse-item flex gap-3 p-3 rounded-lg bg-surface-container-low border border-thistle animate-in">
+                        <div className={`pulse-icon w-2 h-2 rounded-full mt-1.5 ${log.type === 'view' ? 'bg-blue-400' : log.type === 'click' ? 'bg-gold' : 'bg-green-400'}`}></div>
+                        <div className="pulse-content flex-1">
+                          <p className="text-[11px] leading-tight text-primary m-0">{log.text}</p>
+                          <span className="text-[9px] opacity-40 uppercase font-bold">{log.time}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="dashboard-card glass-card">
                   <h3 className="card-title text-gold"><Calendar size={18} /> Market Invitations</h3>
                   <div className="event-invites-list flex flex-col gap-4 mt-4">
                     {(allEvents || []).map(event => {
@@ -1121,6 +1148,25 @@ const CuratorDashboard = () => {
                       );
                     })}
                     {(!allEvents || allEvents.length === 0) && <p className="text-xs opacity-50 italic text-center py-4">No invitations currently active.</p>}
+                  </div>
+                </section>
+
+                <section className="dashboard-card glass-card">
+                  <h2 className="card-title text-gold"><Sparkles size={20} /> Atmospheric Themes</h2>
+                  <p className="text-xs opacity-60 mb-6">Choose the visual frequency of your sanctuary.</p>
+                  <div className="theme-grid grid grid-cols-3 gap-4">
+                    {['classic_gold', 'obsidian_dark', 'botanical_sage'].map(t => (
+                      <div 
+                        key={t}
+                        onClick={() => setEditData({...editData, themePreference: t})}
+                        className={`theme-swatch p-4 rounded-xl border-2 transition-all cursor-pointer ${editData.themePreference === t ? 'border-gold bg-gold-glow' : 'border-thistle hover:border-gold'}`}
+                      >
+                        <div className={`swatch-preview h-12 w-full rounded-md mb-2 ${t}`}></div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider block text-center">
+                          {t.replace('_', ' ')}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </section>
 
@@ -1844,12 +1890,19 @@ const CuratorDashboard = () => {
                   </div>
                   
                   <div className="chat-messages flex-1 overflow-y-auto p-6 flex flex-col gap-4">
-                    {privateMessages.filter(m => isAdmin ? (m.sender_id === selectedRecipient || m.receiver_id === selectedRecipient) : true).map(m => (
-                      <div key={m.id} className={`message-bubble max-w-[80%] p-4 rounded-2xl ${m.sender_id === user.id ? 'bg-gold-light text-white self-end' : 'bg-surface border border-thistle self-start'}`}>
-                        <p className="text-sm m-0">{m.content}</p>
-                        <span className="text-[10px] opacity-60 mt-1 block">{new Date(m.created_at).toLocaleTimeString()}</span>
-                      </div>
-                    ))}
+                    {privateMessages.filter(m => isAdmin ? (m.sender_id === selectedRecipient || m.receiver_id === selectedRecipient) : true).map(m => {
+                      const isImage = m.content.match(/\.(jpeg|jpg|gif|png)$/) != null || m.content.startsWith('http') && (m.content.includes('images.unsplash.com') || m.content.includes('supabase'));
+                      return (
+                        <div key={m.id} className={`message-bubble max-w-[80%] p-4 rounded-2xl ${m.sender_id === user.id ? 'bg-gold-light text-white self-end' : 'bg-surface border border-thistle self-start'}`}>
+                          {isImage ? (
+                            <img src={m.content} alt="Shared media" className="rounded-lg max-w-full h-auto mb-2 cursor-zoom-in" onClick={() => window.open(m.content, '_blank')} />
+                          ) : (
+                            <p className="text-sm m-0">{m.content}</p>
+                          )}
+                          <span className="text-[10px] opacity-60 mt-1 block">{new Date(m.created_at).toLocaleTimeString()}</span>
+                        </div>
+                      );
+                    })}
                     {(!isAdmin || selectedRecipient) && privateMessages.filter(m => isAdmin ? (m.sender_id === selectedRecipient || m.receiver_id === selectedRecipient) : true).length === 0 && (
                       <div className="text-center py-20 opacity-40 italic">Start the conversation...</div>
                     )}

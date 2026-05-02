@@ -1247,3 +1247,33 @@
   opacity: 0.7;
 }
 
+/* Atmospheric Themes */
+.dashboard-container.obsidian_dark {
+  background-color: #0f110c;
+  color: #FAF9F6;
+}
+.dashboard-container.obsidian_dark .glass-card {
+  background: rgba(26, 31, 20, 0.8);
+  border-color: rgba(203, 167, 47, 0.2);
+}
+.dashboard-container.obsidian_dark .text-primary { color: #FAF9F6; }
+
+.dashboard-container.botanical_sage {
+  background-color: #F2F4ED;
+}
+.dashboard-container.botanical_sage .glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: #B5BEA8;
+}
+
+.theme-swatch .swatch-preview.classic_gold { background: linear-gradient(135deg, #3A1C36, #CBA72F); }
+.theme-swatch .swatch-preview.obsidian_dark { background: linear-gradient(135deg, #1A1F14, #3D4435); }
+.theme-swatch .swatch-preview.botanical_sage { background: linear-gradient(135deg, #DFE5D4, #6C6D11); }
+
+.pulse-item {
+  transition: all 0.3s ease;
+}
+.pulse-item:hover {
+  transform: translateX(4px);
+  border-color: var(--metallic-gold);
+}

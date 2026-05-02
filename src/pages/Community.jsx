@@ -448,7 +448,13 @@ const Community = () => {
                           <p className="reply-text-preview">{msg.parent.text}</p>
                         </div>
                       )}
-                      <div className="message-text">{msg.text}</div>
+                      <div className="message-text">
+                        {(msg.text.match(/\.(jpeg|jpg|gif|png)$/) != null || (msg.text.startsWith('http') && (msg.text.includes('images.unsplash.com') || msg.text.includes('supabase')))) ? (
+                          <img src={msg.text} alt="Shared media" className="rounded-lg max-w-full h-auto cursor-zoom-in hover:opacity-90 transition-opacity" style={{maxHeight: '300px'}} onClick={() => window.open(msg.text, '_blank')} />
+                        ) : (
+                          msg.text
+                        )}
+                      </div>
                     </div>
                   </div>
 
