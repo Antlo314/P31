@@ -1868,6 +1868,7 @@ const CuratorDashboard = () => {
                     </form>
                   )}
                 </div>
+              </div>
             </div>
           } />
           <Route path="analytics" element={
