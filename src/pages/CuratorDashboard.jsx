@@ -3,7 +3,7 @@ import { useNavigate, Link, useLocation, Routes, Route, Navigate } from 'react-r
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Community from './Community'; // Nested import
-import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Users, Trash2, Plus, ShoppingCart, Loader2, CreditCard } from 'lucide-react';
+import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Users, Trash2, Plus, ShoppingCart, Loader2, CreditCard, X } from 'lucide-react';
 import './CuratorDashboard.css';
 
 const CuratorDashboard = () => {
@@ -23,7 +23,7 @@ const CuratorDashboard = () => {
   const [products, setProducts] = useState([]);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [productForm, setProductForm] = useState({ name: '', description: '', price: '', image_url: '', category: 'Collection', external_url: '' });
+  const [productForm, setProductForm] = useState({ name: '', description: '', price: '', image_url: '', category: 'Collection', external_url: '', stock_status: 'in_stock' });
   const [productImageLoading, setProductImageLoading] = useState(false);
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [partnershipInquiries, setPartnershipInquiries] = useState([]);
@@ -31,6 +31,9 @@ const CuratorDashboard = () => {
   const [reviewingCuratorProducts, setReviewingCuratorProducts] = useState([]);
   const [adminError, setAdminError] = useState(null);
   const [adminFeedbackMap, setAdminFeedbackMap] = useState({}); // state to hold feedback input per vendor
+  
+  const [showWalkthrough, setShowWalkthrough] = useState(false);
+  const [walkthroughStep, setWalkthroughStep] = useState(1);
   
   const [formLoading, setFormLoading] = useState(false);
   const [editData, setEditData] = useState({
@@ -73,6 +76,13 @@ const CuratorDashboard = () => {
         otherPaymentLink: curatorData.other_payment_link || '',
         otherPaymentLabel: curatorData.other_payment_label || ''
       });
+    }
+  }, [curatorData]);
+
+  useEffect(() => {
+    // Show walkthrough if first time or incomplete
+    if (curatorData && !curatorData.status && !localStorage.getItem('p31_walkthrough_seen')) {
+      setShowWalkthrough(true);
     }
   }, [curatorData]);
 
@@ -393,7 +403,7 @@ const CuratorDashboard = () => {
       }
       setIsProductModalOpen(false);
       setEditingProduct(null);
-      setProductForm({ name: '', description: '', price: '', image_url: '', category: 'Collection', external_url: '' });
+      setProductForm({ name: '', description: '', price: '', image_url: '', category: 'Collection', external_url: '', stock_status: 'in_stock' });
       fetchProducts();
     } catch (err) {
       alert('Error saving product: ' + err.message);
@@ -419,12 +429,13 @@ const CuratorDashboard = () => {
     }
   };
 
-  const approveVendor = async (id, feedback = '') => {
-    await supabase.from('curator_data').update({ 
-      status: 'approved', 
-      is_published: true,
-      admin_feedback: feedback 
     }).eq('id', id);
+    fetchPendingApprovals();
+  };
+
+  const toggleFeatured = async (id, currentStatus) => {
+    await supabase.from('curator_data').update({ is_featured: !currentStatus }).eq('id', id);
+    if (reviewingCurator) setReviewingCurator(prev => ({ ...prev, is_featured: !currentStatus }));
     fetchPendingApprovals();
   };
 
@@ -534,6 +545,22 @@ const CuratorDashboard = () => {
               <h1 className="font-headline text-primary">Curator <span className="text-gold">Studio</span></h1>
               <p>Welcome back, {profile?.full_name}. Refine your sanctuary’s professional presence.</p>
             </header>
+
+            {/* Identity Stats Overview */}
+            <div className="stats-row mb-8">
+              <div className="stat-pill glass-card">
+                <span className="stat-label">Product Views</span>
+                <span className="stat-value text-gold">284</span>
+              </div>
+              <div className="stat-pill glass-card">
+                <span className="stat-label">Purchase Clicks</span>
+                <span className="stat-value text-gold">42</span>
+              </div>
+              <div className="stat-pill glass-card">
+                <span className="stat-label">Profile Authority</span>
+                <span className="stat-value text-gold">88%</span>
+              </div>
+            </div>
 
             <div className="dashboard-grid">
               <section className="dashboard-card glass-card">
@@ -723,14 +750,27 @@ const CuratorDashboard = () => {
                   )}
                   <div className="divider-thistle"></div>
                   
+                   <div className="divider-thistle"></div>
+                  
                   {/* Submission Checklist */}
                   <div className="submission-checklist mb-4">
+                    <h4 className="text-[10px] uppercase tracking-widest opacity-40 mb-3">Sanctuary Progress</h4>
                     <div className={`check-item ${editData.businessName ? 'success' : 'pending'}`}>
-                      {editData.businessName ? '✓' : '○'} Business Identity Set
+                      {editData.businessName ? '✓' : '○'} Brand Identity
                     </div>
                     <div className={`check-item ${products.length >= 1 ? 'success' : 'pending'}`}>
-                      {products.length >= 1 ? '✓' : '○'} At least 1 Artifact Uploaded
+                      {products.length >= 1 ? '✓' : '○'} Artisan Collection ({products.length}/10)
                     </div>
+                    <div className={`check-item ${editData.bannerUrl && editData.logoUrl ? 'success' : 'pending'}`}>
+                      {editData.bannerUrl && editData.logoUrl ? '✓' : '○'} Shop Aesthetics
+                    </div>
+                    <div className={`check-item ${(editData.stripeLink || editData.cashappTag || editData.venmoHandle) ? 'success' : 'pending'}`}>
+                      {(editData.stripeLink || editData.cashappTag || editData.venmoHandle) ? '✓' : '○'} Payment Connectivity
+                    </div>
+                  </div>
+
+                  <div className="onboarding-guide-trigger" onClick={() => setShowWalkthrough(true)}>
+                    <Sparkles size={14} /> Need architectural guidance?
                   </div>
 
                   {curatorData?.status === 'pending' && (
@@ -891,7 +931,7 @@ const CuratorDashboard = () => {
                     <div className="product-actions flex-center gap-4 mt-4">
                       <button onClick={() => {
                         setEditingProduct(p);
-                        setProductForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url, category: p.category || 'Collection', external_url: p.external_url || '' });
+                        setProductForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url, category: p.category || 'Collection', external_url: p.external_url || '', stock_status: p.stock_status || 'in_stock' });
                         setIsProductModalOpen(true);
                       }} className="icon-btn"><Settings size={16} /></button>
                       <button onClick={() => deleteProduct(p.id)} className="icon-btn text-red"><Trash2 size={16} /></button>
@@ -944,6 +984,19 @@ const CuratorDashboard = () => {
                           <option value="Home">Home</option>
                           <option value="Art">Art</option>
                           <option value="Apparel">Apparel</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label>Availability Status</label>
+                        <select 
+                          value={productForm.stock_status} 
+                          onChange={e => setProductForm({...productForm, stock_status: e.target.value})}
+                          className="premium-select"
+                        >
+                          <option value="in_stock">In Stock</option>
+                          <option value="out_of_stock">Sold Out</option>
+                          <option value="limited_edition">Limited Edition</option>
+                          <option value="pre_order">Pre-Order</option>
                         </select>
                       </div>
                     </div>
@@ -1200,6 +1253,18 @@ const CuratorDashboard = () => {
                             style={{color: '#ff4b4b', borderColor: '#ff4b4b'}}
                           >Reject Artifacts</button>
                         </div>
+
+                        <div className="mt-8 pt-8 border-t border-thistle">
+                           <h4 className="font-label text-gold mb-4">Promotional Authority</h4>
+                           <button 
+                             onClick={() => toggleFeatured(reviewingCurator.id, reviewingCurator.is_featured)}
+                             className={`btn-outline-primary w-full flex-center gap-2 ${reviewingCurator.is_featured ? 'active-featured' : ''}`}
+                             style={reviewingCurator.is_featured ? {background: 'var(--metallic-gold)', color: 'white'} : {}}
+                           >
+                             <Sparkles size={16} /> {reviewingCurator.is_featured ? 'Curator Featured' : 'Feature this Curator'}
+                           </button>
+                           <p className="text-[10px] opacity-50 mt-2">Featured curators appear at the top of the P31 Directory.</p>
+                        </div>
                       </div>
 
                       {/* Right: Artifact Audit */}
@@ -1233,6 +1298,65 @@ const CuratorDashboard = () => {
           } />
         </Routes>
       </main>
+
+      {/* STUDIO WALKTHROUGH OVERLAY */}
+      {showWalkthrough && (
+        <div className="walkthrough-overlay flex-center">
+          <div className="walkthrough-card glass-card shadow-2xl p-10 max-w-md w-full relative">
+            <button className="absolute top-4 right-4 opacity-40 hover:opacity-100" onClick={() => {
+              setShowWalkthrough(false);
+              localStorage.setItem('p31_walkthrough_seen', 'true');
+            }}><X size={20} /></button>
+            
+            <div className="walkthrough-icon-ring mb-6">
+              {walkthroughStep === 1 && <Sparkles size={32} className="text-gold" />}
+              {walkthroughStep === 2 && <User size={32} className="text-gold" />}
+              {walkthroughStep === 3 && <ShoppingBag size={32} className="text-gold" />}
+              {walkthroughStep === 4 && <Layout size={32} className="text-gold" />}
+              {walkthroughStep === 5 && <CreditCard size={32} className="text-gold" />}
+              {walkthroughStep === 6 && <ShieldAlert size={32} className="text-gold" />}
+            </div>
+
+            <h2 className="font-headline text-2xl text-primary mb-4">
+              {walkthroughStep === 1 && "Welcome, Curator"}
+              {walkthroughStep === 2 && "Identity First"}
+              {walkthroughStep === 3 && "Curate Artifacts"}
+              {walkthroughStep === 4 && "Visual Excellence"}
+              {walkthroughStep === 5 && "Accept Payments"}
+              {walkthroughStep === 6 && "Master Review"}
+            </h2>
+
+            <p className="opacity-80 leading-relaxed mb-8">
+              {walkthroughStep === 1 && "Welcome to the P31 Curator Studio. We have created this space for you to build a sanctuary for your brand. Let's walk through the initialization process."}
+              {walkthroughStep === 2 && "Start in the 'Identity' tab. Define your business name, story, and vanity URL. This is the foundation of your digital presence."}
+              {walkthroughStep === 3 && "In the 'Storefront' tab, upload your first artifacts. Each item represents your craftsmanship. You can list up to 10 products."}
+              {walkthroughStep === 4 && "Elevate your shop by uploading a premium banner and logo. Consistent aesthetics build trust and prestige with your customers."}
+              {walkthroughStep === 5 && "Ensure you can receive the fruits of your labor. Connect your Stripe, Cash App, or Venmo so customers can purchase directly."}
+              {walkthroughStep === 6 && "Once your sanctuary is complete, click 'Submit for Review'. Our architects will vet your shop for the upcoming Marketplace."}
+            </p>
+
+            <div className="flex-between">
+              <div className="walkthrough-dots">
+                {[1,2,3,4,5,6].map(s => (
+                  <span key={s} className={`dot ${walkthroughStep === s ? 'active' : ''}`}></span>
+                ))}
+              </div>
+              <button 
+                onClick={() => {
+                  if (walkthroughStep < 6) setWalkthroughStep(walkthroughStep + 1);
+                  else {
+                    setShowWalkthrough(false);
+                    localStorage.setItem('p31_walkthrough_seen', 'true');
+                  }
+                }}
+                className="btn-solid-gold"
+              >
+                {walkthroughStep === 6 ? "Begin Curation" : "Next Step"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

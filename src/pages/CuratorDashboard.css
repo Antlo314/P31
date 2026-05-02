@@ -836,6 +836,84 @@
   flex: 1;
 }
 
+/* Walkthrough Styling */
+.walkthrough-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(14, 5, 18, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 5000;
+  padding: 2rem;
+}
+
+.walkthrough-card {
+  text-align: center;
+  border: 1px solid var(--metallic-gold);
+  animation: walkIn 0.6s var(--ease-fluid);
+}
+
+@keyframes walkIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.walkthrough-icon-ring {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 1px solid var(--metallic-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  background: rgba(203, 167, 47, 0.05);
+}
+
+.walkthrough-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.walkthrough-dots .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--outline-variant);
+  transition: all 0.3s ease;
+}
+
+.walkthrough-dots .dot.active {
+  background: var(--metallic-gold);
+  transform: scale(1.5);
+}
+
+.onboarding-guide-trigger {
+  font-size: 0.7rem;
+  color: var(--metallic-gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 1rem;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.onboarding-guide-trigger:hover {
+  opacity: 1;
+}
+
+.submission-checklist .check-item.success {
+  color: #5D7A0E; /* Botanical Green */
+}
+
+.submission-checklist .check-item.pending {
+  color: rgba(58, 28, 54, 0.4);
+}
+
 /* Storefront Aesthetics Manager */
 .storefront-aesthetics {
   padding: 2.5rem !important;
@@ -961,5 +1039,43 @@
     width: 100%;
     height: 120px;
   }
+}
+
+/* Stats Row */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-pill {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.5;
+  font-weight: 700;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-family: var(--font-label);
+}
+
+.active-featured {
+  animation: featuredPulse 2s infinite;
+}
+
+@keyframes featuredPulse {
+  0% { box-shadow: 0 0 0 0 rgba(203, 167, 47, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(203, 167, 47, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(203, 167, 47, 0); }
 }
 

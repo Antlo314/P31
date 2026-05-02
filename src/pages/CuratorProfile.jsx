@@ -3,7 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Crown, Leaf, MapPin, Instagram, Facebook, Globe, Calendar, ArrowRight, ShoppingBag, CreditCard, DollarSign, Send } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Crown, Leaf, MapPin, Instagram, Facebook, Globe, Calendar, ArrowRight, ShoppingBag, CreditCard, DollarSign, Send, ShieldAlert, X } from 'lucide-react';
 import './CuratorProfile.css';
 import './CuratorProfileMiniShop.css';
 
@@ -87,12 +88,26 @@ const MELANIE_CURATOR_DATA = {
 };
 
 const CuratorProfile = () => {
+  const { user } = useAuth();
   const { id: slug } = useParams();
   const [curator, setCurator] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const containerRef = useRef(null);
+
+  const logEvent = async (type, productId = null) => {
+    if (!curator) return;
+    try {
+      await supabase.from('curator_analytics').insert([{
+        curator_id: curator.id,
+        product_id: productId,
+        event_type: type
+      }]);
+    } catch (err) {
+      console.warn('Analytics log failed:', err.message);
+    }
+  };
 
   useEffect(() => {
     const fetchCurator = async () => {
@@ -186,7 +201,7 @@ const CuratorProfile = () => {
   }
 
   // If curator hasn't been approved, they shouldn't be publicly visible (except to themselves)
-  if (curator.status !== 'approved' && slug !== curator.id) {
+  if (curator.status !== 'approved' && user?.id !== curator.id) {
      return (
        <div className="curator-profile-page error-state">
          <ShieldAlert size={48} className="text-gold mb-4" />
@@ -328,22 +343,22 @@ const CuratorProfile = () => {
                       <h4 className="cp-card-title">Secure Payments</h4>
                       <div className="cp-payment-buttons mt-4">
                         {curator.stripe_link && (
-                          <a href={curator.stripe_link} target="_blank" rel="noreferrer" className="cp-payment-btn stripe">
+                          <a href={curator.stripe_link} target="_blank" rel="noreferrer" className="cp-payment-btn stripe" onClick={() => logEvent('payment_click')}>
                             <CreditCard size={18} /> Pay with Card
                           </a>
                         )}
                         {curator.cashapp_tag && (
-                          <a href={`https://cash.app/$${curator.cashapp_tag.replace('$', '')}`} target="_blank" rel="noreferrer" className="cp-payment-btn cashapp">
+                          <a href={`https://cash.app/$${curator.cashapp_tag.replace('$', '')}`} target="_blank" rel="noreferrer" className="cp-payment-btn cashapp" onClick={() => logEvent('payment_click')}>
                             <DollarSign size={18} /> CashApp ${curator.cashapp_tag.replace('$', '')}
                           </a>
                         )}
                         {curator.venmo_handle && (
-                          <a href={`https://venmo.com/${curator.venmo_handle.replace('@', '')}`} target="_blank" rel="noreferrer" className="cp-payment-btn venmo">
+                          <a href={`https://venmo.com/${curator.venmo_handle.replace('@', '')}`} target="_blank" rel="noreferrer" className="cp-payment-btn venmo" onClick={() => logEvent('payment_click')}>
                             <Send size={18} /> Venmo @{curator.venmo_handle.replace('@', '')}
                           </a>
                         )}
                         {curator.other_payment_link && (
-                          <a href={curator.other_payment_link.startsWith('http') ? curator.other_payment_link : `mailto:${curator.other_payment_link}`} target="_blank" rel="noreferrer" className="cp-payment-btn other">
+                          <a href={curator.other_payment_link.startsWith('http') ? curator.other_payment_link : `mailto:${curator.other_payment_link}`} target="_blank" rel="noreferrer" className="cp-payment-btn other" onClick={() => logEvent('payment_click')}>
                             <ShoppingBag size={18} /> {curator.other_payment_label || 'Direct Payment'}
                           </a>
                         )}
@@ -364,9 +379,23 @@ const CuratorProfile = () => {
                 <h2 className="cp-category-title">{category}</h2>
                 <div className="cp-products-grid">
                   {productsByCategory[category].map(p => (
-                    <div key={p.id} className="cp-product-card" onClick={() => p.external_url && window.open(p.external_url, '_blank')}>
+                    <div 
+                      key={p.id} 
+                      className="cp-product-card" 
+                      onClick={() => {
+                        logEvent('product_click', p.id);
+                        if (p.external_url) window.open(p.external_url, '_blank');
+                      }}
+                    >
                       <div className="cp-product-img-wrapper">
                          <img src={p.image_url || 'https://via.placeholder.com/400x500?text=Artifact'} alt={p.name} className="cp-product-img" />
+                         {p.stock_status && p.stock_status !== 'in_stock' && (
+                           <span className={`stock-badge ${p.stock_status}`}>
+                             {p.stock_status === 'out_of_stock' ? 'Sold Out' : 
+                              p.stock_status === 'limited_edition' ? 'Limited' : 
+                              p.stock_status === 'pre_order' ? 'Pre-Order' : ''}
+                           </span>
+                         )}
                          <div className="cp-product-hover">
                             <span>{p.external_url ? 'Buy Now' : 'Inquiry Only'}</span>
                          </div>

@@ -480,6 +480,35 @@
   box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
+/* Stock Badges */
+.stock-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 5;
+}
+
+.stock-badge.out_of_stock {
+  background: #ff4b4b;
+  color: white;
+}
+
+.stock-badge.limited_edition {
+  background: var(--metallic-gold);
+  color: white;
+}
+
+.stock-badge.pre_order {
+  background: #008cff;
+  color: white;
+}
+
 @media (max-width: 400px) {
   .cp-products-grid {
     gap: 0.75rem;
