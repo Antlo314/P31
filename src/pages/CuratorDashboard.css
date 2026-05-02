@@ -1110,3 +1110,27 @@
   color: white;
 }
 
+.input-with-prefix {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.slug-copy-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--metallic-gold);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.slug-copy-btn:hover {
+  opacity: 0.7;
+}
+

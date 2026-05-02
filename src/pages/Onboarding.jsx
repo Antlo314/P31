@@ -40,6 +40,7 @@ const Onboarding = () => {
       // Note: Supabase often handles profile creation via triggers, 
       // but we'll do manual inserts for the specific curator data here.
       const userId = authData.user.id;
+      const initialSlug = formData.fullName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
       const { error: profileError } = await supabase
         .from('profiles')
@@ -49,7 +50,12 @@ const Onboarding = () => {
 
       const { error: curatorError } = await supabase
         .from('curator_data')
-        .insert([{ id: userId, business_name: 'New Sanctuary', is_paid: false }]);
+        .insert([{ 
+          id: userId, 
+          business_name: `${formData.fullName}'s Sanctuary`, 
+          slug: initialSlug,
+          is_paid: false 
+        }]);
 
       if (curatorError) throw curatorError;
 

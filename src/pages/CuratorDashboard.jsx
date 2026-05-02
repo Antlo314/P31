@@ -3,7 +3,7 @@ import { useNavigate, Link, useLocation, Routes, Route, Navigate } from 'react-r
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Community from './Community'; // Nested import
-import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Users, Trash2, Plus, ShoppingCart, Loader2, CreditCard, X } from 'lucide-react';
+import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X } from 'lucide-react';
 import './CuratorDashboard.css';
 
 const CuratorDashboard = () => {
@@ -96,6 +96,27 @@ const CuratorDashboard = () => {
       setShowWalkthrough(true);
     }
   }, [curatorData]);
+
+  const [linkCopied, setLinkCopied] = useState(false);
+  const copyShopLink = () => {
+    const fullUrl = `${window.location.origin}/${editData.slug}`;
+    navigator.clipboard.writeText(fullUrl);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  const handleBusinessNameChange = (e) => {
+    const newName = e.target.value;
+    const updates = { businessName: newName };
+    
+    // Auto-suggest slug only if current slug is based on the OLD name or empty
+    const oldNameSlug = editData.businessName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    if (!editData.slug || editData.slug === oldNameSlug || editData.slug.includes("'s-sanctuary")) {
+      updates.slug = newName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    }
+    
+    setEditData({...editData, ...updates});
+  };
 
   const fetchLeads = async () => {
     try {
@@ -682,23 +703,31 @@ const CuratorDashboard = () => {
                     <input 
                       type="text" 
                       value={editData.businessName}
-                      onChange={(e) => setEditData({...editData, businessName: e.target.value})}
+                      onChange={handleBusinessNameChange}
                       required
                     />
                   </div>
 
                   <div className="form-group">
                     <label>Vanity URL (p31market.com/your-slug)</label>
-                    <div className="input-with-prefix">
-                      <span className="url-prefix text-olive">p31market.com/</span>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. luxe-candles"
-                        value={editData.slug}
-                        onChange={(e) => setEditData({...editData, slug: e.target.value})}
-                        pattern="[a-zA-Z0-9-]+"
-                      />
-                    </div>
+                     <div className="input-with-prefix">
+                       <span className="url-prefix text-olive">p31market.com/</span>
+                       <input 
+                         type="text" 
+                         placeholder="e.g. luxe-candles"
+                         value={editData.slug}
+                         onChange={(e) => setEditData({...editData, slug: e.target.value})}
+                         pattern="[a-zA-Z0-9-]+"
+                       />
+                       <button 
+                         type="button" 
+                         onClick={copyShopLink} 
+                         className="slug-copy-btn"
+                         title="Copy Shop Link"
+                       >
+                         {linkCopied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+                       </button>
+                     </div>
                     <p className="help-text">Letters, numbers, and hyphens only.</p>
                   </div>
 
