@@ -32,6 +32,14 @@ const CuratorDashboard = () => {
   const [adminError, setAdminError] = useState(null);
   const [adminFeedbackMap, setAdminFeedbackMap] = useState({}); // state to hold feedback input per vendor
   
+  const [testimonials, setTestimonials] = useState([]);
+  const [isTestimonialModalOpen, setIsTestimonialModalOpen] = useState(false);
+  const [testimonialForm, setTestimonialForm] = useState({ customer_name: '', content: '', rating: 5 });
+  
+  const [privateMessages, setPrivateMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [selectedRecipient, setSelectedRecipient] = useState(null); // For admin to pick curator
+  
   const [showWalkthrough, setShowWalkthrough] = useState(false);
   const [walkthroughStep, setWalkthroughStep] = useState(1);
   
@@ -169,8 +177,33 @@ const CuratorDashboard = () => {
       fetchLeads();
       fetchPendingApprovals();
       fetchPartnershipInquiries();
+      fetchAllCurators(); // For messaging
     }
-  }, [isAdmin, activeTab]);
+    if (user) {
+      fetchTestimonials();
+      fetchPrivateMessages();
+    }
+  }, [isAdmin, activeTab, user]);
+
+  const fetchTestimonials = async () => {
+    const { data } = await supabase.from('testimonials').select('*').eq('curator_id', user.id);
+    setTestimonials(data || []);
+  };
+
+  const fetchPrivateMessages = async () => {
+    const { data } = await supabase
+      .from('private_messages')
+      .select('*, sender:profiles!private_messages_sender_id_fkey(full_name, avatar_url)')
+      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      .order('created_at', { ascending: true });
+    setPrivateMessages(data || []);
+  };
+
+  const [allCurators, setAllCurators] = useState([]);
+  const fetchAllCurators = async () => {
+    const { data } = await supabase.from('curator_data').select('*, profiles(full_name)');
+    setAllCurators(data || []);
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -438,6 +471,37 @@ const CuratorDashboard = () => {
     fetchPendingApprovals();
   };
 
+  const sendPrivateMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+    const receiverId = isAdmin ? selectedRecipient : '545b1f22-6780-49a8-a3c6-408812815fb0'; 
+    await supabase.from('private_messages').insert([{
+      sender_id: user.id,
+      receiver_id: receiverId,
+      content: newMessage
+    }]);
+    setNewMessage('');
+    fetchPrivateMessages();
+  };
+
+  const saveTestimonial = async (e) => {
+    e.preventDefault();
+    await supabase.from('testimonials').insert([{
+      ...testimonialForm,
+      curator_id: user.id
+    }]);
+    setIsTestimonialModalOpen(false);
+    setTestimonialForm({ customer_name: '', content: '', rating: 5 });
+    fetchTestimonials();
+  };
+
+  const deleteTestimonial = async (id) => {
+    if (window.confirm('Remove this testimonial?')) {
+      await supabase.from('testimonials').delete().eq('id', id);
+      fetchTestimonials();
+    }
+  };
+
   const toggleFeatured = async (id, currentStatus) => {
     await supabase.from('curator_data').update({ is_featured: !currentStatus }).eq('id', id);
     if (reviewingCurator) setReviewingCurator(prev => ({ ...prev, is_featured: !currentStatus }));
@@ -525,6 +589,20 @@ const CuratorDashboard = () => {
             className={`nav-item ${activeTab === 'storefront' ? 'active' : ''}`}
           >
             <ShoppingBag size={20} /> Storefront
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('testimonials')} 
+            className={`nav-item ${activeTab === 'testimonials' ? 'active' : ''}`}
+          >
+            <MessageSquare size={20} /> Testimonials
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('concierge')} 
+            className={`nav-item ${activeTab === 'concierge' ? 'active' : ''}`}
+          >
+            <Bell size={20} /> Concierge
           </button>
 
           {isAdmin && (
@@ -1347,6 +1425,141 @@ const CuratorDashboard = () => {
             </div>
               </div>
             ) : <Navigate to="identity" replace />
+          } />
+
+          <Route path="testimonials" element={
+            <div className="dashboard-view">
+              <header className="dashboard-header">
+                <h1 className="font-headline text-primary">Customer <span className="text-gold">Voices</span></h1>
+                <p>Curate the testimonials that define your brand's reputation for excellence.</p>
+              </header>
+
+              <section className="dashboard-card glass-card">
+                <div className="flex-between mb-8">
+                  <h2 className="card-title text-gold m-0"><MessageSquare size={20} /> Artisan Testimonials</h2>
+                  <button onClick={() => setIsTestimonialModalOpen(true)} className="btn-solid-gold btn-sm"><Plus size={16} /> Add Voice</button>
+                </div>
+
+                <div className="testimonials-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem'}}>
+                  {testimonials.map(t => (
+                    <div key={t.id} className="testimonial-item p-6 bg-surface rounded-xl border border-thistle relative">
+                      <button onClick={() => deleteTestimonial(t.id)} className="absolute top-2 right-2 text-red-500 opacity-40 hover:opacity-100"><Trash2 size={16} /></button>
+                      <div className="flex gap-1 mb-3">
+                        {[...Array(t.rating)].map((_, i) => <Sparkles key={i} size={12} className="text-gold" />)}
+                      </div>
+                      <p className="italic text-sm opacity-80 mb-4">"{t.content}"</p>
+                      <p className="font-bold text-xs text-primary">— {t.customer_name}</p>
+                    </div>
+                  ))}
+                  {testimonials.length === 0 && (
+                    <div className="col-span-full text-center py-20 opacity-40 italic">
+                      No testimonials added yet. Let your customers speak for your craftsmanship.
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {isTestimonialModalOpen && (
+                <div className="modal-overlay flex-center">
+                  <form onSubmit={saveTestimonial} className="modal-content glass-card p-8 max-w-md w-full">
+                    <h2 className="font-headline text-2xl text-primary mb-6">Add Customer Voice</h2>
+                    <div className="form-group mb-4">
+                      <label>Customer Name</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={testimonialForm.customer_name}
+                        onChange={e => setTestimonialForm({...testimonialForm, customer_name: e.target.value})}
+                      />
+                    </div>
+                    <div className="form-group mb-4">
+                      <label>Testimonial Content</label>
+                      <textarea 
+                        required 
+                        className="feedback-input"
+                        value={testimonialForm.content}
+                        onChange={e => setTestimonialForm({...testimonialForm, content: e.target.value})}
+                      ></textarea>
+                    </div>
+                    <div className="form-group mb-6">
+                      <label>Rating (1-5)</label>
+                      <select 
+                        value={testimonialForm.rating}
+                        onChange={e => setTestimonialForm({...testimonialForm, rating: parseInt(e.target.value)})}
+                        className="premium-select"
+                      >
+                        {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Stars</option>)}
+                      </select>
+                    </div>
+                    <div className="flex gap-4">
+                      <button type="submit" className="btn-solid-gold flex-1">Add to Profile</button>
+                      <button type="button" onClick={() => setIsTestimonialModalOpen(false)} className="btn-outline-primary flex-1">Cancel</button>
+                    </div>
+                  </form>
+                </div>
+              )}
+            </div>
+          } />
+
+          <Route path="concierge" element={
+            <div className="dashboard-view">
+              <header className="dashboard-header">
+                <h1 className="font-headline text-primary">Studio <span className="text-gold">Concierge</span></h1>
+                <p>Direct architectural guidance from the Master Architects.</p>
+              </header>
+
+              <div className="concierge-layout" style={{display: 'grid', gridTemplateColumns: isAdmin ? '300px 1fr' : '1fr', gap: '2rem'}}>
+                {isAdmin && (
+                  <div className="concierge-sidebar glass-card p-6">
+                    <h4 className="font-label text-gold mb-4">Active Curators</h4>
+                    <div className="curator-list flex flex-col gap-2">
+                      {allCurators.map(c => (
+                        <button 
+                          key={c.id} 
+                          onClick={() => setSelectedRecipient(c.id)}
+                          className={`text-left p-3 rounded-lg text-sm transition-all ${selectedRecipient === c.id ? 'bg-gold-light text-white' : 'hover:bg-muted'}`}
+                        >
+                          {c.profiles?.full_name || 'Anonymous'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="concierge-chat glass-card flex flex-col h-[600px]">
+                  <div className="chat-header p-6 border-b border-thistle flex-between">
+                    <h3 className="font-label text-primary m-0">
+                      {isAdmin ? (selectedRecipient ? `Chatting with ${allCurators.find(c => c.id === selectedRecipient)?.profiles?.full_name}` : 'Select a Curator') : 'Master Architect Concierge'}
+                    </h3>
+                  </div>
+                  
+                  <div className="chat-messages flex-1 overflow-y-auto p-6 flex flex-col gap-4">
+                    {privateMessages.filter(m => isAdmin ? (m.sender_id === selectedRecipient || m.receiver_id === selectedRecipient) : true).map(m => (
+                      <div key={m.id} className={`message-bubble max-w-[80%] p-4 rounded-2xl ${m.sender_id === user.id ? 'bg-gold-light text-white self-end' : 'bg-surface border border-thistle self-start'}`}>
+                        <p className="text-sm m-0">{m.content}</p>
+                        <span className="text-[10px] opacity-60 mt-1 block">{new Date(m.created_at).toLocaleTimeString()}</span>
+                      </div>
+                    ))}
+                    {(!isAdmin || selectedRecipient) && privateMessages.filter(m => isAdmin ? (m.sender_id === selectedRecipient || m.receiver_id === selectedRecipient) : true).length === 0 && (
+                      <div className="text-center py-20 opacity-40 italic">Start the conversation...</div>
+                    )}
+                  </div>
+
+                  {(!isAdmin || selectedRecipient) && (
+                    <form onSubmit={sendPrivateMessage} className="chat-input-area p-6 border-t border-thistle flex gap-4">
+                      <input 
+                        type="text" 
+                        className="feedback-input m-0" 
+                        placeholder="Type your message..." 
+                        value={newMessage}
+                        onChange={e => setNewMessage(e.target.value)}
+                      />
+                      <button type="submit" className="btn-solid-gold"><Send size={18} /></button>
+                    </form>
+                  )}
+                </div>
+              </div>
+            </div>
           } />
         </Routes>
       </main>

@@ -551,6 +551,36 @@
   --metallic-gold: #c3a343;
 }
 
+/* Testimonials Showcase */
+.cp-testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2.5rem;
+}
+
+.cp-testimonial-card {
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.cp-testimonial-content {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.85);
+  font-style: italic;
+  flex: 1;
+}
+
+.cp-testimonial-author {
+  font-family: var(--font-label);
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--metallic-gold);
+  font-weight: 700;
+}
+
 @media (max-width: 400px) {
   .cp-products-grid {
     gap: 0.75rem;

@@ -1079,3 +1079,34 @@
   100% { box-shadow: 0 0 0 0 rgba(203, 167, 47, 0); }
 }
 
+/* Concierge & Chat */
+.concierge-chat {
+  overflow: hidden;
+}
+
+.message-bubble {
+  word-wrap: break-word;
+  line-height: 1.5;
+}
+
+.bg-gold-light {
+  background-color: var(--metallic-gold);
+}
+
+/* Testimonials */
+.testimonial-item {
+  transition: transform 0.3s ease;
+}
+
+.testimonial-item:hover {
+  transform: translateY(-5px);
+}
+
+.curator-list button {
+  width: 100%;
+}
+
+.curator-list button.bg-gold-light {
+  color: white;
+}
+

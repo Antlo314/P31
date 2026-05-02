@@ -95,6 +95,7 @@ const CuratorProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const containerRef = useRef(null);
+  const [testimonials, setTestimonials] = useState([]);
 
   const logEvent = async (type, productId = null) => {
     if (!curator) return;
@@ -164,6 +165,14 @@ const CuratorProfile = () => {
         } else if (slug === MELANIE_CURATOR_DATA.id || slug === 'ilcollection' || data.business_name?.includes('Incandescent Lily')) {
           setProducts(IL_COLLECTION_PRODUCTS);
         }
+
+        // Fetch Testimonials
+        const { data: testData } = await supabase
+          .from('testimonials')
+          .select('*')
+          .eq('curator_id', data.id)
+          .eq('is_approved', true);
+        setTestimonials(testData || []);
       } catch (err) {
         console.error('Curator fetch error:', err);
         setError('Curator not found');
@@ -418,6 +427,30 @@ const CuratorProfile = () => {
            )}
         </div>
       </section>
+
+      {/* Customer Testimonials Section */}
+      {testimonials.length > 0 && (
+        <section className="cp-testimonials-section section-padded border-t border-white/5">
+          <div className="container-fluid">
+             <h2 className="cp-section-title text-center">Collector's Praise</h2>
+             <div className="divider-gold mb-12"></div>
+             
+             <div className="cp-testimonials-grid">
+                {testimonials.map(t => (
+                  <div key={t.id} className="cp-testimonial-card glass-card">
+                     <div className="flex gap-1 mb-4">
+                       {[...Array(t.rating)].map((_, i) => <Sparkles key={i} size={10} className="text-gold" />)}
+                     </div>
+                     <p className="cp-testimonial-content">"{t.content}"</p>
+                     <div className="mt-6 pt-4 border-t border-white/10">
+                       <p className="cp-testimonial-author">— {t.customer_name}</p>
+                     </div>
+                  </div>
+                ))}
+             </div>
+          </div>
+        </section>
+      )}
 
     </div>
   );
