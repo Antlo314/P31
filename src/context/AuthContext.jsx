@@ -48,22 +48,30 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserData = async (userId) => {
     try {
-      const { data: profileData } = await supabase
+      const { data: profileData, error: pError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
       
-      const { data: cData } = await supabase
+      if (pError && pError.code !== 'PGRST116') {
+        console.warn('Profile fetch error:', pError.message);
+      }
+      
+      const { data: cData, error: cError } = await supabase
         .from('curator_data')
         .select('*')
         .eq('id', userId)
         .single();
+
+      if (cError && cError.code !== 'PGRST116') {
+        console.warn('Curator data fetch error:', cError.message);
+      }
         
-      setProfile(profileData);
-      setCuratorData(cData);
+      setProfile(profileData || null);
+      setCuratorData(cData || null);
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('Unexpected error fetching user data:', error);
     } finally {
       setLoading(false);
     }
