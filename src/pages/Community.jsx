@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Send, Hash, Users, Bell, Search, Settings, Crown, Leaf, Trash2, MessageCircle, UserPlus, ShieldCheck } from 'lucide-react';
+import { Send, Hash, Users, Bell, Search, Settings, Crown, Leaf, Trash2, MessageCircle, UserPlus, ShieldCheck, Pin, PinOff } from 'lucide-react';
 import './Community.css';
 
 const PUBLIC_CHANNELS = [
@@ -23,6 +23,7 @@ const Community = () => {
   const [isLoadingCurators, setIsLoadingCurators] = useState(false);
   const [chatError, setChatError] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null);
+  const [pinnedMessages, setPinnedMessages] = useState([]);
   const messagesStartRef = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -55,6 +56,7 @@ const Community = () => {
     if (!supabase || !user) return;
     
     fetchMessages();
+    fetchPinnedMessages();
 
     // REAL-TIME SUBSCRIPTION
     // We listen to the entire messages table for relevant updates
@@ -147,6 +149,25 @@ const Community = () => {
       console.error('Chat fetch error:', err.message);
       setChatError('Sanctuary Connectivity Error: ' + err.message);
     }
+  };
+
+  const fetchPinnedMessages = async () => {
+    const { data } = await supabase
+      .from('messages')
+      .select('*, profiles!profile_id(full_name)')
+      .eq('is_pinned', true)
+      .eq('channel_id', activeChannelId);
+    setPinnedMessages(data || []);
+  };
+
+  const togglePin = async (msgId, currentStatus) => {
+    if (!isAdmin) return;
+    const { error } = await supabase
+      .from('messages')
+      .update({ is_pinned: !currentStatus })
+      .eq('id', msgId);
+    
+    if (!error) fetchPinnedMessages();
   };
 
   const fetchNewMessage = async (id) => {
@@ -336,21 +357,34 @@ const Community = () => {
         </div>
       </aside>
 
-      <main className="chat-main">
-        <header className="chat-header">
-          <div className="chat-header-info">
-            <h1 className="font-headline text-primary">{activeHeaderTitle}</h1>
-            <p className="chat-header-desc">{activeHeaderDesc}</p>
-          </div>
-          <div className="chat-header-actions">
-             {activeDmRecipient && <div className="botanical-badge text-gold"><ShieldCheck size={12} /> Encrypted</div>}
-             {isAdmin && !activeDmRecipient && (
-               <button onClick={clearChannel} className="btn-outline-primary btn-sm flex items-center gap-2" style={{borderColor: 'rgba(255,0,0,0.3)', color: 'rgba(255,0,0,0.7)'}}>
-                 <Trash2 size={14} /> Purge Channel
-               </button>
-             )}
-          </div>
-        </header>
+       <main className="chat-main">
+         <header className="chat-header">
+           <div className="chat-header-info">
+             <h1 className="font-headline text-primary">{activeHeaderTitle}</h1>
+             <p className="chat-header-desc">{activeHeaderDesc}</p>
+           </div>
+           <div className="chat-header-actions">
+              {activeDmRecipient && <div className="botanical-badge text-gold"><ShieldCheck size={12} /> Encrypted</div>}
+              {isAdmin && !activeDmRecipient && (
+                <button onClick={clearChannel} className="btn-outline-primary btn-sm flex items-center gap-2" style={{borderColor: 'rgba(255,0,0,0.3)', color: 'rgba(255,0,0,0.7)'}}>
+                  <Trash2 size={14} /> Purge Channel
+                </button>
+              )}
+           </div>
+         </header>
+
+         {pinnedMessages.length > 0 && (
+           <div className="pinned-messages-banner glass-card animate-in">
+             <Pin size={14} className="text-gold" />
+             <div className="pinned-messages-scroll">
+               {pinnedMessages.map(m => (
+                 <span key={m.id} className="pinned-text">
+                   <strong>{m.profiles?.full_name}:</strong> {m.text}
+                 </span>
+               ))}
+             </div>
+           </div>
+         )}
 
         <div className="chat-feed">
           <div ref={messagesStartRef} />
@@ -384,14 +418,19 @@ const Community = () => {
                       {isMine && <span className="message-time">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>}
                       
                       <div className="message-actions">
-                        <button onClick={() => setReplyingTo(msg)} className="msg-action-btn" title="Reply">
-                          <MessageCircle size={12} />
-                        </button>
-                        {canDelete && (
-                          <button onClick={() => handleDeleteMessage(msg.id)} className="msg-action-btn delete" title="Delete Message">
-                            <Trash2 size={12} />
-                          </button>
-                        )}
+                         <button onClick={() => setReplyingTo(msg)} className="msg-action-btn" title="Reply">
+                           <MessageCircle size={12} />
+                         </button>
+                         {isAdmin && (
+                           <button onClick={() => togglePin(msg.id, msg.is_pinned)} className={`msg-action-btn ${msg.is_pinned ? 'pinned' : ''}`} title={msg.is_pinned ? 'Unpin' : 'Pin'}>
+                             {msg.is_pinned ? <PinOff size={12} /> : <Pin size={12} />}
+                           </button>
+                         )}
+                         {canDelete && (
+                           <button onClick={() => handleDeleteMessage(msg.id)} className="msg-action-btn delete" title="Delete Message">
+                             <Trash2 size={12} />
+                           </button>
+                         )}
                       </div>
 
                       {!isMine && <span className="message-time">{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>}

@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAuth } from '../context/AuthContext';
-import { Crown, Leaf, MapPin, Instagram, Facebook, Globe, Calendar, ArrowRight, ShoppingBag, CreditCard, DollarSign, Send, ShieldAlert, X } from 'lucide-react';
+import { Crown, Leaf, MapPin, Instagram, Facebook, Globe, Calendar, ArrowRight, ShoppingBag, ExternalLink, Sparkles, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Image as ImageIcon } from 'lucide-react';
 import './CuratorProfile.css';
 import './CuratorProfileMiniShop.css';
 
@@ -269,6 +269,11 @@ const CuratorProfile = () => {
               </div>
             )}
 
+            <div className="cp-curator-badges mb-4">
+              {curator.custom_title && <span className="cp-prestige-title">{curator.custom_title}</span>}
+              {curator.is_early_bird && <span className="cp-founder-badge"><Leaf size={12} /> Founding Artisan</span>}
+            </div>
+
             <p className="cp-tagline text-gold font-label">{curator.tagline}</p>
             
             <div className="cp-social-strip">
@@ -337,7 +342,11 @@ const CuratorProfile = () => {
 
                 <div className="cp-contact-column">
                   <div className="cp-contact-card">
-                     <h4 className="cp-card-title">Direct Concierge</h4>
+                     <p className="cp-hero-tagline">{curator.tagline}</p>
+                     <div className="cp-curator-badges">
+                       {curator.custom_title && <span className="cp-prestige-title">{curator.custom_title}</span>}
+                       {curator.is_early_bird && <span className="cp-founder-badge"><Leaf size={12} /> Founding Artisan</span>}
+                     </div>
                      <div className="cp-contact-row">
                         <span className="cp-contact-label">Email</span>
                         <span className="cp-contact-val">{curator.profiles?.email}</span>
@@ -399,6 +408,13 @@ const CuratorProfile = () => {
                     >
                       <div className="cp-product-img-wrapper">
                          <img src={p.image_url || 'https://via.placeholder.com/400x500?text=Artifact'} alt={p.name} className="cp-product-img" />
+                         
+                         {p.image_urls?.length > 1 && (
+                            <div className="cp-gallery-indicator">
+                              <ImageIcon size={12} /> {p.image_urls.length}
+                            </div>
+                          )}
+
                          {p.stock_status && p.stock_status !== 'in_stock' && (
                            <span className={`stock-badge ${p.stock_status}`}>
                              {p.stock_status === 'out_of_stock' ? 'Sold Out' : 

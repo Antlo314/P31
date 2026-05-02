@@ -581,6 +581,58 @@
   font-weight: 700;
 }
 
+/* Prestige Badges */
+.cp-curator-badges {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cp-prestige-title {
+  font-family: var(--font-label);
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: white;
+  background: var(--metallic-gold);
+  padding: 4px 10px;
+  border-radius: 2px;
+  font-weight: 700;
+}
+
+.cp-founder-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-label);
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #9cdb9c;
+  background: rgba(156, 219, 156, 0.1);
+  border: 1px solid rgba(156, 219, 156, 0.3);
+  padding: 4px 10px;
+  border-radius: 2px;
+}
+
+/* Gallery Indicator */
+.cp-gallery-indicator {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 5;
+}
+
 @media (max-width: 400px) {
   .cp-products-grid {
     gap: 0.75rem;

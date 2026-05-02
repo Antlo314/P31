@@ -3,7 +3,8 @@ import { useNavigate, Link, useLocation, Routes, Route, Navigate } from 'react-r
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Community from './Community'; // Nested import
-import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X } from 'lucide-react';
+import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import './CuratorDashboard.css';
 
 const CuratorDashboard = () => {
@@ -23,7 +24,16 @@ const CuratorDashboard = () => {
   const [products, setProducts] = useState([]);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [productForm, setProductForm] = useState({ name: '', description: '', price: '', image_url: '', category: 'Collection', external_url: '', stock_status: 'in_stock' });
+  const [productForm, setProductForm] = useState({ 
+    name: '', 
+    description: '', 
+    price: '', 
+    image_url: '', 
+    image_urls: [], 
+    category: 'Collection', 
+    external_url: '', 
+    stock_status: 'in_stock' 
+  });
   const [productImageLoading, setProductImageLoading] = useState(false);
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [partnershipInquiries, setPartnershipInquiries] = useState([]);
@@ -62,7 +72,8 @@ const CuratorDashboard = () => {
     venmoHandle: '',
     otherPaymentLabel: '',
     themePreference: 'classic_gold',
-    shopAnnouncement: ''
+    shopAnnouncement: '',
+    customTitle: ''
   });
   useEffect(() => {
     if (curatorData) {
@@ -85,7 +96,8 @@ const CuratorDashboard = () => {
         otherPaymentLink: curatorData.other_payment_link || '',
         otherPaymentLabel: curatorData.other_payment_label || '',
         themePreference: curatorData.theme_preference || 'classic_gold',
-        shopAnnouncement: curatorData.shop_announcement || ''
+        shopAnnouncement: curatorData.shop_announcement || '',
+        customTitle: curatorData.custom_title || ''
       });
     }
   }, [curatorData]);
@@ -252,6 +264,7 @@ const CuratorDashboard = () => {
           other_payment_label: editData.otherPaymentLabel,
           theme_preference: editData.themePreference,
           shop_announcement: editData.shopAnnouncement,
+          custom_title: editData.customTitle,
           slug: editData.slug.toLowerCase().replace(/[^a-z0-9-]/g, '')
         })
         .eq('id', user.id);
@@ -437,7 +450,11 @@ const CuratorDashboard = () => {
 
       const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(filePath);
       
-      setProductForm(prev => ({ ...prev, image_url: publicUrl }));
+      setProductForm(prev => ({ 
+        ...prev, 
+        image_url: prev.image_url || publicUrl, // Set as main if empty
+        image_urls: [...(prev.image_urls || []), publicUrl] 
+      }));
       alert('Portrait successfully uploaded to the collective.');
     } catch (err) {
       console.error('Upload failure:', err);
@@ -462,7 +479,7 @@ const CuratorDashboard = () => {
       }
       setIsProductModalOpen(false);
       setEditingProduct(null);
-      setProductForm({ name: '', description: '', price: '', image_url: '', category: 'Collection', external_url: '', stock_status: 'in_stock' });
+      setProductForm({ name: '', description: '', price: '', image_url: '', image_urls: [], category: 'Collection', external_url: '', stock_status: 'in_stock' });
       fetchProducts();
     } catch (err) {
       alert('Error saving product: ' + err.message);
@@ -732,6 +749,17 @@ const CuratorDashboard = () => {
                   </div>
 
                   <div className="form-group">
+                    <label>Professional Custom Title</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Master Artisan, Lead Curator" 
+                      value={editData.customTitle}
+                      onChange={(e) => setEditData({...editData, customTitle: e.target.value})}
+                    />
+                    <p className="help-text">Displays next to your name in chat and on your profile.</p>
+                  </div>
+
+                  <div className="form-group">
                     <label>Sanctuary Tagline</label>
                     <input 
                       type="text" 
@@ -947,6 +975,47 @@ const CuratorDashboard = () => {
                     </div>
                   )}
                 </section>
+
+                <section className="dashboard-card glass-card">
+                  <h2 className="card-title text-gold"><QrCode size={20} /> Share Your Sanctuary</h2>
+                  <div className="qr-share-layout flex flex-col items-center gap-6 py-8">
+                    <div className="qr-container p-6 bg-white rounded-2xl shadow-xl border-4 border-gold">
+                      <QRCodeSVG 
+                        id="sanctuary-qr"
+                        value={`${window.location.origin}/${editData.slug}`} 
+                        size={200}
+                        level="H"
+                        includeMargin={true}
+                      />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm opacity-70 mb-6">Display this code at physical markets to bridge your digital and physical influence.</p>
+                      <button 
+                        onClick={() => {
+                          const svg = document.getElementById('sanctuary-qr');
+                          const svgData = new XMLSerializer().serializeToString(svg);
+                          const canvas = document.createElement("canvas");
+                          const ctx = canvas.getContext("2d");
+                          const img = new Image();
+                          img.onload = () => {
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            ctx.drawImage(img, 0, 0);
+                            const pngFile = canvas.toDataURL("image/png");
+                            const downloadLink = document.createElement("a");
+                            downloadLink.download = `${editData.slug}-qr-code.png`;
+                            downloadLink.href = pngFile;
+                            downloadLink.click();
+                          };
+                          img.src = "data:image/svg+xml;base64," + btoa(svgData);
+                        }}
+                        className="btn-outline-primary flex items-center gap-2"
+                      >
+                        <Download size={18} /> Download Brand QR
+                      </button>
+                    </div>
+                  </div>
+                </section>
               </div>
             </div>
             </div>
@@ -968,7 +1037,7 @@ const CuratorDashboard = () => {
                 <button 
                   onClick={() => {
                     setEditingProduct(null);
-                    setProductForm({ name: '', description: '', price: '', image_url: '', category: 'Collection', external_url: '' });
+                    setProductForm({ name: '', description: '', price: '', image_url: '', image_urls: [], category: 'Collection', external_url: '' });
                     setIsProductModalOpen(true);
                   }} 
                   className="btn-solid-gold flex-center gap-2"
@@ -1083,7 +1152,7 @@ const CuratorDashboard = () => {
                     <div className="product-actions flex-center gap-4 mt-4">
                       <button onClick={() => {
                         setEditingProduct(p);
-                        setProductForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url, category: p.category || 'Collection', external_url: p.external_url || '', stock_status: p.stock_status || 'in_stock' });
+                        setProductForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url, image_urls: p.image_urls || [], category: p.category || 'Collection', external_url: p.external_url || '', stock_status: p.stock_status || 'in_stock' });
                         setIsProductModalOpen(true);
                       }} className="icon-btn"><Settings size={16} /></button>
                       <button onClick={() => deleteProduct(p.id)} className="icon-btn text-red"><Trash2 size={16} /></button>
@@ -1107,13 +1176,44 @@ const CuratorDashboard = () => {
                   <h2 className="font-headline text-primary mb-6">{editingProduct ? 'Refine Artifact' : 'New Artisan Item'}</h2>
                   <form onSubmit={saveProduct} className="premium-form">
                     <div className="product-image-uploader mb-6">
-                      <div className="image-dropzone" onClick={() => document.getElementById('prod-img-input').click()}>
-                        {productImageLoading ? <Loader2 className="animate-spin" /> : (
-                          productForm.image_url ? <img src={productForm.image_url} alt="Preview" /> : <><Camera size={32} /> <p className="text-xs mt-2">Upload Photo</p></>
+                      <div className="avatar-preview-wrapper bg-muted flex-center" onClick={() => document.getElementById('prod-img-input').click()}>
+                        {productImageLoading ? <Loader2 className="animate-spin text-gold" /> : (
+                          productForm.image_url ? <img src={productForm.image_url} alt="Main" /> : <Plus size={32} className="text-gold" />
                         )}
                       </div>
                       <input type="file" id="prod-img-input" hidden accept="image/*" onChange={handleProductImageUpload} />
+                      <p className="help-text">Select the primary artifact portrait.</p>
                     </div>
+
+                    {productForm.image_urls?.length > 0 && (
+                      <div className="form-group">
+                        <label>Artifact Gallery ({productForm.image_urls.length}/5)</label>
+                        <div className="flex gap-2 flex-wrap mt-2">
+                          {productForm.image_urls.map((url, i) => (
+                            <div key={i} className="relative w-16 h-16 rounded border border-thistle overflow-hidden group">
+                              <img src={url} className="w-full h-full object-cover" alt={`Gallery ${i}`} />
+                              <button 
+                                type="button"
+                                onClick={() => setProductForm(prev => ({
+                                  ...prev, 
+                                  image_urls: prev.image_urls.filter((_, idx) => idx !== i),
+                                  image_url: prev.image_url === url ? (prev.image_urls[1] || '') : prev.image_url
+                                }))}
+                                className="absolute inset-0 bg-red-500/80 text-white flex-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          ))}
+                          {productForm.image_urls.length < 5 && (
+                            <button type="button" onClick={() => document.getElementById('prod-img-input').click()} className="w-16 h-16 rounded border-2 border-dashed border-thistle flex-center text-gold hover:border-gold transition-colors">
+                              <Plus size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="form-group">
                       <label>Artifact Name</label>
                       <input type="text" value={productForm.name} onChange={e => setProductForm({...productForm, name: e.target.value})} required />
