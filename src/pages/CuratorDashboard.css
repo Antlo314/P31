@@ -798,6 +798,119 @@
   }
 }
 
+/* ==========================================================
+   V10 INSTITUTIONAL UI ADDITIONS
+   ========================================================== */
+
+/* Prestige Ribbons */
+.product-img-frame {
+  position: relative;
+}
+
+.product-prestige-ribbon {
+  position: absolute;
+  top: 15px;
+  right: -30px;
+  background: var(--gold-gradient);
+  color: #1a1000;
+  padding: 6px 40px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transform: rotate(45deg);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.product-prestige-ribbon.sold-out {
+  background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%);
+  color: white;
+}
+
+/* Analytics Charts */
+.chart-container {
+  display: flex;
+  align-items: flex-end;
+  height: 200px;
+  gap: 12px;
+  padding-bottom: 20px;
+}
+
+.chart-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.chart-bar {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  background: var(--gold-gradient);
+  transition: all 0.6s var(--ease-fluid);
+}
+
+.chart-tooltip {
+  position: absolute;
+  top: -40px;
+  background: var(--dark-plum);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  pointer-events: none;
+}
+
+.authority-meter {
+  border: 4px solid rgba(203, 167, 47, 0.1);
+}
+
+/* Event Invitations */
+.event-invite-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--outline-variant);
+  transition: all 0.3s ease;
+}
+
+.event-invite-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--metallic-gold);
+}
+
+.bg-gold-gradient {
+  background: var(--gold-gradient);
+}
+
+.discovery-list .flex-between {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(203, 167, 47, 0.1);
+}
+
+.discovery-list .flex-between:last-child {
+  border-bottom: none;
+}
+
+.h-64 { height: 16rem; }
+.w-32 { width: 8rem; }
+.h-32 { height: 8rem; }
+.flex-1 { flex: 1; }
+.group:hover .chart-bar {
+  opacity: 1 !important;
+  transform: scaleX(1.1);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.botanical-badge.text-gold {
+  animation: float 3s ease-in-out infinite;
+}
+
 /* Payment Configuration */
 .payment-config-grid {
   display: flex;

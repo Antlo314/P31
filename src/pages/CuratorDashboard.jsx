@@ -53,6 +53,14 @@ const CuratorDashboard = () => {
   const [showWalkthrough, setShowWalkthrough] = useState(false);
   const [walkthroughStep, setWalkthroughStep] = useState(1);
   
+  const [allEvents, setAllEvents] = useState([]);
+  const [rsvps, setRsvps] = useState([]);
+  const [analyticsHistory, setAnalyticsHistory] = useState([
+    { day: 'Mon', views: 42 }, { day: 'Tue', views: 38 }, { day: 'Wed', views: 65 }, 
+    { day: 'Thu', views: 82 }, { day: 'Fri', views: 55 }, { day: 'Sat', views: 120 }, { day: 'Sun', views: 90 }
+  ]);
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+  
   const [formLoading, setFormLoading] = useState(false);
   const [editData, setEditData] = useState({
     businessName: '',
@@ -221,8 +229,77 @@ const CuratorDashboard = () => {
     if (user) {
       fetchTestimonials();
       fetchPrivateMessages();
+      fetchEvents();
     }
   }, [isAdmin, activeTab, user]);
+
+  const fetchEvents = async () => {
+    try {
+      const { data: events } = await supabase.from('market_events').select('*').eq('is_active', true);
+      setAllEvents(events || []);
+      const { data: myRsvps } = await supabase.from('event_rsvps').select('*').eq('curator_id', user.id);
+      setRsvps(myRsvps || []);
+    } catch (err) {
+      console.warn('Events fetch error:', err.message);
+    }
+  };
+
+  const handleRSVP = async (eventId, status = 'confirmed') => {
+    try {
+      const { error } = await supabase.from('event_rsvps').upsert({
+        event_id: eventId,
+        curator_id: user.id,
+        status
+      });
+      if (error) throw error;
+      fetchEvents();
+    } catch (err) {
+      alert('RSVP Error: ' + err.message);
+    }
+  };
+
+  const exportLeads = () => {
+    if (leads.length === 0) return;
+    const headers = ['Date', 'Full Name', 'Email', 'Phone'];
+    const csvRows = leads.map(l => [
+      new Date(l.created_at).toLocaleDateString(),
+      l.full_name,
+      l.email,
+      l.phone || ''
+    ].map(v => `"${v}"`).join(','));
+    
+    const csvContent = "data:text/csv;charset=utf-8," + headers.join(',') + "\n" + csvRows.join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `P31_Leads_${new Date().toLocaleDateString()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+  };
+
+  const handleBroadcast = async () => {
+    if (!newMessage || !isAdmin) return;
+    if (!window.confirm(`Broadcast this message to ALL ${allCurators.length} curators?`)) return;
+    
+    setIsBroadcasting(true);
+    try {
+      const messages = allCurators.map(c => ({
+        sender_id: user.id,
+        receiver_id: c.id,
+        content: `[BROADCAST] ${newMessage}`
+      }));
+      
+      const { error } = await supabase.from('private_messages').insert(messages);
+      if (error) throw error;
+      setNewMessage('');
+      alert('Broadcast transmission complete.');
+      fetchPrivateMessages();
+    } catch (err) {
+      alert('Broadcast Error: ' + err.message);
+    } finally {
+      setIsBroadcasting(false);
+    }
+  };
 
   const fetchTestimonials = async () => {
     const { data } = await supabase.from('testimonials').select('*').eq('curator_id', user.id);
@@ -668,6 +745,13 @@ const CuratorDashboard = () => {
             <Bell size={20} /> Concierge
           </button>
 
+          <button 
+            onClick={() => setActiveTab('analytics')} 
+            className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`}
+          >
+            <Sparkles size={20} /> Intelligence
+          </button>
+
           {isAdmin && (
             <button 
               onClick={() => setActiveTab('governance')} 
@@ -701,11 +785,11 @@ const CuratorDashboard = () => {
 
             {/* Identity Stats Overview */}
             <div className="stats-row mb-8">
-              <div className="stat-pill glass-card">
+              <div className="stat-pill glass-card" onClick={() => setActiveTab('analytics')} style={{cursor: 'pointer'}}>
                 <span className="stat-label">Product Views</span>
                 <span className="stat-value text-gold">284</span>
               </div>
-              <div className="stat-pill glass-card">
+              <div className="stat-pill glass-card" onClick={() => setActiveTab('analytics')} style={{cursor: 'pointer'}}>
                 <span className="stat-label">Purchase Clicks</span>
                 <span className="stat-value text-gold">42</span>
               </div>
@@ -997,6 +1081,38 @@ const CuratorDashboard = () => {
                 </section>
 
                 <section className="dashboard-card glass-card">
+                  <h3 className="card-title text-gold"><Calendar size={18} /> Market Invitations</h3>
+                  <div className="event-invites-list flex flex-col gap-4 mt-4">
+                    {allEvents.map(event => {
+                      const rsvp = rsvps.find(r => r.event_id === event.id);
+                      return (
+                        <div key={event.id} className="event-invite-item glass-border p-4 rounded-lg">
+                          <p className="text-xs font-bold text-primary mb-1">{event.title}</p>
+                          <div className="flex items-center gap-2 text-[10px] opacity-60 mb-3">
+                            <Calendar size={10} /> {new Date(event.event_date).toLocaleDateString()} • {event.location}
+                          </div>
+                          
+                          {rsvp ? (
+                            <div className="flex-between">
+                              <span className="text-[10px] text-green-500 font-bold uppercase tracking-wider">✓ RSVP Confirmed</span>
+                              <button onClick={() => handleRSVP(event.id, 'cancelled')} className="text-[10px] opacity-40 hover:opacity-100">Cancel</button>
+                            </div>
+                          ) : (
+                            <button 
+                              onClick={() => handleRSVP(event.id)}
+                              className="btn-solid-gold w-full py-2 text-[10px] font-bold"
+                            >
+                              Confirm Exhibit Space
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {allEvents.length === 0 && <p className="text-xs opacity-50 italic text-center py-4">No invitations currently active.</p>}
+                  </div>
+                </section>
+
+                <section className="dashboard-card glass-card">
                   <h2 className="card-title text-gold"><QrCode size={20} /> Share Your Sanctuary</h2>
                   <div className="qr-share-layout flex flex-col items-center gap-6 py-8">
                     <div className="qr-container p-6 bg-white rounded-2xl shadow-xl border-4 border-gold">
@@ -1171,6 +1287,8 @@ const CuratorDashboard = () => {
                 <div key={p.id} className="product-card glass-card">
                   <div className="product-img-frame">
                     <img src={p.image_url || 'https://via.placeholder.com/400x500?text=Artifact'} alt={p.name} />
+                    {p.stock_status === 'limited_edition' && <div className="product-prestige-ribbon">Limited Edition</div>}
+                    {p.stock_status === 'out_of_stock' && <div className="product-prestige-ribbon sold-out">Sold Out</div>}
                   </div>
                   <div className="product-info">
                     <h3 className="font-headline">{p.name}</h3>
@@ -1417,7 +1535,16 @@ const CuratorDashboard = () => {
               <div className="leads-management-section">
                 <section className="dashboard-card glass-card">
                   <header className="flex-between mb-6">
-                    <h2 className="card-title text-gold"><Users size={20} /> Subscriber & Lead Console</h2>
+                    <div className="flex items-center gap-4">
+                      <h2 className="card-title text-gold"><Users size={20} /> Subscriber & Lead Console</h2>
+                      <button 
+                        onClick={exportLeads}
+                        className="btn-outline-primary btn-sm flex items-center gap-2"
+                        title="Download CSV for Email Marketing"
+                      >
+                        <Download size={14} /> Export CSV
+                      </button>
+                    </div>
                     <span className="text-xs opacity-50 uppercase letter-spacing-2">{leads.length} Total Captured</span>
                   </header>
                   
@@ -1691,6 +1818,17 @@ const CuratorDashboard = () => {
                     <h3 className="font-label text-primary m-0">
                       {isAdmin ? (selectedRecipient ? `Chatting with ${allCurators.find(c => c.id === selectedRecipient)?.profiles?.full_name}` : 'Select a Curator') : 'Master Architect Concierge'}
                     </h3>
+                    {isAdmin && (
+                      <button 
+                        onClick={handleBroadcast}
+                        disabled={isBroadcasting || !newMessage}
+                        className="btn-outline-primary btn-sm flex items-center gap-2"
+                        style={{borderColor: 'var(--metallic-gold)', color: 'var(--metallic-gold)'}}
+                      >
+                        {isBroadcasting ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />} 
+                        Broadcast to All
+                      </button>
+                    )}
                   </div>
                   
                   <div className="chat-messages flex-1 overflow-y-auto p-6 flex flex-col gap-4">
@@ -1717,6 +1855,54 @@ const CuratorDashboard = () => {
                       <button type="submit" className="btn-solid-gold"><Send size={18} /></button>
                     </form>
                   )}
+                </div>
+              </div>
+            </div>
+          } />
+          <Route path="analytics" element={
+            <div className="dashboard-view">
+               <header className="dashboard-header">
+                <h1 className="font-headline text-primary">Influence <span className="text-gold">Intelligence</span></h1>
+                <p>Real-time data synchronization of your sanctuary’s market authority.</p>
+              </header>
+
+              <div className="analytics-grid" style={{display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem'}}>
+                <section className="dashboard-card glass-card">
+                  <h2 className="card-title text-gold mb-8">Weekly Visitor Velocity</h2>
+                  <div className="chart-container h-64 flex items-end justify-between gap-2 px-4">
+                    {analyticsHistory.map((d, i) => (
+                      <div key={i} className="chart-column flex-1 flex flex-col items-center group">
+                        <div className="chart-tooltip opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white text-[10px] p-2 rounded mb-2">
+                          {d.views} Views
+                        </div>
+                        <div 
+                          className="chart-bar w-full bg-gold-gradient rounded-t-lg transition-all duration-500" 
+                          style={{height: `${(d.views / 150) * 100}%`, minHeight: '4px', opacity: 0.6 + (d.views/200)}}
+                        ></div>
+                        <span className="text-[10px] mt-4 opacity-40 uppercase font-bold">{d.day}</span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                <div className="analytics-sidebar flex flex-col gap-6">
+                   <section className="dashboard-card glass-card text-center py-8">
+                      <div className="authority-meter mb-4 mx-auto w-32 h-32 rounded-full border-4 border-thistle flex-center relative">
+                        <div className="absolute inset-0 border-4 border-gold rounded-full" style={{clipPath: 'polygon(0 0, 100% 0, 100% 88%, 0 88%)'}}></div>
+                        <span className="text-3xl font-headline text-gold">88%</span>
+                      </div>
+                      <h4 className="font-label text-primary text-sm">Market Authority</h4>
+                      <p className="text-[10px] opacity-60 mt-2 px-6">Your sanctuary ranks in the top 12% of artisan storefronts.</p>
+                   </section>
+
+                   <section className="dashboard-card glass-card">
+                      <h4 className="card-title text-sm text-gold">Origin Discovery</h4>
+                      <div className="discovery-list flex flex-col gap-3 mt-4">
+                         <div className="flex-between text-xs"><span>P31 Directory</span> <span className="font-bold">62%</span></div>
+                         <div className="flex-between text-xs"><span>Instagram</span> <span className="font-bold">24%</span></div>
+                         <div className="flex-between text-xs"><span>Direct Link</span> <span className="font-bold">14%</span></div>
+                      </div>
+                   </section>
                 </div>
               </div>
             </div>
