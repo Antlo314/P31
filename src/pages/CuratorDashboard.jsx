@@ -8,7 +8,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import './CuratorDashboard.css';
 
 const CuratorDashboard = () => {
-  const { user, profile, curatorData, isAdmin, signOut, fetchUserData } = useAuth();
+  const { user, profile, curatorData, isAdmin, loading, signOut, fetchUserData } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -142,9 +142,15 @@ const CuratorDashboard = () => {
 
   const fetchAnnouncements = async () => {
     try {
-      const { data, error } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
-      if (error) throw error;
-      if (data) setAnnouncements(data);
+      const { data, error } = await supabase.from('announcements').select('*');
+      if (error) {
+        if (error.message.includes('406')) {
+          console.warn('Announcements table missing or inaccessible.');
+          return;
+        }
+        throw error;
+      }
+      if (data) setAnnouncements(data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
     } catch (err) {
       console.warn('Announcements fetch error:', err.message);
     }
@@ -582,6 +588,20 @@ const CuratorDashboard = () => {
     navigate('/login');
   };
 
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login');
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="dashboard-container flex-center">
+        <Loader2 className="animate-spin text-gold" size={48} />
+      </div>
+    );
+  }
+
   if (!user) {
     return <div className="dashboard-container flex-center">Redirecting to Login...</div>;
   }
@@ -980,19 +1000,25 @@ const CuratorDashboard = () => {
                   <h2 className="card-title text-gold"><QrCode size={20} /> Share Your Sanctuary</h2>
                   <div className="qr-share-layout flex flex-col items-center gap-6 py-8">
                     <div className="qr-container p-6 bg-white rounded-2xl shadow-xl border-4 border-gold">
-                      <QRCodeSVG 
-                        id="sanctuary-qr"
-                        value={`${window.location.origin}/${editData.slug}`} 
-                        size={200}
-                        level="H"
-                        includeMargin={true}
-                      />
+                      {editData.slug ? (
+                        <QRCodeSVG 
+                          id="sanctuary-qr"
+                          value={`${window.location.origin}/${editData.slug}`} 
+                          size={200}
+                          level="H"
+                          includeMargin={true}
+                        />
+                      ) : (
+                        <div className="flex-center h-48 w-48 text-gray-400 italic">Establish a Vanity URL first</div>
+                      )}
                     </div>
                     <div className="text-center">
                       <p className="text-sm opacity-70 mb-6">Display this code at physical markets to bridge your digital and physical influence.</p>
                       <button 
+                        disabled={!editData.slug}
                         onClick={() => {
                           const svg = document.getElementById('sanctuary-qr');
+                          if (!svg) return;
                           const svgData = new XMLSerializer().serializeToString(svg);
                           const canvas = document.createElement("canvas");
                           const ctx = canvas.getContext("2d");
