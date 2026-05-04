@@ -52,7 +52,27 @@
 
 .login-page .premium-form input {
   padding-left: 3rem !important;
+  padding-right: 3rem !important;
   width: 100%;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 1rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--olive);
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle:hover {
+  opacity: 1;
 }
 
 .login-actions {
