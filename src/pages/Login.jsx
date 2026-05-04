@@ -38,6 +38,16 @@ const Login = () => {
 
         if (signUpData.user) {
           const userId = signUpData.user.id;
+          
+          // Check for pre-approval
+          const { data: approvedRecord } = await supabase
+            .from('vendor_approvals')
+            .select('*')
+            .eq('email', formData.email.toLowerCase().trim())
+            .single();
+
+          const isAutoApproved = !!approvedRecord;
+
           // Create profile
           await supabase.from('profiles').insert([{ 
             id: userId, 
@@ -49,7 +59,9 @@ const Login = () => {
           await supabase.from('curator_data').insert([{ 
             id: userId, 
             business_name: formData.bizName || 'My Sanctuary',
-            status: 'pending' // Awaiting review
+            status: isAutoApproved ? 'approved' : 'pending',
+            is_paid: isAutoApproved,
+            is_published: isAutoApproved
           }]);
         }
         alert('Welcome to the Collective. Sanctuary established.');

@@ -3,7 +3,7 @@ import { useNavigate, Link, useLocation, Routes, Route, Navigate } from 'react-r
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Community from './Community'; // Nested import
-import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Calendar, Users } from 'lucide-react';
+import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, ShieldCheck, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Calendar, Users, Search } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import './CuratorDashboard.css';
 
@@ -60,6 +60,11 @@ const CuratorDashboard = () => {
     { day: 'Thu', views: 82 }, { day: 'Fri', views: 55 }, { day: 'Sat', views: 120 }, { day: 'Sun', views: 90 }
   ]);
   const [isBroadcasting, setIsBroadcasting] = useState(false);
+  
+  const [vendorApprovals, setVendorApprovals] = useState([]);
+  const [approvalSearch, setApprovalSearch] = useState('');
+  const [approvalForm, setApprovalForm] = useState({ firstName: '', lastName: '', email: '' });
+  const [isApprovalLoading, setIsApprovalLoading] = useState(false);
   
   const [formLoading, setFormLoading] = useState(false);
   const [editData, setEditData] = useState({
@@ -227,7 +232,8 @@ const CuratorDashboard = () => {
             fetchLeads(),
             fetchPendingApprovals(),
             fetchPartnershipInquiries(),
-            fetchAllCurators()
+            fetchAllCurators(),
+            fetchVendorApprovals()
           ]);
         }
         if (user) {
@@ -671,6 +677,47 @@ const CuratorDashboard = () => {
     }
   };
 
+  const fetchVendorApprovals = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('vendor_approvals')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setVendorApprovals(data || []);
+    } catch (err) {
+      console.warn('Vendor approvals fetch error:', err.message);
+    }
+  };
+
+  const handleAddApproval = async (e) => {
+    e.preventDefault();
+    setIsApprovalLoading(true);
+    try {
+      const { error } = await supabase.from('vendor_approvals').insert([{
+        first_name: approvalForm.firstName,
+        last_name: approvalForm.lastName,
+        email: approvalForm.email.toLowerCase().trim(),
+        approved_by: user.id
+      }]);
+      if (error) throw error;
+      setApprovalForm({ firstName: '', lastName: '', email: '' });
+      fetchVendorApprovals();
+      alert('Vendor pre-approved successfully.');
+    } catch (err) {
+      alert('Error approving vendor: ' + err.message);
+    } finally {
+      setIsApprovalLoading(false);
+    }
+  };
+
+  const deleteApproval = async (id) => {
+    if (window.confirm('Revoke this pre-approval?')) {
+      await supabase.from('vendor_approvals').delete().eq('id', id);
+      fetchVendorApprovals();
+    }
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
@@ -772,12 +819,20 @@ const CuratorDashboard = () => {
           </button>
 
           {isAdmin && (
-            <button 
-              onClick={() => setActiveTab('governance')} 
-              className={`nav-item ${activeTab === 'governance' ? 'active' : ''}`}
-            >
-              <Crown size={20} /> Governance
-            </button>
+            <>
+              <button 
+                onClick={() => setActiveTab('governance')} 
+                className={`nav-item ${activeTab === 'governance' ? 'active' : ''}`}
+              >
+                <Crown size={20} /> Governance
+              </button>
+              <button 
+                onClick={() => setActiveTab('approvals')} 
+                className={`nav-item ${activeTab === 'approvals' ? 'active' : ''}`}
+              >
+                <ShieldCheck size={20} /> Vendor Approvals
+              </button>
+            </>
           )}
 
           <div className="nav-item-with-badge">
@@ -1557,10 +1612,10 @@ const CuratorDashboard = () => {
                 </section>
               </div>
 
-              {/* Vendor Approvals Section */}
+              {/* Pending Sanctuary Reviews */}
               <div className="mb-12">
                 <section className="dashboard-card glass-card">
-                  <h2 className="card-title text-gold"><ShieldAlert size={20} /> Vendor Approvals</h2>
+                  <h2 className="card-title text-gold"><ShieldAlert size={20} /> Pending Sanctuary Reviews</h2>
                   <div className="admin-announcements-list">
                     {pendingApprovals.map(p => (
                       <div key={p.id} className="admin-governance-item glass-border p-6 mb-4">
@@ -1768,6 +1823,103 @@ const CuratorDashboard = () => {
                 </div>
               )}
             </div>
+              </div>
+            ) : <Navigate to="identity" replace />
+          } />
+
+          <Route path="approvals" element={
+            isAdmin ? (
+              <div className="dashboard-view">
+                <header className="dashboard-header">
+                  <h1 className="font-headline text-primary">Vendor <span className="text-gold">Approvals</span></h1>
+                  <p>Pre-authorize artisans for immediate sanctuary activation.</p>
+                </header>
+
+                <div className="dashboard-grid admin-grid">
+                  <section className="dashboard-card glass-card">
+                    <h2 className="card-title text-gold"><Plus size={20} /> Pre-Approve Vendor</h2>
+                    <form onSubmit={handleAddApproval} className="premium-form">
+                      <div className="form-row-grid">
+                        <div className="form-group">
+                          <label>First Name</label>
+                          <input 
+                            type="text" 
+                            required 
+                            value={approvalForm.firstName}
+                            onChange={e => setApprovalForm({...approvalForm, firstName: e.target.value})}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Last Name</label>
+                          <input 
+                            type="text" 
+                            required 
+                            value={approvalForm.lastName}
+                            onChange={e => setApprovalForm({...approvalForm, lastName: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label>Email Address</label>
+                        <input 
+                          type="email" 
+                          required 
+                          placeholder="artisan@example.com"
+                          value={approvalForm.email}
+                          onChange={e => setApprovalForm({...approvalForm, email: e.target.value})}
+                        />
+                        <p className="help-text">Vendor will bypass manual review if they sign up with this email.</p>
+                      </div>
+                      <button type="submit" disabled={isApprovalLoading} className="btn-solid-gold w-full">
+                        {isApprovalLoading ? <Loader2 className="animate-spin" size={18} /> : 'Approve Vendor'}
+                      </button>
+                    </form>
+                  </section>
+
+                  <section className="dashboard-card glass-card">
+                    <div className="flex-between mb-6">
+                      <h2 className="card-title text-gold m-0">Authorized Directory</h2>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 opacity-40" size={14} />
+                        <input 
+                          type="text" 
+                          placeholder="Search emails..." 
+                          className="search-input-small"
+                          value={approvalSearch}
+                          onChange={e => setApprovalSearch(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="admin-leads-table overflow-x-auto">
+                      <table className="w-full text-left text-sm border-collapse">
+                        <thead>
+                          <tr className="border-b border-thistle opacity-60">
+                            <th className="py-3 px-4">Name</th>
+                            <th className="py-3 px-4">Email</th>
+                            <th className="py-3 px-4 text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {vendorApprovals.filter(v => v.email.includes(approvalSearch.toLowerCase())).map(v => (
+                            <tr key={v.id} className="border-b border-thistle/20 hover:bg-gold/5 transition-colors">
+                              <td className="py-3 px-4">{v.first_name} {v.last_name}</td>
+                              <td className="py-3 px-4 text-xs opacity-70">{v.email}</td>
+                              <td className="py-3 px-4 text-right">
+                                <button onClick={() => deleteApproval(v.id)} className="text-red hover:scale-110 transition-transform"><Trash2 size={14} /></button>
+                              </td>
+                            </tr>
+                          ))}
+                          {vendorApprovals.length === 0 && (
+                            <tr>
+                              <td colSpan="3" className="text-center py-12 opacity-40 italic">No pre-approved vendors found.</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+                </div>
               </div>
             ) : <Navigate to="identity" replace />
           } />
