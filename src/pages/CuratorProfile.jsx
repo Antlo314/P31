@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAuth } from '../context/AuthContext';
-import { Crown, Leaf, MapPin, Instagram, Facebook, Globe, Calendar, ArrowRight, ShoppingBag, ExternalLink, Sparkles, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Image as ImageIcon } from 'lucide-react';
+import { Crown, ShieldAlert, DollarSign, Leaf, MapPin, Instagram, Facebook, Globe, Calendar, ArrowRight, ShoppingBag, ExternalLink, Sparkles, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Image as ImageIcon } from 'lucide-react';
 import './CuratorProfile.css';
 import './CuratorProfileMiniShop.css';
 
@@ -77,6 +77,7 @@ const MELANIE_CURATOR_DATA = {
   website: 'https://www.nebaministry.org/ilcollection',
   slug: 'ilcollection',
   location: 'Atlanta, GA',
+  status: 'approved',
   is_early_bird: true,
   is_paid: true,
   profiles: {

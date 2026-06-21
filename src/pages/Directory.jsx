@@ -183,7 +183,9 @@ const Directory = () => {
               </p>
               
               <div className="vendor-actions">
-                {vendor.slug || vendor.id ? (
+                {/* Only link to a storefront that actually exists: real curators have a slug
+                    or a UUID id. Hardcoded sample boutiques use numeric ids and have no store. */}
+                {vendor.slug || (typeof vendor.id === 'string' && vendor.id.includes('-')) ? (
                   <Link to={vendor.slug ? `/${vendor.slug}` : `/${vendor.id}`} className="btn-solid-gold">
                     Explore Collection
                   </Link>
