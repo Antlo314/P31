@@ -320,11 +320,14 @@
   margin-bottom: 0.75rem;
 }
 
-/* 2-col on desktop, shrinks on mobile */
+/* Composed product grid — capped & centered so it reads as an editorial
+   collection rather than stretching edge-to-edge on wide screens. */
 .cp-products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 2.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 3rem 2.5rem;
+  max-width: var(--content-max);
+  margin: 0 auto;
 }
 
 .cp-product-card {

@@ -8,7 +8,6 @@ import './Home.css';
 import heroVid     from '../assets/hero.mp4';
 import faithVid    from '../assets/faith.mp4';
 import missionVid  from '../assets/p31market2.mp4';
-import visionaryVid from '../assets/visionary.mp4';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,28 +23,50 @@ const Home = () => {
   const [email, setEmail] = useState('');
 
   useEffect(() => {
-    let ctx = gsap.context(() => {
-      // Hero text slides up
-      gsap.fromTo('.hero-editorial-text',
-        { y: 60, opacity: 0 },
-        { y: 0, opacity: 1, duration: 1.6, ease: 'power3.out', delay: 0.4 }
-      );
+    // Respect users who prefer reduced motion — leave everything in its
+    // natural (visible) state and skip the choreography entirely.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-      // Video parallax
+    let ctx = gsap.context(() => {
+      // ── Hero: masked line reveal + staggered supporting copy ──
+      const heroTl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+      heroTl
+        .from('.hero-eyebrow', { y: 20, opacity: 0, duration: 0.9 }, 0.15)
+        .from('.hero-headline .reveal-line > span',
+          { yPercent: 120, duration: 1.25, stagger: 0.12 }, 0.25)
+        .from('.hero-body', { y: 24, opacity: 0, duration: 1 }, 0.85)
+        .from('.hero-ctas', { y: 24, opacity: 0, duration: 1 }, 1.0);
+
+      // Hero copy drifts gently as the section scrolls away
+      gsap.to('.hero-editorial-text', {
+        yPercent: -12, opacity: 0.55, ease: 'none',
+        scrollTrigger: {
+          trigger: '.home-hero', start: 'bottom bottom', end: 'bottom top', scrub: true,
+        },
+      });
+
+      // ── Cinematic video parallax ──
       gsap.utils.toArray('.img-parallax').forEach(img => {
         gsap.to(img, {
-          yPercent: 18,
-          ease: 'none',
+          yPercent: 18, ease: 'none',
           scrollTrigger: {
             trigger: img.closest('section') || img.parentElement,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: true,
-          }
+            start: 'top bottom', end: 'bottom top', scrub: true,
+          },
         });
       });
 
-      // Section reveals
+      // ── Staggered group reveals (pillars + dates) ──
+      gsap.from('.pillar-item', {
+        y: 56, opacity: 0, duration: 1.1, stagger: 0.14, ease: 'power3.out',
+        scrollTrigger: { trigger: '.pillars-grid', start: 'top 82%' },
+      });
+      gsap.from('.date-row', {
+        y: 40, opacity: 0, duration: 0.9, stagger: 0.1, ease: 'power3.out',
+        scrollTrigger: { trigger: '.dates-list', start: 'top 85%' },
+      });
+
+      // ── Generic single-element reveals ──
       gsap.utils.toArray('.reveal').forEach(el => {
         gsap.fromTo(el,
           { y: 48, opacity: 0 },
@@ -88,9 +109,9 @@ const Home = () => {
         <div className="home-hero__content hero-editorial-text">
           <span className="hero-eyebrow">Proverbs 31 Marketplace</span>
           <h1 className="hero-headline">
-            Where<br />
-            Her Gifts<br />
-            <em>Make Room.</em>
+            <span className="reveal-line"><span>Where</span></span>
+            <span className="reveal-line"><span>Her Gifts</span></span>
+            <span className="reveal-line"><span><em>Make Room.</em></span></span>
           </h1>
           <p className="hero-body">
             A premium curated marketplace for women creatives, artisans, and visionaries.
@@ -147,7 +168,7 @@ const Home = () => {
             { num: '02', icon: 'diversity_3', title: 'Strategic Networking', body: 'A community of visionary women cultivating powerful, faith-driven connections.' },
             { num: '03', icon: 'nightlife',  title: 'Exclusive Ambiance', body: 'A majestic, high-end atmosphere elevated by curated aesthetics and live music.' },
           ].map(p => (
-            <div className="pillar-item reveal" key={p.num}>
+            <div className="pillar-item" key={p.num}>
               <span className="pillar-num">{p.num}</span>
               <span className="material-symbols-outlined pillar-icon">{p.icon}</span>
               <h3 className="pillar-title">{p.title}</h3>
@@ -199,17 +220,16 @@ const Home = () => {
       </section>
 
 
-      {/* ── PARTNER TEASER ── */}
-      <section className="home-partner py-24">
-        <div className="partner-content container reveal">
-          <div className="section-header reveal text-center mb-5">
-          <span className="eyebrow-label text-gold">Bespoke Offerings</span>
-          <h1 className="display-3 font-headline text-white mb-4">Elevate Your Presence</h1>
-             <p className="partner-body max-w-2xl mx-auto opacity-80 mt-6 mb-10">
-               Proverbs 31 Marketplace is more than an event—it is a movement. Join us in cultivating spaces where faith, purpose, and community converge.
-             </p>
-             <Link to="/partner" className="btn-solid-gold">Explore Partnerships</Link>
-          </div>
+      {/* ── PARTNER TEASER — full-bleed plum CTA band ── */}
+      <section className="home-partner">
+        <div className="partner-inner reveal">
+          <span className="eyebrow-label eyebrow-gold">Bespoke Offerings</span>
+          <h2 className="partner-title">Elevate Your Presence</h2>
+          <p className="partner-body">
+            Proverbs 31 Marketplace is more than an event—it is a movement. Join us in
+            cultivating spaces where faith, purpose, and community converge.
+          </p>
+          <Link to="/partner" className="btn-solid-gold">Explore Partnerships</Link>
         </div>
       </section>
 
@@ -222,7 +242,7 @@ const Home = () => {
 
         <div className="dates-list">
           {marketDates.map((d, i) => (
-            <div className="date-row reveal" key={i}>
+            <div className="date-row" key={i}>
               <div className="date-num">
                 <span className="date-day">{d.day}</span>
                 <span className="date-month">{d.month}</span>
