@@ -57,10 +57,7 @@ const CuratorDashboard = () => {
   
   const [allEvents, setAllEvents] = useState([]);
   const [rsvps, setRsvps] = useState([]);
-  const [analyticsHistory, setAnalyticsHistory] = useState([
-    { day: 'Mon', views: 42 }, { day: 'Tue', views: 38 }, { day: 'Wed', views: 65 }, 
-    { day: 'Thu', views: 82 }, { day: 'Fri', views: 55 }, { day: 'Sat', views: 120 }, { day: 'Sun', views: 90 }
-  ]);
+  const [analyticsHistory, setAnalyticsHistory] = useState([]);
   const [isBroadcasting, setIsBroadcasting] = useState(false);
   
   const [stripeLoading, setStripeLoading] = useState(false);
@@ -320,10 +317,41 @@ const CuratorDashboard = () => {
     }
   };
 
+  // Real 7-day interaction time-series from curator_analytics
+  const fetchAnalyticsData = async () => {
+    try {
+      const since = new Date();
+      since.setDate(since.getDate() - 6);
+      since.setHours(0, 0, 0, 0);
+      const { data } = await supabase
+        .from('curator_analytics')
+        .select('event_type, created_at')
+        .eq('curator_id', user.id)
+        .gte('created_at', since.toISOString());
+      const events = data || [];
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const start = new Date();
+        start.setDate(start.getDate() - i);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(start.getTime() + 86400000);
+        const count = events.filter(e => {
+          const t = new Date(e.created_at);
+          return t >= start && t < end;
+        }).length;
+        days.push({ day: start.toLocaleDateString('en-US', { weekday: 'short' }), views: count });
+      }
+      setAnalyticsHistory(days);
+    } catch (err) {
+      console.warn('Analytics fetch error:', err.message);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchProducts();
       fetchMyStats();
+      fetchAnalyticsData();
       if (CARD_PAYMENTS_ENABLED) fetchOrders();
     }
   }, [user]);
@@ -2710,39 +2738,69 @@ const CuratorDashboard = () => {
 
               <div className="analytics-grid" style={{display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem'}}>
                 <section className="dashboard-card glass-card">
-                  <h2 className="card-title text-gold mb-8">Weekly Visitor Velocity</h2>
-                  <div className="chart-container h-64 flex items-end justify-between gap-2 px-4">
-                    {analyticsHistory.map((d, i) => (
-                      <div key={i} className="chart-column flex-1 flex flex-col items-center group">
-                        <div className="chart-tooltip opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white text-[10px] p-2 rounded mb-2">
-                          {d.views} Views
-                        </div>
-                        <div 
-                          className="chart-bar w-full bg-gold-gradient rounded-t-lg transition-all duration-500" 
-                          style={{height: `${(d.views / 150) * 100}%`, minHeight: '4px', opacity: 0.6 + (d.views/200)}}
-                        ></div>
-                        <span className="text-[10px] mt-4 opacity-40 uppercase font-bold">{d.day}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <h2 className="card-title text-gold mb-8">Interactions — Last 7 Days</h2>
+                  {analyticsHistory.reduce((s, d) => s + d.views, 0) === 0 ? (
+                    <div className="text-center py-16 opacity-50">
+                      <Sparkles size={36} className="mx-auto mb-3 text-gold" />
+                      <p className="font-headline mb-1">No visits yet this week</p>
+                      <p className="text-sm">Share your shop link — views and clicks appear here as they happen.</p>
+                    </div>
+                  ) : (
+                    <div className="chart-container h-64 flex items-end justify-between gap-2 px-4">
+                      {analyticsHistory.map((d, i) => {
+                        const maxViews = Math.max(1, ...analyticsHistory.map(x => x.views));
+                        return (
+                          <div key={i} className="chart-column flex-1 flex flex-col items-center group">
+                            <div className="chart-tooltip opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white text-[10px] p-2 rounded mb-2">
+                              {d.views} interaction{d.views === 1 ? '' : 's'}
+                            </div>
+                            <div
+                              className="chart-bar w-full bg-gold-gradient rounded-t-lg transition-all duration-500"
+                              style={{height: `${(d.views / maxViews) * 100}%`, minHeight: d.views > 0 ? '6px' : '2px', opacity: d.views > 0 ? 1 : 0.25}}
+                            ></div>
+                            <span className="text-[10px] mt-4 opacity-40 uppercase font-bold">{d.day}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </section>
 
                 <div className="analytics-sidebar flex flex-col gap-6">
                    <section className="dashboard-card glass-card text-center py-8">
                       <div className="authority-meter mb-4 mx-auto w-32 h-32 rounded-full border-4 border-thistle flex-center relative">
-                        <div className="absolute inset-0 border-4 border-gold rounded-full" style={{clipPath: 'polygon(0 0, 100% 0, 100% 88%, 0 88%)'}}></div>
-                        <span className="text-3xl font-headline text-gold">88%</span>
+                        <div className="absolute inset-0 border-4 border-gold rounded-full" style={{clipPath: `polygon(0 0, 100% 0, 100% ${100 - Math.min(myStats.views > 0 ? Math.round((myStats.clicks / myStats.views) * 100) : 0, 100)}%, 0 ${100 - Math.min(myStats.views > 0 ? Math.round((myStats.clicks / myStats.views) * 100) : 0, 100)}%)`}}></div>
+                        <span className="text-3xl font-headline text-gold">{myStats.views > 0 ? Math.round((myStats.clicks / myStats.views) * 100) : 0}%</span>
                       </div>
-                      <h4 className="font-label text-primary text-sm">Market Authority</h4>
-                      <p className="text-[10px] opacity-60 mt-2 px-6">Your sanctuary ranks in the top 12% of artisan storefronts.</p>
+                      <h4 className="font-label text-primary text-sm">Buy Intent Rate</h4>
+                      <p className="text-[10px] opacity-60 mt-2 px-6">
+                        {myStats.views > 0
+                          ? 'Share of product views that led to a payment click.'
+                          : 'No product views recorded yet.'}
+                      </p>
                    </section>
 
                    <section className="dashboard-card glass-card">
-                      <h4 className="card-title text-sm text-gold">Origin Discovery</h4>
+                      <h4 className="card-title text-sm text-gold">Engagement Breakdown</h4>
                       <div className="discovery-list flex flex-col gap-3 mt-4">
-                         <div className="flex-between text-xs"><span>P31 Directory</span> <span className="font-bold">62%</span></div>
-                         <div className="flex-between text-xs"><span>Instagram</span> <span className="font-bold">24%</span></div>
-                         <div className="flex-between text-xs"><span>Direct Link</span> <span className="font-bold">14%</span></div>
+                        {(() => {
+                          const total = myStats.views + myStats.clicks;
+                          const rows = [
+                            { label: 'Product Opens', count: myStats.views },
+                            { label: 'Payment Clicks', count: myStats.clicks }
+                          ];
+                          return (
+                            <>
+                              {rows.map(r => (
+                                <div key={r.label} className="flex-between text-xs">
+                                  <span>{r.label}</span>
+                                  <span className="font-bold">{r.count}{total > 0 ? ` · ${Math.round((r.count / total) * 100)}%` : ''}</span>
+                                </div>
+                              ))}
+                              {total === 0 && <p className="text-[11px] opacity-50 italic mt-1">No engagement recorded yet.</p>}
+                            </>
+                          );
+                        })()}
                       </div>
                    </section>
                 </div>
