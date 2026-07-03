@@ -341,10 +341,17 @@
   position: relative;
   aspect-ratio: 4/5;
   overflow: hidden;
-  border-radius: 14px;   /* softer — not square */
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  border-radius: 18px;   /* softer — not square */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
   margin-bottom: 1.25rem;
   background: #fff;
+  transition: box-shadow 0.5s var(--ease-fluid), border-color 0.5s var(--ease-fluid);
+}
+
+.cp-product-card:hover .cp-product-img-wrapper {
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--gold-glow), var(--elev-gold);
+  border-color: rgba(203, 167, 47, 0.5);
 }
 
 .cp-product-img {
