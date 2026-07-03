@@ -686,3 +686,30 @@
   color: #7fd18a;
   background: rgba(46, 125, 50, 0.1);
 }
+
+/* ============================================================
+   RECOLOR — luminous vivid-purple shop base (2026 bright palette)
+   Shifts the near-black base to a rich, vibrant purple. White text
+   stays fully legible (>15:1). Gold + amethyst accents pop brighter.
+   ============================================================ */
+.curator-profile-page { background-color: #2a1345; }
+
+.cp-bio-section {
+  background: radial-gradient(ellipse at 18% 40%, rgba(140, 63, 214, 0.40) 0%, #271243 60%) !important;
+}
+.cp-products-section {
+  background: linear-gradient(180deg, #271243 0%, #331b57 100%) !important;
+}
+.cp-testimonials-section {
+  background: #241040 !important;
+}
+
+/* Warm the section text up a touch for extra legibility on the brighter base */
+.cp-bio-text { color: rgba(255, 255, 255, 0.82) !important; }
+
+/* Contact / payment cards: brighter glass on the vivid base */
+.cp-contact-card,
+.cp-events-card {
+  background: rgba(168, 85, 232, 0.10) !important;
+  border: 1px solid rgba(168, 85, 232, 0.22) !important;
+}

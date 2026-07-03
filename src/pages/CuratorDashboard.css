@@ -1354,9 +1354,9 @@
 /* Premium plum sidebar with a subtle gold aura + depth */
 .dashboard-sidebar {
   background:
-    radial-gradient(90% 40% at 50% 0%, rgba(203, 167, 47, 0.12) 0%, transparent 60%),
-    linear-gradient(180deg, #3f1f3a 0%, var(--dark-plum) 45%, #2a1428 100%);
-  box-shadow: 12px 0 40px rgba(19, 23, 14, 0.14);
+    radial-gradient(90% 40% at 50% 0%, rgba(242, 206, 77, 0.16) 0%, transparent 60%),
+    linear-gradient(180deg, #7A3AB0 0%, var(--dark-plum) 45%, #3d1a5c 100%);
+  box-shadow: 12px 0 40px rgba(46, 20, 80, 0.18);
 }
 .sidebar-brand {
   padding: 0 2rem 1.5rem;

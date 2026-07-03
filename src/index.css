@@ -5,43 +5,49 @@
    Purple leads. Gold accents. Earth grounds.
    ============================================================ */
 :root {
-  /* === Core Brand Palette === */
-  --dark-plum:       #3A1C36;           /* Royal Plum Lead (Restored) */
-  --amethyst:        #9B71B2;           /* Soft Purple Accent */
-  --thistle:         #E3D0EA;           /* Lavender Contrast */
-  --cal-poly-green:  #27341B;           /* Deep Forest Accent */
-  --olive:           #6C6D11;           /* Earthy Accent */
-  --metallic-gold:   #CBA72F;
-  --gold-light:      #E9C349;
-  --gold-glow:       rgba(203, 167, 47, 0.35);
+  /* === Core Brand Palette — BRIGHT & VIVID === */
+  --dark-plum:       #5E2A8C;           /* Vivid royal purple (brighter lead) */
+  --amethyst:        #A855E8;           /* Bright amethyst accent */
+  --thistle:         #ECDDFA;           /* Light lavender */
+  --cal-poly-green:  #1B6E44;           /* Emerald-forest accent */
+  --olive:           #7E8C1E;           /* Brightened olive */
+  --metallic-gold:   #D9A93A;           /* Warm bright gold */
+  --gold-light:      #F2CE4D;
+  --gold-glow:       rgba(217, 169, 58, 0.38);
+
+  /* === Green accent family (fresh, varied) === */
+  --emerald:         #17A673;           /* Vivid fresh emerald */
+  --sage:            #79C36F;           /* Bright sage */
+  --fern:            #3E8E5A;           /* Mid green */
+  --forest-deep:     #123D28;           /* Deep green (dark sections) */
 
   /* === Semantic Roles === */
   --primary:                var(--dark-plum);
-  --primary-container:      rgba(58, 28, 54, 0.08);
+  --primary-container:      rgba(94, 42, 140, 0.08);
   --secondary:              var(--cal-poly-green);
-  --secondary-light:        #3D4A32;
+  --secondary-light:        #2E9E63;
   --accent-earth:           var(--olive);
-  --accent-deep:            var(--emerald-deep);
+  --accent-deep:            var(--cal-poly-green);
   --accent-royal:           var(--dark-plum);
 
-  /* === Surfaces (botanical/warm, never stark white) === */
-  --surface:                #FAF9F6;           /* linen white */
-  --surface-alt:            #F2F4ED;           /* sage-washed white */
-  --surface-container-low:  #E9EDE1;           /* subtle moss white */
-  --surface-container:      #DFE5D4;           /* sage-tinted */
-  --surface-dark:           #1A1F14;           /* obsidian forest */
+  /* === Surfaces — bright & airy (faint lavender, never stark) === */
+  --surface:                #FCFBFE;           /* bright near-white */
+  --surface-alt:            #F5F1FB;           /* light lavender */
+  --surface-container-low:  #F1EBFA;           /* soft lavender */
+  --surface-container:      #E9E0F6;           /* lavender-tinted */
+  --surface-dark:           #241533;           /* deep purple (dark sections) */
 
-  /* === Text === */
-  --on-surface:             #13170E;           /* deep moss black */
-  --on-surface-variant:     #3D4435;           /* muted forest */
-  --on-surface-muted:       #7B8370;           /* sage-grey */
+  /* === Text — high legibility (AA+ on light surfaces) === */
+  --on-surface:             #201431;           /* dark purple-black */
+  --on-surface-variant:     #4A3B5C;           /* legible secondary */
+  --on-surface-muted:       #6E6580;           /* muted but readable */
   --on-primary:             #FFFFFF;
-  --on-tertiary-fixed:      #241a00;
+  --on-tertiary-fixed:      #2a1a00;
 
   /* === Borders / Outlines === */
-  --outline:                #B5BEA8;
-  --outline-variant:        #DDE2D5;
-  --outline-subtle:         rgba(108, 109, 17, 0.15);
+  --outline:                #CBB9E2;
+  --outline-variant:        #E7DCF4;
+  --outline-subtle:         rgba(94, 42, 140, 0.14);
 
   /* === Legacy compat aliases === */
   --royal-plum:      var(--dark-plum);
@@ -81,11 +87,12 @@
   --elev-gold: 0 20px 50px rgba(203, 167, 47, 0.28);
 
   /* Signature gradient meshes for premium dark/plush sections */
-  --mesh-plum: radial-gradient(120% 120% at 15% 10%, rgba(155,113,178,0.35) 0%, transparent 45%),
-               radial-gradient(120% 120% at 90% 20%, rgba(203,167,47,0.20) 0%, transparent 50%),
-               linear-gradient(160deg, #2a1228 0%, #1a1114 100%);
-  --mesh-forest: radial-gradient(120% 120% at 80% 0%, rgba(108,109,17,0.30) 0%, transparent 50%),
-                 linear-gradient(160deg, #1f2915 0%, #13170e 100%);
+  --mesh-plum: radial-gradient(120% 120% at 12% 8%, rgba(168,85,232,0.45) 0%, transparent 46%),
+               radial-gradient(120% 120% at 92% 16%, rgba(242,206,77,0.26) 0%, transparent 52%),
+               linear-gradient(155deg, #4a1f78 0%, #2c1450 100%);
+  --mesh-forest: radial-gradient(120% 120% at 80% 0%, rgba(23,166,115,0.42) 0%, transparent 52%),
+                 radial-gradient(100% 100% at 8% 100%, rgba(126,140,30,0.22) 0%, transparent 48%),
+                 linear-gradient(155deg, #17603c 0%, #0f3d28 100%);
 }
 
 /* ============================================================
