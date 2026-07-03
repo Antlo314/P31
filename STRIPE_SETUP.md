@@ -1,5 +1,19 @@
 # P31 Marketplace — Stripe Payments Setup (Supabase)
 
+> ## ⏸️ Card payments are currently OFF (by design)
+>
+> The site ships with `VITE_ENABLE_CARD_PAYMENTS=false` in `.env`. In this
+> mode there is **nothing to configure and no keys or banking info anywhere**:
+> curators build their full store and get paid through their own pasted links
+> (their Stripe Payment Link, CashApp, Venmo). All card-payment UI is hidden.
+>
+> When you're ready for built-in card checkout, complete the steps below, set
+> `VITE_ENABLE_CARD_PAYMENTS=true`, and redeploy.
+>
+> **Note for the site owner:** the two Stripe secrets below belong in *your*
+> Supabase dashboard and come from *your* Stripe dashboard. You can enter them
+> yourself — no developer or third party ever needs to see or hold your keys.
+
 Vendors connect their own Stripe account (Stripe Connect **Express**) from the
 dashboard, buyers pay by card via Stripe Checkout, and payouts land directly in
 each vendor's own bank account. The payment backend runs entirely on **Supabase

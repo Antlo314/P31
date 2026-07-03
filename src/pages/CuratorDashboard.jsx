@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Community from './Community'; // Nested import
 import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, ShieldCheck, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Calendar, Users, Search, DollarSign, RefreshCw } from 'lucide-react';
-import { invokePayment } from '../lib/payments';
+import { invokePayment, CARD_PAYMENTS_ENABLED } from '../lib/payments';
 import { QRCodeSVG } from 'qrcode.react';
 import './CuratorDashboard.css';
 
@@ -253,7 +253,7 @@ const CuratorDashboard = () => {
 
   // Sync Stripe status when the vendor returns from Stripe onboarding
   useEffect(() => {
-    if (!user) return;
+    if (!user || !CARD_PAYMENTS_ENABLED) return;
     const params = new URLSearchParams(location.search);
     const stripeParam = params.get('stripe');
     if (stripeParam === 'return' || stripeParam === 'refresh') {
@@ -306,7 +306,7 @@ const CuratorDashboard = () => {
   useEffect(() => {
     if (user) {
       fetchProducts();
-      fetchOrders();
+      if (CARD_PAYMENTS_ENABLED) fetchOrders();
     }
   }, [user]);
   useEffect(() => {
@@ -320,7 +320,7 @@ const CuratorDashboard = () => {
             fetchPartnershipInquiries(),
             fetchAllCurators(),
             fetchVendorApprovals(),
-            fetchAllOrders()
+            ...(CARD_PAYMENTS_ENABLED ? [fetchAllOrders()] : [])
           ]);
         }
         if (user) {
@@ -662,7 +662,7 @@ const CuratorDashboard = () => {
       alert('Please set a valid price greater than $0.');
       return;
     }
-    if (priceNum < 0.5 && !productForm.external_url) {
+    if (CARD_PAYMENTS_ENABLED && priceNum < 0.5 && !productForm.external_url) {
       alert('Card checkout requires a minimum price of $0.50. Set a higher price or add an external purchase link.');
       return;
     }
@@ -886,12 +886,14 @@ const CuratorDashboard = () => {
             <ShoppingBag size={20} /> Storefront
           </button>
 
-          <button
-            onClick={() => setActiveTab('sales')}
-            className={`nav-item ${activeTab === 'sales' ? 'active' : ''}`}
-          >
-            <DollarSign size={20} /> Sales
-          </button>
+          {CARD_PAYMENTS_ENABLED && (
+            <button
+              onClick={() => setActiveTab('sales')}
+              className={`nav-item ${activeTab === 'sales' ? 'active' : ''}`}
+            >
+              <DollarSign size={20} /> Sales
+            </button>
+          )}
 
           <button
             onClick={() => setActiveTab('testimonials')}
@@ -1437,6 +1439,7 @@ const CuratorDashboard = () => {
               <div className="divider-thistle mb-6"></div>
 
               {/* Stripe Connect — native card payments with direct payouts */}
+              {CARD_PAYMENTS_ENABLED && (
               <div className="stripe-connect-panel">
                 <div className="flex-between mb-4">
                   <h3 className="card-title text-gold m-0" style={{fontSize: '1rem'}}>
@@ -1504,8 +1507,18 @@ const CuratorDashboard = () => {
                   </>
                 )}
               </div>
+              )}
 
-              <div className="form-divider-label">Manual Payment Links (Fallback)</div>
+              <div className="form-divider-label">
+                {CARD_PAYMENTS_ENABLED ? 'Manual Payment Links (Fallback)' : 'Get Paid — Your Payment Links'}
+              </div>
+              {!CARD_PAYMENTS_ENABLED && (
+                <p className="text-xs opacity-60 mb-4">
+                  Customers pay you directly through your own accounts — nothing to configure and no
+                  fees to the marketplace. Paste any links you already use: a Stripe Payment Link,
+                  CashApp tag, Venmo handle, or anything else.
+                </p>
+              )}
 
               <div className="payment-config-grid">
                 <div className="form-group">
@@ -1692,9 +1705,11 @@ const CuratorDashboard = () => {
                         onChange={e => setProductForm({...productForm, external_url: e.target.value})}
                       />
                       <p className="help-text">
-                        {curatorData?.stripe_charges_enabled
+                        {CARD_PAYMENTS_ENABLED && curatorData?.stripe_charges_enabled
                           ? 'Leave blank to sell with your built-in card checkout. Add a link only if this item is sold on another website.'
-                          : 'Link where customers buy this item — or connect Stripe above to sell with built-in card checkout instead.'}
+                          : CARD_PAYMENTS_ENABLED
+                          ? 'Link where customers buy this item — or connect Stripe above to sell with built-in card checkout instead.'
+                          : 'Link where customers buy this item (your website, Stripe Payment Link, Etsy, etc.). Without a link, the item shows as Inquiry Only.'}
                       </p>
                     </div>
                     <div className="form-group">
@@ -1713,6 +1728,7 @@ const CuratorDashboard = () => {
           } />
 
           <Route path="sales" element={
+            !CARD_PAYMENTS_ENABLED ? <Navigate to="storefront" replace /> :
             <div className="dashboard-view">
               <header className="dashboard-header flex-between">
                 <div>
@@ -1901,9 +1917,11 @@ const CuratorDashboard = () => {
                           </div>
                           <div className="vendor-quick-stats font-label text-gold text-xs flex items-center gap-3">
                             <span>Artifacts: {p.products?.length || '0'}</span>
-                            <span className={`stripe-status-pill ${p.stripe_charges_enabled ? 'live' : p.stripe_account_id ? 'pending' : 'off'}`}>
-                              {p.stripe_charges_enabled ? 'Payments Live' : p.stripe_account_id ? 'Stripe Onboarding' : 'Links Only'}
-                            </span>
+                            {CARD_PAYMENTS_ENABLED && (
+                              <span className={`stripe-status-pill ${p.stripe_charges_enabled ? 'live' : p.stripe_account_id ? 'pending' : 'off'}`}>
+                                {p.stripe_charges_enabled ? 'Payments Live' : p.stripe_account_id ? 'Stripe Onboarding' : 'Links Only'}
+                              </span>
+                            )}
                           </div>
                         </div>
 
@@ -1923,6 +1941,7 @@ const CuratorDashboard = () => {
               </div>
 
               {/* Marketplace Commerce Overview */}
+              {CARD_PAYMENTS_ENABLED && (
               <div className="mb-12">
                 <section className="dashboard-card glass-card">
                   <div className="flex-between mb-6">
@@ -1980,6 +1999,7 @@ const CuratorDashboard = () => {
                   </div>
                 </section>
               </div>
+              )}
 
               {/* Lead Management Section */}
               <div className="leads-management-section">
@@ -2496,7 +2516,9 @@ const CuratorDashboard = () => {
               {walkthroughStep === 2 && "Start in the 'Identity' tab. Define your business name, story, and vanity URL. This is the foundation of your digital presence."}
               {walkthroughStep === 3 && "In the 'Storefront' tab, upload your first artifacts. Each item represents your craftsmanship. You can list up to 10 products."}
               {walkthroughStep === 4 && "Elevate your shop by uploading a premium banner and logo. Consistent aesthetics build trust and prestige with your customers."}
-              {walkthroughStep === 5 && "Ensure you can receive the fruits of your labor. In the Storefront tab, click 'Connect with Stripe' — no API keys needed — and customers can pay by card right on your page, with earnings deposited straight to your bank. Track every sale in your Sales tab. You can also add Cash App or Venmo links as backups."}
+              {walkthroughStep === 5 && (CARD_PAYMENTS_ENABLED
+                ? "Ensure you can receive the fruits of your labor. In the Storefront tab, click 'Connect with Stripe' — no API keys needed — and customers can pay by card right on your page, with earnings deposited straight to your bank. Track every sale in your Sales tab. You can also add Cash App or Venmo links as backups."
+                : "Ensure you can receive the fruits of your labor. In the Storefront tab, add your payment links — a Stripe Payment Link, CashApp tag, or Venmo handle. Customers pay you directly through your own accounts; the marketplace never touches your money.")}
               {walkthroughStep === 6 && "Once your sanctuary is complete, click 'Submit for Review'. Our architects will vet your shop for the upcoming Marketplace."}
             </p>
 

@@ -48,13 +48,15 @@ const Onboarding = () => {
 
       if (profileError) throw profileError;
 
+      // Holders of the access token are vetted — unlock the studio so they
+      // can build their store immediately (mirrors the pre-approval flow).
       const { error: curatorError } = await supabase
         .from('curator_data')
-        .insert([{ 
-          id: userId, 
-          business_name: `${formData.fullName}'s Sanctuary`, 
+        .insert([{
+          id: userId,
+          business_name: `${formData.fullName}'s Sanctuary`,
           slug: initialSlug,
-          is_paid: false 
+          is_paid: true
         }]);
 
       if (curatorError) throw curatorError;

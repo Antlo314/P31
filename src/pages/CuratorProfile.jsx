@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { invokePayment } from '../lib/payments';
+import { invokePayment, CARD_PAYMENTS_ENABLED } from '../lib/payments';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAuth } from '../context/AuthContext';
@@ -112,6 +112,7 @@ const CuratorProfile = () => {
   // Native checkout is available when the vendor completed Stripe onboarding
   // and the product is a real catalog item (numeric DB id) with a valid price.
   const canCheckout = (p) =>
+    CARD_PAYMENTS_ENABLED &&
     !!curator?.stripe_charges_enabled &&
     typeof p.id === 'number' &&
     parseFloat(p.price) >= 0.5 &&
