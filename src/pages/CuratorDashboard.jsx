@@ -1439,6 +1439,25 @@ const CuratorDashboard = () => {
               </div>
             </header>
 
+            {/* Nudge: prompt curators to add a payment method until they have one */}
+            {!CARD_PAYMENTS_ENABLED &&
+             !editData.stripeLink && !editData.cashappTag && !editData.venmoHandle && !editData.otherPaymentLink && (
+              <div className="payment-nudge-banner">
+                <div className="payment-nudge-icon"><DollarSign size={24} /></div>
+                <div className="payment-nudge-text">
+                  <strong>Add how you get paid</strong>
+                  <span>Customers can't pay you until you add a payment method. Drop in your CashApp, Venmo, or a payment link — it takes about 30 seconds.</span>
+                </div>
+                <button
+                  type="button"
+                  className="btn-solid-gold btn-sm payment-nudge-btn"
+                  onClick={() => document.getElementById('payment-links-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                >
+                  Set Up Payments →
+                </button>
+              </div>
+            )}
+
             {/* Storefront Aesthetic & Payment Manager */}
             <section className="storefront-aesthetics glass-card mb-8">
               <div className="flex-between mb-6">
@@ -1551,7 +1570,7 @@ const CuratorDashboard = () => {
               </div>
               )}
 
-              <div className="form-divider-label">
+              <div className="form-divider-label" id="payment-links-section">
                 {CARD_PAYMENTS_ENABLED ? 'Manual Payment Links (Fallback)' : 'Get Paid — Your Payment Links'}
                 <HelpTip title="How Customers Pay You" label="How do I get these?">
                   <p>Customers pay you <strong>directly</strong> through apps you may already have. You only need ONE of these — fill in whichever you use:</p>

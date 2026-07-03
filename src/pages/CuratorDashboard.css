@@ -1438,3 +1438,57 @@
 @media (max-width: 900px) {
   .stat-pill { padding: 1.25rem !important; }
 }
+
+/* ============================================================
+   PAYMENT NUDGE BANNER — prompt curators to add a payout method
+   ============================================================ */
+.payment-nudge-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(203, 167, 47, 0.14), rgba(233, 195, 73, 0.06));
+  border: 1px solid rgba(203, 167, 47, 0.45);
+  box-shadow: var(--elev-1);
+  animation: nudgePulse 2.6s ease-in-out infinite;
+}
+@keyframes nudgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(203, 167, 47, 0.0); }
+  50% { box-shadow: 0 0 0 6px rgba(203, 167, 47, 0.10); }
+}
+.payment-nudge-icon {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--metallic-gold), var(--gold-light));
+  color: #1a1000;
+  box-shadow: var(--elev-gold);
+}
+.payment-nudge-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.payment-nudge-text strong {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  color: var(--primary);
+}
+.payment-nudge-text span {
+  font-size: 0.88rem;
+  color: var(--on-surface-variant);
+  line-height: 1.5;
+}
+.payment-nudge-btn { flex-shrink: 0; white-space: nowrap; }
+
+@media (max-width: 640px) {
+  .payment-nudge-banner { flex-direction: column; text-align: center; }
+  .payment-nudge-text { align-items: center; }
+}
