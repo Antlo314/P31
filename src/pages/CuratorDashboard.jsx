@@ -3,7 +3,8 @@ import { useNavigate, Link, useLocation, Routes, Route, Navigate } from 'react-r
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Community from './Community'; // Nested import
-import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, ShieldCheck, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Calendar, Users, Search } from 'lucide-react';
+import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, ShieldCheck, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Calendar, Users, Search, DollarSign, RefreshCw } from 'lucide-react';
+import { apiPost } from '../lib/api';
 import { QRCodeSVG } from 'qrcode.react';
 import './CuratorDashboard.css';
 
@@ -61,6 +62,10 @@ const CuratorDashboard = () => {
   ]);
   const [isBroadcasting, setIsBroadcasting] = useState(false);
   
+  const [stripeLoading, setStripeLoading] = useState(false);
+  const [stripeSyncing, setStripeSyncing] = useState(false);
+  const [orders, setOrders] = useState([]);
+
   const [vendorApprovals, setVendorApprovals] = useState([]);
   const [approvalSearch, setApprovalSearch] = useState('');
   const [approvalForm, setApprovalForm] = useState({ firstName: '', lastName: '', email: '' });
@@ -179,6 +184,70 @@ const CuratorDashboard = () => {
     }
   };
 
+  const fetchOrders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('curator_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setOrders(data || []);
+    } catch (err) {
+      console.warn('Orders fetch error:', err.message);
+    }
+  };
+
+  const toggleFulfilled = async (order) => {
+    const next = order.fulfillment_status === 'fulfilled' ? 'new' : 'fulfilled';
+    try {
+      const { error } = await supabase.from('orders').update({ fulfillment_status: next }).eq('id', order.id);
+      if (error) throw error;
+      fetchOrders();
+    } catch (err) {
+      alert('Order update error: ' + err.message);
+    }
+  };
+
+  const handleStripeConnect = async () => {
+    setStripeLoading(true);
+    try {
+      const { url } = await apiPost('/api/stripe/connect', {}, { auth: true });
+      window.location.href = url;
+    } catch (err) {
+      alert('Stripe Connect Error: ' + err.message);
+      setStripeLoading(false);
+    }
+  };
+
+  const syncStripeStatus = async (openDashboard = false) => {
+    setStripeSyncing(true);
+    try {
+      const status = await apiPost(
+        '/api/stripe/account-status',
+        openDashboard ? { action: 'dashboard' } : {},
+        { auth: true }
+      );
+      await fetchUserData(user.id);
+      if (openDashboard && status.dashboardUrl) window.open(status.dashboardUrl, '_blank');
+    } catch (err) {
+      alert('Stripe Status Error: ' + err.message);
+    } finally {
+      setStripeSyncing(false);
+    }
+  };
+
+  // Sync Stripe status when the vendor returns from Stripe onboarding
+  useEffect(() => {
+    if (!user) return;
+    const params = new URLSearchParams(location.search);
+    const stripeParam = params.get('stripe');
+    if (stripeParam === 'return' || stripeParam === 'refresh') {
+      syncStripeStatus();
+      navigate(location.pathname, { replace: true });
+    }
+  }, [user]);
+
   const fetchPendingApprovals = async () => {
     try {
       setAdminError(null);
@@ -221,7 +290,10 @@ const CuratorDashboard = () => {
   };
 
   useEffect(() => {
-    if (user) fetchProducts();
+    if (user) {
+      fetchProducts();
+      fetchOrders();
+    }
   }, [user]);
   useEffect(() => {
     const initData = async () => {
@@ -790,8 +862,15 @@ const CuratorDashboard = () => {
             <ShoppingBag size={20} /> Storefront
           </button>
 
-          <button 
-            onClick={() => setActiveTab('testimonials')} 
+          <button
+            onClick={() => setActiveTab('sales')}
+            className={`nav-item ${activeTab === 'sales' ? 'active' : ''}`}
+          >
+            <DollarSign size={20} /> Sales
+          </button>
+
+          <button
+            onClick={() => setActiveTab('testimonials')}
             className={`nav-item ${activeTab === 'testimonials' ? 'active' : ''}`}
           >
             <MessageSquare size={20} /> Testimonials
@@ -1122,8 +1201,8 @@ const CuratorDashboard = () => {
                     <div className={`check-item ${editData.bannerUrl && editData.logoUrl ? 'success' : 'pending'}`}>
                       {editData.bannerUrl && editData.logoUrl ? '✓' : '○'} Shop Aesthetics
                     </div>
-                    <div className={`check-item ${(editData.stripeLink || editData.cashappTag || editData.venmoHandle) ? 'success' : 'pending'}`}>
-                      {(editData.stripeLink || editData.cashappTag || editData.venmoHandle) ? '✓' : '○'} Payment Connectivity
+                    <div className={`check-item ${(curatorData?.stripe_charges_enabled || editData.stripeLink || editData.cashappTag || editData.venmoHandle) ? 'success' : 'pending'}`}>
+                      {(curatorData?.stripe_charges_enabled || editData.stripeLink || editData.cashappTag || editData.venmoHandle) ? '✓' : '○'} Payment Connectivity
                     </div>
                   </div>
 
@@ -1333,6 +1412,73 @@ const CuratorDashboard = () => {
 
               <div className="divider-thistle mb-6"></div>
 
+              {/* Stripe Connect — native card payments with direct payouts */}
+              <div className="stripe-connect-panel">
+                <div className="flex-between mb-4">
+                  <h3 className="card-title text-gold m-0" style={{fontSize: '1rem'}}>
+                    <CreditCard size={18} /> Card Payments (Stripe)
+                  </h3>
+                  <span className={`stripe-status-pill ${curatorData?.stripe_charges_enabled ? 'live' : curatorData?.stripe_account_id ? 'pending' : 'off'}`}>
+                    {curatorData?.stripe_charges_enabled ? '● Live — Accepting Payments' :
+                     curatorData?.stripe_account_id ? '● Setup Incomplete' : '○ Not Connected'}
+                  </span>
+                </div>
+
+                {!curatorData?.stripe_account_id && (
+                  <>
+                    <p className="text-sm opacity-70 mb-4">
+                      Connect your own Stripe account to sell directly on your storefront. Customers pay by card
+                      at checkout and earnings are deposited straight into your bank account.
+                    </p>
+                    <button type="button" onClick={handleStripeConnect} disabled={stripeLoading} className="btn-solid-gold flex-center gap-2">
+                      {stripeLoading ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}
+                      {stripeLoading ? 'Opening Stripe...' : 'Connect with Stripe'}
+                    </button>
+                  </>
+                )}
+
+                {curatorData?.stripe_account_id && !curatorData?.stripe_charges_enabled && (
+                  <>
+                    <p className="text-sm opacity-70 mb-4">
+                      Your Stripe account was created but onboarding isn't finished. Complete it to start
+                      accepting card payments on your storefront.
+                    </p>
+                    <div className="flex gap-3 flex-wrap">
+                      <button type="button" onClick={handleStripeConnect} disabled={stripeLoading} className="btn-solid-gold flex-center gap-2">
+                        {stripeLoading ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}
+                        Finish Stripe Setup
+                      </button>
+                      <button type="button" onClick={() => syncStripeStatus()} disabled={stripeSyncing} className="btn-outline-primary flex-center gap-2">
+                        <RefreshCw size={14} className={stripeSyncing ? 'animate-spin' : ''} /> Refresh Status
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {curatorData?.stripe_charges_enabled && (
+                  <>
+                    <p className="text-sm opacity-70 mb-4">
+                      Your storefront is accepting card payments. Each product with a price now shows a native
+                      "Buy Now" checkout — payouts go {curatorData?.stripe_payouts_enabled ? 'directly to your bank account' : 'to your Stripe balance (add a bank account in Stripe to enable payouts)'}.
+                    </p>
+                    <div className="flex gap-3 flex-wrap">
+                      <button type="button" onClick={() => syncStripeStatus(true)} disabled={stripeSyncing} className="btn-solid-gold flex-center gap-2">
+                        {stripeSyncing ? <Loader2 size={16} className="animate-spin" /> : <ExternalLink size={16} />}
+                        Open Stripe Dashboard
+                      </button>
+                      <button type="button" onClick={() => setActiveTab('sales')} className="btn-outline-primary flex-center gap-2">
+                        <DollarSign size={14} /> View Sales
+                      </button>
+                      <button type="button" onClick={() => syncStripeStatus()} disabled={stripeSyncing} className="btn-outline-primary flex-center gap-2">
+                        <RefreshCw size={14} className={stripeSyncing ? 'animate-spin' : ''} /> Refresh
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="form-divider-label">Manual Payment Links (Fallback)</div>
+
               <div className="payment-config-grid">
                 <div className="form-group">
                   <label><CreditCard size={14} /> Stripe Payment Link</label>
@@ -1531,6 +1677,103 @@ const CuratorDashboard = () => {
                 </div>
               </div>
             )}
+            </div>
+          } />
+
+          <Route path="sales" element={
+            <div className="dashboard-view">
+              <header className="dashboard-header flex-between">
+                <div>
+                  <h1 className="font-headline text-primary">Sales <span className="text-gold">Ledger</span></h1>
+                  <p>Every card payment received through your storefront.</p>
+                </div>
+                <button onClick={fetchOrders} className="btn-outline-primary flex-center gap-2">
+                  <RefreshCw size={14} /> Refresh
+                </button>
+              </header>
+
+              <div className="stats-row mb-8">
+                <div className="stat-pill glass-card">
+                  <span className="stat-label">Gross Revenue</span>
+                  <span className="stat-value text-gold">
+                    ${(orders.filter(o => o.payment_status === 'paid').reduce((sum, o) => sum + (o.amount_total || 0), 0) / 100).toFixed(2)}
+                  </span>
+                </div>
+                <div className="stat-pill glass-card">
+                  <span className="stat-label">Orders</span>
+                  <span className="stat-value text-gold">{orders.length}</span>
+                </div>
+                <div className="stat-pill glass-card">
+                  <span className="stat-label">Awaiting Fulfillment</span>
+                  <span className="stat-value text-gold">
+                    {orders.filter(o => o.payment_status === 'paid' && o.fulfillment_status !== 'fulfilled').length}
+                  </span>
+                </div>
+              </div>
+
+              <section className="dashboard-card glass-card">
+                <h2 className="card-title text-gold"><DollarSign size={20} /> Order History</h2>
+
+                {!curatorData?.stripe_charges_enabled && orders.length === 0 && (
+                  <div className="text-center py-12 opacity-60">
+                    <CreditCard size={40} className="mx-auto mb-4 text-gold" />
+                    <p className="font-headline mb-2">Card payments aren't live yet.</p>
+                    <p className="text-sm mb-6">Connect your Stripe account in the Storefront tab to start taking payments.</p>
+                    <button onClick={() => setActiveTab('storefront')} className="btn-solid-gold">Set Up Payments</button>
+                  </div>
+                )}
+
+                {(curatorData?.stripe_charges_enabled || orders.length > 0) && (
+                  <div className="leads-table-container">
+                    <table className="leads-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Product</th>
+                          <th>Buyer</th>
+                          <th>Qty</th>
+                          <th>Total</th>
+                          <th>Payment</th>
+                          <th>Fulfillment</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {orders.map(o => (
+                          <tr key={o.id} className="lead-row">
+                            <td className="text-xs">{new Date(o.created_at).toLocaleDateString()}</td>
+                            <td className="font-bold">{o.product_name || '—'}</td>
+                            <td>
+                              <div>{o.buyer_name || 'Guest'}</div>
+                              {o.buyer_email && <a href={`mailto:${o.buyer_email}`} className="text-olive text-xs">{o.buyer_email}</a>}
+                            </td>
+                            <td>{o.quantity}</td>
+                            <td className="text-gold font-bold">${((o.amount_total || 0) / 100).toFixed(2)}</td>
+                            <td>
+                              <span className={`order-status-pill ${o.payment_status}`}>{o.payment_status}</span>
+                            </td>
+                            <td>
+                              <button
+                                onClick={() => toggleFulfilled(o)}
+                                className={`order-fulfill-btn ${o.fulfillment_status === 'fulfilled' ? 'done' : ''}`}
+                                title={o.fulfillment_status === 'fulfilled' ? 'Mark as new' : 'Mark as fulfilled'}
+                              >
+                                {o.fulfillment_status === 'fulfilled' ? <><Check size={12} /> Fulfilled</> : 'Mark Fulfilled'}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {orders.length === 0 && (
+                          <tr>
+                            <td colSpan="7" className="text-center py-8 opacity-50">
+                              No orders yet. Share your storefront link to start selling.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
             </div>
           } />
 

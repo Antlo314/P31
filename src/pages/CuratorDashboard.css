@@ -1277,3 +1277,71 @@
   transform: translateX(4px);
   border-color: var(--metallic-gold);
 }
+
+/* ====== Stripe Connect & Sales Ledger ====== */
+.stripe-connect-panel {
+  border: 1px solid rgba(203, 167, 47, 0.35);
+  background: rgba(203, 167, 47, 0.04);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stripe-status-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 6px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.stripe-status-pill.live {
+  color: #2e7d32;
+  background: rgba(46, 125, 50, 0.1);
+  border: 1px solid rgba(46, 125, 50, 0.3);
+}
+.stripe-status-pill.pending {
+  color: var(--metallic-gold, #CBA72F);
+  background: rgba(203, 167, 47, 0.1);
+  border: 1px solid rgba(203, 167, 47, 0.35);
+}
+.stripe-status-pill.off {
+  color: inherit;
+  opacity: 0.5;
+  border: 1px solid currentColor;
+}
+
+.order-status-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.order-status-pill.paid { color: #2e7d32; background: rgba(46, 125, 50, 0.08); }
+.order-status-pill.pending { color: #b26a00; background: rgba(178, 106, 0, 0.08); }
+.order-status-pill.refunded { color: #c62828; background: rgba(198, 40, 40, 0.08); }
+
+.order-fulfill-btn {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--metallic-gold, #CBA72F);
+  background: transparent;
+  color: var(--metallic-gold, #CBA72F);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+.order-fulfill-btn:hover { background: rgba(203, 167, 47, 0.12); }
+.order-fulfill-btn.done {
+  border-color: #2e7d32;
+  color: #2e7d32;
+  background: rgba(46, 125, 50, 0.08);
+}

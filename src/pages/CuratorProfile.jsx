@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { apiPost } from '../lib/api';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAuth } from '../context/AuthContext';
@@ -97,6 +98,36 @@ const CuratorProfile = () => {
   const [error, setError] = useState(null);
   const containerRef = useRef(null);
   const [testimonials, setTestimonials] = useState([]);
+  const [checkoutLoadingId, setCheckoutLoadingId] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const purchaseStatus = searchParams.get('purchase'); // 'success' | 'cancelled' | null
+
+  const dismissPurchaseBanner = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('purchase');
+    next.delete('session_id');
+    setSearchParams(next, { replace: true });
+  };
+
+  // Native checkout is available when the vendor completed Stripe onboarding
+  // and the product is a real catalog item (numeric DB id) with a valid price.
+  const canCheckout = (p) =>
+    !!curator?.stripe_charges_enabled &&
+    typeof p.id === 'number' &&
+    parseFloat(p.price) >= 0.5 &&
+    p.stock_status !== 'out_of_stock';
+
+  const startCheckout = async (p) => {
+    if (checkoutLoadingId) return;
+    setCheckoutLoadingId(p.id);
+    try {
+      const { url } = await apiPost('/api/stripe/checkout', { productId: p.id });
+      window.location.href = url;
+    } catch (err) {
+      alert('Checkout could not be started: ' + err.message);
+      setCheckoutLoadingId(null);
+    }
+  };
 
   const logEvent = async (type, productId = null) => {
     if (!curator) return;
@@ -233,7 +264,23 @@ const CuratorProfile = () => {
 
   return (
     <div className={`curator-profile-page theme-${curator.theme_preference || 'classic'}`} ref={containerRef}>
-      
+
+      {/* Post-checkout status banner */}
+      {purchaseStatus === 'success' && (
+        <div className="cp-purchase-banner success">
+          <Check size={18} />
+          <span>Payment received — thank you for supporting {curator.business_name}! A receipt has been emailed to you.</span>
+          <button onClick={dismissPurchaseBanner} aria-label="Dismiss"><X size={16} /></button>
+        </div>
+      )}
+      {purchaseStatus === 'cancelled' && (
+        <div className="cp-purchase-banner cancelled">
+          <ShieldAlert size={18} />
+          <span>Checkout was cancelled — your card was not charged.</span>
+          <button onClick={dismissPurchaseBanner} aria-label="Dismiss"><X size={16} /></button>
+        </div>
+      )}
+
       {/* Luxury Parallax Hero */}
       <section className="cp-hero-section">
         <div className="cp-hero-banner-wrap">
@@ -358,10 +405,15 @@ const CuratorProfile = () => {
                      </div>
                   </div>
 
-                  {(curator.stripe_link || curator.cashapp_tag || curator.venmo_handle || curator.other_payment_link) && (
+                  {(curator.stripe_charges_enabled || curator.stripe_link || curator.cashapp_tag || curator.venmo_handle || curator.other_payment_link) && (
                     <div className="cp-contact-card mt-6">
                       <h4 className="cp-card-title">Secure Payments</h4>
                       <div className="cp-payment-buttons mt-4">
+                        {curator.stripe_charges_enabled && (
+                          <div className="cp-payment-btn stripe native">
+                            <CreditCard size={18} /> Card payments accepted — buy any item directly below
+                          </div>
+                        )}
                         {curator.stripe_link && (
                           <a href={curator.stripe_link} target="_blank" rel="noreferrer" className="cp-payment-btn stripe" onClick={() => logEvent('payment_click')}>
                             <CreditCard size={18} /> Pay with Card
@@ -404,7 +456,8 @@ const CuratorProfile = () => {
                       className="cp-product-card" 
                       onClick={() => {
                         logEvent('product_click', p.id);
-                        if (p.external_url) window.open(p.external_url, '_blank');
+                        if (canCheckout(p)) startCheckout(p);
+                        else if (p.external_url) window.open(p.external_url, '_blank');
                       }}
                     >
                       <div className="cp-product-img-wrapper">
@@ -424,7 +477,11 @@ const CuratorProfile = () => {
                            </span>
                          )}
                          <div className="cp-product-hover">
-                            <span>{p.external_url ? 'Buy Now' : 'Inquiry Only'}</span>
+                            <span>
+                              {checkoutLoadingId === p.id ? 'Opening Checkout…' :
+                               canCheckout(p) ? 'Buy Now — Secure Checkout' :
+                               p.external_url ? 'Buy Now' : 'Inquiry Only'}
+                            </span>
                          </div>
                       </div>
                       <div className="cp-product-info">
