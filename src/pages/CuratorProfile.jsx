@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { apiPost } from '../lib/api';
+import { invokePayment } from '../lib/payments';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAuth } from '../context/AuthContext';
@@ -121,7 +121,7 @@ const CuratorProfile = () => {
     if (checkoutLoadingId) return;
     setCheckoutLoadingId(p.id);
     try {
-      const { url } = await apiPost('/api/stripe/checkout', { productId: p.id });
+      const { url } = await invokePayment('stripe-checkout', { productId: p.id });
       window.location.href = url;
     } catch (err) {
       alert('Checkout could not be started: ' + err.message);

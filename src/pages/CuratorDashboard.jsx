@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Community from './Community'; // Nested import
 import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, ShieldCheck, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Calendar, Users, Search, DollarSign, RefreshCw } from 'lucide-react';
-import { apiPost } from '../lib/api';
+import { invokePayment } from '../lib/payments';
 import { QRCodeSVG } from 'qrcode.react';
 import './CuratorDashboard.css';
 
@@ -65,6 +65,7 @@ const CuratorDashboard = () => {
   const [stripeLoading, setStripeLoading] = useState(false);
   const [stripeSyncing, setStripeSyncing] = useState(false);
   const [orders, setOrders] = useState([]);
+  const [allOrders, setAllOrders] = useState([]);
 
   const [vendorApprovals, setVendorApprovals] = useState([]);
   const [approvalSearch, setApprovalSearch] = useState('');
@@ -198,6 +199,20 @@ const CuratorDashboard = () => {
     }
   };
 
+  const fetchAllOrders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      setAllOrders(data || []);
+    } catch (err) {
+      console.warn('Marketplace orders fetch error:', err.message);
+    }
+  };
+
   const toggleFulfilled = async (order) => {
     const next = order.fulfillment_status === 'fulfilled' ? 'new' : 'fulfilled';
     try {
@@ -212,7 +227,7 @@ const CuratorDashboard = () => {
   const handleStripeConnect = async () => {
     setStripeLoading(true);
     try {
-      const { url } = await apiPost('/api/stripe/connect', {}, { auth: true });
+      const { url } = await invokePayment('stripe-connect');
       window.location.href = url;
     } catch (err) {
       alert('Stripe Connect Error: ' + err.message);
@@ -223,10 +238,9 @@ const CuratorDashboard = () => {
   const syncStripeStatus = async (openDashboard = false) => {
     setStripeSyncing(true);
     try {
-      const status = await apiPost(
-        '/api/stripe/account-status',
-        openDashboard ? { action: 'dashboard' } : {},
-        { auth: true }
+      const status = await invokePayment(
+        'stripe-account-status',
+        openDashboard ? { action: 'dashboard' } : {}
       );
       await fetchUserData(user.id);
       if (openDashboard && status.dashboardUrl) window.open(status.dashboardUrl, '_blank');
@@ -305,7 +319,8 @@ const CuratorDashboard = () => {
             fetchPendingApprovals(),
             fetchPartnershipInquiries(),
             fetchAllCurators(),
-            fetchVendorApprovals()
+            fetchVendorApprovals(),
+            fetchAllOrders()
           ]);
         }
         if (user) {
@@ -640,6 +655,15 @@ const CuratorDashboard = () => {
     e.preventDefault();
     if (products.length >= 10 && !editingProduct) {
       alert('Initial collections are limited to 10 products.');
+      return;
+    }
+    const priceNum = parseFloat(productForm.price);
+    if (!Number.isFinite(priceNum) || priceNum <= 0) {
+      alert('Please set a valid price greater than $0.');
+      return;
+    }
+    if (priceNum < 0.5 && !productForm.external_url) {
+      alert('Card checkout requires a minimum price of $0.50. Set a higher price or add an external purchase link.');
       return;
     }
     setFormLoading(true);
@@ -1371,7 +1395,7 @@ const CuratorDashboard = () => {
                 <button 
                   onClick={() => {
                     setEditingProduct(null);
-                    setProductForm({ name: '', description: '', price: '', image_url: '', image_urls: [], category: 'Collection', external_url: '' });
+                    setProductForm({ name: '', description: '', price: '', image_url: '', image_urls: [], category: 'Collection', external_url: '', stock_status: 'in_stock' });
                     setIsProductModalOpen(true);
                   }} 
                   className="btn-solid-gold flex-center gap-2"
@@ -1429,6 +1453,10 @@ const CuratorDashboard = () => {
                     <p className="text-sm opacity-70 mb-4">
                       Connect your own Stripe account to sell directly on your storefront. Customers pay by card
                       at checkout and earnings are deposited straight into your bank account.
+                    </p>
+                    <p className="text-xs opacity-50 mb-4">
+                      No API keys or technical setup needed — you'll securely sign in on Stripe's own site
+                      (or create a free account there) and be brought right back here. Takes about 2 minutes.
                     </p>
                     <button type="button" onClick={handleStripeConnect} disabled={stripeLoading} className="btn-solid-gold flex-center gap-2">
                       {stripeLoading ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}
@@ -1624,7 +1652,7 @@ const CuratorDashboard = () => {
                     <div className="form-row-grid">
                       <div className="form-group">
                         <label>Price (USD)</label>
-                        <input type="number" step="0.01" value={productForm.price} onChange={e => setProductForm({...productForm, price: e.target.value})} required />
+                        <input type="number" step="0.01" min="0.50" placeholder="25.00" value={productForm.price} onChange={e => setProductForm({...productForm, price: e.target.value})} required />
                       </div>
                       <div className="form-group">
                         <label>Category</label>
@@ -1656,14 +1684,18 @@ const CuratorDashboard = () => {
                       </div>
                     </div>
                     <div className="form-group">
-                      <label>Direct Purchase URL (External Website)</label>
-                      <input 
-                        type="url" 
+                      <label>External Purchase URL (Optional)</label>
+                      <input
+                        type="url"
                         placeholder="https://yourwebsite.com/product"
-                        value={productForm.external_url} 
-                        onChange={e => setProductForm({...productForm, external_url: e.target.value})} 
+                        value={productForm.external_url}
+                        onChange={e => setProductForm({...productForm, external_url: e.target.value})}
                       />
-                      <p className="help-text">Link where customers can actually buy this artifact.</p>
+                      <p className="help-text">
+                        {curatorData?.stripe_charges_enabled
+                          ? 'Leave blank to sell with your built-in card checkout. Add a link only if this item is sold on another website.'
+                          : 'Link where customers buy this item — or connect Stripe above to sell with built-in card checkout instead.'}
+                      </p>
                     </div>
                     <div className="form-group">
                       <label>Description</label>
@@ -1867,8 +1899,11 @@ const CuratorDashboard = () => {
                             <strong>{p.profiles?.full_name || 'Anonymous'} ({p.business_name || 'Unnamed Biz'})</strong>
                             <p className="text-xs opacity-60">Identity: {p.profiles?.email}</p>
                           </div>
-                          <div className="vendor-quick-stats font-label text-gold text-xs">
-                            Artifacts: {p.products?.length || '0'}
+                          <div className="vendor-quick-stats font-label text-gold text-xs flex items-center gap-3">
+                            <span>Artifacts: {p.products?.length || '0'}</span>
+                            <span className={`stripe-status-pill ${p.stripe_charges_enabled ? 'live' : p.stripe_account_id ? 'pending' : 'off'}`}>
+                              {p.stripe_charges_enabled ? 'Payments Live' : p.stripe_account_id ? 'Stripe Onboarding' : 'Links Only'}
+                            </span>
                           </div>
                         </div>
 
@@ -1883,6 +1918,65 @@ const CuratorDashboard = () => {
                       </div>
                     ))}
                     {pendingApprovals.length === 0 && <p className="opacity-50 italic text-sm text-center py-8">All sanctuaries currently align with architectural standards.</p>}
+                  </div>
+                </section>
+              </div>
+
+              {/* Marketplace Commerce Overview */}
+              <div className="mb-12">
+                <section className="dashboard-card glass-card">
+                  <div className="flex-between mb-6">
+                    <h2 className="card-title text-gold m-0"><DollarSign size={20} /> Marketplace Commerce</h2>
+                    <span className="text-xs opacity-50 uppercase letter-spacing-2">
+                      ${(allOrders.filter(o => o.payment_status === 'paid').reduce((s, o) => s + (o.amount_total || 0), 0) / 100).toFixed(2)} Gross • {allOrders.length} Orders
+                    </span>
+                  </div>
+
+                  <div className="mb-6">
+                    <h4 className="text-[10px] uppercase tracking-widest opacity-40 mb-3">Curator Payment Readiness</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {(allCurators || []).map(c => (
+                        <span key={c.id} className={`stripe-status-pill ${c.stripe_charges_enabled ? 'live' : c.stripe_account_id ? 'pending' : 'off'}`}>
+                          {(c.business_name || c.profiles?.full_name || 'Unnamed')} — {c.stripe_charges_enabled ? 'Live' : c.stripe_account_id ? 'Onboarding' : 'Links Only'}
+                        </span>
+                      ))}
+                      {(!allCurators || allCurators.length === 0) && <p className="text-xs opacity-50 italic m-0">No curators yet.</p>}
+                    </div>
+                  </div>
+
+                  <div className="leads-table-container">
+                    <table className="leads-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Shop</th>
+                          <th>Product</th>
+                          <th>Buyer</th>
+                          <th>Total</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {allOrders.slice(0, 15).map(o => {
+                          const shop = (allCurators || []).find(c => c.id === o.curator_id);
+                          return (
+                            <tr key={o.id} className="lead-row">
+                              <td className="text-xs">{new Date(o.created_at).toLocaleDateString()}</td>
+                              <td className="font-bold">{shop?.business_name || '—'}</td>
+                              <td>{o.product_name || '—'}</td>
+                              <td className="text-xs">{o.buyer_email || 'Guest'}</td>
+                              <td className="text-gold font-bold">${((o.amount_total || 0) / 100).toFixed(2)}</td>
+                              <td><span className={`order-status-pill ${o.payment_status}`}>{o.payment_status}</span></td>
+                            </tr>
+                          );
+                        })}
+                        {allOrders.length === 0 && (
+                          <tr>
+                            <td colSpan="6" className="text-center py-8 opacity-50">No marketplace orders yet.</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </section>
               </div>
@@ -2402,7 +2496,7 @@ const CuratorDashboard = () => {
               {walkthroughStep === 2 && "Start in the 'Identity' tab. Define your business name, story, and vanity URL. This is the foundation of your digital presence."}
               {walkthroughStep === 3 && "In the 'Storefront' tab, upload your first artifacts. Each item represents your craftsmanship. You can list up to 10 products."}
               {walkthroughStep === 4 && "Elevate your shop by uploading a premium banner and logo. Consistent aesthetics build trust and prestige with your customers."}
-              {walkthroughStep === 5 && "Ensure you can receive the fruits of your labor. Connect your Stripe, Cash App, or Venmo so customers can purchase directly."}
+              {walkthroughStep === 5 && "Ensure you can receive the fruits of your labor. In the Storefront tab, click 'Connect with Stripe' — no API keys needed — and customers can pay by card right on your page, with earnings deposited straight to your bank. Track every sale in your Sales tab. You can also add Cash App or Venmo links as backups."}
               {walkthroughStep === 6 && "Once your sanctuary is complete, click 'Submit for Review'. Our architects will vet your shop for the upcoming Marketplace."}
             </p>
 

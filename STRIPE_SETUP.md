@@ -1,20 +1,29 @@
-# P31 Marketplace — Stripe Payments Setup
+# P31 Marketplace — Stripe Payments Setup (Supabase)
 
 Vendors connect their own Stripe account (Stripe Connect **Express**) from the
 dashboard, buyers pay by card via Stripe Checkout, and payouts land directly in
-the vendor's bank account. Orders are recorded automatically and shown in the
-vendor's **Sales** tab.
+each vendor's own bank account. The payment backend runs entirely on **Supabase
+Edge Functions** — no Vercel or separate server required. Orders are recorded
+automatically and shown in the vendor's **Sales** tab.
+
+## The important part: you never enter vendors anywhere
+
+You do a **one-time** setup with **your own** platform Stripe account (below).
+After that, each vendor connects their own account by clicking **Connect with
+Stripe** in their dashboard — you never touch their details. Every vendor gets
+their own checkout and their own payouts automatically.
 
 ## How money flows
 
 1. Vendor clicks **Connect with Stripe** (Dashboard → Storefront) and completes
    Stripe's hosted onboarding (identity + bank account).
-2. A buyer clicks a product on the vendor's storefront → Stripe Checkout opens.
-3. The charge is created on the platform account with a
-   `transfer_data.destination` pointing at the vendor's connected account, so
+2. A buyer clicks a product on the storefront → Stripe Checkout opens.
+3. The charge is a destination charge to the vendor's connected account, so
    funds (minus the optional platform fee) route to the vendor automatically.
 4. The `checkout.session.completed` webhook records the order in Supabase; the
    vendor sees it in **Dashboard → Sales** and marks it fulfilled.
+
+---
 
 ## One-time setup
 
@@ -25,64 +34,84 @@ It adds Stripe columns to `curator_data` and creates the `orders` table with RLS
 
 ### 2. Enable Stripe Connect
 
-In the [Stripe Dashboard](https://dashboard.stripe.com/):
-- Go to **Connect → Get started** and enable Connect with **Express** accounts.
-- (Test mode works the same way — use test keys first.)
+In the [Stripe Dashboard](https://dashboard.stripe.com/) → **Connect → Get
+started**, enable Connect with **Express** accounts. (Start in test mode.)
 
-### 3. Set environment variables (Vercel → Project → Settings → Environment Variables)
+### 3. Add your secrets to Supabase
 
-| Variable | Value |
+Only two secrets are required — Supabase injects `SUPABASE_URL` and
+`SUPABASE_SERVICE_ROLE_KEY` into Edge Functions automatically.
+
+**Via the dashboard:** Project → **Edge Functions → Secrets** (or Project
+Settings → Edge Functions), add:
+
+| Secret | Value |
 |---|---|
-| `STRIPE_SECRET_KEY` | `sk_live_...` (or `sk_test_...`) from Stripe → Developers → API keys |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_...` from the webhook endpoint you create in step 4 |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API → `service_role` key (server-only, never expose in the client) |
-| `SUPABASE_URL` | Your Supabase project URL (same value as `VITE_SUPABASE_URL`) |
-| `APP_URL` | Your production URL, e.g. `https://p31market.com` (used for Stripe redirect URLs) |
+| `STRIPE_SECRET_KEY` | `sk_test_...` (then `sk_live_...`) from Stripe → Developers → API keys |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...` from the webhook you create in step 5 |
+| `APP_URL` | Your site URL, e.g. `https://p31market.com` (used for Stripe redirect links) |
 | `PLATFORM_FEE_PERCENT` | Optional. e.g. `5` keeps 5% of each sale for the platform. Defaults to `0`. |
 
-`VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` should already be set for the frontend.
+**Via the CLI** (equivalent):
 
-### 4. Create the webhook endpoint
+```bash
+supabase secrets set STRIPE_SECRET_KEY=sk_test_... STRIPE_WEBHOOK_SECRET=whsec_... APP_URL=https://p31market.com
+```
+
+### 4. Deploy the Edge Functions
+
+**Via the CLI** (recommended):
+
+```bash
+supabase link --project-ref xsnhxjttdizljaawpumz
+supabase functions deploy stripe-connect
+supabase functions deploy stripe-account-status
+supabase functions deploy stripe-checkout
+supabase functions deploy stripe-webhook   # config.toml sets verify_jwt = false for this one
+```
+
+**Via the dashboard:** Project → **Edge Functions → Deploy a new function**,
+create one per folder in `supabase/functions/`, and paste in each `index.ts`.
+For **stripe-webhook**, turn **Verify JWT** OFF (Stripe can't send a Supabase
+token). The other three keep Verify JWT on.
+
+### 5. Create the webhook endpoint
 
 Stripe Dashboard → **Developers → Webhooks → Add endpoint**:
-- URL: `https://<your-domain>/api/stripe/webhook`
-- Events to send:
-  - `checkout.session.completed`
-  - `account.updated`
-- Copy the signing secret into `STRIPE_WEBHOOK_SECRET` and redeploy.
+- URL: `https://xsnhxjttdizljaawpumz.supabase.co/functions/v1/stripe-webhook`
+- Events: `checkout.session.completed` and `account.updated`
+- Copy the signing secret into the `STRIPE_WEBHOOK_SECRET` secret (step 3) and
+  redeploy `stripe-webhook`.
 
-## API endpoints (Vercel serverless functions in `api/`)
+---
 
-| Endpoint | Auth | Purpose |
+## Edge Functions (in `supabase/functions/`)
+
+| Function | Caller | Purpose |
 |---|---|---|
-| `POST /api/stripe/connect` | Vendor session | Create/reuse the vendor's Express account, return onboarding link |
-| `POST /api/stripe/account-status` | Vendor session | Sync charges/payouts status; `{"action":"dashboard"}` returns an Express dashboard login link |
-| `POST /api/stripe/checkout` | Public | Create a Checkout Session for a product (`{"productId": 123}`) |
-| `POST /api/stripe/webhook` | Stripe signature | Records orders, syncs account status |
+| `stripe-connect` | Vendor | Create/reuse the vendor's Express account, return onboarding link |
+| `stripe-account-status` | Vendor | Sync charges/payouts status; `{ "action": "dashboard" }` returns a Stripe dashboard login link |
+| `stripe-checkout` | Public | Create a Checkout Session for a product (`{ "productId": 123 }`) |
+| `stripe-webhook` | Stripe | Records orders, syncs account status (Verify JWT **off**) |
+
+The frontend calls these through `supabase.functions.invoke()` (see
+[src/lib/payments.js](src/lib/payments.js)); the auth token is attached
+automatically, so no keys ever live in the browser.
+
+## Testing (test mode)
+
+1. Use `sk_test_...` and a test-mode webhook.
+2. As a vendor: Dashboard → Storefront → **Connect with Stripe** and complete
+   Stripe's test onboarding.
+3. On the storefront, click a product and pay with test card
+   `4242 4242 4242 4242`, any future expiry, any CVC, any ZIP.
+4. Check Dashboard → **Sales** for the recorded order.
 
 ## Local development
 
-`npm run dev` (Vite) serves only the frontend — the `/api` functions won't exist.
-To run the full stack locally:
+`npm run dev` (Vite) serves only the frontend. To run the functions locally:
 
 ```bash
-npm i -g vercel
-vercel dev
+supabase functions serve --env-file ./supabase/.env.local
+stripe listen --forward-to localhost:54321/functions/v1/stripe-webhook
 ```
-
-and put the env vars above in `.env` (Vercel dev loads them). To receive
-webhooks locally:
-
-```bash
-stripe listen --forward-to localhost:3000/api/stripe/webhook
-```
-
-## Testing the flow (test mode)
-
-1. Use `sk_test_...` keys and a test-mode webhook.
-2. As a vendor: Dashboard → Storefront → **Connect with Stripe** — Stripe's
-   test onboarding lets you fill fake data (use `000-000-0000` / any test SSN
-   prompts it offers).
-3. Visit the storefront, click a product, pay with card `4242 4242 4242 4242`,
-   any future expiry / any CVC.
-4. Check Dashboard → **Sales** for the recorded order.

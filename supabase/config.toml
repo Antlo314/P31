@@ -1,0 +1,7 @@
+# Supabase project config (used by the Supabase CLI).
+# project_id is your project ref — the subdomain of your Supabase URL.
+project_id = "xsnhxjttdizljaawpumz"
+
+# Stripe calls the webhook directly with no Supabase JWT, so it must be public.
+[functions.stripe-webhook]
+verify_jwt = false
