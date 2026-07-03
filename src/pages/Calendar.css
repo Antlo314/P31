@@ -1,6 +1,6 @@
 /* ==========================================================
    Calendar.css — P31 Brand Kit
-   Dark plum base. Bold editorial typography.
+   Luxury events lineup. Bento event cards over dark earth.
    ========================================================== */
 
 .calendar-v2 {
@@ -34,11 +34,15 @@
   pointer-events: none;
 }
 
-/* Header */
-.cal-header-v2 {
-  margin-bottom: 12vh;
+/* ── Header ─────────────────────────────────────────────── */
+.cal-head-v2 {
+  margin-bottom: 8vh;
   position: relative;
   z-index: 1;
+}
+
+.cal-head-v2 .section-kicker {
+  margin-bottom: 1.5rem;
 }
 
 .cal-title-huge {
@@ -59,110 +63,195 @@
   font-family: var(--font-body);
   color: rgba(255, 255, 255, 0.6);
   font-weight: 300;
+  max-width: 42ch;
 }
 
-/* Event Rows */
-.cal-list-v2 {
-  display: flex;
-  flex-direction: column;
+/* ── Lineup grid ────────────────────────────────────────── */
+.cal-lineup {
   position: relative;
   z-index: 1;
+  grid-auto-rows: minmax(150px, 1fr);
 }
 
-.cal-row-v2 {
-  display: flex;
-  gap: 8vw;
-  padding: 7vh 0;
-  border-top: 1px solid rgba(155, 113, 178, 0.15);
-  transition: background 0.4s ease;
+/* Shared media cell treatment — richer, taller overlay for editorial feel */
+.cal-featured .bento-overlay,
+.cal-tba .bento-overlay {
+  background: linear-gradient(to top,
+    rgba(19, 12, 20, 0.94) 0%,
+    rgba(26, 13, 24, 0.55) 45%,
+    rgba(26, 13, 24, 0.10) 100%);
 }
 
-.cal-row-v2:last-child {
-  border-bottom: 1px solid rgba(155, 113, 178, 0.15);
-}
-
-.cal-row-v2:hover {
-  background: rgba(155, 113, 178, 0.04);
-  padding-left: 1rem;
-  transition: padding 0.5s var(--ease-fluid), background 0.4s ease;
-}
-
-/* Date column */
-.cal-date-col {
+.cal-feat-content,
+.cal-tba-content {
+  padding: clamp(1.75rem, 3vw, 3rem);
   display: flex;
   flex-direction: column;
-  flex: 0 0 160px;
+  align-items: flex-start;
 }
 
-.cal-day {
-  font-family: var(--font-heading);
-  font-size: clamp(3.5rem, 6vw, 5.5rem);
-  line-height: 1;
+/* ── Featured event ─────────────────────────────────────── */
+.cal-feat-flag,
+.cal-tba-flag {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dark-plum);
+  background: linear-gradient(120deg, var(--metallic-gold), var(--gold-light));
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--elev-gold);
+}
+
+.cal-tba-flag {
   color: rgba(255, 255, 255, 0.92);
+  background: rgba(155, 113, 178, 0.28);
+  border: 1px solid rgba(227, 208, 234, 0.35);
+  box-shadow: none;
+}
+
+/* Date chip */
+.cal-feat-datechip,
+.cal-tba-datechip {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+.cal-feat-day,
+.cal-tba-day {
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 0.9;
+  color: var(--pure-white);
   font-weight: 400;
 }
 
-.cal-month {
-  font-size: 0.82rem;
+.cal-tba-day {
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.cal-feat-month,
+.cal-tba-month {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--metallic-gold);
-  margin-top: 8px;
   font-weight: 700;
 }
 
-/* Info column */
-.cal-info-col { flex: 1; }
-
-.cal-info-col h2 {
-  font-size: clamp(1.8rem, 3.5vw, 3rem);
+.cal-feat-title,
+.cal-tba-title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.8rem, 3.4vw, 3rem);
   color: var(--pure-white);
+  line-height: 1.05;
   margin-bottom: 1.25rem;
   font-weight: 400;
 }
 
-.cal-meta {
-  list-style: none;
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.5rem;
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  color: var(--amethyst);
-  letter-spacing: 0.08em;
+.cal-tba-title {
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
 }
 
-.cal-meta li::before {
-  content: '◦ ';
+/* Meta */
+.cal-feat-meta,
+.cal-tba-meta {
+  list-style: none;
+  display: flex;
+  gap: 1.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  color: var(--thistle);
+  letter-spacing: 0.05em;
+}
+
+.cal-feat-meta li,
+.cal-tba-meta li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cal-feat-meta .material-symbols-outlined,
+.cal-tba-meta .material-symbols-outlined {
+  font-size: 1.15rem;
   color: var(--metallic-gold);
 }
 
-.cal-desc {
-  font-size: 1.1rem;
-  line-height: 1.75;
-  color: rgba(255, 255, 255, 0.65);
-  max-width: 640px;
+/* Description */
+.cal-feat-desc,
+.cal-tba-desc {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 52ch;
   margin-bottom: 2rem;
 }
 
-.cal-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+.cal-tba-desc {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+}
 
-/* TBA row — dimmed */
-.tba-row { opacity: 0.45; }
-.tba-row:hover { opacity: 0.65; }
+/* RSVP */
+.cal-rsvp {
+  margin-top: auto;
+}
 
-/* Responsive */
+/* TBA badge */
+.cal-tba-badge {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--thistle);
+  border: 1px solid rgba(227, 208, 234, 0.3);
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .cal-row-v2 {
-    flex-direction: column;
-    gap: 2rem;
+  /* Let stacked media cells breathe with generous fixed height */
+  .cal-featured,
+  .cal-tba {
+    min-height: 480px;
   }
-  .cal-date-col { flex: none; align-items: flex-start; }
-  .cal-meta     { flex-direction: column; gap: 0.5rem; }
+  .cal-feat-meta,
+  .cal-tba-meta {
+    gap: 1rem;
+  }
 }
 
 @media (max-width: 768px) {
   .calendar-v2 { padding-top: 14vh; padding-bottom: 10vh; }
   .cal-title-huge { font-size: clamp(2.8rem, 12vw, 5rem); }
+  .cal-head-v2 { margin-bottom: 5vh; }
+}
+
+@media (max-width: 560px) {
+  .cal-featured,
+  .cal-tba {
+    min-height: 440px;
+  }
+  .cal-feat-datechip,
+  .cal-tba-datechip {
+    gap: 0.6rem;
+  }
 }
