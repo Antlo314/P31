@@ -7,12 +7,12 @@
   top: 0;
   width: 100%;
   z-index: 200;
-  padding: 14px 5vw;
-  background: rgba(250, 247, 245, 0.88);
+  padding: 16px 5vw;
+  background: rgba(250, 247, 245, 0.82);
   -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
-  border-bottom: 2px solid var(--metallic-gold);
-  transition: background 0.4s ease, box-shadow 0.4s ease;
+  border-bottom: 1px solid rgba(203, 167, 47, 0.25);
+  transition: padding 0.45s var(--ease-fluid), background 0.4s ease;
 }
 
 /* Under Construction Badges */
@@ -70,9 +70,23 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
+/* Floating glass pill on scroll — 2026 enterprise nav treatment */
 .navbar-v2.scrolled {
-  background: rgba(250, 249, 246, 0.97);
-  box-shadow: 0 4px 30px rgba(39, 52, 27, 0.08);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom-color: transparent;
+  padding: 12px 5vw;
+}
+.navbar-v2.scrolled .navbar-v2-inner {
+  background: rgba(250, 249, 246, 0.9);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  backdrop-filter: blur(28px) saturate(1.4);
+  border: 1px solid var(--outline-variant);
+  border-radius: 999px;
+  padding: 10px 12px 10px 26px;
+  box-shadow: var(--elev-2);
+  max-width: 1240px;
 }
 
 .navbar-v2-inner {
@@ -81,6 +95,7 @@
   align-items: center;
   max-width: 1600px;
   margin: 0 auto;
+  transition: padding 0.45s var(--ease-fluid), background 0.45s var(--ease-fluid), box-shadow 0.45s var(--ease-fluid), max-width 0.45s var(--ease-fluid);
 }
 
 /* Logo */
