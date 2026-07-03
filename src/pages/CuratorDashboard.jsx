@@ -67,6 +67,8 @@ const CuratorDashboard = () => {
   const [stripeSyncing, setStripeSyncing] = useState(false);
   const [orders, setOrders] = useState([]);
   const [allOrders, setAllOrders] = useState([]);
+  const [myStats, setMyStats] = useState({ views: 0, clicks: 0 });
+  const [recentActivity, setRecentActivity] = useState([]);
 
   const [vendorApprovals, setVendorApprovals] = useState([]);
   const [approvalSearch, setApprovalSearch] = useState('');
@@ -304,9 +306,24 @@ const CuratorDashboard = () => {
     }
   };
 
+  const fetchMyStats = async () => {
+    try {
+      const [{ count: views }, { count: clicks }, { data: recent }] = await Promise.all([
+        supabase.from('curator_analytics').select('*', { count: 'exact', head: true }).eq('curator_id', user.id).eq('event_type', 'product_click'),
+        supabase.from('curator_analytics').select('*', { count: 'exact', head: true }).eq('curator_id', user.id).eq('event_type', 'payment_click'),
+        supabase.from('curator_analytics').select('event_type, created_at').eq('curator_id', user.id).order('created_at', { ascending: false }).limit(8)
+      ]);
+      setMyStats({ views: views || 0, clicks: clicks || 0 });
+      setRecentActivity(recent || []);
+    } catch (err) {
+      console.warn('Stats fetch error:', err.message);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchProducts();
+      fetchMyStats();
       if (CARD_PAYMENTS_ENABLED) fetchOrders();
     }
   }, [user]);
@@ -422,8 +439,34 @@ const CuratorDashboard = () => {
 
   const [allCurators, setAllCurators] = useState([]);
   const fetchAllCurators = async () => {
-    const { data } = await supabase.from('curator_data').select('*, profiles(full_name)');
+    const { data } = await supabase.from('curator_data').select('*, profiles(full_name, email, avatar_url)');
     setAllCurators(data || []);
+  };
+
+  const [curatorSearch, setCuratorSearch] = useState('');
+  const [deletingCuratorId, setDeletingCuratorId] = useState(null);
+
+  // Admin-only: permanently remove a curator and all their products from the
+  // marketplace. Requires the admin RLS policies from storefront_v15.
+  const deleteCurator = async (curator) => {
+    if (!isAdmin) return;
+    const label = curator.business_name || curator.profiles?.full_name || 'this curator';
+    if (!window.confirm(`Permanently remove "${label}" and ALL their products from the marketplace? This cannot be undone.`)) return;
+    setDeletingCuratorId(curator.id);
+    try {
+      // Products first (FK references profiles, not curator_data — remove explicitly)
+      const { error: prodErr } = await supabase.from('products').delete().eq('curator_id', curator.id);
+      if (prodErr) throw prodErr;
+      const { error: curErr } = await supabase.from('curator_data').delete().eq('id', curator.id);
+      if (curErr) throw curErr;
+      setAllCurators(prev => prev.filter(c => c.id !== curator.id));
+      fetchPendingApprovals();
+      alert(`"${label}" has been removed from the marketplace.`);
+    } catch (err) {
+      alert('Could not remove curator: ' + err.message + '\n\nMake sure the admin delete policies (storefront_v15_admin_delete.sql) have been applied in Supabase.');
+    } finally {
+      setDeletingCuratorId(null);
+    }
   };
 
   const handleSave = async (e) => {
@@ -972,17 +1015,17 @@ const CuratorDashboard = () => {
 
             {/* Identity Stats Overview */}
             <div className="stats-row mb-8">
-              <div className="stat-pill glass-card" onClick={() => setActiveTab('analytics')} style={{cursor: 'pointer'}}>
+              <div className="stat-pill glass-card">
                 <span className="stat-label">Product Views</span>
-                <span className="stat-value text-gold">284</span>
-              </div>
-              <div className="stat-pill glass-card" onClick={() => setActiveTab('analytics')} style={{cursor: 'pointer'}}>
-                <span className="stat-label">Purchase Clicks</span>
-                <span className="stat-value text-gold">42</span>
+                <span className="stat-value text-gold">{myStats.views}</span>
               </div>
               <div className="stat-pill glass-card">
-                <span className="stat-label">Profile Authority</span>
-                <span className="stat-value text-gold">88%</span>
+                <span className="stat-label">Purchase Clicks</span>
+                <span className="stat-value text-gold">{myStats.clicks}</span>
+              </div>
+              <div className="stat-pill glass-card">
+                <span className="stat-label">Live Products</span>
+                <span className="stat-value text-gold">{products.length}</span>
               </div>
             </div>
 
@@ -1282,20 +1325,25 @@ const CuratorDashboard = () => {
                 <section className="dashboard-card glass-card">
                   <h3 className="card-title text-gold"><Sparkles size={18} /> Activity Pulse</h3>
                   <div className="pulse-feed flex flex-col gap-3 mt-4 max-h-[300px] overflow-y-auto pr-2">
-                    {[
-                      { type: 'view', text: 'Someone from Atlanta viewed your Profile', time: '2m ago' },
-                      { type: 'click', text: 'External Purchase Link clicked by visitor', time: '14m ago' },
-                      { type: 'rsvp', text: 'Curator "Heritage" RSVP\'d for Market', time: '1h ago' },
-                      { type: 'broadcast', text: 'Architect Broadcast: Market Layout V2', time: '3h ago' }
-                    ].map((log, i) => (
-                      <div key={i} className="pulse-item flex gap-3 p-3 rounded-lg bg-surface-container-low border border-thistle animate-in">
-                        <div className={`pulse-icon w-2 h-2 rounded-full mt-1.5 ${log.type === 'view' ? 'bg-blue-400' : log.type === 'click' ? 'bg-gold' : 'bg-green-400'}`}></div>
-                        <div className="pulse-content flex-1">
-                          <p className="text-[11px] leading-tight text-primary m-0">{log.text}</p>
-                          <span className="text-[9px] opacity-40 uppercase font-bold">{log.time}</span>
+                    {recentActivity.map((log, i) => {
+                      const labels = {
+                        view: 'Someone viewed your profile',
+                        product_click: 'A visitor opened one of your products',
+                        payment_click: 'A visitor clicked one of your payment links'
+                      };
+                      return (
+                        <div key={i} className="pulse-item flex gap-3 p-3 rounded-lg bg-surface-container-low border border-thistle animate-in">
+                          <div className={`pulse-icon w-2 h-2 rounded-full mt-1.5 ${log.event_type === 'payment_click' ? 'bg-gold' : log.event_type === 'product_click' ? 'bg-green-400' : 'bg-blue-400'}`}></div>
+                          <div className="pulse-content flex-1">
+                            <p className="text-[11px] leading-tight text-primary m-0">{labels[log.event_type] || 'Activity'}</p>
+                            <span className="text-[9px] opacity-40 uppercase font-bold">{new Date(log.created_at).toLocaleString()}</span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
+                    {recentActivity.length === 0 && (
+                      <p className="text-xs opacity-50 italic text-center py-6">No visitor activity yet. Share your shop link to start tracking views and clicks.</p>
+                    )}
                   </div>
                 </section>
 
@@ -2044,6 +2092,89 @@ const CuratorDashboard = () => {
                       </div>
                     ))}
                     {pendingApprovals.length === 0 && <p className="opacity-50 italic text-sm text-center py-8">All sanctuaries currently align with architectural standards.</p>}
+                  </div>
+                </section>
+              </div>
+
+              {/* Curator Registry — full roster with removal controls */}
+              <div className="mb-12">
+                <section className="dashboard-card glass-card">
+                  <div className="flex-between mb-6">
+                    <h2 className="card-title text-gold m-0">
+                      <Users size={20} /> Curator Registry
+                      <HelpTip title="Managing & Removing Curators">
+                        <p>Every curator account in the marketplace is listed here.</p>
+                        <ol>
+                          <li>Use the search box to find a curator by name, business, or email.</li>
+                          <li>Click the red trash icon to <strong>permanently remove</strong> a curator and all of their products — useful for clearing out test/placeholder accounts or vendors who have left.</li>
+                          <li>You'll be asked to confirm first. This can't be undone.</li>
+                        </ol>
+                        <p className="helptip-note">Removal requires the one-time <strong>storefront_v15_admin_delete.sql</strong> policy in Supabase. If a delete fails, that's the fix.</p>
+                      </HelpTip>
+                    </h2>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 opacity-40" size={14} />
+                      <input
+                        type="text"
+                        placeholder="Search curators..."
+                        className="search-input-small"
+                        value={curatorSearch}
+                        onChange={e => setCuratorSearch(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="admin-leads-table overflow-x-auto">
+                    <table className="w-full text-left text-sm border-collapse">
+                      <thead>
+                        <tr className="border-b border-thistle opacity-60">
+                          <th className="py-3 px-4">Business</th>
+                          <th className="py-3 px-4">Curator</th>
+                          <th className="py-3 px-4">Status</th>
+                          <th className="py-3 px-4 text-right">Remove</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {allCurators
+                          .filter(c => {
+                            const q = curatorSearch.toLowerCase();
+                            return !q ||
+                              (c.business_name || '').toLowerCase().includes(q) ||
+                              (c.profiles?.full_name || '').toLowerCase().includes(q) ||
+                              (c.profiles?.email || '').toLowerCase().includes(q);
+                          })
+                          .map(c => (
+                            <tr key={c.id} className="border-b border-thistle/20 hover:bg-gold/5 transition-colors">
+                              <td className="py-3 px-4 font-bold">
+                                {c.business_name || <span className="opacity-40 italic">Unnamed</span>}
+                                {c.slug && <a href={`/${c.slug}`} target="_blank" rel="noreferrer" className="text-olive ml-2 text-xs">/{c.slug}</a>}
+                              </td>
+                              <td className="py-3 px-4">
+                                <div>{c.profiles?.full_name || 'Artisan'}</div>
+                                <div className="text-xs opacity-60">{c.profiles?.email}</div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <span className={`stripe-status-pill ${c.status === 'approved' ? 'live' : c.status === 'pending' ? 'pending' : 'off'}`}>
+                                  {c.status || 'draft'}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-right">
+                                <button
+                                  onClick={() => deleteCurator(c)}
+                                  disabled={deletingCuratorId === c.id}
+                                  className="text-red hover:scale-110 transition-transform disabled:opacity-40"
+                                  title="Remove curator and all their products"
+                                >
+                                  {deletingCuratorId === c.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        {allCurators.length === 0 && (
+                          <tr><td colSpan="4" className="text-center py-12 opacity-40 italic">No curators registered yet.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </section>
               </div>

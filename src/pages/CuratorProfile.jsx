@@ -9,85 +9,11 @@ import { Crown, ShieldAlert, DollarSign, Leaf, MapPin, Instagram, Facebook, Glob
 import './CuratorProfile.css';
 import './CuratorProfileMiniShop.css';
 
-// Mock images fallback
-import serumImg from '../assets/curators/ilcollection/serum_official.png';
-import oilImg from '../assets/curators/ilcollection/oil_official.png';
-import eyeCreamImg from '../assets/curators/ilcollection/eye_cream_official.png';
-import cleanserImg from '../assets/curators/ilcollection/cleanser_official.png';
-import collectionSetImg from '../assets/curators/ilcollection/luxe_box_official.png';
-import heroUltra from '../assets/curators/ilcollection/hero_ultra.png';
-import portraitUltra from '../assets/curators/ilcollection/portrait_ultra.png';
-import bathroomAccent from '../assets/curators/ilcollection/bathroom_accent.png';
+// Generic brand fallbacks for curators who haven't uploaded their own art
+import defaultBanner from '../assets/hero.png';
+import defaultLogo from '../assets/p31_botanical_logo.png';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const IL_COLLECTION_PRODUCTS = [
-  {
-    id: 'il-serum',
-    name: 'Illumine™ Brightening & Anti-aging Serum',
-    category: 'Skin',
-    price: 59.98,
-    description: 'A powerful anti-aging and brightening serum rooted in pure botanical power.',
-    image_url: serumImg,
-    external_url: 'https://www.nebaministry.org/product-page/illumine-brightening-anti-aging-serum'
-  },
-  {
-    id: 'il-woke-oil',
-    name: 'Woke™ Luxury Oil',
-    category: 'Skin',
-    price: 27.98,
-    description: 'A premium hydrating oil that radiates beauty and purpose.',
-    image_url: oilImg,
-    external_url: 'https://www.nebaministry.org/product-page/awaken-glow-oil'
-  },
-  {
-    id: 'il-restore-eye',
-    name: 'Restore™ Eye Cream',
-    category: 'Skin',
-    price: 34.98,
-    description: 'Bespoke eye restoration to illuminate and refresh.',
-    image_url: eyeCreamImg,
-    external_url: 'https://www.nebaministry.org/product-page/restore-eye-cream'
-  },
-  {
-    id: 'il-brightstar',
-    name: 'Brightstar™ Manuka Honey Cleanser',
-    category: 'Skin',
-    price: 27.98,
-    description: 'A gentle, honey-based cleanser for deep purity.',
-    image_url: cleanserImg,
-    external_url: 'https://www.nebaministry.org/product-page/brightstar-manuka-honey-cleanser'
-  },
-  {
-    id: 'il-luxe-box',
-    name: 'Incandescent Luxe Box™',
-    category: 'Wellness',
-    price: 174.98,
-    description: 'The ultimate botanical collection set for the complete artisan experience.',
-    image_url: collectionSetImg,
-    external_url: 'https://www.nebaministry.org/product-page/the-il-collection'
-  }
-];
-
-const MELANIE_CURATOR_DATA = {
-  id: '545b1f22-6780-49a8-a3c6-408812815fb0',
-  business_name: 'Incandescent Lily Collection',
-  tagline: 'Wellness and body care rooted in purity and intentional design.',
-  bio: 'Transforming the beauty industry by creating wellness and body care rooted in purity and purpose. Built for the Proverbs 31 woman.',
-  instagram: 'ilcollection__',
-  website: 'https://www.nebaministry.org/ilcollection',
-  slug: 'ilcollection',
-  location: 'Atlanta, GA',
-  status: 'approved',
-  is_early_bird: true,
-  is_paid: true,
-  profiles: {
-    full_name: 'Melanie JC',
-    email: 'proverbs31markets@gmail.com',
-    avatar_url: portraitUltra
-  },
-  created_at: '2026-04-19'
-};
 
 const CuratorProfile = () => {
   const { user } = useAuth();
@@ -151,17 +77,9 @@ const CuratorProfile = () => {
       }
       setLoading(true);
       try {
-        // High-priority vanity bypass for Matriarch Storefront
-        if (slug === 'ilcollection') {
-          setCurator(MELANIE_CURATOR_DATA);
-          setProducts(IL_COLLECTION_PRODUCTS);
-          setLoading(false);
-          return;
-        }
-
-        // Try to fetch others by slug or by profile ID
+        // Resolve the curator by vanity slug or by profile id (UUID)
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
-        
+
         let query = supabase
           .from('curator_data')
           .select('*, profiles (*)');
@@ -173,31 +91,17 @@ const CuratorProfile = () => {
         }
 
         const { data, error: dbError } = await query.single();
-
-        if (dbError) {
-          if (slug === 'ilcollection' || slug === MELANIE_CURATOR_DATA.id) {
-             setCurator(MELANIE_CURATOR_DATA);
-             setProducts(IL_COLLECTION_PRODUCTS);
-             setLoading(false);
-             return;
-          }
-          throw dbError;
-        }
+        if (dbError) throw dbError;
 
         setCurator(data);
 
-        // Fetch products for this curator
+        // Fetch this curator's real products
         const { data: prodData } = await supabase
           .from('products')
           .select('*')
           .eq('curator_id', data.id)
           .order('created_at', { ascending: false });
-        
-        if (prodData && prodData.length > 0) {
-          setProducts(prodData);
-        } else if (slug === MELANIE_CURATOR_DATA.id || slug === 'ilcollection' || data.business_name?.includes('Incandescent Lily')) {
-          setProducts(IL_COLLECTION_PRODUCTS);
-        }
+        setProducts(prodData || []);
 
         // Fetch Testimonials
         const { data: testData } = await supabase
@@ -261,8 +165,6 @@ const CuratorProfile = () => {
     return acc;
   }, {});
 
-  const isILShop = slug === 'ilcollection' || (curator?.business_name && curator.business_name.includes('Incandescent Lily'));
-
   return (
     <div className={`curator-profile-page theme-${curator.theme_preference || 'classic'}`} ref={containerRef}>
 
@@ -285,9 +187,9 @@ const CuratorProfile = () => {
       {/* Luxury Parallax Hero */}
       <section className="cp-hero-section">
         <div className="cp-hero-banner-wrap">
-          <img 
-            src={curator.banner_url || heroUltra} 
-            alt="Sanctuary Banner" 
+          <img
+            src={curator.banner_url || defaultBanner}
+            alt="Sanctuary Banner"
             className="cp-hero-banner"
           />
           <div className="cp-hero-overlay"></div>
@@ -295,7 +197,7 @@ const CuratorProfile = () => {
         
         <div className="cp-hero-content container-fluid">
           <div className="cp-logo-frame">
-            <img src={curator.logo_url || portraitUltra} alt="Brand Logo" className="cp-brand-logo" />
+            <img src={curator.logo_url || defaultLogo} alt="Brand Logo" className="cp-brand-logo" />
             {curator.is_featured && (
               <div className="cp-featured-ring">
                 <Sparkles size={24} className="text-gold" />
@@ -345,30 +247,6 @@ const CuratorProfile = () => {
           </div>
         </div>
       </section>
-
-      {/* Mini-Shop Accent Banner & Spotlight (New Template Logic) */}
-      {isILShop && (
-        <>
-          <section className="cp-accent-banner">
-            <img src={bathroomAccent} alt="Luxury Sanctuary" />
-            <div className="cp-accent-overlay"></div>
-          </section>
-
-          <section className="cp-spotlight-section">
-            <div className="cp-spotlight-card">
-              <img src={IL_COLLECTION_PRODUCTS[0].image_url} alt={IL_COLLECTION_PRODUCTS[0].name} className="cp-spotlight-img" />
-              <div className="cp-spotlight-info">
-                <span className="overline-gold">Matriarch Spotlight</span>
-                <h2>{IL_COLLECTION_PRODUCTS[0].name}</h2>
-                <p>{IL_COLLECTION_PRODUCTS[0].description}</p>
-                <a href={IL_COLLECTION_PRODUCTS[0].external_url} target="_blank" rel="noreferrer" className="btn-solid-gold">
-                  Explore The Serum <ArrowRight size={18} />
-                </a>
-              </div>
-            </div>
-          </section>
-        </>
-      )}
 
       {/* Curator Business & Bio Details */}
       <section className="cp-bio-section section-padded">

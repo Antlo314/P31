@@ -6,107 +6,45 @@ import { Sparkles, Leaf, Crown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import './Directory.css';
 
-import vendor1 from '../assets/vendor_candles.png';
-import vendor2 from '../assets/vendor_skincare.png';
-import vendor3 from '../assets/vendor_ceramics.png';
-import vendor4 from '../assets/vendor_jewelry.png';
+import defaultAvatar from '../assets/p31_botanical_logo.png';
 
 gsap.registerPlugin(ScrollTrigger);
-const vendors = [
-  {
-    id: '545b1f22-6780-49a8-a3c6-408812815fb0',
-    name: 'Melanie JC',
-    businessName: 'Incandescent Lily Collection',
-    bio: 'Transforming the beauty industry by creating wellness and body care rooted in purity and purpose. Built for the Proverbs 31 woman.',
-    products: 'Bespoke Wellness, Bodycare',
-    image: 'https://static.wixstatic.com/media/a60154_732e513fd3594078b0b4c1d08679ba20~mv2.png',
-    social: 'https://instagram.com/ilcollection__',
-    slug: 'ilcollection',
-    isFounder: true,
-    isAdmin: true
-  },
-  {
-    id: 1,
-    name: 'Serena James',
-    businessName: 'Luminescent Essentials',
-    bio: 'Artisanal candle maker specializing in non-toxic, eco-friendly luxury candles.',
-    products: 'Soy Candles, Diffusers',
-    image: vendor1,
-    social: 'https://instagram.com/luminescent_essentials'
-  },
-  {
-    id: 2,
-    name: 'Aaliyah Brown',
-    businessName: 'Royal Plum Beauty',
-    bio: 'Handmade organic skincare goods crafted for sensitive skin targeting natural glow.',
-    products: 'Organic Soaps, Body Butter',
-    image: vendor2,
-    social: 'https://instagram.com/royalplum_beauty'
-  },
-  {
-    id: 3,
-    name: 'Chloe Monet',
-    businessName: 'Monet Artistry',
-    bio: 'Premium handmade crafts and home decor blending modern design with earthy tones.',
-    products: 'Ceramics, Wall Art',
-    image: vendor3,
-    social: 'https://instagram.com/monet_artistry'
-  },
-  {
-    id: 4,
-    name: 'Imogen Luxe',
-    businessName: 'Aurum Jewelry',
-    bio: 'Fine bespoke jewelry designed for the modern woman using ethically sourced gold.',
-    products: 'Gold Necklaces, Rings',
-    image: vendor4,
-    social: 'https://instagram.com/aurum_jewelry'
-  }
-];
 
 const Directory = () => {
   const containerRef = useRef(null);
-  const [activeVendors, setActiveVendors] = useState(vendors);
+  const [activeVendors, setActiveVendors] = useState([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    fetchRealCurators();
-  }, []);
+    // Real approved curators only — no mock/sample data.
+    const loadCurators = async () => {
+      const { data } = await supabase
+        .from('curator_data')
+        .select('*, profiles(full_name, avatar_url, email)')
+        .eq('status', 'approved')
+        .order('is_featured', { ascending: false })
+        .order('is_early_bird', { ascending: false });
 
-  const fetchRealCurators = async () => {
-    const { data } = await supabase
-      .from('curator_data')
-      .select('*, profiles(full_name, avatar_url, email)')
-      .eq('status', 'approved')
-      .order('is_featured', { ascending: false })
-      .order('is_early_bird', { ascending: false }); // Only show approved sanctuaries
-    
-    // Pick Melanie (Matriarch) and 2 examples as requested
-    const examples = vendors.filter(v => 
-      v.id === '545b1f22-6780-49a8-a3c6-408812815fb0' || 
-      v.id === 1 || 
-      v.id === 4
-    );
-    
-    if (data && data.length > 0) {
-      const realVendors = data.map(d => ({
-        id: d.id,
-        name: d.profiles?.full_name || 'Artisan',
-        businessName: d.business_name,
-        bio: d.bio,
-        products: d.tagline || 'P31 Collective',
-        image: d.profiles?.avatar_url || vendor1,
-        slug: d.slug,
-        isFounder: d.is_early_bird,
-        isFeatured: d.is_featured,
-        isAdmin: ['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'].includes(d.profiles?.email?.toLowerCase())
-      }));
-      
-      // Filter out those who haven't set up a business name yet (sanity check)
-      const filtered = realVendors.filter(v => v.businessName);
-      setActiveVendors([...filtered, ...examples]);
-    } else {
-      setActiveVendors(examples);
-    }
-  };
+      const realVendors = (data || [])
+        .filter(d => d.business_name)
+        .map(d => ({
+          id: d.id,
+          name: d.profiles?.full_name || 'Artisan',
+          businessName: d.business_name,
+          bio: d.bio,
+          products: d.tagline || 'P31 Collective',
+          image: d.profiles?.avatar_url || d.logo_url || defaultAvatar,
+          slug: d.slug,
+          isFounder: d.is_early_bird,
+          isFeatured: d.is_featured,
+          isAdmin: ['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'].includes(d.profiles?.email?.toLowerCase())
+        }));
+
+      setActiveVendors(realVendors);
+      setLoaded(true);
+    };
+    loadCurators();
+  }, []);
   useEffect(() => {
     let ctx = gsap.context(() => {
       // Stagger initial items
@@ -199,8 +137,15 @@ const Directory = () => {
             
           </div>
         ))}
+
+        {loaded && activeVendors.length === 0 && (
+          <div className="text-center" style={{ padding: '8vh 0' }}>
+            <h3 className="font-headline" style={{ color: 'var(--primary)', fontSize: '2rem', marginBottom: '0.75rem' }}>No Curators Yet</h3>
+            <p style={{ color: 'var(--on-surface-variant)' }}>Approved curators will appear here as they join the collective.</p>
+          </div>
+        )}
       </section>
-      
+
     </div>
   );
 };
