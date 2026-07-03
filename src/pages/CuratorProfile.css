@@ -688,28 +688,75 @@
 }
 
 /* ============================================================
-   RECOLOR — luminous vivid-purple shop base (2026 bright palette)
-   Shifts the near-black base to a rich, vibrant purple. White text
-   stays fully legible (>15:1). Gold + amethyst accents pop brighter.
+   RECOLOR — LIGHT bright shop theme (2026 palette)
+   The hero stays a dark band over the banner photo (white text over
+   image is intentional); everything below flips to bright surfaces
+   with dark text. Every element is re-set for AA+ legibility, and
+   !important is used to beat inline white-text styles so nothing
+   ends up invisible.
    ============================================================ */
-.curator-profile-page { background-color: #2a1345; }
+.curator-profile-page {
+  background-color: var(--surface);
+  color: var(--on-surface);
+}
 
+/* ---- Bio / story section ---- */
 .cp-bio-section {
-  background: radial-gradient(ellipse at 18% 40%, rgba(140, 63, 214, 0.40) 0%, #271243 60%) !important;
+  background: radial-gradient(ellipse at 15% 25%, rgba(168, 85, 232, 0.07) 0%, var(--surface) 55%) !important;
+  border-top: 1px solid var(--outline-variant);
 }
+.cp-section-title { color: var(--primary) !important; }
+.cp-bio-text { color: var(--on-surface-variant) !important; }
+
+/* Story + contact cards → white glass, dark text */
+.cp-events-card,
+.cp-contact-card {
+  background: #fff !important;
+  border: 1px solid var(--outline-variant) !important;
+  box-shadow: var(--elev-2) !important;
+  color: var(--on-surface) !important;
+}
+.cp-events-card p,
+.cp-contact-card p { color: var(--on-surface-variant) !important; }
+.cp-card-title { color: #9c7a1c !important; border-bottom-color: rgba(203, 167, 47, 0.28) !important; }
+.cp-event-info strong { color: var(--on-surface) !important; }
+.cp-event-info span { color: var(--on-surface-muted) !important; }
+.cp-event-date { color: var(--primary) !important; }
+.cp-events-list li,
+.cp-contact-row { border-bottom-color: var(--outline-variant) !important; }
+.cp-contact-label { color: var(--on-surface-muted) !important; }
+.cp-contact-val,
+.link-no-style { color: var(--on-surface) !important; }
+.link-no-style:hover { color: var(--primary) !important; }
+.cp-payment-btn.other { color: #8a6d1a !important; border-color: #c39a2e !important; }
+.cp-payment-btn.native {
+  color: #1f7a45 !important;
+  background: rgba(23, 166, 115, 0.12) !important;
+  border-color: rgba(23, 166, 115, 0.4) !important;
+}
+
+/* ---- Spotlight (featured) card ---- */
+.cp-spotlight-section { background: var(--surface) !important; }
+.cp-spotlight-info h2 { color: var(--primary) !important; }
+.cp-spotlight-info p { color: var(--on-surface-variant) !important; opacity: 1 !important; }
+.cp-spotlight-info .overline-gold { color: #9c7a1c !important; }
+.cp-accent-overlay { background: linear-gradient(to bottom, transparent, var(--surface)) !important; }
+
+/* ---- Products section ---- */
 .cp-products-section {
-  background: linear-gradient(180deg, #271243 0%, #331b57 100%) !important;
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-alt) 100%) !important;
+  border-top: 1px solid var(--outline-variant) !important;
 }
-.cp-testimonials-section {
-  background: #241040 !important;
+.cp-products-header h3,
+.cp-category-title { color: var(--primary) !important; }
+.cp-product-info h4 { color: var(--on-surface) !important; }
+.cp-product-price { color: #9c7a1c !important; font-weight: 700 !important; }
+.cp-product-img-wrapper {
+  border: 1px solid var(--outline-variant) !important;
+  box-shadow: var(--elev-2) !important;
 }
 
-/* Warm the section text up a touch for extra legibility on the brighter base */
-.cp-bio-text { color: rgba(255, 255, 255, 0.82) !important; }
-
-/* Contact / payment cards: brighter glass on the vivid base */
-.cp-contact-card,
-.cp-events-card {
-  background: rgba(168, 85, 232, 0.10) !important;
-  border: 1px solid rgba(168, 85, 232, 0.22) !important;
-}
+/* ---- Testimonials ---- */
+.cp-testimonials-section { background: var(--surface-alt) !important; }
+.cp-testimonial-content { color: var(--on-surface-variant) !important; }
+.cp-testimonial-author { color: #9c7a1c !important; }
