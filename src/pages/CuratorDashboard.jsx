@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import Community from './Community'; // Nested import
 import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, ShieldCheck, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Calendar, Users, Search, DollarSign, RefreshCw } from 'lucide-react';
 import { invokePayment, CARD_PAYMENTS_ENABLED } from '../lib/payments';
+import HelpTip from '../components/HelpTip';
 import { QRCodeSVG } from 'qrcode.react';
 import './CuratorDashboard.css';
 
@@ -940,6 +941,13 @@ const CuratorDashboard = () => {
             </>
           )}
 
+          <button
+            onClick={() => { setWalkthroughStep(1); setShowWalkthrough(true); }}
+            className="nav-item"
+          >
+            <ShieldCheck size={20} /> Help & Guide
+          </button>
+
           <div className="nav-item-with-badge">
             <Link to="/directory" className="nav-item"><ExternalLink size={20} /> View Directory</Link>
             <span className="sidebar-construction-tag">Under Construction</span>
@@ -980,7 +988,19 @@ const CuratorDashboard = () => {
 
             <div className="dashboard-grid">
               <section className="dashboard-card glass-card">
-                <h2 className="card-title text-gold"><User size={20} /> Professional Identity</h2>
+                <h2 className="card-title text-gold">
+                  <User size={20} /> Professional Identity
+                  <HelpTip title="Setting Up Your Identity">
+                    <p>This page is your shop's "front door." Here's what each part means:</p>
+                    <ol>
+                      <li><strong>Business Name</strong> — the name customers see at the top of your shop.</li>
+                      <li><strong>Vanity URL</strong> — your shop's web address. If you type <strong>luxe-candles</strong>, your shop lives at <strong>p31market.com/luxe-candles</strong>. Share this link anywhere!</li>
+                      <li><strong>Tagline & Story</strong> — one catchy sentence, then a short paragraph about you. Write like you're talking to a customer at your booth.</li>
+                      <li><strong>Photo</strong> — click the round photo circle to upload a picture of yourself or your logo.</li>
+                    </ol>
+                    <p className="helptip-note">Don't overthink it — you can change everything later. Click <strong>Save Sanctuary Settings</strong> when you're done.</p>
+                  </HelpTip>
+                </h2>
 
                 {/* Digital Portrait Section */}
                 <div className="avatar-upload-section">
@@ -1385,7 +1405,18 @@ const CuratorDashboard = () => {
             <div className="dashboard-view boutique-studio">
             <header className="dashboard-header flex-between">
               <div>
-                <h1 className="font-headline text-primary">Marketplace <span className="text-gold">Studio</span></h1>
+                <h1 className="font-headline text-primary">
+                  Marketplace <span className="text-gold">Studio</span>
+                  <HelpTip title="Adding Your Products">
+                    <ol>
+                      <li>Click the gold <strong>Add Artifact</strong> button (top right).</li>
+                      <li>Tap the photo circle to upload a picture. <strong>Photo tip:</strong> natural daylight near a window, plain background, product in the middle. Phone photos are perfectly fine!</li>
+                      <li>Fill in the name, price, and a short description — mention what it is, what it's made of, and why customers love it.</li>
+                      <li>Pick a category and availability, then press <strong>Save Artifact</strong>.</li>
+                    </ol>
+                    <p className="helptip-note">You can add up to 10 products. To edit one later, click the small gear icon on its card. Use <strong>View Store</strong> to see exactly what customers see.</p>
+                  </HelpTip>
+                </h1>
                 <p>Curate your botanical collection and shop aesthetics.</p>
               </div>
               <div className="flex-center gap-4">
@@ -1411,7 +1442,18 @@ const CuratorDashboard = () => {
             {/* Storefront Aesthetic & Payment Manager */}
             <section className="storefront-aesthetics glass-card mb-8">
               <div className="flex-between mb-6">
-                <h2 className="card-title text-gold m-0"><Sparkles size={20} /> Shop Aesthetics & Payments</h2>
+                <h2 className="card-title text-gold m-0">
+                  <Sparkles size={20} /> Shop Aesthetics & Payments
+                  <HelpTip title="Making Your Shop Look Professional">
+                    <ol>
+                      <li><strong>Shop Banner</strong> — the wide picture across the top of your shop. Use a photo of your products, workspace, or anything that shows your vibe. Wide/landscape photos work best.</li>
+                      <li><strong>Shop Logo</strong> — a square image (your logo or a favorite product shot).</li>
+                      <li>Click either box to upload from your phone or computer.</li>
+                      <li>Scroll down to add <strong>how customers pay you</strong> — tap the ? next to that section for a walkthrough.</li>
+                    </ol>
+                    <p className="helptip-note">Always press <strong>Save Settings</strong> (top right of this box) after making changes.</p>
+                  </HelpTip>
+                </h2>
                 <button onClick={handleSave} className="btn-solid-gold btn-sm" disabled={formLoading}>
                   <Save size={14} /> {formLoading ? 'Saving...' : 'Save Settings'}
                 </button>
@@ -1511,6 +1553,30 @@ const CuratorDashboard = () => {
 
               <div className="form-divider-label">
                 {CARD_PAYMENTS_ENABLED ? 'Manual Payment Links (Fallback)' : 'Get Paid — Your Payment Links'}
+                <HelpTip title="How Customers Pay You" label="How do I get these?">
+                  <p>Customers pay you <strong>directly</strong> through apps you may already have. You only need ONE of these — fill in whichever you use:</p>
+                  <p><strong>💵 Cash App (easiest)</strong></p>
+                  <ol>
+                    <li>Open Cash App on your phone.</li>
+                    <li>Tap your profile picture (top right).</li>
+                    <li>Your <strong>$Cashtag</strong> is right under your name (like $JanesCandles).</li>
+                    <li>Type it in the CashApp box below — the $ is already added for you.</li>
+                  </ol>
+                  <p><strong>💙 Venmo</strong></p>
+                  <ol>
+                    <li>Open Venmo and tap the ☰ menu or your profile.</li>
+                    <li>Your <strong>@username</strong> is at the top (like @Jane-Smith-12).</li>
+                    <li>Type it in the Venmo box below — the @ is already added.</li>
+                  </ol>
+                  <p><strong>💳 Stripe Payment Link (lets customers pay by card)</strong></p>
+                  <ol>
+                    <li>Go to <strong>stripe.com</strong> and create a free account (they'll ask for your bank info so they can deposit your money — that stays between you and Stripe).</li>
+                    <li>Once signed in, click <strong>+ Create</strong> → <strong>Payment Link</strong>.</li>
+                    <li>Type a name and price, then click <strong>Create Link</strong>.</li>
+                    <li>Copy the link (it starts with buy.stripe.com) and paste it in the Stripe box below.</li>
+                  </ol>
+                  <p className="helptip-note">After adding your info, press <strong>Save Settings</strong> at the top. Your shop will show payment buttons automatically — nothing else to do!</p>
+                </HelpTip>
               </div>
               {!CARD_PAYMENTS_ENABLED && (
                 <p className="text-xs opacity-60 mb-4">
@@ -1732,7 +1798,18 @@ const CuratorDashboard = () => {
             <div className="dashboard-view">
               <header className="dashboard-header flex-between">
                 <div>
-                  <h1 className="font-headline text-primary">Sales <span className="text-gold">Ledger</span></h1>
+                  <h1 className="font-headline text-primary">
+                    Sales <span className="text-gold">Ledger</span>
+                    <HelpTip title="Reading Your Sales">
+                      <p>Every card payment made on your shop shows up here automatically.</p>
+                      <ol>
+                        <li><strong>Gross Revenue</strong> — total money from paid orders.</li>
+                        <li><strong>Each row</strong> shows what sold, who bought it (click their email to reply), and the shipping address Stripe collected.</li>
+                        <li>After you ship or deliver an order, click <strong>Mark Fulfilled</strong> so you can tell at a glance what still needs to go out.</li>
+                      </ol>
+                      <p className="helptip-note">Your money is deposited to your bank by Stripe automatically — typically within 2 business days of each sale.</p>
+                    </HelpTip>
+                  </h1>
                   <p>Every card payment received through your storefront.</p>
                 </div>
                 <button onClick={fetchOrders} className="btn-outline-primary flex-center gap-2">
@@ -1835,7 +1912,19 @@ const CuratorDashboard = () => {
             isAdmin ? (
               <div className="dashboard-view">
             <header className="dashboard-header">
-              <h1 className="font-headline text-primary">Master <span className="text-gold">Governance</span></h1>
+              <h1 className="font-headline text-primary">
+                Master <span className="text-gold">Governance</span>
+                <HelpTip title="Your Admin Control Room">
+                  <p>Everything you need to run the marketplace, top to bottom:</p>
+                  <ol>
+                    <li><strong>Global Announcements</strong> — post a message every curator sees on their dashboard (market dates, deadlines, news).</li>
+                    <li><strong>Pending Sanctuary Reviews</strong> — when a curator submits their shop, it appears here. Click <strong>Review Sanctuary Boutique</strong> to see their whole shop, then Approve (goes live) or Reject with a note telling them what to fix.</li>
+                    <li><strong>Leads Console</strong> — everyone who signed up through the website popup. Click <strong>Export CSV</strong> to download the list for email campaigns.</li>
+                    <li><strong>Partnership Inquiries</strong> — messages from the Partner page.</li>
+                  </ol>
+                  <p className="helptip-note">While reviewing a shop you can also <strong>Feature</strong> a curator (puts them at the top of the Directory) and award <strong>badges</strong> like "Handmade" or "Organic."</p>
+                </HelpTip>
+              </h1>
               <p>Ultimate architectural authority at your fingertips.</p>
             </header>
 
@@ -2188,7 +2277,18 @@ const CuratorDashboard = () => {
             isAdmin ? (
               <div className="dashboard-view">
                 <header className="dashboard-header">
-                  <h1 className="font-headline text-primary">Vendor <span className="text-gold">Approvals</span></h1>
+                  <h1 className="font-headline text-primary">
+                    Vendor <span className="text-gold">Approvals</span>
+                    <HelpTip title="Letting New Curators In">
+                      <p>There are two doors into the marketplace:</p>
+                      <ol>
+                        <li><strong>Pre-approve them here (recommended):</strong> type the curator's name and email below, click <strong>Approve Vendor</strong>. When they sign up at <strong>p31market.com/register</strong> with that same email, their studio unlocks instantly — no waiting.</li>
+                        <li><strong>Access token:</strong> give trusted curators the signup link <strong>p31market.com/onboarding-exclusive</strong> and the access token. They unlock immediately too.</li>
+                      </ol>
+                      <p>Anyone who signs up <em>without</em> being pre-approved waits in a pending state until you approve them.</p>
+                      <p className="helptip-note">Made a mistake? Click the trash icon next to any name to revoke the pre-approval (this doesn't remove accounts that already signed up).</p>
+                    </HelpTip>
+                  </h1>
                   <p>Pre-authorize artisans for immediate sanctuary activation.</p>
                 </header>
 
@@ -2290,7 +2390,18 @@ const CuratorDashboard = () => {
 
               <section className="dashboard-card glass-card">
                 <div className="flex-between mb-8">
-                  <h2 className="card-title text-gold m-0"><MessageSquare size={20} /> Artisan Testimonials</h2>
+                  <h2 className="card-title text-gold m-0">
+                    <MessageSquare size={20} /> Artisan Testimonials
+                    <HelpTip title="Collecting Customer Praise">
+                      <p>Testimonials build trust — shops with reviews sell more. How to gather them:</p>
+                      <ol>
+                        <li>Text or DM a happy customer: <em>"Would you mind sharing a sentence or two about the [product] you bought? I'd love to feature it on my shop page."</em></li>
+                        <li>Click <strong>Add Voice</strong>, paste what they said, and add their first name.</li>
+                        <li>Pick a star rating and save — it appears on your public shop page.</li>
+                      </ol>
+                      <p className="helptip-note">Even 2–3 short testimonials make a big difference. Keep them honest and in the customer's own words.</p>
+                    </HelpTip>
+                  </h2>
                   <button onClick={() => setIsTestimonialModalOpen(true)} className="btn-solid-gold btn-sm"><Plus size={16} /> Add Voice</button>
                 </div>
 
@@ -2358,7 +2469,14 @@ const CuratorDashboard = () => {
           <Route path="concierge" element={
             <div className="dashboard-view">
               <header className="dashboard-header">
-                <h1 className="font-headline text-primary">Studio <span className="text-gold">Concierge</span></h1>
+                <h1 className="font-headline text-primary">
+                  Studio <span className="text-gold">Concierge</span>
+                  <HelpTip title="Getting Help From the P31 Team">
+                    <p>This is your private line to the marketplace team. Stuck on anything — photos, payments, your shop link? Type your question below and send it.</p>
+                    <p>The team sees your message on their end and replies right here. Check back for a response, and keep an eye on your dashboard for announcements too.</p>
+                    <p className="helptip-note">No question is too small. "How do I change my price?" is a great message.</p>
+                  </HelpTip>
+                </h1>
                 <p>Direct architectural guidance from the Master Architects.</p>
               </header>
 
@@ -2528,12 +2646,19 @@ const CuratorDashboard = () => {
                   <span key={s} className={`dot ${walkthroughStep === s ? 'active' : ''}`}></span>
                 ))}
               </div>
-              <button 
+              <button
                 onClick={() => {
-                  if (walkthroughStep < 6) setWalkthroughStep(walkthroughStep + 1);
+                  if (walkthroughStep < 6) {
+                    const nextStep = walkthroughStep + 1;
+                    setWalkthroughStep(nextStep);
+                    // Show the area being described behind the guide
+                    const tabForStep = { 2: 'identity', 3: 'storefront', 4: 'storefront', 5: 'storefront', 6: 'identity' };
+                    if (tabForStep[nextStep]) setActiveTab(tabForStep[nextStep]);
+                  }
                   else {
                     setShowWalkthrough(false);
                     localStorage.setItem('p31_walkthrough_seen', 'true');
+                    setActiveTab('identity');
                   }
                 }}
                 className="btn-solid-gold"
