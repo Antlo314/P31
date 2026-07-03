@@ -8,6 +8,13 @@ import './Home.css';
 import heroVid     from '../assets/hero.mp4';
 import faithVid    from '../assets/faith.mp4';
 import missionVid  from '../assets/p31market2.mp4';
+import curatorVid  from '../assets/curator.mp4';
+import productVid  from '../assets/product.mp4';
+import bentoJewelry  from '../assets/vendor_jewelry.png';
+import bentoCeramics from '../assets/vendor_ceramics.png';
+import bentoCandles  from '../assets/vendor_candles.png';
+import bentoSkincare from '../assets/vendor_skincare.png';
+import bentoCommunity from '../assets/p31_community_impact_editorial_1776544076592.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -74,6 +81,41 @@ const Home = () => {
             scrollTrigger: { trigger: el, start: 'top 88%' } }
         );
       });
+
+      // ── Bento mosaic: staggered rise ──
+      gsap.from('.bento-cell', {
+        y: 60, opacity: 0, duration: 1, stagger: 0.09, ease: 'power3.out',
+        scrollTrigger: { trigger: '.bento-grid', start: 'top 80%' },
+      });
+
+      // ── Animated stat counters ──
+      gsap.utils.toArray('.stat-count').forEach(el => {
+        const target = parseFloat(el.dataset.target);
+        const suffix = el.dataset.suffix || '';
+        const decimals = el.dataset.decimals ? parseInt(el.dataset.decimals) : 0;
+        const obj = { v: 0 };
+        gsap.to(obj, {
+          v: target, duration: 2, ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 90%' },
+          onUpdate: () => { el.textContent = obj.v.toFixed(decimals) + suffix; },
+        });
+      });
+
+      // ── Magnetic buttons (pointer-follow) ──
+      gsap.utils.toArray('.magnetic').forEach(btn => {
+        const strength = 0.35;
+        const move = (e) => {
+          const r = btn.getBoundingClientRect();
+          gsap.to(btn, {
+            x: (e.clientX - (r.left + r.width / 2)) * strength,
+            y: (e.clientY - (r.top + r.height / 2)) * strength,
+            duration: 0.5, ease: 'power3.out',
+          });
+        };
+        const reset = () => gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' });
+        btn.addEventListener('mousemove', move);
+        btn.addEventListener('mouseleave', reset);
+      });
     }, containerRef);
 
     return () => ctx.revert();
@@ -117,8 +159,8 @@ const Home = () => {
             A premium curated marketplace for women creatives, artisans, and visionaries.
           </p>
           <div className="hero-ctas">
-            <a href="#newsletter" className="btn-gold-pill">Join the Inner Circle</a>
-            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noopener noreferrer" className="btn-ghost-pill">Become a Curator</a>
+            <a href="#newsletter" className="btn-gold-pill magnetic">Join the Inner Circle</a>
+            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noopener noreferrer" className="btn-ghost-pill magnetic">Become a Curator</a>
           </div>
         </div>
 
@@ -152,6 +194,23 @@ const Home = () => {
             </blockquote>
             <cite className="scripture-cite">— Proverbs 31:31 KJV</cite>
           </div>
+        </div>
+      </section>
+
+      {/* ── STATS BAND — enterprise trust signal ───────────── */}
+      <section className="home-stats">
+        <div className="stats-inner">
+          {[
+            { target: 7,   suffix: '',  decimals: 0, label: 'Curated Categories' },
+            { target: 4,   suffix: '',  decimals: 0, label: 'Seasonal Markets / Yr' },
+            { target: 100, suffix: '%', decimals: 0, label: 'Hand-Selected Curators' },
+            { target: 1,   suffix: 'K+',decimals: 0, label: 'Community Members' },
+          ].map((s, i) => (
+            <div className="stat-block" key={i}>
+              <span className="stat-count" data-target={s.target} data-suffix={s.suffix} data-decimals={s.decimals}>0{s.suffix}</span>
+              <span className="stat-label-sm">{s.label}</span>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -219,6 +278,92 @@ const Home = () => {
         </div>
       </section>
 
+
+      {/* ── BENTO SHOWCASE — the signature enterprise mosaic ── */}
+      <section className="home-bento" id="marketplace">
+        <div className="bento-header reveal">
+          <span className="section-kicker">Inside the Collective</span>
+          <h2 className="bento-title">A Marketplace, Composed</h2>
+          <p className="bento-lead">
+            Seven worlds of craftsmanship under one roof — each curator hand-selected,
+            each artifact a testament to gifted hands.
+          </p>
+        </div>
+
+        <div className="bento-grid">
+          {/* Tall hero media — curator film */}
+          <div className="bento-cell is-media col-6 row-2">
+            <video src={curatorVid} autoPlay loop muted playsInline />
+            <div className="bento-overlay" />
+            <div className="bento-content">
+              <span className="bento-tag">Featured</span>
+              <h3 className="bento-cell-title">Curated by Hand</h3>
+              <p className="bento-cell-text">Every maker is vetted for craft, story, and purpose.</p>
+            </div>
+          </div>
+
+          <div className="bento-cell is-media col-3">
+            <img src={bentoJewelry} alt="Artisan jewelry" />
+            <div className="bento-overlay" />
+            <div className="bento-content"><span className="bento-cat">Adornment</span></div>
+          </div>
+
+          <div className="bento-cell is-media col-3">
+            <img src={bentoCeramics} alt="Handmade ceramics" />
+            <div className="bento-overlay" />
+            <div className="bento-content"><span className="bento-cat">Home & Craft</span></div>
+          </div>
+
+          <div className="bento-cell is-gold col-3">
+            <div className="bento-content">
+              <span className="stat-count bento-stat" data-target={7} data-suffix="" data-decimals={0}>0</span>
+              <span className="bento-stat-label">Curated Categories</span>
+            </div>
+          </div>
+
+          <div className="bento-cell is-media col-3">
+            <img src={bentoCandles} alt="Botanical candles" />
+            <div className="bento-overlay" />
+            <div className="bento-content"><span className="bento-cat">Wellness</span></div>
+          </div>
+
+          <div className="bento-cell is-dark col-4">
+            <div className="bento-content">
+              <span className="material-symbols-outlined bento-quote-mark">format_quote</span>
+              <p className="bento-quote">Where faith, purpose, and beauty converge.</p>
+            </div>
+          </div>
+
+          <div className="bento-cell is-media col-4">
+            <video src={productVid} autoPlay loop muted playsInline />
+            <div className="bento-overlay" />
+            <div className="bento-content"><span className="bento-cat">The Craft</span></div>
+          </div>
+
+          <div className="bento-cell is-forest col-4">
+            <div className="bento-content">
+              <h3 className="bento-cell-title">Become a Curator</h3>
+              <p className="bento-cell-text">Claim your storefront in the collective.</p>
+              <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noopener noreferrer" className="bento-cta magnetic">Apply →</a>
+            </div>
+          </div>
+
+          <div className="bento-cell is-media col-8">
+            <img src={bentoCommunity} alt="P31 community gathering" />
+            <div className="bento-overlay" />
+            <div className="bento-content">
+              <h3 className="bento-cell-title">More Than Commerce</h3>
+              <p className="bento-cell-text">A movement of visionary women, gathering in person and online.</p>
+            </div>
+          </div>
+
+          <div className="bento-cell is-media col-4">
+            <img src={bentoSkincare} alt="Artisan skincare" />
+            <div className="bento-overlay" />
+            <div className="bento-content"><span className="bento-cat">Beauty</span></div>
+          </div>
+        </div>
+      </section>
 
       {/* ── PARTNER TEASER — full-bleed plum CTA band ── */}
       <section className="home-partner">

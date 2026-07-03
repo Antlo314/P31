@@ -938,3 +938,162 @@
     align-self: center;
   }
 }
+
+/* ============================================================
+   STATS BAND — enterprise trust signal (dark forest)
+   ============================================================ */
+.home-stats {
+  background: var(--mesh-forest);
+  padding: 7vh 6vw;
+  border-top: 1px solid rgba(108, 109, 17, 0.25);
+  border-bottom: 1px solid rgba(108, 109, 17, 0.25);
+}
+.stats-inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+}
+.stat-block {
+  text-align: center;
+  position: relative;
+  padding: 0.5rem 1rem;
+}
+.stat-block:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 15%;
+  height: 70%;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(203,167,47,0.4), transparent);
+}
+.stat-count {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: clamp(2.6rem, 6vw, 4.2rem);
+  font-weight: 700;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--gold-light), var(--metallic-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.6rem;
+}
+.stat-label-sm {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
+}
+
+/* ============================================================
+   BENTO SHOWCASE
+   ============================================================ */
+.home-bento {
+  background: var(--surface);
+  padding: 14vh 6vw;
+  position: relative;
+}
+.bento-header {
+  max-width: var(--content-max);
+  margin: 0 auto 3.5rem;
+  text-align: center;
+}
+.bento-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2.4rem, 5.5vw, 4rem);
+  color: var(--primary);
+  margin: 1rem 0 1.25rem;
+  line-height: 1.05;
+}
+.bento-lead {
+  max-width: 620px;
+  margin: 0 auto;
+  font-size: 1.1rem;
+  color: var(--on-surface-variant);
+  line-height: 1.7;
+}
+.home-bento .bento-grid {
+  max-width: var(--content-wide);
+  margin: 0 auto;
+}
+.home-bento .bento-cell { min-height: 200px; }
+
+.bento-tag, .bento-cat {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(203, 167, 47, 0.9);
+  color: #1a1000;
+  margin-bottom: 0.75rem;
+}
+.bento-cat { background: rgba(255,255,255,0.9); color: var(--primary); margin: 0; }
+.bento-cell-title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: #fff;
+  margin-bottom: 0.4rem;
+  line-height: 1.1;
+}
+.is-gold .bento-cell-title, .is-gold .bento-cell-text { color: #1a1000; }
+.bento-cell-text {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.5;
+}
+.bento-stat {
+  font-size: clamp(2.8rem, 5vw, 4rem) !important;
+  background: none !important;
+  -webkit-text-fill-color: #1a1000 !important;
+  color: #1a1000;
+  margin-bottom: 0.25rem !important;
+}
+.bento-stat-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgba(26, 16, 0, 0.75);
+}
+.bento-quote-mark { font-size: 2.5rem; color: var(--gold-light); opacity: 0.7; }
+.bento-quote {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #fff;
+  line-height: 1.4;
+  margin-top: 0.25rem;
+}
+.bento-cta {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 10px 24px;
+  border-radius: 999px;
+  background: var(--gold-light);
+  color: #1a1000 !important;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+
+@media (max-width: 768px) {
+  .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 2.5rem 1rem; }
+  .stat-block:nth-child(2)::after { display: none; }
+  .home-stats { padding: 6vh 6vw; }
+}
+@media (max-width: 480px) {
+  .stats-inner { grid-template-columns: 1fr 1fr; }
+  .stat-block::after { display: none !important; }
+}
