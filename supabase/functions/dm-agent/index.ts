@@ -16,6 +16,15 @@
 // Then point a Zernio webhook (events message.received + message.sent) at
 // https://<project>.supabase.co/functions/v1/dm-agent with the same secret.
 //
+// Story replies and story mentions arrive as DMs and are answered like any DM.
+// Comments and Google reviews have their own switches (both default off), and
+// need those events added to the same Zernio webhook:
+//   COMMENT_AGENT_ENABLED=true   + event comment.received  → public replies under IG/FB posts
+//   REVIEW_AGENT_ENABLED=true    + event review.new        → thank-you replies to 4–5★ Google reviews
+// Under 4 stars, or anything Carla flags, emails DM_AGENT_NOTIFY_EMAIL instead.
+// DM_AGENT_DRY_RUN and DM_AGENT_ACCOUNT_IDS apply to all three (include the
+// Google Business account id there if the list is set).
+//
 // Preview: a correctly signed request with header `X-DM-Preview: 1` and a
 // message.received-shaped body is answered synchronously with the reply the
 // agent would write — nothing is sent and nothing is recorded.
@@ -65,16 +74,41 @@ async function zernio(path: string, init: RequestInit = {}) {
   return text ? JSON.parse(text) : {};
 }
 
-type ZMessage = { id: string; message?: string; direction: 'incoming' | 'outgoing'; createdAt: string; attachments?: { type?: string; originalType?: string }[] };
+type ZMessage = {
+  id: string; message?: string; direction: 'incoming' | 'outgoing'; createdAt: string;
+  attachments?: { type?: string; originalType?: string }[];
+  storyReply?: { storyId: string }; isStoryMention?: boolean;
+};
 
-// What a message "says" when it is only a photo, reel or story mention.
+// What a message "says" when it is only a photo, reel, story reply or story mention.
 function describe(m: ZMessage) {
   const text = (m.message || '').trim();
-  const att = (m.attachments || []).map((a) => {
+  const notes = new Set<string>();
+  if (m.storyReply) notes.add('replying to one of our stories');
+  if (m.isStoryMention) notes.add('mentioned us in their story');
+  for (const a of m.attachments || []) {
     const t = a.originalType || a.type || 'attachment';
-    return t === 'story_mention' ? 'mentioned us in their story' : `sent a ${t.replace(/^ig_/, '')}`;
-  });
-  return [text, att.length ? `[${att.join(', ')}]` : ''].filter(Boolean).join(' ');
+    if (t === 'story_mention') notes.add('mentioned us in their story');
+    else if (t === 'ig_story' || t === 'story') notes.add('shared a story');
+    else notes.add(`sent a ${t.replace(/^ig_/, '')}`);
+  }
+  return [text, notes.size ? `[${[...notes].join(', ')}]` : ''].filter(Boolean).join(' ');
+}
+
+const esc = (s: string) => s.replace(/[<>&]/g, '');
+const enc = encodeURIComponent;
+
+// Email the team when something needs a person (needs RESEND_API_KEY).
+async function notifyTeam(subject: string, title: string, html: string) {
+  const to = env('DM_AGENT_NOTIFY_EMAIL');
+  if (!to || env('DM_AGENT_DRY_RUN') === 'true') return;
+  await sendEmail(to, subject, layout(title, html));
+}
+
+async function countSince(db: ReturnType<typeof admin>, task: string, hours: number) {
+  const since = new Date(Date.now() - hours * 3600_000).toISOString();
+  const { count } = await db.from('ai_usage').select('id', { count: 'exact', head: true }).eq('task', task).gte('created_at', since);
+  return count || 0;
 }
 
 // Live facts that change between messages: today's date and the market list.
@@ -291,14 +325,143 @@ ${who}`;
   if (out.handoff) {
     // The team takes it from here: pause the agent and let them know.
     await db.from('ai_usage').insert({ user_id: null, task: `dm_pause:${conversationId}` });
-    const to = env('DM_AGENT_NOTIFY_EMAIL');
-    if (to && !dryRun) {
-      const lastText = describe(last).replace(/[<>&]/g, '');
-      await sendEmail(to, `DM needs you: ${sender.name || sender.username || 'a follower'} on ${msg.platform}`, layout('A conversation needs you',
-        `<p><strong>${(sender.name || sender.username || 'Someone').replace(/[<>&]/g, '')}</strong> on ${msg.platform}: “${lastText}”</p>
-<p>Why: ${(out.handoff_reason || 'asked for the team').replace(/[<>&]/g, '')}</p>
-<p>The assistant told them the team will follow up and is paused on this conversation for ${PAUSE_HOURS} hours. Reply from the Zernio inbox or the ${msg.platform} app.</p>`));
+    await notifyTeam(`DM needs you: ${sender.name || sender.username || 'a follower'} on ${msg.platform}`, 'A conversation needs you',
+      `<p><strong>${esc(sender.name || sender.username || 'Someone')}</strong> on ${msg.platform}: “${esc(describe(last))}”</p>
+<p>Why: ${esc(out.handoff_reason || 'asked for the team')}</p>
+<p>The assistant told them the team will follow up and is paused on this conversation for ${PAUSE_HOURS} hours. Reply from the Zernio inbox or the ${msg.platform} app.</p>`);
+  }
+  return { reply, handoff: out.handoff, handoff_reason: out.handoff_reason };
+}
+
+// ── Comments on our posts ───────────────────────────────────────────────────
+// Carla answers new comments publicly, in the comment thread. She never joins a
+// thread where followers are talking to each other, and answers one person at
+// most a few times per post per day.
+const COMMENT_DAILY_CAP = 300;
+const COMMENT_PER_PERSON = 3;
+
+type ZComment = { id: string; message?: string; from?: { id?: string; name?: string; username?: string; isOwner?: boolean } };
+
+async function handleComment(evt: any, { preview = false } = {}): Promise<Outcome> {
+  const c = evt.comment;
+  const accountId: string = evt.account?.accountId || evt.account?.id;
+  const author = c.author || {};
+  const db = admin();
+  const skip = (why: string): Outcome => { console.log(`comment-agent: ${c.platform} ${c.id} — ${why}`); return { skipped: why }; };
+
+  const text = (c.text || '').trim();
+  if (author.isOwnAccount) return skip('our own comment');
+  if (!text) return skip('empty comment');
+  if (c.isLive) return skip('comment on a live broadcast');
+
+  if (!preview) {
+    if (await countSince(db, 'comment_reply', 24) >= COMMENT_DAILY_CAP) return skip('daily comment cap reached');
+    if (await countSince(db, `comment_seen:${c.platformPostId}:${author.id}`, 24) >= COMMENT_PER_PERSON) return skip('already answered this person on this post today');
+  }
+
+  // A reply inside a thread: answer only when the thread is a conversation with
+  // us (we wrote the parent, or this person started it and we've answered there).
+  const turns: Turn[] = [];
+  let replyTo = c.id;
+  if (c.isReply && c.parentCommentId) {
+    replyTo = c.parentCommentId; // Instagram and Facebook thread replies under the top comment
+    const page = await zernio(`/inbox/comments/${enc(c.platformPostId)}?accountId=${enc(accountId)}&commentId=${enc(c.parentCommentId)}&limit=20`);
+    const parent: ZComment | undefined = page.comment;
+    const replies: ZComment[] = page.comments || [];
+    const ours = !!parent?.from?.isOwner;
+    const theirs = parent?.from?.id === author.id && replies.some((r) => r.from?.isOwner);
+    if (!ours && !theirs) return skip('a conversation between followers');
+    for (const m of [parent, ...replies]) {
+      if (!m || m.id === c.id || !(m.message || '').trim()) continue;
+      const role = m.from?.isOwner ? 'assistant' : 'user';
+      if (!turns.length && role === 'assistant') continue;
+      const prev = turns[turns.length - 1];
+      const line = role === 'user' && m.from?.id !== author.id ? `(${m.from?.username || m.from?.name || 'someone else'}): ${m.message}` : m.message!;
+      if (prev && prev.role === role) prev.content = `${prev.content}\n${line}`;
+      else turns.push({ role, content: line });
     }
+  }
+  const prev = turns[turns.length - 1];
+  if (prev && prev.role === 'user') prev.content = `${prev.content}\n${text}`;
+  else turns.push({ role: 'user', content: text });
+
+  const where = c.platform === 'instagram' ? 'Instagram' : 'Facebook';
+  const caption = (evt.post?.content || '').trim().slice(0, 800);
+  const system = `${await liveContext(db)}
+
+MODE: PUBLIC COMMENT. You are replying in the comments of one of our ${where} posts, to ${author.name || author.username || 'someone'}${author.username ? ` (@${author.username})` : ''}. Everyone can read this reply. Follow the "Public comments" rules.
+${caption ? `The post's caption: """${caption}"""` : 'The post caption is not available.'}${c.ad ? '\nThis post is a paid ad.' : ''}`;
+
+  const out = await think(system, turns);
+  if (!out) return skip('no usable reply from the model');
+  const reply = (out.reply || '').trim().slice(0, 600);
+  if (preview) return { reply, handoff: out.handoff, handoff_reason: out.handoff_reason };
+
+  const dryRun = env('DM_AGENT_DRY_RUN') === 'true';
+  if (reply && !dryRun) {
+    await zernio(`/inbox/comments/${enc(c.platformPostId)}`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': `comment-agent-${c.id}` },
+      body: JSON.stringify({ accountId, message: reply, commentId: replyTo }),
+    });
+  }
+  console.log(`comment-agent${dryRun ? ' [dry run]' : ''}: ${c.platform} ${c.id} ← ${JSON.stringify(reply)}${out.handoff ? ` (handoff: ${out.handoff_reason})` : ''}`);
+
+  await db.from('ai_usage').insert([
+    { user_id: null, task: 'comment_reply', input_tokens: out.inputTokens, output_tokens: out.outputTokens },
+    { user_id: null, task: `comment_seen:${c.platformPostId}:${author.id}` },
+  ]);
+  if (out.handoff) {
+    await notifyTeam(`Comment needs you: ${author.username || author.name || 'a follower'} on ${c.platform}`, 'A comment needs you',
+      `<p><strong>${esc(author.username || author.name || 'Someone')}</strong> commented on ${c.platform}: “${esc(text)}”</p>
+<p>Why: ${esc(out.handoff_reason || 'needs the team')}</p>
+${reply ? `<p>Carla replied publicly: “${esc(reply)}”</p>` : '<p>Carla did not reply.</p>'}
+${evt.post?.permalink ? `<p><a href="${esc(evt.post.permalink)}">Open the post</a></p>` : ''}`);
+  }
+  return { reply, handoff: out.handoff, handoff_reason: out.handoff_reason };
+}
+
+// ── Google reviews ──────────────────────────────────────────────────────────
+// 4–5 stars: Carla writes a gracious thank-you. 1–3 stars: no automatic reply;
+// the team is emailed so a person can answer it personally.
+async function handleReview(evt: any, { preview = false } = {}): Promise<Outcome> {
+  const r = evt.review;
+  const accountId: string = evt.account?.accountId || evt.account?.id;
+  const name = r.reviewer?.name || 'A reviewer';
+  const skip = (why: string): Outcome => { console.log(`review-agent: ${r.id} — ${why}`); return { skipped: why }; };
+  if (r.hasReply) return skip('already answered');
+
+  if (r.rating <= 3) {
+    if (!preview) {
+      await notifyTeam(`${r.rating}-star Google review from ${name}`, 'A review needs a personal reply',
+        `<p><strong>${esc(name)}</strong> left ${r.rating} star${r.rating === 1 ? '' : 's'}${r.text ? `: “${esc(r.text)}”` : ' (no text)'}</p>
+<p>Carla does not answer reviews under 4 stars. Reply from the Content Studio, Zernio or Google Business Profile.</p>`);
+    }
+    return skip(`${r.rating}-star review left for the team`);
+  }
+
+  const db = admin();
+  const system = `${await liveContext(db)}
+
+MODE: GOOGLE REVIEW. ${name} left us a ${r.rating}-star review on Google${r.text ? '' : ' with no written text'}. Write our public reply, following the "Google reviews" rules.`;
+  const out = await think(system, [{ role: 'user', content: r.text?.trim() || `[${r.rating} stars, no text]` }]);
+  if (!out) return skip('no usable reply from the model');
+  const reply = (out.reply || '').trim().slice(0, 1000);
+  if (preview) return { reply, handoff: out.handoff, handoff_reason: out.handoff_reason };
+
+  const dryRun = env('DM_AGENT_DRY_RUN') === 'true';
+  if (reply && !out.handoff && !dryRun) {
+    await zernio(`/inbox/reviews/${enc(r.id)}/reply`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': `review-agent-${evt.id}` },
+      body: JSON.stringify({ accountId, message: reply }),
+    });
+  }
+  console.log(`review-agent${dryRun ? ' [dry run]' : ''}: ${r.id} ← ${JSON.stringify(reply)}${out.handoff ? ` (held for the team: ${out.handoff_reason})` : ''}`);
+  await db.from('ai_usage').insert({ user_id: null, task: 'review_reply', input_tokens: out.inputTokens, output_tokens: out.outputTokens });
+  if (out.handoff) {
+    await notifyTeam(`Google review from ${name} needs you`, 'A review needs a personal reply',
+      `<p><strong>${esc(name)}</strong> (${r.rating} stars): “${esc(r.text || '')}”</p><p>Why: ${esc(out.handoff_reason || '')}</p><p>Suggested reply (not posted): “${esc(reply)}”</p>`);
   }
   return { reply, handoff: out.handoff, handoff_reason: out.handoff_reason };
 }
@@ -317,7 +480,8 @@ Deno.serve(async (req) => {
   // Signed preview: return the reply the agent would write, send nothing.
   if (req.headers.get('X-DM-Preview') === '1') {
     try {
-      return new Response(JSON.stringify(await handleIncoming(evt, { preview: true })), { headers: { 'Content-Type': 'application/json' } });
+      const handler = evt.event === 'comment.received' ? handleComment : evt.event === 'review.new' ? handleReview : handleIncoming;
+      return new Response(JSON.stringify(await handler(evt, { preview: true })), { headers: { 'Content-Type': 'application/json' } });
     } catch (e) {
       return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
@@ -327,8 +491,13 @@ Deno.serve(async (req) => {
   const allowed = env('DM_AGENT_ACCOUNT_IDS').split(',').map((s) => s.trim()).filter(Boolean);
   const forUs = !allowed.length || allowed.includes(accountId);
   const msg = evt.message;
+  const run = (label: string, p: Promise<unknown>) => EdgeRuntime.waitUntil(p.catch((e) => console.error(`${label} error:`, e)));
 
-  if (env('DM_AGENT_ENABLED') === 'true' && forUs && msg && PLATFORMS.has(msg.platform)) {
+  if (evt.event === 'comment.received') {
+    if (env('COMMENT_AGENT_ENABLED') === 'true' && forUs && PLATFORMS.has(evt.comment?.platform)) run('comment-agent', handleComment(evt));
+  } else if (evt.event === 'review.new') {
+    if (env('REVIEW_AGENT_ENABLED') === 'true' && forUs && evt.review) run('review-agent', handleReview(evt));
+  } else if (env('DM_AGENT_ENABLED') === 'true' && forUs && msg && PLATFORMS.has(msg.platform)) {
     if (evt.event === 'message.received' && msg.direction === 'incoming') {
       EdgeRuntime.waitUntil(handleIncoming(evt).catch((e) => console.error('dm-agent error:', e)));
     } else if (evt.event === 'message.sent' && msg.sentVia === 'human') {
