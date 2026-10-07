@@ -36,3 +36,7 @@ verify_jwt = false
 
 [functions.stripe-account-status]
 verify_jwt = false
+
+# Zernio calls this with no Supabase JWT; the function checks Zernio's signature.
+[functions.dm-agent]
+verify_jwt = false

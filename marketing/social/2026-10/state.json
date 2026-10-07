@@ -1,0 +1,24 @@
+{
+  "uploads": {
+    "out/reel-launch.mp4": "https://media.zernio.com/temp/1791400122823_0vhuagdl_p31-reel-launch.mp4",
+    "out/reel-launch-cover.jpg": "https://media.zernio.com/temp/1791400125054_5jcfbyu3_p31-reel-launch-cover.jpg",
+    "out/fill.jpg": "https://media.zernio.com/temp/1791400128607_aezvkako_p31-fill.jpg",
+    "out/curator.jpg": "https://media.zernio.com/temp/1791400130921_0ojckeis_p31-curator.jpg",
+    "out/founder.jpg": "https://media.zernio.com/temp/1791400133352_xx6tmbzr_p31-founder.jpg",
+    "out/gala.jpg": "https://media.zernio.com/temp/1791400135626_mefe1fk2_p31-gala.jpg",
+    "out/reel-sunday.mp4": "https://media.zernio.com/temp/1791400137550_j7wqbnge_p31-reel-sunday.mp4",
+    "out/reel-sunday-cover.jpg": "https://media.zernio.com/temp/1791400139530_fwknwjye_p31-reel-sunday-cover.jpg",
+    "out/worlds.jpg": "https://media.zernio.com/temp/1791400143075_0rzxxq5s_p31-worlds.jpg",
+    "out/partner.jpg": "https://media.zernio.com/temp/1791400145135_4i5b61kq_p31-partner.jpg"
+  },
+  "posts": {
+    "launch": "6ac698bdbbbf6d37219814f7",
+    "fill": "6ac698c19b80b3614b23e708",
+    "curator": "6ac698c49c0848637b73b1a4",
+    "founder": "6ac698c69c0848637b73b1b8",
+    "gala": "6ac698c89c0848637b73b1cf",
+    "sunday": "6ac698ccbbbf6d3721981530",
+    "worlds": "6ac698cff3056d56fdcde61f",
+    "partner": "6ac698d1bbbf6d3721981544"
+  }
+}

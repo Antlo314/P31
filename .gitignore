@@ -29,3 +29,6 @@ public/__lab/
 
 # Iris bridge secrets (service role key) — never commit
 tools/.env.iris
+
+# Supabase CLI local state
+supabase/.temp/

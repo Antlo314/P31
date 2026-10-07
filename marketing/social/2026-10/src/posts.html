@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>P31 social graphics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;1,400&family=Manrope:wght@600;700;800&display=block" rel="stylesheet" />
+<style>
+  /* One template, many posts: open posts.html#<id>. Feed posts are 1080×1350 (4:5);
+     reel frames are 1080×1920 with a transparent arch window for the video. */
+  :root { --night: #140a22; --night2: #1e1031; --gold: #D9A93A; --goldhi: #F2CE4D; --ink: #fff; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { font-family: 'Manrope', sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+  .post { display: none; position: relative; width: 1080px; height: 1350px; overflow: hidden; isolation: isolate;
+    background:
+      radial-gradient(62% 48% at 90% 0%, rgba(168, 85, 232, 0.4), transparent 62%),
+      radial-gradient(55% 42% at 0% 100%, rgba(217, 169, 58, 0.2), transparent 62%),
+      linear-gradient(180deg, var(--night2) 0%, var(--night) 100%); }
+  .post:target { display: block; }
+  .post.reel { height: 1920px; background: transparent; }
+  .grain::before { content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0.9; mix-blend-mode: overlay;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .09 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+  .frame { position: absolute; inset: 34px; border: 1.5px solid rgba(242, 206, 77, 0.42); border-radius: 30px; pointer-events: none; }
+  .gate { position: absolute; z-index: -1; right: -90px; bottom: -2px; width: 640px; height: 860px;
+    border: 1.5px solid rgba(242, 206, 77, 0.2); border-bottom: 0; border-radius: 999px 999px 0 0; }
+  .gate::after { content: ''; position: absolute; inset: 34px 34px 0; border: 1.5px solid rgba(242, 206, 77, 0.12); border-bottom: 0; border-radius: inherit; }
+
+  .inner { position: absolute; inset: 0; padding: 120px 110px; display: flex; flex-direction: column; }
+  .center { align-items: center; text-align: center; justify-content: center; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 18px; margin: 0 0 34px;
+    font-weight: 800; font-size: 23px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--goldhi); }
+  .eyebrow::before, .center .eyebrow::after { content: ''; width: 54px; height: 2px; background: linear-gradient(90deg, var(--gold), var(--goldhi)); }
+  h1 { margin: 0; font-family: 'Noto Serif', serif; font-weight: 400; font-size: 112px; line-height: 0.98; letter-spacing: -0.03em; }
+  h1 em, .gold { font-style: italic; padding-right: 0.06em;
+    background: linear-gradient(100deg, #F7E3A1 0%, var(--goldhi) 35%, var(--gold) 80%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lede { margin: 34px 0 0; max-width: 760px; font-size: 34px; line-height: 1.5; font-weight: 600; color: rgba(255, 255, 255, 0.8); }
+  .rule { width: 110px; height: 2px; margin: 44px 0; background: linear-gradient(90deg, var(--gold), var(--goldhi)); }
+  .center .rule { margin-inline: auto; }
+  .list { list-style: none; margin: 46px 0 0; padding: 0; display: grid; gap: 26px; }
+  .list li { display: flex; align-items: center; gap: 22px; font-size: 36px; font-weight: 700; color: rgba(255, 255, 255, 0.92); }
+  .list li::before { content: ''; flex: none; width: 16px; height: 16px; transform: rotate(45deg); background: var(--goldhi); }
+  .pill { display: inline-flex; align-items: center; gap: 14px; margin-top: auto; align-self: flex-start; height: 92px; padding: 0 44px; border-radius: 999px;
+    background: linear-gradient(135deg, var(--goldhi), var(--gold)); color: #2a1a00; font-weight: 800; font-size: 30px; letter-spacing: 0.06em; }
+  .center .pill { align-self: center; }
+  .handle { position: absolute; left: 0; right: 0; bottom: 74px; text-align: center; font-weight: 800; font-size: 22px; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); }
+  .logo { width: 104px; height: 104px; border-radius: 26px; object-fit: cover; box-shadow: 0 0 0 1.5px rgba(242, 206, 77, 0.5); margin-bottom: 44px; }
+
+  /* Fill in the blank */
+  .verse { margin: 0; font-family: 'Noto Serif', serif; font-style: italic; font-size: 76px; line-height: 1.24; letter-spacing: -0.01em; text-wrap: balance; }
+  .blank { display: inline-block; width: 300px; height: 6px; vertical-align: baseline; background: var(--goldhi); border-radius: 3px; margin-left: 10px; }
+  .ref { margin-top: 48px; font-weight: 800; font-size: 24px; letter-spacing: 0.3em; color: var(--goldhi); }
+  .ask { margin-top: 70px; display: inline-flex; align-items: center; gap: 16px; padding: 22px 38px; border-radius: 999px;
+    border: 1.5px solid rgba(255, 255, 255, 0.35); background: rgba(255, 255, 255, 0.08); font-size: 32px; font-weight: 800; }
+
+  /* Seven worlds */
+  .chips { margin-top: 56px; display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 860px; }
+  .chips span { padding: 22px 34px; border-radius: 999px; border: 1.5px solid rgba(242, 206, 77, 0.5); background: rgba(255, 255, 255, 0.05);
+    font-family: 'Noto Serif', serif; font-size: 40px; }
+
+  /* Founder */
+  .arch-photo { position: absolute; left: 50%; top: 100px; transform: translateX(-50%); width: 520px; height: 700px; overflow: hidden;
+    border-radius: 999px 999px 32px 32px; box-shadow: 0 50px 100px -40px rgba(0, 0, 0, 0.8); }
+  .arch-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; }
+  .arch-photo::after { content: ''; position: absolute; inset: 14px; border-radius: inherit; border: 1.5px solid rgba(242, 206, 77, 0.55); }
+  .founder-copy { position: absolute; left: 0; right: 0; top: 850px; text-align: center; }
+  .founder-copy h1 { font-size: 88px; }
+  .founder-copy p { margin: 26px 0 0; font-weight: 800; font-size: 23px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--goldhi); }
+
+  /* Reel frames: everything outside the arch window is painted; the window stays clear for the video. */
+  .window { position: absolute; left: 110px; top: 520px; width: 860px; height: 1020px; border-radius: 999px 999px 40px 40px;
+    box-shadow: 0 0 0 3000px var(--night); }
+  .window::after { content: ''; position: absolute; inset: -16px; border-radius: inherit; border: 2px solid rgba(242, 206, 77, 0.6); }
+  .reel-bg { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .reel-top { position: absolute; z-index: 2; left: 0; right: 0; top: 130px; text-align: center; padding: 0 80px; }
+  .reel-top h1 { font-size: 104px; }
+  .reel-bottom { position: absolute; z-index: 2; left: 0; right: 0; top: 1600px; text-align: center; padding: 0 90px; }
+  .reel-bottom .url { font-weight: 800; font-size: 44px; letter-spacing: 0.16em; color: #fff; }
+  .reel-bottom .verse { font-size: 50px; }
+  .reel-glow { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background:
+      radial-gradient(60% 30% at 92% 0%, rgba(168, 85, 232, 0.45), transparent 62%),
+      radial-gradient(55% 25% at 0% 100%, rgba(217, 169, 58, 0.22), transparent 62%); }
+</style>
+</head>
+<body>
+
+<!-- 1 · Fill in the blank -->
+<section class="post grain" id="fill">
+  <div class="frame"></div><span class="gate"></span>
+  <div class="inner center">
+    <p class="eyebrow">Bible fill-in-the-blank</p>
+    <p class="verse">“Give her of the fruit of her hands; and let her own works praise her in the<span class="blank"></span>.”</p>
+    <p class="ref">PROVERBS 31:31 · KJV</p>
+    <span class="ask">No peeking — answer in the comments 👇</span>
+  </div>
+  <p class="handle">@proverbs31market</p>
+</section>
+
+<!-- 2 · Become a curator -->
+<section class="post grain" id="curator">
+  <div class="frame"></div><span class="gate"></span>
+  <div class="inner">
+    <img class="logo" src="logo-square.jpg" alt="" />
+    <p class="eyebrow">Now accepting applications</p>
+    <h1>Become a <em>curator</em></h1>
+    <ul class="list">
+      <li>Your own storefront on p31market.com</li>
+      <li>A seat at our seasonal Atlanta markets</li>
+      <li>Brand curation, design &amp; coaching</li>
+      <li>A community of women who build</li>
+    </ul>
+    <span class="pill">APPLY · LINK IN BIO</span>
+  </div>
+</section>
+
+<!-- 3 · Founder -->
+<section class="post grain" id="founder">
+  <div class="frame"></div>
+  <div class="arch-photo"><img src="founder.jpg" alt="" /></div>
+  <div class="founder-copy">
+    <p class="eyebrow" style="margin-bottom:22px">Meet the visionary</p>
+    <h1>Melanie<br /><em>Jeffers-Cameron</em></h1>
+    <p>Founder · Proverbs 31 Marketplace</p>
+  </div>
+</section>
+
+<!-- 4 · Winter Gala teaser (no date until it's announced) -->
+<section class="post grain" id="gala">
+  <div class="frame"></div><span class="gate"></span>
+  <div class="inner center">
+    <p class="eyebrow">Proverbs 31 Marketplace presents</p>
+    <h1>The Winter<br /><em>Gala</em></h1>
+    <div class="rule"></div>
+    <p class="lede" style="margin-top:0">Shop hand-selected women-owned brands in art, beauty, clothing, food and more. All are welcome.</p>
+    <p class="ref" style="margin-top:56px">DATE ANNOUNCING SOON</p>
+    <span class="pill" style="margin-top:60px">GET NOTIFIED · LINK IN BIO</span>
+  </div>
+</section>
+
+<!-- 5 · Seven worlds -->
+<section class="post grain" id="worlds">
+  <div class="frame"></div><span class="gate"></span>
+  <div class="inner center">
+    <p class="eyebrow">Inside the collective</p>
+    <h1>Seven worlds,<br /><em>one roof</em></h1>
+    <div class="chips">
+      <span>Art</span><span>Beauty &amp; Wellness</span><span>Clothing</span><span>Food</span><span>Literature</span><span>Services</span><span>Community</span>
+    </div>
+    <span class="ask">Which world is yours? Tell us below 👇</span>
+  </div>
+  <p class="handle">@proverbs31market</p>
+</section>
+
+<!-- 6 · Partner -->
+<section class="post grain" id="partner">
+  <div class="frame"></div><span class="gate"></span>
+  <div class="inner">
+    <img class="logo" src="logo-square.jpg" alt="" />
+    <p class="eyebrow">Sponsors · Venues · Brands</p>
+    <h1>Partner with<br /><em>the movement</em></h1>
+    <ul class="list">
+      <li>Financial giving</li>
+      <li>In-kind: space, tables, tents, services</li>
+      <li>Strategic partnership</li>
+      <li>Volunteer at a market</li>
+    </ul>
+    <span class="pill">P31MARKET.COM/PARTNER</span>
+  </div>
+</section>
+
+<!-- Reel frame · site launch -->
+<section class="post reel" id="reel-launch">
+  <div class="reel-bg"><div class="window"></div></div>
+  <div class="reel-glow"></div>
+  <div class="reel-top">
+    <p class="eyebrow" style="margin-bottom:26px">It’s here</p>
+    <h1>Our new home<br />is <em>live</em></h1>
+  </div>
+  <div class="reel-bottom">
+    <p class="url">P31MARKET.COM</p>
+    <p class="ref" style="margin-top:22px">SHOP · CURATORS · MARKET DATES</p>
+  </div>
+</section>
+
+<!-- Reel frame · Sunday encouragement -->
+<section class="post reel" id="reel-sunday">
+  <div class="reel-bg"><div class="window"></div></div>
+  <div class="reel-glow"></div>
+  <div class="reel-top">
+    <p class="eyebrow" style="margin-bottom:26px">Sunday encouragement</p>
+    <h1 style="font-size:96px">Clothed in<br /><em>strength</em></h1>
+  </div>
+  <div class="reel-bottom">
+    <p class="verse">“Strength and honour are her clothing; and she shall rejoice in time to come.”</p>
+    <p class="ref" style="margin-top:24px">PROVERBS 31:25</p>
+  </div>
+</section>
+
+</body>
+</html>

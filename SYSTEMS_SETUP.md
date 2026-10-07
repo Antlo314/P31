@@ -49,6 +49,7 @@ supabase functions deploy ai-assist
 supabase functions deploy send-campaign
 supabase functions deploy systems-admin
 supabase functions deploy social-search
+supabase functions deploy dm-agent
 ```
 
 Secrets (Supabase → Edge Functions → Secrets, or `supabase secrets set NAME=value`):
@@ -60,11 +61,28 @@ Secrets (Supabase → Edge Functions → Secrets, or `supabase secrets set NAME=
 | `ANTHROPIC_API_KEY` | "Write with AI" everywhere (captions, product copy, bios, outreach, campaigns) | console.anthropic.com → API Keys |
 | `APIFY_TOKEN` | Growth search + comment fetching | apify.com → Settings → Integrations |
 | `APP_URL` | Links inside emails (defaults to `https://p31market.com`) | — |
+| `ZERNIO_API_KEY` | DM assistant: reads conversations and sends replies | zernio.com → API Keys (the key whose account has P31's Instagram + Facebook) |
+| `ZERNIO_WEBHOOK_SECRET` | DM assistant: proves webhook calls come from Zernio | Any long random string; the same value goes on the Zernio webhook |
+| `DM_AGENT_ENABLED` | DM assistant on/off switch (`true` = on) | — |
+| `DM_AGENT_DRY_RUN` | `true` = write replies to the function logs only, send nothing | — |
+| `DM_AGENT_ACCOUNT_IDS` | Comma-separated Zernio account ids the assistant answers for | Zernio account ids |
+| `DM_AGENT_NOTIFY_EMAIL` | Who gets an email when a DM needs a person | — |
 
 Everything degrades gracefully: without a secret, that button explains what's
 missing instead of failing. Systems → Settings shows what's connected.
 
 AI limits: operators 300 requests/day, curators 40/day (logged in `ai_usage`).
+
+DM assistant (`dm-agent`): answers Instagram and Facebook DMs in P31's voice.
+Her persona and everything she knows live in
+`supabase/functions/dm-agent/persona.ts`; edit it and redeploy to change her.
+Upcoming markets come live from `market_events`. A date only shows once it's
+marked public. She hands off refunds, complaints, fees and press to the team,
+and stays out of any conversation a person on the team has replied in for
+24 hours. In Zernio, add a webhook to
+`https://xsnhxjttdizljaawpumz.supabase.co/functions/v1/dm-agent` for events
+`message.received` and `message.sent`, using the same secret as
+`ZERNIO_WEBHOOK_SECRET`.
 
 ## 4. Card payments (optional)
 

@@ -1,0 +1,87 @@
+{
+  "timezone": "America/New_York",
+  "accounts": { "instagram": "6ac6716d90b16e751447d7fe", "facebook": "6ac67950507b603704a87454" },
+  "why_these_times": "Followers are online most 12–9 PM ET (peak 8–9 PM); past posts earned the most engagement Tue–Thu 8–10 PM and Sat ~6 PM (Zernio analytics, Sep 8 – Oct 5 2026).",
+  "posts": [
+    {
+      "id": "launch",
+      "when": "2026-10-08T20:00:00",
+      "label": "Thu Oct 8 · 8:00 PM",
+      "theme": "New website launch",
+      "media": { "type": "video", "file": "out/reel-launch.mp4", "cover": "out/reel-launch-cover.jpg" },
+      "alt": "A golden silk ribbon floats in a softly lit room inside an arch frame with the words: Our new home is live, p31market.com.",
+      "instagram": "Our new home is live. 💜\n\np31market.com was built for her: explore the collective, meet our hand-selected curators, see what's coming to our markets, and apply to become a curator — all in one place.\n\nAdd it to your home screen and keep the collective close. Link in bio.\n\n#P31Marketplace #WomenWhoBuild #KingdomEntrepreneur #atlantaentrepreneurs #WomenOwnedBusiness",
+      "facebook": "Our new home is live. 💜\n\np31market.com was built for her: explore the collective, meet our hand-selected curators, see what's coming to our markets, and apply to become a curator — all in one place.\n\nAdd it to your home screen and keep the collective close: https://www.p31market.com\n\n#P31Marketplace #WomenWhoBuild #KingdomEntrepreneur"
+    },
+    {
+      "id": "fill",
+      "when": "2026-10-10T18:00:00",
+      "label": "Sat Oct 10 · 6:00 PM",
+      "theme": "Bible fill-in-the-blank (your top-performing format)",
+      "media": { "type": "image", "file": "out/fill.jpg" },
+      "alt": "Bible fill-in-the-blank: Give her of the fruit of her hands; and let her own works praise her in the blank. Proverbs 31:31.",
+      "instagram": "Bible fill-in-the-blank, P31 edition 🤭\n\n\"Give her of the fruit of her hands; and let her own works praise her in the ______.\" Proverbs 31:31\n\nNo peeking! Drop your answer in the comments 👇 (Hint: it's the verse our whole marketplace is built on.)\n\n#P31Marketplace #Proverbs31Woman #BibleChallenge #faithreels #KingdomEntrepreneur",
+      "facebook": "Bible fill-in-the-blank, P31 edition 🤭\n\n\"Give her of the fruit of her hands; and let her own works praise her in the ______.\" Proverbs 31:31\n\nNo peeking! Drop your answer in the comments 👇 (Hint: it's the verse our whole marketplace is built on.)\n\n#P31Marketplace #Proverbs31Woman #BibleChallenge"
+    },
+    {
+      "id": "curator",
+      "when": "2026-10-13T20:00:00",
+      "label": "Tue Oct 13 · 8:00 PM",
+      "theme": "Become a curator — applications open",
+      "media": { "type": "image", "file": "out/curator.jpg" },
+      "alt": "Now accepting applications: Become a curator. Your own storefront on p31market.com, a seat at our seasonal Atlanta markets, brand curation, design and coaching, and a community of women who build.",
+      "instagram": "Your gift was never meant to stay hidden. ✨\n\nApplications are open to become a P31 curator: your own storefront on p31market.com, a seat at our seasonal Atlanta markets, brand curation, design and coaching, and a community of women who build together.\n\nEvery curator is hand-selected for craft, story and purpose. Apply through the link in our bio.\n\n#P31Marketplace #WomenWhoBuild #AtlantaMakers #WomenOwnedBusiness #KingdomEntrepreneur",
+      "facebook": "Your gift was never meant to stay hidden. ✨\n\nApplications are open to become a P31 curator: your own storefront on p31market.com, a seat at our seasonal Atlanta markets, brand curation, design and coaching, and a community of women who build together.\n\nEvery curator is hand-selected for craft, story and purpose. Apply here: https://forms.gle/vmkK7fhgwiYNYEa38\n\n#P31Marketplace #WomenWhoBuild #AtlantaMakers"
+    },
+    {
+      "id": "founder",
+      "when": "2026-10-15T20:00:00",
+      "label": "Thu Oct 15 · 8:00 PM",
+      "theme": "Founder spotlight",
+      "media": { "type": "image", "file": "out/founder.jpg" },
+      "alt": "Meet the visionary: Melanie Jeffers-Cameron, founder of Proverbs 31 Marketplace, standing in a gold-framed arch.",
+      "instagram": "Meet the visionary behind it all. 👑\n\n@officialmelaniejc founded Proverbs 31 Marketplace on a simple conviction: gifted women deserve a stage as excellent as their work. Today it's a traveling collective of women creatives, artisans and faith-driven entrepreneurs, rising and building together.\n\nTag a woman whose gifts are making room. 💜\n\n#P31Marketplace #WomenWhoBuild #KingdomEntrepreneur #atlantaentrepreneurs #Proverbs31Woman",
+      "facebook": "Meet the visionary behind it all. 👑\n\nMelanie Jeffers-Cameron founded Proverbs 31 Marketplace on a simple conviction: gifted women deserve a stage as excellent as their work. Today it's a traveling collective of women creatives, artisans and faith-driven entrepreneurs, rising and building together.\n\nTag a woman whose gifts are making room. 💜\n\n#P31Marketplace #WomenWhoBuild #KingdomEntrepreneur"
+    },
+    {
+      "id": "gala",
+      "when": "2026-10-17T18:00:00",
+      "label": "Sat Oct 17 · 6:00 PM",
+      "theme": "Winter Gala teaser (date stays 'coming soon')",
+      "media": { "type": "image", "file": "out/gala.jpg" },
+      "alt": "Proverbs 31 Marketplace presents The Winter Gala. Shop hand-selected women-owned brands. Date announcing soon. Get notified, link in bio.",
+      "instagram": "Save the season. ✨\n\nThe Winter Gala is coming — hand-selected women-owned brands in art, beauty, clothing, food and more, all under one roof. All are welcome.\n\nThe date drops soon. Tap the link in our bio to be the first to know. 💜\n\n#P31Marketplace #WinterGala #ShopSmallATL #WomenOwnedBusiness #atlantaevents",
+      "facebook": "Save the season. ✨\n\nThe Winter Gala is coming — hand-selected women-owned brands in art, beauty, clothing, food and more, all under one roof. All are welcome.\n\nThe date drops soon. Be the first to know: https://www.p31market.com/calendar 💜\n\n#P31Marketplace #WinterGala #ShopSmallATL"
+    },
+    {
+      "id": "sunday",
+      "when": "2026-10-18T19:00:00",
+      "label": "Sun Oct 18 · 7:00 PM",
+      "theme": "Sunday encouragement reel",
+      "media": { "type": "video", "file": "out/reel-sunday.mp4", "cover": "out/reel-sunday-cover.jpg" },
+      "alt": "A woman stands beneath rays of light breaking through purple clouds, inside an arch frame. Text: Clothed in strength. Strength and honour are her clothing; and she shall rejoice in time to come. Proverbs 31:25.",
+      "instagram": "\"Strength and honour are her clothing; and she shall rejoice in time to come.\" Proverbs 31:25\n\nWhatever this week holds, you're not walking into it empty-handed. Go in strength, sis. 💜\n\n#P31Marketplace #Proverbs31Woman #SundayEncouragement #faithreels #WomenOfFaith",
+      "facebook": "\"Strength and honour are her clothing; and she shall rejoice in time to come.\" Proverbs 31:25\n\nWhatever this week holds, you're not walking into it empty-handed. Go in strength, sis. 💜\n\n#P31Marketplace #Proverbs31Woman #SundayEncouragement"
+    },
+    {
+      "id": "worlds",
+      "when": "2026-10-20T20:00:00",
+      "label": "Tue Oct 20 · 8:00 PM",
+      "theme": "Seven worlds — comment prompt",
+      "media": { "type": "image", "file": "out/worlds.jpg" },
+      "alt": "Inside the collective: Seven worlds, one roof. Art, Beauty and Wellness, Clothing, Food, Literature, Services, Community. Which world is yours?",
+      "instagram": "Seven worlds, one roof. 🤍\n\nArt. Beauty & wellness. Clothing. Food. Literature. Services. Community.\n\nEvery curator in the collective is hand-selected, and each one brings her gift to the table. Which world is yours? Tell us in the comments 👇\n\n#P31Marketplace #WomenOwnedBusiness #AtlantaMakers #ShopSmallATL #WomenWhoBuild",
+      "facebook": "Seven worlds, one roof. 🤍\n\nArt. Beauty & wellness. Clothing. Food. Literature. Services. Community.\n\nEvery curator in the collective is hand-selected, and each one brings her gift to the table. Which world is yours? Tell us in the comments 👇\n\n#P31Marketplace #WomenOwnedBusiness #ShopSmallATL"
+    },
+    {
+      "id": "partner",
+      "when": "2026-10-21T20:00:00",
+      "label": "Wed Oct 21 · 8:00 PM",
+      "theme": "Partner with the movement",
+      "media": { "type": "image", "file": "out/partner.jpg" },
+      "alt": "Sponsors, venues and brands: Partner with the movement. Financial giving, in-kind support, strategic partnership, volunteering. p31market.com/partner.",
+      "instagram": "Every vision needs people willing to stand behind it.\n\nProverbs 31 Marketplace is more than an event — it's a movement giving women room to grow, build and break cycles. Sponsors, venues and brands can partner with us through financial giving, in-kind support (event space, tables, tents, services), strategic partnership, or by volunteering at a market.\n\nLearn more at p31market.com/partner 💜\n\n#P31Marketplace #CommunityPartners #atlantaentrepreneurs #WomenWhoBuild #KingdomEntrepreneur",
+      "facebook": "Every vision needs people willing to stand behind it.\n\nProverbs 31 Marketplace is more than an event — it's a movement giving women room to grow, build and break cycles. Sponsors, venues and brands can partner with us through financial giving, in-kind support (event space, tables, tents, services), strategic partnership, or by volunteering at a market.\n\nLearn more: https://www.p31market.com/partner 💜\n\n#P31Marketplace #CommunityPartners #atlantaentrepreneurs"
+    }
+  ]
+}
