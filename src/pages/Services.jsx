@@ -1,167 +1,104 @@
-import React, { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import './Services.css';
+import React from 'react';
+import { Crown, Ruler, GraduationCap, Mail, ArrowUpRight, Check } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import LazyVideo from '../components/LazyVideo';
+import { openJoin } from '../lib/join';
 
-import curatorVid   from '../assets/curator.mp4';
-import visionaryVid from '../assets/visionary.mp4';
-import productVid   from '../assets/product.mp4';
+import curatorVid from '../assets/web/curator.mp4';
+import curatorPoster from '../assets/web/curator-poster.webp';
+import productVid from '../assets/web/product.mp4';
+import productPoster from '../assets/web/product-poster.webp';
+import visionaryVid from '../assets/web/visionary.mp4';
+import visionaryPoster from '../assets/web/visionary-poster.webp';
 
-gsap.registerPlugin(ScrollTrigger);
+const INQUIRE = 'mailto:proverbs31markets@gmail.com?subject=Bespoke%20services';
 
-const Services = () => {
-  const containerRef = useRef(null);
+const SERVICES = [
+  {
+    Icon: Crown, title: 'Bespoke brand', accent: 'curation', tag: 'Signature',
+    body: 'For the established artisan ready to elevate her presence — end-to-end strategic refinement so your gifts make room in the highest circles.',
+    points: ['Brand story & positioning', 'Collection and pricing review', 'Storefront styling on P31'],
+    video: curatorVid, poster: curatorPoster,
+  },
+  {
+    Icon: Ruler, title: 'Bespoke', accent: 'design',
+    body: 'Consultation for physical market spaces and digital storefronts — atmospheres where luxury and purpose converge.',
+    points: ['Booth & display design', 'Product photography direction', 'Packaging and print touchpoints'],
+    video: productVid, poster: productPoster,
+  },
+  {
+    Icon: GraduationCap, title: 'Curator', accent: 'coaching',
+    body: 'One-on-one mentorship for the Proverbs 31 woman of influence — mastering entrepreneurial excellence with purposeful elegance.',
+    points: ['Monthly 1:1 sessions', 'Growth & social strategy', 'Market-day readiness'],
+    video: visionaryVid, poster: visionaryPoster,
+  },
+];
 
-  useEffect(() => {
-    // Respect reduced-motion: leave everything in its natural, visible state.
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+const Services = () => (
+  <div className="k-page">
+    <PageHeader
+      eyebrow="Bespoke Offerings"
+      title="Services &"
+      accent="strategic curation"
+      lead="Tailored experiences and strategic support for the modern woman of influence. Our full suite is launching soon — reserve a conversation today."
+      media={{ src: curatorVid, poster: curatorPoster, video: true }}
+      actions={<a href={INQUIRE} className="k-btn k-btn--gold"><Mail size={18} /> Inquire with our concierge</a>}
+    />
 
-    let ctx = gsap.context(() => {
-      // ── Hero reveal ──
-      const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-      heroTl
-        .from('.services-hero__kicker', { y: 20, opacity: 0, duration: 0.9 }, 0.1)
-        .from('.services-headline', { y: 34, opacity: 0, duration: 1.1 }, 0.25)
-        .from('.services-sub', { y: 24, opacity: 0, duration: 1 }, 0.6)
-        .from('.services-hero__scroll', { opacity: 0, duration: 1 }, 0.9);
-
-      // ── Section header reveal ──
-      gsap.from('.services-bento__header > *', {
-        y: 32, opacity: 0, duration: 1, stagger: 0.12, ease: 'power3.out',
-        scrollTrigger: { trigger: '.services-bento__header', start: 'top 85%' },
-      });
-
-      // ── Bento mosaic: staggered rise ──
-      gsap.from('.services-bento .bento-cell', {
-        y: 60, opacity: 0, duration: 1, stagger: 0.1, ease: 'power3.out',
-        scrollTrigger: { trigger: '.services-bento .bento-grid', start: 'top 82%' },
-      });
-
-      // ── CTA band reveal ──
-      gsap.from('.services-cta__inner > *', {
-        y: 30, opacity: 0, duration: 1, stagger: 0.12, ease: 'power3.out',
-        scrollTrigger: { trigger: '.services-cta', start: 'top 85%' },
-      });
-
-      // ── Magnetic buttons (pointer-follow) ──
-      gsap.utils.toArray('.magnetic').forEach(btn => {
-        const strength = 0.3;
-        const move = (e) => {
-          const r = btn.getBoundingClientRect();
-          gsap.to(btn, {
-            x: (e.clientX - (r.left + r.width / 2)) * strength,
-            y: (e.clientY - (r.top + r.height / 2)) * strength,
-            duration: 0.5, ease: 'power3.out',
-          });
-        };
-        const reset = () => gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' });
-        btn.addEventListener('mousemove', move);
-        btn.addEventListener('mouseleave', reset);
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <div className="services-page" ref={containerRef}>
-      {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="services-hero">
-        <div className="services-hero__overlay" />
-        <div className="services-hero__content">
-          <span className="section-kicker services-hero__kicker">Elite Offerings</span>
-          <h1 className="services-headline">Services &amp; <br /><em>Strategic Curation.</em></h1>
-          <p className="services-sub">
-            Tailored experiences and strategic support for the modern woman of influence.
-            Currently refining our full suite of artisan services.
-          </p>
-          <span className="services-hero__scroll">
-            <span className="material-symbols-outlined">south</span>
-          </span>
-        </div>
-      </section>
-
-      {/* ── SERVICES BENTO ───────────────────────────────────── */}
-      <section className="services-bento">
-        <div className="services-bento__header">
-          <span className="section-kicker">The Bespoke Suite</span>
-          <h2 className="services-bento__title">Three Ways We Elevate Her Gifts</h2>
-          <p className="services-bento__lead">
-            From end-to-end brand refinement to intimate one-on-one mentorship — each
-            offering is composed to help the modern artisan make room in the highest circles.
-          </p>
-        </div>
-
-        <div className="bento-grid">
-          {/* Featured / primary service — Bespoke Brand Curation */}
-          <div className="bento-cell is-media col-6 row-2">
-            <video src={curatorVid} autoPlay loop muted playsInline />
-            <div className="bento-overlay" />
-            <div className="bento-content">
-              <span className="bento-tag">Featured Service</span>
-              <span className="material-symbols-outlined service-icon">diversity_3</span>
-              <h3 className="service-title">Bespoke Brand Curation</h3>
-              <p className="service-desc">
-                For the established artisan looking to elevate their digital Presence. We provide
-                end-to-end strategic refinement to ensure your gifts make room in the highest circles.
-              </p>
+    <section className="k-section">
+      <div style={{ display: 'grid', gap: 'clamp(64px, 9vw, 128px)' }}>
+        {SERVICES.map((s, i) => (
+          <article className={`k-split ${i % 2 ? 'k-split--wide-left k-split--flip' : 'k-split--wide-right'}`} key={s.title}>
+            <div className="k-arch k-arch--ring" data-reveal="clip" style={{ maxWidth: 440, width: '100%' }}>
+              <LazyVideo src={s.video} poster={s.poster} />
             </div>
-          </div>
-
-          {/* Value-statement accent — dark plum */}
-          <div className="bento-cell is-dark col-6">
-            <div className="bento-content">
-              <span className="material-symbols-outlined service-quote-mark">format_quote</span>
-              <p className="service-value">
-                Where entrepreneurial excellence and purposeful elegance converge.
-              </p>
+            <div className="k-head" style={{ marginBottom: 0 }}>
+              <p className="k-eyebrow" data-reveal="fade">0{i + 1}{s.tag ? ` · ${s.tag}` : ''}</p>
+              <h2 className="k-h2" data-split>{s.title} <em>{s.accent}</em></h2>
+              <p className="k-lede" data-reveal>{s.body}</p>
+              <ul className="k-checks" data-reveal-group>
+                {s.points.map((p) => <li key={p}><Check size={18} /> {p}</li>)}
+              </ul>
+              <div className="k-actions" data-reveal>
+                <a href={`${INQUIRE}%20%E2%80%94%20${encodeURIComponent(`${s.title} ${s.accent}`)}`} className="k-link">Ask about {`${s.title} ${s.accent}`.toLowerCase()} <ArrowUpRight size={16} /></a>
+              </div>
             </div>
-          </div>
+          </article>
+        ))}
+      </div>
+    </section>
 
-          {/* Bespoke Design */}
-          <div className="bento-cell is-media col-3">
-            <video src={productVid} autoPlay loop muted playsInline />
-            <div className="bento-overlay" />
-            <div className="bento-content">
-              <span className="material-symbols-outlined service-icon">architecture</span>
-              <h3 className="service-title">Bespoke Design</h3>
-              <p className="service-desc">
-                Architectural consultation for physical market spaces and digital storefronts.
-                We create atmospheres where luxury and purpose converge.
-              </p>
-            </div>
-          </div>
+    <section className="k-section k-section--night k-dark">
+      <div className="k-head k-center">
+        <p className="k-eyebrow k-eyebrow--center" data-reveal="fade">How we work together</p>
+        <h2 className="k-h2" data-split>A considered <em>process</em></h2>
+      </div>
+      <ol className="k-steps" data-reveal-group>
+        <li><h3>Discovery</h3><p>A conversation about your gift, your goals and where your brand is today.</p></li>
+        <li><h3>Strategy</h3><p>A tailored plan — story, presentation, pricing and the channels that fit you.</p></li>
+        <li><h3>Elevation</h3><p>Hands-on refinement with check-ins until your brand shows up the way it should.</p></li>
+      </ol>
+    </section>
 
-          {/* Curator Coaching */}
-          <div className="bento-cell is-media col-3">
-            <video src={visionaryVid} autoPlay loop muted playsInline />
-            <div className="bento-overlay" />
-            <div className="bento-content">
-              <span className="material-symbols-outlined service-icon">auto_awesome</span>
-              <h3 className="service-title">Curator Coaching</h3>
-              <p className="service-desc">
-                One-on-one mentorship for the Proverbs 31 woman of influence. Mastering the balance
-                of entrepreneurial excellence and purposeful elegance.
-              </p>
-            </div>
-          </div>
+    <section className="k-section">
+      <figure className="k-quote k-center" style={{ maxWidth: 900 }}>
+        <blockquote data-scrub>Where entrepreneurial excellence and purposeful elegance converge.</blockquote>
+        <figcaption data-reveal="fade">The P31 standard</figcaption>
+      </figure>
+    </section>
+
+    <section className="k-section k-section--tight">
+      <div className="k-cta k-dark" data-reveal="scale">
+        <p className="k-eyebrow">Bespoke concierge</p>
+        <h2 className="k-h2">Ready to <em>elevate?</em></h2>
+        <p className="k-lede">Be among the first to experience the P31 strategic suite. Tell us a little about your brand and we’ll be in touch.</p>
+        <div className="k-actions">
+          <a href={INQUIRE} className="k-btn k-btn--gold"><Mail size={18} /> Inquire with our concierge</a>
+          <button type="button" className="k-btn k-btn--light" onClick={openJoin}>Get launch updates</button>
         </div>
-      </section>
-
-      {/* ── CONCIERGE CTA ────────────────────────────────────── */}
-      <section className="services-cta">
-        <div className="services-cta__inner">
-          <span className="section-kicker services-cta__kicker">Bespoke Concierge</span>
-          <h2 className="cta-headline font-headline">Interested in Bespoke Support?</h2>
-          <p className="cta-body">
-            Our full services catalog is launching soon. Connect with our concierge to be among the
-            first to experience the new P31 strategic suite.
-          </p>
-          <a href="mailto:proverbs31markets@gmail.com" className="btn-solid-gold magnetic">Inquire with Concierge</a>
-        </div>
-      </section>
-    </div>
-  );
-};
+      </div>
+    </section>
+  </div>
+);
 
 export default Services;

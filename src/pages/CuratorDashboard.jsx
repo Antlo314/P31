@@ -1,13 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { fetchUpcomingEvents, formatEventDate } from '../lib/events';
 import Community from './Community'; // Nested import
 import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, ShieldCheck, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Calendar, Users, Search, DollarSign, RefreshCw } from 'lucide-react';
 import { invokePayment, CARD_PAYMENTS_ENABLED } from '../lib/payments';
 import HelpTip from '../components/HelpTip';
+import { withEmails } from '../lib/people';
+import AiAssist from '../components/AiAssist';
 import { QRCodeSVG } from 'qrcode.react';
+import StudioTab from '../features/dashboard/StudioTab';
+import StoreDesigner from '../features/store-design/StoreDesigner';
+import ProEditPanel from '../features/pro-edit/ProEditPanel';
+import OrdersPanel from '../features/orders/OrdersPanel';
+import DiscountsPanel from '../features/orders/DiscountsPanel';
 import './CuratorDashboard.css';
+
+const PhotoStudio = lazy(() => import('../features/photo-studio/PhotoStudio'));
+
+// Empty product form. Prices/inventory stay strings while editing.
+const BLANK_PRODUCT = {
+  name: '', description: '', price: '', image_url: '', image_urls: [], category: 'Collection',
+  external_url: '', stock_status: 'in_stock',
+  compare_at_price: '', inventory: '', sku: '', tags: '', is_active: true, variants: [],
+};
+
+const productToForm = (p) => ({
+  ...BLANK_PRODUCT,
+  name: p.name, description: p.description || '', price: p.price, image_url: p.image_url || '',
+  image_urls: p.image_urls || [], category: p.category || 'Collection', external_url: p.external_url || '',
+  stock_status: p.stock_status || 'in_stock',
+  compare_at_price: p.compare_at_price ?? '', inventory: p.inventory ?? '', sku: p.sku || '',
+  tags: (p.tags || []).join(', '), is_active: p.is_active !== false,
+  variants: (Array.isArray(p.variants) ? p.variants : []).map((g) => ({ name: g.name, options: (g.options || []).join(', ') })),
+});
+
+const formToProduct = (f) => ({
+  ...f,
+  compare_at_price: f.compare_at_price === '' ? null : parseFloat(f.compare_at_price),
+  inventory: f.inventory === '' ? null : parseInt(f.inventory, 10),
+  sku: f.sku?.trim() || null,
+  tags: String(f.tags || '').split(',').map((t) => t.trim()).filter(Boolean),
+  // Option groups: "Size" → "S, M, L" becomes { name: 'Size', options: ['S','M','L'] }.
+  variants: (f.variants || [])
+    .map((g) => ({ name: String(g.name || '').trim(), options: String(g.options || '').split(',').map((o) => o.trim()).filter(Boolean) }))
+    .filter((g) => g.name && g.options.length),
+});
 
 const CuratorDashboard = () => {
   const { user, profile, curatorData, isAdmin, loading, signOut, fetchUserData } = useAuth();
@@ -18,7 +57,6 @@ const CuratorDashboard = () => {
   const activeTab = pathParts.length > 1 ? pathParts.pop() : 'identity';
   const setActiveTab = (tab) => navigate(`/dashboard/${tab}`);
 
-  const [profileImage, setProfileImage] = useState(null);
   
   const [announcementForm, setAnnouncementForm] = useState({ title: '', content: '', type: 'info' });
   const [announcements, setAnnouncements] = useState([]);
@@ -26,16 +64,8 @@ const CuratorDashboard = () => {
   const [products, setProducts] = useState([]);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [productForm, setProductForm] = useState({ 
-    name: '', 
-    description: '', 
-    price: '', 
-    image_url: '', 
-    image_urls: [], 
-    category: 'Collection', 
-    external_url: '', 
-    stock_status: 'in_stock' 
-  });
+    const [productForm, setProductForm] = useState(BLANK_PRODUCT);
+  const [photoStudioOpen, setPhotoStudioOpen] = useState(false);
   const [productImageLoading, setProductImageLoading] = useState(false);
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [partnershipInquiries, setPartnershipInquiries] = useState([]);
@@ -62,7 +92,7 @@ const CuratorDashboard = () => {
   
   const [stripeLoading, setStripeLoading] = useState(false);
   const [stripeSyncing, setStripeSyncing] = useState(false);
-  const [orders, setOrders] = useState([]);
+  const [, setOrders] = useState([]); // legacy Sales ledger; the Orders tab loads its own
   const [allOrders, setAllOrders] = useState([]);
   const [myStats, setMyStats] = useState({ views: 0, clicks: 0 });
   const [recentActivity, setRecentActivity] = useState([]);
@@ -213,17 +243,6 @@ const CuratorDashboard = () => {
     }
   };
 
-  const toggleFulfilled = async (order) => {
-    const next = order.fulfillment_status === 'fulfilled' ? 'new' : 'fulfilled';
-    try {
-      const { error } = await supabase.from('orders').update({ fulfillment_status: next }).eq('id', order.id);
-      if (error) throw error;
-      fetchOrders();
-    } catch (err) {
-      alert('Order update error: ' + err.message);
-    }
-  };
-
   const handleStripeConnect = async () => {
     setStripeLoading(true);
     try {
@@ -265,9 +284,9 @@ const CuratorDashboard = () => {
   const fetchPendingApprovals = async () => {
     try {
       setAdminError(null);
-      const { data, error } = await supabase.from('curator_data').select('*, profiles(full_name, email)').eq('status', 'pending');
+      const { data, error } = await supabase.from('curator_data').select('*, profiles(full_name)').eq('status', 'pending');
       if (error) throw error;
-      if (data) setPendingApprovals(data);
+      if (data) setPendingApprovals(await withEmails(data));
     } catch (err) {
       console.error('Governance fetch error:', err.message);
       setAdminError('Architectural Maintenance Req: ' + err.message);
@@ -385,8 +404,7 @@ const CuratorDashboard = () => {
 
   const fetchEvents = async () => {
     try {
-      const { data: events } = await supabase.from('market_events').select('*').eq('is_active', true);
-      setAllEvents(events || []);
+      setAllEvents(await fetchUpcomingEvents());
       const { data: myRsvps } = await supabase.from('event_rsvps').select('*').eq('curator_id', user.id);
       setRsvps(myRsvps || []);
     } catch (err) {
@@ -467,8 +485,8 @@ const CuratorDashboard = () => {
 
   const [allCurators, setAllCurators] = useState([]);
   const fetchAllCurators = async () => {
-    const { data } = await supabase.from('curator_data').select('*, profiles(full_name, email, avatar_url)');
-    setAllCurators(data || []);
+    const { data } = await supabase.from('curator_data').select('*, profiles(full_name, avatar_url)');
+    setAllCurators(await withEmails(data));
   };
 
   const [curatorSearch, setCuratorSearch] = useState('');
@@ -689,31 +707,7 @@ const CuratorDashboard = () => {
 
     setProductImageLoading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}-${Math.floor(Math.random() * 1000)}.${fileExt}`;
-      const filePath = fileName; // Clean path in the 'products' bucket
-
-      const { data, error: uploadError } = await supabase.storage
-        .from('products')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) {
-        if (uploadError.message.includes('bucket not found')) {
-          throw new Error('The products repository has not been initialized. Please contact the Master Architect.');
-        }
-        throw uploadError;
-      }
-
-      const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(filePath);
-      
-      setProductForm(prev => ({ 
-        ...prev, 
-        image_url: prev.image_url || publicUrl, // Set as main if empty
-        image_urls: [...(prev.image_urls || []), publicUrl] 
-      }));
+      await uploadProductImage(file, file.name.split('.').pop());
       alert('Portrait successfully uploaded to the collective.');
     } catch (err) {
       console.error('Upload failure:', err);
@@ -723,12 +717,46 @@ const CuratorDashboard = () => {
     }
   };
 
+  // Shared by the file picker and Photo Studio. Adds the image to the product
+  // being edited (as the main image if there isn't one yet).
+  const uploadProductImage = async (fileOrBlob, ext) => {
+    const filePath = `${user.id}-${Date.now()}-${Math.floor(Math.random() * 1000)}.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from('products')
+      .upload(filePath, fileOrBlob, { cacheControl: '3600', upsert: false, contentType: fileOrBlob.type || undefined });
+    if (uploadError) {
+      if (uploadError.message.includes('bucket not found')) {
+        throw new Error('The products repository has not been initialized. Please contact the Master Architect.');
+      }
+      throw uploadError;
+    }
+    const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(filePath);
+    setProductForm(prev => ({
+      ...prev,
+      image_url: prev.image_url || publicUrl,
+      image_urls: [...(prev.image_urls || []), publicUrl]
+    }));
+    return publicUrl;
+  };
+
+  // Photo Studio result -> image on the product being edited.
+  const usePhotoInProduct = async (blob) => {
+    await uploadProductImage(blob, blob.type === 'image/png' ? 'png' : 'jpg');
+    setPhotoStudioOpen(false);
+  };
+
+  // Photo Studio result from the Studio tab -> start a new product with it.
+  const startProductFromPhoto = async (blob) => {
+    setEditingProduct(null);
+    setProductForm(BLANK_PRODUCT);
+    await uploadProductImage(blob, blob.type === 'image/png' ? 'png' : 'jpg');
+    setActiveTab('storefront');
+    setIsProductModalOpen(true);
+  };
+
   const saveProduct = async (e) => {
     e.preventDefault();
-    if (products.length >= 10 && !editingProduct) {
-      alert('Initial collections are limited to 10 products.');
-      return;
-    }
+    
     const priceNum = parseFloat(productForm.price);
     if (!Number.isFinite(priceNum) || priceNum <= 0) {
       alert('Please set a valid price greater than $0.');
@@ -740,14 +768,14 @@ const CuratorDashboard = () => {
     }
     setFormLoading(true);
     try {
-      if (editingProduct) {
-        await supabase.from('products').update(productForm).eq('id', editingProduct.id);
-      } else {
-        await supabase.from('products').insert([{ ...productForm, curator_id: user.id }]);
-      }
+            const row = formToProduct(productForm);
+      const { error } = editingProduct
+        ? await supabase.from('products').update(row).eq('id', editingProduct.id)
+        : await supabase.from('products').insert([{ ...row, curator_id: user.id, sort_order: products.length }]);
+      if (error) throw error;
       setIsProductModalOpen(false);
       setEditingProduct(null);
-      setProductForm({ name: '', description: '', price: '', image_url: '', image_urls: [], category: 'Collection', external_url: '', stock_status: 'in_stock' });
+      setProductForm(BLANK_PRODUCT);
       fetchProducts();
     } catch (err) {
       alert('Error saving product: ' + err.message);
@@ -955,17 +983,44 @@ const CuratorDashboard = () => {
             onClick={() => setActiveTab('storefront')} 
             className={`nav-item ${activeTab === 'storefront' ? 'active' : ''}`}
           >
-            <ShoppingBag size={20} /> Storefront
+                        <ShoppingBag size={20} /> Storefront
           </button>
 
-          {CARD_PAYMENTS_ENABLED && (
-            <button
-              onClick={() => setActiveTab('sales')}
-              className={`nav-item ${activeTab === 'sales' ? 'active' : ''}`}
-            >
-              <DollarSign size={20} /> Sales
-            </button>
-          )}
+          <button
+            onClick={() => setActiveTab('design')}
+            className={`nav-item ${activeTab === 'design' ? 'active' : ''}`}
+          >
+            <Layout size={20} /> Store Design
+          </button>
+
+          <button
+            onClick={() => setActiveTab('studio')}
+            className={`nav-item ${activeTab === 'studio' ? 'active' : ''}`}
+          >
+            <Camera size={20} /> Creative Studio
+          </button>
+
+          <button
+            onClick={() => setActiveTab('pro-edit')}
+            className={`nav-item ${activeTab === 'pro-edit' ? 'active' : ''}`}
+          >
+            <Crown size={20} /> Pro Edit {curatorData?.plan !== 'premium' && <span className="nav-premium-tag">Premium</span>}
+          </button>
+
+
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`nav-item ${activeTab === 'orders' || activeTab === 'sales' ? 'active' : ''}`}
+          >
+            <DollarSign size={20} /> Orders
+          </button>
+
+          <button
+            onClick={() => setActiveTab('discounts')}
+            className={`nav-item ${activeTab === 'discounts' ? 'active' : ''}`}
+          >
+            <Sparkles size={20} /> Discounts
+          </button>
 
           <button
             onClick={() => setActiveTab('testimonials')}
@@ -1138,8 +1193,11 @@ const CuratorDashboard = () => {
                     <input 
                       type="text" 
                       value={editData.tagline}
-                      onChange={(e) => setEditData({...editData, tagline: e.target.value})}
+                                            onChange={(e) => setEditData({...editData, tagline: e.target.value})}
                     />
+                    <AiAssist compact task="tagline" label="Suggest taglines"
+                      getInput={() => ({ business: editData.businessName, what: editData.bio?.slice(0, 300) })}
+                      onUse={(t) => setEditData((d) => ({ ...d, tagline: t }))} />
                   </div>
 
                   <div className="form-group">
@@ -1147,8 +1205,11 @@ const CuratorDashboard = () => {
                     <textarea 
                       rows="4" 
                       value={editData.bio}
-                      onChange={(e) => setEditData({...editData, bio: e.target.value})}
+                                            onChange={(e) => setEditData({...editData, bio: e.target.value})}
                     ></textarea>
+                    <AiAssist task="shop_bio" label="Write my bio with AI (uses your notes above)"
+                      getInput={() => ({ business: editData.businessName, maker: profile?.full_name, what: editData.tagline, story: editData.bio, location: editData.location })}
+                      onUse={(t) => setEditData((d) => ({ ...d, bio: t }))} />
                   </div>
 
                   <div className="form-row-grid">
@@ -1313,7 +1374,7 @@ const CuratorDashboard = () => {
                       {editData.businessName ? '✓' : '○'} Brand Identity
                     </div>
                     <div className={`check-item ${products.length >= 1 ? 'success' : 'pending'}`}>
-                      {products.length >= 1 ? '✓' : '○'} Artisan Collection ({products.length}/10)
+                      {products.length >= 1 ? '✓' : '○'} Artisan Collection ({products.length})
                     </div>
                     <div className={`check-item ${editData.bannerUrl && editData.logoUrl ? 'success' : 'pending'}`}>
                       {editData.bannerUrl && editData.logoUrl ? '✓' : '○'} Shop Aesthetics
@@ -1384,7 +1445,7 @@ const CuratorDashboard = () => {
                         <div key={event.id} className="event-invite-item glass-border p-4 rounded-lg">
                           <p className="text-xs font-bold text-primary mb-1">{event.title}</p>
                           <div className="flex items-center gap-2 text-[10px] opacity-60 mb-3">
-                            <Calendar size={10} /> {new Date(event.event_date).toLocaleDateString()} • {event.location}
+                            <Calendar size={10} /> {formatEventDate(event.event_date, {})} • {event.venue || event.location || 'Venue TBA'}
                           </div>
                           
                           {rsvp ? (
@@ -1504,11 +1565,10 @@ const CuratorDashboard = () => {
                 <button 
                   onClick={() => {
                     setEditingProduct(null);
-                    setProductForm({ name: '', description: '', price: '', image_url: '', image_urls: [], category: 'Collection', external_url: '', stock_status: 'in_stock' });
+                                        setProductForm(BLANK_PRODUCT);
                     setIsProductModalOpen(true);
-                  }} 
+                  }}
                   className="btn-solid-gold flex-center gap-2"
-                  disabled={products.length >= 10}
                 >
                   <Plus size={18} /> Add Artifact
                 </button>
@@ -1749,7 +1809,8 @@ const CuratorDashboard = () => {
                   <div className="product-img-frame">
                     <img src={p.image_url || 'https://via.placeholder.com/400x500?text=Artifact'} alt={p.name} />
                     {p.stock_status === 'limited_edition' && <div className="product-prestige-ribbon">Limited Edition</div>}
-                    {p.stock_status === 'out_of_stock' && <div className="product-prestige-ribbon sold-out">Sold Out</div>}
+                                        {p.stock_status === 'out_of_stock' && <div className="product-prestige-ribbon sold-out">Sold Out</div>}
+                    {p.is_active === false && <div className="product-prestige-ribbon hidden-ribbon">Hidden</div>}
                   </div>
                   <div className="product-info">
                     <h3 className="font-headline">{p.name}</h3>
@@ -1757,7 +1818,7 @@ const CuratorDashboard = () => {
                     <div className="product-actions flex-center gap-4 mt-4">
                       <button onClick={() => {
                         setEditingProduct(p);
-                        setProductForm({ name: p.name, description: p.description, price: p.price, image_url: p.image_url, image_urls: p.image_urls || [], category: p.category || 'Collection', external_url: p.external_url || '', stock_status: p.stock_status || 'in_stock' });
+                                                setProductForm(productToForm(p));
                         setIsProductModalOpen(true);
                       }} className="icon-btn"><Settings size={16} /></button>
                       <button onClick={() => deleteProduct(p.id)} className="icon-btn text-red"><Trash2 size={16} /></button>
@@ -1774,6 +1835,16 @@ const CuratorDashboard = () => {
               )}
             </div>
 
+                        {photoStudioOpen && (
+              <div className="modal-overlay flex-center studio-modal">
+                <div className="studio-modal__panel">
+                  <Suspense fallback={<p className="text-muted">Loading Photo Studio…</p>}>
+                    <PhotoStudio onSave={usePhotoInProduct} onClose={() => setPhotoStudioOpen(false)} saveLabel="Use this photo" />
+                  </Suspense>
+                </div>
+              </div>
+            )}
+
             {/* Product Modal */}
             {isProductModalOpen && (
               <div className="modal-overlay flex-center">
@@ -1786,13 +1857,16 @@ const CuratorDashboard = () => {
                           productForm.image_url ? <img src={productForm.image_url} alt="Main" /> : <Plus size={32} className="text-gold" />
                         )}
                       </div>
-                      <input type="file" id="prod-img-input" hidden accept="image/*" onChange={handleProductImageUpload} />
+                                            <input type="file" id="prod-img-input" hidden accept="image/*" onChange={handleProductImageUpload} />
                       <p className="help-text">Select the primary artifact portrait.</p>
+                      <button type="button" className="btn-outline-primary flex-center gap-2 mt-2" onClick={() => setPhotoStudioOpen(true)}>
+                        <Sparkles size={16} /> Remove background &amp; stage in Photo Studio
+                      </button>
                     </div>
 
                     {productForm.image_urls?.length > 0 && (
                       <div className="form-group">
-                        <label>Artifact Gallery ({productForm.image_urls.length}/5)</label>
+                        <label>Artifact Gallery ({productForm.image_urls.length}/10)</label>
                         <div className="flex gap-2 flex-wrap mt-2">
                           {productForm.image_urls.map((url, i) => (
                             <div key={i} className="relative w-16 h-16 rounded border border-thistle overflow-hidden group">
@@ -1810,7 +1884,7 @@ const CuratorDashboard = () => {
                               </button>
                             </div>
                           ))}
-                          {productForm.image_urls.length < 5 && (
+                          {productForm.image_urls.length < 10 && (
                             <button type="button" onClick={() => document.getElementById('prod-img-input').click()} className="w-16 h-16 rounded border-2 border-dashed border-thistle flex-center text-gold hover:border-gold transition-colors">
                               <Plus size={16} />
                             </button>
@@ -1875,8 +1949,55 @@ const CuratorDashboard = () => {
                     </div>
                     <div className="form-group">
                       <label>Description</label>
-                      <textarea rows="3" value={productForm.description} onChange={e => setProductForm({...productForm, description: e.target.value})}></textarea>
+                                            <textarea rows="3" value={productForm.description} onChange={e => setProductForm({...productForm, description: e.target.value})}></textarea>
+                      <AiAssist
+                        task="product_description"
+                        label="Write description with AI"
+                        getInput={() => ({ name: productForm.name, category: productForm.category, notes: productForm.description })}
+                        getImage={() => (productForm.image_url?.startsWith('https://') ? { imageUrl: productForm.image_url } : null)}
+                        onUse={(t) => setProductForm((f) => ({ ...f, description: t }))}
+                      />
                     </div>
+                    <div className="form-row-grid">
+                      <div className="form-group">
+                        <label>Compare-at price (optional)</label>
+                        <input type="number" step="0.01" min="0" placeholder="Original price — shows a Sale tag" value={productForm.compare_at_price} onChange={e => setProductForm({...productForm, compare_at_price: e.target.value})} />
+                      </div>
+                      <div className="form-group">
+                        <label>Inventory (optional)</label>
+                        <input type="number" step="1" min="0" placeholder="Leave blank to not track" value={productForm.inventory} onChange={e => setProductForm({...productForm, inventory: e.target.value})} />
+                      </div>
+                    </div>
+                    <div className="form-row-grid">
+                      <div className="form-group">
+                        <label>SKU (optional)</label>
+                        <input type="text" value={productForm.sku} onChange={e => setProductForm({...productForm, sku: e.target.value})} />
+                      </div>
+                      <div className="form-group">
+                        <label>Tags</label>
+                        <input type="text" placeholder="handmade, gift, lavender" value={productForm.tags} onChange={e => setProductForm({...productForm, tags: e.target.value})} />
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label>Options (size, colour, scent…)</label>
+                      {(productForm.variants || []).map((g, gi) => (
+                        <div key={gi} className="variant-row">
+                          <input placeholder="Option name, e.g. Size" value={g.name} onChange={e => setProductForm({ ...productForm, variants: productForm.variants.map((x, i) => i === gi ? { ...x, name: e.target.value } : x) })} />
+                          <input placeholder="Choices, e.g. S, M, L" value={g.options} onChange={e => setProductForm({ ...productForm, variants: productForm.variants.map((x, i) => i === gi ? { ...x, options: e.target.value } : x) })} />
+                          <button type="button" className="icon-btn text-red" onClick={() => setProductForm({ ...productForm, variants: productForm.variants.filter((_, i) => i !== gi) })} aria-label="Remove option"><Trash2 size={14} /></button>
+                        </div>
+                      ))}
+                      {(productForm.variants || []).length < 3 && (
+                        <button type="button" className="btn-outline-primary flex-center gap-2 mt-2" onClick={() => setProductForm({ ...productForm, variants: [...(productForm.variants || []), { name: '', options: '' }] })}>
+                          <Plus size={14} /> Add an option
+                        </button>
+                      )}
+                      <p className="help-text">Shoppers must pick one of each before adding to their bag.</p>
+                    </div>
+                    <label className="product-visible-toggle">
+                      <input type="checkbox" checked={productForm.is_active} onChange={e => setProductForm({...productForm, is_active: e.target.checked})} />
+                      Visible in my storefront
+                    </label>
                     <div className="flex-center gap-4 mt-8">
                       <button type="button" onClick={() => setIsProductModalOpen(false)} className="btn-outline-primary flex-1">Cancel</button>
                       <button type="submit" className="btn-solid-gold flex-1">Save Artifact</button>
@@ -1888,112 +2009,63 @@ const CuratorDashboard = () => {
             </div>
           } />
 
-          <Route path="sales" element={
-            !CARD_PAYMENTS_ENABLED ? <Navigate to="storefront" replace /> :
+                    <Route path="design" element={
             <div className="dashboard-view">
-              <header className="dashboard-header flex-between">
+              <header className="dashboard-header">
                 <div>
-                  <h1 className="font-headline text-primary">
-                    Sales <span className="text-gold">Ledger</span>
-                    <HelpTip title="Reading Your Sales">
-                      <p>Every card payment made on your shop shows up here automatically.</p>
-                      <ol>
-                        <li><strong>Gross Revenue</strong> — total money from paid orders.</li>
-                        <li><strong>Each row</strong> shows what sold, who bought it (click their email to reply), and the shipping address Stripe collected.</li>
-                        <li>After you ship or deliver an order, click <strong>Mark Fulfilled</strong> so you can tell at a glance what still needs to go out.</li>
-                      </ol>
-                      <p className="helptip-note">Your money is deposited to your bank by Stripe automatically — typically within 2 business days of each sale.</p>
-                    </HelpTip>
-                  </h1>
-                  <p>Every card payment received through your storefront.</p>
+                  <span className="section-kicker">Store Design</span>
+                  <h1 className="font-headline">Make the shop yours</h1>
+                  <p className="text-muted">Pick a template, then tune colours, fonts, layout and sections. Changes go live when you publish.</p>
                 </div>
-                <button onClick={fetchOrders} className="btn-outline-primary flex-center gap-2">
-                  <RefreshCw size={14} /> Refresh
-                </button>
               </header>
-
-              <div className="stats-row mb-8">
-                <div className="stat-pill glass-card">
-                  <span className="stat-label">Gross Revenue</span>
-                  <span className="stat-value text-gold">
-                    ${(orders.filter(o => o.payment_status === 'paid').reduce((sum, o) => sum + (o.amount_total || 0), 0) / 100).toFixed(2)}
-                  </span>
+              <StoreDesigner curator={curatorData} products={products} onSaved={() => fetchUserData(user.id)} />
+            </div>
+          } />
+          <Route path="studio" element={<StudioTab onUsePhoto={startProductFromPhoto} brandLogo={curatorData?.logo_url} />} />
+          <Route path="pro-edit" element={
+            <div className="dashboard-view">
+              <header className="dashboard-header">
+                <div>
+                  <span className="section-kicker">Premium</span>
+                  <h1 className="font-headline">Pro Edit</h1>
+                  <p className="text-muted">Send raw footage; our editor Iris returns a polished, colour-graded DaVinci Resolve edit.</p>
                 </div>
-                <div className="stat-pill glass-card">
-                  <span className="stat-label">Orders</span>
-                  <span className="stat-value text-gold">{orders.length}</span>
+              </header>
+              {curatorData?.plan === 'premium' ? (
+                <ProEditPanel userId={user.id} />
+              ) : (
+                <div className="premium-upsell glass-card">
+                  <Crown size={28} className="text-gold" />
+                  <h2 className="font-headline">Part of P31 Premium</h2>
+                  <p>Pro Edit is included with Premium. Ask the P31 team to upgrade your storefront — in the meantime, Creative Studio’s Clip Studio makes quick edits on your phone for free.</p>
+                  <button className="btn-solid-gold" onClick={() => setActiveTab('studio')}>Open Creative Studio</button>
                 </div>
-                <div className="stat-pill glass-card">
-                  <span className="stat-label">Awaiting Fulfillment</span>
-                  <span className="stat-value text-gold">
-                    {orders.filter(o => o.payment_status === 'paid' && o.fulfillment_status !== 'fulfilled').length}
-                  </span>
+              )}
+            </div>
+          } />
+          <Route path="sales" element={<Navigate to="../orders" replace />} />
+          <Route path="orders" element={
+            <div className="dashboard-view">
+              <header className="dashboard-header">
+                <div>
+                  <span className="section-kicker">Orders</span>
+                  <h1 className="font-headline">Your orders</h1>
+                  <p className="text-muted">Card payments and order requests in one place. Confirm, fulfil and track — shoppers get emailed along the way.</p>
                 </div>
-              </div>
-
-              <section className="dashboard-card glass-card">
-                <h2 className="card-title text-gold"><DollarSign size={20} /> Order History</h2>
-
-                {!curatorData?.stripe_charges_enabled && orders.length === 0 && (
-                  <div className="text-center py-12 opacity-60">
-                    <CreditCard size={40} className="mx-auto mb-4 text-gold" />
-                    <p className="font-headline mb-2">Card payments aren't live yet.</p>
-                    <p className="text-sm mb-6">Connect your Stripe account in the Storefront tab to start taking payments.</p>
-                    <button onClick={() => setActiveTab('storefront')} className="btn-solid-gold">Set Up Payments</button>
-                  </div>
-                )}
-
-                {(curatorData?.stripe_charges_enabled || orders.length > 0) && (
-                  <div className="leads-table-container">
-                    <table className="leads-table">
-                      <thead>
-                        <tr>
-                          <th>Date</th>
-                          <th>Product</th>
-                          <th>Buyer</th>
-                          <th>Qty</th>
-                          <th>Total</th>
-                          <th>Payment</th>
-                          <th>Fulfillment</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {orders.map(o => (
-                          <tr key={o.id} className="lead-row">
-                            <td className="text-xs">{new Date(o.created_at).toLocaleDateString()}</td>
-                            <td className="font-bold">{o.product_name || '—'}</td>
-                            <td>
-                              <div>{o.buyer_name || 'Guest'}</div>
-                              {o.buyer_email && <a href={`mailto:${o.buyer_email}`} className="text-olive text-xs">{o.buyer_email}</a>}
-                            </td>
-                            <td>{o.quantity}</td>
-                            <td className="text-gold font-bold">${((o.amount_total || 0) / 100).toFixed(2)}</td>
-                            <td>
-                              <span className={`order-status-pill ${o.payment_status}`}>{o.payment_status}</span>
-                            </td>
-                            <td>
-                              <button
-                                onClick={() => toggleFulfilled(o)}
-                                className={`order-fulfill-btn ${o.fulfillment_status === 'fulfilled' ? 'done' : ''}`}
-                                title={o.fulfillment_status === 'fulfilled' ? 'Mark as new' : 'Mark as fulfilled'}
-                              >
-                                {o.fulfillment_status === 'fulfilled' ? <><Check size={12} /> Fulfilled</> : 'Mark Fulfilled'}
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                        {orders.length === 0 && (
-                          <tr>
-                            <td colSpan="7" className="text-center py-8 opacity-50">
-                              No orders yet. Share your storefront link to start selling.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </section>
+              </header>
+              <OrdersPanel curatorId={user.id} />
+            </div>
+          } />
+          <Route path="discounts" element={
+            <div className="dashboard-view">
+              <header className="dashboard-header">
+                <div>
+                  <span className="section-kicker">Promotions</span>
+                  <h1 className="font-headline">Discount codes</h1>
+                  <p className="text-muted">Shoppers enter these in their bag. Percent or dollar amounts, with optional minimums, limits and end dates.</p>
+                </div>
+              </header>
+              <DiscountsPanel curatorId={user.id} />
             </div>
           } />
 

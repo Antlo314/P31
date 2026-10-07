@@ -1,0 +1,485 @@
+/* ==========================================================
+   P31 MARKETPLACE — V19: COMMERCE, EVENTS & GROWTH
+   Run in the Supabase SQL Editor after v18, right before
+   deploying the matching site code. Safe to re-run.
+
+   1. Privacy: account emails are no longer publicly readable.
+   2. Orders: multi-item orders, order requests (no card
+      needed), fulfillment/tracking, and curators can only
+      change fulfillment fields — never amounts or status.
+   3. Discount codes (checked on the server at checkout).
+   4. Inventory that counts down when an order is paid.
+   5. Events: per-event "date announced" switch, capacity,
+      public RSVPs with waitlist, team event management.
+   6. Spam guard: newsletter & partner forms go through
+      rate-limited functions with a bot trap; one-click
+      unsubscribe.
+   7. Email campaigns (team only) and AI usage log.
+   ========================================================== */
+
+
+-- ──────────────────────────────────────────────────────────
+-- 1. Privacy — hide profiles.email
+--    Names and avatars stay public (chat, directory). The email
+--    column is only readable through the admin-only lookup below.
+-- ──────────────────────────────────────────────────────────
+REVOKE SELECT ON public.profiles FROM anon, authenticated;
+GRANT SELECT (id, full_name, avatar_url, created_at) ON public.profiles TO anon, authenticated;
+
+-- Which profiles belong to P31 admins (for the "P31" badge). Safe to expose.
+CREATE OR REPLACE FUNCTION public.admin_profile_ids()
+RETURNS SETOF UUID
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+  SELECT id FROM auth.users
+  WHERE lower(email) IN ('info@lumenlabsatl.com', 'proverbs31markets@gmail.com');
+$$;
+GRANT EXECUTE ON FUNCTION public.admin_profile_ids() TO anon, authenticated;
+
+-- Curator account emails — admins and Systems operators only.
+CREATE OR REPLACE FUNCTION public.curator_contacts()
+RETURNS TABLE (id UUID, email TEXT)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+  SELECT u.id, u.email::text FROM auth.users u
+  WHERE public.is_admin() OR public.is_operator();
+$$;
+REVOKE ALL ON FUNCTION public.curator_contacts() FROM public, anon;
+GRANT EXECUTE ON FUNCTION public.curator_contacts() TO authenticated;
+
+
+-- ──────────────────────────────────────────────────────────
+-- 2. Orders
+-- ──────────────────────────────────────────────────────────
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS items JSONB DEFAULT '[]'::jsonb,       -- [{product_id,name,price,quantity,options,image_url}]
+ADD COLUMN IF NOT EXISTS order_type TEXT DEFAULT 'card',        -- card | request
+ADD COLUMN IF NOT EXISTS buyer_phone TEXT,
+ADD COLUMN IF NOT EXISTS buyer_note TEXT,
+ADD COLUMN IF NOT EXISTS discount_code TEXT,
+ADD COLUMN IF NOT EXISTS discount_amount INTEGER DEFAULT 0,     -- cents
+ADD COLUMN IF NOT EXISTS fulfillment_method TEXT,               -- ship | pickup | market
+ADD COLUMN IF NOT EXISTS tracking_number TEXT,
+ADD COLUMN IF NOT EXISTS fulfillment_note TEXT,
+ADD COLUMN IF NOT EXISTS fulfilled_at TIMESTAMPTZ,
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+-- Curators may only move an order along (fulfillment fields).
+CREATE OR REPLACE FUNCTION public.guard_orders()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF public.is_trusted_writer() THEN
+    NEW.updated_at := NOW();
+    RETURN NEW;
+  END IF;
+  -- Everything except fulfillment details is frozen.
+  NEW := jsonb_populate_record(NEW, to_jsonb(OLD) || jsonb_build_object(
+    'fulfillment_status', NEW.fulfillment_status,
+    'tracking_number', NEW.tracking_number,
+    'fulfillment_note', NEW.fulfillment_note,
+    'fulfilled_at', CASE WHEN NEW.fulfillment_status = 'fulfilled' AND OLD.fulfillment_status IS DISTINCT FROM 'fulfilled'
+                         THEN to_jsonb(NOW()) ELSE to_jsonb(OLD.fulfilled_at) END,
+    'updated_at', to_jsonb(NOW())
+  ));
+  IF NEW.fulfillment_status NOT IN ('new', 'confirmed', 'fulfilled', 'cancelled') THEN
+    NEW.fulfillment_status := OLD.fulfillment_status;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS guard_orders ON orders;
+CREATE TRIGGER guard_orders BEFORE UPDATE ON orders
+FOR EACH ROW EXECUTE FUNCTION public.guard_orders();
+
+DROP POLICY IF EXISTS "Operators view all orders" ON orders;
+CREATE POLICY "Operators view all orders" ON orders
+FOR SELECT TO authenticated USING (public.is_operator());
+
+CREATE INDEX IF NOT EXISTS orders_status_idx ON orders (curator_id, fulfillment_status, created_at DESC);
+
+
+-- ──────────────────────────────────────────────────────────
+-- 3. Discount codes
+--    Curators manage their own; shoppers never read this table —
+--    codes are checked inside the checkout / order functions.
+-- ──────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS discount_codes (
+  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  curator_id UUID NOT NULL REFERENCES curator_data(id) ON DELETE CASCADE DEFAULT auth.uid(),
+  code TEXT NOT NULL,
+  kind TEXT NOT NULL DEFAULT 'percent' CHECK (kind IN ('percent', 'amount')),
+  value NUMERIC(10,2) NOT NULL CHECK (value > 0),
+  min_subtotal NUMERIC(10,2) DEFAULT 0,
+  max_uses INTEGER,
+  uses INTEGER NOT NULL DEFAULT 0,
+  expires_at TIMESTAMPTZ,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS discount_codes_unique ON discount_codes (curator_id, upper(code));
+ALTER TABLE discount_codes ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Curators manage own discount codes" ON discount_codes;
+CREATE POLICY "Curators manage own discount codes" ON discount_codes
+FOR ALL TO authenticated
+USING (curator_id = auth.uid() OR public.is_admin())
+WITH CHECK (curator_id = auth.uid() OR public.is_admin());
+
+-- Curators can't fake usage counts.
+CREATE OR REPLACE FUNCTION public.guard_discount_uses()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  IF NOT public.is_trusted_writer() THEN
+    NEW.uses := CASE WHEN TG_OP = 'INSERT' THEN 0 ELSE OLD.uses END;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS guard_discount_uses ON discount_codes;
+CREATE TRIGGER guard_discount_uses BEFORE INSERT OR UPDATE ON discount_codes
+FOR EACH ROW EXECUTE FUNCTION public.guard_discount_uses();
+
+
+-- ──────────────────────────────────────────────────────────
+-- 4. Inventory — server-side only (called by the order webhook)
+-- ──────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION public.decrement_inventory(p_product_id BIGINT, p_qty INTEGER)
+RETURNS VOID
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  UPDATE products SET inventory = GREATEST(inventory - GREATEST(p_qty, 0), 0)
+  WHERE id = p_product_id AND inventory IS NOT NULL;
+$$;
+REVOKE ALL ON FUNCTION public.decrement_inventory(BIGINT, INTEGER) FROM public, anon, authenticated;
+
+
+-- ──────────────────────────────────────────────────────────
+-- 5. Events
+-- ──────────────────────────────────────────────────────────
+ALTER TABLE market_events
+ADD COLUMN IF NOT EXISTS date_public BOOLEAN DEFAULT FALSE,   -- show the real date/time publicly
+ADD COLUMN IF NOT EXISTS capacity INTEGER,                    -- NULL = unlimited
+ADD COLUMN IF NOT EXISTS rsvp_enabled BOOLEAN DEFAULT TRUE,
+ADD COLUMN IF NOT EXISTS image_url TEXT;
+
+DROP POLICY IF EXISTS "Operators manage events" ON market_events;
+CREATE POLICY "Operators manage events" ON market_events
+FOR ALL TO authenticated USING (public.is_operator() OR public.is_admin())
+WITH CHECK (public.is_operator() OR public.is_admin());
+
+CREATE TABLE IF NOT EXISTS event_registrations (
+  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  event_id UUID NOT NULL REFERENCES market_events(id) ON DELETE CASCADE,
+  full_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  guests INTEGER NOT NULL DEFAULT 1 CHECK (guests BETWEEN 1 AND 10),
+  status TEXT NOT NULL DEFAULT 'confirmed' CHECK (status IN ('confirmed', 'waitlist', 'cancelled')),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS event_registrations_once ON event_registrations (event_id, lower(email));
+ALTER TABLE event_registrations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Team reads registrations" ON event_registrations;
+CREATE POLICY "Team reads registrations" ON event_registrations
+FOR ALL TO authenticated USING (public.is_operator() OR public.is_admin())
+WITH CHECK (public.is_operator() OR public.is_admin());
+
+-- Seats still open (NULL = unlimited).
+CREATE OR REPLACE FUNCTION public.event_spots_left(p_event_id UUID)
+RETURNS INTEGER
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT CASE WHEN e.capacity IS NULL THEN NULL
+              ELSE GREATEST(e.capacity - coalesce((
+                SELECT sum(r.guests) FROM event_registrations r
+                WHERE r.event_id = e.id AND r.status = 'confirmed'), 0), 0)::int END
+  FROM market_events e WHERE e.id = p_event_id;
+$$;
+GRANT EXECUTE ON FUNCTION public.event_spots_left(UUID) TO anon, authenticated;
+
+-- Public RSVP. Returns 'confirmed', 'waitlist', 'already' or 'closed'.
+CREATE OR REPLACE FUNCTION public.register_for_event(
+  p_event_id UUID, p_name TEXT, p_email TEXT, p_guests INTEGER DEFAULT 1, p_trap TEXT DEFAULT NULL)
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  ev market_events;
+  left_ INTEGER;
+  st TEXT;
+BEGIN
+  IF coalesce(p_trap, '') <> '' THEN RETURN 'confirmed'; END IF;           -- bot trap
+  IF p_email !~* '^[^@\s]+@[^@\s]+\.[^@\s]+$' OR length(trim(p_name)) < 2 THEN
+    RAISE EXCEPTION 'Please enter your name and a valid email.';
+  END IF;
+  IF (SELECT count(*) FROM event_registrations WHERE created_at > NOW() - interval '1 minute') > 40 THEN
+    RAISE EXCEPTION 'Lots of people are signing up right now — please try again in a minute.';
+  END IF;
+
+  SELECT * INTO ev FROM market_events WHERE id = p_event_id AND is_active;
+  IF ev.id IS NULL OR NOT coalesce(ev.rsvp_enabled, TRUE) OR ev.event_date < CURRENT_DATE THEN
+    RETURN 'closed';
+  END IF;
+  IF EXISTS (SELECT 1 FROM event_registrations WHERE event_id = p_event_id AND lower(email) = lower(trim(p_email))) THEN
+    RETURN 'already';
+  END IF;
+
+  left_ := public.event_spots_left(p_event_id);
+  st := CASE WHEN left_ IS NULL OR left_ >= greatest(p_guests, 1) THEN 'confirmed' ELSE 'waitlist' END;
+  INSERT INTO event_registrations (event_id, full_name, email, guests, status)
+  VALUES (p_event_id, trim(p_name), lower(trim(p_email)), least(greatest(p_guests, 1), 10), st);
+  RETURN st;
+END;
+$$;
+GRANT EXECUTE ON FUNCTION public.register_for_event(UUID, TEXT, TEXT, INTEGER, TEXT) TO anon, authenticated;
+
+
+-- ──────────────────────────────────────────────────────────
+-- 6. Spam guard + unsubscribe
+--    Forms now call these functions instead of inserting rows
+--    directly. Each checks a bot trap, validates, de-duplicates
+--    and throttles floods.
+-- ──────────────────────────────────────────────────────────
+ALTER TABLE leads
+ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'new',
+ADD COLUMN IF NOT EXISTS source TEXT,
+ADD COLUMN IF NOT EXISTS unsubscribed BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS unsubscribe_token UUID DEFAULT gen_random_uuid();
+UPDATE leads SET unsubscribe_token = gen_random_uuid() WHERE unsubscribe_token IS NULL;
+
+CREATE OR REPLACE FUNCTION public.subscribe_lead(
+  p_name TEXT, p_email TEXT, p_phone TEXT DEFAULT NULL, p_source TEXT DEFAULT 'site', p_trap TEXT DEFAULT NULL)
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF coalesce(p_trap, '') <> '' THEN RETURN 'ok'; END IF;
+  IF p_email !~* '^[^@\s]+@[^@\s]+\.[^@\s]+$' OR length(trim(coalesce(p_name, ''))) < 2 THEN
+    RAISE EXCEPTION 'Please enter your name and a valid email.';
+  END IF;
+  IF (SELECT count(*) FROM leads WHERE created_at > NOW() - interval '1 minute') > 30 THEN
+    RAISE EXCEPTION 'Please try again in a minute.';
+  END IF;
+  IF EXISTS (SELECT 1 FROM leads WHERE lower(email) = lower(trim(p_email))) THEN
+    UPDATE leads SET unsubscribed = FALSE WHERE lower(email) = lower(trim(p_email));
+    RETURN 'ok';
+  END IF;
+  INSERT INTO leads (full_name, email, phone, source)
+  VALUES (trim(p_name), lower(trim(p_email)), nullif(trim(coalesce(p_phone, '')), ''), left(coalesce(p_source, 'site'), 40));
+  RETURN 'ok';
+END;
+$$;
+GRANT EXECUTE ON FUNCTION public.subscribe_lead(TEXT, TEXT, TEXT, TEXT, TEXT) TO anon, authenticated;
+
+CREATE OR REPLACE FUNCTION public.unsubscribe_lead(p_token UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  UPDATE leads SET unsubscribed = TRUE WHERE unsubscribe_token = p_token RETURNING TRUE;
+$$;
+GRANT EXECUTE ON FUNCTION public.unsubscribe_lead(UUID) TO anon, authenticated;
+
+CREATE OR REPLACE FUNCTION public.submit_partnership(
+  p_name TEXT, p_email TEXT, p_phone TEXT, p_type TEXT, p_message TEXT, p_trap TEXT DEFAULT NULL)
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF coalesce(p_trap, '') <> '' THEN RETURN 'ok'; END IF;
+  IF p_email !~* '^[^@\s]+@[^@\s]+\.[^@\s]+$' OR length(trim(coalesce(p_name, ''))) < 2 THEN
+    RAISE EXCEPTION 'Please enter your name and a valid email.';
+  END IF;
+  IF (SELECT count(*) FROM partnerships WHERE lower(email) = lower(trim(p_email)) AND created_at > NOW() - interval '1 hour') >= 3
+     OR (SELECT count(*) FROM partnerships WHERE created_at > NOW() - interval '1 minute') > 10 THEN
+    RAISE EXCEPTION 'We already received your message — we''ll be in touch soon.';
+  END IF;
+  INSERT INTO partnerships (full_name, email, phone, partnership_type, message)
+  VALUES (trim(p_name), lower(trim(p_email)), nullif(trim(coalesce(p_phone, '')), ''),
+          coalesce(nullif(p_type, ''), 'Strategic'), left(coalesce(p_message, ''), 4000));
+  RETURN 'ok';
+END;
+$$;
+GRANT EXECUTE ON FUNCTION public.submit_partnership(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT) TO anon, authenticated;
+
+-- Close the old "anyone can insert" doors (the functions above replace them).
+DROP POLICY IF EXISTS "Anyone can insert leads" ON leads;
+DROP POLICY IF EXISTS "Enable insert for everyone" ON partnerships;
+
+-- Team can read leads (admins already could).
+DROP POLICY IF EXISTS "Operators read leads" ON leads;
+CREATE POLICY "Operators read leads" ON leads
+FOR SELECT TO authenticated USING (public.is_operator());
+
+
+-- ──────────────────────────────────────────────────────────
+-- 7. Campaigns + AI usage
+-- ──────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS campaigns (
+  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL DEFAULT auth.uid(),
+  subject TEXT NOT NULL,
+  body TEXT NOT NULL,                 -- plain text / light markdown
+  audience TEXT NOT NULL DEFAULT 'subscribers' CHECK (audience IN ('subscribers', 'curators', 'everyone')),
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'sending', 'sent', 'failed')),
+  sent_count INTEGER DEFAULT 0,
+  error TEXT,
+  sent_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Operators manage campaigns" ON campaigns;
+CREATE POLICY "Operators manage campaigns" ON campaigns
+FOR ALL TO authenticated USING (public.is_operator()) WITH CHECK (public.is_operator());
+
+CREATE TABLE IF NOT EXISTS ai_usage (
+  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  task TEXT,
+  input_tokens INTEGER,
+  output_tokens INTEGER,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ai_usage_user_day ON ai_usage (user_id, created_at DESC);
+ALTER TABLE ai_usage ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Operators read ai usage" ON ai_usage;
+CREATE POLICY "Operators read ai usage" ON ai_usage
+FOR SELECT TO authenticated USING (public.is_operator() OR user_id = auth.uid());
+
+
+-- ──────────────────────────────────────────────────────────
+-- 8. Discount maths — one source of truth for the bag preview,
+--    order requests and card checkout. Amounts in cents.
+-- ──────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION public.compute_discount(p_curator_id UUID, p_code TEXT, p_subtotal_cents INTEGER)
+RETURNS JSONB
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  d discount_codes;
+  amt INTEGER;
+BEGIN
+  IF coalesce(trim(p_code), '') = '' THEN
+    RETURN jsonb_build_object('ok', false, 'amount_cents', 0, 'message', '');
+  END IF;
+  SELECT * INTO d FROM discount_codes
+  WHERE curator_id = p_curator_id AND upper(code) = upper(trim(p_code)) AND active;
+  IF d.id IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'amount_cents', 0, 'message', 'That code isn’t valid for this shop.');
+  END IF;
+  IF d.expires_at IS NOT NULL AND d.expires_at < NOW() THEN
+    RETURN jsonb_build_object('ok', false, 'amount_cents', 0, 'message', 'That code has expired.');
+  END IF;
+  IF d.max_uses IS NOT NULL AND d.uses >= d.max_uses THEN
+    RETURN jsonb_build_object('ok', false, 'amount_cents', 0, 'message', 'That code has been fully redeemed.');
+  END IF;
+  IF p_subtotal_cents < round(coalesce(d.min_subtotal, 0) * 100) THEN
+    RETURN jsonb_build_object('ok', false, 'amount_cents', 0,
+      'message', 'Spend $' || to_char(d.min_subtotal, 'FM999990.00') || ' or more to use this code.');
+  END IF;
+  amt := CASE WHEN d.kind = 'percent' THEN round(p_subtotal_cents * least(d.value, 100) / 100.0)
+              ELSE round(d.value * 100) END;
+  amt := least(amt, greatest(p_subtotal_cents - 50, 0));   -- never below the 50¢ card minimum
+  RETURN jsonb_build_object('ok', true, 'amount_cents', amt, 'code', upper(d.code),
+    'message', CASE WHEN d.kind = 'percent' THEN trim(to_char(d.value, 'FM990.##')) || '% off'
+                    ELSE '$' || to_char(d.value, 'FM999990.00') || ' off' END);
+END;
+$$;
+GRANT EXECUTE ON FUNCTION public.compute_discount(UUID, TEXT, INTEGER) TO anon, authenticated;
+
+-- Bump a code's usage (server-side only).
+CREATE OR REPLACE FUNCTION public.redeem_discount(p_curator_id UUID, p_code TEXT)
+RETURNS VOID
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  UPDATE discount_codes SET uses = uses + 1
+  WHERE curator_id = p_curator_id AND upper(code) = upper(trim(p_code));
+$$;
+REVOKE ALL ON FUNCTION public.redeem_discount(UUID, TEXT) FROM public, anon, authenticated;
+
+-- Stock follows the order: it's taken when an order starts "holding" stock
+-- (a confirmed request, or a paid card order) and given back if the order
+-- is cancelled. Card orders are first taken by the payment webhook.
+CREATE OR REPLACE FUNCTION public.restock(p_product_id BIGINT, p_qty INTEGER)
+RETURNS VOID
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  UPDATE products SET inventory = inventory + GREATEST(p_qty, 0)
+  WHERE id = p_product_id AND inventory IS NOT NULL;
+$$;
+REVOKE ALL ON FUNCTION public.restock(BIGINT, INTEGER) FROM public, anon, authenticated;
+
+CREATE OR REPLACE FUNCTION public.order_holds_stock(o orders)
+RETURNS BOOLEAN
+LANGUAGE sql
+IMMUTABLE
+AS $$
+  SELECT CASE
+    WHEN o.fulfillment_status = 'cancelled' THEN FALSE
+    WHEN o.order_type = 'request' THEN o.fulfillment_status IN ('confirmed', 'fulfilled')
+    ELSE o.payment_status = 'paid'
+  END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.on_order_confirmed()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  it JSONB;
+  was BOOLEAN := public.order_holds_stock(OLD);
+  now_ BOOLEAN := public.order_holds_stock(NEW);
+BEGIN
+  IF was = now_ THEN RETURN NEW; END IF;
+  FOR it IN SELECT * FROM jsonb_array_elements(coalesce(NEW.items, '[]'::jsonb)) LOOP
+    IF now_ THEN
+      PERFORM public.decrement_inventory((it->>'product_id')::bigint, coalesce((it->>'quantity')::int, 1));
+    ELSE
+      PERFORM public.restock((it->>'product_id')::bigint, coalesce((it->>'quantity')::int, 1));
+    END IF;
+  END LOOP;
+  RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS on_order_confirmed ON orders;
+CREATE TRIGGER on_order_confirmed AFTER UPDATE OF fulfillment_status ON orders
+FOR EACH ROW EXECUTE FUNCTION public.on_order_confirmed();
+
+-- Live updates for the Orders screens.
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE orders;
+EXCEPTION WHEN duplicate_object OR undefined_object THEN NULL;
+END $$;

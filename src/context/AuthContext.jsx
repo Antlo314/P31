@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data: profileData, error: pError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, full_name, avatar_url, created_at')
         .eq('id', userId)
         .single();
       

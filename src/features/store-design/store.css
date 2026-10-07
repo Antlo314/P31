@@ -1,0 +1,54 @@
+/* ============================================================
+   Storefront templates (Store Design). Each template sets the
+   storefront's colour variables; the other classes switch
+   headings, cards, buttons and hero treatment.
+   Applied to the .sf root by CuratorProfile via designAttrs().
+   ============================================================ */
+
+/* Atelier is the default palette in CuratorProfile.css. */
+.store-tpl-boutique {
+  --sf-bg: #FFFAF3; --sf-surface: #FFFFFF; --sf-soft: #F5ECDD;
+  --sf-ink: #2B2116; --sf-ink-2: #5C4B38; --sf-muted: #7D6A55; --sf-line: #EADCC6;
+}
+.store-tpl-gallery {
+  --sf-bg: #FFFFFF; --sf-surface: #FFFFFF; --sf-soft: #F4F4F4;
+  --sf-ink: #111111; --sf-ink-2: #3D3D3D; --sf-muted: #6B6B6B; --sf-line: #E6E6E6;
+}
+.store-tpl-editorial {
+  --sf-bg: #F6F1EA; --sf-surface: #FFFDF9; --sf-soft: #ECE3D6;
+  --sf-ink: #1F1A24; --sf-ink-2: #4A4250; --sf-muted: #6E6574; --sf-line: #DDD2C3;
+}
+.store-tpl-market {
+  --sf-bg: #F6FFF9; --sf-surface: #FFFFFF; --sf-soft: #E3F7EC;
+  --sf-ink: #10291C; --sf-ink-2: #2F4A3B; --sf-muted: #567061; --sf-line: #CFEEDD;
+}
+.store-tpl-noir {
+  --sf-bg: #120A1A; --sf-surface: #1B1026; --sf-soft: #241536;
+  --sf-ink: #F4EEF8; --sf-ink-2: #CBBFD6; --sf-muted: #A99BB6; --sf-line: rgba(255, 255, 255, 0.1);
+  --sf-on-accent: #120A1A;
+}
+
+/* Headings */
+.store-head-sans { --sf-head: var(--font-body); --sf-head-weight: 800; }
+.store-head-serif { --sf-head: var(--font-heading); --sf-head-weight: 400; }
+
+/* Hero */
+.store-hero-tall .sf-hero.has-banner { min-height: 72svh; display: flex; align-items: flex-end; }
+.store-hero-minimal .sf-hero__bg { display: none; }
+.store-hero-minimal .sf-hero.has-banner { color: var(--sf-ink); background: linear-gradient(180deg, color-mix(in srgb, var(--sf-accent) 14%, var(--sf-bg)), var(--sf-bg)); min-height: 0; }
+.store-hero-minimal .sf-hero.has-banner::after { display: none; }
+.store-hero-minimal .sf-hero.has-banner h1 { color: var(--sf-ink); }
+.store-hero-minimal .sf-hero.has-banner .sf-tagline { color: var(--sf-ink-2); }
+.store-hero-minimal .sf-hero.has-banner .sf-chip,
+.store-hero-minimal .sf-hero.has-banner .sf-social a,
+.store-hero-minimal .sf-hero.has-banner .sf-badges span { color: var(--sf-ink); background: var(--sf-surface); border-color: var(--sf-line); }
+
+/* Product cards */
+.store-cards-framed .sf-card { padding: 8px; border-radius: calc(var(--sf-radius) - 6px); background: var(--sf-surface); border: 1px solid var(--sf-line); }
+.store-cards-framed .sf-card__img { border-radius: 8px; }
+.store-cards-minimal { --sf-radius: 0px; }
+
+/* Buttons */
+.store-btn-pill { --sf-btn-radius: 999px; }
+.store-btn-rounded { --sf-btn-radius: 14px; }
+.store-btn-square { --sf-btn-radius: 2px; }

@@ -1,21 +1,35 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
-import About from './pages/About';
-import Calendar from './pages/Calendar';
-import Directory from './pages/Directory';
-import CuratorProfile from './pages/CuratorProfile';
-import Partner from './pages/Partner';
-import Community from './pages/Community';
-import Login from './pages/Login';
-import CuratorDashboard from './pages/CuratorDashboard';
-import Onboarding from './pages/Onboarding';
-import Services from './pages/Services';
 import LeadPopup from './components/LeadPopup';
+import CartSheet from './components/CartSheet';
 import OfferTicker from './components/OfferTicker';
 import AnnouncementBanner from './components/AnnouncementBanner';
+import { ROUTE_META, SITE_NAME, applyMeta } from './lib/seo';
+import { isFlushRoute } from './lib/routes';
+import MotionRoot from './components/MotionRoot';
+
+// Everything but the landing page loads on demand, so phones only download
+// what they open.
+const About = lazy(() => import('./pages/About'));
+const Calendar = lazy(() => import('./pages/Calendar'));
+const Directory = lazy(() => import('./pages/Directory'));
+const CuratorProfile = lazy(() => import('./pages/CuratorProfile'));
+const Partner = lazy(() => import('./pages/Partner'));
+const Login = lazy(() => import('./pages/Login'));
+const CuratorDashboard = lazy(() => import('./pages/CuratorDashboard'));
+const Onboarding = lazy(() => import('./pages/Onboarding'));
+const Services = lazy(() => import('./pages/Services'));
+const Unsubscribe = lazy(() => import('./pages/Unsubscribe'));
+const Shop = lazy(() => import('./pages/Shop'));
+
+// The team console is its own app: loaded only when someone opens it,
+// and drawn without the public site's header, footer and popups.
+const SystemsApp = lazy(() => import('./systems/SystemsApp'));
+// Dev-only studio test bench; compiled out of production builds.
+const Lab = import.meta.env.DEV ? lazy(() => import('./dev/Lab')) : null;
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -25,15 +39,30 @@ const ScrollToTop = () => {
   return null;
 }
 
-function App() {
+// Title / description / share card for fixed pages (storefronts set their own).
+const RouteMeta = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const key = pathname.replace(/\/+$/, '') || '/';
+    if (ROUTE_META[key]) applyMeta({ ...ROUTE_META[key], path: key });
+    else if (key.startsWith('/dashboard') || key === '/onboarding-exclusive') {
+      applyMeta({ title: `Curator studio — ${SITE_NAME}`, description: ROUTE_META['/'].description, noindex: true });
+    }
+  }, [pathname]);
+  return null;
+};
+
+function SiteRoutes() {
+  const { pathname } = useLocation();
   return (
-    <Router>
-      <ScrollToTop />
-      <div className="app-container">
-        <AnnouncementBanner />
-        <OfferTicker />
-        <Navbar />
-        <main>
+    <div className="app-container">
+      <AnnouncementBanner />
+      <OfferTicker />
+      <Navbar />
+      <RouteMeta />
+      <MotionRoot />
+      <main className={`site-main ${isFlushRoute(pathname) ? 'is-flush' : ''}`}>
+        <Suspense fallback={<div aria-busy="true" style={{ minHeight: '70vh' }} />}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
@@ -45,13 +74,37 @@ function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/dashboard/*" element={<CuratorDashboard />} />
             <Route path="/onboarding-exclusive" element={<Onboarding />} />
+            <Route path="/unsubscribe" element={<Unsubscribe />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/favorites" element={<Shop favoritesOnly />} />
             {/* Vanity URL Catch-all: /popcorn or /id */}
             <Route path="/:id" element={<CuratorProfile />} />
           </Routes>
-        </main>
-        <Footer />
-        <LeadPopup />
-      </div>
+        </Suspense>
+      </main>
+      <Footer />
+      <LeadPopup />
+      <CartSheet />
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <ScrollToTop />
+      <Routes>
+        <Route
+          path="/systems/*"
+          element={
+            <Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#12081d' }} />}>
+              <SystemsApp />
+            </Suspense>
+          }
+        />
+        {Lab && <Route path="/__lab" element={<Suspense fallback={null}><Lab /></Suspense>} />}
+        <Route path="/*" element={<SiteRoutes />} />
+      </Routes>
     </Router>
   );
 }

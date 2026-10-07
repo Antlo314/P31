@@ -23,3 +23,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local-only test media for the /__lab dev page
+public/__lab/
+
+# Iris bridge secrets (service role key) — never commit
+tools/.env.iris

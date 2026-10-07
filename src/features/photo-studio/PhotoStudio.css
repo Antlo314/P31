@@ -1,0 +1,139 @@
+/* Photo Studio — same dark studio surface as Clip Studio. Prefix: ps- */
+.ps {
+  --ps-bg: #160a24;
+  --ps-panel: #22123a;
+  --ps-line: rgba(255, 255, 255, 0.1);
+  --ps-dim: rgba(255, 255, 255, 0.66);
+  --ps-gold: #F2CE4D;
+  position: relative;
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 24px;
+  background: var(--ps-bg);
+  color: #fff;
+  font-family: var(--font-body, Manrope, system-ui, sans-serif);
+}
+.ps-close {
+  position: absolute; top: 10px; right: 10px; z-index: 3;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid var(--ps-line); background: rgba(0, 0, 0, 0.4); color: #fff;
+  display: grid; place-items: center; cursor: pointer;
+}
+.ps-drop {
+  display: grid; place-items: center; gap: 6px; text-align: center;
+  padding: 48px 20px; border-radius: 18px; cursor: pointer;
+  border: 1.5px dashed rgba(242, 206, 77, 0.5); background: rgba(242, 206, 77, 0.06);
+}
+.ps-drop svg { color: var(--ps-gold); }
+.ps-drop span { color: var(--ps-dim); font-size: 0.88rem; max-width: 32ch; }
+
+.ps-preview {
+  position: relative;
+  display: grid; place-items: center;
+  border-radius: 18px; overflow: hidden;
+  background: #0d0616;
+  min-height: 200px;
+}
+.ps-preview canvas {
+  display: block; width: 100%; height: auto; max-height: 58vh; object-fit: contain;
+}
+.ps-preview canvas.is-checker {
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, #ddd 25%, transparent 25%), linear-gradient(-45deg, #ddd 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ddd 75%), linear-gradient(-45deg, transparent 75%, #ddd 75%);
+  background-size: 24px 24px;
+  background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+}
+.ps-busy {
+  position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px;
+  background: rgba(13, 6, 22, 0.72); backdrop-filter: blur(4px); text-align: center; padding: 16px;
+}
+.ps-spinner {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.15); border-top-color: var(--ps-gold);
+  animation: ps-spin 0.9s linear infinite;
+}
+@keyframes ps-spin { to { transform: rotate(360deg); } }
+.ps-progress { width: 220px; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.ps-progress span { display: block; height: 100%; background: linear-gradient(90deg, #A855E8, var(--ps-gold)); }
+
+.ps-error {
+  display: flex; gap: 8px; margin: 0; padding: 12px; border-radius: 12px;
+  background: rgba(255, 90, 90, 0.14); border: 1px solid rgba(255, 90, 90, 0.4); color: #ffd6d6; font-size: 0.9rem;
+}
+.ps-note { display: flex; gap: 6px; align-items: center; margin: 0; color: var(--ps-dim); font-size: 0.88rem; }
+
+.ps-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: var(--ps-panel); padding: 4px; border-radius: 14px; }
+.ps-tabs button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 44px; border-radius: 10px; border: 0; background: transparent; color: var(--ps-dim);
+  font: inherit; font-weight: 700; cursor: pointer;
+}
+.ps-tabs button.is-on { background: rgba(242, 206, 77, 0.14); color: var(--ps-gold); }
+
+.ps-panel { display: grid; gap: 12px; background: var(--ps-panel); border: 1px solid var(--ps-line); border-radius: 16px; padding: 14px; }
+
+.ps-stages { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ps-stage {
+  display: grid; gap: 6px; justify-items: center; text-align: center;
+  padding: 8px 4px 10px; border-radius: 12px; cursor: pointer;
+  background: rgba(255, 255, 255, 0.04); border: 1.5px solid transparent; color: #fff;
+  font: inherit; font-size: 0.74rem; font-weight: 600;
+}
+.ps-stage.is-on { border-color: var(--ps-gold); background: rgba(242, 206, 77, 0.1); }
+.ps-stage__sw { width: 100%; aspect-ratio: 1; border-radius: 8px; border: 1px solid var(--ps-line); }
+.ps-stage--original .ps-stage__sw { background: linear-gradient(135deg, #8b7a6a, #3d342c); }
+.ps-stage--transparent .ps-stage__sw { background: repeating-conic-gradient(#ddd 0 25%, #fff 0 50%) 0 0 / 12px 12px; }
+.ps-stage--white .ps-stage__sw { background: #fff; }
+.ps-stage--studio .ps-stage__sw { background: radial-gradient(circle at 50% 40%, #f7f6f8, #c9c6ce); }
+.ps-stage--blush .ps-stage__sw { background: linear-gradient(135deg, #fbf3ff, #ecddfa 55%, #f6d9e6); }
+.ps-stage--linen .ps-stage__sw { background: linear-gradient(#f4ece0, #e6d8c4); }
+.ps-stage--marble .ps-stage__sw { background: linear-gradient(120deg, #fbfaf8 40%, #cfcad3 42%, #fbfaf8 46%, #ebe8e4); }
+.ps-stage--botanical .ps-stage__sw { background: radial-gradient(ellipse at 80% 20%, rgba(60, 70, 40, 0.3), transparent 50%), linear-gradient(135deg, #fbf6ec, #efe4d0); }
+.ps-stage--pedestal .ps-stage__sw { background: linear-gradient(transparent 60%, #F2CE4D 60% 63%, #4a1f78 63%), radial-gradient(circle at 50% 35%, #6b3299, #1d0f2e); }
+.ps-stage--night .ps-stage__sw { background: radial-gradient(circle at 50% 50%, rgba(242, 206, 77, 0.45), transparent 55%), linear-gradient(#2a1544, #12081d); }
+.ps-stage--emerald .ps-stage__sw { background: radial-gradient(circle at 50% 35%, #2bb07c, #0f3d28); }
+@media (min-width: 640px) { .ps-stages { grid-template-columns: repeat(6, 1fr); } }
+
+.ps-filters, .ps-outputs { display: flex; flex-wrap: wrap; gap: 6px; }
+.ps-chip {
+  min-height: 40px; padding: 0 14px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--ps-line); background: rgba(255, 255, 255, 0.04); color: #fff;
+  font: inherit; font-size: 0.85rem; font-weight: 600;
+}
+.ps-chip span { color: var(--ps-dim); font-weight: 500; }
+.ps-chip.is-on { border-color: var(--ps-gold); background: rgba(242, 206, 77, 0.14); color: var(--ps-gold); }
+.ps-slider { display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--ps-dim); }
+.ps-slider input { accent-color: var(--ps-gold); width: 100%; }
+.ps-linkbtn { justify-self: start; background: none; border: 0; color: var(--ps-gold); font: inherit; font-weight: 700; cursor: pointer; padding: 6px 0; }
+
+.ps-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+.ps-btn {
+  flex: 1 1 auto;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 50px; padding: 0 16px; border-radius: 999px; cursor: pointer;
+  border: 1px solid transparent; font: inherit; font-weight: 800; font-size: 0.92rem;
+}
+.ps-btn--gold { background: linear-gradient(135deg, #F2CE4D, #D9A93A); color: #2a1a00; }
+.ps-btn--gold:disabled { opacity: 0.5; cursor: progress; }
+.ps-btn--ghost { background: rgba(255, 255, 255, 0.06); border-color: var(--ps-line); color: #fff; }
+
+/* Batch */
+.ps-btn.is-disabled { opacity: 0.5; pointer-events: none; }
+.ps-batch { display: grid; gap: 10px; background: var(--ps-panel); border: 1px solid var(--ps-line); border-radius: 16px; padding: 14px; }
+.ps-batch header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ps-batch header strong { display: flex; align-items: center; gap: 8px; }
+.ps-batch__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.ps-batch__item { position: relative; margin: 0; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--ps-line); }
+.ps-batch__item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ps-batch__item.is-error { border-color: rgba(255, 120, 120, 0.5); }
+.ps-batch__ph { position: absolute; inset: 0; display: grid; place-items: center; font-size: 0.75rem; color: var(--ps-dim); }
+.ps-batch__ph .ps-spinner { width: 22px; height: 22px; }
+.ps-batch__item figcaption { position: absolute; right: 6px; bottom: 6px; display: flex; gap: 6px; }
+.ps-batch__item figcaption a, .ps-batch__item figcaption button {
+  width: 32px; height: 32px; display: grid; place-items: center; border-radius: 10px; border: 0; cursor: pointer;
+  background: rgba(20, 10, 30, 0.75); color: #fff; backdrop-filter: blur(6px);
+}
+.ps-batch__item figcaption button:disabled { color: #F2CE4D; }

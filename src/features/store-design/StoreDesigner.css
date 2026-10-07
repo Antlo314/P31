@@ -1,0 +1,60 @@
+/* Store designer (dashboard). Light surface to match the curator studio. */
+.sd { display: grid; gap: 20px; }
+@media (min-width: 1000px) { .sd { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; } }
+.sd-controls { display: grid; gap: 18px; }
+.sd-controls section {
+  display: grid; gap: 10px; padding: 16px; border-radius: 18px;
+  background: #fff; border: 1px solid var(--outline-variant);
+}
+.sd h3 {
+  display: flex; align-items: center; gap: 6px; margin: 0;
+  font-family: var(--font-body); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dark-plum);
+}
+.sd-templates { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr)); gap: 10px; }
+.sd-tpl {
+  display: grid; gap: 6px; text-align: left; align-content: start;
+  padding: 12px; border-radius: 14px; cursor: pointer; font: inherit;
+  background: var(--surface-alt); border: 2px solid transparent; color: var(--on-surface);
+}
+.sd-tpl.is-on { border-color: var(--metallic-gold); background: #fff; box-shadow: 0 10px 24px -14px rgba(94, 42, 140, 0.45); }
+.sd-tpl__sw { display: flex; height: 34px; border-radius: 8px; overflow: hidden; border: 1px solid var(--outline-variant); }
+.sd-tpl__sw i { flex: 1; }
+.sd-tpl strong { font-size: 0.95rem; }
+.sd-tpl span:last-child { font-size: 0.78rem; color: var(--on-surface-muted); line-height: 1.35; }
+.sd-accents { display: flex; flex-wrap: wrap; gap: 8px; }
+.sd-accent {
+  width: 38px; height: 38px; border-radius: 50%; cursor: pointer;
+  border: 3px solid #fff; box-shadow: 0 0 0 1px var(--outline);
+}
+.sd-accent.is-on { box-shadow: 0 0 0 3px var(--metallic-gold); }
+.sd-accent--custom {
+  position: relative; overflow: hidden;
+  background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+}
+.sd-accent--custom input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.sd-seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.sd-seg button {
+  min-height: 40px; padding: 0 14px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 0.86rem; font-weight: 600;
+  background: var(--surface-alt); border: 1px solid var(--outline-variant); color: var(--on-surface);
+}
+.sd-seg button.is-on { background: var(--dark-plum); border-color: var(--dark-plum); color: #fff; }
+.sd-toggle { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 0; cursor: pointer; }
+.sd-toggle input { width: 20px; height: 20px; accent-color: var(--dark-plum); }
+
+.sd-side { display: grid; gap: 12px; }
+@media (min-width: 1000px) { .sd-side { position: sticky; top: 24px; } }
+.sd-save { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.sd-error { color: #b42318; margin: 0; font-size: 0.88rem; }
+.sd-view { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; color: var(--dark-plum); }
+
+.sd-prev {
+  border-radius: 18px; overflow: hidden; padding-bottom: 14px;
+  border: 1px solid var(--outline-variant); box-shadow: 0 20px 40px -24px rgba(29, 15, 46, 0.4);
+}
+.sd-prev__hero { display: grid; place-items: end start; padding: 12px; color: #fff; font-size: 1.05rem; }
+.sd-prev__grid { display: grid; gap: 8px; padding: 12px; }
+.sd-prev__img { aspect-ratio: 4 / 5; background-size: cover; background-position: center; }
+.sd-prev__price { height: 6px; width: 40%; margin-top: 6px; border-radius: 3px; }
+.sd-prev__about { height: 40px; margin: 6px 12px; border-radius: 8px; border: 1px solid; }
+.sd-prev__btn { height: 18px; width: 50%; margin: 6px auto 0; }

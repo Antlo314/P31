@@ -1492,3 +1492,157 @@
   .payment-nudge-banner { flex-direction: column; text-align: center; }
   .payment-nudge-text { align-items: center; }
 }
+
+/* ── Creative Studio / Store Design / Pro Edit (2026) ───────── */
+.studio-switch {
+  display: inline-flex; gap: 4px; padding: 4px; margin-bottom: 1.25rem;
+  border-radius: 999px; background: var(--surface-container-low); border: 1px solid var(--outline-variant);
+}
+.studio-switch button {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 44px; padding: 0 18px; border-radius: 999px; border: 0; cursor: pointer;
+  background: transparent; color: var(--on-surface-variant); font: inherit; font-weight: 700;
+}
+.studio-switch button.is-on { background: var(--dark-plum); color: #fff; }
+
+.studio-modal { z-index: 2000; padding: 12px; align-items: flex-start; overflow-y: auto; }
+.studio-modal__panel { width: min(100%, 720px); margin: auto; }
+
+.nav-premium-tag {
+  margin-left: auto; padding: 1px 8px; border-radius: 999px;
+  font-size: 0.62rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+  background: rgba(242, 206, 77, 0.2); color: #8a6d1a;
+}
+.premium-upsell { display: grid; gap: 12px; justify-items: start; padding: 2rem; max-width: 640px; }
+.premium-upsell p { margin: 0; }
+
+.product-visible-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 0.5rem; font-weight: 600; }
+.product-visible-toggle input { width: 18px; height: 18px; accent-color: var(--dark-plum); }
+.product-prestige-ribbon.hidden-ribbon { background: #555 !important; color: #fff !important; }
+
+/* ============================================================
+   2026 LAYOUT — works with the site's fixed top bar.
+   Desktop: sidebar sits below the bar. Phones: the studio nav
+   becomes a sticky, swipeable row of pills; dialogs become
+   bottom sheets.
+   ============================================================ */
+.dashboard-sidebar {
+  top: var(--nb-h, 64px);
+  height: calc(100vh - var(--nb-h, 64px));
+  overflow-y: auto;
+}
+/* The public bottom tab bar is hidden inside the studio. */
+.app-container:has(.dashboard-container) { padding-bottom: 0; }
+
+@media (max-width: 900px) {
+  .dashboard-container { flex-direction: column; }
+
+  .dashboard-sidebar {
+    position: sticky;
+    top: var(--nb-h, 64px);
+    z-index: 60;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    padding: 10px 0;
+    background: rgba(29, 15, 46, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 10px 24px -18px rgba(0, 0, 0, 0.6);
+  }
+  .sidebar-brand, .sidebar-footer { display: none !important; }
+
+  .sidebar-nav {
+    display: flex;
+    gap: 6px;
+    padding: 0 12px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .sidebar-nav::-webkit-scrollbar { display: none; }
+  .sidebar-nav .nav-item,
+  .sidebar-nav .nav-item-with-badge .nav-item {
+    flex: none;
+    width: auto;
+    gap: 8px;
+    padding: 9px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+    scroll-snap-align: start;
+    color: rgba(255, 255, 255, 0.78);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .sidebar-nav .nav-item svg { width: 16px; height: 16px; }
+  .sidebar-nav .nav-item.active {
+    background: var(--gold-light);
+    border-color: var(--gold-light) !important;
+    color: #2a1a00;
+  }
+  .sidebar-nav .nav-item-with-badge { display: contents; }
+  .sidebar-construction-tag { display: none; }
+  .nav-premium-tag { margin-left: 2px; }
+
+  .dashboard-main { padding: 20px 16px 48px; max-width: 100%; }
+  .dashboard-header { margin-bottom: 1.5rem; }
+  .dashboard-header h1 { font-size: clamp(1.7rem, 7vw, 2.2rem) !important; line-height: 1.1; }
+  .dashboard-card { padding: 1.25rem !important; border-radius: 20px !important; }
+  .form-row-grid { grid-template-columns: 1fr !important; }
+
+  /* Dialogs → bottom sheets */
+  .modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+  .modal-overlay > .modal-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92dvh;
+    overflow-y: auto;
+    border-radius: 26px 26px 0 0 !important;
+    padding: 22px 18px calc(22px + env(safe-area-inset-bottom)) !important;
+    animation: dash-sheet-up 0.4s var(--ease-fluid) both;
+  }
+  .studio-modal { padding: 0 !important; align-items: flex-end !important; }
+  .studio-modal__panel { width: 100%; margin: 0; max-height: 96dvh; overflow-y: auto; }
+  .studio-modal__panel .ps { border-radius: 26px 26px 0 0; }
+}
+@keyframes dash-sheet-up { from { transform: translateY(100%); } }
+.variant-row { display: grid; grid-template-columns: 1fr 1.4fr auto; gap: 8px; align-items: center; margin-top: 8px; }
+@media (max-width: 520px) { .variant-row { grid-template-columns: 1fr auto; } .variant-row input:nth-child(2) { grid-column: 1; } .variant-row button { grid-row: 1; grid-column: 2; } }
+
+/* ============================================================
+   BRAND KIT ALIGNMENT — same night plum, gold and ivory as the
+   public site; arch motif on avatars and active states.
+   ============================================================ */
+.dashboard-container { background: var(--ivory); }
+.dashboard-sidebar { background: var(--night-bg); border-right-color: rgba(242, 206, 77, 0.12); isolation: isolate; }
+.dashboard-sidebar::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--grain); mix-blend-mode: overlay; pointer-events: none; }
+.sidebar-brand span { font-family: var(--font-heading); font-weight: 400; }
+.nav-item { border-left: 0 !important; margin: 2px 14px; width: calc(100% - 28px); padding: 12px 16px; border-radius: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.62); }
+.nav-item:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+.nav-item.active { background: rgba(242, 206, 77, 0.12); color: var(--gold-hi); box-shadow: inset 0 0 0 1px rgba(242, 206, 77, 0.28); }
+.logout-btn { border-radius: 999px; min-height: 44px; justify-content: center; }
+
+.dashboard-header h1 { font-family: var(--font-heading); font-weight: 400; font-size: clamp(2.2rem, 1.6rem + 2.4vw, 3.4rem); letter-spacing: -0.025em; color: var(--plum); line-height: 1; }
+.dashboard-header p { color: var(--ink-2); font-weight: 500; opacity: 1; }
+.dashboard-header .section-kicker { color: var(--gold-text); }
+.section-kicker::before { background: linear-gradient(90deg, var(--gold), var(--gold-hi)); }
+
+.dashboard-card { border-radius: var(--r-lg) !important; border-color: var(--line) !important; box-shadow: var(--shadow-1) !important; }
+.card-title { font-weight: 400; color: var(--plum); border-bottom-color: var(--line); }
+.premium-form input, .premium-form select, .premium-form textarea,
+.dashboard-form input, .dashboard-form select, .dashboard-form textarea {
+  border-radius: 14px; border: 1px solid var(--line-2); background: #fff; min-height: 48px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.premium-form :is(input, select, textarea):focus, .dashboard-form :is(input, select, textarea):focus {
+  outline: 0; border-color: var(--plum); box-shadow: 0 0 0 4px rgba(168, 85, 232, 0.16);
+}
+.product-card { border-radius: var(--r-lg); border: 1px solid var(--line); box-shadow: var(--shadow-1); transition: transform 0.45s var(--ease-fluid), box-shadow 0.45s var(--ease-fluid); }
+@media (hover: hover) { .product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-2); } }
+.avatar-preview-wrapper, .avatar-preview { border-radius: 999px 999px 18px 18px !important; }
+.studio-switch { background: var(--mist); border-color: var(--line); }
+.studio-switch button.is-on { background: var(--plum); }
+.payment-nudge-banner { border-radius: var(--r-lg); }
+.modal-content { border-radius: var(--r-xl); }

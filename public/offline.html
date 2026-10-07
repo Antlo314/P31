@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#1d0f2e" />
+<title>Offline — Proverbs 31 Marketplace</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; box-sizing: border-box;
+    background: radial-gradient(60% 50% at 100% 0%, rgba(168,85,232,.3), transparent 70%), #1d0f2e;
+    color: #f6f1fb; font-family: system-ui, -apple-system, sans-serif; text-align: center; }
+  img { width: 72px; height: 72px; border-radius: 20px; }
+  h1 { font-family: Georgia, serif; font-weight: 400; font-size: 2rem; margin: 18px 0 8px; }
+  p { color: rgba(246,241,251,.75); max-width: 30ch; margin: 0 auto 22px; line-height: 1.5; }
+  button { min-height: 50px; padding: 0 26px; border-radius: 999px; border: 0; font: inherit; font-weight: 800;
+    background: linear-gradient(135deg, #F2CE4D, #D9A93A); color: #2a1a00; cursor: pointer; }
+</style>
+</head>
+<body>
+  <main>
+    <img src="/icons/icon-192.png" alt="" />
+    <h1>You’re offline</h1>
+    <p>Check your connection — the collective will be right here when you’re back.</p>
+    <button onclick="location.reload()">Try again</button>
+  </main>
+</body>
+</html>

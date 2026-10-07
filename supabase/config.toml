@@ -2,6 +2,37 @@
 # project_id is your project ref — the subdomain of your Supabase URL.
 project_id = "xsnhxjttdizljaawpumz"
 
+# The site uses the new publishable key (sb_publishable_…), which the gateway's
+# legacy JWT check rejects for visitors who aren't signed in. Every function
+# below does its own check instead: public ones validate input and rate-limit;
+# the rest read the caller with auth.getUser() and require a curator/operator.
+
 # Stripe calls the webhook directly with no Supabase JWT, so it must be public.
 [functions.stripe-webhook]
+verify_jwt = false
+
+# Shoppers (not signed in) start checkout and send order requests.
+[functions.stripe-checkout]
+verify_jwt = false
+
+[functions.order-request]
+verify_jwt = false
+
+# Signed-in callers; the function verifies the user itself.
+[functions.ai-assist]
+verify_jwt = false
+
+[functions.send-campaign]
+verify_jwt = false
+
+[functions.social-search]
+verify_jwt = false
+
+[functions.systems-admin]
+verify_jwt = false
+
+[functions.stripe-connect]
+verify_jwt = false
+
+[functions.stripe-account-status]
 verify_jwt = false

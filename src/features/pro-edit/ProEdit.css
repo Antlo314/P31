@@ -1,0 +1,53 @@
+/* Pro Edit — inherits colour from its host (light dashboard or dark Systems). */
+.pe { display: grid; gap: 16px; }
+@media (min-width: 960px) { .pe { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: start; } }
+.pe-card, .pe-jobs {
+  display: grid; gap: 12px;
+  padding: 18px; border-radius: 20px;
+  background: var(--pe-panel, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--pe-line, rgba(127, 127, 127, 0.2));
+}
+.pe h3 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.1rem; }
+.pe-muted { margin: 0; opacity: 0.72; font-size: 0.9rem; }
+.pe-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pe-field { display: grid; gap: 6px; font-size: 0.82rem; font-weight: 700; }
+.pe-field input, .pe-field select, .pe-field textarea {
+  font: inherit; font-size: 16px; font-weight: 500;
+  padding: 11px 12px; border-radius: 12px;
+  border: 1px solid var(--pe-line, rgba(127, 127, 127, 0.3));
+  background: var(--pe-input, rgba(255, 255, 255, 0.06)); color: inherit;
+}
+.pe-drop {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 52px; border-radius: 14px; cursor: pointer; font-weight: 700;
+  border: 1.5px dashed #D9A93A; background: rgba(242, 206, 77, 0.08);
+}
+.pe-files { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 0.85rem; }
+.pe-files li { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.pe-files button { background: none; border: 0; color: inherit; cursor: pointer; }
+.pe-error { margin: 0; color: #e5484d; font-size: 0.9rem; }
+.pe-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 50px; padding: 0 18px; border-radius: 999px; border: 0; cursor: pointer;
+  background: linear-gradient(135deg, #F2CE4D, #D9A93A); color: #2a1a00; font: inherit; font-weight: 800;
+}
+.pe-btn:disabled { opacity: 0.6; cursor: progress; }
+.pe-btn--sm { min-height: 38px; padding: 0 14px; font-size: 0.85rem; }
+.pe-job {
+  display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start;
+  padding: 14px; border-radius: 14px; border: 1px solid var(--pe-line, rgba(127, 127, 127, 0.2));
+}
+.pe-job--done > svg { color: #17A673; }
+.pe-job--failed > svg { color: #e5484d; }
+.pe-job--processing > svg, .pe-job--queued > svg { color: #D9A93A; }
+.pe-job__main { display: grid; gap: 2px; min-width: 0; }
+.pe-job__main span { font-size: 0.82rem; opacity: 0.75; }
+.pe-status { font-weight: 700; opacity: 1 !important; }
+.pe-notes { font-style: italic; }
+.pe-job__actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pe-job__actions select { font: inherit; padding: 8px; border-radius: 10px; background: transparent; color: inherit; border: 1px solid var(--pe-line, rgba(127, 127, 127, 0.3)); }
+.pe-linkbtn { background: none; border: 0; color: #D9A93A; font: inherit; font-weight: 700; cursor: pointer; padding: 4px; }
+.pe-spin { animation: pe-spin 1.2s linear infinite; }
+@keyframes pe-spin { to { transform: rotate(360deg); } }
+.pe-pill { font-size: 0.72rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: rgba(168, 85, 232, 0.16); }
+label.pe-btn { cursor: pointer; }

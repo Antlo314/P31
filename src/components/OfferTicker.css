@@ -1,65 +1,25 @@
+/* Time-limited offer, shown as a floating pill under the top bar. */
 .offer-ticker {
-  background: linear-gradient(90deg, #1a0d18 0%, #3a1c36 50%, #1a0d18 100%);
+  position: fixed;
+  z-index: 279;
+  top: calc(var(--nb-h, 64px) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(100% - 24px), 720px);
+  border-radius: 18px;
+  padding: 10px 14px;
+  background: linear-gradient(120deg, #2a1544, #4a1f78);
   color: #fff;
-  padding: 8px 1rem;
+  border: 1px solid rgba(242, 206, 77, 0.35);
+  box-shadow: 0 18px 40px -18px rgba(18, 8, 29, 0.7);
   font-family: var(--font-body);
-  border-bottom: 1px solid rgba(203, 167, 47, 0.4);
-  position: relative;
-  z-index: 1000;
 }
-
-.ticker-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
+.ticker-content { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 12px; text-align: center; }
 .ticker-badge {
-  background: var(--metallic-gold);
-  color: #1a1000;
-  font-weight: 800;
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 4px;
-  letter-spacing: 0.1em;
+  background: var(--gold-light); color: #2a1a00;
+  font-weight: 800; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em;
+  padding: 3px 8px; border-radius: 999px;
 }
-
-.ticker-text {
-  font-size: 0.82rem;
-  margin: 0;
-  letter-spacing: 0.02em;
-}
-
-.timer-countdown {
-  color: var(--gold-light);
-  font-weight: 700;
-  display: inline-block;
-  min-width: 120px;
-  margin-left: 8px;
-}
-
-.ticker-link {
-  color: var(--gold-light);
-  text-decoration: underline;
-  font-weight: 700;
-  font-size: 0.8rem;
-  transition: opacity 0.3s ease;
-}
-
-.ticker-link:hover {
-  opacity: 0.8;
-}
-
-@media (max-width: 900px) {
-  .ticker-content {
-    flex-direction: column;
-    gap: 4px;
-    text-align: center;
-  }
-  .ticker-badge { display: none; }
-  .timer-countdown { margin-left: 0; display: block; margin-top: 2px; }
-}
+.ticker-text { margin: 0; color: #fff; font-size: 0.84rem; line-height: 1.4; }
+.timer-countdown { font-variant-numeric: tabular-nums; color: var(--gold-light); font-weight: 800; }
+.ticker-link { color: var(--gold-light); font-weight: 800; font-size: 0.84rem; text-decoration: none; }

@@ -1,10 +1,14 @@
 // Supabase Edge Function: stripe-checkout
-// Public: creates a Stripe Checkout Session for a product. The charge is created
-// on the platform account and transferred to the vendor's connected account
-// (destination charge); an optional PLATFORM_FEE_PERCENT is kept by the platform.
+// Public: creates a Stripe Checkout Session for a shopper's bag (one shop per
+// checkout). The charge is created on the platform account and transferred to
+// the vendor's connected account (destination charge); an optional
+// PLATFORM_FEE_PERCENT is kept by the platform.
+// Accepts { items: [{ productId, quantity, options }], discountCode } — or the
+// older { productId, quantity } for a single item.
 // Deploy: supabase functions deploy stripe-checkout
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { buildLines, discountFor, CartError } from '../_shared/cart.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -29,78 +33,98 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
-    const { productId, quantity: rawQty } = await req.json().catch(() => ({}));
-    const quantity = Math.min(Math.max(parseInt(rawQty, 10) || 1, 1), 10);
-    if (!productId) return json({ error: 'productId is required.' }, 400);
+    const body = await req.json().catch(() => ({}));
+    const items = Array.isArray(body.items) && body.items.length
+      ? body.items
+      : body.productId ? [{ productId: body.productId, quantity: body.quantity }] : [];
 
-    const { data: product } = await admin
-      .from('products')
-      .select('id, curator_id, name, description, price, image_url, stock_status')
-      .eq('id', productId)
-      .single();
-    if (!product) return json({ error: 'Product not found.' }, 404);
-    if (product.stock_status === 'out_of_stock') return json({ error: 'This item is sold out.' }, 400);
+    const { shop, lines, subtotal } = await buildLines(admin, null, items);
 
     const { data: curator } = await admin
       .from('curator_data')
       .select('id, slug, business_name, stripe_account_id, stripe_charges_enabled')
-      .eq('id', product.curator_id)
+      .eq('id', shop)
       .single();
     if (!curator?.stripe_account_id || !curator.stripe_charges_enabled) {
       return json({ error: 'This shop is not accepting card payments yet.' }, 400);
     }
 
-    const unitAmount = Math.round(parseFloat(product.price) * 100);
-    if (!Number.isFinite(unitAmount) || unitAmount < 50) {
-      return json({ error: 'This item does not have a valid price for checkout.' }, 400);
-    }
+    const disc = await discountFor(admin, curator.id, body.discountCode, subtotal);
+    const discount = disc.ok ? disc.amount_cents : 0;
+    const total = subtotal - discount;
+    if (total < 50) return json({ error: 'Card checkout needs a total of at least $0.50.' }, 400);
 
-    // Fee must be a sane percentage and strictly less than the charge total,
-    // or Stripe rejects the PaymentIntent and no checkout is possible.
+    // Fee must be a sane percentage and strictly less than the charge total.
     const rawFeePercent = parseFloat(Deno.env.get('PLATFORM_FEE_PERCENT') || '0');
     const feePercent = Number.isFinite(rawFeePercent) ? Math.min(Math.max(rawFeePercent, 0), 50) : 0;
-    const applicationFee = feePercent > 0
-      ? Math.min(Math.round((unitAmount * quantity * feePercent) / 100), unitAmount * quantity - 1)
-      : 0;
+    const applicationFee = feePercent > 0 ? Math.min(Math.round((total * feePercent) / 100), total - 1) : 0;
 
     const origin = (Deno.env.get('APP_URL') || req.headers.get('origin') || '').replace(/\/$/, '');
     const shopPath = `/${curator.slug || curator.id}`;
 
+    // A one-off coupon carries the discount so Stripe's receipt shows it.
+    const discounts = discount > 0
+      ? [{ coupon: (await stripe.coupons.create({ amount_off: discount, currency: 'usd', duration: 'once', name: disc.code || 'Discount' })).id }]
+      : undefined;
+
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      line_items: [{
-        quantity,
-        price_data: {
-          currency: 'usd',
-          unit_amount: unitAmount,
-          product_data: {
-            name: product.name,
-            ...(product.description ? { description: String(product.description).slice(0, 500) } : {}),
-            ...(product.image_url && String(product.image_url).startsWith('http')
-              ? { images: [product.image_url] }
-              : {}),
+      line_items: lines.map((l) => {
+        const opts = Object.entries(l.options).map(([k, v]) => `${k}: ${v}`).join(' · ');
+        return {
+          quantity: l.quantity,
+          price_data: {
+            currency: 'usd',
+            unit_amount: l.price_cents,
+            product_data: {
+              name: l.name,
+              ...(opts ? { description: opts } : {}),
+              ...(l.image_url && l.image_url.startsWith('http') ? { images: [l.image_url] } : {}),
+            },
           },
-        },
-      }],
+        };
+      }),
+      ...(discounts ? { discounts } : {}),
       payment_intent_data: {
         transfer_data: { destination: curator.stripe_account_id },
         ...(applicationFee > 0 ? { application_fee_amount: applicationFee } : {}),
-        metadata: { product_id: String(product.id), curator_id: curator.id },
+        metadata: { curator_id: curator.id },
       },
       metadata: {
-        product_id: String(product.id),
-        product_name: product.name,
         curator_id: curator.id,
-        quantity: String(quantity),
+        product_id: String(lines[0].product_id),
+        product_name: lines.length > 1 ? `${lines[0].name} + ${lines.length - 1} more` : lines[0].name,
+        quantity: String(lines.reduce((s, l) => s + l.quantity, 0)),
         application_fee: String(applicationFee),
       },
+      phone_number_collection: { enabled: true },
       shipping_address_collection: { allowed_countries: ['US'] },
       success_url: `${origin}${shopPath}?purchase=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}${shopPath}?purchase=cancelled`,
     });
 
+    // Record the pending order now (full line items); the webhook marks it paid.
+    const { error: orderErr } = await admin.from('orders').upsert({
+      stripe_session_id: session.id,
+      curator_id: curator.id,
+      order_type: 'card',
+      payment_status: 'pending',
+      items: lines,
+      product_id: lines[0].product_id,
+      product_name: lines.length > 1 ? `${lines[0].name} + ${lines.length - 1} more` : lines[0].name,
+      quantity: lines.reduce((s, l) => s + l.quantity, 0),
+      amount_subtotal: subtotal,
+      amount_total: total,
+      discount_code: disc.ok ? disc.code : null,
+      discount_amount: discount,
+      application_fee: applicationFee,
+      fulfillment_method: 'ship',
+    }, { onConflict: 'stripe_session_id' });
+    if (orderErr) console.error('Pending order insert failed:', orderErr.message);
+
     return json({ url: session.url });
   } catch (err) {
+    if (err instanceof CartError) return json({ error: err.message }, 400);
     console.error('stripe-checkout error:', err);
     return json({ error: (err as Error).message || 'Failed to start checkout.' }, 500);
   }

@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /systems
+Disallow: /login
+Disallow: /register
+Disallow: /onboarding-exclusive
+Disallow: /unsubscribe
+Disallow: /favorites
+
+Sitemap: https://www.p31market.com/sitemap.xml

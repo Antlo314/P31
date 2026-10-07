@@ -1,310 +1,172 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
+import { HandCoins, Gift, TrendingUp, HandHeart, Heart, CheckCircle2, Mail, Phone, ArrowUpRight, ArrowDown, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { Heart, Gift, TrendingUp, CheckCircle2, ChevronRight, Mail, Phone, DollarSign } from 'lucide-react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import './Partner.css';
+import PageHeader from '../components/PageHeader';
+import LazyVideo from '../components/LazyVideo';
 
-import heroImg from '../assets/p31_partner_hero_editorial_1776544063235.png';
-import groupImg from '../assets/p31_community_impact_editorial_1776544076592.png';
-import investVid from '../assets/visionary.mp4';
-import craftImg from '../assets/vendor_ceramics.png';
-import adornImg from '../assets/vendor_jewelry.png';
+import heroImg from '../assets/web/p31_partner_hero_editorial.webp';
+import groupImg from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
+import visionaryVid from '../assets/web/visionary.mp4';
+import visionaryPoster from '../assets/web/visionary-poster.webp';
 
-gsap.registerPlugin(ScrollTrigger);
+const DONATE_URL = 'https://www.paypal.com/donate/?hosted_button_id=WY2ZX3TXDMF5Y';
+
+const WAYS = [
+  { Icon: HandCoins, title: 'Financial giving', tone: 'night', body: 'Your contribution helps us host markets, expand resources and sustain the vision.', cta: 'Give now', href: DONATE_URL },
+  { Icon: Gift, title: 'In-kind giving', tone: 'gold', body: 'Event space, tables and tents, artisan products, or services like photography and marketing.', cta: 'Offer resources', type: 'In-Kind' },
+  { Icon: TrendingUp, title: 'Strategic partnership', body: 'Businesses and organizations collaborating at scale to expand our reach and impact.', cta: 'Collaborate', type: 'Strategic' },
+  { Icon: HandHeart, title: 'Volunteer', body: 'Serve at a market — welcome guests, support curators, help the day run beautifully.', cta: 'Volunteer', type: 'Volunteer' },
+];
+const TYPES = [['Financial', 'Financial'], ['In-Kind', 'In-kind'], ['Strategic', 'Strategic'], ['Volunteer', 'Volunteer']];
+const blankForm = { full_name: '', email: '', phone: '', partnership_type: 'Strategic', message: '', trap: '' };
 
 const Partner = () => {
-  const containerRef = useRef(null);
-  const [formState, setFormState] = useState({
-    full_name: '',
-    email: '',
-    phone: '',
-    partnership_type: 'Strategic',
-    message: ''
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [form, setForm] = useState(blankForm);
+  const [state, setState] = useState('idle'); // idle | sending | done | error
+  const [errMsg, setErrMsg] = useState('');
 
-  useEffect(() => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced) return;
+  const choose = (type) => {
+    setForm((f) => ({ ...f, partnership_type: type }));
+    document.getElementById('partner-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
-    let ctx = gsap.context(() => {
-      // Hero fade
-      gsap.from('.ptr-hero-content', {
-        opacity: 0, y: 40, duration: 1.5, ease: 'expo.out', delay: 0.2
-      });
-
-      // Generic single-element reveals
-      gsap.utils.toArray('.ptr-reveal').forEach(el => {
-        gsap.fromTo(el,
-          { opacity: 0, y: 34 },
-          {
-            opacity: 1, y: 0,
-            duration: 1.1,
-            ease: 'power3.out',
-            scrollTrigger: { trigger: el, start: 'top 85%' }
-          }
-        );
-      });
-
-      // Bento mosaic: staggered rise
-      gsap.from('.ptr-bento .bento-cell', {
-        y: 56, opacity: 0, duration: 1, stagger: 0.09, ease: 'power3.out',
-        scrollTrigger: { trigger: '.ptr-bento .bento-grid', start: 'top 82%' }
-      });
-
-      // Checklist stagger
-      gsap.from('.ptr-checklist li', {
-        x: -20, opacity: 0, duration: 0.7, stagger: 0.1, ease: 'power2.out',
-        scrollTrigger: { trigger: '.ptr-checklist', start: 'top 88%' }
-      });
-
-      // Magnetic buttons (pointer-follow)
-      gsap.utils.toArray('.magnetic').forEach(btn => {
-        const strength = 0.32;
-        const move = (e) => {
-          const r = btn.getBoundingClientRect();
-          gsap.to(btn, {
-            x: (e.clientX - (r.left + r.width / 2)) * strength,
-            y: (e.clientY - (r.top + r.height / 2)) * strength,
-            duration: 0.5, ease: 'power3.out',
-          });
-        };
-        const reset = () => gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' });
-        btn.addEventListener('mousemove', move);
-        btn.addEventListener('mouseleave', reset);
-      });
-    }, containerRef);
-    return () => ctx.revert();
-  }, []);
-
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const { error } = await supabase.from('partnerships').insert([formState]);
-      if (error) throw error;
-      setIsSuccess(true);
-      setFormState({ full_name: '', email: '', phone: '', partnership_type: 'Strategic', message: '' });
-    } catch (err) {
-      alert('Architectural Error: ' + err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
+    setState('sending');
+    const { error } = await supabase.rpc('submit_partnership', {
+      p_name: form.full_name, p_email: form.email, p_phone: form.phone,
+      p_type: form.partnership_type, p_message: form.message, p_trap: form.trap,
+    });
+    if (error) { setErrMsg(error.message); return setState('error'); }
+    setForm(blankForm);
+    setState('done');
   };
 
   return (
-    <div className="partner-page" ref={containerRef}>
-      {/* SECTION 1: THE VISION (HERO) */}
-      <section className="ptr-hero" style={{ backgroundImage: `url(${heroImg})` }}>
-        <div className="ptr-hero-overlay" />
-        <div className="ptr-hero-content container">
-          <span className="section-kicker ptr-hero-kicker">A Holy Movement</span>
-          <h1 className="ptr-title font-headline text-gold">
-            Partner With <br />Proverbs 31 Marketplace
-          </h1>
-          <div className="ptr-vision-block glass-card">
-            <h3 className="font-headline mb-4">The Vision</h3>
-            <p className="ptr-lead">
-              Proverbs 31 Marketplace is more than an event—it is a movement.
-            </p>
-            <p>
-              It was established to create a space where women can build, heal, and walk boldly in what God has entrusted to them. This marketplace exists to empower faith-driven entrepreneurs, provide opportunity, and cultivate a community where purpose is activated and supported.
-            </p>
-            <p className="mt-4">
-              We are not simply hosting markets—we are creating access, visibility, and transformation for women who are ready to walk in their calling.
-            </p>
-          </div>
-        </div>
-      </section>
+    <div className="k-page">
+      <PageHeader
+        eyebrow="A Holy Movement"
+        title="Partner with"
+        accent="the movement"
+        lead="More than an event — a space where women build, heal and walk boldly in what God has entrusted to them. Stand with us."
+        media={{ src: heroImg, alt: 'A Proverbs 31 curator in an editorial portrait' }}
+        actions={<>
+          <a href="#ways" className="k-btn k-btn--gold">Ways to give <ArrowDown size={18} /></a>
+          <a href="#partner-form" className="k-btn k-btn--light">Get in touch</a>
+        </>}
+      />
 
-      {/* SECTION 2: WHY PARTNERSHIP MATTERS */}
-      <section className="ptr-why section-padded container">
-        <div className="ptr-grid">
-          <div className="ptr-why-text ptr-reveal">
-            <span className="section-kicker">Impact</span>
-            <h2 className="font-headline text-primary ptr-section-title">Why Partnership Matters</h2>
-            <p className="ptr-why-intro">Every vision requires people who are willing to stand behind it. Your partnership helps us:</p>
-            <ul className="ptr-checklist">
-              <li><CheckCircle2 size={20} className="text-gold" /> Provide opportunities for small businesses to grow</li>
-              <li><CheckCircle2 size={20} className="text-gold" /> Create safe, impactful environments for community engagement</li>
-              <li><CheckCircle2 size={20} className="text-gold" /> Support women in breaking cycles and building legacy</li>
-              <li><CheckCircle2 size={20} className="text-gold" /> Expand our reach to serve more individuals through marketplace experiences</li>
+      {/* Why */}
+      <section className="k-section">
+        <div className="k-split k-split--wide-left">
+          <div className="k-head" style={{ marginBottom: 0 }}>
+            <p className="k-eyebrow" data-reveal="fade">Impact</p>
+            <h2 className="k-h2" data-split>Why partnership <em>matters</em></h2>
+            <p className="k-lede" data-reveal>Every vision needs people willing to stand behind it. Your partnership helps us:</p>
+            <ul className="k-checks" data-reveal-group>
+              <li><CheckCircle2 size={20} /> Give small businesses room to grow</li>
+              <li><CheckCircle2 size={20} /> Create safe, impactful spaces for community</li>
+              <li><CheckCircle2 size={20} /> Support women breaking cycles and building legacy</li>
+              <li><CheckCircle2 size={20} /> Reach more people through marketplace experiences</li>
             </ul>
-            <p className="ptr-impact-quote font-headline">
-              "What you give becomes a seed into something far greater than a single event."
-            </p>
           </div>
-          <div className="ptr-why-visual ptr-reveal">
-            <div className="ptr-visual-overlay" />
-            <img src={groupImg} alt="Women gathering in community at a Proverbs 31 market" />
+          <div className="k-arch k-arch--ring" data-reveal="clip">
+            <img src={groupImg} alt="Women gathering at a Proverbs 31 market" loading="lazy" decoding="async" data-parallax="7" style={{ height: '116%', top: '-8%' }} />
           </div>
         </div>
       </section>
 
-      {/* SECTION 3: WAYS TO INVEST — BENTO MOSAIC */}
-      <section className="ptr-invest ptr-bento section-padded container">
-        <div className="ptr-invest-header ptr-reveal">
-          <span className="section-kicker">Engagement</span>
-          <h2 className="font-headline text-primary ptr-section-title">Ways to Invest</h2>
-          <p className="ptr-invest-lead">
-            Every form of giving carries weight. Choose the path that aligns with your
-            calling—each one becomes a seed into something greater than a single event.
-          </p>
-        </div>
-
-        <div className="bento-grid">
-          {/* Financial — dark feature */}
-          <div className="bento-cell is-dark col-5 row-2">
-            <div className="bento-content ptr-cell-body">
-              <span className="ptr-cell-index">01</span>
-              <div className="ptr-cell-icon"><DollarSign /></div>
-              <h3 className="font-headline ptr-cell-title">Financial Giving</h3>
-              <p className="ptr-cell-text">
-                If you feel led to support financially, your contribution helps us execute
-                events, expand resources, and sustain the vision.
-              </p>
-              <a href="https://www.paypal.com/donate/?hosted_button_id=WY2ZX3TXDMF5Y" target="_blank" rel="noreferrer" className="ptr-cell-cta magnetic">
-                Give Gracefully <ChevronRight size={16} />
-              </a>
-            </div>
-          </div>
-
-          {/* Media — visionary film */}
-          <div className="bento-cell is-media col-4 row-2">
-            <video src={investVid} autoPlay loop muted playsInline />
-            <div className="bento-overlay" />
-            <div className="bento-content">
-              <span className="ptr-media-tag">The Movement</span>
-              <p className="ptr-media-caption">Access, visibility, and transformation—made real.</p>
-            </div>
-          </div>
-
-          {/* Gold stat / heart accent */}
-          <div className="bento-cell is-gold col-3">
-            <div className="bento-content ptr-gold-cell">
-              <Heart className="ptr-gold-heart" />
-              <span className="ptr-gold-label">Every gift is honored—seen or unseen</span>
-            </div>
-          </div>
-
-          {/* Adornment media */}
-          <div className="bento-cell is-media col-3">
-            <img src={adornImg} alt="Handcrafted artisan jewelry" />
-            <div className="bento-overlay" />
-            <div className="bento-content"><span className="ptr-cat">Curators You Empower</span></div>
-          </div>
-
-          {/* In-Kind — forest */}
-          <div className="bento-cell is-forest col-4">
-            <div className="bento-content ptr-cell-body">
-              <span className="ptr-cell-index">02</span>
-              <div className="ptr-cell-icon"><Gift /></div>
-              <h3 className="font-headline ptr-cell-title">In-Kind Giving</h3>
-              <p className="ptr-cell-text">
-                Event spaces, equipment (tables, tents), artisan products, or professional
-                services (photo/marketing) are just as valuable.
-              </p>
-              <a href="#partner-form" className="ptr-cell-cta magnetic">Offer Resources <ChevronRight size={16} /></a>
-            </div>
-          </div>
-
-          {/* Strategic — dark */}
-          <div className="bento-cell is-dark col-5">
-            <div className="bento-content ptr-cell-body">
-              <span className="ptr-cell-index">03</span>
-              <div className="ptr-cell-icon"><TrendingUp /></div>
-              <h3 className="font-headline ptr-cell-title">Strategic Partnership</h3>
-              <p className="ptr-cell-text">
-                We welcome businesses and organizations desiring to collaborate in a larger
-                capacity to help expand our reach and impact.
-              </p>
-              <a href="#partner-form" className="ptr-cell-cta magnetic">Collaborate <ChevronRight size={16} /></a>
-            </div>
-          </div>
-
-          {/* Craft media */}
-          <div className="bento-cell is-media col-3">
-            <img src={craftImg} alt="Handmade ceramics by a P31 curator" />
-            <div className="bento-overlay" />
-            <div className="bento-content"><span className="ptr-cat">The Craft</span></div>
-          </div>
-        </div>
+      <section className="k-section k-section--night k-dark k-section--tight">
+        <figure className="k-quote k-center" style={{ maxWidth: 940 }}>
+          <blockquote data-scrub>“What you give becomes a seed into something far greater than a single event.”</blockquote>
+        </figure>
       </section>
 
-      {/* SECTION 4: THE HEART BEHIND YOUR GIVING */}
-      <section className="ptr-heart-sec section-padded container">
-        <div className="ptr-heart ptr-reveal">
-          <Heart size={44} className="text-gold ptr-heart-icon" />
-          <span className="section-kicker ptr-heart-kicker">Purpose</span>
-          <h2 className="font-headline text-primary ptr-section-title">The Heart Behind Your Giving</h2>
-          <p className="ptr-heart-body">
-            We honor every form of giving—whether seen or unseen. Your contribution is not just support... It is alignment with a vision that is committed to uplifting women, strengthening communities, and walking in purpose with integrity. What you give carries weight. It helps build something that will outlive a moment.
-          </p>
+      {/* Ways */}
+      <section className="k-section k-section--mist" id="ways">
+        <div className="k-head">
+          <p className="k-eyebrow" data-reveal="fade">Engagement</p>
+          <h2 className="k-h2" data-split>Ways to <em>invest</em></h2>
+          <p className="k-lede" data-reveal>Every form of giving carries weight. Choose the path that aligns with your calling.</p>
         </div>
-      </section>
-
-      {/* SECTION 5: CALL TO ACTION (FORM) */}
-      <section className="ptr-form-sec section-padded container" id="partner-form">
-        <div className="ptr-grid ptr-reveal">
-          <div className="ptr-form-info">
-            <span className="section-kicker">Take the Next Step</span>
-            <h2 className="font-headline text-primary ptr-section-title">Align With the Movement</h2>
-            <p className="ptr-form-intro">If you feel led to partner with Proverbs 31 Marketplace, we invite you to connect.</p>
-
-            <div className="ptr-contact-details">
-              <div className="ptr-contact-item">
-                <a href="mailto:proverbs31markets@gmail.com" className="ptr-contact-link">
-                  <span className="ptr-contact-icon"><Mail size={20} className="text-gold" /></span>
-                  <span>proverbs31markets@gmail.com</span>
+        <div className="k-grid k-grid--2" data-reveal-group>
+          {WAYS.map((w, i) => (
+            <article key={w.title} className={`k-card ${w.tone ? `k-card--${w.tone}` : ''}`}>
+              <span className="k-num">0{i + 1}</span>
+              <span className="k-icon"><w.Icon size={22} /></span>
+              <h3>{w.title}</h3>
+              <p>{w.body}</p>
+              {w.href ? (
+                <a href={w.href} target="_blank" rel="noreferrer" className={`k-btn k-btn--sm ${w.tone === 'night' ? 'k-btn--gold' : 'k-btn--plum'}`} style={{ justifySelf: 'start', marginTop: 8 }}>
+                  {w.cta} <ArrowUpRight size={16} />
                 </a>
-              </div>
-              <div className="ptr-contact-item">
-                <a href="tel:14705622852" className="ptr-contact-link">
-                  <span className="ptr-contact-icon"><Phone size={20} className="text-gold" /></span>
-                  <span>1 (470) 562-2852</span>
-                </a>
-              </div>
+              ) : (
+                <button onClick={() => choose(w.type)} className={`k-btn k-btn--sm ${w.tone === 'gold' ? 'k-btn--plum' : 'k-btn--outline'}`} style={{ justifySelf: 'start', marginTop: 8 }}>
+                  {w.cta} <ArrowRight size={16} />
+                </button>
+              )}
+            </article>
+          ))}
+        </div>
+        <article className="k-tile" style={{ minHeight: 300, marginTop: 'clamp(14px, 1.6vw, 22px)' }} data-reveal="clip">
+          <LazyVideo src={visionaryVid} poster={visionaryPoster} />
+          <div className="k-tile__copy" style={{ maxWidth: 620 }}>
+            <span className="k-chip"><Heart size={12} /> The heart behind your giving</span>
+            <h3>Seen or unseen, every gift matters.</h3>
+            <p>It is alignment with a vision committed to uplifting women and strengthening communities.</p>
+          </div>
+        </article>
+      </section>
+
+      {/* Form */}
+      <section className="k-section" id="partner-form">
+        <div className="k-split" style={{ alignItems: 'start' }}>
+          <div className="k-head" style={{ marginBottom: 0 }}>
+            <p className="k-eyebrow" data-reveal="fade">Take the next step</p>
+            <h2 className="k-h2" data-split>Align with the <em>movement</em></h2>
+            <p className="k-lede" data-reveal>If you feel led to partner with Proverbs 31 Marketplace, we invite you to connect.</p>
+            <div className="k-contact" data-reveal-group>
+              <a href="mailto:proverbs31markets@gmail.com"><Mail size={18} /> proverbs31markets@gmail.com</a>
+              <a href="tel:14705622852"><Phone size={18} /> 1 (470) 562-2852</a>
             </div>
           </div>
 
-          <div className="ptr-form-wrapper glass-card">
-            {isSuccess ? (
-              <div className="ptr-success-msg text-center">
-                <CheckCircle2 size={64} className="text-gold ptr-success-icon" />
-                <h3 className="font-headline text-primary">Alignment Confirmed</h3>
-                <p>Your inquiry has been stored in the Master Governance vault. The Architect will review your partnership shortly.</p>
-                <button onClick={() => setIsSuccess(false)} className="btn-solid-gold mt-6">Send Another</button>
+          <div className="k-card" style={{ padding: 'clamp(22px, 4vw, 40px)' }} data-reveal>
+            {state === 'done' ? (
+              <div className="k-success">
+                <span className="k-icon"><CheckCircle2 size={28} /></span>
+                <h3>Thank you</h3>
+                <p>Your message reached the P31 team — we’ll be in touch soon.</p>
+                <button className="k-btn k-btn--ghost" onClick={() => setState('idle')}>Send another</button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="premium-form">
-                <div className="form-group">
-                  <label>Full Name</label>
-                  <input type="text" value={formState.full_name} onChange={e => setFormState({ ...formState, full_name: e.target.value })} required />
-                </div>
-                <div className="form-row-grid">
-                  <div className="form-group">
-                    <label>Email</label>
-                    <input type="email" value={formState.email} onChange={e => setFormState({ ...formState, email: e.target.value })} required />
-                  </div>
-                  <div className="form-group">
-                    <label>Partnership Type</label>
-                    <select value={formState.partnership_type} onChange={e => setFormState({ ...formState, partnership_type: e.target.value })}>
-                      <option value="Financial">Financial Investment</option>
-                      <option value="In-Kind">In-Kind (Goods/Services)</option>
-                      <option value="Strategic">Strategic Collaboration</option>
-                      <option value="Volunteer">Volunteer Support</option>
-                    </select>
+              <form className="k-form" onSubmit={submit}>
+                <div className="k-field">
+                  <span>I’d like to help with</span>
+                  <div className="k-segs" role="group" aria-label="Partnership type">
+                    {TYPES.map(([v, label]) => (
+                      <button type="button" key={v} aria-pressed={form.partnership_type === v} onClick={() => setForm({ ...form, partnership_type: v })}>{label}</button>
+                    ))}
                   </div>
                 </div>
-                <div className="form-group">
-                  <label>Manifesto / Message</label>
-                  <textarea rows="4" value={formState.message} onChange={e => setFormState({ ...formState, message: e.target.value })} placeholder="How do you wish to align with the movement?"></textarea>
+                <label className="k-field"><span>Full name</span>
+                  <input required autoComplete="name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+                </label>
+                <div className="k-row">
+                  <label className="k-field"><span>Email</span>
+                    <input required type="email" autoComplete="email" inputMode="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                  </label>
+                  <label className="k-field"><span>Phone (optional)</span>
+                    <input type="tel" autoComplete="tel" inputMode="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                  </label>
                 </div>
-                <button type="submit" className="btn-solid-gold w-full mt-4 magnetic" disabled={isSubmitting}>
-                  {isSubmitting ? 'Transmitting Inward...' : 'Align with P31 →'}
+                <label className="k-field"><span>Message</span>
+                  <textarea rows={4} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="How would you like to partner with us?" />
+                </label>
+                <input className="k-trap" tabIndex={-1} autoComplete="off" aria-hidden="true" value={form.trap} onChange={(e) => setForm({ ...form, trap: e.target.value })} />
+                {state === 'error' && <p className="k-error" role="alert">{errMsg || 'Something went wrong — please try again or email us.'}</p>}
+                <button className="k-btn k-btn--gold k-btn--lg k-btn--block" disabled={state === 'sending'}>
+                  {state === 'sending' ? 'Sending…' : <>Send to the P31 team <ArrowRight size={18} /></>}
                 </button>
               </form>
             )}

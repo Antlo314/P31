@@ -1,464 +1,415 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MapPin } from 'lucide-react';
+import { MapPin, CalendarClock, ArrowRight, ArrowUpRight, Lock, Sparkles, Gem, Users, Music4, Check, ArrowDown } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { fetchUpcomingEvents, formatEventDate, parseEventDate, showDate } from '../lib/events';
+import { gsap, reducedMotion } from '../lib/motion';
+import { openJoin } from '../lib/join';
+import LazyVideo from '../components/LazyVideo';
 import './Home.css';
 
-import heroVid     from '../assets/hero.mp4';
-import faithVid    from '../assets/faith.mp4';
-import missionVid  from '../assets/p31market2.mp4';
-import curatorVid  from '../assets/curator.mp4';
-import productVid  from '../assets/product.mp4';
-import bentoJewelry  from '../assets/vendor_jewelry.png';
-import bentoCeramics from '../assets/vendor_ceramics.png';
-import bentoCandles  from '../assets/vendor_candles.png';
-import bentoSkincare from '../assets/vendor_skincare.png';
-import bentoCommunity from '../assets/p31_community_impact_editorial_1776544076592.png';
+// Web-optimised copies of the original footage and photos (same media,
+// re-encoded: no audio track, 720px, fast-start). See src/assets/web/.
+import heroVid from '../assets/web/hero.mp4';
+import heroPoster from '../assets/web/hero-poster.webp';
+import faithVid from '../assets/web/faith.mp4';
+import faithPoster from '../assets/web/faith-poster.webp';
+import missionVid from '../assets/web/p31market2.mp4';
+import missionPoster from '../assets/web/p31market2-poster.webp';
+import curatorVid from '../assets/web/curator.mp4';
+import curatorPoster from '../assets/web/curator-poster.webp';
+import productVid from '../assets/web/product.mp4';
+import productPoster from '../assets/web/product-poster.webp';
+import bentoJewelry from '../assets/web/vendor_jewelry.webp';
+import bentoCeramics from '../assets/web/vendor_ceramics.webp';
+import bentoCandles from '../assets/web/vendor_candles.webp';
+import bentoSkincare from '../assets/web/vendor_skincare.webp';
+import bentoCommunity from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
+import partnerImg from '../assets/web/p31_partner_hero_editorial.webp';
 
-gsap.registerPlugin(ScrollTrigger);
-
-const marketDates = [
-  { day: '28', month: "Jun '26", name: 'Summer Showcase',   time: '3:30 PM', status: 'notify' },
-  { day: '27', month: "Sep '26", name: 'Autumn Gathering',  time: '3:30 PM', status: 'notify' },
-  { day: '27', month: "Dec '26", name: 'Winter Gala',       time: '3:30 PM', status: 'coming' },
-  { day: '28', month: "Mar '27", name: 'Spring Renewal',    time: '3:30 PM', status: 'coming' },
+const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
+const CATEGORIES = ['Art', 'Wellness', 'Clothing', 'Food', 'Literature', 'Community', 'Services'];
+const PILLARS = [
+  { Icon: Gem, title: 'Artisan crafted', body: 'Elite, hand-selected curators representing the pinnacle of craftsmanship and true beauty.' },
+  { Icon: Users, title: 'Strategic networking', body: 'A community of visionary women cultivating powerful, faith-driven connections.' },
+  { Icon: Music4, title: 'Exclusive ambiance', body: 'A majestic, high-end atmosphere elevated by curated aesthetics and live music.' },
 ];
+const STATS = [['7', 'Curated categories'], ['4', 'Seasonal markets a year'], ['100%', 'Hand-selected curators'], ['1K+', 'Community members']];
+
+const monthShort = (iso) => parseEventDate(iso).toLocaleDateString('en-US', { month: 'short' });
 
 const Home = () => {
-  const containerRef = useRef(null);
-  const [email, setEmail] = useState('');
+  const [events, setEvents] = useState([]);
+  const [eventsLoaded, setEventsLoaded] = useState(false);
+  const [curators, setCurators] = useState([]);
+  const [news, setNews] = useState({ name: '', email: '', trap: '' });
+  const [newsState, setNewsState] = useState('idle'); // idle | sending | done | error
+  const heroRef = useRef(null);
+  const nextEvent = events[0];
 
   useEffect(() => {
-    // Respect users who prefer reduced motion — leave everything in its
-    // natural (visible) state and skip the choreography entirely.
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    fetchUpcomingEvents().then((rows) => {
+      setEvents(rows);
+      setEventsLoaded(true);
+    });
+    // Live curator spotlight — only approved, published storefronts.
+    supabase
+      ?.from('curator_data')
+      .select('id, slug, business_name, tagline, custom_title, logo_url, banner_url, location')
+      .eq('status', 'approved')
+      .eq('is_published', true)
+      .order('is_featured', { ascending: false })
+      .limit(8)
+      .then(({ data }) => setCurators(data || []));
+  }, []);
 
-    let ctx = gsap.context(() => {
-      // ── Hero: masked line reveal + staggered supporting copy ──
-      const heroTl = gsap.timeline({ defaults: { ease: 'power4.out' } });
-      heroTl
-        .from('.hero-eyebrow', { y: 20, opacity: 0, duration: 0.9 }, 0.15)
-        .from('.hero-headline .reveal-line > span',
-          { yPercent: 120, duration: 1.25, stagger: 0.12 }, 0.25)
-        .from('.hero-body', { y: 24, opacity: 0, duration: 1 }, 0.85)
-        .from('.hero-ctas', { y: 24, opacity: 0, duration: 1 }, 1.0);
-
-      // Hero copy drifts gently as the section scrolls away
-      gsap.to('.hero-editorial-text', {
-        yPercent: -12, opacity: 0.55, ease: 'none',
-        scrollTrigger: {
-          trigger: '.home-hero', start: 'bottom bottom', end: 'bottom top', scrub: true,
-        },
-      });
-
-      // ── Cinematic video parallax ──
-      gsap.utils.toArray('.img-parallax').forEach(img => {
-        gsap.to(img, {
-          yPercent: 18, ease: 'none',
-          scrollTrigger: {
-            trigger: img.closest('section') || img.parentElement,
-            start: 'top bottom', end: 'bottom top', scrub: true,
-          },
-        });
-      });
-
-      // ── Staggered group reveals (pillars + dates) ──
-      gsap.from('.pillar-item', {
-        y: 56, opacity: 0, duration: 1.1, stagger: 0.14, ease: 'power3.out',
-        scrollTrigger: { trigger: '.pillars-grid', start: 'top 82%' },
-      });
-      gsap.from('.date-row', {
-        y: 40, opacity: 0, duration: 0.9, stagger: 0.1, ease: 'power3.out',
-        scrollTrigger: { trigger: '.dates-list', start: 'top 85%' },
-      });
-
-      // ── Generic single-element reveals ──
-      gsap.utils.toArray('.reveal').forEach(el => {
-        gsap.fromTo(el,
-          { y: 48, opacity: 0 },
-          { y: 0, opacity: 1, duration: 1.2, ease: 'power2.out',
-            scrollTrigger: { trigger: el, start: 'top 88%' } }
-        );
-      });
-
-      // ── Bento mosaic: staggered rise ──
-      gsap.from('.bento-cell', {
-        y: 60, opacity: 0, duration: 1, stagger: 0.09, ease: 'power3.out',
-        scrollTrigger: { trigger: '.bento-grid', start: 'top 80%' },
-      });
-
-      // ── Animated stat counters ──
-      gsap.utils.toArray('.stat-count').forEach(el => {
-        const target = parseFloat(el.dataset.target);
-        const suffix = el.dataset.suffix || '';
-        const decimals = el.dataset.decimals ? parseInt(el.dataset.decimals) : 0;
-        const obj = { v: 0 };
-        gsap.to(obj, {
-          v: target, duration: 2, ease: 'power2.out',
-          scrollTrigger: { trigger: el, start: 'top 90%' },
-          onUpdate: () => { el.textContent = obj.v.toFixed(decimals) + suffix; },
-        });
-      });
-
-      // ── Magnetic buttons (pointer-follow) ──
-      gsap.utils.toArray('.magnetic').forEach(btn => {
-        const strength = 0.35;
-        const move = (e) => {
-          const r = btn.getBoundingClientRect();
-          gsap.to(btn, {
-            x: (e.clientX - (r.left + r.width / 2)) * strength,
-            y: (e.clientY - (r.top + r.height / 2)) * strength,
-            duration: 0.5, ease: 'power3.out',
-          });
-        };
-        const reset = () => gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' });
-        btn.addEventListener('mousemove', move);
-        btn.addEventListener('mouseleave', reset);
-      });
-    }, containerRef);
-
+  // Hero: the film slowly pushes in and the copy lifts away as you scroll.
+  useEffect(() => {
+    if (reducedMotion() || !heroRef.current) return undefined;
+    const ctx = gsap.context(() => {
+      const st = { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: true };
+      gsap.to('.h26-hero__media', { scale: 1.14, yPercent: 6, ease: 'none', scrollTrigger: st });
+      gsap.to('.h26-hero__inner', { yPercent: -18, opacity: 0.15, ease: 'none', scrollTrigger: { ...st, start: 'top top', end: '80% top' } });
+    }, heroRef);
     return () => ctx.revert();
   }, []);
 
-  const handleNewsletter = (e) => {
+  const handleNewsletter = async (e) => {
     e.preventDefault();
-    const subject = encodeURIComponent('Newsletter Subscription');
-    const body = encodeURIComponent(`Please add me to the Proverbs 31 Marketplace newsletter!\n\nEmail: ${email}`);
-    window.location.href = `mailto:proverbs31markets@gmail.com?subject=${subject}&body=${body}`;
-    setEmail('');
+    setNewsState('sending');
+    const { error } = await supabase.rpc('subscribe_lead', {
+      p_name: news.name.trim(), p_email: news.email.trim(), p_source: 'home', p_trap: news.trap,
+    });
+    if (error) return setNewsState('error');
+    try { localStorage.setItem('p31_subscribed', '1'); } catch { /* private mode */ }
+    setNewsState('done');
   };
 
   return (
-    <div className="home-wrapper" ref={containerRef}>
+    <div className="h26">
 
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="home-hero">
-        {/* Hero Video Element — Optimized for "Shins Up" crop in CSS */}
-        <video 
-          key={heroVid}
-          autoPlay 
-          muted 
-          loop 
-          playsInline 
-          className="home-hero__video"
-        >
-          <source src={heroVid} type="video/mp4" />
-        </video>
-        <div className="home-hero__overlay" />
+      <section className="h26-hero k-dark" ref={heroRef}>
+        <LazyVideo src={heroVid} poster={heroPoster} className="h26-hero__media" eager />
+        <div className="h26-hero__scrim" />
+        <span className="k-hero__arch h26-hero__arch" aria-hidden="true" />
 
-        {/* Bottom-left editorial text — like a luxury magazine cover */}
-        <div className="home-hero__content hero-editorial-text">
-          <span className="hero-eyebrow">Proverbs 31 Marketplace</span>
-          <h1 className="hero-headline">
-            <span className="reveal-line"><span>Where</span></span>
-            <span className="reveal-line"><span>Her Gifts</span></span>
-            <span className="reveal-line"><span><em>Make Room.</em></span></span>
+        <div className="h26-hero__inner">
+          {nextEvent && (
+            <a href="#dates" className="k-chip k-chip--glass h26-hero__next" data-intro="0">
+              <span className="h26-pulse" aria-hidden="true" />
+              Next market · {nextEvent.title} · {showDate(nextEvent) ? formatEventDate(nextEvent.event_date, { month: 'short', day: 'numeric' }) : 'Coming soon'}
+              <ArrowRight size={13} />
+            </a>
+          )}
+          <p className="k-eyebrow" data-intro="0.05">Proverbs 31 Marketplace</p>
+          <h1 className="k-display h26-hero__title" data-split="intro" data-delay="0.1">
+            Where her gifts <em>make room.</em>
           </h1>
-          <p className="hero-body">
-            A premium curated marketplace for women creatives, artisans, and visionaries.
+          <p className="k-lede h26-hero__lead" data-intro="0.45">
+            A premium curated marketplace for women creatives, artisans and visionaries — online and at our seasonal markets.
           </p>
-          <div className="hero-ctas">
-            <a href="#newsletter" className="btn-gold-pill magnetic">Join the Inner Circle</a>
-            <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noopener noreferrer" className="btn-ghost-pill magnetic">Become a Curator</a>
+          <div className="k-actions h26-hero__ctas" data-intro="0.6">
+            <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--gold k-btn--lg">
+              Become a curator <ArrowUpRight size={18} />
+            </a>
+            <button type="button" className="k-btn k-btn--light k-btn--lg" onClick={openJoin}>Join the Inner Circle</button>
           </div>
         </div>
 
+        <a href="#story" className="h26-scroll" aria-label="Scroll to explore" data-intro="1"><ArrowDown size={16} /></a>
 
-        {/* Scrolling ticker at bottom */}
-        <div className="hero-ticker">
-          <div className="hero-ticker__track">
-            {['Art', 'Wellness', 'Clothing', 'Food', 'Literature', 'Community',
-              'Art', 'Wellness', 'Clothing', 'Food', 'Literature', 'Community'].map((w, i) => (
-              <span key={i}>{w} <span className="ticker-dot">◆</span></span>
+        <div className="h26-marquee" aria-hidden="true">
+          <div className="h26-marquee__track">
+            {[...CATEGORIES, ...CATEGORIES].map((w, i) => <span key={i}>{w}<i>✦</i></span>)}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SCRIPTURE ───────────────────────────────────────── */}
+      <section className="h26-scripture k-dark" id="story">
+        <LazyVideo src={faithVid} poster={faithPoster} className="h26-scripture__media" />
+        <div className="h26-scripture__scrim" />
+        <figure className="k-quote k-center h26-scripture__body">
+          <p className="k-eyebrow k-eyebrow--center" style={{ margin: 0 }} data-reveal="fade">Proverbs 31:31</p>
+          <blockquote data-scrub>“Give her of the fruit of her hands; and let her own works praise her in the gates.”</blockquote>
+        </figure>
+      </section>
+
+      {/* ── EXPERIENCE + STATS ──────────────────────────────── */}
+      <section className="k-section">
+        <div className="k-head k-head--row">
+          <div style={{ display: 'grid', gap: 16 }}>
+            <p className="k-eyebrow" style={{ margin: 0 }} data-reveal="fade">The Experience</p>
+            <h2 className="k-h2" data-split>Beyond a <em>marketplace</em></h2>
+          </div>
+          <p className="k-lede" data-reveal style={{ maxWidth: '42ch' }}>Part gallery, part gathering, part storefront — built for the woman of influence and the people who love what she makes.</p>
+        </div>
+        <div className="k-grid k-grid--3" data-reveal-group>
+          {PILLARS.map((p, i) => (
+            <article className={`k-card ${i === 1 ? 'k-card--night' : ''}`} key={p.title}>
+              <span className="k-num">0{i + 1}</span>
+              <span className="k-icon"><p.Icon size={22} /></span>
+              <h3>{p.title}</h3>
+              <p>{p.body}</p>
+            </article>
+          ))}
+        </div>
+        <dl className="k-stats" style={{ marginTop: 'clamp(20px, 3vw, 36px)' }} data-reveal>
+          {STATS.map(([n, l]) => <div key={l}><dt data-count>{n}</dt><dd>{l}</dd></div>)}
+        </dl>
+      </section>
+
+      {/* ── MISSION ─────────────────────────────────────────── */}
+      <section className="k-section k-section--night k-dark" id="about">
+        <div className="k-split k-split--wide-right">
+          <div className="k-arch k-arch--ring h26-mission__media" data-reveal="clip">
+            <LazyVideo src={missionVid} poster={missionPoster} label="Melanie Jeffers-Cameron at the P31 Marketplace" />
+          </div>
+          <div className="k-head" style={{ marginBottom: 0 }}>
+            <p className="k-eyebrow" data-reveal="fade">Our mission · The Matriarch</p>
+            <h2 className="k-h2" data-split>Melanie <em>Jeffers-Cameron</em></h2>
+            <p className="k-lede" data-reveal>
+              Proverbs 31 Marketplace is a global marketplace for creativity. We honor the modern woman of
+              influence with a premium platform to showcase her gifts — every curator hand-selected,
+              rooted in purposeful elegance, where faith and luxury converge.
+            </p>
+            <ul className="h26-tags" data-reveal-group>
+              {CATEGORIES.map((c) => <li key={c}>{c}</li>)}
+            </ul>
+            <div className="k-actions" data-reveal>
+              <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></a>
+              <Link to="/about" className="k-btn k-btn--light">Our story</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── BENTO SHOWCASE ──────────────────────────────────── */}
+      <section className="k-section" id="marketplace">
+        <div className="k-head k-center">
+          <p className="k-eyebrow k-eyebrow--center" data-reveal="fade">Inside the collective</p>
+          <h2 className="k-h2" data-split>A marketplace, <em>composed</em></h2>
+          <p className="k-lede" data-reveal>Seven worlds of craftsmanship under one roof — each curator hand-selected, each piece a testament to gifted hands.</p>
+        </div>
+
+        <div className="h26-bento" data-reveal-group="scale">
+          <article className="h26-tile h26-tile--media h26-tile--tall">
+            <LazyVideo src={curatorVid} poster={curatorPoster} className="h26-fill" />
+            <div className="h26-tile__copy">
+              <span className="k-chip">Featured</span>
+              <h3>Curated by hand</h3>
+              <p>Every maker is vetted for craft, story and purpose.</p>
+            </div>
+          </article>
+          <article className="h26-tile h26-tile--media">
+            <img src={bentoJewelry} alt="Artisan jewelry" loading="lazy" decoding="async" />
+            <div className="h26-tile__copy"><span className="h26-tile__cat">Adornment</span></div>
+          </article>
+          <article className="h26-tile h26-tile--media">
+            <img src={bentoCeramics} alt="Handmade ceramics" loading="lazy" decoding="async" />
+            <div className="h26-tile__copy"><span className="h26-tile__cat">Home &amp; craft</span></div>
+          </article>
+          <article className="h26-tile h26-tile--gold">
+            <div className="h26-tile__copy">
+              <span className="h26-tile__big" data-count>7</span>
+              <span className="h26-tile__cat">Curated categories</span>
+            </div>
+          </article>
+          <article className="h26-tile h26-tile--media">
+            <img src={bentoCandles} alt="Botanical candles" loading="lazy" decoding="async" />
+            <div className="h26-tile__copy"><span className="h26-tile__cat">Wellness</span></div>
+          </article>
+          <article className="h26-tile h26-tile--night h26-tile--wide">
+            <div className="h26-tile__copy">
+              <Sparkles size={22} className="h26-gold" />
+              <p className="h26-tile__quote">Where faith, purpose and beauty converge.</p>
+            </div>
+          </article>
+          <article className="h26-tile h26-tile--media">
+            <LazyVideo src={productVid} poster={productPoster} className="h26-fill" />
+            <div className="h26-tile__copy"><span className="h26-tile__cat">The craft</span></div>
+          </article>
+          <Link to="/shop" className="h26-tile h26-tile--night h26-tile--link">
+            <div className="h26-tile__copy">
+              <h3>Shop the collective</h3>
+              <p>Every piece, every curator.</p>
+              <span className="k-link">Browse <ArrowRight size={16} /></span>
+            </div>
+          </Link>
+          <article className="h26-tile h26-tile--media h26-tile--wide">
+            <img src={bentoCommunity} alt="P31 community gathering" loading="lazy" decoding="async" />
+            <div className="h26-tile__copy">
+              <h3>More than commerce</h3>
+              <p>A movement of visionary women, gathering in person and online.</p>
+            </div>
+          </article>
+          <article className="h26-tile h26-tile--media">
+            <img src={bentoSkincare} alt="Artisan skincare" loading="lazy" decoding="async" />
+            <div className="h26-tile__copy"><span className="h26-tile__cat">Beauty</span></div>
+          </article>
+        </div>
+      </section>
+
+      {/* ── CURATOR SPOTLIGHT (live; hidden until curators are approved) ── */}
+      {curators.length > 0 && (
+        <section className="k-section k-section--mist">
+          <div className="k-head k-head--row">
+            <div style={{ display: 'grid', gap: 16 }}>
+              <p className="k-eyebrow" style={{ margin: 0 }} data-reveal="fade">Meet the curators</p>
+              <h2 className="k-h2" data-split>Shop the <em>collective</em></h2>
+            </div>
+            <Link to="/directory" className="k-link" data-reveal>View all <ArrowRight size={16} /></Link>
+          </div>
+          <div className="h26-rail" data-reveal-group>
+            {curators.map((c) => (
+              <Link to={`/${c.slug || c.id}`} className="h26-curator" key={c.id}>
+                <div className="h26-curator__banner">
+                  {c.banner_url && <img src={c.banner_url} alt="" loading="lazy" decoding="async" />}
+                </div>
+                <div className="h26-curator__body">
+                  {c.logo_url
+                    ? <img className="h26-curator__logo" src={c.logo_url} alt="" loading="lazy" decoding="async" />
+                    : <span className="h26-curator__logo h26-curator__logo--blank">{(c.business_name || '?').charAt(0)}</span>}
+                  <h3>{c.business_name}</h3>
+                  {(c.custom_title || c.tagline) && <p>{c.custom_title || c.tagline}</p>}
+                  {c.location && <span className="h26-curator__loc"><MapPin size={12} /> {c.location}</span>}
+                </div>
+              </Link>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* ── SCRIPTURE — Dark Plum ───────────────────────────── */}
-      <section className="home-scripture">
-        <video
-          src={faithVid}
-          autoPlay loop muted playsInline
-          className="home-scripture__video img-parallax"
-        />
-        <div className="home-scripture__overlay" />
-        <div className="home-scripture__body reveal">
-          {/* Olive vertical rule on left */}
-          <div className="scripture-rule" />
-          <div>
-            <blockquote className="scripture-quote">
-              "Give her of the fruit of her hands;<br />
-              And let her own works praise her in the gates."
-            </blockquote>
-            <cite className="scripture-cite">— Proverbs 31:31 KJV</cite>
+      {/* ── MARKET DATES ────────────────────────────────────── */}
+      <section className="k-section k-section--night k-dark" id="dates">
+        <div className="k-head k-head--row">
+          <div style={{ display: 'grid', gap: 16 }}>
+            <p className="k-eyebrow" style={{ margin: 0 }} data-reveal="fade">Upcoming</p>
+            <h2 className="k-h2" data-split>Market <em>dates</em></h2>
           </div>
-        </div>
-      </section>
-
-      {/* ── STATS BAND — enterprise trust signal ───────────── */}
-      <section className="home-stats">
-        <div className="stats-inner">
-          {[
-            { target: 7,   suffix: '',  decimals: 0, label: 'Curated Categories' },
-            { target: 4,   suffix: '',  decimals: 0, label: 'Seasonal Markets / Yr' },
-            { target: 100, suffix: '%', decimals: 0, label: 'Hand-Selected Curators' },
-            { target: 1,   suffix: 'K+',decimals: 0, label: 'Community Members' },
-          ].map((s, i) => (
-            <div className="stat-block" key={i}>
-              <span className="stat-count" data-target={s.target} data-suffix={s.suffix} data-decimals={s.decimals}>0{s.suffix}</span>
-              <span className="stat-label-sm">{s.label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── EXPERIENCE PILLARS — Parchment + Amethyst ─────── */}
-      <section className="home-pillars">
-        <div className="pillars-header reveal">
-          <span className="eyebrow-label">The Experience</span>
-          <h2 className="pillars-title">Beyond a Marketplace</h2>
+          <Link to="/calendar" className="k-link" data-reveal>All dates &amp; RSVP <ArrowRight size={16} /></Link>
         </div>
 
-        <div className="pillars-grid">
-          {[
-            { num: '01', icon: 'diamond',    title: 'Artisan Crafted',   body: 'Elite, hand-selected curators representing the pinnacle of craftsmanship and true beauty.' },
-            { num: '02', icon: 'diversity_3', title: 'Strategic Networking', body: 'A community of visionary women cultivating powerful, faith-driven connections.' },
-            { num: '03', icon: 'nightlife',  title: 'Exclusive Ambiance', body: 'A majestic, high-end atmosphere elevated by curated aesthetics and live music.' },
-          ].map(p => (
-            <div className="pillar-item" key={p.num}>
-              <span className="pillar-num">{p.num}</span>
-              <span className="material-symbols-outlined pillar-icon">{p.icon}</span>
-              <h3 className="pillar-title">{p.title}</h3>
-              <p className="pillar-body">{p.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── MISSION — Cal Poly Green (THE green section) ───── */}
-      <section className="home-mission" id="about">
-        <div className="mission-img-col reveal">
-          <div className="mission-img-frame">
-            <video
-              src={missionVid}
-              autoPlay loop muted playsInline
-              className="mission-img-video img-parallax"
-            />
-          </div>
-        </div>
-
-        <div className="mission-text-col reveal">
-          <span className="eyebrow-label eyebrow-gold">Our Mission</span>
-          <h2 className="mission-headline">Melanie Jeffers-Cameron</h2>
-          <p className="mission-sub">The Matriarch of P31 Marketplace</p>
-          <p className="mission-body">
-            Proverbs 31 Marketplace is a global marketplace for creativity.
-            We honor the modern woman of influence by providing a premium
-            platform to showcase her unique gifts. Every curator is hand-selected,
-            representing entrepreneurial excellence. Rooted in purposeful elegance, we create
-            spaces where faith and luxury converge.
-          </p>
-
-          <div className="mission-tags">
-            {['palette|Art', 'spa|Wellness', 'styler|Clothing', 'restaurant|Food', 'menu_book|Literature', 'diversity_1|Community', 'design_services|Services'].map(t => {
-              const [icon, label] = t.split('|');
-              return (
-                <span className="mission-tag" key={label}>
-                  <span className="material-symbols-outlined">{icon}</span> {label}
-                </span>
-              );
-            })}
-          </div>
-
-          <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noopener noreferrer" className="btn-gold-pill mt-cta">
-            Become a Curator →
-          </a>
-        </div>
-      </section>
-
-
-      {/* ── BENTO SHOWCASE — the signature enterprise mosaic ── */}
-      <section className="home-bento" id="marketplace">
-        <div className="bento-header reveal">
-          <span className="section-kicker">Inside the Collective</span>
-          <h2 className="bento-title">A Marketplace, Composed</h2>
-          <p className="bento-lead">
-            Seven worlds of craftsmanship under one roof — each curator hand-selected,
-            each artifact a testament to gifted hands.
-          </p>
-        </div>
-
-        <div className="bento-grid">
-          {/* Tall hero media — curator film */}
-          <div className="bento-cell is-media col-6 row-2">
-            <video src={curatorVid} autoPlay loop muted playsInline />
-            <div className="bento-overlay" />
-            <div className="bento-content">
-              <span className="bento-tag">Featured</span>
-              <h3 className="bento-cell-title">Curated by Hand</h3>
-              <p className="bento-cell-text">Every maker is vetted for craft, story, and purpose.</p>
-            </div>
-          </div>
-
-          <div className="bento-cell is-media col-3">
-            <img src={bentoJewelry} alt="Artisan jewelry" />
-            <div className="bento-overlay" />
-            <div className="bento-content"><span className="bento-cat">Adornment</span></div>
-          </div>
-
-          <div className="bento-cell is-media col-3">
-            <img src={bentoCeramics} alt="Handmade ceramics" />
-            <div className="bento-overlay" />
-            <div className="bento-content"><span className="bento-cat">Home & Craft</span></div>
-          </div>
-
-          <div className="bento-cell is-gold col-3">
-            <div className="bento-content">
-              <span className="stat-count bento-stat" data-target={7} data-suffix="" data-decimals={0}>0</span>
-              <span className="bento-stat-label">Curated Categories</span>
-            </div>
-          </div>
-
-          <div className="bento-cell is-media col-3">
-            <img src={bentoCandles} alt="Botanical candles" />
-            <div className="bento-overlay" />
-            <div className="bento-content"><span className="bento-cat">Wellness</span></div>
-          </div>
-
-          <div className="bento-cell is-dark col-4">
-            <div className="bento-content">
-              <span className="material-symbols-outlined bento-quote-mark">format_quote</span>
-              <p className="bento-quote">Where faith, purpose, and beauty converge.</p>
-            </div>
-          </div>
-
-          <div className="bento-cell is-media col-4">
-            <video src={productVid} autoPlay loop muted playsInline />
-            <div className="bento-overlay" />
-            <div className="bento-content"><span className="bento-cat">The Craft</span></div>
-          </div>
-
-          <div className="bento-cell is-forest col-4">
-            <div className="bento-content">
-              <h3 className="bento-cell-title">Become a Curator</h3>
-              <p className="bento-cell-text">Claim your storefront in the collective.</p>
-              <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noopener noreferrer" className="bento-cta magnetic">Apply →</a>
-            </div>
-          </div>
-
-          <div className="bento-cell is-media col-8">
-            <img src={bentoCommunity} alt="P31 community gathering" />
-            <div className="bento-overlay" />
-            <div className="bento-content">
-              <h3 className="bento-cell-title">More Than Commerce</h3>
-              <p className="bento-cell-text">A movement of visionary women, gathering in person and online.</p>
-            </div>
-          </div>
-
-          <div className="bento-cell is-media col-4">
-            <img src={bentoSkincare} alt="Artisan skincare" />
-            <div className="bento-overlay" />
-            <div className="bento-content"><span className="bento-cat">Beauty</span></div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── PARTNER TEASER — full-bleed plum CTA band ── */}
-      <section className="home-partner">
-        <div className="partner-inner reveal">
-          <span className="eyebrow-label eyebrow-gold">Bespoke Offerings</span>
-          <h2 className="partner-title">Elevate Your Presence</h2>
-          <p className="partner-body">
-            Proverbs 31 Marketplace is more than an event—it is a movement. Join us in
-            cultivating spaces where faith, purpose, and community converge.
-          </p>
-          <Link to="/partner" className="btn-solid-gold">Explore Partnerships</Link>
-        </div>
-      </section>
-
-      {/* ── MARKET DATES — Olive / Deep Earth ──────────────── */}
-      <section className="home-dates" id="dates">
-        <div className="dates-header reveal">
-          <span className="eyebrow-label eyebrow-thistle">Upcoming Dates</span>
-          <h2 className="dates-title">Market Dates</h2>
-        </div>
-
-        <div className="dates-list">
-          {marketDates.map((d, i) => (
-            <div className="date-row" key={i}>
-              <div className="date-num">
-                <span className="date-day">{d.day}</span>
-                <span className="date-month">{d.month}</span>
-              </div>
-              <div className="date-info">
-                <h3 className="date-name">{d.name}</h3>
-                <p className="date-time">{d.time}</p>
-              </div>
-              <div className="date-action">
-                {d.status === 'notify' ? (
-                  <a href="#newsletter" className="btn-outline-pill-light">Notify Me</a>
+        <div className="h26-dates__grid">
+          <div className="h26-dates__list" data-reveal-group>
+            {events.map((ev, i) => (
+              <article className="h26-date" key={ev.id}>
+                <div className="h26-date__cal">
+                  {showDate(ev) ? (
+                    <>
+                      <span className="h26-date__day">{parseEventDate(ev.event_date).getDate()}</span>
+                      <span className="h26-date__mon">{monthShort(ev.event_date)} ’{String(parseEventDate(ev.event_date).getFullYear()).slice(2)}</span>
+                    </>
+                  ) : (
+                    <>
+                      <CalendarClock size={24} className="h26-date__icon" />
+                      <span className="h26-date__mon">Soon</span>
+                    </>
+                  )}
+                </div>
+                <div className="h26-date__info">
+                  <h3>{ev.title}</h3>
+                  <p>{showDate(ev) ? ([ev.start_time, ev.venue].filter(Boolean).join(' · ') || 'Details coming soon') : 'Date coming soon'}</p>
+                </div>
+                {ev.rsvp_url ? (
+                  <a href={ev.rsvp_url} target="_blank" rel="noreferrer" className="k-btn k-btn--sm k-btn--gold">RSVP</a>
+                ) : ev.rsvp_enabled !== false ? (
+                  <Link to="/calendar" className="k-btn k-btn--sm k-btn--light">RSVP</Link>
+                ) : i < 2 ? (
+                  <button type="button" onClick={openJoin} className="k-btn k-btn--sm k-btn--light">Notify me</button>
                 ) : (
-                  <span className="date-badge">Incoming</span>
+                  <span className="k-chip k-chip--glass">Incoming</span>
                 )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+              </article>
+            ))}
+            {eventsLoaded && events.length === 0 && (
+              <article className="h26-date">
+                <div className="h26-date__info">
+                  <h3>New dates coming soon</h3>
+                  <p>Join the collective to hear first.</p>
+                </div>
+                <button type="button" onClick={openJoin} className="k-btn k-btn--sm k-btn--light">Notify me</button>
+              </article>
+            )}
+          </div>
 
-      {/* ── VISIT US — Dedicated Location Section ───────────── */}
-      <section className="home-location-section reveal">
-        <div className="location-inner">
-          <div className="location-text">
-            <span className="eyebrow-label eyebrow-plum">Visit Us</span>
-            <h2 className="location-title">Our Next Market Location</h2>
-            <p className="location-desc">
-              Join us for a day of discovery and community at the heart of Duluth.
+          <aside className="h26-visit" data-reveal="right">
+            <span className="k-icon"><MapPin size={22} /></span>
+            <p className="k-eyebrow" style={{ margin: '18px 0 8px' }}>Next market location</p>
+            <h3>{nextEvent?.venue || 'Venue to be announced'}</h3>
+            {(nextEvent?.address || nextEvent?.location) && <p className="h26-visit__addr">{nextEvent.address || nextEvent.location}</p>}
+            <p className="h26-visit__date">
+              {showDate(nextEvent) ? formatEventDate(nextEvent.event_date) : 'Date coming soon'}
+              {showDate(nextEvent) && nextEvent?.start_time ? ` · ${nextEvent.start_time}` : ''}
             </p>
+            {nextEvent?.address && (
+              <a className="k-link" href={`https://maps.google.com/?q=${encodeURIComponent(`${nextEvent.venue || ''} ${nextEvent.address}`)}`} target="_blank" rel="noreferrer">
+                Directions <ArrowUpRight size={16} />
+              </a>
+            )}
+          </aside>
+        </div>
+      </section>
+
+      {/* ── PARTNER ─────────────────────────────────────────── */}
+      <section className="k-section">
+        <div className="k-split k-split--wide-left">
+          <div className="k-head" style={{ marginBottom: 0 }}>
+            <p className="k-eyebrow" data-reveal="fade">Bespoke offerings</p>
+            <h2 className="k-h2" data-split>Elevate your <em>presence</em></h2>
+            <p className="k-lede" data-reveal>
+              Proverbs 31 Marketplace is more than an event — it is a movement. Partner with us, sponsor a
+              market, or work with our team on bespoke brand services.
+            </p>
+            <div className="k-actions" data-reveal>
+              <Link to="/partner" className="k-btn k-btn--plum">Explore partnerships <ArrowRight size={18} /></Link>
+              <Link to="/services" className="k-btn k-btn--outline">Services</Link>
+            </div>
           </div>
-          <div className="location-box glass-card">
-            <div className="location-icon">
-              <MapPin size={32} className="text-gold" />
-            </div>
-            <div className="location-details">
-              <h3 className="location-venue">Embassy Suites</h3>
-              <p className="location-address">
-                2029 Satellite Blvd<br />
-                Duluth, GA 30097
-              </p>
-              <div className="location-market-date">
-                <span>June 28, 2026</span>
-              </div>
-            </div>
+          <div className="k-arch k-arch--ring" data-reveal="clip" style={{ maxWidth: 440, justifySelf: 'center', width: '100%' }}>
+            <img src={partnerImg} alt="" loading="lazy" decoding="async" data-parallax="7" style={{ height: '116%', top: '-8%' }} />
           </div>
         </div>
       </section>
 
-      {/* ── NEWSLETTER — Thistle / Light Purple ─────────────── */}
-      <section className="home-newsletter" id="newsletter">
-        <div className="newsletter-inner reveal">
-          <span className="eyebrow-label eyebrow-plum">Stay Connected</span>
-          <h2 className="newsletter-headline">Join the Collective</h2>
-          <p className="newsletter-body">
-            Receive exclusive invitations, market updates, and highlights
-            from our community of visionary women.
-          </p>
-          <form onSubmit={handleNewsletter} className="newsletter-form">
-            <input
-              type="email"
-              placeholder="Your email address"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              className="newsletter-input"
-            />
-            <button type="submit" className="btn-gold-pill">Subscribe</button>
-          </form>
+      {/* ── NEWSLETTER ──────────────────────────────────────── */}
+      <section className="k-section k-section--tight" id="newsletter">
+        <div className="k-cta k-dark h26-news" data-reveal="scale">
+          <p className="k-eyebrow">The Inner Circle</p>
+          <h2 className="k-h2">Join the <em>collective</em></h2>
+          <p className="k-lede">Exclusive invitations, market dates and highlights from our community of visionary women.</p>
+          {newsState === 'done' ? (
+            <p className="h26-news__done"><Check size={18} /> You’re on the list — welcome to the collective.</p>
+          ) : (
+            <form className="h26-news__form" onSubmit={handleNewsletter}>
+              <label className="sr-only" htmlFor="h26-name">First name</label>
+              <input id="h26-name" className="k-input" required autoComplete="given-name" placeholder="First name"
+                value={news.name} onChange={(e) => setNews({ ...news, name: e.target.value })} />
+              <label className="sr-only" htmlFor="h26-email">Email address</label>
+              <input id="h26-email" className="k-input" required type="email" autoComplete="email" inputMode="email" placeholder="Email address"
+                value={news.email} onChange={(e) => setNews({ ...news, email: e.target.value })} />
+              <input className="k-trap" tabIndex={-1} autoComplete="off" aria-hidden="true" value={news.trap} onChange={(e) => setNews({ ...news, trap: e.target.value })} />
+              <button className="k-btn k-btn--gold" disabled={newsState === 'sending'}>
+                {newsState === 'sending' ? 'Joining…' : <>Join <ArrowRight size={18} /></>}
+              </button>
+              {newsState === 'error' && <p className="k-error" role="alert">Something went wrong — please try again.</p>}
+            </form>
+          )}
         </div>
       </section>
 
+      {/* ── SYSTEMS (team sign-in) ──────────────────────────── */}
+      <section className="k-section k-section--tight" id="systems" style={{ paddingTop: 0 }}>
+        <div className="h26-systems" data-reveal>
+          <span className="k-icon"><Lock size={20} /></span>
+          <div>
+            <h3>Systems — the P31 operations console</h3>
+            <p>Social command, growth search, campaigns, orders and the creative studios. Team sign-in only.</p>
+          </div>
+          <Link to="/systems" className="k-btn k-btn--outline k-btn--sm">Sign in <ArrowRight size={16} /></Link>
+        </div>
+      </section>
     </div>
   );
 };

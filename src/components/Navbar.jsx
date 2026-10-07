@@ -1,114 +1,218 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Crown, Leaf, User, LogOut, Layout } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import {
+  Home, Store, CalendarDays, Handshake, LayoutGrid, ShoppingBasket, Heart, X, ChevronRight, Sparkles, Info,
+  LayoutDashboard, LogOut, Lock, Instagram, Facebook, UserRound, Crown, ShoppingBag,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+import { isFlushRoute } from '../lib/routes';
 import './Navbar.css';
 
-import logoPath from '../assets/logo.png';
-import logo2Path from '../assets/logo2.png';
+import logoPath from '../assets/web/logo-160.webp';
+
+const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
+
+const TikTok = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5v3a8 8 0 0 1-5-1.5z" />
+  </svg>
+);
+
+const LINKS = [
+  { to: '/', label: 'Home', Icon: Home, end: true },
+  { to: '/shop', label: 'Shop the Marketplace', Icon: ShoppingBasket },
+  { to: '/directory', label: 'Curators & Shops', Icon: Store },
+  { to: '/favorites', label: 'Favorites', Icon: Heart },
+  { to: '/calendar', label: 'Market Dates', Icon: CalendarDays },
+  { to: '/partner', label: 'Partner With Us', Icon: Handshake },
+  { to: '/services', label: 'Services', Icon: Sparkles },
+  { to: '/about', label: 'Our Story', Icon: Info },
+];
+
+// Phones: an app-style bottom bar for the four places people go most,
+// plus "Menu" for everything else.
+const TABS = [
+  { to: '/', label: 'Home', Icon: Home, end: true },
+  { to: '/shop', label: 'Shop', Icon: ShoppingBasket },
+  { to: '/directory', label: 'Curators', Icon: Store },
+  { to: '/calendar', label: 'Dates', Icon: CalendarDays },
+];
 
 const Navbar = () => {
-  const { user, profile, curatorData, isAdmin, signOut } = useAuth();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const location = useLocation();
+  const { user, profile, isAdmin, signOut } = useAuth();
+  const { count, openCart } = useCart();
+  const { pathname } = useLocation();
+  const [scrolled, setScrolled] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [userMenu, setUserMenu] = useState(false);
+
+  // Over the dark page heroes the bar is clear; once you scroll (and on
+  // storefronts and the studio) it becomes frosted glass.
+  const overHero = isFlushRoute(pathname) && !scrolled;
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 80);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Close menus on navigation.
+  useEffect(() => {
+    Promise.resolve().then(() => { setSheetOpen(false); setUserMenu(false); });
+  }, [pathname]);
+
+  // Lock the page behind the sheet; Escape closes it.
+  useEffect(() => {
+    if (!sheetOpen) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e) => e.key === 'Escape' && setSheetOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [sheetOpen]);
+
+  const firstName = profile?.full_name?.split(' ')[0];
+  const initial = (firstName || user?.email || '?').charAt(0).toUpperCase();
+
   return (
-    <nav className={`navbar-v2 ${isScrolled ? 'scrolled' : ''}`}>
-      <div className="navbar-v2-inner">
-        <Link to="/" className="nav-brand">
-          <img src={logoPath} alt="Proverbs 31 Marketplace" className="nav-logo-img gold-plated-logo" />
-        </Link>
+    <>
+      <header className={`nb ${overHero ? 'nb--clear' : 'nb--glass'}`}>
+        <div className="nb__inner">
+          <Link to="/" className="nb__brand" aria-label="Proverbs 31 Marketplace — home">
+            <img src={logoPath} alt="" />
+            <span className="nb__wordmark">
+              <strong>Proverbs 31</strong>
+              <small>Marketplace</small>
+            </span>
+          </Link>
 
-        <div className="nav-links desktop-only">
-          <Link to="/partner" className={location.pathname === '/partner' ? 'active' : ''}>Partner</Link>
-          <Link to="/services" className={location.pathname === '/services' ? 'active' : ''}>Services</Link>
-          <div className="nav-link-with-badge">
-            <Link to="/directory" className={location.pathname === '/directory' ? 'active' : ''}>Curators</Link>
-            <span className="construction-badge">Soon</span>
-          </div>
-          <Link to="/directory" className={location.pathname === '/directory' ? 'active' : ''}>Marketplace</Link>
-        </div>
+          <nav className="nb__links" aria-label="Main">
+            {[['/shop', 'Shop'], ['/directory', 'Curators'], ['/calendar', 'Dates'], ['/partner', 'Partner'], ['/services', 'Services']].map(([to, label]) => (
+              <NavLink key={to} to={to} className="nb__link">{label}</NavLink>
+            ))}
+          </nav>
 
-        <div className="nav-actions desktop-only">
-          {user ? (
-            <div className="user-nav-wrapper">
-              <button className="user-nav-btn" onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}>
-                <div className="user-nav-avatar">
-                  <img src={profile?.avatar_url || 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=50'} alt="Me" />
-                  {isAdmin && <Crown size={12} className="prestige-icon admin-crown" />}
-                  {curatorData?.is_early_bird && !isAdmin && <Leaf size={12} className="prestige-icon founder-leaf" />}
-                </div>
-                <span className="user-nav-name desktop-only">{profile?.full_name?.split(' ')[0]}</span>
-              </button>
-              
-              {isUserMenuOpen && (
-                <div className="user-dropdown glass-card shadow-lg">
-                  <Link to="/dashboard" onClick={() => setIsUserMenuOpen(false)}><Layout size={16} /> Studio Dashboard</Link>
-                  <button onClick={() => { signOut(); setIsUserMenuOpen(false); }} className="nav-logout-btn">
-                    <LogOut size={16} /> Exit Studio
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link to="/login" className="btn-solid-gold">
-              Curator Portal
-            </Link>
-          )}
-        </div>
-
-        <button className="mobile-menu-btn mobile-only" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-          {isMobileMenuOpen ? <X size={24} color="#D4AF37" /> : <Menu size={24} color="#D4AF37" />}
-        </button>
-      </div>
-
-      {isMobileMenuOpen && (
-        <div className="mobile-dropdown animate-nav-in">
-          <button className="mobile-close-btn" onClick={() => setIsMobileMenuOpen(false)}>
-            <X size={32} />
-          </button>
-          
-          <div className="mobile-menu-brand">
-            <img src={logo2Path} alt="P31" className="mobile-brand-logo" />
-          </div>
-
-          <div className="mobile-menu-links">
-            <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
-            <Link to="/partner" onClick={() => setIsMobileMenuOpen(false)}>Partner</Link>
-            <Link to="/services" onClick={() => setIsMobileMenuOpen(false)}>Services</Link>
-            <div className="mobile-nav-link-badge">
-              <Link to="/directory" onClick={() => setIsMobileMenuOpen(false)}>Curators</Link>
-              <span className="mobile-construction-badge">Soon</span>
-            </div>
-            <div className="mobile-nav-link-badge">
-              <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>Storefront App</Link>
-            </div>
-          </div>
-
-          <div className="mobile-menu-footer">
-            {!user ? (
-              <Link to="/login" className="btn-solid-gold w-full" onClick={() => setIsMobileMenuOpen(false)}>
-                Curator Portal
-              </Link>
+          <div className="nb__actions">
+            <button className="nb__bag" onClick={openCart} aria-label={`Bag, ${count} item${count === 1 ? '' : 's'}`}>
+              <ShoppingBag size={19} />
+              {count > 0 && <span>{count > 99 ? '99+' : count}</span>}
+            </button>
+            {user ? (
+              <div className="nb__user">
+                <button className="nb__avatar" onClick={() => setUserMenu(!userMenu)} aria-expanded={userMenu} aria-label="Account menu">
+                  {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : <span>{initial}</span>}
+                  {isAdmin && <Crown size={11} className="nb__crown" />}
+                </button>
+                {userMenu && (
+                  <div className="nb__menu" role="menu">
+                    <p className="nb__menu-name">{firstName || 'Your account'}</p>
+                    <Link to="/dashboard" role="menuitem"><LayoutDashboard size={16} /> Studio dashboard</Link>
+                    <button role="menuitem" onClick={signOut}><LogOut size={16} /> Sign out</button>
+                  </div>
+                )}
+              </div>
             ) : (
-              <Link to="/dashboard" className="btn-solid-gold w-full" onClick={() => setIsMobileMenuOpen(false)}>
-                Go to Studio
+              <Link to="/login" className="nb__cta">
+                <UserRound size={16} /> <span>Curator Portal</span>
               </Link>
             )}
           </div>
         </div>
-      )}
-    </nav>
+      </header>
+
+      {/* ── Bottom tab bar (phones) — the studio has its own nav ── */}
+      {!pathname.startsWith('/dashboard') && <nav className="tb" aria-label="Quick navigation">
+        {TABS.map((t) => (
+          <NavLink key={t.to} to={t.to} end={t.end} className="tb__item">
+            <t.Icon size={21} strokeWidth={1.9} />
+            <span>{t.label}</span>
+          </NavLink>
+        ))}
+        <button className={`tb__item ${sheetOpen ? 'active' : ''}`} onClick={() => setSheetOpen(true)} aria-expanded={sheetOpen}>
+          <LayoutGrid size={21} strokeWidth={1.9} />
+          <span>Menu</span>
+        </button>
+      </nav>}
+
+      {/* ── Menu sheet ──────────────────────────────────────── */}
+      <div className={`sheet ${sheetOpen ? 'is-open' : ''}`} aria-hidden={!sheetOpen}>
+        <button className="sheet__backdrop" onClick={() => setSheetOpen(false)} aria-label="Close menu" tabIndex={sheetOpen ? 0 : -1} />
+        <div className="sheet__panel" role="dialog" aria-modal="true" aria-label="Menu">
+          <div className="sheet__grip" aria-hidden="true" />
+          <div className="sheet__head">
+            <span className="sheet__title">Menu</span>
+            <button className="sheet__close" onClick={() => setSheetOpen(false)} aria-label="Close"><X size={20} /></button>
+          </div>
+
+          <div className="sheet__account">
+            {user ? (
+              <>
+                <span className="sheet__avatar">{profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : initial}</span>
+                <div>
+                  <strong>{firstName || 'Welcome back'}</strong>
+                  <span>Signed in</span>
+                </div>
+                <Link to="/dashboard" className="sheet__pill">Studio</Link>
+              </>
+            ) : (
+              <>
+                <span className="sheet__avatar sheet__avatar--gold"><UserRound size={20} /></span>
+                <div>
+                  <strong>Curator Portal</strong>
+                  <span>Manage your storefront</span>
+                </div>
+                <Link to="/login" className="sheet__pill">Sign in</Link>
+              </>
+            )}
+          </div>
+
+          <ul className="sheet__list">
+            {LINKS.map((l) => (
+              <li key={l.to}>
+                <NavLink to={l.to} end={l.end}>
+                  <span className="sheet__icon"><l.Icon size={18} /></span>
+                  {l.label}
+                  <ChevronRight size={18} className="sheet__chev" />
+                </NavLink>
+              </li>
+            ))}
+            <li>
+              <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">
+                <span className="sheet__icon sheet__icon--gold"><Sparkles size={18} /></span>
+                Become a Curator
+                <ChevronRight size={18} className="sheet__chev" />
+              </a>
+            </li>
+            <li>
+              <Link to="/systems">
+                <span className="sheet__icon sheet__icon--dark"><Lock size={16} /></span>
+                Systems <small>Team</small>
+                <ChevronRight size={18} className="sheet__chev" />
+              </Link>
+            </li>
+            {user && (
+              <li>
+                <button onClick={signOut}>
+                  <span className="sheet__icon"><LogOut size={18} /></span>
+                  Sign out
+                </button>
+              </li>
+            )}
+          </ul>
+
+          <div className="sheet__social">
+            <a href="https://www.instagram.com/proverbs31market" target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram size={18} /></a>
+            <a href="https://www.facebook.com/share/1LEtAu9AJD/?mibextid=wwXIfr" target="_blank" rel="noreferrer" aria-label="Facebook"><Facebook size={18} /></a>
+            <a href="https://www.tiktok.com/@p31marketplace" target="_blank" rel="noreferrer" aria-label="TikTok"><TikTok /></a>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

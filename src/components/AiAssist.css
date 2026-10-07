@@ -1,0 +1,26 @@
+/* "Write with AI" — inherits colour so it works on light and dark screens. */
+.ai { display: grid; gap: 8px; }
+.ai__btn {
+  justify-self: start; display: inline-flex; align-items: center; gap: 6px;
+  min-height: 38px; padding: 0 14px; border-radius: 999px; cursor: pointer;
+  font: inherit; font-size: 0.84rem; font-weight: 800; color: inherit;
+  background: linear-gradient(135deg, rgba(168, 85, 232, 0.16), rgba(242, 206, 77, 0.18));
+  border: 1px solid rgba(168, 85, 232, 0.35);
+}
+.ai__btn:disabled { opacity: 0.7; cursor: progress; }
+.ai__spin { animation: ai-spin 0.9s linear infinite; }
+@keyframes ai-spin { to { transform: rotate(360deg); } }
+.ai__err { margin: 0; font-size: 0.84rem; font-weight: 600; color: #e5484d; }
+.ai__panel { display: grid; gap: 8px; padding: 10px; border-radius: 16px; border: 1px solid rgba(168, 85, 232, 0.3); background: rgba(168, 85, 232, 0.06); }
+.ai__head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 800; opacity: 0.85; }
+.ai__head span { display: inline-flex; align-items: center; gap: 6px; }
+.ai__head div { display: flex; gap: 4px; }
+.ai__head button, .ai__opt button {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0 10px; border-radius: 999px; cursor: pointer;
+  font: inherit; font-size: 0.78rem; font-weight: 700; color: inherit;
+  background: transparent; border: 1px solid rgba(127, 127, 127, 0.3);
+}
+.ai__opt { display: grid; gap: 8px; padding: 10px 12px; border-radius: 12px; background: rgba(127, 127, 127, 0.08); }
+.ai__opt p { margin: 0; white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5; color: inherit; }
+.ai__opt > div { display: flex; gap: 6px; flex-wrap: wrap; }
+.ai__opt .ai__use { background: #5E2A8C; border-color: #5E2A8C; color: #fff; }

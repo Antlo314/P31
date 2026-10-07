@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { fetchAdminIds } from '../lib/people';
 import { Send, Hash, Users, Bell, Search, Settings, Crown, Leaf, Trash2, MessageCircle, UserPlus, ShieldCheck, Pin, PinOff } from 'lucide-react';
 import './Community.css';
 
@@ -14,6 +15,9 @@ const PUBLIC_CHANNELS = [
 const Community = () => {
   const { user, profile, curatorData, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState('channels'); // 'channels' or 'dms'
+  // Who wears the P31 badge (account emails are private, so ask the server).
+  const [adminIds, setAdminIds] = useState(() => new Set());
+  useEffect(() => { fetchAdminIds().then(setAdminIds); }, []);
   const [activeChannelId, setActiveChannelId] = useState('general');
   const [activeDmRecipient, setActiveDmRecipient] = useState(null);
   
@@ -34,7 +38,7 @@ const Community = () => {
       try {
         const { data, error } = await supabase
           .from('curator_data')
-          .select('*, profiles(full_name, avatar_url, email)')
+          .select('*, profiles(full_name, avatar_url)')
           .eq('status', 'approved')
           .neq('id', user?.id) // Don't DM yourself
           .order('business_name', { ascending: true });
@@ -100,7 +104,6 @@ const Community = () => {
           profiles!profile_id (
             full_name, 
             avatar_url, 
-            email,
             curator_data (is_early_bird)
           ),
           parent:parent_id (
@@ -134,7 +137,7 @@ const Community = () => {
           // Legacy Fallback (No recipient_id filter)
           const legacyQuery = await supabase
             .from('messages')
-            .select('*, profiles!profile_id(full_name, avatar_url, email, curator_data(is_early_bird))')
+            .select('*, profiles!profile_id(full_name, avatar_url, curator_data(is_early_bird))')
             .eq('channel_id', activeChannelId)
             .order('created_at', { ascending: true });
           
@@ -173,7 +176,7 @@ const Community = () => {
   const fetchNewMessage = async (id) => {
     const { data, error } = await supabase
       .from('messages')
-      .select('*, profiles!profile_id(full_name, avatar_url, email, curator_data(is_early_bird)), parent:parent_id(id, text, profiles!profile_id(full_name))')
+      .select('*, profiles!profile_id(full_name, avatar_url, curator_data(is_early_bird)), parent:parent_id(id, text, profiles!profile_id(full_name))')
       .eq('id', id)
       .single();
     
@@ -395,7 +398,7 @@ const Community = () => {
           )}
           <div className="messages-list">
             {messages.map((msg) => {
-              const msgIsAdmin = ['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'].includes(msg.profiles?.email?.toLowerCase());
+              const msgIsAdmin = adminIds.has(msg.profile_id);
               const msgIsFounder = msg.profiles?.curator_data?.[0]?.is_early_bird;
               const isMine = msg.profile_id === user?.id;
               const canDelete = isMine || isAdmin;

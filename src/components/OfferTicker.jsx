@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './OfferTicker.css';
 
+// Target Date: 15 days from April 19th -> May 4, 2026
+const deadline = new Date('2026-05-04T13:15:00').getTime();
+
 const OfferTicker = () => {
   const [timeLeft, setTimeLeft] = useState('');
-  const [isOfferActive, setIsOfferActive] = useState(true);
-
-  // Target Date: 15 days from April 19th -> May 4, 2026
-  const deadline = new Date('2026-05-04T13:15:00').getTime();
+  // Decide up front so an expired offer never flashes on load.
+  const [isOfferActive, setIsOfferActive] = useState(() => Date.now() < deadline);
 
   useEffect(() => {
     const timer = setInterval(() => {

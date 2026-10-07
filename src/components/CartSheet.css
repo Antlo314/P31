@@ -1,0 +1,110 @@
+/* Shopping bag — bottom sheet on phones, side drawer on desktop. Prefix: cs2- */
+.cs2 {
+  position: fixed; inset: 0; z-index: 650;
+  display: flex; align-items: flex-end; justify-content: flex-end;
+  background: rgba(18, 8, 29, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  animation: cs2-fade 0.25s ease both;
+}
+.cs2__panel {
+  width: 100%; max-height: 92dvh; overflow-y: auto; overscroll-behavior: contain;
+  padding: 8px 16px calc(20px + env(safe-area-inset-bottom));
+  border-radius: 26px 26px 0 0; background: var(--surface); color: var(--on-surface);
+  animation: cs2-up 0.42s var(--ease-fluid) both;
+}
+@media (min-width: 720px) {
+  .cs2 { align-items: stretch; }
+  .cs2__panel { width: 440px; max-height: none; height: 100%; border-radius: 0; animation-name: cs2-side; padding-top: 18px; }
+  .cs2__grip { display: none; }
+}
+.cs2__grip { width: 40px; height: 5px; border-radius: 999px; background: var(--outline); margin: 4px auto 10px; }
+.cs2__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.cs2__head h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-family: var(--font-heading); font-size: 1.5rem; color: var(--dark-plum); }
+.cs2__head h2 span { font-family: var(--font-body); font-size: 0.75rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; background: var(--gold-light); color: #2a1a00; }
+.cs2__close { width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer; background: var(--surface-container-low); color: var(--on-surface); display: grid; place-items: center; }
+
+.cs2-empty { display: grid; justify-items: center; gap: 10px; padding: 40px 16px; text-align: center; color: var(--on-surface-muted); }
+.cs2-empty p { margin: 0; }
+
+.cs2-group { display: grid; gap: 12px; padding: 14px; margin-bottom: 12px; border-radius: 20px; background: #fff; border: 1px solid var(--outline-variant); }
+.cs2-shop { display: flex; align-items: center; gap: 10px; }
+.cs2-shop img, .cs2-shop > span { width: 32px; height: 32px; border-radius: 10px; object-fit: cover; display: grid; place-items: center; background: var(--surface-container-low); color: var(--dark-plum); }
+.cs2-shop a { font-weight: 800; color: var(--on-surface); text-decoration: none; }
+
+.cs2-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.cs2-lines li { display: grid; grid-template-columns: 56px 1fr auto; gap: 10px; align-items: center; }
+.cs2-thumb { width: 56px; height: 64px; border-radius: 12px; overflow: hidden; display: grid; place-items: center; background: var(--surface-container-low); color: var(--on-surface-muted); }
+.cs2-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.cs2-info { display: grid; gap: 2px; min-width: 0; }
+.cs2-info strong { font-size: 0.9rem; line-height: 1.25; }
+.cs2-info span { font-size: 0.78rem; color: var(--on-surface-muted); }
+.cs2-info .cs2-price { color: var(--on-surface); font-weight: 700; font-size: 0.88rem; }
+.cs2-qty { display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 999px; background: var(--surface-container-low); }
+.cs2-qty button { width: 32px; height: 32px; border-radius: 50%; border: 0; cursor: pointer; background: #fff; color: var(--dark-plum); display: grid; place-items: center; }
+.cs2-qty button:disabled { opacity: 0.4; }
+.cs2-qty span { min-width: 22px; text-align: center; font-weight: 800; font-size: 0.9rem; }
+
+.cs2-code { display: flex; align-items: center; gap: 8px; padding: 0 6px 0 12px; height: 46px; border-radius: 14px; border: 1px solid var(--outline); color: var(--on-surface-muted); }
+.cs2-code input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: inherit; font-size: 16px; text-transform: uppercase; color: var(--on-surface); }
+.cs2-code button { height: 34px; padding: 0 14px; border-radius: 10px; border: 0; cursor: pointer; background: var(--surface-container-low); color: var(--dark-plum); font: inherit; font-weight: 800; font-size: 0.82rem; }
+.cs2-ok { margin: -4px 0 0; color: #17603C; font-weight: 700; font-size: 0.85rem; }
+.cs2-err { margin: 0; color: #b42318; font-weight: 600; font-size: 0.86rem; }
+
+.cs2-totals { margin: 0; display: grid; gap: 4px; }
+.cs2-totals div { display: flex; justify-content: space-between; font-size: 0.92rem; }
+.cs2-totals dt, .cs2-totals dd { margin: 0; }
+.cs2-totals .is-disc { color: #17603C; }
+.cs2-totals .is-total { font-weight: 800; font-size: 1.05rem; padding-top: 6px; border-top: 1px solid var(--outline-variant); }
+
+.cs2-actions, .cs2-form { display: grid; gap: 8px; }
+.cs2-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 50px; padding: 0 18px; border-radius: 999px; border: 0; cursor: pointer;
+  font: inherit; font-weight: 800; font-size: 0.95rem; text-decoration: none;
+}
+.cs2-btn--plum { background: var(--dark-plum); color: #fff; }
+.cs2-btn--ghost { background: var(--surface-container-low); color: var(--dark-plum); }
+.cs2-btn:disabled { opacity: 0.6; }
+.cs2-link { justify-self: center; background: none; border: 0; cursor: pointer; color: var(--on-surface-muted); font: inherit; font-size: 0.84rem; font-weight: 700; padding: 6px; }
+.cs2-label { margin: 0; font-size: 0.85rem; font-weight: 700; color: var(--on-surface-variant); }
+.cs2-form input, .cs2-form textarea {
+  min-height: 48px; padding: 10px 14px; border-radius: 14px; border: 1px solid var(--outline);
+  background: #fff; color: var(--on-surface); font: inherit; font-size: 16px;
+}
+.cs2-methods { display: grid; gap: 6px; }
+.cs2-methods label { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; border-radius: 14px; border: 1px solid var(--outline-variant); cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+.cs2-methods label.is-on { border-color: var(--dark-plum); background: var(--surface-container-low); }
+.cs2-methods input { accent-color: var(--dark-plum); }
+.cs2-trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+.cs2-done { display: grid; justify-items: center; gap: 8px; text-align: center; padding: 8px 4px; }
+.cs2-done > span { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; background: rgba(23, 166, 115, 0.15); color: #17A673; }
+.cs2-done h3 { margin: 0; font-family: var(--font-heading); color: var(--dark-plum); font-size: 1.4rem; }
+.cs2-done p { margin: 0; color: var(--on-surface-variant); }
+.cs2-pay { width: 100%; display: grid; gap: 6px; margin-top: 8px; }
+.cs2-pay a { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 14px; border-radius: 14px; background: var(--surface-container-low); color: var(--on-surface); font-weight: 700; text-decoration: none; }
+.cs2-spin { animation: cs2-spin 0.9s linear infinite; }
+
+@keyframes cs2-fade { from { opacity: 0; } }
+@keyframes cs2-up { from { transform: translateY(100%); } }
+@keyframes cs2-side { from { transform: translateX(100%); } }
+@keyframes cs2-spin { to { transform: rotate(360deg); } }
+
+/* ── Brand kit alignment ─────────────────────────────────── */
+.cs2 { background: rgba(20, 10, 34, 0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.cs2__panel { background: var(--ivory); }
+.cs2__head h2 { font-weight: 400; font-size: 1.7rem; color: var(--plum); }
+.cs2__head h2 span { background: var(--gold-hi); color: var(--gold-ink); }
+.cs2__close { background: var(--mist); transition: transform 0.3s var(--ease-fluid); }
+.cs2__close:hover { transform: rotate(90deg); }
+.cs2-group { border-color: var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-1); }
+.cs2-shop img, .cs2-shop > span { border-radius: 999px 999px 8px 8px; }
+.cs2-thumb { border-radius: 14px; }
+.cs2-btn { min-height: 52px; transition: transform 0.35s var(--ease-fluid), box-shadow 0.35s var(--ease-fluid); }
+.cs2-btn:active { transform: scale(0.97); }
+.cs2-btn--plum { background: linear-gradient(135deg, var(--gold-hi), var(--gold)); color: var(--gold-ink); box-shadow: var(--shadow-gold), inset 0 1px 0 rgba(255, 255, 255, 0.5); }
+.cs2-btn--ghost { background: var(--mist); border: 1px solid var(--line); }
+.cs2-code, .cs2-form input, .cs2-form textarea { border-color: var(--line-2); }
+.cs2-code:focus-within, .cs2-form input:focus-visible, .cs2-form textarea:focus-visible { outline: 0; border-color: var(--plum); box-shadow: 0 0 0 4px rgba(168, 85, 232, 0.16); }
+.cs2-methods label.is-on { border-color: var(--plum); background: var(--mist); }
+.cs2-done h3 { font-weight: 400; font-size: 1.7rem; }
+.cs2-done > span { border-radius: 50%; }

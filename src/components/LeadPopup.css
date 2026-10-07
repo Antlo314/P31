@@ -1,145 +1,88 @@
-/* ==========================================================
-   LeadPopup.css — P31 Brand Kit
-   Compact, editorial, richly toned.
-   ========================================================== */
+/* "Join the collective" — split brand dialog on desktop, bottom sheet on phones. */
+.lp2 {
+  position: fixed; inset: 0; z-index: 500;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(20, 10, 34, 0.62);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.lp2__panel {
+  position: relative; width: 100%; max-height: 94dvh; overflow: hidden auto; overscroll-behavior: contain;
+  display: grid; background: var(--ivory);
+  border-radius: 30px 30px 0 0;
+  box-shadow: 0 -30px 90px -30px rgba(0, 0, 0, 0.7);
+}
+.lp2__close { top: 12px; right: 12px; background: rgba(255, 255, 255, 0.92); }
 
-.lead-popup-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(26, 13, 24, 0.78);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  animation: overlayFadeIn 0.4s var(--ease-fluid) both;
+/* Dark brand side — a short arch banner on phones */
+.lp2__side {
+  position: relative; isolation: isolate; overflow: hidden;
+  display: grid; grid-template-columns: 96px 1fr; align-items: end; gap: 16px;
+  padding: 22px 64px 20px 22px;
+  background: var(--night-bg);
+}
+.lp2__side::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--grain); mix-blend-mode: overlay; }
+.lp2__media { position: relative; aspect-ratio: 4 / 5; border-radius: 999px 999px 18px 18px; overflow: hidden; background: var(--night-3); box-shadow: 0 0 0 1px rgba(242, 206, 77, 0.4); }
+.lp2__media img { width: 100%; height: 100%; object-fit: cover; }
+.lp2__verse { margin: 0; display: grid; gap: 8px; }
+.lp2__verse blockquote { margin: 0; font-family: var(--font-heading); font-style: italic; font-size: 1.15rem; line-height: 1.25; color: #fff; }
+.lp2__verse figcaption { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-hi); }
+
+.lp2__main { position: relative; padding: 22px 22px calc(26px + env(safe-area-inset-bottom)); display: grid; gap: 14px; align-content: start; }
+.lp2__main > .k-eyebrow { margin: 0; }
+.lp2__grip { display: none; }
+.lp2__title { font-size: clamp(2.1rem, 1.6rem + 2vw, 3.2rem); }
+.lp2__perks { list-style: none; margin: 2px 0 4px; padding: 0; display: grid; gap: 10px; }
+.lp2__perks li { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 0.92rem; color: var(--ink); }
+.lp2__perks span {
+  flex: none; width: 32px; height: 32px; border-radius: 999px 999px 10px 10px; display: grid; place-items: center;
+  background: var(--mist); color: var(--plum); border: 1px solid var(--line);
+}
+.lp2__form { gap: 12px; }
+.lp2__more {
+  justify-self: start; display: inline-flex; align-items: center; gap: 6px; padding: 4px 0;
+  border: 0; background: none; cursor: pointer; font: inherit; font-size: 0.85rem; font-weight: 700; color: var(--plum);
+}
+.lp2__fine { display: flex; align-items: center; justify-content: center; gap: 6px; text-align: center; }
+.lp2__fine svg { color: #17A673; }
+
+/* Success */
+.lp2__done { display: grid; justify-items: center; text-align: center; gap: 14px; padding: 12px 0 6px; }
+.lp2__done > * { margin: 0; }
+.lp2__done .k-body { max-width: 36ch; }
+.lp2__burst { position: relative; width: 76px; height: 76px; margin-bottom: 6px; }
+.lp2__seal { display: block; }
+.lp2__seal circle { fill: var(--gold-hi); stroke: var(--gold); stroke-width: 2; }
+.lp2__seal path { fill: none; stroke: var(--gold-ink); stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
+.lp2__spark {
+  position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 2px;
+  background: var(--gold); opacity: 0; transform: rotate(45deg);
+}
+.lp2__spark:nth-child(3n) { background: #8B3FD0; border-radius: 50%; }
+.lp2__spark:nth-child(4n) { background: var(--gold-hi); width: 6px; height: 6px; }
+
+/* Desktop: a composed two-panel card */
+@media (min-width: 760px) {
+  .lp2 { align-items: center; padding: 24px; }
+  .lp2__panel { max-width: 920px; grid-template-columns: 0.92fr 1.08fr; border-radius: 34px; overflow: hidden; max-height: min(92dvh, 720px); }
+  .lp2__side { grid-template-columns: 1fr; align-content: space-between; gap: 26px; padding: 34px; }
+  .lp2__media { width: min(100%, 300px); margin-inline: auto; border-radius: 999px 999px 26px 26px; }
+  .lp2__verse blockquote { font-size: 1.5rem; }
+  .lp2__main { padding: 46px 44px 38px; gap: 16px; overflow-y: auto; }
+  .lp2__close { top: 18px; right: 18px; background: var(--mist); }
+}
+@media (max-width: 759px) {
+  .lp2__grip { display: block; position: absolute; z-index: 2; top: 8px; left: 50%; width: 42px; height: 5px; margin-left: -21px; border-radius: 999px; background: rgba(255, 255, 255, 0.5); }
+  .lp2__side { border-radius: 30px 30px 0 0; }
+  .lp2__main .k-row { grid-template-columns: 1fr; }
 }
 
-@keyframes overlayFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+/* Phones: keep the whole form above the fold. */
+@media (max-width: 759px) {
+  .lp2__side { grid-template-columns: 72px 1fr; padding: 18px 64px 16px 18px; gap: 14px; }
+  .lp2__verse blockquote { font-size: 1.02rem; }
+  .lp2__main { gap: 12px; padding-top: 18px; }
+  .lp2__title { font-size: 2rem; }
 }
-
-/* Main Modal */
-.lead-popup-content {
-  background: var(--surface);
-  border: 1px solid var(--outline-variant);
-  padding: 2.25rem 2rem;
-  border-radius: 22px;
-  width: 90%;
-  max-width: 380px;
-  position: relative;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.9);
-  transform: translateY(24px);
-  animation: modalSlideUp 0.55s var(--ease-fluid) both;
-  color: var(--on-surface);
-}
-
-@keyframes modalSlideUp {
-  to { transform: translateY(0); }
-}
-
-/* Amethyst top accent stripe */
-.lead-popup-content::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--amethyst), var(--metallic-gold), var(--amethyst));
-  border-radius: 22px 22px 0 0;
-}
-
-/* Close Button */
-.lead-popup-close-btn {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: var(--surface-container-low);
-  border: 1px solid var(--outline-variant);
-  color: var(--on-surface-muted);
-  cursor: pointer;
-  width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.3s var(--ease-soft);
-}
-
-.lead-popup-close-btn:hover {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: var(--pure-white);
-  transform: rotate(90deg);
-}
-
-/* Header */
-.lead-popup-header {
-  text-align: center;
-  margin-bottom: 1.25rem;
-}
-
-/* Form — compact edition */
-.premium-form .form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1rem;
-}
-
-.premium-form label {
-  font-family: var(--font-body);
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 0.35rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.premium-form input {
-  padding: 11px 14px;
-  background: var(--surface-container-low);
-  border: 1.5px solid var(--outline-variant);
-  border-radius: 10px;
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  color: var(--on-surface);
-  transition: all 0.3s ease;
-}
-
-.premium-form input::placeholder { color: var(--on-surface-muted); }
-
-.premium-form input:focus {
-  outline: none;
-  border-color: var(--amethyst);
-  background: var(--pure-white);
-  box-shadow: 0 0 0 3px rgba(155, 113, 178, 0.15);
-}
-
-.full-width-btn {
-  width: 100%;
-  padding: 13px;
-  font-size: 0.9rem;
-  border: none;
-}
-
-.form-helper {
-  text-align: center;
-  font-size: 0.72rem;
-  margin-top: 0.6rem;
-  color: var(--on-surface-muted);
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  .lead-popup-content {
-    padding: 2rem 1.5rem;
-    border-radius: 18px;
-    max-width: 340px;
-  }
+@media (max-width: 759px) and (max-height: 920px) {
+  .lp2__perks { display: none; }
 }

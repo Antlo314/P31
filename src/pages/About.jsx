@@ -1,218 +1,158 @@
-import React, { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import './About.css';
+import React from 'react';
+import { Mail, Phone, MapPin, ArrowUpRight, Gem, HeartHandshake, Users, Sparkles, ArrowRight } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import LazyVideo from '../components/LazyVideo';
+import { openJoin } from '../lib/join';
 
-import editorialImg from '../assets/p31_partner_hero_editorial_1776544063235.png';
-import curatorPortrait from '../assets/melanie23_rm.png';
-import bentoJewelry from '../assets/vendor_jewelry.png';
-import bentoCeramics from '../assets/vendor_ceramics.png';
-import bentoCandles from '../assets/vendor_candles.png';
+import founder from '../assets/web/melanie23_rm.webp';
+import editorialImg from '../assets/web/p31_partner_hero_editorial.webp';
+import gatherImg from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
+import marketVid from '../assets/web/p31market2.mp4';
+import marketPoster from '../assets/web/p31market2-poster.webp';
 
-gsap.registerPlugin(ScrollTrigger);
+const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
 
-const About = () => {
-  const containerRef = useRef(null);
+const VALUES = [
+  { Icon: Gem, title: 'Faith meets luxury', body: 'A stage worthy of her craft — where beauty, purpose and excellence are never an afterthought.' },
+  { Icon: HeartHandshake, title: 'Hand-selected, always', body: 'Every curator is personally vetted for craft, story and purpose. No pay-to-play, no filler.' },
+  { Icon: Users, title: 'Community first', body: 'A movement of visionary women who gather, pray, build and buy from one another.' },
+];
 
-  useEffect(() => {
-    // Respect users who prefer reduced motion — leave everything visible.
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const STEPS = [
+  ['Apply', 'Tell us about your gift — your craft, your story and what you make.'],
+  ['Get curated', 'Our team reviews every application by hand and welcomes the best fit.'],
+  ['Open your shop', 'Your storefront, studio tools and orders — all in your P31 dashboard.'],
+  ['Gather', 'Meet your customers at our seasonal markets in Atlanta and beyond.'],
+];
 
-    let ctx = gsap.context(() => {
-      if (reduce) return;
+const About = () => (
+  <div className="k-page">
+    <PageHeader
+      eyebrow="Our Story"
+      title="Where her gifts"
+      accent="make room."
+      lead="An elite, traveling collective of women creatives — defying the standard pop-up to bring a majestic, high-end market to Atlanta and beyond."
+      media={{ src: founder, portrait: true, alt: 'Melanie Jeffers-Cameron, founder of Proverbs 31 Marketplace' }}
+      actions={<>
+        <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></a>
+        <button type="button" className="k-btn k-btn--light" onClick={openJoin}>Join the collective</button>
+      </>}
+    />
 
-      // Cinematic Reveals
-      const reveals = gsap.utils.toArray('.cinematic-reveal');
-      reveals.forEach(elem => {
-        gsap.fromTo(elem,
-          { y: 40, opacity: 0, filter: 'blur(5px)' },
-          {
-            y: 0, opacity: 1, filter: 'blur(0px)', duration: 1.2, ease: 'power2.out',
-            scrollTrigger: {
-              trigger: elem,
-              start: 'top 80%',
-            }
-          }
-        );
-      });
-
-      // Bento mosaic — staggered rise for the new "What We Stand For" cells
-      gsap.from('.about-bento .bento-cell', {
-        y: 60, opacity: 0, duration: 1, stagger: 0.09, ease: 'power3.out',
-        scrollTrigger: { trigger: '.about-bento .bento-grid', start: 'top 82%' },
-      });
-
-      // Magnetic buttons (pointer-follow)
-      gsap.utils.toArray('.magnetic').forEach(btn => {
-        const strength = 0.35;
-        const move = (e) => {
-          const r = btn.getBoundingClientRect();
-          gsap.to(btn, {
-            x: (e.clientX - (r.left + r.width / 2)) * strength,
-            y: (e.clientY - (r.top + r.height / 2)) * strength,
-            duration: 0.5, ease: 'power3.out',
-          });
-        };
-        const reset = () => gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' });
-        btn.addEventListener('mousemove', move);
-        btn.addEventListener('mouseleave', reset);
-      });
-    }, containerRef);
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <div className="about-cinematic-wrapper" ref={containerRef}>
-      <div className="container-fluid">
-
-        {/* Hero Section */}
-        <section className="about-hero-section flex-center">
-          <div className="about-hero-content text-center cinematic-reveal">
-            <span className="section-kicker about-hero-kicker">Our Origin</span>
-            <h1 className="font-headline text-primary about-hero-title">
-              The Vision
-            </h1>
-            <p className="hero-subtitle">
-              The Proverbs 31 Marketplace is an elite, traveling collective of women creatives.
-              We are defying the standard pop-up formula to bring a majestic, high-end shopping
-              experience to Atlanta and beyond.
-            </p>
+    {/* Foundation */}
+    <section className="k-section">
+      <div className="k-split k-split--wide-left">
+        <div className="k-head" style={{ marginBottom: 0 }}>
+          <p className="k-eyebrow" data-reveal="fade">Our Foundation</p>
+          <h2 className="k-h2" data-split>Rooted in <em>purpose.</em></h2>
+          <p className="k-lede" data-reveal>
+            We curate spaces where faith and luxury converge. Our mission is to empower women to rise,
+            build and elevate their brand presence — every curator hand-selected, representing the
+            pinnacle of craftsmanship, beauty and entrepreneurial excellence.
+          </p>
+          <div className="k-actions" data-reveal>
+            <a href="#how" className="k-link">How it works <ArrowRight size={16} /></a>
           </div>
-        </section>
-
-        {/* Story & Contact Section */}
-        <section className="about-story-section">
-          <div className="about-grid">
-
-            {/* Main Story */}
-            <div className="story-text-card cinematic-reveal glass-card shadow-lg">
-              <span className="section-kicker">Our Foundation</span>
-              <h2 className="font-headline text-primary story-heading">
-                Rooted in Purpose.
-              </h2>
-              <div className="divider-gold mb-6"></div>
-
-              <blockquote className="scripture-quote text-primary">
-                "Give her of the fruit of her hands; And let her own works praise her in the gates"
-                <br/>
-                <span className="font-label text-gold scripture-cite">— Proverbs 31:31 KJV</span>
-              </blockquote>
-
-              <p className="story-body">
-                We curate spaces where faith and luxury converge. Our mission is to empower women to rise,
-                build, and elevate their brand presence. Every curator is hand-selected, representing the
-                pinnacle of craftsmanship, beauty, and entrepreneurial excellence.
-              </p>
-
-              <Link to="/apply" className="btn-solid-gold magnetic">
-                Apply as a Curator
-              </Link>
-            </div>
-
-            {/* Contact Details */}
-            <div className="story-contact-card cinematic-reveal glass-card text-center">
-              <span className="material-symbols-outlined text-gold contact-icon">mail</span>
-              <h3 className="font-headline text-primary contact-heading">Direct Inquiries</h3>
-              <ul className="contact-list">
-                <li>
-                  <span className="font-label text-gold contact-label">Telephone</span>
-                  <a href="tel:14705622852" className="text-primary contact-value">1 (470) 562-2852</a>
-                </li>
-                <li>
-                  <span className="font-label text-gold contact-label">Email</span>
-                  <a href="mailto:proverbs31markets@gmail.com" className="text-primary contact-value contact-value--email">proverbs31markets@gmail.com</a>
-                </li>
-                <li>
-                  <span className="font-label text-gold contact-label">Location</span>
-                  <span className="text-primary contact-value">Atlanta, GA (Touring)</span>
-                </li>
-              </ul>
-            </div>
-
-          </div>
-        </section>
-
-        {/* What We Stand For — signature bento mosaic */}
-        <section className="about-bento">
-          <div className="about-bento-header cinematic-reveal">
-            <span className="section-kicker">What We Stand For</span>
-            <h2 className="font-headline text-primary about-bento-title">
-              A Standard, Composed
-            </h2>
-            <p className="about-bento-lead">
-              Every curator, every category, every gathering is measured against a single
-              conviction — that gifted hands deserve a majestic stage.
-            </p>
-          </div>
-
-          <div className="bento-grid">
-            {/* Tall editorial media */}
-            <div className="bento-cell is-media col-5 row-2">
-              <img src={editorialImg} alt="Proverbs 31 editorial gathering" />
-              <div className="bento-overlay" />
-              <div className="bento-content">
-                <span className="bento-tag">The Collective</span>
-                <h3 className="bento-cell-title">Faith Meets Luxury</h3>
-                <p className="bento-cell-text">A traveling marketplace built for the woman of influence.</p>
-              </div>
-            </div>
-
-            {/* Brand promise — dark */}
-            <div className="bento-cell is-dark col-4">
-              <div className="bento-content">
-                <span className="material-symbols-outlined bento-quote-mark">format_quote</span>
-                <p className="bento-promise">
-                  We promise a stage worthy of her craft — where beauty, purpose,
-                  and community are never an afterthought.
-                </p>
-              </div>
-            </div>
-
-            {/* Stat — gold */}
-            <div className="bento-cell is-gold col-3">
-              <div className="bento-content about-stat">
-                <span className="about-stat-num">100%</span>
-                <span className="about-stat-label">Hand-Selected Curators</span>
-              </div>
-            </div>
-
-            {/* Category image — adornment */}
-            <div className="bento-cell is-media col-4">
-              <img src={bentoJewelry} alt="Artisan jewelry" />
-              <div className="bento-overlay" />
-              <div className="bento-content"><span className="bento-cat">Adornment</span></div>
-            </div>
-
-            {/* Category image — wellness */}
-            <div className="bento-cell is-media col-3">
-              <img src={bentoCandles} alt="Botanical candles" />
-              <div className="bento-overlay" />
-              <div className="bento-content"><span className="bento-cat">Wellness</span></div>
-            </div>
-
-            {/* Curator portrait media — wide */}
-            <div className="bento-cell is-media col-7">
-              <img src={curatorPortrait} alt="A Proverbs 31 curator" />
-              <div className="bento-overlay" />
-              <div className="bento-content">
-                <h3 className="bento-cell-title">Women Who Build</h3>
-                <p className="bento-cell-text">Visionaries elevating their gifts, and one another.</p>
-              </div>
-            </div>
-
-            {/* Category image — home & craft */}
-            <div className="bento-cell is-media col-5">
-              <img src={bentoCeramics} alt="Handmade ceramics" />
-              <div className="bento-overlay" />
-              <div className="bento-content"><span className="bento-cat">Home & Craft</span></div>
-            </div>
-          </div>
-        </section>
-
+        </div>
+        <div className="k-arch k-arch--ring" data-reveal="clip">
+          <img src={editorialImg} alt="A Proverbs 31 Marketplace curator" loading="lazy" decoding="async" data-parallax="7" style={{ height: '116%', top: '-8%' }} />
+        </div>
       </div>
-    </div>
-  );
-};
+    </section>
+
+    {/* Scripture */}
+    <section className="k-section k-section--night k-dark">
+      <figure className="k-quote k-center" style={{ maxWidth: 980 }}>
+        <p className="k-eyebrow k-eyebrow--center" style={{ margin: 0 }} data-reveal="fade">The verse we’re built on</p>
+        <blockquote data-scrub>“Give her of the fruit of her hands; and let her own works praise her in the gates.”</blockquote>
+        <figcaption data-reveal="fade">Proverbs 31:31</figcaption>
+      </figure>
+    </section>
+
+    {/* Values */}
+    <section className="k-section">
+      <div className="k-head">
+        <p className="k-eyebrow" data-reveal="fade">What we stand for</p>
+        <h2 className="k-h2" data-split>A standard, <em>composed</em></h2>
+      </div>
+      <div className="k-grid k-grid--3" data-reveal-group>
+        {VALUES.map((v, i) => (
+          <article className={`k-card ${i === 1 ? 'k-card--night' : ''}`} key={v.title}>
+            <span className="k-num">0{i + 1}</span>
+            <span className="k-icon"><v.Icon size={22} /></span>
+            <h3>{v.title}</h3>
+            <p>{v.body}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    {/* How it works */}
+    <section className="k-section k-section--mist" id="how">
+      <div className="k-head k-head--row">
+        <div style={{ display: 'grid', gap: 16 }}>
+          <p className="k-eyebrow" style={{ margin: 0 }} data-reveal="fade">For curators</p>
+          <h2 className="k-h2" data-split>From gift to <em>storefront</em></h2>
+        </div>
+        <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--plum" data-reveal>Start your application <ArrowUpRight size={18} /></a>
+      </div>
+      <ol className="k-steps" style={{ '--steps': 4 }} data-reveal-group>
+        {STEPS.map(([t, b]) => <li key={t}><h3>{t}</h3><p>{b}</p></li>)}
+      </ol>
+    </section>
+
+    {/* Founder */}
+    <section className="k-section">
+      <div className="k-split k-split--wide-right">
+        <div className="k-arch" data-reveal="clip" style={{ maxWidth: 460 }}>
+          <LazyVideo src={marketVid} poster={marketPoster} label="Melanie Jeffers-Cameron at a Proverbs 31 market" />
+        </div>
+        <div className="k-head" style={{ marginBottom: 0 }}>
+          <p className="k-eyebrow" data-reveal="fade">The Matriarch</p>
+          <h2 className="k-h2" data-split>Melanie <em>Jeffers-Cameron</em></h2>
+          <p className="k-lede" data-reveal>
+            Proverbs 31 Marketplace began with a simple conviction: gifted women deserve a stage as
+            excellent as their work. Melanie built a market that honors the modern woman of
+            influence — a place to be seen, supported and celebrated.
+          </p>
+          <ul className="k-checks" data-reveal-group>
+            <li><Sparkles size={18} /> Founder &amp; lead curator</li>
+            <li><Sparkles size={18} /> Building community across Atlanta</li>
+            <li><Sparkles size={18} /> Championing women-owned brands</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    {/* Contact + CTA */}
+    <section className="k-section k-section--mist">
+      <div className="k-split" style={{ alignItems: 'start' }}>
+        <div className="k-head" style={{ marginBottom: 0 }}>
+          <p className="k-eyebrow" data-reveal="fade">Direct inquiries</p>
+          <h2 className="k-h2" data-split>Let’s <em>talk</em></h2>
+          <p className="k-lede" data-reveal>Questions about markets, curating or partnering — we’d love to hear from you.</p>
+        </div>
+        <div className="k-contact" data-reveal-group>
+          <a href="tel:14705622852"><Phone size={18} /> 1 (470) 562-2852</a>
+          <a href="mailto:proverbs31markets@gmail.com"><Mail size={18} /> proverbs31markets@gmail.com</a>
+          <div><MapPin size={18} /> Atlanta, GA — touring</div>
+        </div>
+      </div>
+    </section>
+
+    <section className="k-section k-section--tight">
+      <div className="k-cta k-dark" data-reveal="scale">
+        <img src={gatherImg} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.18, zIndex: -2 }} />
+        <p className="k-eyebrow">Your seat at the table</p>
+        <h2 className="k-h2">Your gifts deserve a <em>stage.</em></h2>
+        <p className="k-lede">Apply to curate, or join the collective to hear about the next market first.</p>
+        <div className="k-actions">
+          <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></a>
+          <button type="button" className="k-btn k-btn--light" onClick={openJoin}>Join the collective</button>
+        </div>
+      </div>
+    </section>
+  </div>
+);
 
 export default About;

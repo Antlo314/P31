@@ -1,122 +1,57 @@
-.login-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--surface);
-  position: relative;
-  overflow: hidden;
-  padding: 2rem;
+/* Curator Portal — night editorial split with a bright form card. Prefix: lg- */
+.lg {
+  position: relative; isolation: isolate; overflow: hidden;
+  min-height: 100dvh;
+  padding: calc(var(--nb-h, 64px) + clamp(28px, 5vw, 72px)) var(--gutter) clamp(48px, 6vw, 96px);
+  background: var(--night-bg); color: #fff;
 }
+.lg::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--grain); mix-blend-mode: overlay; }
+.lg__inner { max-width: var(--max); margin-inline: auto; display: grid; gap: clamp(32px, 5vw, 80px); align-items: center; }
+@media (min-width: 980px) { .lg__inner { grid-template-columns: 1.05fr 0.95fr; } }
+.lg__story { display: grid; gap: 22px; justify-items: start; }
+.lg__story > * { margin: 0; }
+.lg__perks { margin-top: 4px; }
+.lg__media {
+  display: none; position: relative; width: min(100%, 360px); aspect-ratio: 4 / 5; overflow: hidden;
+  border-radius: 999px 999px 26px 26px; box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.8);
+}
+.lg__media::after { content: ''; position: absolute; inset: 10px; border-radius: inherit; border: 1px solid rgba(242, 206, 77, 0.4); pointer-events: none; }
+.lg__media video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+@media (min-width: 980px) { .lg__media { display: block; } }
+@media (max-width: 979px) { .lg__perks, .lg__story .k-lede { display: none; } }
 
-.login-container {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 480px;
+.lg__card {
+  position: relative; width: min(100%, 480px); justify-self: center;
+  display: grid; gap: 6px; padding: clamp(26px, 4vw, 42px);
+  border-radius: var(--r-xl); background: var(--ivory); color: var(--ink);
+  box-shadow: 0 50px 100px -40px rgba(0, 0, 0, 0.75);
 }
-
-.login-card {
-  padding: 4rem 3rem !important;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.85) !important;
-  border: 1px solid var(--outline-variant) !important;
-  box-shadow: 0 30px 60px rgba(39, 52, 27, 0.08) !important;
+.lg__badge {
+  display: grid; place-items: center; width: 54px; height: 60px; margin-bottom: 10px;
+  border-radius: 999px 999px 16px 16px; background: var(--night-bg); color: var(--gold-hi);
 }
-
-.login-header {
-  margin-bottom: 3rem;
+.lg__title { font-size: clamp(2.1rem, 1.7rem + 1.6vw, 2.8rem) !important; color: var(--plum) !important; }
+.lg__title em { background-image: linear-gradient(100deg, var(--plum) 10%, #8B3FD0 90%) !important; }
+.lg__sub { margin: 6px 0 16px; color: var(--ink-2); font-size: 0.97rem; }
+.lg__switch {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 5px; margin-bottom: 12px;
+  border-radius: 999px; background: var(--mist); border: 1px solid var(--line);
 }
-
-.login-header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
+.lg__switch button {
+  min-height: 44px; border-radius: 999px; border: 0; cursor: pointer;
+  background: transparent; color: var(--ink-2); font: inherit; font-weight: 800; font-size: 0.9rem;
+  transition: background 0.25s, color 0.25s, box-shadow 0.25s;
 }
-
-.login-subtitle {
-  color: var(--on-surface-variant);
-  font-size: 1rem;
+.lg__switch button[aria-selected="true"] { background: #fff; color: var(--plum); box-shadow: 0 6px 16px -8px rgba(29, 15, 46, 0.35); }
+.lg__form { display: grid; gap: 14px; }
+.lg__field { display: grid; gap: 7px; }
+.lg__field > span { font-size: 0.76rem; font-weight: 800; letter-spacing: 0.04em; color: var(--ink-2); }
+.lg__input {
+  display: flex; align-items: center; gap: 10px; min-height: 54px; padding: 0 6px 0 16px; border-radius: 14px;
+  border: 1px solid var(--line-2); background: #fff; color: var(--ink-3); transition: border-color 0.2s, box-shadow 0.2s;
 }
-
-.input-with-icon {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.input-icon {
-  position: absolute;
-  left: 1rem;
-  color: var(--olive);
-}
-
-.login-page .premium-form input {
-  padding-left: 3rem !important;
-  padding-right: 3rem !important;
-  width: 100%;
-}
-
-.password-toggle {
-  position: absolute;
-  right: 1rem;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  color: var(--olive);
-  opacity: 0.6;
-  transition: opacity 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.password-toggle:hover {
-  opacity: 1;
-}
-
-.login-actions {
-  margin-top: 2rem;
-}
-
-.login-footer {
-  margin-top: 2rem;
-  font-size: 0.9rem;
-  color: var(--on-surface-muted);
-}
-
-.login-footer a {
-  font-weight: 600;
-  text-decoration: underline;
-}
-
-/* Background blobs for that artistic feel */
-.login-bg-blob {
-  position: absolute;
-  filter: blur(80px);
-  z-index: 1;
-  border-radius: 50%;
-  opacity: 0.4;
-}
-
-.blob-1 {
-  width: 400px;
-  height: 400px;
-  background-color: var(--surface-container);
-  top: -100px;
-  right: -100px;
-}
-
-.blob-2 {
-  width: 300px;
-  height: 300px;
-  background-color: var(--gold-glow);
-  bottom: -50px;
-  left: -50px;
-}
-
-@media (max-width: 768px) {
-  .login-card {
-    padding: 3rem 1.5rem !important;
-  }
-}
+.lg__input:focus-within { border-color: var(--plum); box-shadow: 0 0 0 4px rgba(168, 85, 232, 0.16); }
+.lg__input input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: inherit; font-size: 16px; color: var(--ink); }
+.lg__eye { width: 42px; height: 42px; border: 0; background: none; color: var(--ink-3); cursor: pointer; border-radius: 10px; display: grid; place-items: center; }
+.lg__foot { margin: 16px 0 0; text-align: center; font-size: 0.88rem; color: var(--ink-2); }
+.lg__foot a { color: var(--plum); font-weight: 800; }
