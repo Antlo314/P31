@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import {
   Home, Store, CalendarDays, Handshake, LayoutGrid, ShoppingBasket, Heart, X, ChevronRight, Sparkles, Info,
-  LayoutDashboard, LogOut, Lock, Instagram, Facebook, UserRound, Crown, ShoppingBag,
+  LayoutDashboard, LogOut, Lock, Instagram, Facebook, UserRound, Crown, ShoppingBag, GraduationCap, KeyRound,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -25,6 +25,8 @@ const LINKS = [
   { to: '/directory', label: 'Curators & Shops', Icon: Store },
   { to: '/favorites', label: 'Favorites', Icon: Heart },
   { to: '/calendar', label: 'Market Dates', Icon: CalendarDays },
+  { to: '/mentorship', label: 'Mentorship', Icon: GraduationCap },
+  { to: '/portal', label: 'Member Portal', Icon: KeyRound },
   { to: '/partner', label: 'Partner With Us', Icon: Handshake },
   { to: '/services', label: 'Services', Icon: Sparkles },
   { to: '/about', label: 'Our Story', Icon: Info },
@@ -92,7 +94,7 @@ const Navbar = () => {
           </Link>
 
           <nav className="nb__links" aria-label="Main">
-            {[['/shop', 'Shop'], ['/directory', 'Curators'], ['/calendar', 'Dates'], ['/partner', 'Partner'], ['/services', 'Services']].map(([to, label]) => (
+            {[['/shop', 'Shop'], ['/directory', 'Curators'], ['/calendar', 'Dates'], ['/mentorship', 'Mentorship'], ['/partner', 'Partner']].map(([to, label]) => (
               <NavLink key={to} to={to} className="nb__link">{label}</NavLink>
             ))}
           </nav>
@@ -111,7 +113,7 @@ const Navbar = () => {
                 {userMenu && (
                   <div className="nb__menu" role="menu">
                     <p className="nb__menu-name">{firstName || 'Your account'}</p>
-                    <Link to="/dashboard" role="menuitem"><LayoutDashboard size={16} /> Studio dashboard</Link>
+                    <Link to="/portal?choose" role="menuitem"><LayoutDashboard size={16} /> My dashboards</Link>
                     <button role="menuitem" onClick={signOut}><LogOut size={16} /> Sign out</button>
                   </div>
                 )}

@@ -10,6 +10,7 @@ const BLURBS = {
   '/systems/events': 'Create markets, announce dates, and manage RSVPs.',
   '/systems/campaigns': 'Email subscribers and curators — with AI drafts.',
   '/systems/orders': 'Every order across the marketplace, live.',
+  '/systems/academy': 'Mentorship prices, mentors, members and Studio seats.',
   '/systems/clips': 'Turn raw footage into captioned, edited clips on your phone.',
   '/systems/photos': 'Remove backgrounds, stage products and apply looks.',
   '/systems/pro-edit': 'Premium DaVinci Resolve edits, handled by Iris.',

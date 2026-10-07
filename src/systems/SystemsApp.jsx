@@ -18,6 +18,7 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const Events = lazy(() => import('./pages/Events'));
 const Campaigns = lazy(() => import('./pages/Campaigns'));
 const Orders = lazy(() => import('./pages/Orders'));
+const Academy = lazy(() => import('./pages/Academy'));
 
 // Phones get the four most-used tabs in the bottom bar; "More" opens a
 // sheet with every section.
@@ -83,6 +84,7 @@ const SystemsApp = () => {
             <Route path="events" element={<Events />} />
             <Route path="campaigns" element={<Campaigns />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="academy" element={<Academy />} />
             <Route path="clips" element={<Clips />} />
             <Route path="photos" element={<Photos />} />
             <Route path="pro-edit" element={<ProEdit />} />

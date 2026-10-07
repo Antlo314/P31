@@ -3,6 +3,10 @@
 const FLUSH = new Set([
   '/', '/shop', '/favorites', '/directory', '/calendar', '/about', '/services', '/partner',
   '/login', '/register', '/unsubscribe', '/onboarding-exclusive',
+  '/mentorship', '/mentorship/business', '/mentorship/faith', '/portal',
 ]);
 
-export const isFlushRoute = (pathname) => FLUSH.has(pathname.replace(/\/+$/, '') || '/');
+export const isFlushRoute = (pathname) => {
+  const p = pathname.replace(/\/+$/, '') || '/';
+  return FLUSH.has(p) || p.startsWith('/enroll/');
+};

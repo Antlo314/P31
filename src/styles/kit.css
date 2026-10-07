@@ -428,3 +428,6 @@
   .k-marquee__track { animation: none; }
   .k-btn, .k-card--link, .k-tile > img, .k-tile > video { transition: none; }
 }
+
+.k-spin { animation: k-spin 0.9s linear infinite; }
+@keyframes k-spin { to { transform: rotate(360deg); } }

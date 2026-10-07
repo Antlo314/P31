@@ -8,7 +8,7 @@ import './LeadPopup.css';
 
 import gatherImg from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
 
-const QUIET = ['/login', '/register', '/dashboard', '/systems', '/onboarding-exclusive', '/unsubscribe'];
+const QUIET = ['/login', '/register', '/dashboard', '/systems', '/onboarding-exclusive', '/unsubscribe', '/portal', '/enroll', '/academy', '/studio'];
 const PERKS = [
   { Icon: CalendarHeart, text: 'First word on every market date' },
   { Icon: Gem, text: 'Private previews & curator drops' },

@@ -52,6 +52,19 @@ export const ROUTE_META = {
     title: `Sponsor & Partner With Us — ${SITE_NAME}`,
     description: 'Sponsors, venues and brands: partner with Proverbs 31 Marketplace through financial, in-kind or strategic support and reach Atlanta’s women creatives.',
   },
+  '/mentorship': {
+    title: `Mentorship — The Proverbs 31 Collective`,
+    description: 'Private business and faith-based mentorship for faith-driven women. Begin with an intro call.',
+  },
+  '/mentorship/business': {
+    title: `Proverbs 31 Business Mentorship — Strategy, Structure, Accountability`,
+    description: 'Private business mentorship with Melanie JC: weekly or biweekly 60-minute sessions, action plans, launch support and priority access. Book an intro call.',
+  },
+  '/mentorship/faith': {
+    title: `Faith-Based Mentorship — The Proverbs 31 Collective`,
+    description: 'Grow in faith, identity and calling with a mentor who walks alongside you. Book an intro call.',
+  },
+  '/portal': { title: `Member portal — ${SITE_NAME}`, description: 'Sign in to your mentorship classroom or the Content Studio.', noindex: true },
   '/favorites': { title: `Your favorites — ${SITE_NAME}`, description: 'Pieces you’ve saved from the collective.', noindex: true },
   '/login': { title: `Sign in — ${SITE_NAME}`, description: 'Curator sign in.', noindex: true },
   '/register': { title: `Join — ${SITE_NAME}`, description: 'Create your curator account.', noindex: true },

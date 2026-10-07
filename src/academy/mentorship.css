@@ -1,0 +1,64 @@
+/* Public mentorship pages — layout bits on top of the brand kit. Prefix: mt- */
+.mt-mark { width: 92px; height: 92px; object-fit: contain; margin-bottom: 4px; }
+.mt-pillars { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.mt-pillars li {
+  padding: 8px 14px; border-radius: 999px; font-size: 0.74rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--gold-hi); border: 1px solid rgba(242, 206, 77, 0.35); background: rgba(255, 255, 255, 0.04);
+}
+
+.mt-program { min-height: 280px; align-content: space-between; }
+.mt-program__pillars { font-size: 0.7rem !important; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-text) !important; }
+.k-card--night .mt-program__pillars { color: var(--gold-hi) !important; }
+.mt-program h3 { font-size: clamp(1.7rem, 1.3rem + 1.4vw, 2.4rem) !important; }
+.mt-program__go { justify-self: start; margin-top: 6px; }
+.k-card--night .mt-program__go { color: var(--gold-hi); }
+
+.mt-sections { display: grid; gap: clamp(14px, 1.8vw, 22px); }
+@media (min-width: 900px) { .mt-sections { grid-template-columns: repeat(2, 1fr); } .mt-block.is-wide { grid-row: span 2; } }
+.mt-block {
+  display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: start;
+  padding: clamp(22px, 3vw, 34px); border-radius: var(--r-lg); background: #fff; border: 1px solid var(--line); box-shadow: var(--shadow-1);
+}
+.mt-block__icon {
+  display: grid; place-items: center; width: 54px; height: 60px; border-radius: 999px 999px 16px 16px;
+  background: var(--night-bg); color: var(--gold-hi);
+}
+.mt-block .k-num { margin: 0 0 4px; }
+.mt-block__list { margin-top: 14px; }
+.mt-block__list li { font-weight: 600; font-size: 0.97rem; }
+
+.mt-steps { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 12px; counter-reset: mt; }
+.mt-steps li {
+  position: relative; display: grid; gap: 2px; padding: 14px 16px 14px 60px; border-radius: var(--r-md);
+  background: #fff; border: 1px solid var(--line);
+}
+.mt-steps li::before {
+  counter-increment: mt; content: counter(mt); position: absolute; left: 14px; top: 14px;
+  width: 32px; height: 36px; border-radius: 999px 999px 10px 10px; display: grid; place-items: center;
+  background: var(--night-bg); color: var(--gold-hi); font-family: var(--font-heading); font-size: 1.05rem;
+}
+.mt-steps strong { color: var(--ink); }
+.mt-steps span { color: var(--ink-2); font-size: 0.92rem; }
+
+/* Portal + enrollment cards (shell is .lg from Login.css) */
+.lg__forgot { justify-self: center; display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; padding: 6px; border: 0; background: none; cursor: pointer; font: inherit; font-size: 0.86rem; font-weight: 700; color: var(--ink-3); }
+.lg__forgot:hover { color: var(--plum); }
+.pt-list { display: grid; gap: 10px; margin-top: 14px; }
+.pt-item {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 14px; border-radius: var(--r-md);
+  background: #fff; border: 1px solid var(--line); color: var(--ink); text-decoration: none;
+  transition: border-color 0.2s, transform 0.35s var(--ease-fluid);
+}
+.pt-item:hover { border-color: var(--gold); transform: translateX(3px); color: var(--ink); }
+.pt-item strong { display: block; font-size: 1rem; }
+.pt-item small { color: var(--ink-3); font-size: 0.84rem; }
+.pt-item.is-locked { opacity: 0.7; }
+.pt-item__icon { display: grid; place-items: center; width: 44px; height: 50px; border-radius: 999px 999px 12px 12px; background: var(--night-bg); color: var(--gold-hi); }
+.pt-empty { display: grid; gap: 10px; justify-items: start; color: var(--ink-2); }
+.pt-empty p { margin: 0; }
+.en-plan { display: grid; gap: 4px; padding: 18px; margin-bottom: 16px; border-radius: var(--r-md); background: var(--night-bg); color: #fff; }
+.en-plan .k-eyebrow { color: var(--gold-hi); }
+.en-plan__price { margin: 6px 0 0; font-family: var(--font-heading); font-size: 2.6rem; line-height: 1; color: #fff; }
+.en-plan__price small { font-family: var(--font-body); font-size: 0.95rem; font-weight: 700; color: rgba(255, 255, 255, 0.72); }
+.en-plan__label { margin: 4px 0 0; font-size: 0.88rem; color: rgba(255, 255, 255, 0.75); }
+.k-dark .mt-mark, .lg .mt-mark { background: rgba(255, 255, 255, 0.94); border-radius: 50%; padding: 8px; box-shadow: 0 0 0 1px rgba(242, 206, 77, 0.45); }

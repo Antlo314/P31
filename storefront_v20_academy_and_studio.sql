@@ -13,6 +13,9 @@
    7. Student tools: business goals, faith journal.
    8. Private "academy" storage bucket for PDFs and files.
    9. my_roles(): which dashboards a signed-in person can open.
+  10. Private 1:1 mentorship: per-student sessions & notes,
+      action plans with checkable next steps, and materials
+      submitted for the mentor's feedback.
    ========================================================== */
 
 
@@ -537,18 +540,40 @@ INSERT INTO storage.buckets (id, name, public, file_size_limit)
 VALUES ('academy', 'academy', false, 52428800)
 ON CONFLICT (id) DO NOTHING;
 
+-- Paths: academy/<slug>/files/...                  shared class files (mentors upload)
+--        academy/<slug>/submissions/<user-id>/...   a student's work (that student + mentors only)
+CREATE OR REPLACE FUNCTION public.academy_can_read_file(p_name TEXT)
+RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, storage
+AS $$
+  SELECT CASE
+    WHEN (storage.foldername(p_name))[2] = 'submissions'
+      THEN (storage.foldername(p_name))[3] = auth.uid()::text
+           OR public.is_mentor(public.academy_program_id((storage.foldername(p_name))[1]))
+    ELSE public.has_academy_access(public.academy_program_id((storage.foldername(p_name))[1]))
+  END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.academy_can_write_file(p_name TEXT)
+RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, storage
+AS $$
+  SELECT public.is_mentor(public.academy_program_id((storage.foldername(p_name))[1]))
+      OR ((storage.foldername(p_name))[2] = 'submissions'
+          AND (storage.foldername(p_name))[3] = auth.uid()::text
+          AND public.has_academy_access(public.academy_program_id((storage.foldername(p_name))[1])));
+$$;
+
 DROP POLICY IF EXISTS "Academy files: class reads" ON storage.objects;
 CREATE POLICY "Academy files: class reads" ON storage.objects FOR SELECT TO authenticated
-  USING (bucket_id = 'academy' AND public.has_academy_access(public.academy_program_id((storage.foldername(name))[1])));
+  USING (bucket_id = 'academy' AND public.academy_can_read_file(name));
 DROP POLICY IF EXISTS "Academy files: mentors upload" ON storage.objects;
 CREATE POLICY "Academy files: mentors upload" ON storage.objects FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'academy' AND public.is_mentor(public.academy_program_id((storage.foldername(name))[1])));
+  WITH CHECK (bucket_id = 'academy' AND public.academy_can_write_file(name));
 DROP POLICY IF EXISTS "Academy files: mentors change" ON storage.objects;
 CREATE POLICY "Academy files: mentors change" ON storage.objects FOR UPDATE TO authenticated
   USING (bucket_id = 'academy' AND public.is_mentor(public.academy_program_id((storage.foldername(name))[1])));
 DROP POLICY IF EXISTS "Academy files: mentors delete" ON storage.objects;
 CREATE POLICY "Academy files: mentors delete" ON storage.objects FOR DELETE TO authenticated
-  USING (bucket_id = 'academy' AND public.is_mentor(public.academy_program_id((storage.foldername(name))[1])));
+  USING (bucket_id = 'academy' AND public.academy_can_write_file(name));
 
 
 -- ──────────────────────────────────────────────────────────
@@ -583,6 +608,139 @@ REVOKE ALL ON FUNCTION public.remove_studio_member(UUID) FROM public, anon;
 GRANT EXECUTE ON FUNCTION public.academy_roster(UUID), public.academy_enroll_manual(TEXT, TEXT, INT, TEXT),
   public.academy_end_enrollment(UUID), public.add_academy_mentor(TEXT, TEXT, TEXT), public.remove_academy_mentor(UUID, TEXT),
   public.add_studio_member(TEXT, TEXT), public.remove_studio_member(UUID) TO authenticated;
+
+-- ──────────────────────────────────────────────────────────
+-- 10. Private 1:1 mentorship
+-- ──────────────────────────────────────────────────────────
+-- Sessions can be for the whole class (student_id NULL) or one student.
+ALTER TABLE public.academy_sessions ADD COLUMN IF NOT EXISTS student_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE public.academy_sessions ADD COLUMN IF NOT EXISTS notes TEXT;
+DROP POLICY IF EXISTS "Class reads" ON public.academy_sessions;
+CREATE POLICY "Class reads" ON public.academy_sessions FOR SELECT TO authenticated
+  USING (public.has_academy_access(program_id) AND (student_id IS NULL OR student_id = auth.uid() OR public.is_mentor(program_id)));
+
+-- Action plans: written by the mentor after a session, with clear next steps.
+CREATE TABLE IF NOT EXISTS public.academy_action_plans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  program_id UUID NOT NULL REFERENCES public.academy_programs(id) ON DELETE CASCADE,
+  student_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  session_id UUID REFERENCES public.academy_sessions(id) ON DELETE SET NULL,
+  title TEXT NOT NULL,
+  summary TEXT,
+  created_by UUID DEFAULT auth.uid(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.academy_action_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  plan_id UUID NOT NULL REFERENCES public.academy_action_plans(id) ON DELETE CASCADE,
+  program_id UUID NOT NULL REFERENCES public.academy_programs(id) ON DELETE CASCADE,
+  student_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  text TEXT NOT NULL,
+  due_date DATE,
+  position INT NOT NULL DEFAULT 0,
+  is_done BOOLEAN NOT NULL DEFAULT false,
+  done_at TIMESTAMPTZ
+);
+ALTER TABLE public.academy_action_plans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.academy_action_items ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Student and mentors read" ON public.academy_action_plans;
+CREATE POLICY "Student and mentors read" ON public.academy_action_plans FOR SELECT TO authenticated
+  USING (student_id = auth.uid() OR public.is_mentor(program_id));
+DROP POLICY IF EXISTS "Mentors write" ON public.academy_action_plans;
+CREATE POLICY "Mentors write" ON public.academy_action_plans FOR ALL TO authenticated
+  USING (public.is_mentor(program_id)) WITH CHECK (public.is_mentor(program_id));
+DROP POLICY IF EXISTS "Student and mentors read" ON public.academy_action_items;
+CREATE POLICY "Student and mentors read" ON public.academy_action_items FOR SELECT TO authenticated
+  USING (student_id = auth.uid() OR public.is_mentor(program_id));
+DROP POLICY IF EXISTS "Mentors write" ON public.academy_action_items;
+CREATE POLICY "Mentors write" ON public.academy_action_items FOR ALL TO authenticated
+  USING (public.is_mentor(program_id)) WITH CHECK (public.is_mentor(program_id));
+DROP POLICY IF EXISTS "Students tick their items" ON public.academy_action_items;
+CREATE POLICY "Students tick their items" ON public.academy_action_items FOR UPDATE TO authenticated
+  USING (student_id = auth.uid()) WITH CHECK (student_id = auth.uid());
+
+-- Students may only tick items done/undone — never rewrite them.
+CREATE OR REPLACE FUNCTION public.guard_action_items()
+RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public
+AS $$
+BEGIN
+  IF public.is_mentor(OLD.program_id) OR public.is_trusted_writer() THEN RETURN NEW; END IF;
+  IF NEW.text IS DISTINCT FROM OLD.text OR NEW.due_date IS DISTINCT FROM OLD.due_date
+     OR NEW.position IS DISTINCT FROM OLD.position OR NEW.plan_id IS DISTINCT FROM OLD.plan_id
+     OR NEW.student_id IS DISTINCT FROM OLD.student_id OR NEW.program_id IS DISTINCT FROM OLD.program_id THEN
+    RAISE EXCEPTION 'Only your mentor can change an action item.';
+  END IF;
+  NEW.done_at := CASE WHEN NEW.is_done THEN coalesce(OLD.done_at, now()) END;
+  RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS action_items_guard ON public.academy_action_items;
+CREATE TRIGGER action_items_guard BEFORE UPDATE ON public.academy_action_items
+  FOR EACH ROW EXECUTE FUNCTION public.guard_action_items();
+
+-- Materials sent for review: offers, funnels, marketing plans, proposals…
+CREATE TABLE IF NOT EXISTS public.academy_submissions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  program_id UUID NOT NULL REFERENCES public.academy_programs(id) ON DELETE CASCADE,
+  student_id UUID NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  note TEXT,
+  file_path TEXT,
+  file_name TEXT,
+  mime_type TEXT,
+  size_bytes BIGINT,
+  link_url TEXT,
+  status TEXT NOT NULL DEFAULT 'submitted' CHECK (status IN ('submitted', 'reviewed')),
+  feedback TEXT,
+  reviewed_by UUID,
+  reviewed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE public.academy_submissions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Student and mentors read" ON public.academy_submissions;
+CREATE POLICY "Student and mentors read" ON public.academy_submissions FOR SELECT TO authenticated
+  USING (student_id = auth.uid() OR public.is_mentor(program_id));
+DROP POLICY IF EXISTS "Students submit" ON public.academy_submissions;
+CREATE POLICY "Students submit" ON public.academy_submissions FOR INSERT TO authenticated
+  WITH CHECK (student_id = auth.uid() AND status = 'submitted' AND feedback IS NULL AND public.has_academy_access(program_id));
+DROP POLICY IF EXISTS "Students withdraw unreviewed" ON public.academy_submissions;
+CREATE POLICY "Students withdraw unreviewed" ON public.academy_submissions FOR DELETE TO authenticated
+  USING ((student_id = auth.uid() AND status = 'submitted') OR public.is_mentor(program_id));
+DROP POLICY IF EXISTS "Mentors review" ON public.academy_submissions;
+CREATE POLICY "Mentors review" ON public.academy_submissions FOR UPDATE TO authenticated
+  USING (public.is_mentor(program_id)) WITH CHECK (public.is_mentor(program_id));
+
+-- Mentor roster also counts work waiting for review.
+CREATE OR REPLACE FUNCTION public.academy_awaiting_review(p_program UUID)
+RETURNS INT LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
+AS $$
+  SELECT CASE WHEN public.is_mentor(p_program)
+    THEN (SELECT count(*)::INT FROM academy_submissions WHERE program_id = p_program AND status = 'submitted') END;
+$$;
+REVOKE ALL ON FUNCTION public.academy_awaiting_review(UUID) FROM public, anon;
+GRANT EXECUTE ON FUNCTION public.academy_awaiting_review(UUID) TO authenticated;
+
+-- Students can see the plan they're enrolled in (their own price, nobody else's).
+DROP POLICY IF EXISTS "Students read their own plan" ON public.academy_plans;
+CREATE POLICY "Students read their own plan" ON public.academy_plans FOR SELECT TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.academy_enrollments e WHERE e.plan_id = academy_plans.id AND e.user_id = auth.uid()));
+
+-- Messages can only be marked read after they're sent — never rewritten.
+CREATE OR REPLACE FUNCTION public.guard_academy_messages()
+RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public
+AS $$
+BEGIN
+  IF NEW.body IS DISTINCT FROM OLD.body OR NEW.sender_id IS DISTINCT FROM OLD.sender_id
+     OR NEW.student_id IS DISTINCT FROM OLD.student_id OR NEW.program_id IS DISTINCT FROM OLD.program_id
+     OR NEW.created_at IS DISTINCT FROM OLD.created_at THEN
+    RAISE EXCEPTION 'Messages can''t be edited.';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS academy_messages_guard ON public.academy_messages;
+CREATE TRIGGER academy_messages_guard BEFORE UPDATE ON public.academy_messages
+  FOR EACH ROW EXECUTE FUNCTION public.guard_academy_messages();
 
 -- Live updates for mentor messages.
 DO $$ BEGIN

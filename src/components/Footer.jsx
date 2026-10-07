@@ -46,6 +46,7 @@ const Footer = () => (
           <Link to="/shop">Shop the marketplace</Link>
           <Link to="/directory">Curators &amp; shops</Link>
           <Link to="/calendar">Market dates</Link>
+          <Link to="/mentorship">Mentorship</Link>
           <Link to="/about">Our story</Link>
         </nav>
         <nav className="ft__col" aria-label="Join">
@@ -54,6 +55,7 @@ const Footer = () => (
           <Link to="/partner">Partner with us</Link>
           <Link to="/services">Services</Link>
           <Link to="/login">Curator portal</Link>
+          <Link to="/portal">Member portal</Link>
         </nav>
         <div className="ft__col">
           <h4>Contact</h4>

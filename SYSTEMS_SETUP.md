@@ -125,6 +125,44 @@ Give a curator premium:
 UPDATE curator_data SET plan = 'premium' WHERE slug = 'their-shop';
 ```
 
+## 7. Mentorship Academy & Content Studio
+
+Role-based dashboards behind one sign-in at **p31market.com/portal**:
+
+| Who | Where | What they get |
+|---|---|---|
+| Business mentorship students | `/academy/business` | Sessions & join links, action plans with checkable next steps, goals, lessons, PDF library, submit work for feedback, member line (messages), billing |
+| Faith mentorship students | `/academy/faith` | Lessons, private prayer & reflection journal, daily KJV verse, sessions, library, messages, billing |
+| Mentors | `/academy/<program>/teach` | Students & 1:1 sessions, action plans, feedback on submissions, intro-call inbox, private enrollment invites, curriculum & file uploads, announcements, group sessions |
+| Content Studio (3 seats) | `/studio` | Zernio overview & 30-day insights, best times, content calendar (edit / reschedule / delete), composer with media upload, DMs & comments (read-only), Clip & Photo Studio → straight into a post |
+| Admins (Systems) | `/systems/academy` | Plan prices, mentors, members & manual / complimentary enrollment, Studio seats, all intro calls |
+
+**Pricing is never public.** The public pages (`/mentorship`, `/mentorship/business`, `/mentorship/faith`) end in an intro-call form. After the call, a mentor sends a private, single-use enrollment link (Mentor console → Intro calls → *Send enrollment invite*); only that link shows the plan and price. Business is $250/month and Faith $160/month (seeded); weekly, pay-as-you-go and 6-month plans stay hidden until priced in Systems → Academy.
+
+### Turn it on — in this order
+1. **Database:** run `storefront_v20_academy_and_studio.sql` in the SQL Editor.
+2. **Mentors and Studio seats** (each person needs an account first — students get one from their enrollment link; mentors and Studio members tap “Create an account” at `/portal`):
+   ```sql
+   SELECT public.add_academy_mentor('melanie@example.com', 'business', 'Lead mentor');
+   SELECT public.add_studio_member('teammate@example.com');   -- up to 3 seats
+   ```
+   (Or use Systems → Academy.)
+3. **Functions:**
+   ```bash
+   supabase functions deploy studio-zernio
+   supabase functions deploy academy-checkout
+   supabase functions deploy academy-billing
+   supabase functions deploy academy-webhook
+   supabase functions deploy dm-agent          # Carla now knows about the mentorships (never prices)
+   ```
+4. **Stripe (card enrollment):**
+   - `supabase secrets set STRIPE_SECRET_KEY=sk_live_... APP_URL=https://www.p31market.com`
+   - Stripe → Developers → Webhooks → *Add endpoint* `https://xsnhxjttdizljaawpumz.supabase.co/functions/v1/academy-webhook` with events `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted`, then `supabase secrets set ACADEMY_STRIPE_WEBHOOK_SECRET=whsec_...`
+   - Stripe → Settings → Billing → Customer portal: turn it on (students use it to update cards or cancel).
+5. **Deploy the site** (merge `feature/academy-studio` into `main`).
+
+Until Stripe is connected, invite links explain that card payments aren’t ready and point to members@thep31collective.org, and admins can enroll people manually in Systems → Academy.
+
 ## What's where
 
 | Feature | Who | Where |

@@ -40,3 +40,17 @@ verify_jwt = false
 # Zernio calls this with no Supabase JWT; the function checks Zernio's signature.
 [functions.dm-agent]
 verify_jwt = false
+
+# Content Studio + Academy: each checks the caller itself (studio seat, invite email, Stripe signature).
+[functions.studio-zernio]
+verify_jwt = false
+
+[functions.academy-checkout]
+verify_jwt = false
+
+[functions.academy-billing]
+verify_jwt = false
+
+# Stripe calls this directly; the Stripe signature is the check.
+[functions.academy-webhook]
+verify_jwt = false

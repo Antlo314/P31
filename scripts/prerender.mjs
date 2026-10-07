@@ -3,8 +3,8 @@
 // so Google and link previews (iMessage, Facebook, X) see real content.
 // Also writes sitemap.xml. Storefronts and announced market dates come from
 // Supabase with the public anon key; if it's unreachable, static pages still build.
-import { readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { join, dirname } from 'node:path';
 import { loadEnv } from 'vite';
 import { SITE_URL, SITE_NAME, DEFAULT_IMAGE, ROUTE_META, INDEXED_ROUTES, BUSINESS, curatorMeta } from '../src/lib/seo.js';
 
@@ -124,7 +124,8 @@ const pages = Object.keys(ROUTE_META).map((path) => ({
 
 // Slugs that would collide with real files or app routes are left to the SPA.
 const RESERVED = new Set(['index', 'assets', 'icons', 'shop', 'directory', 'calendar', 'about', 'services', 'partner',
-  'favorites', 'login', 'register', 'unsubscribe', 'dashboard', 'systems', 'offline', 'sw', 'sitemap', 'robots', 'manifest']);
+  'favorites', 'login', 'register', 'unsubscribe', 'dashboard', 'systems', 'offline', 'sw', 'sitemap', 'robots', 'manifest',
+  'mentorship', 'portal', 'enroll', 'academy', 'studio']);
 const safeSlug = (s) => /^[a-z0-9][a-z0-9_-]{0,80}$/i.test(s || '') && !RESERVED.has(s.toLowerCase());
 
 const shops = curators.filter((c) => safeSlug(c.slug) && c.business_name);
@@ -147,6 +148,7 @@ for (const c of shops) {
 // "/shop" → dist/shop.html, served at /shop (vercel.json cleanUrls).
 for (const page of pages) {
   const file = page.path === '/' ? 'index.html' : `${page.path.slice(1)}.html`;
+  mkdirSync(dirname(join(dist, file)), { recursive: true });
   writeFileSync(join(dist, file), render(page));
 }
 

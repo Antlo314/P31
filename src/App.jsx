@@ -24,10 +24,17 @@ const Onboarding = lazy(() => import('./pages/Onboarding'));
 const Services = lazy(() => import('./pages/Services'));
 const Unsubscribe = lazy(() => import('./pages/Unsubscribe'));
 const Shop = lazy(() => import('./pages/Shop'));
+const MentorshipLanding = lazy(() => import('./academy/Mentorship').then((m) => ({ default: m.MentorshipLanding })));
+const MentorshipProgram = lazy(() => import('./academy/Mentorship').then((m) => ({ default: m.MentorshipProgram })));
+const Portal = lazy(() => import('./academy/Portal'));
+const Enroll = lazy(() => import('./academy/Enroll'));
 
 // The team console is its own app: loaded only when someone opens it,
 // and drawn without the public site's header, footer and popups.
 const SystemsApp = lazy(() => import('./systems/SystemsApp'));
+// Member dashboards: mentorship classrooms / mentor consoles, and the Content Studio.
+const AcademyApp = lazy(() => import('./academy/app/AcademyApp'));
+const StudioApp = lazy(() => import('./studio/StudioApp'));
 // Dev-only studio test bench; compiled out of production builds.
 const Lab = import.meta.env.DEV ? lazy(() => import('./dev/Lab')) : null;
 
@@ -45,6 +52,7 @@ const RouteMeta = () => {
   useEffect(() => {
     const key = pathname.replace(/\/+$/, '') || '/';
     if (ROUTE_META[key]) applyMeta({ ...ROUTE_META[key], path: key });
+    else if (key.startsWith('/enroll/')) applyMeta({ title: `Your invitation — ${SITE_NAME}`, description: ROUTE_META['/mentorship'].description, noindex: true });
     else if (key.startsWith('/dashboard') || key === '/onboarding-exclusive') {
       applyMeta({ title: `Curator studio — ${SITE_NAME}`, description: ROUTE_META['/'].description, noindex: true });
     }
@@ -77,6 +85,10 @@ function SiteRoutes() {
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/favorites" element={<Shop favoritesOnly />} />
+            <Route path="/mentorship" element={<MentorshipLanding />} />
+            <Route path="/mentorship/:program" element={<MentorshipProgram />} />
+            <Route path="/portal" element={<Portal />} />
+            <Route path="/enroll/:token" element={<Enroll />} />
             {/* Vanity URL Catch-all: /popcorn or /id */}
             <Route path="/:id" element={<CuratorProfile />} />
           </Routes>
@@ -101,6 +113,14 @@ function App() {
               <SystemsApp />
             </Suspense>
           }
+        />
+        <Route
+          path="/academy/:program/*"
+          element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#FCFBFE' }} />}><AcademyApp /></Suspense>}
+        />
+        <Route
+          path="/studio/*"
+          element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#12081d' }} />}><StudioApp /></Suspense>}
         />
         {Lab && <Route path="/__lab" element={<Suspense fallback={null}><Lab /></Suspense>} />}
         <Route path="/*" element={<SiteRoutes />} />
