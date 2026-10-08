@@ -38,7 +38,7 @@ CREATE POLICY "Class reads recordings" ON public.academy_recordings FOR SELECT T
 -- Joining checks invitations too (calls for chosen students).
 CREATE OR REPLACE FUNCTION public.academy_join_session(p_session UUID)
 RETURNS TEXT LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, auth
-AS $$
+AS $fn$
 DECLARE
   s academy_sessions%ROWTYPE;
   v_mentor BOOLEAN;
@@ -67,7 +67,7 @@ BEGIN
   END IF;
   RETURN s.join_url;
 END;
-$$;
+$fn$;
 REVOKE ALL ON FUNCTION public.academy_join_session(UUID) FROM public, anon;
 GRANT EXECUTE ON FUNCTION public.academy_join_session(UUID) TO authenticated;
 
@@ -75,7 +75,7 @@ GRANT EXECUTE ON FUNCTION public.academy_join_session(UUID) TO authenticated;
 CREATE OR REPLACE FUNCTION public.academy_call_report(p_session UUID)
 RETURNS TABLE (user_id UUID, full_name TEXT, email TEXT, joins INT, first_join TIMESTAMPTZ, last_leave TIMESTAMPTZ, minutes NUMERIC, attendance TEXT)
 LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, auth
-AS $$
+AS $fn$
 DECLARE v_program UUID;
 BEGIN
   SELECT program_id INTO v_program FROM academy_sessions WHERE id = p_session;
@@ -95,21 +95,21 @@ BEGIN
   FROM people p JOIN auth.users u ON u.id = p.user_id
   ORDER BY 7 DESC NULLS LAST;
 END;
-$$;
+$fn$;
 REVOKE ALL ON FUNCTION public.academy_call_report(UUID) FROM public, anon;
 GRANT EXECUTE ON FUNCTION public.academy_call_report(UUID) TO authenticated;
 
 -- Server-side CRM entries for call events (used by the daily-webhook function).
 CREATE OR REPLACE FUNCTION public.crm_service_event(p_user UUID, p_kind TEXT, p_title TEXT, p_detail JSONB, p_source TEXT)
 RETURNS VOID LANGUAGE sql SECURITY DEFINER SET search_path = public
-AS $$ SELECT public.crm_add(NULL, NULL, NULL, p_user, p_kind, p_title, p_detail, p_source); $$;
+AS $fn$ SELECT public.crm_add(NULL, NULL, NULL, p_user, p_kind, p_title, p_detail, p_source); $fn$;
 REVOKE ALL ON FUNCTION public.crm_service_event(UUID, TEXT, TEXT, JSONB, TEXT) FROM public, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.crm_service_event(UUID, TEXT, TEXT, JSONB, TEXT) TO service_role;
 
 -- "Live now" notifications go straight to the room, and only to invited students.
 CREATE OR REPLACE FUNCTION public.academy_notify_events()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
-AS $$
+AS $fn$
 DECLARE
   v_base TEXT := '/academy/' || public.academy_slug(NEW.program_id);
 BEGIN
@@ -163,4 +163,4 @@ EXCEPTION WHEN OTHERS THEN
   RAISE WARNING 'academy notification skipped: %', SQLERRM;
   RETURN NULL;
 END;
-$$;
+$fn$;
