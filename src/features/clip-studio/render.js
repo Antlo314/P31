@@ -6,6 +6,8 @@
 // stay in sync with the audio. The canvas + mixed audio are captured with
 // MediaRecorder — MP4 where the browser supports it, WebM otherwise.
 
+import { drawCaption, loadCaptionFont } from './captions';
+
 const MIME_CANDIDATES = [
   'video/mp4;codecs=avc1.640028,mp4a.40.2',
   'video/mp4;codecs=avc1,mp4a',
@@ -46,12 +48,13 @@ const waitFor = (el, event, ms = 4000) =>
   });
 
 export async function renderClip({
-  clips, timeline, style, aspect, pages, audioCtx, clipBuffers, music, levels,
+  clips, timeline, style, aspect, pages, captionStyle, audioCtx, clipBuffers, music, levels,
   title, brand, canvas, onProgress, signal,
 }) {
   // Browsers stop drawing hidden pages, which would freeze the render.
   if (document.hidden) throw new Error('Keep Clip Studio on screen while it renders.');
 
+  if (pages?.length) await loadCaptionFont(captionStyle);
   const W = aspect.w;
   const H = aspect.h;
   canvas.width = W;
@@ -252,66 +255,10 @@ export async function renderClip({
     ctx.restore();
   };
 
+  // Captions: one page at a time, measured with the loaded font (see captions.js).
   const drawCaptions = (T) => {
     if (!pages?.length || T > editEnd) return;
-    const c = style.caption;
-    const idx = pages.findIndex((pg, k) => T >= pg.start - 0.05 && T < (pages[k + 1] ? Math.min(pg.end + 0.4, pages[k + 1].start) : pg.end + 0.6));
-    if (idx < 0) return;
-    const page = pages[idx];
-    const size = Math.round(base * c.size);
-    ctx.save();
-    ctx.font = `${c.italic ? 'italic ' : ''}${c.weight} ${size}px ${c.font === 'Noto Serif' ? '"Noto Serif"' : 'Manrope'}`;
-    ctx.textBaseline = 'middle';
-    const words = page.words.map((w) => ({ ...w, label: c.upper ? w.text.toUpperCase() : w.text }));
-    const space = ctx.measureText(' ').width;
-
-    // Wrap into lines that fit 86% of the width.
-    const lines = [[]];
-    let lineW = 0;
-    for (const w of words) {
-      w.w = ctx.measureText(w.label).width;
-      if (lineW && lineW + space + w.w > W * 0.86) { lines.push([]); lineW = 0; }
-      lines[lines.length - 1].push(w);
-      lineW += (lineW ? space : 0) + w.w;
-    }
-
-    const pop = clamp01((T - page.start + 0.05) / 0.12);
-    const lh = size * 1.25;
-    const top = H * c.y - (lines.length * lh) / 2;
-    ctx.translate(W / 2, top + (lines.length * lh) / 2);
-    ctx.scale(0.92 + 0.08 * pop, 0.92 + 0.08 * pop);
-    ctx.translate(-W / 2, -(top + (lines.length * lh) / 2));
-
-    lines.forEach((line, li) => {
-      const total = line.reduce((s, w, k) => s + w.w + (k ? space : 0), 0);
-      let x = (W - total) / 2;
-      const y = top + li * lh + lh / 2;
-      if (c.box) {
-        ctx.fillStyle = c.box;
-        ctx.beginPath();
-        ctx.roundRect(x - size * 0.35, y - lh / 2, total + size * 0.7, lh, size * 0.28);
-        ctx.fill();
-      }
-      for (const w of line) {
-        const active = T >= w.start && T < w.end + 0.05;
-        if (active && c.activeBox) {
-          ctx.fillStyle = c.activeBox;
-          ctx.beginPath();
-          ctx.roundRect(x - size * 0.12, y - lh / 2 + size * 0.08, w.w + size * 0.24, lh - size * 0.16, size * 0.18);
-          ctx.fill();
-        }
-        if (c.stroke) {
-          ctx.lineJoin = 'round';
-          ctx.lineWidth = size * 0.16;
-          ctx.strokeStyle = c.stroke;
-          ctx.strokeText(w.label, x, y);
-        }
-        ctx.fillStyle = active ? c.active : c.color;
-        ctx.fillText(w.label, x, y);
-        x += w.w + space;
-      }
-    });
-    ctx.restore();
+    drawCaption(ctx, pages, T, captionStyle, W, H);
   };
 
   const drawTitle = (T) => {

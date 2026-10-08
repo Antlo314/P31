@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Upload, Film, X, ChevronUp, ChevronDown, Wand2, Captions, Music2, Scissors, Download, Share2, RotateCcw, Save, Check, AlertTriangle, Stamp } from 'lucide-react';
 import { CLIP_STYLES, ASPECTS, LENGTHS } from './styles';
-import { probeVideo, decodeForMix, toAnalysisPcm, findActiveRanges, buildTimeline, timelinePcm, mapToOutput, pageCaptions, MAX_FILE_BYTES } from './analyze';
+import { probeVideo, decodeForMix, toAnalysisPcm, findActiveRanges, buildTimeline, timelinePcm, mapToOutput, MAX_FILE_BYTES } from './analyze';
+import { captionSettings, cleanWords, buildPages } from './captions';
+import CaptionPanel from './CaptionPanel';
 import { renderClip, canRender } from './render';
 import './ClipStudio.css';
 
@@ -29,14 +31,6 @@ const shrinkLogo = (img) => {
   return c.toDataURL('image/png');
 };
 
-// Re-time an edited caption line evenly across its original span.
-const retimePage = (page, text) => {
-  const tokens = text.trim().split(/\s+/).filter(Boolean);
-  if (!tokens.length) return null;
-  const step = (page.end - page.start) / tokens.length;
-  return { ...page, words: tokens.map((t, i) => ({ text: t, start: page.start + i * step, end: page.start + (i + 1) * step })) };
-};
-
 /**
  * Mobile-first auto editor. Raw footage in → cut, transitioned, captioned clip out.
  * onSave(blob, meta) is optional; when given, a "Save" button appears.
@@ -56,6 +50,8 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
   const [progress, setProgress] = useState({ stage: '', pct: 0 });
   const [error, setError] = useState('');
   const [pages, setPages] = useState([]);
+  const [capStyle, setCapStyle] = useState(() => captionSettings(CLIP_STYLES[0].caption));
+  const wordsRef = useRef([]); // clean speech words, kept so captions can be regrouped
   const [results, setResults] = useState([]); // one finished video per size
   const [saved, setSaved] = useState([]); // indexes of saved results
   const [extraAspects, setExtraAspects] = useState([]);
@@ -236,7 +232,8 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
           captionCache.current.set(sig, words);
         }
       }
-      setPages(pageCaptions(words, style.caption.words));
+      wordsRef.current = cleanWords(words);
+      setPages(buildPages(wordsRef.current, capStyle));
       setPhase('review');
     } catch (e) {
       setError(e.message || 'Something went wrong while analysing the footage.');
@@ -266,6 +263,7 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
           style,
           aspect: size,
           pages: captions ? pages : [],
+          captionStyle: capStyle,
           audioCtx: ctx,
           clipBuffers: clips.map((c) => analysisRef.current.get(c.id)?.buffer || null),
           music,
@@ -359,7 +357,7 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
             <h3><Wand2 size={16} /> Style</h3>
             <div className="cs-styles">
               {CLIP_STYLES.map((s) => (
-                <button key={s.id} className={`cs-style ${styleId === s.id ? 'is-on' : ''}`} onClick={() => setStyleId(s.id)} aria-pressed={styleId === s.id}>
+                <button key={s.id} className={`cs-style ${styleId === s.id ? 'is-on' : ''}`} onClick={() => { setStyleId(s.id); setCapStyle(captionSettings(s.caption)); }} aria-pressed={styleId === s.id}>
                   <span className="cs-style__sw" style={{ background: `linear-gradient(135deg, ${s.swatch[0]} 0 50%, ${s.swatch[1]} 50% 100%)` }} />
                   <strong>{s.name}</strong>
                   <span>{s.blurb}</span>
@@ -457,22 +455,10 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
           </section>
           {captions && (
             <section className="cs-block">
-              <h3><Captions size={16} /> Captions <span>tap to fix any word</span></h3>
-              {pages.length === 0 && <p className="cs-note">No speech was found, so there are no captions.</p>}
-              <div className="cs-pages">
-                {pages.map((pg, i) => (
-                  <label className="cs-page" key={`${i}-${pg.start}`}>
-                    <span>{fmtTime(pg.start)}</span>
-                    <input
-                      defaultValue={pg.words.map((w) => w.text).join(' ')}
-                      onBlur={(e) => {
-                        const next = retimePage(pg, e.target.value);
-                        setPages((ps) => (next ? ps.map((p, k) => (k === i ? next : p)) : ps.filter((_, k) => k !== i)));
-                      }}
-                    />
-                  </label>
-                ))}
-              </div>
+              <h3><Captions size={16} /> Captions <span>style, timing &amp; text — preview updates live</span></h3>
+              <CaptionPanel pages={pages} setPages={setPages} settings={capStyle} setSettings={setCapStyle}
+                onRegroup={(next) => setPages(buildPages(wordsRef.current, next))}
+                clips={clips} timeline={timelineRef.current} aspect={aspect} />
             </section>
           )}
           <section className="cs-block">
