@@ -136,7 +136,7 @@ const Portal = () => {
 
           {!recovery && status === 'ready' && (
             <>
-              <h2 className="k-h2 lg__title">Your <em>dashboards</em></h2>
+              <h2 className="k-h2 lg__title">{dashboards.length > 1 ? <>Where to <em>today?</em></> : <>Your <em>dashboard</em></>}</h2>
               {note && <p className="k-fine" role="status">{note}</p>}
               {dashboards.length ? (
                 <nav className="pt-list">
@@ -149,8 +149,8 @@ const Portal = () => {
                       <ArrowRight size={18} />
                     </>;
                     return href === d.to
-                      ? <Link key={d.to} to={d.to} className={`pt-item ${d.locked ? 'is-locked' : ''}`}>{body}</Link>
-                      : <a key={d.to} href={href} className={`pt-item ${d.locked ? 'is-locked' : ''}`}>{body}</a>;
+                      ? <Link key={d.to} to={d.to} className={`pt-item ${d.locked ? 'is-locked' : ''}`} data-program={d.program || d.kind}>{body}</Link>
+                      : <a key={d.to} href={href} className={`pt-item ${d.locked ? 'is-locked' : ''}`} data-program={d.program || d.kind}>{body}</a>;
                   })}
                 </nav>
               ) : (

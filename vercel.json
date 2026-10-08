@@ -99,6 +99,17 @@
       ],
       "destination": "https://www.thep31collective.org/systems/:path*",
       "permanent": false
+    },
+    {
+      "source": "/verify/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.p31market.com"
+        }
+      ],
+      "destination": "https://www.thep31collective.org/verify/:path*",
+      "permanent": false
     }
   ],
   "rewrites": [

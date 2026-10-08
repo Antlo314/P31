@@ -8,5 +8,5 @@ const FLUSH = new Set([
 
 export const isFlushRoute = (pathname) => {
   const p = pathname.replace(/\/+$/, '') || '/';
-  return FLUSH.has(p) || p.startsWith('/enroll/');
+  return FLUSH.has(p) || p.startsWith('/enroll/') || p.startsWith('/verify');
 };

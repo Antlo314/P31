@@ -54,6 +54,9 @@
 .pt-item small { color: var(--ink-3); font-size: 0.84rem; }
 .pt-item.is-locked { opacity: 0.7; }
 .pt-item__icon { display: grid; place-items: center; width: 44px; height: 50px; border-radius: 999px 999px 12px 12px; background: var(--night-bg); color: var(--gold-hi); }
+.pt-item[data-program="faith"] .pt-item__icon { background: linear-gradient(180deg, #8f3a6c, #4a1638); color: #ffe3f1; }
+.pt-item[data-program="studio"] .pt-item__icon { background: linear-gradient(180deg, #2f1a4f, #12081d); color: #c9a6ff; }
+.pt-item[data-program="systems"] .pt-item__icon { background: linear-gradient(180deg, #3a3a46, #15151c); color: #e8e8f0; }
 .pt-empty { display: grid; gap: 10px; justify-items: start; color: var(--ink-2); }
 .pt-empty p { margin: 0; }
 .en-plan { display: grid; gap: 4px; padding: 18px; margin-bottom: 16px; border-radius: var(--r-md); background: var(--night-bg); color: #fff; }

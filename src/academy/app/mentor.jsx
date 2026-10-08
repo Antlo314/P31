@@ -10,26 +10,11 @@ import { DashHead, DashEmpty } from '../../apps/DashShell';
 import RichText from '../RichText';
 import Thread from './Thread';
 import { useAcademy, useNow, useRows, write } from './data';
+import { Modal } from './ui';
+import { toLocalInput, fromLocalInput, useRoster } from './helpers';
+import { AttendanceModal, MentorPulse, StudentNotes, StudentProgressPanel } from './teach';
 
-// ── Small building blocks ────────────────────────────────────
-const Modal = ({ title, onClose, children }) => (
-  <div className="ds-modal" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.target === e.currentTarget && onClose()}>
-    <div className="ds-modal__panel">
-      <button className="k-close" onClick={onClose} aria-label="Close"><X size={18} /></button>
-      <h2>{title}</h2>
-      {children}
-    </div>
-  </div>
-);
-const toLocalInput = (iso) => {
-  if (!iso) return '';
-  const d = new Date(iso);
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-};
-const fromLocalInput = (v) => (v ? new Date(v).toISOString() : null);
 const daysFromNow = (d) => new Date(Date.now() + d * 86400e3).toISOString();
-const useRoster = (program) => useRows(() => supabase.rpc('academy_roster', { p_program: program.id }), [program.id]);
 const STATUS_PILL = { active: 'ds-pill--green', past_due: 'ds-pill--red', canceled: '', expired: '' };
 
 // ── Overview ─────────────────────────────────────────────────
@@ -50,9 +35,10 @@ export const MentorOverview = () => {
       <div className="ds-grid ds-grid--4">
         <Link to="students" className="ds-stat"><strong>{active}</strong><span>Active students</span></Link>
         <Link to="calls" className="ds-stat"><strong>{newCalls.length}</strong><span>New intro-call requests</span></Link>
-        <Link to="students" className="ds-stat"><strong>{unread}</strong><span>Unread messages</span></Link>
-        <Link to="students" className="ds-stat"><strong>{review.data || 0}</strong><span>Waiting for your feedback</span></Link>
+        <Link to="inbox" className="ds-stat"><strong>{unread}</strong><span>Unread messages</span></Link>
+        <Link to="gradebook" className="ds-stat"><strong>{review.data || 0}</strong><span>Waiting for your feedback</span></Link>
       </div>
+      <MentorPulse />
       <div className="ds-grid ds-grid--2 ds-section">
         <article className="ds-card">
           <div className="ds-card__head"><h2><CalendarDays size={18} /> Coming up</h2><Link to="sessions" className="k-link">Sessions</Link></div>
@@ -359,12 +345,15 @@ export const MentorStudent = () => {
         lead={s ? `${s.email} · ${s.plan_label || s.source} · ${s.status.replace('_', ' ')}${s.access_until ? ` · access to ${fmtDate(s.access_until)}` : ''}` : ''}
         actions={s && <a className="k-btn k-btn--ghost k-btn--sm" href={`mailto:${s.email}`}><Mail size={15} /> Email</a>} />
       <div className="ds-tabs-inline" role="tablist">
-        {[['messages', 'Messages'], ['plans', 'Action plans'], ['sessions', '1:1 sessions'], ['work', `Work${subs.data.some((x) => x.status === 'submitted') ? ' •' : ''}`]].map(([v, l]) => (
+        {[['messages', 'Messages'], ['progress', 'Progress'], ['plans', 'Action plans'], ['sessions', '1:1 sessions'], ['work', `Work${subs.data.some((x) => x.status === 'submitted') ? ' •' : ''}`], ['notes', 'Private notes']].map(([v, l]) => (
           <button key={v} role="tab" aria-selected={tab === v} onClick={() => setTab(v)}>{l}</button>
         ))}
       </div>
 
       {tab === 'messages' && <div style={{ maxWidth: 820 }}><Thread programId={program.id} studentId={userId} meId={user?.id} mentorView emptyText="Start the conversation." /></div>}
+
+      {tab === 'progress' && <StudentProgressPanel studentId={userId} />}
+      {tab === 'notes' && <StudentNotes studentId={userId} />}
 
       {tab === 'plans' && (
         <>
@@ -616,9 +605,12 @@ export const MentorSessions = () => {
   const past = list.data.filter((s) => new Date(s.starts_at).getTime() < now);
   const who = (id) => roster.data.find((r) => r.user_id === id)?.full_name || 'Student';
   const row = (s) => (
-    <li key={s.id}><button className="ds-row" onClick={() => setModal({ session: s })}>
-      <CalendarDays size={18} /><div><strong>{s.title}</strong><small>{fmtDateTime(s.starts_at)} · {s.duration_minutes} min · {s.student_id ? `1:1 with ${who(s.student_id)}` : 'Group'}{s.join_url ? '' : ' · no join link yet'}</small></div><Pencil size={15} />
-    </button></li>
+    <li key={s.id} className="cl-session-row">
+      <button className="ds-row" onClick={() => setModal({ session: s })}>
+        <CalendarDays size={18} /><div><strong>{s.title}</strong><small>{fmtDateTime(s.starts_at)} · {s.duration_minutes} min · {s.student_id ? `1:1 with ${who(s.student_id)}` : 'Group'}{s.join_url ? '' : ' · no join link yet'}</small></div><Pencil size={15} />
+      </button>
+      {new Date(s.starts_at).getTime() < now && <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => setModal({ attendance: s })}><Users size={15} /> Attendance</button>}
+    </li>
   );
   return (
     <>
@@ -628,6 +620,7 @@ export const MentorSessions = () => {
       {past.length > 0 && <section className="ds-section"><h2>Past — add notes and recordings</h2><ul className="ds-list">{past.map(row)}</ul></section>}
       {modal === 'new' && <SessionModal onClose={() => setModal(null)} onSaved={list.reload} />}
       {modal?.session && <SessionModal session={modal.session} onClose={() => setModal(null)} onSaved={list.reload} />}
+      {modal?.attendance && <AttendanceModal session={modal.attendance} onClose={() => setModal(null)} />}
     </>
   );
 };

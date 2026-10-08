@@ -10,6 +10,7 @@ import { DashHead, DashEmpty } from '../../apps/DashShell';
 import RichText from '../RichText';
 import Thread from './Thread';
 import { useAcademy, useNow, useRows, write } from './data';
+import { DueSoon } from './learn';
 
 const isBusiness = (p) => p?.slug === 'business';
 const sessionEnd = (s) => new Date(new Date(s.starts_at).getTime() + (s.duration_minutes || 60) * 60000);
@@ -91,6 +92,8 @@ export const StudentHome = () => {
           <div className="ds-card__head"><h2><CalendarDays size={18} /> Next session</h2><Link to="sessions" className="k-link">All</Link></div>
           {next ? <SessionCard s={next} compact /> : <p className="ds-muted">No session scheduled yet — your mentor will add it here.</p>}
         </article>
+
+        <DueSoon />
 
         <article className="ds-card">
           <div className="ds-card__head"><h2><BookOpen size={18} /> Your progress</h2><Link to="learn" className="k-link">Lessons</Link></div>

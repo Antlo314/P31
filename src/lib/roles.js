@@ -60,9 +60,10 @@ export function dashboardsFor(roles) {
     note: s.has_access ? 'Your classroom' : 'Your access has ended — renew to continue', locked: !s.has_access,
   }));
   (roles.mentor || []).forEach((slug) => out.push({
-    to: `/academy/${slug}/teach`, kind: 'mentor', title: `${PROGRAM_NAMES[slug] || slug} — Mentor`, note: 'Classroom, students and intro calls',
+    to: `/academy/${slug}/teach`, kind: 'mentor', program: slug, title: PROGRAM_NAMES[slug] || slug,
+    note: 'Mentor console · lessons, assignments, grading, messages',
   }));
-  if (roles.studio) out.push({ to: '/studio', kind: 'studio', title: 'Content Studio', note: 'Socials, scheduling and creative tools' });
+  if (roles.studio) out.push({ to: '/studio', kind: 'studio', title: 'Content Studio', note: 'Instagram & Facebook · plan, create, schedule, reply' });
   if (roles.operator || roles.admin) out.push({ to: '/systems', kind: 'systems', title: 'Systems', note: 'P31 operations console' });
   if (roles.curator) out.push({ to: '/dashboard', kind: 'curator', title: 'Curator Studio', note: 'Your shop, products and orders' });
   return out;

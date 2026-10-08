@@ -9,7 +9,7 @@ import './dash.css';
  *   nav:   [{ to, label, Icon, end?, badge? }]   — first 4 become the phone tab bar
  *   theme: 'light' (ivory work area) | 'dark' (night, for the studio)
  */
-const DashShell = ({ theme = 'light', brand, nav, account, onSignOut, banner, children }) => {
+const DashShell = ({ theme = 'light', variant, brand, nav, account, onSignOut, banner, tools, children }) => {
   const [more, setMore] = useState(false);
   const { pathname } = useLocation();
   useEffect(() => { Promise.resolve().then(() => setMore(false)); }, [pathname]);
@@ -33,7 +33,7 @@ const DashShell = ({ theme = 'light', brand, nav, account, onSignOut, banner, ch
   ));
 
   return (
-    <div className={`ds ds--${theme}`}>
+    <div className={`ds ds--${theme} ${variant ? `ds--${variant}` : ''}`}>
       <aside className="ds-side">
         <Link to={brand.to} className="ds-brand">
           {brand.mark && <img src={brand.mark} alt="" />}
@@ -43,6 +43,7 @@ const DashShell = ({ theme = 'light', brand, nav, account, onSignOut, banner, ch
         <div className="ds-me">
           <div><strong>{account?.name || 'Signed in'}</strong><span>{account?.role}</span></div>
           <div className="ds-me__actions">
+            {tools}
             <Link to="/portal?choose" className="ds-icon-btn" aria-label="All my dashboards"><LayoutGrid size={17} /></Link>
             {onSignOut && <button className="ds-icon-btn" onClick={onSignOut} aria-label="Sign out"><LogOut size={17} /></button>}
           </div>
@@ -54,6 +55,7 @@ const DashShell = ({ theme = 'light', brand, nav, account, onSignOut, banner, ch
           {brand.mark && <img src={brand.mark} alt="" />}
           <span><strong>{brand.title}</strong><small>{brand.subtitle}</small></span>
         </Link>
+        {tools && <div className="ds-top__tools">{tools}</div>}
       </div>
 
       <main className="ds-main">
