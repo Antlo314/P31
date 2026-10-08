@@ -9,7 +9,7 @@
           "value": "www.p31market.com"
         }
       ],
-      "destination": "https://thep31collective.org/",
+      "destination": "https://www.thep31collective.org/",
       "permanent": false
     },
     {
@@ -20,7 +20,7 @@
           "value": "www.p31market.com"
         }
       ],
-      "destination": "https://thep31collective.org/mentorship/:path*",
+      "destination": "https://www.thep31collective.org/mentorship/:path*",
       "permanent": false
     },
     {
@@ -31,7 +31,7 @@
           "value": "www.p31market.com"
         }
       ],
-      "destination": "https://thep31collective.org/enroll/:path*",
+      "destination": "https://www.thep31collective.org/enroll/:path*",
       "permanent": false
     },
     {
@@ -42,7 +42,7 @@
           "value": "www.p31market.com"
         }
       ],
-      "destination": "https://thep31collective.org/academy/:path*",
+      "destination": "https://www.thep31collective.org/academy/:path*",
       "permanent": false
     }
   ],

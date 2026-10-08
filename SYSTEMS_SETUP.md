@@ -130,8 +130,8 @@ UPDATE curator_data SET plan = 'premium' WHERE slug = 'their-shop';
 The mentorships live on their own domain, **thep31collective.org**, served by the same app and the same Supabase (see `src/lib/site.js`). The Collective has the mentorship pages, the member portal, enrollment links and classrooms; **p31market.com** keeps the marketplace, the Content Studio and Systems, and forwards `/mentorship`, `/enroll` and `/academy` to the Collective. Members sign in at **thep31collective.org/portal**; the Studio team at **p31market.com/portal**. (A login is per domain: same email and password, signed in once on each.)
 
 **Domain setup (once):**
-1. Vercel → the P31 project → Settings → Domains → add `thep31collective.org` and `www.thep31collective.org` (redirect www → the bare domain), then add the DNS records Vercel shows at your domain registrar.
-2. Supabase → Authentication → URL Configuration → *Redirect URLs* → add `https://thep31collective.org/**` (password-reset and confirm-email links).
+1. Vercel → the P31 project → Settings → Domains → add `thep31collective.org` and `www.thep31collective.org` (the bare domain redirects to www), then add the DNS records Vercel shows at your domain registrar.
+2. Supabase → Authentication → URL Configuration → *Redirect URLs* → add `https://www.thep31collective.org/**` (password-reset and confirm-email links).
 3. Preview either side locally or on a Vercel preview with `?site=collective` or `?site=market`.
 
 Role-based dashboards:
@@ -163,7 +163,7 @@ Role-based dashboards:
    supabase functions deploy dm-agent          # Carla now knows about the mentorships (never prices)
    ```
 4. **Stripe (card enrollment):**
-   - `supabase secrets set STRIPE_SECRET_KEY=sk_live_...` (checkout returns to `ACADEMY_URL`, default `https://thep31collective.org`)
+   - `supabase secrets set STRIPE_SECRET_KEY=sk_live_...` (checkout returns to `ACADEMY_URL`, default `https://www.thep31collective.org`)
    - Stripe → Developers → Webhooks → *Add endpoint* `https://xsnhxjttdizljaawpumz.supabase.co/functions/v1/academy-webhook` with events `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.updated`, `customer.subscription.deleted`, then `supabase secrets set ACADEMY_STRIPE_WEBHOOK_SECRET=whsec_...`
    - Stripe → Settings → Billing → Customer portal: turn it on (students use it to update cards or cancel).
 5. **Deploy the site** (merge `feature/academy-studio` into `main`).

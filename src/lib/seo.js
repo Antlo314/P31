@@ -6,7 +6,7 @@ export const SITE_URL = 'https://www.p31market.com';
 export const SITE_NAME = 'Proverbs 31 Marketplace';
 // The mentorships, member portal and classrooms live on their own domain
 // (same app, same Supabase): see src/lib/site.js.
-export const COLLECTIVE_URL = 'https://thep31collective.org';
+export const COLLECTIVE_URL = 'https://www.thep31collective.org';
 export const COLLECTIVE_NAME = 'The Proverbs 31 Collective';
 export const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
 
