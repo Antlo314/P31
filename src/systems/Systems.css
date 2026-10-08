@@ -342,3 +342,24 @@ button.sys-tabbar__link.active { background: rgba(242, 206, 77, 0.1); }
 .sys-eyebrow::before { content: ''; width: 26px; height: 1.5px; background: linear-gradient(90deg, var(--gold), var(--gold-hi)); }
 .sys-brand__mark { border-radius: 999px 999px 10px 10px; }
 .sys-login { background: var(--night-bg); }
+
+/* CRM */
+.crm-search { display: flex; align-items: center; gap: 8px; }
+.crm-search input { flex: 1; }
+.crm-row { width: 100%; text-align: left; cursor: pointer; font: inherit; color: inherit; display: flex; align-items: center; gap: 12px; }
+.crm-avatar { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: rgba(242, 206, 77, 0.14); color: var(--gold-hi); }
+.crm-stage { text-transform: capitalize; }
+.crm-stage--member { background: rgba(23, 166, 115, 0.18) !important; color: #6fe0b4 !important; }
+.crm-stage--prospect { background: rgba(242, 206, 77, 0.18) !important; color: var(--gold-hi) !important; }
+.crm-stage--partner { background: rgba(168, 85, 232, 0.2) !important; color: #d7b3f7 !important; }
+.crm-grid { display: grid; gap: 14px; }
+@media (min-width: 980px) { .crm-grid { grid-template-columns: 340px minmax(0, 1fr); align-items: start; } }
+.crm-tag-input, .crm-note { min-height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.05); color: inherit; font: inherit; font-size: 16px; }
+.crm-tag-input { width: 110px; }
+.crm-note { border-radius: 12px; flex: 1 1 220px; }
+.crm-timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.crm-timeline li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.crm-timeline__icon { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.07); color: var(--gold-hi); }
+.crm-timeline strong { display: block; font-size: 0.92rem; }
+.crm-timeline small { color: rgba(255, 255, 255, 0.55); font-size: 0.78rem; }
+.crm-timeline p { margin: 6px 0 0; font-size: 0.88rem; color: rgba(255, 255, 255, 0.78); white-space: pre-wrap; }

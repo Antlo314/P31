@@ -1,0 +1,10 @@
+/* Inline Calendly calendar */
+.cal-embed { position: relative; min-height: var(--cal-h, 720px); border-radius: var(--r-lg, 26px); overflow: hidden; background: #fff; border: 1px solid var(--line); }
+.cal-embed__frame { min-height: var(--cal-h, 720px); }
+.cal-embed__frame iframe { width: 100% !important; min-height: var(--cal-h, 720px); border: 0; }
+.cal-embed__wait { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; color: var(--ink-3); text-align: center; padding: 24px; pointer-events: none; }
+.cal-embed__wait a { pointer-events: auto; color: var(--plum); font-weight: 800; }
+.cal-embed__wait p { margin: 0; }
+@media (max-width: 640px) { .cal-embed, .cal-embed__frame, .cal-embed__frame iframe { min-height: 1000px; } }
+/* Calendly's popup sits above the site chrome */
+.calendly-overlay { z-index: 1000 !important; }

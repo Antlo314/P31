@@ -65,3 +65,10 @@
 .en-plan__price small { font-family: var(--font-body); font-size: 0.95rem; font-weight: 700; color: rgba(255, 255, 255, 0.72); }
 .en-plan__label { margin: 4px 0 0; font-size: 0.88rem; color: rgba(255, 255, 255, 0.75); }
 .k-dark .mt-mark, .lg .mt-mark { background: rgba(255, 255, 255, 0.94); border-radius: 50%; padding: 8px; box-shadow: 0 0 0 1px rgba(242, 206, 77, 0.45); }
+
+/* Intro-call booking: calendar or request form */
+.mt-book { display: grid; gap: 12px; min-width: 0; }
+.mt-book__tabs { display: inline-flex; justify-self: start; gap: 4px; padding: 4px; border-radius: 999px; background: #fff; border: 1px solid var(--line); }
+.mt-book__tabs button { border: 0; background: none; padding: 10px 18px; min-height: 42px; border-radius: 999px; font: inherit; font-weight: 800; font-size: 0.88rem; color: var(--ink-2); cursor: pointer; }
+.mt-book__tabs button[aria-selected="true"] { background: var(--night-bg); color: var(--gold-hi); }
+.mt-book__note { text-align: center; }

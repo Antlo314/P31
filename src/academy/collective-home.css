@@ -41,3 +41,17 @@
 .ch-melanie__verse { margin: 0; padding: 16px 20px; border-left: 2px solid var(--gold); background: var(--mist); border-radius: 0 16px 16px 0; }
 .ch-melanie__verse blockquote { margin: 0; font-family: var(--font-heading); font-style: italic; font-size: 1.08rem; line-height: 1.45; color: var(--ink); }
 .ch-melanie__verse figcaption { margin-top: 6px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-text); }
+
+/* Book a call */
+.ch-call {
+  display: grid; gap: 10px; align-content: start; justify-items: start;
+  padding: clamp(24px, 3vw, 32px); border-radius: var(--r-lg); background: #fff; border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+}
+.ch-call > * { margin: 0; }
+.ch-call--gold { border-color: rgba(217, 169, 58, 0.55); box-shadow: 0 24px 50px -30px rgba(217, 169, 58, 0.7); }
+.ch-call__icon { display: grid; place-items: center; width: 48px; height: 54px; border-radius: 999px 999px 14px 14px; background: var(--night-bg); color: var(--gold-hi); }
+.ch-call small { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-text); }
+.ch-call h3 { font-family: var(--font-heading); font-weight: 400; font-size: 1.45rem; color: var(--plum); line-height: 1.15; }
+.ch-call p { color: var(--ink-2); line-height: 1.6; flex: 1; }
+.ch-call .k-btn { margin-top: 6px; }

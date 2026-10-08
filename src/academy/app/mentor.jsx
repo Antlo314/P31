@@ -287,6 +287,31 @@ const PlanModal = ({ student, onClose, onSaved }) => {
   );
 };
 
+// Zoom: the zoom-meetings function creates/updates/deletes the real meeting.
+const zoomCall = async (action, sessionId) => {
+  const { data, error } = await supabase.functions.invoke('zoom-meetings', { body: { action, session_id: sessionId } });
+  if (error) {
+    let msg = error.message;
+    try { msg = (await error.context?.json())?.error || msg; } catch { /* keep message */ }
+    return { error: msg };
+  }
+  return data;
+};
+
+/** "Start as host" — fetches a fresh host link (Zoom's expire) and opens it. */
+export const HostButton = ({ session, className = 'k-btn k-btn--sm k-btn--plum' }) => {
+  const [busy, setBusy] = useState(false);
+  if (session.provider !== 'zoom') return null;
+  const start = async () => {
+    const tab = window.open('', '_blank');
+    setBusy(true);
+    const res = await zoomCall('host', session.id);
+    setBusy(false);
+    if (res?.start_url) { if (tab) tab.location = res.start_url; else window.location.href = res.start_url; } else { tab?.close(); window.alert(res?.error || 'Couldn’t get the host link.'); }
+  };
+  return <button type="button" className={className} onClick={start} disabled={busy}><Video size={15} /> {busy ? 'Opening…' : 'Start as host'}</button>;
+};
+
 export const SessionModal = ({ session, studentId, onClose, onSaved }) => {
   const { program } = useAcademy();
   const [form, setForm] = useState({
@@ -294,16 +319,39 @@ export const SessionModal = ({ session, studentId, onClose, onSaved }) => {
     starts_at: toLocalInput(session?.starts_at), duration_minutes: session?.duration_minutes || 60,
     join_url: session?.join_url || '', recording_url: session?.recording_url || '', notes: session?.notes || '',
   });
+  const [zoom, setZoom] = useState(!session);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const isZoom = session?.provider === 'zoom';
   const save = async (e) => {
     e.preventDefault();
+    setBusy(true); setError('');
     const row = { ...form, starts_at: fromLocalInput(form.starts_at), duration_minutes: Number(form.duration_minutes), program_id: program.id,
       student_id: session ? session.student_id : studentId || null, join_url: form.join_url || null, recording_url: form.recording_url || null };
-    const { error: err } = await write(session ? supabase.from('academy_sessions').update(row).eq('id', session.id) : supabase.from('academy_sessions').insert(row));
-    if (err) return setError(err);
+    if (isZoom) delete row.join_url; // Zoom owns the link
+    const { data, error: err } = await write(session
+      ? supabase.from('academy_sessions').update(row).eq('id', session.id).select('id').single()
+      : supabase.from('academy_sessions').insert(row).select('id').single());
+    if (err) { setBusy(false); return setError(err); }
+    let warn = '';
+    if (!session && zoom && !form.join_url) {
+      const res = await zoomCall('create', data.id);
+      if (res?.error) warn = `Session saved, but the Zoom meeting wasn’t created: ${res.error}`;
+    } else if (isZoom) {
+      const res = await zoomCall('update', session.id);
+      if (res?.error) warn = `Saved here, but Zoom wasn’t updated: ${res.error}`;
+    }
+    setBusy(false);
+    onSaved();
+    if (warn) return setError(warn);
+    onClose();
+  };
+  const remove = async () => {
+    if (!window.confirm(isZoom ? 'Delete this session and its Zoom meeting?' : 'Delete this session?')) return;
+    if (isZoom) await zoomCall('delete', session.id);
+    await write(supabase.from('academy_sessions').delete().eq('id', session.id));
     onSaved(); onClose();
   };
-  const remove = async () => { if (window.confirm('Delete this session?')) { await write(supabase.from('academy_sessions').delete().eq('id', session.id)); onSaved(); onClose(); } };
   return (
     <Modal title={session ? 'Edit session' : studentId ? 'Schedule a 1:1 session' : 'Schedule a group session'} onClose={onClose}>
       <form className="ds-form" onSubmit={save}>
@@ -312,13 +360,23 @@ export const SessionModal = ({ session, studentId, onClose, onSaved }) => {
           <label className="k-field"><span>Starts</span><input required type="datetime-local" value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} /></label>
           <label className="k-field"><span>Length (minutes)</span><input type="number" min="5" max="600" value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: e.target.value })} /></label>
         </div>
-        <label className="k-field"><span>Join link (Zoom, Google Meet…)</span><input type="url" value={form.join_url} onChange={(e) => setForm({ ...form, join_url: e.target.value })} placeholder="https://" /></label>
+        {isZoom ? (
+          <div className="ds-row"><Video size={18} /><div><strong>Zoom meeting</strong><small>{session.join_url}</small></div><HostButton session={session} /></div>
+        ) : !session ? (
+          <label className="ds-row" style={{ cursor: 'pointer' }}>
+            <input type="checkbox" className="ds-check" checked={zoom} onChange={(e) => setZoom(e.target.checked)} />
+            <div><strong>Create a Zoom meeting automatically</strong><small>Students get a Join button; joining marks their attendance and logs it in the CRM.</small></div>
+          </label>
+        ) : null}
+        {!isZoom && (!zoom || session) && (
+          <label className="k-field"><span>Join link (Google Meet, Zoom or other)</span><input type="url" value={form.join_url} onChange={(e) => setForm({ ...form, join_url: e.target.value })} placeholder="https://" /></label>
+        )}
         <label className="k-field"><span>Description (optional)</span><textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></label>
         {session && <label className="k-field"><span>Session notes (visible to the student)</span><textarea rows={4} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></label>}
-        {session && <label className="k-field"><span>Recording link (optional)</span><input type="url" value={form.recording_url} onChange={(e) => setForm({ ...form, recording_url: e.target.value })} /></label>}
+        {session && <label className="k-field"><span>Recording link {isZoom ? '(fills in by itself when Zoom finishes a cloud recording)' : '(optional)'}</span><input type="url" value={form.recording_url} onChange={(e) => setForm({ ...form, recording_url: e.target.value })} /></label>}
         {error && <p className="k-error">{error}</p>}
         <div className="k-actions">
-          <button className="k-btn k-btn--gold">{session ? 'Save' : 'Schedule'}</button>
+          <button className="k-btn k-btn--gold" disabled={busy}>{busy ? 'Saving…' : session ? 'Save' : 'Schedule'}</button>
           {session && <button type="button" className="k-btn k-btn--ghost" onClick={remove}><Trash2 size={15} /> Delete</button>}
         </div>
       </form>
@@ -607,9 +665,11 @@ export const MentorSessions = () => {
   const row = (s) => (
     <li key={s.id} className="cl-session-row">
       <button className="ds-row" onClick={() => setModal({ session: s })}>
-        <CalendarDays size={18} /><div><strong>{s.title}</strong><small>{fmtDateTime(s.starts_at)} · {s.duration_minutes} min · {s.student_id ? `1:1 with ${who(s.student_id)}` : 'Group'}{s.join_url ? '' : ' · no join link yet'}</small></div><Pencil size={15} />
+        <CalendarDays size={18} /><div><strong>{s.title}</strong><small>{fmtDateTime(s.starts_at)} · {s.duration_minutes} min · {s.student_id ? `1:1 with ${who(s.student_id)}` : 'Group'}{s.provider === 'zoom' ? ' · Zoom' : s.join_url ? '' : ' · no join link yet'}</small></div><Pencil size={15} />
       </button>
-      {new Date(s.starts_at).getTime() < now && <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => setModal({ attendance: s })}><Users size={15} /> Attendance</button>}
+      {new Date(s.starts_at).getTime() < now
+        ? <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => setModal({ attendance: s })}><Users size={15} /> Attendance</button>
+        : <HostButton session={s} className="k-btn k-btn--sm k-btn--ghost" />}
     </li>
   );
   return (

@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, GraduationCap, Clapperboard, ShieldCheck, ArrowUpRight, Sparkles, Instagram } from 'lucide-react';
+import { ArrowRight, GraduationCap, Clapperboard, ShieldCheck, ArrowUpRight, Sparkles, Instagram, CalendarDays, Handshake, Video, Lock } from 'lucide-react';
 import { PROGRAMS } from './content';
 import { marketHome } from '../lib/site';
+import { CALENDLY, openCalendly } from '../lib/calendly';
 import mark from '../assets/academy/collective-mark.png';
 import melanie from '../assets/web/melanie23_rm.webp';
 import './mentorship.css';
@@ -27,8 +28,8 @@ const CollectiveHome = () => (
           Mentorship for faith-driven women — and the home of the P31 team. Classrooms, the Content Studio and Systems, all in one place.
         </p>
         <div className="k-actions ch-hero__actions" data-intro="0.55">
-          <Link to="/mentorship" className="k-btn k-btn--gold k-btn--lg">Explore mentorship <ArrowRight size={18} /></Link>
-          <Link to="/portal" className="k-btn k-btn--light k-btn--lg">Sign in</Link>
+          <button type="button" className="k-btn k-btn--gold k-btn--lg" onClick={() => openCalendly('intro', { source: 'home-hero' })}><CalendarDays size={18} /> Book an intro call</button>
+          <Link to="/mentorship" className="k-btn k-btn--light k-btn--lg">Explore mentorship <ArrowRight size={18} /></Link>
         </div>
       </div>
     </header>
@@ -61,7 +62,8 @@ const CollectiveHome = () => (
             <figcaption>Proverbs 31:31 · the verse P31 is built on</figcaption>
           </figure>
           <div className="k-actions" data-reveal>
-            <Link to="/mentorship/business" className="k-btn k-btn--plum">Mentorship with Melanie <ArrowRight size={18} /></Link>
+            <button type="button" className="k-btn k-btn--plum" onClick={() => openCalendly('connect', { source: 'meet-melanie' })}><Handshake size={18} /> Connect with Melanie JC</button>
+            <Link to="/mentorship/business" className="k-btn k-btn--ghost">Mentorship with Melanie <ArrowRight size={18} /></Link>
             <a href="https://www.instagram.com/proverbs31market" target="_blank" rel="noreferrer" className="k-btn k-btn--ghost"><Instagram size={17} /> Follow along</a>
           </div>
         </div>
@@ -84,6 +86,37 @@ const CollectiveHome = () => (
             <span className="k-link mt-program__go">Explore the mentorship <ArrowRight size={16} /></span>
           </Link>
         ))}
+      </div>
+    </section>
+
+    <section className="k-section k-section--mist" id="book">
+      <div className="k-head k-center">
+        <p className="k-eyebrow k-eyebrow--center" data-reveal="fade">Ways to connect</p>
+        <h2 className="k-h2" data-split>Book a <em>call</em></h2>
+        <p className="k-lede" data-reveal>Pick a time that works for you — you’ll get a calendar invite right away.</p>
+      </div>
+      <div className="k-grid k-grid--3 ch-calls" data-reveal-group>
+        <article className="ch-call ch-call--gold">
+          <span className="ch-call__icon"><CalendarDays size={22} /></span>
+          <small>{CALENDLY.intro.length} · open to everyone</small>
+          <h3>Private Mentorship Intro Call</h3>
+          <p>Talk through your goals and your season, and see whether the business or faith mentorship is the right fit.</p>
+          <button type="button" className="k-btn k-btn--gold" onClick={() => openCalendly('intro', { source: 'book-section' })}>Book an intro call</button>
+        </article>
+        <article className="ch-call">
+          <span className="ch-call__icon"><Handshake size={22} /></span>
+          <small>{CALENDLY.connect.length} · open to everyone</small>
+          <h3>Connect or Collab with Melanie JC</h3>
+          <p>Partnerships, collaborations, speaking and community — a conversation with Melanie directly.</p>
+          <button type="button" className="k-btn k-btn--plum" onClick={() => openCalendly('connect', { source: 'book-section' })}>Connect with Melanie JC</button>
+        </article>
+        <article className="ch-call ch-call--members">
+          <span className="ch-call__icon"><Video size={22} /></span>
+          <small>{CALENDLY.session.length} · active mentees</small>
+          <h3>Private Mentorship Session</h3>
+          <p>Already enrolled? Schedule your one-on-one session from your classroom, where your details are filled in for you.</p>
+          <Link to="/portal" className="k-btn k-btn--ghost"><Lock size={16} /> Members: sign in to schedule</Link>
+        </article>
       </div>
     </section>
 

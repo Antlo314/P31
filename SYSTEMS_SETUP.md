@@ -212,3 +212,19 @@ curators to export 1080p for Pro Edit, or raise the limit on a paid plan.
 - Worth a look next: [Mediabunny](https://github.com/Vanilagy/mediabunny) (MPL-2.0) for faster-than-real-time
   rendering on newer phones; [Postiz](https://github.com/gitroomhq/postiz-app) (self-hosted) for
   auto-publishing scheduled posts.
+
+## 8. Zoom sessions, Calendly and the CRM
+
+**Database:** run `storefront_v21_classroom.sql`, then `storefront_v22_crm_and_zoom.sql`.
+
+**Zoom (classroom sessions)**
+1. marketplace.zoom.us → Develop → Build App → **Server-to-Server OAuth**. Add scopes `meeting:write:meeting:admin`, `meeting:update:meeting:admin`, `meeting:delete:meeting:admin`, `meeting:read:meeting:admin`, then Activate.
+2. `supabase secrets set ZOOM_ACCOUNT_ID=... ZOOM_CLIENT_ID=... ZOOM_CLIENT_SECRET=...` (optional `ZOOM_USER=host@email.com`, `ZOOM_AUTO_RECORD=cloud` on a paid Zoom plan).
+3. Same app → Features → **Event Subscriptions**: endpoint `https://xsnhxjttdizljaawpumz.supabase.co/functions/v1/zoom-webhook`, events *Participant/Host joined meeting*, *Participant/Host left meeting*, *All recordings have completed*. Copy the **Secret Token**: `supabase secrets set ZOOM_WEBHOOK_SECRET=...`.
+4. `supabase functions deploy zoom-meetings zoom-webhook`
+
+Mentors tick “Create a Zoom meeting automatically” when scheduling; students tap **Join** (that marks attendance and logs the CRM). Mentors start with **Start as host** (fresh host link each time). Any other link (Google Meet) still works by pasting it.
+
+**Calendly** (no setup): intro call on the mentorship pages and Collective home, Melanie’s connect/collab call on the Collective home and the marketplace Partner page, private sessions inside the student classroom. Bookings made on the site are logged to the CRM.
+
+**CRM:** Systems → CRM. One contact per email with a timeline fed automatically by sign-ups, partnership requests, market RSVPs, intro-call requests, Calendly bookings, invites, enrollments, session joins, attendance, Zoom joins and certificates. Edit stage, tags and notes; export CSV.

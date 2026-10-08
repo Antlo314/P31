@@ -11,8 +11,19 @@ import RichText from '../RichText';
 import Thread from './Thread';
 import { useAcademy, useNow, useRows, write } from './data';
 import { DueSoon } from './learn';
+import { openCalendly } from '../../lib/calendly';
 
 const isBusiness = (p) => p?.slug === 'business';
+// Join a session: log it (attendance + CRM), then open the meeting.
+const joinSession = async (s) => {
+  const tab = window.open('', '_blank');
+  const { data, error } = await supabase.rpc('academy_join_session', { p_session: s.id });
+  const url = data || s.join_url;
+  if (error) console.warn('join log:', error.message);
+  if (tab) tab.location = url; else window.location.href = url;
+};
+// Private 1-hour sessions (Calendly), with the member's details filled in.
+const bookSession = (user) => openCalendly('session', { name: user?.user_metadata?.full_name || '', email: user?.email || '', source: 'classroom' });
 const sessionEnd = (s) => new Date(new Date(s.starts_at).getTime() + (s.duration_minutes || 60) * 60000);
 
 const useSessions = (program, user) => useRows(
@@ -42,7 +53,7 @@ const SessionCard = ({ s, compact }) => {
       {s.notes && !compact && <div><p className="k-eyebrow" style={{ margin: '6px 0' }}>Session notes</p><RichText text={s.notes} /></div>}
       <div className="k-actions">
         {s.join_url && sessionEnd(s) > new Date() && (
-          <a href={s.join_url} target="_blank" rel="noopener noreferrer" className={`k-btn k-btn--sm ${live ? 'k-btn--gold' : 'k-btn--plum'}`}><Video size={16} /> {live ? 'Join now' : 'Join link'}</a>
+          <button type="button" onClick={() => joinSession(s)} className={`k-btn k-btn--sm ${live ? 'k-btn--gold' : 'k-btn--plum'}`}><Video size={16} /> {live ? 'Join now' : s.provider === 'zoom' ? 'Join on Zoom' : 'Join link'}</button>
         )}
         {sessionEnd(s) > new Date() && <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => downloadIcs(s)}><CalendarPlus size={16} /> Add to calendar</button>}
         {s.recording_url && <a href={s.recording_url} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--sm k-btn--ghost"><ExternalLink size={16} /> Recording</a>}
@@ -90,7 +101,8 @@ export const StudentHome = () => {
 
         <article className="ds-card">
           <div className="ds-card__head"><h2><CalendarDays size={18} /> Next session</h2><Link to="sessions" className="k-link">All</Link></div>
-          {next ? <SessionCard s={next} compact /> : <p className="ds-muted">No session scheduled yet — your mentor will add it here.</p>}
+          {next ? <SessionCard s={next} compact /> : <p className="ds-muted">No session scheduled yet — book one, or your mentor will add it here.</p>}
+          <button className="k-btn k-btn--ghost k-btn--sm" style={{ justifySelf: 'start' }} onClick={() => bookSession(user)}><CalendarPlus size={15} /> Book a private session</button>
         </article>
 
         <DueSoon />
@@ -263,7 +275,8 @@ export const StudentSessions = () => {
   const past = sessions.data.filter((s) => sessionEnd(s) <= new Date()).reverse();
   return (
     <>
-      <DashHead eyebrow={program.title} title="Your" accent="sessions" lead={isBusiness(program) ? 'Private 60-minute sessions, conducted virtually. Join links appear here.' : 'Gatherings and one-on-one time with your mentor.'} />
+      <DashHead eyebrow={program.title} title="Your" accent="sessions" lead={isBusiness(program) ? 'Private 60-minute sessions, conducted virtually. Join links appear here.' : 'Gatherings and one-on-one time with your mentor.'}
+        actions={<button className="k-btn k-btn--gold" onClick={() => bookSession(user)}><CalendarPlus size={16} /> Book a private session</button>} />
       {upcoming.length ? <div className="ds-grid ds-grid--2">{upcoming.map((s) => <SessionCard key={s.id} s={s} />)}</div>
         : <DashEmpty Icon={CalendarDays} title="No upcoming sessions">Your mentor will schedule your next session here. Need to reschedule? Send a message.</DashEmpty>}
       {past.length > 0 && <section className="ds-section"><h2>Past sessions</h2><div className="ds-grid ds-grid--2">{past.map((s) => <SessionCard key={s.id} s={s} />)}</div></section>}

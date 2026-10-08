@@ -54,3 +54,10 @@ verify_jwt = false
 # Stripe calls this directly; the Stripe signature is the check.
 [functions.academy-webhook]
 verify_jwt = false
+
+# Zoom: mentors call zoom-meetings (checked inside); Zoom calls zoom-webhook (signature checked).
+[functions.zoom-meetings]
+verify_jwt = false
+
+[functions.zoom-webhook]
+verify_jwt = false

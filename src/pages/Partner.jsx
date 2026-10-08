@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { HandCoins, Gift, TrendingUp, HandHeart, Heart, CheckCircle2, Mail, Phone, ArrowUpRight, ArrowDown, ArrowRight } from 'lucide-react';
+import { HandCoins, Gift, TrendingUp, HandHeart, Heart, CheckCircle2, Mail, Phone, ArrowUpRight, ArrowDown, ArrowRight, CalendarDays } from 'lucide-react';
+import { openCalendly } from '../lib/calendly';
 import { supabase } from '../lib/supabase';
 import PageHeader from '../components/PageHeader';
 import LazyVideo from '../components/LazyVideo';
@@ -128,6 +129,9 @@ const Partner = () => {
             <div className="k-contact" data-reveal-group>
               <a href="mailto:proverbs31markets@gmail.com"><Mail size={18} /> proverbs31markets@gmail.com</a>
               <a href="tel:14705622852"><Phone size={18} /> 1 (470) 562-2852</a>
+            </div>
+            <div className="k-actions" data-reveal>
+              <button type="button" className="k-btn k-btn--plum" onClick={() => openCalendly('connect', { source: 'partner-page' })}><CalendarDays size={18} /> Book a 30-min connect call</button>
             </div>
           </div>
 

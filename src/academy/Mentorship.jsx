@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ArrowRight, CalendarDays, Target, ClipboardCheck, TrendingUp, Users, Crown, BookOpen, Check, Mail } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import IntroCallForm from './IntroCallForm';
+import CalendlyEmbed from '../components/CalendlyEmbed';
 import { PROGRAMS, STEPS } from './content';
 import { CONTACT_EMAIL } from '../lib/academy';
 import mark from '../assets/academy/collective-mark.png';
@@ -27,12 +28,27 @@ const IntroCallSection = ({ program }) => (
           {STEPS.map(([t, b]) => <li key={t}><strong>{t}</strong><span>{b}</span></li>)}
         </ol>
       </div>
-      <div className="k-card" style={{ padding: 'clamp(22px, 4vw, 40px)' }} data-reveal>
-        <IntroCallForm program={program} />
-      </div>
+      <IntroCallBooking program={program} />
     </div>
   </section>
 );
+
+// Pick a time on the calendar, or leave details and we reach out.
+const IntroCallBooking = ({ program }) => {
+  const [mode, setMode] = useState('calendar');
+  return (
+    <div className="mt-book" data-reveal>
+      <div className="mt-book__tabs" role="tablist">
+        <button role="tab" aria-selected={mode === 'calendar'} onClick={() => setMode('calendar')}>Pick a time</button>
+        <button role="tab" aria-selected={mode === 'form'} onClick={() => setMode('form')}>Have us reach out</button>
+      </div>
+      {mode === 'calendar'
+        ? <CalendlyEmbed kind="intro" source={program ? `mentorship-${program}` : 'mentorship'} />
+        : <div className="k-card" style={{ padding: 'clamp(22px, 4vw, 40px)' }}><IntroCallForm program={program} /></div>}
+      <p className="k-fine mt-book__note">30 minutes · you’ll get a calendar invite right away. Pricing is shared personally after your call.</p>
+    </div>
+  );
+};
 
 // /mentorship — both programs, no prices.
 export const MentorshipLanding = () => (

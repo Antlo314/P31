@@ -96,7 +96,7 @@ export const PROGRAMS = {
 };
 
 export const STEPS = [
-  ['Book an intro call', 'Tell us a little about you and when you’re free. We’ll reach out to set a time.'],
+  ['Book an intro call', 'Pick a time on the calendar — or leave your details and we’ll reach out to you.'],
   ['Meet and pray it through', 'A real conversation about your goals, your season and whether the mentorship is the right fit.'],
   ['Receive your private invitation', 'If it’s a fit, you’ll get a personal enrollment link with your plan.'],
   ['Step into your classroom', 'Your dashboard opens right away — sessions, resources and your mentor, all in one place.'],

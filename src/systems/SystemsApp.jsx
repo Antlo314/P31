@@ -19,6 +19,7 @@ const Events = lazy(() => import('./pages/Events'));
 const Campaigns = lazy(() => import('./pages/Campaigns'));
 const Orders = lazy(() => import('./pages/Orders'));
 const Academy = lazy(() => import('./pages/Academy'));
+const Crm = lazy(() => import('./pages/Crm'));
 
 // Phones get the four most-used tabs in the bottom bar; "More" opens a
 // sheet with every section.
@@ -79,6 +80,7 @@ const SystemsApp = () => {
         <Suspense fallback={<div className="sys-loading">Loading…</div>}>
           <Routes>
             <Route index element={<Overview operator={operator} />} />
+            <Route path="crm" element={<Crm />} />
             <Route path="social" element={<Social />} />
             <Route path="growth" element={<Growth />} />
             <Route path="events" element={<Events />} />
