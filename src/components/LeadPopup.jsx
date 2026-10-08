@@ -83,8 +83,11 @@ const LeadPopup = () => {
     if (reducedMotion() || !rootRef.current) return finish();
     const tl = gsap.timeline({ onComplete: finish });
     closing.current = tl;
-    tl.to(panelRef.current, { y: window.innerWidth < 760 ? '100%' : 24, opacity: window.innerWidth < 760 ? 1 : 0, duration: 0.4, ease: 'power3.in' })
-      .to(rootRef.current, { opacity: 0, duration: 0.25, ease: 'power1.out' }, '-=0.15');
+    const phone = window.innerWidth < 760;
+    tl.to(panelRef.current, phone
+      ? { y: '100%', duration: 0.42, ease: 'power3.in' }
+      : { y: 26, rotateX: -10, scale: 0.95, opacity: 0, duration: 0.45, ease: 'power3.in' })
+      .to(rootRef.current, { opacity: 0, duration: 0.28, ease: 'power1.out' }, '-=0.18');
   }, []);
 
   // Entrance, focus, Escape, and page lock.
@@ -99,14 +102,33 @@ const LeadPopup = () => {
 
     let ctx;
     if (!reducedMotion()) {
+      // The invitation: the card tilts up into place, a gold foil frame
+      // unrolls, the arch portrait opens with a sheen, the headline comes into
+      // focus, and a few glints keep twinkling while it's open.
       ctx = gsap.context(() => {
         const phone = window.innerWidth < 760;
         gsap.timeline({ defaults: { ease: 'expo.out' } })
-          .fromTo(rootRef.current, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: 'power1.out' })
-          .fromTo(panelRef.current, phone ? { y: '100%' } : { y: 40, scale: 0.96, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.9 }, 0.05)
-          .fromTo('.lp2__media', { clipPath: 'inset(100% 0% 0% 0% round 999px 999px 24px 24px)' }, { clipPath: 'inset(0% 0% 0% 0% round 999px 999px 24px 24px)', duration: 1.3 }, 0.2)
-          .fromTo('.lp2__media img', { scale: 1.25 }, { scale: 1, duration: 1.6 }, 0.2)
-          .fromTo('.lp2__in', { y: 22, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.06 }, 0.3);
+          .fromTo(rootRef.current, { opacity: 0 }, { opacity: 1, duration: 0.45, ease: 'power1.out' })
+          .fromTo(panelRef.current, phone
+            ? { y: '100%' }
+            : { y: 60, rotateX: 14, scale: 0.92, opacity: 0, transformOrigin: '50% 100%' },
+          { y: 0, rotateX: 0, scale: 1, opacity: 1, duration: phone ? 0.95 : 1.25 }, 0.05)
+          .fromTo('.lp2__foil', { clipPath: 'inset(0% 50% 0% 50%)', opacity: 0 }, { clipPath: 'inset(0% 0% 0% 0%)', opacity: 0.7, duration: 1.4, ease: 'power3.inOut' }, 0.3)
+          .fromTo('.lp2__media', { clipPath: 'inset(100% 0% 0% 0% round 999px 999px 24px 24px)' }, { clipPath: 'inset(0% 0% 0% 0% round 999px 999px 24px 24px)', duration: 1.4 }, 0.3)
+          .fromTo('.lp2__media img', { scale: 1.35, filter: 'saturate(0.4) brightness(0.8)' }, { scale: 1, filter: 'saturate(1) brightness(1)', duration: 1.8 }, 0.3)
+          .fromTo('.lp2__sheen', { xPercent: -160 }, { xPercent: 360, duration: 1.3, ease: 'power2.inOut' }, 1.0)
+          .fromTo('.lp2__main > .k-eyebrow', { opacity: 0, letterSpacing: '0.6em' }, { opacity: 1, letterSpacing: '0.22em', duration: 1.2, ease: 'power3.out' }, 0.45)
+          .fromTo('.lp2__title', { opacity: 0, y: 26, filter: 'blur(12px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.1, ease: 'power3.out' }, 0.55)
+          .fromTo('.lp2__title em', { backgroundPosition: '100% 0' }, { backgroundPosition: '0% 0', duration: 1.6, ease: 'power2.inOut' }, 0.8)
+          .fromTo('.lp2__in:not(.k-eyebrow):not(.lp2__title)', { y: 20, opacity: 0, filter: 'blur(6px)' }, { y: 0, opacity: 1, filter: 'blur(0px)', duration: 0.9, stagger: 0.07 }, 0.7)
+          .add(() => {
+            gsap.utils.toArray('.lp2__glint').forEach((g, i) => {
+              gsap.fromTo(g, { opacity: 0, scale: 0.2, rotate: 0 }, {
+                opacity: 1, scale: 1, rotate: 90, duration: 0.9, ease: 'sine.inOut',
+                yoyo: true, repeat: -1, repeatDelay: gsap.utils.random(0.8, 2.4), delay: i * 0.45,
+              });
+            });
+          }, 1.2);
       }, rootRef);
     }
     return () => {
@@ -156,12 +178,14 @@ const LeadPopup = () => {
 
   return (
     <div className="lp2" ref={rootRef} onClick={(e) => e.target === e.currentTarget && close()} role="dialog" aria-modal="true" aria-labelledby="lp2-title">
-      <div className="lp2__panel" ref={panelRef}>
+      <div className="lp2__panel k-dark" ref={panelRef}>
+        <span className="lp2__foil" aria-hidden="true" />
         <div className="lp2__grip" aria-hidden="true" />
         <button className="k-close lp2__close" onClick={close} aria-label="Close"><X size={18} /></button>
 
-        <aside className="lp2__side k-dark">
-          <div className="lp2__media"><img src={gatherImg} alt="" /></div>
+        <aside className="lp2__side">
+          <div className="lp2__media"><img src={gatherImg} alt="" /><span className="lp2__sheen" aria-hidden="true" /></div>
+          {[0, 1, 2, 3].map((i) => <i key={i} className="lp2__glint" aria-hidden="true" />)}
           <figure className="lp2__verse lp2__in">
             <blockquote>“Give her of the fruit of her hands.”</blockquote>
             <figcaption>Proverbs 31:31</figcaption>
@@ -181,7 +205,7 @@ const LeadPopup = () => {
               <p className="k-eyebrow k-eyebrow--center lp2__done-in">The Inner Circle</p>
               <h2 id="lp2-title" className="k-h2 lp2__done-in">Welcome{firstName ? `, ${firstName}` : ''}.</h2>
               <p className="k-body lp2__done-in">You’re in the collective. Market dates, invitations and curator stories will find their way to you.</p>
-              <button className="k-btn k-btn--plum lp2__done-in" onClick={close}>Continue exploring <ArrowRight size={18} /></button>
+              <button className="k-btn k-btn--gold lp2__done-in" onClick={close}>Continue exploring <ArrowRight size={18} /></button>
             </div>
           ) : (
             <>

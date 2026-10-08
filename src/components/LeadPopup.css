@@ -1,49 +1,105 @@
-/* "Join the collective" — split brand dialog on desktop, bottom sheet on phones. */
+/* "Join the collective" — an evening invitation: deep plum and wine with
+   champagne-gold foil. Split card on desktop, bottom sheet on phones. */
 .lp2 {
+  --lp-champagne: #F4E4C1;
+  --lp-foil: linear-gradient(120deg, #b98a2c, #f6dc8c 30%, #fff3cf 48%, #e0b54b 66%, #a87a22);
   position: fixed; inset: 0; z-index: 500;
   display: flex; align-items: flex-end; justify-content: center;
-  background: rgba(20, 10, 34, 0.62);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  background: rgba(14, 6, 24, 0.7);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  perspective: 1400px;
 }
 .lp2__panel {
-  position: relative; width: 100%; max-height: 94dvh; overflow: hidden auto; overscroll-behavior: contain;
-  display: grid; background: var(--ivory);
+  position: relative; isolation: isolate; width: 100%; max-height: 94dvh; overflow: hidden auto; overscroll-behavior: contain;
+  display: grid; color: #fff;
+  background:
+    radial-gradient(120% 80% at 100% 0%, rgba(122, 52, 168, 0.55) 0%, transparent 55%),
+    radial-gradient(90% 70% at 0% 100%, rgba(120, 28, 72, 0.5) 0%, transparent 60%),
+    linear-gradient(160deg, #241035 0%, #160a24 60%, #1b0b22 100%);
   border-radius: 30px 30px 0 0;
-  box-shadow: 0 -30px 90px -30px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 -30px 90px -30px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(244, 228, 193, 0.18);
+  transform-style: preserve-3d;
 }
-.lp2__close { top: 12px; right: 12px; background: rgba(255, 255, 255, 0.92); }
+.lp2__panel::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--grain); mix-blend-mode: overlay; pointer-events: none; }
 
-/* Dark brand side — a short arch banner on phones */
-.lp2__side {
-  position: relative; isolation: isolate; overflow: hidden;
-  display: grid; grid-template-columns: 96px 1fr; align-items: end; gap: 16px;
-  padding: 22px 64px 20px 22px;
-  background: var(--night-bg);
+/* Gold foil frame, drawn in by the entrance */
+.lp2__foil {
+  position: absolute; inset: 10px; z-index: 3; pointer-events: none;
+  border-radius: 24px 24px 0 0;
+  border: 1px solid transparent;
+  background: var(--lp-foil) border-box;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0.7;
 }
-.lp2__side::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--grain); mix-blend-mode: overlay; }
-.lp2__media { position: relative; aspect-ratio: 4 / 5; border-radius: 999px 999px 18px 18px; overflow: hidden; background: var(--night-3); box-shadow: 0 0 0 1px rgba(242, 206, 77, 0.4); }
+.lp2__close {
+  top: 16px; right: 16px; z-index: 4;
+  background: rgba(255, 255, 255, 0.08) !important; color: var(--lp-champagne) !important;
+  border: 1px solid rgba(244, 228, 193, 0.25) !important;
+}
+.lp2__close:hover { background: rgba(244, 228, 193, 0.16) !important; }
+
+/* Brand side — the arch portrait and verse (a short banner on phones) */
+.lp2__side {
+  position: relative; overflow: hidden;
+  display: grid; grid-template-columns: 96px 1fr; align-items: end; gap: 16px;
+  padding: 26px 64px 18px 26px;
+}
+.lp2__media {
+  position: relative; aspect-ratio: 4 / 5; border-radius: 999px 999px 18px 18px; overflow: hidden;
+  background: #2a1240;
+  box-shadow: 0 0 0 1px rgba(244, 228, 193, 0.55), 0 0 0 6px rgba(244, 228, 193, 0.06), 0 24px 60px -24px rgba(0, 0, 0, 0.8);
+}
 .lp2__media img { width: 100%; height: 100%; object-fit: cover; }
+.lp2__media::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, transparent 55%, rgba(22, 10, 36, 0.55));
+}
+.lp2__sheen {
+  position: absolute; inset: -10% auto -10% 0; z-index: 1; width: 45%; pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255, 243, 207, 0.55), transparent);
+  transform: translateX(-160%) skewX(-12deg); mix-blend-mode: soft-light;
+}
+.lp2__glint {
+  position: absolute; z-index: 2; width: 14px; height: 14px; pointer-events: none; opacity: 0;
+  background: var(--lp-champagne);
+  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+  filter: drop-shadow(0 0 6px rgba(246, 220, 140, 0.9));
+}
+.lp2__glint:nth-of-type(1) { top: 12%; left: 14%; }
+.lp2__glint:nth-of-type(2) { top: 22%; right: 12%; width: 10px; height: 10px; }
+.lp2__glint:nth-of-type(3) { bottom: 30%; left: 8%; width: 8px; height: 8px; }
+.lp2__glint:nth-of-type(4) { bottom: 18%; right: 18%; width: 12px; height: 12px; }
 .lp2__verse { margin: 0; display: grid; gap: 8px; }
-.lp2__verse blockquote { margin: 0; font-family: var(--font-heading); font-style: italic; font-size: 1.15rem; line-height: 1.25; color: #fff; }
+.lp2__verse blockquote { margin: 0; font-family: var(--font-heading); font-style: italic; font-size: 1.15rem; line-height: 1.25; color: var(--lp-champagne); }
 .lp2__verse figcaption { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-hi); }
 
-.lp2__main { position: relative; padding: 22px 22px calc(26px + env(safe-area-inset-bottom)); display: grid; gap: 14px; align-content: start; }
-.lp2__main > .k-eyebrow { margin: 0; }
+/* Form side */
+.lp2__main { position: relative; padding: 18px 26px calc(28px + env(safe-area-inset-bottom)); display: grid; gap: 14px; align-content: start; }
+.lp2__main > .k-eyebrow { margin: 0; color: var(--gold-hi); }
 .lp2__grip { display: none; }
 .lp2__title { font-size: clamp(2.1rem, 1.6rem + 2vw, 3.2rem); }
+.lp2__title em {
+  background: var(--lp-foil); background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  padding-right: 0.06em;
+}
+.lp2 .k-body { color: rgba(255, 255, 255, 0.74); }
 .lp2__perks { list-style: none; margin: 2px 0 4px; padding: 0; display: grid; gap: 10px; }
-.lp2__perks li { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 0.92rem; color: var(--ink); }
+.lp2__perks li { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 0.92rem; color: rgba(255, 255, 255, 0.88); }
 .lp2__perks span {
   flex: none; width: 32px; height: 32px; border-radius: 999px 999px 10px 10px; display: grid; place-items: center;
-  background: var(--mist); color: var(--plum); border: 1px solid var(--line);
+  background: rgba(244, 228, 193, 0.08); color: var(--gold-hi); border: 1px solid rgba(244, 228, 193, 0.28);
 }
 .lp2__form { gap: 12px; }
+.lp2 .k-field :is(input, select, textarea) { background: rgba(255, 255, 255, 0.06); border-color: rgba(244, 228, 193, 0.22); color: #fff; }
+.lp2 .k-field :is(input, select, textarea):focus-visible { border-color: var(--gold-hi); box-shadow: 0 0 0 4px rgba(242, 206, 77, 0.16); }
 .lp2__more {
   justify-self: start; display: inline-flex; align-items: center; gap: 6px; padding: 4px 0;
-  border: 0; background: none; cursor: pointer; font: inherit; font-size: 0.85rem; font-weight: 700; color: var(--plum);
+  border: 0; background: none; cursor: pointer; font: inherit; font-size: 0.85rem; font-weight: 700; color: var(--lp-champagne);
 }
-.lp2__fine { display: flex; align-items: center; justify-content: center; gap: 6px; text-align: center; }
-.lp2__fine svg { color: #17A673; }
+.lp2__fine { display: flex; align-items: center; justify-content: center; gap: 6px; text-align: center; color: rgba(255, 255, 255, 0.55) !important; }
+.lp2__fine svg { color: var(--gold-hi); }
 
 /* Success */
 .lp2__done { display: grid; justify-items: center; text-align: center; gap: 14px; padding: 12px 0 6px; }
@@ -51,36 +107,41 @@
 .lp2__done .k-body { max-width: 36ch; }
 .lp2__burst { position: relative; width: 76px; height: 76px; margin-bottom: 6px; }
 .lp2__seal { display: block; }
-.lp2__seal circle { fill: var(--gold-hi); stroke: var(--gold); stroke-width: 2; }
+.lp2__seal circle { fill: var(--gold-hi); stroke: var(--lp-champagne); stroke-width: 2; }
 .lp2__seal path { fill: none; stroke: var(--gold-ink); stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
 .lp2__spark {
   position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 2px;
   background: var(--gold); opacity: 0; transform: rotate(45deg);
 }
-.lp2__spark:nth-child(3n) { background: #8B3FD0; border-radius: 50%; }
-.lp2__spark:nth-child(4n) { background: var(--gold-hi); width: 6px; height: 6px; }
+.lp2__spark:nth-child(3n) { background: var(--lp-champagne); border-radius: 50%; }
+.lp2__spark:nth-child(4n) { background: #c86fa8; width: 6px; height: 6px; }
 
-/* Desktop: a composed two-panel card */
+/* Desktop: a composed two-panel invitation */
 @media (min-width: 760px) {
   .lp2 { align-items: center; padding: 24px; }
   .lp2__panel { max-width: 920px; grid-template-columns: 0.92fr 1.08fr; border-radius: 34px; overflow: hidden; max-height: min(92dvh, 720px); }
-  .lp2__side { grid-template-columns: 1fr; align-content: space-between; gap: 26px; padding: 34px; }
-  .lp2__media { width: min(100%, 300px); margin-inline: auto; border-radius: 999px 999px 26px 26px; }
+  .lp2__foil { inset: 12px; border-radius: 24px; }
+  .lp2__side { grid-template-columns: 1fr; align-content: space-between; gap: 26px; padding: 40px 34px 34px; }
+  .lp2__side::after {
+    content: ''; position: absolute; top: 40px; bottom: 40px; right: 0; width: 1px;
+    background: linear-gradient(transparent, rgba(244, 228, 193, 0.35), transparent);
+  }
+  .lp2__media { width: min(100%, 290px); margin-inline: auto; border-radius: 999px 999px 26px 26px; }
+  .lp2__verse { text-align: center; justify-items: center; }
   .lp2__verse blockquote { font-size: 1.5rem; }
-  .lp2__main { padding: 46px 44px 38px; gap: 16px; overflow-y: auto; }
-  .lp2__close { top: 18px; right: 18px; background: var(--mist); }
+  .lp2__main { padding: 50px 46px 40px; gap: 16px; overflow-y: auto; }
+  .lp2__close { top: 22px; right: 22px; }
 }
 @media (max-width: 759px) {
-  .lp2__grip { display: block; position: absolute; z-index: 2; top: 8px; left: 50%; width: 42px; height: 5px; margin-left: -21px; border-radius: 999px; background: rgba(255, 255, 255, 0.5); }
-  .lp2__side { border-radius: 30px 30px 0 0; }
+  .lp2__grip { display: block; position: absolute; z-index: 4; top: 8px; left: 50%; width: 42px; height: 5px; margin-left: -21px; border-radius: 999px; background: rgba(244, 228, 193, 0.45); }
   .lp2__main .k-row { grid-template-columns: 1fr; }
 }
 
 /* Phones: keep the whole form above the fold. */
 @media (max-width: 759px) {
-  .lp2__side { grid-template-columns: 72px 1fr; padding: 18px 64px 16px 18px; gap: 14px; }
+  .lp2__side { grid-template-columns: 72px 1fr; padding: 24px 64px 10px 22px; gap: 14px; }
   .lp2__verse blockquote { font-size: 1.02rem; }
-  .lp2__main { gap: 12px; padding-top: 18px; }
+  .lp2__main { gap: 12px; padding-top: 12px; }
   .lp2__title { font-size: 2rem; }
 }
 @media (max-width: 759px) and (max-height: 920px) {
