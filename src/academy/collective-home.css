@@ -1,0 +1,29 @@
+/* thep31collective.org home */
+.ch-hero { padding-bottom: clamp(64px, 9vw, 128px); }
+.ch-hero__arch { right: 50%; transform: translateX(50%); width: clamp(320px, 52vw, 760px); }
+.ch-hero__inner { position: relative; max-width: 880px; margin-inline: auto; display: grid; gap: 22px; justify-items: center; }
+.ch-hero__inner > * { margin: 0; }
+.ch-hero__mark { width: 116px; height: 116px; }
+.ch-hero__title { font-size: clamp(2.7rem, 1.4rem + 5.6vw, 6rem); }
+.ch-hero__actions { justify-content: center; }
+
+.ch-doors { margin-top: clamp(8px, 2vw, 20px); }
+.ch-door {
+  display: grid; gap: 10px; align-content: start; justify-items: start;
+  padding: clamp(24px, 3vw, 34px); border-radius: var(--r-arch);
+  padding-top: clamp(40px, 5vw, 56px);
+  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(242, 206, 77, 0.18);
+  color: #fff; text-decoration: none;
+  transition: transform 0.45s var(--ease-fluid), border-color 0.3s, background 0.3s;
+}
+.ch-door > * { margin: 0; }
+.ch-door small { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-hi); }
+.ch-door h3 { font-family: var(--font-heading); font-weight: 400; font-size: 1.6rem; color: #fff; }
+.ch-door p { color: rgba(255, 255, 255, 0.7); line-height: 1.6; }
+.ch-door .k-link { margin-top: 6px; display: inline-flex; align-items: center; gap: 6px; }
+@media (hover: hover) {
+  .ch-door:hover { transform: translateY(-6px); border-color: rgba(242, 206, 77, 0.5); background: rgba(255, 255, 255, 0.07); }
+}
+
+.ch-market { margin: clamp(28px, 4vw, 48px) 0 0; color: var(--ink-3); }
+.ch-market a { display: inline-flex; align-items: center; gap: 4px; }

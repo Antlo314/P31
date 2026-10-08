@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { fetchUpcomingEvents, formatEventDate, parseEventDate, showDate } from '../lib/events';
 import { gsap, reducedMotion } from '../lib/motion';
 import { openJoin } from '../lib/join';
+import { hrefFor } from '../lib/site';
 import LazyVideo from '../components/LazyVideo';
 import './Home.css';
 
@@ -407,7 +408,7 @@ const Home = () => {
             <h3>Systems — the P31 operations console</h3>
             <p>Social command, growth search, campaigns, orders and the creative studios. Team sign-in only.</p>
           </div>
-          <Link to="/systems" className="k-btn k-btn--outline k-btn--sm">Sign in <ArrowRight size={16} /></Link>
+          <a href={hrefFor('/systems')} className="k-btn k-btn--outline k-btn--sm">Sign in <ArrowRight size={16} /></a>
         </div>
       </section>
     </div>

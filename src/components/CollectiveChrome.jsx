@@ -32,12 +32,13 @@ export const CollectiveNav = () => {
           </span>
         </Link>
         <nav className="nb__links" aria-label="Main">
-          <NavLink to="/mentorship/business" className="nb__link">Business</NavLink>
-          <NavLink to="/mentorship/faith" className="nb__link">Faith</NavLink>
+          <NavLink to="/mentorship" className="nb__link">Mentorship</NavLink>
+          <NavLink to="/studio" className="nb__link">Content Studio</NavLink>
+          <NavLink to="/systems" className="nb__link">Systems</NavLink>
           <a href={marketHome()} className="nb__link">Marketplace <ArrowUpRight size={13} /></a>
         </nav>
         <div className="nb__actions cl-nb__actions">
-          <Link to="/portal" className="nb__cta"><KeyRound size={16} /> <span>Member sign in</span></Link>
+          <Link to="/portal" className="nb__cta"><KeyRound size={16} /> <span>Sign in</span></Link>
         </div>
       </div>
     </header>
@@ -51,7 +52,7 @@ export const CollectiveFooter = () => (
         <div className="ft__brand">
           <Link to="/" className="ft__logo">
             <img src={mark} alt="" className="cl-ft__mark" />
-            <span><strong>The Proverbs 31 Collective</strong><small>Mentorship</small></span>
+            <span><strong>The Proverbs 31 Collective</strong><small>Mentorship &amp; team</small></span>
           </Link>
           <p>Private business and faith-based mentorship for faith-driven women — for the business you’re building and the woman you’re becoming.</p>
           <div className="ft__social">
@@ -63,7 +64,12 @@ export const CollectiveFooter = () => (
           <h4>Mentorship</h4>
           <Link to="/mentorship/business">Business mentorship</Link>
           <Link to="/mentorship/faith">Faith-based mentorship</Link>
-          <Link to="/portal">Member sign in</Link>
+        </nav>
+        <nav className="ft__col" aria-label="Sign in">
+          <h4>Sign in</h4>
+          <Link to="/portal">Mentorship classroom</Link>
+          <Link to="/studio">Content Studio</Link>
+          <Link to="/systems">Systems</Link>
         </nav>
         <div className="ft__col">
           <h4>Contact</h4>

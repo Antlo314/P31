@@ -29,6 +29,7 @@ const Shop = lazy(() => import('./pages/Shop'));
 const MentorshipLanding = lazy(() => import('./academy/Mentorship').then((m) => ({ default: m.MentorshipLanding })));
 const MentorshipProgram = lazy(() => import('./academy/Mentorship').then((m) => ({ default: m.MentorshipProgram })));
 const Portal = lazy(() => import('./academy/Portal'));
+const CollectiveHome = lazy(() => import('./academy/CollectiveHome'));
 const Enroll = lazy(() => import('./academy/Enroll'));
 
 // The team console is its own app: loaded only when someone opens it,
@@ -58,7 +59,11 @@ const SiteGate = ({ children }) => {
 
 // The Collective's own titles for the pages it shares with the marketplace.
 const COLLECTIVE_META = {
-  '/': { ...ROUTE_META['/mentorship'], path: '/' },
+  '/': {
+    title: `${COLLECTIVE_NAME} — Mentorship for Faith-Driven Women`,
+    description: 'Private business and faith-based mentorship for faith-driven women, and the home of the P31 team: classrooms, the Content Studio and Systems.',
+    origin: COLLECTIVE_URL,
+  },
   '/portal': { ...ROUTE_META['/portal'], title: `Member portal — ${COLLECTIVE_NAME}`, origin: COLLECTIVE_URL },
 };
 
@@ -102,7 +107,6 @@ function SiteRoutes() {
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/favorites" element={<Shop favoritesOnly />} />
-            <Route path="/portal" element={<Portal />} />
             {/* Vanity URL Catch-all: /popcorn or /id */}
             <Route path="/:id" element={<CuratorProfile />} />
           </Routes>
@@ -126,7 +130,7 @@ function CollectiveRoutes() {
       <main className={`site-main ${isFlushRoute(pathname) ? 'is-flush' : ''}`}>
         <Suspense fallback={<div aria-busy="true" style={{ minHeight: '70vh' }} />}>
           <Routes>
-            <Route path="/" element={<MentorshipLanding />} />
+            <Route path="/" element={<CollectiveHome />} />
             <Route path="/mentorship" element={<MentorshipLanding />} />
             <Route path="/mentorship/:program" element={<MentorshipProgram />} />
             <Route path="/portal" element={<Portal />} />

@@ -9,7 +9,40 @@
           "value": "www.p31market.com"
         }
       ],
-      "destination": "https://www.thep31collective.org/",
+      "destination": "https://www.thep31collective.org/mentorship",
+      "permanent": false
+    },
+    {
+      "source": "/portal",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.p31market.com"
+        }
+      ],
+      "destination": "https://www.thep31collective.org/portal",
+      "permanent": false
+    },
+    {
+      "source": "/studio",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.p31market.com"
+        }
+      ],
+      "destination": "https://www.thep31collective.org/studio",
+      "permanent": false
+    },
+    {
+      "source": "/systems",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.p31market.com"
+        }
+      ],
+      "destination": "https://www.thep31collective.org/systems",
       "permanent": false
     },
     {
@@ -43,6 +76,28 @@
         }
       ],
       "destination": "https://www.thep31collective.org/academy/:path*",
+      "permanent": false
+    },
+    {
+      "source": "/studio/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.p31market.com"
+        }
+      ],
+      "destination": "https://www.thep31collective.org/studio/:path*",
+      "permanent": false
+    },
+    {
+      "source": "/systems/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.p31market.com"
+        }
+      ],
+      "destination": "https://www.thep31collective.org/systems/:path*",
       "permanent": false
     }
   ],

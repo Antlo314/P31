@@ -86,7 +86,7 @@ const Portal = () => {
           <img src={mark} alt="" className="mt-mark" data-intro="0" />
           <p className="k-eyebrow" data-intro="0.05">Member portal</p>
           <h1 className="k-h1" data-split="intro">Welcome <em>home.</em></h1>
-          <p className="k-lede" data-intro="0.25">{isCollective ? 'Sign in to your mentorship classroom or mentor dashboard.' : 'Sign in to the Content Studio and your P31 dashboards.'}</p>
+          <p className="k-lede" data-intro="0.25">One sign-in for your mentorship classroom, the Content Studio and Systems.</p>
         </section>
 
         <div className="lg__card" data-intro="0.15">

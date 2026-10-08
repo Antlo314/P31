@@ -1,8 +1,9 @@
 import { SITE_URL, COLLECTIVE_URL } from './seo';
 
 // One app, two front doors, one Supabase behind both:
-//   www.p31market.com     — the marketplace, Content Studio and Systems
-//   thep31collective.org  — The Proverbs 31 Collective: mentorships, member portal, classrooms
+//   www.p31market.com         — the marketplace: shop, curators, market dates, curator sign-in
+//   www.thep31collective.org  — The Proverbs 31 Collective: mentorships, classrooms, and every
+//                               team sign-in (member portal, Content Studio, Systems)
 // On localhost and Vercel previews there's only one host, so ?site=collective
 // (or ?site=market) picks the side; it sticks for the browser tab.
 const COLLECTIVE_HOST = /(^|\.)thep31collective\.org$/i;
@@ -22,10 +23,9 @@ function previewSite() {
 export const SITE = !host ? 'market' : production ? (COLLECTIVE_HOST.test(host) ? 'collective' : 'market') : previewSite();
 export const isCollective = SITE === 'collective';
 
-// Which side owns a path. "/" and /portal exist on both (the Studio team and
-// curators sign in on the market side; members on the Collective).
-const COLLECTIVE_PATH = /^\/(mentorship|enroll|academy)(\/|$)/;
-const SHARED_PATH = /^\/(portal|__lab)?\/?$/;
+// Which side owns a path. Each side has its own home page at "/".
+const COLLECTIVE_PATH = /^\/(mentorship|enroll|academy|portal|studio|systems)(\/|$)/;
+const SHARED_PATH = /^\/(__lab)?\/?$/;
 const ownerOf = (pathname) => {
   if (COLLECTIVE_PATH.test(pathname)) return 'collective';
   if (SHARED_PATH.test(pathname)) return null;
@@ -44,15 +44,14 @@ function siteUrl(site, path) {
 export function crossSiteTarget(pathname, search = '', hash = '') {
   const owner = ownerOf(pathname);
   if (!owner || owner === SITE) return null;
-  const path = owner === 'collective' && pathname.replace(/\/+$/, '') === '/mentorship' ? '/' : pathname;
-  return siteUrl(owner, `${path}${search}${hash}`);
+  return siteUrl(owner, `${pathname}${search}${hash}`);
 }
 
 /** href for an in-app path: unchanged on this side, a full link to the other side. */
 export function hrefFor(path) {
   const owner = ownerOf(path.split(/[?#]/)[0]);
   if (!owner || owner === SITE) return path;
-  return siteUrl(owner, owner === 'collective' && path === '/mentorship' ? '/' : path);
+  return siteUrl(owner, path);
 }
 
 /** The Collective's member portal, from either side. */

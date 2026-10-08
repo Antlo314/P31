@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook, Mail, Phone, HeartHandshake, ArrowUpRight, MapPin, ArrowRight, ArrowUp, Star } from 'lucide-react';
 import { openJoin } from '../lib/join';
-import { collectiveHome, collectivePortal } from '../lib/site';
+import { collectivePortal, hrefFor } from '../lib/site';
 import logoPath from '../assets/web/logo-160.webp';
 import './Footer.css';
 
@@ -47,7 +47,7 @@ const Footer = () => (
           <Link to="/shop">Shop the marketplace</Link>
           <Link to="/directory">Curators &amp; shops</Link>
           <Link to="/calendar">Market dates</Link>
-          <a href={collectiveHome()}>Mentorship</a>
+          <a href={hrefFor('/mentorship')}>Mentorship</a>
           <Link to="/about">Our story</Link>
         </nav>
         <nav className="ft__col" aria-label="Join">
@@ -56,7 +56,7 @@ const Footer = () => (
           <Link to="/partner">Partner with us</Link>
           <Link to="/services">Services</Link>
           <Link to="/login">Curator portal</Link>
-          <a href={collectivePortal()}>Member portal</a>
+          <a href={collectivePortal()}>The Collective · sign in</a>
         </nav>
         <div className="ft__col">
           <h4>Contact</h4>
@@ -73,7 +73,7 @@ const Footer = () => (
       <div className="ft__bottom">
         <span>© {new Date().getFullYear()} Proverbs 31 Marketplace. All rights reserved.</span>
         <span className="ft__bottom-links">
-          <Link to="/systems">Systems</Link>
+          <a href={hrefFor('/systems')}>Systems</a>
           <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Back to top <ArrowUp size={14} /></button>
         </span>
       </div>

@@ -182,7 +182,7 @@ const AddByEmail = ({ label, withProgram, withTitle, withName, disabled, onAdd }
   return (
     <form className="sys-card sys-form" onSubmit={(e) => { e.preventDefault(); onAdd(f); setF({ ...f, email: '', title: '', name: '' }); }}>
       <h2><UserPlus size={18} /> {label}</h2>
-      <p className="sys-muted">They need an account first — mentors create one at thep31collective.org/portal, Studio members at p31market.com/portal, and students from their enrollment link.</p>
+      <p className="sys-muted">They need an account first — mentors and Studio members create one at thep31collective.org/portal, and students from their enrollment link.</p>
       <div className="sys-row" style={{ flexWrap: 'wrap', gap: 10, alignItems: 'flex-end' }}>
         <label className="sys-field" style={{ flex: '1 1 220px' }}><span>Their account email</span><input type="email" required value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></label>
         {withProgram && <label className="sys-field"><span>Program</span><select value={f.program} onChange={(e) => setF({ ...f, program: e.target.value })}>{PROGRAMS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>}

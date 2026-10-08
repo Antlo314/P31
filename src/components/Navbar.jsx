@@ -7,7 +7,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { isFlushRoute } from '../lib/routes';
-import { collectiveHome, collectivePortal } from '../lib/site';
+import { collectivePortal, hrefFor } from '../lib/site';
 import './Navbar.css';
 
 import logoPath from '../assets/web/logo-160.webp';
@@ -26,8 +26,8 @@ const LINKS = [
   { to: '/directory', label: 'Curators & Shops', Icon: Store },
   { to: '/favorites', label: 'Favorites', Icon: Heart },
   { to: '/calendar', label: 'Market Dates', Icon: CalendarDays },
-  { to: '/mentorship', href: collectiveHome(), label: 'Mentorship', Icon: GraduationCap },
-  { to: '/portal', href: collectivePortal(), label: 'Member Portal', Icon: KeyRound },
+  { to: '/mentorship', href: hrefFor('/mentorship'), label: 'Mentorship', Icon: GraduationCap },
+  { to: '/portal', href: collectivePortal(), label: 'The Collective · Sign in', Icon: KeyRound },
   { to: '/partner', label: 'Partner With Us', Icon: Handshake },
   { to: '/services', label: 'Services', Icon: Sparkles },
   { to: '/about', label: 'Our Story', Icon: Info },
@@ -98,7 +98,7 @@ const Navbar = () => {
             {[['/shop', 'Shop'], ['/directory', 'Curators'], ['/calendar', 'Dates']].map(([to, label]) => (
               <NavLink key={to} to={to} className="nb__link">{label}</NavLink>
             ))}
-            <a href={collectiveHome()} className="nb__link">Mentorship</a>
+            <a href={hrefFor('/mentorship')} className="nb__link">Mentorship</a>
             <NavLink to="/partner" className="nb__link">Partner</NavLink>
           </nav>
 
@@ -116,7 +116,7 @@ const Navbar = () => {
                 {userMenu && (
                   <div className="nb__menu" role="menu">
                     <p className="nb__menu-name">{firstName || 'Your account'}</p>
-                    <Link to="/portal?choose" role="menuitem"><LayoutDashboard size={16} /> My dashboards</Link>
+                    <Link to="/dashboard" role="menuitem"><LayoutDashboard size={16} /> Curator studio</Link>
                     <button role="menuitem" onClick={signOut}><LogOut size={16} /> Sign out</button>
                   </div>
                 )}
@@ -202,11 +202,11 @@ const Navbar = () => {
               </a>
             </li>
             <li>
-              <Link to="/systems">
+              <a href={hrefFor('/systems')}>
                 <span className="sheet__icon sheet__icon--dark"><Lock size={16} /></span>
                 Systems <small>Team</small>
                 <ChevronRight size={18} className="sheet__chev" />
-              </Link>
+              </a>
             </li>
             {user && (
               <li>

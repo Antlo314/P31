@@ -127,7 +127,7 @@ UPDATE curator_data SET plan = 'premium' WHERE slug = 'their-shop';
 
 ## 7. Mentorship Academy & Content Studio
 
-The mentorships live on their own domain, **thep31collective.org**, served by the same app and the same Supabase (see `src/lib/site.js`). The Collective has the mentorship pages, the member portal, enrollment links and classrooms; **p31market.com** keeps the marketplace, the Content Studio and Systems, and forwards `/mentorship`, `/enroll` and `/academy` to the Collective. Members sign in at **thep31collective.org/portal**; the Studio team at **p31market.com/portal**. (A login is per domain: same email and password, signed in once on each.)
+The mentorships live on their own domain, **thep31collective.org**, served by the same app and the same Supabase (see `src/lib/site.js`). The Collective has its own home page, the mentorship pages, enrollment links, classrooms and every team sign-in (member portal, Content Studio, Systems); **p31market.com** is the marketplace (shop, curators, market dates, curator sign-in) and forwards `/mentorship`, `/enroll`, `/academy`, `/portal`, `/studio` and `/systems` to the Collective. Everyone but curators signs in at **www.thep31collective.org/portal**. (A login is per domain: same email and password, signed in once on each.)
 
 **Domain setup (once):**
 1. Vercel → the P31 project → Settings → Domains → add `thep31collective.org` and `www.thep31collective.org` (the bare domain redirects to www), then add the DNS records Vercel shows at your domain registrar.
@@ -148,7 +148,7 @@ Role-based dashboards:
 
 ### Turn it on — in this order
 1. **Database:** run `storefront_v20_academy_and_studio.sql` in the SQL Editor.
-2. **Mentors and Studio seats** (each person needs an account first — students get one from their enrollment link; mentors tap “Create an account” at thep31collective.org/portal, Studio members at p31market.com/portal):
+2. **Mentors and Studio seats** (each person needs an account first — students get one from their enrollment link; mentors and Studio members tap “Create an account” at thep31collective.org/portal):
    ```sql
    SELECT public.add_academy_mentor('melanie@example.com', 'business', 'Lead mentor');
    SELECT public.add_studio_member('teammate@example.com');   -- up to 3 seats
