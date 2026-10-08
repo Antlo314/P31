@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { isFlushRoute } from '../lib/routes';
+import { collectiveHome, collectivePortal } from '../lib/site';
 import './Navbar.css';
 
 import logoPath from '../assets/web/logo-160.webp';
@@ -25,8 +26,8 @@ const LINKS = [
   { to: '/directory', label: 'Curators & Shops', Icon: Store },
   { to: '/favorites', label: 'Favorites', Icon: Heart },
   { to: '/calendar', label: 'Market Dates', Icon: CalendarDays },
-  { to: '/mentorship', label: 'Mentorship', Icon: GraduationCap },
-  { to: '/portal', label: 'Member Portal', Icon: KeyRound },
+  { to: '/mentorship', href: collectiveHome(), label: 'Mentorship', Icon: GraduationCap },
+  { to: '/portal', href: collectivePortal(), label: 'Member Portal', Icon: KeyRound },
   { to: '/partner', label: 'Partner With Us', Icon: Handshake },
   { to: '/services', label: 'Services', Icon: Sparkles },
   { to: '/about', label: 'Our Story', Icon: Info },
@@ -94,9 +95,11 @@ const Navbar = () => {
           </Link>
 
           <nav className="nb__links" aria-label="Main">
-            {[['/shop', 'Shop'], ['/directory', 'Curators'], ['/calendar', 'Dates'], ['/mentorship', 'Mentorship'], ['/partner', 'Partner']].map(([to, label]) => (
+            {[['/shop', 'Shop'], ['/directory', 'Curators'], ['/calendar', 'Dates']].map(([to, label]) => (
               <NavLink key={to} to={to} className="nb__link">{label}</NavLink>
             ))}
+            <a href={collectiveHome()} className="nb__link">Mentorship</a>
+            <NavLink to="/partner" className="nb__link">Partner</NavLink>
           </nav>
 
           <div className="nb__actions">
@@ -176,11 +179,19 @@ const Navbar = () => {
           <ul className="sheet__list">
             {LINKS.map((l) => (
               <li key={l.to}>
-                <NavLink to={l.to} end={l.end}>
-                  <span className="sheet__icon"><l.Icon size={18} /></span>
-                  {l.label}
-                  <ChevronRight size={18} className="sheet__chev" />
-                </NavLink>
+                {l.href ? (
+                  <a href={l.href}>
+                    <span className="sheet__icon"><l.Icon size={18} /></span>
+                    {l.label}
+                    <ChevronRight size={18} className="sheet__chev" />
+                  </a>
+                ) : (
+                  <NavLink to={l.to} end={l.end}>
+                    <span className="sheet__icon"><l.Icon size={18} /></span>
+                    {l.label}
+                    <ChevronRight size={18} className="sheet__chev" />
+                  </NavLink>
+                )}
               </li>
             ))}
             <li>

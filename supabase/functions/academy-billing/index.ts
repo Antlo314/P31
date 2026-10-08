@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
   if (!row?.stripe_customer_id) return json({ error: 'There’s no card on file for this mentorship.' }, 404);
 
   const stripe = new Stripe(env('STRIPE_SECRET_KEY'));
-  const appUrl = (env('APP_URL') || 'https://www.p31market.com').replace(/\/$/, '');
+  const appUrl = (env('ACADEMY_URL') || 'https://thep31collective.org').replace(/\/$/, '');
   const portal = await stripe.billingPortal.sessions.create({
     customer: row.stripe_customer_id, return_url: `${appUrl}/academy/${program}/billing`,
   });

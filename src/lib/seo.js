@@ -4,6 +4,10 @@
 // www is the host Vercel serves; the bare domain redirects here.
 export const SITE_URL = 'https://www.p31market.com';
 export const SITE_NAME = 'Proverbs 31 Marketplace';
+// The mentorships, member portal and classrooms live on their own domain
+// (same app, same Supabase): see src/lib/site.js.
+export const COLLECTIVE_URL = 'https://thep31collective.org';
+export const COLLECTIVE_NAME = 'The Proverbs 31 Collective';
 export const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
 
 // The business as Google knows it — the Google Business Profile and socials,
@@ -53,14 +57,17 @@ export const ROUTE_META = {
     description: 'Sponsors, venues and brands: partner with Proverbs 31 Marketplace through financial, in-kind or strategic support and reach Atlanta’s women creatives.',
   },
   '/mentorship': {
+    origin: COLLECTIVE_URL,
     title: `Mentorship — The Proverbs 31 Collective`,
     description: 'Private business and faith-based mentorship for faith-driven women. Begin with an intro call.',
   },
   '/mentorship/business': {
+    origin: COLLECTIVE_URL,
     title: `Proverbs 31 Business Mentorship — Strategy, Structure, Accountability`,
     description: 'Private business mentorship with Melanie JC: weekly or biweekly 60-minute sessions, action plans, launch support and priority access. Book an intro call.',
   },
   '/mentorship/faith': {
+    origin: COLLECTIVE_URL,
     title: `Faith-Based Mentorship — The Proverbs 31 Collective`,
     description: 'Grow in faith, identity and calling with a mentor who walks alongside you. Book an intro call.',
   },
@@ -71,8 +78,8 @@ export const ROUTE_META = {
   '/unsubscribe': { title: `Unsubscribe — ${SITE_NAME}`, description: 'Manage your email preferences.', noindex: true },
 };
 
-// Pages that are worth listing in the sitemap.
-export const INDEXED_ROUTES = Object.keys(ROUTE_META).filter((p) => !ROUTE_META[p].noindex);
+// Pages that are worth listing in p31market.com's sitemap (Collective pages live on their own domain).
+export const INDEXED_ROUTES = Object.keys(ROUTE_META).filter((p) => !ROUTE_META[p].noindex && !ROUTE_META[p].origin);
 
 export const curatorMeta = (c) => ({
   title: `${c.business_name} — ${SITE_NAME}`,
@@ -82,7 +89,7 @@ export const curatorMeta = (c) => ({
 });
 
 /** Update <head> in the browser for the current page. */
-export function applyMeta({ title, description, image, path, noindex } = {}) {
+export function applyMeta({ title, description, image, path, noindex, origin } = {}) {
   if (typeof document === 'undefined') return;
   const set = (selector, attr, value) => {
     let el = document.head.querySelector(selector);
@@ -94,7 +101,7 @@ export function applyMeta({ title, description, image, path, noindex } = {}) {
     }
     el.setAttribute(attr, value);
   };
-  const url = `${SITE_URL}${path ?? window.location.pathname}`;
+  const url = `${origin || SITE_URL}${path ?? window.location.pathname}`;
   if (title) {
     document.title = title;
     set('meta[property="og:title"]', 'content', title);

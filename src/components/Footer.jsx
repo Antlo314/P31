@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook, Mail, Phone, HeartHandshake, ArrowUpRight, MapPin, ArrowRight, ArrowUp, Star } from 'lucide-react';
 import { openJoin } from '../lib/join';
+import { collectiveHome, collectivePortal } from '../lib/site';
 import logoPath from '../assets/web/logo-160.webp';
 import './Footer.css';
 
@@ -46,7 +47,7 @@ const Footer = () => (
           <Link to="/shop">Shop the marketplace</Link>
           <Link to="/directory">Curators &amp; shops</Link>
           <Link to="/calendar">Market dates</Link>
-          <Link to="/mentorship">Mentorship</Link>
+          <a href={collectiveHome()}>Mentorship</a>
           <Link to="/about">Our story</Link>
         </nav>
         <nav className="ft__col" aria-label="Join">
@@ -55,7 +56,7 @@ const Footer = () => (
           <Link to="/partner">Partner with us</Link>
           <Link to="/services">Services</Link>
           <Link to="/login">Curator portal</Link>
-          <Link to="/portal">Member portal</Link>
+          <a href={collectivePortal()}>Member portal</a>
         </nav>
         <div className="ft__col">
           <h4>Contact</h4>

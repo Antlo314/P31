@@ -1,0 +1,15 @@
+/* thep31collective.org header & footer — the marketplace bar and footer, with the Collective mark. */
+.cl-nb__mark, .cl-ft__mark {
+  object-fit: contain !important;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50% !important;
+  padding: 4px;
+  box-shadow: 0 0 0 1px rgba(242, 206, 77, 0.5), 0 4px 14px -6px rgba(29, 15, 46, 0.5) !important;
+}
+.cl-ft__mark { padding: 5px; }
+.cl-nb .nb__link { display: inline-flex; align-items: center; gap: 4px; }
+/* No phone tab bar on this side, so the page needs no room for one. */
+.cl-site .site-main { padding-bottom: 0; }
+@media (max-width: 420px) {
+  .cl-nb .nb__wordmark strong { font-size: 0.92rem; }
+}

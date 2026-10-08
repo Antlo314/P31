@@ -7,9 +7,11 @@ import LeadPopup from './components/LeadPopup';
 import CartSheet from './components/CartSheet';
 import OfferTicker from './components/OfferTicker';
 import AnnouncementBanner from './components/AnnouncementBanner';
-import { ROUTE_META, SITE_NAME, applyMeta } from './lib/seo';
+import { ROUTE_META, SITE_NAME, COLLECTIVE_URL, COLLECTIVE_NAME, applyMeta } from './lib/seo';
 import { isFlushRoute } from './lib/routes';
+import { isCollective, crossSiteTarget } from './lib/site';
 import MotionRoot from './components/MotionRoot';
+import { CollectiveNav, CollectiveFooter } from './components/CollectiveChrome';
 
 // Everything but the landing page loads on demand, so phones only download
 // what they open.
@@ -46,13 +48,28 @@ const ScrollToTop = () => {
   return null;
 }
 
+// Pages that belong to the other domain (marketplace ↔ Collective) open there.
+const SiteGate = ({ children }) => {
+  const { pathname, search, hash } = useLocation();
+  const target = crossSiteTarget(pathname, search, hash);
+  useEffect(() => { if (target) window.location.replace(target); }, [target]);
+  return target ? <div aria-busy="true" style={{ minHeight: '100dvh' }} /> : children;
+};
+
+// The Collective's own titles for the pages it shares with the marketplace.
+const COLLECTIVE_META = {
+  '/': { ...ROUTE_META['/mentorship'], path: '/' },
+  '/portal': { ...ROUTE_META['/portal'], title: `Member portal — ${COLLECTIVE_NAME}`, origin: COLLECTIVE_URL },
+};
+
 // Title / description / share card for fixed pages (storefronts set their own).
 const RouteMeta = () => {
   const { pathname } = useLocation();
   useEffect(() => {
     const key = pathname.replace(/\/+$/, '') || '/';
-    if (ROUTE_META[key]) applyMeta({ ...ROUTE_META[key], path: key });
-    else if (key.startsWith('/enroll/')) applyMeta({ title: `Your invitation — ${SITE_NAME}`, description: ROUTE_META['/mentorship'].description, noindex: true });
+    if (isCollective && COLLECTIVE_META[key]) applyMeta({ path: key, ...COLLECTIVE_META[key] });
+    else if (ROUTE_META[key]) applyMeta({ ...ROUTE_META[key], path: key });
+    else if (key.startsWith('/enroll/')) applyMeta({ title: `Your invitation — ${COLLECTIVE_NAME}`, description: ROUTE_META['/mentorship'].description, noindex: true, origin: COLLECTIVE_URL });
     else if (key.startsWith('/dashboard') || key === '/onboarding-exclusive') {
       applyMeta({ title: `Curator studio — ${SITE_NAME}`, description: ROUTE_META['/'].description, noindex: true });
     }
@@ -85,10 +102,7 @@ function SiteRoutes() {
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/favorites" element={<Shop favoritesOnly />} />
-            <Route path="/mentorship" element={<MentorshipLanding />} />
-            <Route path="/mentorship/:program" element={<MentorshipProgram />} />
             <Route path="/portal" element={<Portal />} />
-            <Route path="/enroll/:token" element={<Enroll />} />
             {/* Vanity URL Catch-all: /popcorn or /id */}
             <Route path="/:id" element={<CuratorProfile />} />
           </Routes>
@@ -101,30 +115,56 @@ function SiteRoutes() {
   );
 }
 
+// thep31collective.org: the mentorships, member portal and enrollment links.
+function CollectiveRoutes() {
+  const { pathname } = useLocation();
+  return (
+    <div className="app-container cl-site">
+      <CollectiveNav />
+      <RouteMeta />
+      <MotionRoot />
+      <main className={`site-main ${isFlushRoute(pathname) ? 'is-flush' : ''}`}>
+        <Suspense fallback={<div aria-busy="true" style={{ minHeight: '70vh' }} />}>
+          <Routes>
+            <Route path="/" element={<MentorshipLanding />} />
+            <Route path="/mentorship" element={<MentorshipLanding />} />
+            <Route path="/mentorship/:program" element={<MentorshipProgram />} />
+            <Route path="/portal" element={<Portal />} />
+            <Route path="/enroll/:token" element={<Enroll />} />
+          </Routes>
+        </Suspense>
+      </main>
+      <CollectiveFooter />
+    </div>
+  );
+}
+
 function App() {
   return (
     <Router>
       <ScrollToTop />
-      <Routes>
-        <Route
-          path="/systems/*"
-          element={
-            <Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#12081d' }} />}>
-              <SystemsApp />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/academy/:program/*"
-          element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#FCFBFE' }} />}><AcademyApp /></Suspense>}
-        />
-        <Route
-          path="/studio/*"
-          element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#12081d' }} />}><StudioApp /></Suspense>}
-        />
-        {Lab && <Route path="/__lab" element={<Suspense fallback={null}><Lab /></Suspense>} />}
-        <Route path="/*" element={<SiteRoutes />} />
-      </Routes>
+      <SiteGate>
+        <Routes>
+          <Route
+            path="/systems/*"
+            element={
+              <Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#12081d' }} />}>
+                <SystemsApp />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/academy/:program/*"
+            element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#FCFBFE' }} />}><AcademyApp /></Suspense>}
+          />
+          <Route
+            path="/studio/*"
+            element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#12081d' }} />}><StudioApp /></Suspense>}
+          />
+          {Lab && <Route path="/__lab" element={<Suspense fallback={null}><Lab /></Suspense>} />}
+          <Route path="/*" element={isCollective ? <CollectiveRoutes /> : <SiteRoutes />} />
+        </Routes>
+      </SiteGate>
     </Router>
   );
 }

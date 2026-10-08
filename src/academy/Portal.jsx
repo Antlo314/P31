@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useRoles, dashboardsFor } from '../lib/roles';
 import { CONTACT_EMAIL } from '../lib/academy';
+import { hrefFor, isCollective } from '../lib/site';
 import mark from '../assets/academy/collective-mark.png';
 import '../pages/Login.css';
 import './mentorship.css';
@@ -71,7 +72,9 @@ const Portal = () => {
   if (status === 'ready' && !recovery && next && /^\/(academy|studio|systems|dashboard)(\/|$)/.test(next)) {
     return <Navigate to={next} replace />;
   }
-  if (status === 'ready' && !recovery && dashboards.length === 1 && !params.has('choose') && !dashboards[0].locked) {
+  // One dashboard on this domain: go straight there. (A dashboard on the other
+  // domain is listed instead — signing in there is a separate step.)
+  if (status === 'ready' && !recovery && dashboards.length === 1 && !params.has('choose') && !dashboards[0].locked && hrefFor(dashboards[0].to) === dashboards[0].to) {
     return <Navigate to={dashboards[0].to} replace />;
   }
 
@@ -83,7 +86,7 @@ const Portal = () => {
           <img src={mark} alt="" className="mt-mark" data-intro="0" />
           <p className="k-eyebrow" data-intro="0.05">Member portal</p>
           <h1 className="k-h1" data-split="intro">Welcome <em>home.</em></h1>
-          <p className="k-lede" data-intro="0.25">One sign-in for your mentorship classroom, the Content Studio and every P31 dashboard.</p>
+          <p className="k-lede" data-intro="0.25">{isCollective ? 'Sign in to your mentorship classroom or mentor dashboard.' : 'Sign in to the Content Studio and your P31 dashboards.'}</p>
         </section>
 
         <div className="lg__card" data-intro="0.15">
@@ -127,7 +130,7 @@ const Portal = () => {
               <button className="k-btn k-btn--plum k-btn--lg k-btn--block" disabled={busy}>{busy ? 'One moment…' : creating ? 'Create account' : <>Sign in <ArrowRight size={18} /></>}</button>
               {!creating && <button type="button" className="lg__forgot" onClick={forgot}>Forgot password?</button>}
               <button type="button" className="lg__forgot" onClick={() => { setCreating(!creating); setError(''); setNote(''); }}>{creating ? 'I already have an account' : 'Mentor or Studio team? Create an account'}</button>
-              <p className="lg__foot">New to the mentorships? <Link to="/mentorship">Book an intro call</Link></p>
+              <p className="lg__foot">New to the mentorships? <a href={hrefFor('/mentorship')}>Book an intro call</a></p>
             </form>
           )}
 
@@ -139,20 +142,22 @@ const Portal = () => {
                 <nav className="pt-list">
                   {dashboards.map((d) => {
                     const Icon = KIND_ICON[d.kind] || LayoutGrid;
-                    return (
-                      <Link key={d.to} to={d.to} className={`pt-item ${d.locked ? 'is-locked' : ''}`}>
-                        <span className="pt-item__icon"><Icon size={20} /></span>
-                        <span><strong>{d.title}</strong><small>{d.note}</small></span>
-                        <ArrowRight size={18} />
-                      </Link>
-                    );
+                    const href = hrefFor(d.to);
+                    const body = <>
+                      <span className="pt-item__icon"><Icon size={20} /></span>
+                      <span><strong>{d.title}</strong><small>{href === d.to ? d.note : `${d.note} · opens ${isCollective ? 'p31market.com' : 'thep31collective.org'}`}</small></span>
+                      <ArrowRight size={18} />
+                    </>;
+                    return href === d.to
+                      ? <Link key={d.to} to={d.to} className={`pt-item ${d.locked ? 'is-locked' : ''}`}>{body}</Link>
+                      : <a key={d.to} href={href} className={`pt-item ${d.locked ? 'is-locked' : ''}`}>{body}</a>;
                   })}
                 </nav>
               ) : (
                 <div className="pt-empty">
                   <p>This account isn’t connected to a dashboard yet.</p>
                   <p>Enrolling in a mentorship? You’ll get access after your enrollment link is completed. Questions: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></p>
-                  <Link to="/mentorship" className="k-btn k-btn--gold k-btn--block">Explore the mentorships</Link>
+                  <a href={hrefFor('/mentorship')} className="k-btn k-btn--gold k-btn--block">Explore the mentorships</a>
                 </div>
               )}
               <button type="button" className="lg__forgot" onClick={signOut}><LogOut size={14} /> Sign out</button>

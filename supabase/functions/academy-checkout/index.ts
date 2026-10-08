@@ -3,7 +3,7 @@
 // Checkout session. The signed-in person's email must match the invite.
 // Prices live only in academy_plans (never public) and reach the browser only
 // through the invite link.
-//   supabase secrets set STRIPE_SECRET_KEY=sk_live_...   APP_URL=https://www.p31market.com
+//   supabase secrets set STRIPE_SECRET_KEY=sk_live_...   ACADEMY_URL=https://thep31collective.org (optional; that's the default)
 //   supabase functions deploy academy-checkout
 // Body: { token }  →  { url } | { already: true } | { error }
 import Stripe from 'npm:stripe@17.7.0';
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
     return json({ error: 'Card payments aren’t connected yet. Please email members@thep31collective.org and we’ll help you enroll.' }, 503);
   }
   const stripe = new Stripe(env('STRIPE_SECRET_KEY'));
-  const appUrl = (env('APP_URL') || 'https://www.p31market.com').replace(/\/$/, '');
+  const appUrl = (env('ACADEMY_URL') || 'https://thep31collective.org').replace(/\/$/, '');
 
   let customer = existing?.stripe_customer_id || undefined;
   if (!customer) {
