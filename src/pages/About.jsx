@@ -1,14 +1,11 @@
 import React from 'react';
-import { Mail, Phone, MapPin, ArrowUpRight, Gem, HeartHandshake, Users, Sparkles, ArrowRight } from 'lucide-react';
+import { Mail, Phone, MapPin, ArrowUpRight, Gem, HeartHandshake, Users, ArrowRight } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
-import LazyVideo from '../components/LazyVideo';
+import FounderNote from '../components/FounderNote';
 import { openJoin } from '../lib/join';
 
-import founder from '../assets/web/melanie23_rm.webp';
 import editorialImg from '../assets/web/p31_partner_hero_editorial.webp';
 import gatherImg from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
-import marketVid from '../assets/web/p31market2.mp4';
-import marketPoster from '../assets/web/p31market2-poster.webp';
 
 const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
 
@@ -32,7 +29,7 @@ const About = () => (
       title="Where her gifts"
       accent="make room."
       lead="An elite, traveling collective of women creatives — defying the standard pop-up to bring a majestic, high-end market to Atlanta and beyond."
-      media={{ src: founder, portrait: true, alt: 'Melanie Jeffers-Cameron, founder of Proverbs 31 Marketplace' }}
+      media={{ src: gatherImg, alt: 'Women of the Proverbs 31 community gathered together' }}
       actions={<>
         <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></a>
         <button type="button" className="k-btn k-btn--light" onClick={openJoin}>Join the collective</button>
@@ -101,27 +98,9 @@ const About = () => (
       </ol>
     </section>
 
-    {/* Founder */}
-    <section className="k-section">
-      <div className="k-split k-split--wide-right">
-        <div className="k-arch" data-reveal="clip" style={{ maxWidth: 460 }}>
-          <LazyVideo src={marketVid} poster={marketPoster} label="Melanie Jeffers-Cameron at a Proverbs 31 market" />
-        </div>
-        <div className="k-head" style={{ marginBottom: 0 }}>
-          <p className="k-eyebrow" data-reveal="fade">The Matriarch</p>
-          <h2 className="k-h2" data-split>Melanie <em>Jeffers-Cameron</em></h2>
-          <p className="k-lede" data-reveal>
-            Proverbs 31 Marketplace began with a simple conviction: gifted women deserve a stage as
-            excellent as their work. Melanie built a market that honors the modern woman of
-            influence — a place to be seen, supported and celebrated.
-          </p>
-          <ul className="k-checks" data-reveal-group>
-            <li><Sparkles size={18} /> Founder &amp; lead curator</li>
-            <li><Sparkles size={18} /> Building community across Atlanta</li>
-            <li><Sparkles size={18} /> Championing women-owned brands</li>
-          </ul>
-        </div>
-      </div>
+    {/* Founder — a small insert; her full story lives on the Collective */}
+    <section className="k-section k-section--tight">
+      <div style={{ display: 'grid', justifyItems: 'center' }}><FounderNote /></div>
     </section>
 
     {/* Contact + CTA */}

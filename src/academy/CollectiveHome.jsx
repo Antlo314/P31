@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, GraduationCap, Clapperboard, ShieldCheck, ArrowUpRight } from 'lucide-react';
+import { ArrowRight, GraduationCap, Clapperboard, ShieldCheck, ArrowUpRight, Sparkles, Instagram } from 'lucide-react';
 import { PROGRAMS } from './content';
 import { marketHome } from '../lib/site';
 import mark from '../assets/academy/collective-mark.png';
+import melanie from '../assets/web/melanie23_rm.webp';
 import './mentorship.css';
 import './collective-home.css';
 
@@ -31,6 +32,41 @@ const CollectiveHome = () => (
         </div>
       </div>
     </header>
+
+    <section className="k-section ch-melanie" id="melanie">
+      <div className="k-split k-split--wide-right">
+        <div className="ch-melanie__photo" data-reveal="clip">
+          <img src={melanie} alt="Melanie Jeffers-Cameron" loading="lazy" decoding="async" />
+        </div>
+        <div className="k-head" style={{ marginBottom: 0 }}>
+          <p className="k-eyebrow" data-reveal="fade">Meet your mentor</p>
+          <h2 className="k-h2" data-split>Melanie <em>Jeffers-Cameron</em></h2>
+          <p className="k-lede" data-reveal>
+            Melanie is the founder and lead curator of Proverbs 31 Marketplace, an Atlanta-based, traveling marketplace and
+            community for women creatives and faith-driven entrepreneurs. She built it on a simple conviction: gifted women
+            deserve a stage as excellent as their work.
+          </p>
+          <p className="k-body" data-reveal>
+            The Collective carries that conviction from the market floor into the quieter work of building — a business with
+            strategy, structure and accountability, and a life anchored in faith. In the Business Mentorship, Melanie works
+            with women one-on-one, meeting each of them where they are.
+          </p>
+          <ul className="k-checks" data-reveal-group>
+            <li><Sparkles size={18} /> Founder &amp; lead curator, Proverbs 31 Marketplace</li>
+            <li><Sparkles size={18} /> Business mentor — strategy, structure, accountability, Kingdom impact</li>
+            <li><Sparkles size={18} /> Building community for women across Atlanta</li>
+          </ul>
+          <figure className="ch-melanie__verse" data-reveal>
+            <blockquote>“Give her of the fruit of her hands; and let her own works praise her in the gates.”</blockquote>
+            <figcaption>Proverbs 31:31 · the verse P31 is built on</figcaption>
+          </figure>
+          <div className="k-actions" data-reveal>
+            <Link to="/mentorship/business" className="k-btn k-btn--plum">Mentorship with Melanie <ArrowRight size={18} /></Link>
+            <a href="https://www.instagram.com/proverbs31market" target="_blank" rel="noreferrer" className="k-btn k-btn--ghost"><Instagram size={17} /> Follow along</a>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section className="k-section">
       <div className="k-head k-center">

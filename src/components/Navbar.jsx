@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import {
   Home, Store, CalendarDays, Handshake, LayoutGrid, ShoppingBasket, Heart, X, ChevronRight, Sparkles, Info,
-  LayoutDashboard, LogOut, Lock, Instagram, Facebook, UserRound, Crown, ShoppingBag, GraduationCap, KeyRound,
+  LayoutDashboard, LogOut, Instagram, Facebook, UserRound, Crown, ShoppingBag, GraduationCap, KeyRound,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { isFlushRoute } from '../lib/routes';
 import { collectivePortal, hrefFor } from '../lib/site';
+import { useRoles } from '../lib/roles';
 import './Navbar.css';
 
 import logoPath from '../assets/web/logo-160.webp';
@@ -27,7 +28,7 @@ const LINKS = [
   { to: '/favorites', label: 'Favorites', Icon: Heart },
   { to: '/calendar', label: 'Market Dates', Icon: CalendarDays },
   { to: '/mentorship', href: hrefFor('/mentorship'), label: 'Mentorship', Icon: GraduationCap },
-  { to: '/portal', href: collectivePortal(), label: 'The Collective · Sign in', Icon: KeyRound },
+  { to: '/portal', href: collectivePortal(), label: 'The Collective', Icon: KeyRound },
   { to: '/partner', label: 'Partner With Us', Icon: Handshake },
   { to: '/services', label: 'Services', Icon: Sparkles },
   { to: '/about', label: 'Our Story', Icon: Info },
@@ -44,6 +45,8 @@ const TABS = [
 
 const Navbar = () => {
   const { user, profile, isAdmin, signOut } = useAuth();
+  const { roles } = useRoles();
+  const isCurator = !!roles.curator;
   const { count, openCart } = useCart();
   const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
@@ -116,7 +119,9 @@ const Navbar = () => {
                 {userMenu && (
                   <div className="nb__menu" role="menu">
                     <p className="nb__menu-name">{firstName || 'Your account'}</p>
-                    <Link to="/dashboard" role="menuitem"><LayoutDashboard size={16} /> Curator studio</Link>
+                    {isCurator
+                      ? <Link to="/dashboard" role="menuitem"><LayoutDashboard size={16} /> Curator dashboard</Link>
+                      : <a href={collectivePortal()} role="menuitem"><LayoutDashboard size={16} /> My dashboards</a>}
                     <button role="menuitem" onClick={signOut}><LogOut size={16} /> Sign out</button>
                   </div>
                 )}
@@ -162,7 +167,7 @@ const Navbar = () => {
                   <strong>{firstName || 'Welcome back'}</strong>
                   <span>Signed in</span>
                 </div>
-                <Link to="/dashboard" className="sheet__pill">Studio</Link>
+                {isCurator ? <Link to="/dashboard" className="sheet__pill">Dashboard</Link> : <a href={collectivePortal()} className="sheet__pill">Dashboards</a>}
               </>
             ) : (
               <>
@@ -198,13 +203,6 @@ const Navbar = () => {
               <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">
                 <span className="sheet__icon sheet__icon--gold"><Sparkles size={18} /></span>
                 Become a Curator
-                <ChevronRight size={18} className="sheet__chev" />
-              </a>
-            </li>
-            <li>
-              <a href={hrefFor('/systems')}>
-                <span className="sheet__icon sheet__icon--dark"><Lock size={16} /></span>
-                Systems <small>Team</small>
                 <ChevronRight size={18} className="sheet__chev" />
               </a>
             </li>

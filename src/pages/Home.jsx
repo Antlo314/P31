@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, CalendarClock, ArrowRight, ArrowUpRight, Lock, Sparkles, Gem, Users, Music4, Check, ArrowDown } from 'lucide-react';
+import { MapPin, CalendarClock, ArrowRight, ArrowUpRight, Sparkles, Gem, Users, Music4, Check, ArrowDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { fetchUpcomingEvents, formatEventDate, parseEventDate, showDate } from '../lib/events';
 import { gsap, reducedMotion } from '../lib/motion';
 import { openJoin } from '../lib/join';
-import { hrefFor } from '../lib/site';
 import LazyVideo from '../components/LazyVideo';
+import FounderNote from '../components/FounderNote';
 import './Home.css';
 
 // Web-optimised copies of the original footage and photos (same media,
@@ -165,11 +165,11 @@ const Home = () => {
       <section className="k-section k-section--night k-dark" id="about">
         <div className="k-split k-split--wide-right">
           <div className="k-arch k-arch--ring h26-mission__media" data-reveal="clip">
-            <LazyVideo src={missionVid} poster={missionPoster} label="Melanie Jeffers-Cameron at the P31 Marketplace" />
+            <LazyVideo src={missionVid} poster={missionPoster} label="A Proverbs 31 Marketplace market" />
           </div>
           <div className="k-head" style={{ marginBottom: 0 }}>
-            <p className="k-eyebrow" data-reveal="fade">Our mission · The Matriarch</p>
-            <h2 className="k-h2" data-split>Melanie <em>Jeffers-Cameron</em></h2>
+            <p className="k-eyebrow" data-reveal="fade">Our mission</p>
+            <h2 className="k-h2" data-split>A stage as excellent as <em>her work</em></h2>
             <p className="k-lede" data-reveal>
               Proverbs 31 Marketplace is a global marketplace for creativity. We honor the modern woman of
               influence with a premium platform to showcase her gifts — every curator hand-selected,
@@ -178,6 +178,7 @@ const Home = () => {
             <ul className="h26-tags" data-reveal-group>
               {CATEGORIES.map((c) => <li key={c}>{c}</li>)}
             </ul>
+            <FounderNote dark />
             <div className="k-actions" data-reveal>
               <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></a>
               <Link to="/about" className="k-btn k-btn--light">Our story</Link>
@@ -400,17 +401,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── SYSTEMS (team sign-in) ──────────────────────────── */}
-      <section className="k-section k-section--tight" id="systems" style={{ paddingTop: 0 }}>
-        <div className="h26-systems" data-reveal>
-          <span className="k-icon"><Lock size={20} /></span>
-          <div>
-            <h3>Systems — the P31 operations console</h3>
-            <p>Social command, growth search, campaigns, orders and the creative studios. Team sign-in only.</p>
-          </div>
-          <a href={hrefFor('/systems')} className="k-btn k-btn--outline k-btn--sm">Sign in <ArrowRight size={16} /></a>
-        </div>
-      </section>
     </div>
   );
 };

@@ -56,7 +56,7 @@ const Footer = () => (
           <Link to="/partner">Partner with us</Link>
           <Link to="/services">Services</Link>
           <Link to="/login">Curator portal</Link>
-          <a href={collectivePortal()}>The Collective · sign in</a>
+          <a href={collectivePortal()}>The Collective</a>
         </nav>
         <div className="ft__col">
           <h4>Contact</h4>
@@ -73,7 +73,6 @@ const Footer = () => (
       <div className="ft__bottom">
         <span>© {new Date().getFullYear()} Proverbs 31 Marketplace. All rights reserved.</span>
         <span className="ft__bottom-links">
-          <a href={hrefFor('/systems')}>Systems</a>
           <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Back to top <ArrowUp size={14} /></button>
         </span>
       </div>
