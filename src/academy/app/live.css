@@ -1,0 +1,13 @@
+/* Live class room (Daily Prebuilt inside the classroom) */
+.lv { display: grid; gap: 12px; }
+.lv-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.lv-bar strong { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-heading); font-weight: 400; font-size: 1.2rem; color: var(--plum); }
+.lv-stage { position: relative; height: calc(100dvh - 210px); min-height: 460px; border-radius: 20px; background: #12081d; overflow: hidden; }
+@media (min-width: 980px) { .lv-stage { height: calc(100dvh - 140px); } }
+.lv-frame { position: absolute; inset: 0; }
+.lv-stage.is-idle .lv-frame { visibility: hidden; }
+.lv-msg { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; text-align: center; padding: 24px; color: #fff; }
+.lv-msg p { margin: 0; color: rgba(255, 255, 255, 0.7); max-width: 40ch; }
+.lv-msg svg { color: var(--gold-hi); }
+.lv-spin { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, 0.2); border-top-color: var(--gold-hi); animation: lv-spin 0.9s linear infinite; }
+@keyframes lv-spin { to { transform: rotate(360deg); } }

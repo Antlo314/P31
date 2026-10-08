@@ -22,6 +22,7 @@ import {
 import { MentorInbox, MentorAssignments, MentorGradebook, MentorQuizzes, MentorCompletion } from './teach';
 import { StudentAssignments, StudentAssignment, StudentQuizzes, StudentQuiz, StudentProgress } from './learn';
 import { Discussions, DiscussionThread, CertificateView, NotificationBell, InstallApp } from './shared';
+import LiveRoom from './LiveRoom';
 import mark from '../../assets/academy/collective-mark.png';
 import './classroom.css';
 
@@ -163,6 +164,7 @@ const AcademyApp = () => {
           <Route path="discussions/:threadId" element={<DiscussionThread />} />
           <Route path="progress" element={<StudentProgress />} />
           <Route path="certificate/:certId" element={<CertificateView />} />
+          <Route path="live/:sessionId" element={<LiveRoom />} />
           <Route path="teach" element={<MentorOverview />} />
           <Route path="teach/students" element={<MentorStudents />} />
           <Route path="teach/students/:userId" element={<MentorStudent />} />

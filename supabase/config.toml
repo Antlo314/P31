@@ -61,3 +61,11 @@ verify_jwt = false
 
 [functions.zoom-webhook]
 verify_jwt = false
+
+# Live classroom rooms (Daily): checks the caller and their classroom access itself.
+[functions.daily-room]
+verify_jwt = false
+
+# Daily calls this with its own signature (DAILY_WEBHOOK_SECRET).
+[functions.daily-webhook]
+verify_jwt = false

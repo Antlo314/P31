@@ -216,3 +216,9 @@
 .cl-install { position: relative; }
 .cl-install__hint { position: absolute; right: 0; top: 44px; z-index: 80; width: 220px; padding: 12px; border-radius: 14px; background: var(--ivory); color: var(--ink); font-size: 0.82rem; box-shadow: 0 20px 50px -20px rgba(18, 8, 29, 0.5); }
 @media (min-width: 980px) { .cl-install__hint { right: auto; left: 0; top: auto; bottom: 46px; } }
+
+/* Radio/checkbox rows inside forms: keep the control small (it inherited full-width input styles). */
+.ds-form .ds-row > input[type="radio"], .ds-form .ds-row > input[type="checkbox"], .ds-row > input[type="radio"] {
+  width: 20px !important; height: 20px; min-height: 0 !important; flex: none; padding: 0; accent-color: var(--plum); margin: 0;
+}
+.ds-form .ds-row > div { flex: 1; min-width: 0; }

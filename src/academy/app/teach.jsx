@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   Inbox, Megaphone, Send, Users, ArrowLeft, Plus, Trash2, Pencil, Eye, EyeOff, ClipboardList, Download, Link2,
-  ListChecks, X, Check, Award, FileText, Target, UserCheck, StickyNote, BarChart3, HelpCircle, ArrowUp, ArrowDown, ExternalLink,
+  ListChecks, X, Check, Award, FileText, Target, UserCheck, StickyNote, BarChart3, HelpCircle, ArrowUp, ArrowDown, ExternalLink, Radio, Video,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { fmtDate, fmtDateTime, fileSize, openFile, uploadAcademyFile } from '../../lib/academy';
@@ -856,3 +856,112 @@ export const MentorPulse = () => {
   );
 };
 
+
+// ── Live calls: start one now, and the report afterwards ─────
+const fnInvoke = async (fn, body) => {
+  const { data, error } = await supabase.functions.invoke(fn, { body });
+  if (error) {
+    let msg = error.message;
+    try { msg = (await error.context?.json())?.error || msg; } catch { /* keep message */ }
+    return { error: msg };
+  }
+  return data;
+};
+
+/** "Go live now": an instant live class for everyone, chosen students, or one student. */
+export const GoLiveModal = ({ studentId, onClose }) => {
+  const { program } = useAcademy();
+  const navigate = useNavigate();
+  const roster = useRoster(program);
+  const active = roster.data.filter((r) => ['active', 'past_due'].includes(r.status));
+  const one = studentId ? roster.data.find((r) => r.user_id === studentId) : null;
+  const [form, setForm] = useState({ title: studentId ? '1:1 call' : `Live with your mentor`, minutes: 60, record: false });
+  const [who, setWho] = useState(studentId ? 'one' : 'all');
+  const [picked, setPicked] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const start = async (e) => {
+    e.preventDefault();
+    if (who === 'some' && !picked.length) return setError('Choose at least one student.');
+    setBusy(true); setError('');
+    const row = {
+      program_id: program.id, title: form.title.trim() || 'Live class', starts_at: new Date().toISOString(),
+      duration_minutes: Number(form.minutes), is_instant: true, record: form.record,
+      student_id: who === 'one' ? studentId : null, invitees: who === 'some' ? picked : null,
+    };
+    const { data, error: err } = await write(supabase.from('academy_sessions').insert(row).select('id').single());
+    if (err) { setBusy(false); return setError(err); }
+    const res = await fnInvoke('daily-room', { action: 'create', session_id: data.id });
+    if (res?.error) { setBusy(false); return setError(`The class was saved, but the room didn’t open: ${res.error}`); }
+    navigate(`/academy/${program.slug}/live/${data.id}`);
+  };
+
+  return (
+    <Modal title={one ? `Call ${one.full_name} now` : 'Go live now'} onClose={onClose}>
+      <form className="ds-form" onSubmit={start}>
+        <label className="k-field"><span>What’s it called?</span><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></label>
+        {!studentId && (
+          <div className="k-field"><span>Who’s invited</span>
+            <div className="ds-tabs-inline" role="tablist">
+              <button type="button" role="tab" aria-selected={who === 'all'} onClick={() => setWho('all')}>Everyone ({active.length})</button>
+              <button type="button" role="tab" aria-selected={who === 'some'} onClick={() => setWho('some')}>Choose students</button>
+            </div>
+            {who === 'some' && (
+              <div className="ds-list cl-pick">
+                {active.map((r) => (
+                  <label key={r.user_id} className="ds-row" style={{ cursor: 'pointer' }}>
+                    <input type="checkbox" className="ds-check" checked={picked.includes(r.user_id)}
+                      onChange={(e) => setPicked(e.target.checked ? [...picked, r.user_id] : picked.filter((x) => x !== r.user_id))} />
+                    <div><strong>{r.full_name}</strong><small>{r.email}</small></div>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        <label className="k-field"><span>About how long</span>
+          <select value={form.minutes} onChange={(e) => setForm({ ...form, minutes: e.target.value })}>{[30, 45, 60, 90, 120].map((m) => <option key={m} value={m}>{m} minutes</option>)}</select>
+        </label>
+        <label className="ds-row" style={{ cursor: 'pointer' }}>
+          <input type="checkbox" className="ds-check" checked={form.record} onChange={(e) => setForm({ ...form, record: e.target.checked })} />
+          <div><strong>Allow recording</strong><small>You’ll get a Record button in the call. Recordings are saved to the session for students to rewatch (about $0.81 per recorded hour).</small></div>
+        </label>
+        {error && <p className="k-error">{error}</p>}
+        <button className="k-btn k-btn--gold k-btn--lg" disabled={busy}><Radio size={18} /> {busy ? 'Opening the room…' : 'Go live'}</button>
+        <p className="ds-muted">{who === 'one' ? 'They get a notification with a button straight into the call.' : 'Invited students get a “Live now” notification that takes them straight into the call.'}</p>
+      </form>
+    </Modal>
+  );
+};
+
+/** After a call: who came, when, how long, and the recordings. */
+export const CallReportModal = ({ session, onClose }) => {
+  const report = useRows(() => supabase.rpc('academy_call_report', { p_session: session.id }), [session.id]);
+  const [recs, setRecs] = useState(null);
+  const loadRecs = async () => { const res = await fnInvoke('daily-room', { action: 'recording', session_id: session.id }); setRecs(res?.recordings || []); };
+  const total = report.data.reduce((n, r) => n + Number(r.minutes || 0), 0);
+  return (
+    <Modal title={`Call report — ${session.title}`} onClose={onClose} wide>
+      <p className="ds-muted">
+        {fmtDateTime(session.started_at || session.starts_at)}{session.ended_at ? ` → ${fmtDateTime(session.ended_at)}` : ''} · {report.data.length} people · {Math.round(total)} total minutes
+      </p>
+      {report.data.length ? (
+        <div className="cl-table-wrap" style={{ margin: '12px 0' }}>
+          <table className="cl-table">
+            <thead><tr><th>Person</th><th>Joined</th><th>Left</th><th>Minutes</th><th>Times joined</th><th>Attendance</th></tr></thead>
+            <tbody>{report.data.map((r) => (
+              <tr key={r.user_id}><th scope="row">{r.full_name}<small className="ds-muted" style={{ display: 'block' }}>{r.email}</small></th>
+                <td>{r.first_join ? fmtDateTime(r.first_join) : '—'}</td><td>{r.last_leave ? fmtDateTime(r.last_leave) : '—'}</td>
+                <td>{Number(r.minutes) || '—'}</td><td>{r.joins || '—'}</td><td>{r.attendance || '—'}</td></tr>
+            ))}</tbody>
+          </table>
+        </div>
+      ) : <p className="ds-muted">No one has joined yet. Call tracking fills this in as people come and go.</p>}
+      {session.has_recording && (recs === null
+        ? <button className="k-btn k-btn--plum k-btn--sm" onClick={loadRecs}><Video size={15} /> Show recordings</button>
+        : recs.length ? <ul className="ds-list">{recs.map((r, i) => <li key={i}><a className="ds-row" href={r.url} target="_blank" rel="noopener noreferrer"><Video size={16} /><div><strong>Recording {i + 1}</strong><small>{r.minutes} min · link works for 3 hours</small></div></a></li>)}</ul>
+        : <p className="ds-muted">No recordings found.</p>)}
+    </Modal>
+  );
+};

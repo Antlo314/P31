@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { GraduationCap, Users, Clapperboard, PhoneCall, Trash2, Plus, Check, ExternalLink, DollarSign, UserPlus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { money, BILLING, fmtDate } from '../../lib/academy';
+import { installCallTracking } from '../../academy/app/live';
 
 const PROGRAMS = [['business', 'Business Mentorship'], ['faith', 'Faith-Based Mentorship']];
 const ORDER = ['month', 'week', 'six_months', 'one_time'];
@@ -61,6 +62,11 @@ const Academy = () => {
         <h1>Mentorships & Studio</h1>
         <p className="sys-muted">Prices stay private: they’re shown only on the personal enrollment link a mentor sends after an intro call.</p>
       </header>
+      <section className="sys-card" style={{ marginBottom: 14 }}>
+        <h2>Live classes</h2>
+        <p className="sys-muted">Mentors start live calls from their console (“Go live now”). Turn on call tracking once so every call’s joins, minutes and recordings are saved.</p>
+        <button className="sys-btn sys-btn--gold sys-btn--sm" onClick={async () => { const r = await installCallTracking(); if (r?.error) setError(r.error); else { setMsg('Call tracking is on — every live class is now saved.'); setError(''); } }}>Turn on call tracking</button>
+      </section>
       {msg && <p className="sys-ok"><Check size={16} /> {msg}</p>}
       {error && <p className="sys-error">{error}</p>}
 

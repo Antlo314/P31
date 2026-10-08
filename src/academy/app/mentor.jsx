@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   Users, PhoneCall, MessageCircle, FileCheck2, CalendarDays, Plus, Send, Copy, Check, Trash2, Mail, Phone, BookOpen,
-  Upload, Download, Eye, EyeOff, ArrowUp, ArrowDown, Pencil, Megaphone, Pin, Link2, X, ClipboardCheck, Search, ArrowLeft, Video,
+  Upload, Download, Eye, EyeOff, ArrowUp, ArrowDown, Pencil, Megaphone, Pin, Link2, X, ClipboardCheck, Search, ArrowLeft, Video, BarChart3,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { money, BILLING, fmtDate, fmtDateTime, fileSize, openFile, uploadAcademyFile, CONTACT_EMAIL } from '../../lib/academy';
@@ -12,7 +12,7 @@ import Thread from './Thread';
 import { useAcademy, useNow, useRows, write } from './data';
 import { Modal } from './ui';
 import { toLocalInput, fromLocalInput, useRoster } from './helpers';
-import { AttendanceModal, MentorPulse, StudentNotes, StudentProgressPanel } from './teach';
+import { AttendanceModal, CallReportModal, GoLiveModal, MentorPulse, StudentNotes, StudentProgressPanel } from './teach';
 
 const daysFromNow = (d) => new Date(Date.now() + d * 86400e3).toISOString();
 const STATUS_PILL = { active: 'ds-pill--green', past_due: 'ds-pill--red', canceled: '', expired: '' };
@@ -20,6 +20,7 @@ const STATUS_PILL = { active: 'ds-pill--green', past_due: 'ds-pill--red', cancel
 // ── Overview ─────────────────────────────────────────────────
 export const MentorOverview = () => {
   const { program } = useAcademy();
+  const [live, setLive] = useState(false);
   const roster = useRoster(program);
   const calls = useRows(() => supabase.from('academy_inquiries').select('*').eq('program_id', program.id).order('created_at', { ascending: false }).limit(50), [program.id]);
   const review = useRows(() => supabase.rpc('academy_awaiting_review', { p_program: program.id }), [program.id], { initial: 0 });
@@ -31,7 +32,9 @@ export const MentorOverview = () => {
 
   return (
     <>
-      <DashHead eyebrow={`${program.title} · Mentor`} title="Your" accent="classroom" lead="Students, intro calls and everything you’ve shared — at a glance." />
+      <DashHead eyebrow={`${program.title} · Mentor`} title="Your" accent="classroom" lead="Students, intro calls and everything you’ve shared — at a glance."
+        actions={<button className="k-btn k-btn--gold k-btn--lg" onClick={() => setLive(true)}><Video size={18} /> Go live now</button>} />
+      {live && <GoLiveModal onClose={() => setLive(false)} />}
       <div className="ds-grid ds-grid--4">
         <Link to="students" className="ds-stat"><strong>{active}</strong><span>Active students</span></Link>
         <Link to="calls" className="ds-stat"><strong>{newCalls.length}</strong><span>New intro-call requests</span></Link>
@@ -287,9 +290,9 @@ const PlanModal = ({ student, onClose, onSaved }) => {
   );
 };
 
-// Zoom: the zoom-meetings function creates/updates/deletes the real meeting.
-const zoomCall = async (action, sessionId) => {
-  const { data, error } = await supabase.functions.invoke('zoom-meetings', { body: { action, session_id: sessionId } });
+// Zoom (zoom-meetings) and live classroom rooms (daily-room) create/update/delete the real meeting.
+const fnCall = async (fn, action, sessionId) => {
+  const { data, error } = await supabase.functions.invoke(fn, { body: { action, session_id: sessionId } });
   if (error) {
     let msg = error.message;
     try { msg = (await error.context?.json())?.error || msg; } catch { /* keep message */ }
@@ -298,9 +301,14 @@ const zoomCall = async (action, sessionId) => {
   return data;
 };
 
-/** "Start as host" — fetches a fresh host link (Zoom's expire) and opens it. */
+const zoomCall = (action, id) => fnCall('zoom-meetings', action, id);
+const dailyCall = (action, id) => fnCall('daily-room', action, id);
+
+/** "Start class" — the live room inside the classroom, or Zoom as host (fresh link each time). */
 export const HostButton = ({ session, className = 'k-btn k-btn--sm k-btn--plum' }) => {
+  const { program } = useAcademy();
   const [busy, setBusy] = useState(false);
+  if (session.provider === 'daily') return <Link to={`/academy/${program.slug}/live/${session.id}`} className={className}><Video size={15} /> Start class</Link>;
   if (session.provider !== 'zoom') return null;
   const start = async () => {
     const tab = window.open('', '_blank');
@@ -319,27 +327,31 @@ export const SessionModal = ({ session, studentId, onClose, onSaved }) => {
     starts_at: toLocalInput(session?.starts_at), duration_minutes: session?.duration_minutes || 60,
     join_url: session?.join_url || '', recording_url: session?.recording_url || '', notes: session?.notes || '',
   });
-  const [zoom, setZoom] = useState(!session);
+  const [provider, setProvider] = useState('daily'); // new sessions: daily | zoom | link
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const isZoom = session?.provider === 'zoom';
+  const isLive = session?.provider === 'daily';
   const save = async (e) => {
     e.preventDefault();
     setBusy(true); setError('');
     const row = { ...form, starts_at: fromLocalInput(form.starts_at), duration_minutes: Number(form.duration_minutes), program_id: program.id,
       student_id: session ? session.student_id : studentId || null, join_url: form.join_url || null, recording_url: form.recording_url || null };
-    if (isZoom) delete row.join_url; // Zoom owns the link
+    if (isZoom || isLive || (!session && provider !== 'link')) delete row.join_url; // the room owns the link
     const { data, error: err } = await write(session
       ? supabase.from('academy_sessions').update(row).eq('id', session.id).select('id').single()
       : supabase.from('academy_sessions').insert(row).select('id').single());
     if (err) { setBusy(false); return setError(err); }
     let warn = '';
-    if (!session && zoom && !form.join_url) {
+    if (!session && provider === 'daily') {
+      const res = await dailyCall('create', data.id);
+      if (res?.error) warn = `Session saved, but the live room wasn’t created: ${res.error}`;
+    } else if (!session && provider === 'zoom') {
       const res = await zoomCall('create', data.id);
       if (res?.error) warn = `Session saved, but the Zoom meeting wasn’t created: ${res.error}`;
-    } else if (isZoom) {
-      const res = await zoomCall('update', session.id);
-      if (res?.error) warn = `Saved here, but Zoom wasn’t updated: ${res.error}`;
+    } else if (isZoom || isLive) {
+      const res = await (isZoom ? zoomCall : dailyCall)('update', session.id);
+      if (res?.error) warn = `Saved here, but the ${isZoom ? 'Zoom meeting' : 'live room'} wasn’t updated: ${res.error}`;
     }
     setBusy(false);
     onSaved();
@@ -347,8 +359,9 @@ export const SessionModal = ({ session, studentId, onClose, onSaved }) => {
     onClose();
   };
   const remove = async () => {
-    if (!window.confirm(isZoom ? 'Delete this session and its Zoom meeting?' : 'Delete this session?')) return;
+    if (!window.confirm(isZoom ? 'Delete this session and its Zoom meeting?' : isLive ? 'Delete this session and its live room?' : 'Delete this session?')) return;
     if (isZoom) await zoomCall('delete', session.id);
+    if (isLive) await dailyCall('delete', session.id);
     await write(supabase.from('academy_sessions').delete().eq('id', session.id));
     onSaved(); onClose();
   };
@@ -360,15 +373,23 @@ export const SessionModal = ({ session, studentId, onClose, onSaved }) => {
           <label className="k-field"><span>Starts</span><input required type="datetime-local" value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} /></label>
           <label className="k-field"><span>Length (minutes)</span><input type="number" min="5" max="600" value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: e.target.value })} /></label>
         </div>
-        {isZoom ? (
-          <div className="ds-row"><Video size={18} /><div><strong>Zoom meeting</strong><small>{session.join_url}</small></div><HostButton session={session} /></div>
+        {isZoom || isLive ? (
+          <div className="ds-row"><Video size={18} /><div><strong>{isZoom ? 'Zoom meeting' : 'Live room in the classroom'}</strong><small>{isZoom ? session.join_url : 'Opens 30 minutes before class · students join from their Sessions page'}</small></div><HostButton session={session} /></div>
         ) : !session ? (
-          <label className="ds-row" style={{ cursor: 'pointer' }}>
-            <input type="checkbox" className="ds-check" checked={zoom} onChange={(e) => setZoom(e.target.checked)} />
-            <div><strong>Create a Zoom meeting automatically</strong><small>Students get a Join button; joining marks their attendance and logs it in the CRM.</small></div>
-          </label>
+          <div className="k-field"><span>Where the class happens</span>
+            <div className="ds-list">
+              {[['daily', 'Live room in the classroom', 'Video, screen share and chat right inside the site — on phones and computers. Joining marks attendance.'],
+                ['zoom', 'Zoom (created automatically)', 'Needs the Zoom app connection.'],
+                ['link', 'Paste a link', 'Your Zoom personal room, Google Meet or any other link.']].map(([v, l, d]) => (
+                <label key={v} className="ds-row" style={{ cursor: 'pointer' }}>
+                  <input type="radio" name="provider" checked={provider === v} onChange={() => setProvider(v)} />
+                  <div><strong>{l}</strong><small>{d}</small></div>
+                </label>
+              ))}
+            </div>
+          </div>
         ) : null}
-        {!isZoom && (!zoom || session) && (
+        {!isZoom && !isLive && (session || provider === 'link') && (
           <label className="k-field"><span>Join link (Google Meet, Zoom or other)</span><input type="url" value={form.join_url} onChange={(e) => setForm({ ...form, join_url: e.target.value })} placeholder="https://" /></label>
         )}
         <label className="k-field"><span>Description (optional)</span><textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></label>
@@ -401,7 +422,10 @@ export const MentorStudent = () => {
       <Link to=".." relative="path" className="k-link" style={{ marginBottom: 12 }}><ArrowLeft size={16} /> All students</Link>
       <DashHead eyebrow={`${program.title} · Student`} title={s?.full_name || 'Student'}
         lead={s ? `${s.email} · ${s.plan_label || s.source} · ${s.status.replace('_', ' ')}${s.access_until ? ` · access to ${fmtDate(s.access_until)}` : ''}` : ''}
-        actions={s && <a className="k-btn k-btn--ghost k-btn--sm" href={`mailto:${s.email}`}><Mail size={15} /> Email</a>} />
+        actions={s && <>
+          <button className="k-btn k-btn--gold k-btn--sm" onClick={() => setModal('call')}><Video size={15} /> Call now</button>
+          <a className="k-btn k-btn--ghost k-btn--sm" href={`mailto:${s.email}`}><Mail size={15} /> Email</a>
+        </>} />
       <div className="ds-tabs-inline" role="tablist">
         {[['messages', 'Messages'], ['progress', 'Progress'], ['plans', 'Action plans'], ['sessions', '1:1 sessions'], ['work', `Work${subs.data.some((x) => x.status === 'submitted') ? ' •' : ''}`], ['notes', 'Private notes']].map(([v, l]) => (
           <button key={v} role="tab" aria-selected={tab === v} onClick={() => setTab(v)}>{l}</button>
@@ -455,6 +479,7 @@ export const MentorStudent = () => {
         </article>
       ))}</div> : <p className="ds-muted">Nothing submitted yet.</p>)}
 
+      {modal === 'call' && <GoLiveModal studentId={userId} onClose={() => setModal(null)} />}
       {modal === 'plan' && <PlanModal student={userId} onClose={() => setModal(null)} onSaved={plans.reload} />}
       {modal === 'session' && <SessionModal studentId={userId} onClose={() => setModal(null)} onSaved={sessions.reload} />}
       {modal?.session && <SessionModal session={modal.session} onClose={() => setModal(null)} onSaved={sessions.reload} />}
@@ -667,20 +692,27 @@ export const MentorSessions = () => {
       <button className="ds-row" onClick={() => setModal({ session: s })}>
         <CalendarDays size={18} /><div><strong>{s.title}</strong><small>{fmtDateTime(s.starts_at)} · {s.duration_minutes} min · {s.student_id ? `1:1 with ${who(s.student_id)}` : 'Group'}{s.provider === 'zoom' ? ' · Zoom' : s.join_url ? '' : ' · no join link yet'}</small></div><Pencil size={15} />
       </button>
+      {s.provider === 'daily' && !s.ended_at && <HostButton session={s} className="k-btn k-btn--sm k-btn--gold" />}
+      {s.provider === 'daily' && new Date(s.starts_at).getTime() < now && <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => setModal({ report: s })}><BarChart3 size={15} /> Report</button>}
       {new Date(s.starts_at).getTime() < now
         ? <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => setModal({ attendance: s })}><Users size={15} /> Attendance</button>
-        : <HostButton session={s} className="k-btn k-btn--sm k-btn--ghost" />}
+        : s.provider !== 'daily' && <HostButton session={s} className="k-btn k-btn--sm k-btn--ghost" />}
     </li>
   );
   return (
     <>
       <DashHead eyebrow={`${program.title} · Mentor`} title="Sessions" lead="Group sessions for everyone; schedule 1:1 sessions from a student’s page."
-        actions={<button className="k-btn k-btn--gold" onClick={() => setModal('new')}><Plus size={16} /> Group session</button>} />
+        actions={<>
+          <button className="k-btn k-btn--gold" onClick={() => setModal('live')}><Video size={16} /> Go live now</button>
+          <button className="k-btn k-btn--ghost" onClick={() => setModal('new')}><Plus size={16} /> Schedule a session</button>
+        </>} />
       {upcoming.length ? <ul className="ds-list">{upcoming.map(row)}</ul> : <DashEmpty Icon={CalendarDays} title="Nothing scheduled">Add a group session, or schedule a 1:1 from a student’s page.</DashEmpty>}
       {past.length > 0 && <section className="ds-section"><h2>Past — add notes and recordings</h2><ul className="ds-list">{past.map(row)}</ul></section>}
       {modal === 'new' && <SessionModal onClose={() => setModal(null)} onSaved={list.reload} />}
       {modal?.session && <SessionModal session={modal.session} onClose={() => setModal(null)} onSaved={list.reload} />}
       {modal?.attendance && <AttendanceModal session={modal.attendance} onClose={() => setModal(null)} />}
+      {modal?.report && <CallReportModal session={modal.report} onClose={() => setModal(null)} />}
+      {modal === 'live' && <GoLiveModal onClose={() => setModal(null)} />}
     </>
   );
 };

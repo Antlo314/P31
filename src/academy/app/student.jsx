@@ -14,6 +14,13 @@ import { DueSoon } from './learn';
 import { openCalendly } from '../../lib/calendly';
 
 const isBusiness = (p) => p?.slug === 'business';
+// Live-class recordings: fresh links from daily-room (they expire after a few hours).
+const watchRecording = async (s) => {
+  const tab = window.open('', '_blank');
+  const { data } = await supabase.functions.invoke('daily-room', { body: { action: 'recording', session_id: s.id } });
+  const url = data?.recordings?.[data.recordings.length - 1]?.url;
+  if (url && tab) tab.location = url; else { tab?.close(); window.alert('The recording isn’t ready yet — try again in a few minutes.'); }
+};
 // Join a session: log it (attendance + CRM), then open the meeting.
 const joinSession = async (s) => {
   const tab = window.open('', '_blank');
@@ -40,6 +47,7 @@ const useProgress = (program, user) => useRows(
 );
 
 const SessionCard = ({ s, compact }) => {
+  const { program } = useAcademy();
   const now = useNow();
   const live = new Date(s.starts_at).getTime() <= now + 15 * 60000 && sessionEnd(s).getTime() > now;
   return (
@@ -52,11 +60,15 @@ const SessionCard = ({ s, compact }) => {
       {s.description && !compact && <RichText text={s.description} />}
       {s.notes && !compact && <div><p className="k-eyebrow" style={{ margin: '6px 0' }}>Session notes</p><RichText text={s.notes} /></div>}
       <div className="k-actions">
-        {s.join_url && sessionEnd(s) > new Date() && (
+        {s.provider === 'daily' && sessionEnd(s) > new Date() && (
+          <Link to={`/academy/${program.slug}/live/${s.id}`} className={`k-btn k-btn--sm ${live ? 'k-btn--gold' : 'k-btn--plum'}`}><Video size={16} /> {live ? 'Join class now' : 'Class room'}</Link>
+        )}
+        {s.provider !== 'daily' && s.join_url && sessionEnd(s) > new Date() && (
           <button type="button" onClick={() => joinSession(s)} className={`k-btn k-btn--sm ${live ? 'k-btn--gold' : 'k-btn--plum'}`}><Video size={16} /> {live ? 'Join now' : s.provider === 'zoom' ? 'Join on Zoom' : 'Join link'}</button>
         )}
         {sessionEnd(s) > new Date() && <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => downloadIcs(s)}><CalendarPlus size={16} /> Add to calendar</button>}
         {s.recording_url && <a href={s.recording_url} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--sm k-btn--ghost"><ExternalLink size={16} /> Recording</a>}
+        {s.has_recording && !s.recording_url && <button type="button" className="k-btn k-btn--sm k-btn--ghost" onClick={() => watchRecording(s)}><ExternalLink size={16} /> Watch recording</button>}
       </div>
     </article>
   );
