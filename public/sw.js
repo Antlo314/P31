@@ -4,7 +4,7 @@
    - Built assets (/assets/*, hashed names): cache first.
    - Google Fonts: stale-while-revalidate.
    - Never cached: Supabase data/storage/functions, Stripe, videos, anything non-GET. */
-const VERSION = 'p31-v2';
+const VERSION = 'p31-v3';
 const SHELL = ['/', '/offline.html', '/icons/icon-192.png', '/manifest.webmanifest'];
 
 // Browsers won't serve a cached *redirected* response to a page load

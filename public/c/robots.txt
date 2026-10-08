@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /portal
+Disallow: /enroll
+Disallow: /academy
+Disallow: /studio
+Disallow: /systems
+
+Sitemap: https://www.thep31collective.org/sitemap.xml

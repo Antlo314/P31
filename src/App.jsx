@@ -7,7 +7,7 @@ import LeadPopup from './components/LeadPopup';
 import CartSheet from './components/CartSheet';
 import OfferTicker from './components/OfferTicker';
 import AnnouncementBanner from './components/AnnouncementBanner';
-import { ROUTE_META, SITE_NAME, COLLECTIVE_URL, COLLECTIVE_NAME, applyMeta } from './lib/seo';
+import { ROUTE_META, SITE_NAME, COLLECTIVE_URL, COLLECTIVE_NAME, COLLECTIVE_META, applyMeta } from './lib/seo';
 import { isFlushRoute } from './lib/routes';
 import { isCollective, crossSiteTarget } from './lib/site';
 import MotionRoot from './components/MotionRoot';
@@ -59,12 +59,8 @@ const SiteGate = ({ children }) => {
 };
 
 // The Collective's own titles for the pages it shares with the marketplace.
-const COLLECTIVE_META = {
-  '/': {
-    title: `${COLLECTIVE_NAME} — Mentorship for Faith-Driven Women`,
-    description: 'Private business and faith-based mentorship for faith-driven women, and the home of the P31 team: classrooms, the Content Studio and Systems.',
-    origin: COLLECTIVE_URL,
-  },
+const COLLECTIVE_PAGE_META = {
+  ...COLLECTIVE_META,
   '/portal': { ...ROUTE_META['/portal'], title: `Member portal — ${COLLECTIVE_NAME}`, origin: COLLECTIVE_URL },
 };
 
@@ -73,7 +69,8 @@ const RouteMeta = () => {
   const { pathname } = useLocation();
   useEffect(() => {
     const key = pathname.replace(/\/+$/, '') || '/';
-    if (isCollective && COLLECTIVE_META[key]) applyMeta({ path: key, ...COLLECTIVE_META[key] });
+    if (isCollective && COLLECTIVE_PAGE_META[key]) applyMeta({ path: key, ...COLLECTIVE_PAGE_META[key] });
+    else if (isCollective && key.startsWith('/verify')) applyMeta({ ...COLLECTIVE_META['/verify'], path: key, noindex: key !== '/verify' });
     else if (ROUTE_META[key]) applyMeta({ ...ROUTE_META[key], path: key });
     else if (key.startsWith('/enroll/')) applyMeta({ title: `Your invitation — ${COLLECTIVE_NAME}`, description: ROUTE_META['/mentorship'].description, noindex: true, origin: COLLECTIVE_URL });
     else if (key.startsWith('/dashboard') || key === '/onboarding-exclusive') {

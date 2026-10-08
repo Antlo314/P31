@@ -8,6 +8,7 @@ export const SITE_NAME = 'Proverbs 31 Marketplace';
 // (same app, same Supabase): see src/lib/site.js.
 export const COLLECTIVE_URL = 'https://www.thep31collective.org';
 export const COLLECTIVE_NAME = 'The Proverbs 31 Collective';
+export const COLLECTIVE_IMAGE = `${COLLECTIVE_URL}/c/og-image.jpg`;
 export const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
 
 // The business as Google knows it — the Google Business Profile and socials,
@@ -58,16 +59,19 @@ export const ROUTE_META = {
   },
   '/mentorship': {
     origin: COLLECTIVE_URL,
+    image: COLLECTIVE_IMAGE,
     title: `Mentorship — The Proverbs 31 Collective`,
     description: 'Private business and faith-based mentorship for faith-driven women. Begin with an intro call.',
   },
   '/mentorship/business': {
     origin: COLLECTIVE_URL,
+    image: COLLECTIVE_IMAGE,
     title: `Proverbs 31 Business Mentorship — Strategy, Structure, Accountability`,
     description: 'Private business mentorship with Melanie JC: weekly or biweekly 60-minute sessions, action plans, launch support and priority access. Book an intro call.',
   },
   '/mentorship/faith': {
     origin: COLLECTIVE_URL,
+    image: COLLECTIVE_IMAGE,
     title: `Faith-Based Mentorship — The Proverbs 31 Collective`,
     description: 'Grow in faith, identity and calling with a mentor who walks alongside you. Book an intro call.',
   },
@@ -76,6 +80,22 @@ export const ROUTE_META = {
   '/login': { title: `Sign in — ${SITE_NAME}`, description: 'Curator sign in.', noindex: true },
   '/register': { title: `Join — ${SITE_NAME}`, description: 'Create your curator account.', noindex: true },
   '/unsubscribe': { title: `Unsubscribe — ${SITE_NAME}`, description: 'Manage your email preferences.', noindex: true },
+};
+
+// The Collective's own titles (www.thep31collective.org).
+export const COLLECTIVE_META = {
+  '/': {
+    title: `${COLLECTIVE_NAME} — Christian Mentorship for Women in Business & Faith`,
+    description: 'Private business and faith-based mentorship for faith-driven women, founded by Melanie Jeffers-Cameron. Book an intro call — plus classrooms, the Content Studio and Systems for the P31 team.',
+    origin: COLLECTIVE_URL,
+    image: COLLECTIVE_IMAGE,
+  },
+  '/verify': {
+    title: `Verify a certificate — ${COLLECTIVE_NAME}`,
+    description: 'Confirm a Proverbs 31 Collective certificate of completion by its certificate number.',
+    origin: COLLECTIVE_URL,
+    image: COLLECTIVE_IMAGE,
+  },
 };
 
 // Pages that are worth listing in p31market.com's sitemap (Collective pages live on their own domain).

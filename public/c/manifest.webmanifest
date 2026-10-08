@@ -1,0 +1,24 @@
+{
+  "name": "The Proverbs 31 Collective",
+  "short_name": "P31 Collective",
+  "description": "Your mentorship classroom, the Content Studio and P31 Systems — in one app.",
+  "id": "/?app=collective",
+  "start_url": "/portal?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#12081d",
+  "theme_color": "#1d0f2e",
+  "categories": ["education", "productivity", "lifestyle"],
+  "icons": [
+    { "src": "/c/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/c/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/c/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Business Mentorship", "url": "/academy/business", "icons": [{ "src": "/c/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Faith-Based Mentorship", "url": "/academy/faith", "icons": [{ "src": "/c/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Content Studio", "url": "/studio", "icons": [{ "src": "/c/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Systems", "url": "/systems", "icons": [{ "src": "/c/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

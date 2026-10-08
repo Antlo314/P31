@@ -13,3 +13,6 @@
 @media (max-width: 420px) {
   .cl-nb .nb__wordmark strong { font-size: 0.92rem; }
 }
+/* Long email addresses wrap instead of pushing the page wider on phones. */
+.cl-ft .ft__grid > * { min-width: 0; }
+.cl-ft .ft__col a { overflow-wrap: anywhere; }

@@ -7,9 +7,5 @@ Disallow: /register
 Disallow: /onboarding-exclusive
 Disallow: /unsubscribe
 Disallow: /favorites
-Disallow: /portal
-Disallow: /enroll
-Disallow: /academy
-Disallow: /studio
 
 Sitemap: https://www.p31market.com/sitemap.xml
