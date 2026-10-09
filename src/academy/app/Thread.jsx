@@ -7,7 +7,7 @@ import { DashEmpty } from '../../apps/DashShell';
 
 /** One private thread between a student and the program's mentors (with file attachments). */
 const Thread = ({ programId, studentId, meId, mentorView = false, emptyText }) => {
-  const { program } = useAcademy();
+  const { program, viewAs } = useAcademy();
   const [text, setText] = useState('');
   const [file, setFile] = useState(null);
   const [sending, setSending] = useState(false);
@@ -76,6 +76,7 @@ const Thread = ({ programId, studentId, meId, mentorView = false, emptyText }) =
           <button type="button" onClick={() => { setFile(null); if (fileRef.current) fileRef.current.value = ''; }} aria-label="Remove file"><X size={14} /></button>
         </div>
       )}
+      {viewAs ? <p className="ds-muted">Read-only while you’re seeing their dashboard — send messages from the mentor console.</p> : (
       <form className="ds-compose" onSubmit={send}>
         <label className="k-btn k-btn--ghost k-btn--icon cl-clip" aria-label="Attach a file">
           <Paperclip size={18} />
@@ -84,7 +85,7 @@ const Thread = ({ programId, studentId, meId, mentorView = false, emptyText }) =
         <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder={mentorView ? 'Write to your student…' : 'Write to your mentor…'} rows={2}
           onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) send(e); }} aria-label="Message" />
         <button className="k-btn k-btn--plum k-btn--icon" disabled={sending || (!text.trim() && !file)} aria-label="Send"><Send size={18} /></button>
-      </form>
+      </form>)}
       {error && <p className="k-error">{error}</p>}
     </div>
   );

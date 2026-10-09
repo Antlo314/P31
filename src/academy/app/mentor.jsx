@@ -12,7 +12,8 @@ import Thread from './Thread';
 import { useAcademy, useNow, useRows, write } from './data';
 import { Modal } from './ui';
 import { toLocalInput, fromLocalInput, useRoster } from './helpers';
-import { AttendanceModal, CallReportModal, GoLiveModal, MentorPulse, StudentNotes, StudentProgressPanel } from './teach';
+import { AttendanceModal, CallReportModal, GoLiveModal, MentorPulse, StudentFilesPanel, StudentNotes, StudentProgressPanel, StudentTasksPanel } from './teach';
+import { startViewAs } from './viewAs';
 
 const daysFromNow = (d) => new Date(Date.now() + d * 86400e3).toISOString();
 const STATUS_PILL = { active: 'ds-pill--green', past_due: 'ds-pill--red', canceled: '', expired: '' };
@@ -424,10 +425,11 @@ export const MentorStudent = () => {
         lead={s ? `${s.email} · ${s.plan_label || s.source} · ${s.status.replace('_', ' ')}${s.access_until ? ` · access to ${fmtDate(s.access_until)}` : ''}` : ''}
         actions={s && <>
           <button className="k-btn k-btn--gold k-btn--sm" onClick={() => setModal('call')}><Video size={15} /> Call now</button>
+          <button className="k-btn k-btn--ghost k-btn--sm" onClick={() => startViewAs(program.slug, { id: userId, name: s.full_name, email: s.email })}><Eye size={15} /> See their dashboard</button>
           <a className="k-btn k-btn--ghost k-btn--sm" href={`mailto:${s.email}`}><Mail size={15} /> Email</a>
         </>} />
       <div className="ds-tabs-inline" role="tablist">
-        {[['messages', 'Messages'], ['progress', 'Progress'], ['plans', 'Action plans'], ['sessions', '1:1 sessions'], ['work', `Work${subs.data.some((x) => x.status === 'submitted') ? ' •' : ''}`], ['notes', 'Private notes']].map(([v, l]) => (
+        {[['messages', 'Messages'], ['tasks', 'Personal tasks'], ['files', 'Files'], ['sessions', '1:1 sessions'], ['plans', 'Action plans'], ['progress', 'Progress'], ['work', `Work${subs.data.some((x) => x.status === 'submitted') ? ' •' : ''}`], ['notes', 'Private notes']].map(([v, l]) => (
           <button key={v} role="tab" aria-selected={tab === v} onClick={() => setTab(v)}>{l}</button>
         ))}
       </div>
@@ -435,6 +437,8 @@ export const MentorStudent = () => {
       {tab === 'messages' && <div style={{ maxWidth: 820 }}><Thread programId={program.id} studentId={userId} meId={user?.id} mentorView emptyText="Start the conversation." /></div>}
 
       {tab === 'progress' && <StudentProgressPanel studentId={userId} />}
+      {tab === 'tasks' && <StudentTasksPanel studentId={userId} />}
+      {tab === 'files' && <StudentFilesPanel studentId={userId} />}
       {tab === 'notes' && <StudentNotes studentId={userId} />}
 
       {tab === 'plans' && (

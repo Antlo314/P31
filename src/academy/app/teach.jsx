@@ -128,8 +128,10 @@ export const MentorInbox = () => {
 };
 
 // ── Assignments & grading criteria ───────────────────────────
-const AssignmentForm = ({ assignment, criteria, onClose, onSaved }) => {
+const AssignmentForm = ({ assignment, criteria, presetStudent, onClose, onSaved }) => {
   const { program } = useAcademy();
+  const roster = useRoster(program);
+  const [assignTo, setAssignTo] = useState(assignment?.assigned_to || (presetStudent ? [presetStudent] : null)); // null = everyone
   const lessons = useRows(() => supabase.from('academy_lessons').select('id, title').eq('program_id', program.id).order('position'), [program.id]);
   const [form, setForm] = useState({
     title: assignment?.title || '', instructions: assignment?.instructions || '', due_at: toLocalInput(assignment?.due_at),
@@ -148,7 +150,8 @@ const AssignmentForm = ({ assignment, criteria, onClose, onSaved }) => {
     e.preventDefault();
     setBusy(true); setError('');
     try {
-      const row = { ...form, due_at: fromLocalInput(form.due_at), pass_pct: Number(form.pass_pct), lesson_id: form.lesson_id || null, updated_at: new Date().toISOString() };
+      if (assignTo && !assignTo.length) throw new Error('Choose at least one student, or give it to everyone.');
+      const row = { ...form, due_at: fromLocalInput(form.due_at), pass_pct: Number(form.pass_pct), lesson_id: form.lesson_id || null, assigned_to: assignTo, updated_at: new Date().toISOString() };
       if (file) Object.assign(row, await uploadAcademyFile(program.slug, 'files', file));
       delete row.mime_type;
       const { data, error: err } = await write(assignment
@@ -216,19 +219,36 @@ const AssignmentForm = ({ assignment, criteria, onClose, onSaved }) => {
         {!rows.length && <p className="ds-muted">No criteria: you’ll give written feedback only, without a score.</p>}
       </div>
 
-      <label className="ds-row" style={{ cursor: 'pointer' }}><input type="checkbox" className="ds-check" checked={form.is_published} onChange={(e) => setForm({ ...form, is_published: e.target.checked })} /><div><strong>Published</strong><small>Students see it and get a notification</small></div></label>
+      <div className="k-field"><span>Who gets this</span>
+        <div className="ds-tabs-inline" role="tablist">
+          <button type="button" role="tab" aria-selected={!assignTo} onClick={() => setAssignTo(null)}>Everyone</button>
+          <button type="button" role="tab" aria-selected={!!assignTo} onClick={() => setAssignTo(assignTo || [])}>Chosen students (personal task)</button>
+        </div>
+        {assignTo && (
+          <div className="ds-list cl-pick">
+            {roster.data.filter((r) => r.status !== 'expired').map((r) => (
+              <label key={r.user_id} className="ds-row" style={{ cursor: 'pointer' }}>
+                <input type="checkbox" className="ds-check" checked={assignTo.includes(r.user_id)}
+                  onChange={(e) => setAssignTo(e.target.checked ? [...assignTo, r.user_id] : assignTo.filter((x) => x !== r.user_id))} />
+                <div><strong>{r.full_name}</strong><small>{r.email}</small></div>
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+      <label className="ds-row" style={{ cursor: 'pointer' }}><input type="checkbox" className="ds-check" checked={form.is_published} onChange={(e) => setForm({ ...form, is_published: e.target.checked })} /><div><strong>Published</strong><small>{assignTo ? 'Only the chosen students see it and get a notification' : 'Students see it and get a notification'}</small></div></label>
       {error && <p className="k-error">{error}</p>}
       <button className="k-btn k-btn--gold" disabled={busy}>{busy ? 'Saving…' : 'Save assignment'}</button>
     </form>
   );
 };
 
-const AssignmentModal = ({ assignment, onClose, onSaved }) => {
+export const AssignmentModal = ({ assignment, presetStudent, onClose, onSaved }) => {
   const crit = useRows(() => supabase.from('academy_criteria').select('*').eq('assignment_id', assignment.id).order('position'), [assignment?.id]);
   return (
     <Modal title={assignment ? 'Edit assignment' : 'New assignment'} onClose={onClose} wide>
       {assignment && crit.loading ? <p className="ds-muted">Loading…</p>
-        : <AssignmentForm assignment={assignment} criteria={assignment ? crit.data : []} onClose={onClose} onSaved={onSaved} />}
+        : <AssignmentForm assignment={assignment} criteria={assignment ? crit.data : []} presetStudent={presetStudent} onClose={onClose} onSaved={onSaved} />}
     </Modal>
   );
 };
@@ -257,6 +277,7 @@ export const MentorAssignments = () => {
             return (
               <article key={a.id} className="ds-card">
                 <div className="ds-card__head"><h3>{a.title}</h3><span className={`ds-pill ${a.is_published ? 'ds-pill--green' : ''}`}>{a.is_published ? 'Published' : 'Draft'}</span></div>
+                {a.assigned_to && <span className="ds-pill ds-pill--gold" style={{ justifySelf: 'start' }}>Personal · {a.assigned_to.length} student{a.assigned_to.length === 1 ? '' : 's'}</span>}
                 <p className="ds-muted">{a.due_at ? `${late ? 'Was due' : 'Due'} ${fmtDateTime(a.due_at)}` : 'No due date'} · {points ? `${points} points · pass at ${a.pass_pct}%` : 'Feedback only'}{a.file_name ? ' · attachment' : ''}</p>
                 <div className="cl-stats-row">
                   <span><strong>{handedIn}</strong> handed in</span>
@@ -968,5 +989,84 @@ export const CallReportModal = ({ session, onClose }) => {
         : recs.length ? <ul className="ds-list">{recs.map((r, i) => <li key={i}><a className="ds-row" href={r.url} target="_blank" rel="noopener noreferrer"><Video size={16} /><div><strong>Recording {i + 1}</strong><small>{r.minutes} min · link works for 3 hours</small></div></a></li>)}</ul>
         : <p className="ds-muted">No recordings found.</p>)}
     </Modal>
+  );
+};
+
+// ── On a student's page: their personal tasks and private files ─
+export const StudentTasksPanel = ({ studentId }) => {
+  const { program } = useAcademy();
+  const tasks = useRows(() => supabase.from('academy_assignments').select('*').eq('program_id', program.id).contains('assigned_to', [studentId]).order('created_at', { ascending: false }), [program.id, studentId]);
+  const subs = useRows(() => supabase.from('academy_submissions').select('assignment_id, status, score, max_score').eq('program_id', program.id).eq('student_id', studentId), [program.id, studentId]);
+  const [modal, setModal] = useState(null);
+  const state = (a) => {
+    const s = subs.data.find((x) => x.assignment_id === a.id);
+    return s ? (s.status === 'submitted' ? ['Handed in', 'ds-pill--gold'] : s.status === 'revise' ? ['Revising', 'ds-pill--red'] : ['Graded', 'ds-pill--green']) : a.is_published ? ['To do', ''] : ['Draft', ''];
+  };
+  return (
+    <>
+      <button className="k-btn k-btn--gold k-btn--sm" style={{ marginBottom: 14 }} onClick={() => setModal('new')}><Plus size={15} /> New personal task</button>
+      {tasks.data.length ? (
+        <ul className="ds-list">{tasks.data.map((a) => {
+          const [label, cls] = state(a);
+          return (
+            <li key={a.id}><button className="ds-row" onClick={() => setModal({ a })}>
+              <ClipboardList size={18} /><div><strong>{a.title}</strong><small>{a.due_at ? `Due ${fmtDateTime(a.due_at)}` : 'No due date'}{a.assigned_to.length > 1 ? ` · shared with ${a.assigned_to.length - 1} other${a.assigned_to.length > 2 ? 's' : ''}` : ' · just for them'}</small></div>
+              <span className={`ds-pill ${cls}`}>{label}</span>
+            </button></li>
+          );
+        })}</ul>
+      ) : <p className="ds-muted">No personal tasks yet. Tasks for the whole class are under Assignments.</p>}
+      {modal === 'new' && <AssignmentModal presetStudent={studentId} onClose={() => setModal(null)} onSaved={tasks.reload} />}
+      {modal?.a && <AssignmentModal assignment={modal.a} onClose={() => setModal(null)} onSaved={tasks.reload} />}
+    </>
+  );
+};
+
+export const StudentFilesPanel = ({ studentId }) => {
+  const { program } = useAcademy();
+  const files = useRows(() => supabase.from('academy_student_files').select('*').eq('program_id', program.id).eq('student_id', studentId).order('created_at', { ascending: false }), [program.id, studentId]);
+  const [form, setForm] = useState({ title: '', note: '', file: null, busy: false, error: '' });
+  const upload = async (e) => {
+    e.preventDefault();
+    if (!form.file) return setForm({ ...form, error: 'Choose a file.' });
+    setForm({ ...form, busy: true, error: '' });
+    try {
+      const meta = await uploadAcademyFile(program.slug, `messages/${studentId}`, form.file);
+      const { error } = await write(supabase.from('academy_student_files').insert({
+        program_id: program.id, student_id: studentId, title: form.title.trim() || form.file.name.replace(/\.[^.]+$/, ''), note: form.note.trim() || null, ...meta,
+      }));
+      if (error) throw new Error(error);
+      setForm({ title: '', note: '', file: null, busy: false, error: '' }); e.target.reset(); files.reload();
+    } catch (err) { setForm((f) => ({ ...f, busy: false, error: err.message })); }
+  };
+  const remove = async (f) => {
+    if (!window.confirm(`Remove “${f.title}”?`)) return;
+    await supabase.storage.from('academy').remove([f.file_path]);
+    await write(supabase.from('academy_student_files').delete().eq('id', f.id));
+    files.reload();
+  };
+  return (
+    <div className="ds-grid" style={{ maxWidth: 820 }}>
+      <form className="ds-card ds-form" onSubmit={upload}>
+        <strong><Upload size={16} /> Share a private file</strong>
+        <p className="ds-muted" style={{ margin: 0 }}>Only this student (and mentors) can open it. They get a notification.</p>
+        <label className="k-field"><span>File (PDF, worksheet, audio, video — up to 50 MB)</span><input type="file" onChange={(e) => setForm({ ...form, file: e.target.files[0] || null })} /></label>
+        <div className="k-row">
+          <label className="k-field"><span>Title</span><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Defaults to the file name" /></label>
+          <label className="k-field"><span>Note (optional)</span><input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="e.g. Read before Thursday" /></label>
+        </div>
+        {form.error && <p className="k-error">{form.error}</p>}
+        <button className="k-btn k-btn--gold k-btn--sm" style={{ justifySelf: 'start' }} disabled={form.busy}><Upload size={15} /> {form.busy ? 'Uploading…' : 'Share with them'}</button>
+      </form>
+      {files.data.length ? (
+        <ul className="ds-list">{files.data.map((f) => (
+          <li key={f.id} className="ds-row">
+            <FileText size={18} /><div><strong>{f.title}</strong><small>{[f.note, f.file_name, fileSize(f.size_bytes), fmtDate(f.created_at)].filter(Boolean).join(' · ')}</small></div>
+            <button className="k-btn k-btn--icon k-btn--ghost" onClick={() => openFile(f.file_path)} aria-label="Download"><Download size={15} /></button>
+            <button className="k-btn k-btn--icon k-btn--ghost" onClick={() => remove(f)} aria-label="Remove"><Trash2 size={15} /></button>
+          </li>
+        ))}</ul>
+      ) : <p className="ds-muted">Nothing shared privately yet.</p>}
+    </div>
   );
 };

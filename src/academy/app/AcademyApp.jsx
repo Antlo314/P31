@@ -23,6 +23,7 @@ import { MentorInbox, MentorAssignments, MentorGradebook, MentorQuizzes, MentorC
 import { StudentAssignments, StudentAssignment, StudentQuizzes, StudentQuiz, StudentProgress } from './learn';
 import { Discussions, DiscussionThread, CertificateView, NotificationBell, InstallApp } from './shared';
 import LiveRoom from './LiveRoom';
+import { readViewAs, stopViewAs } from './viewAs';
 import mark from '../../assets/academy/collective-mark.png';
 import './classroom.css';
 
@@ -45,6 +46,7 @@ const studentNav = (slug) => {
     { to: `${base}/goals`, label: 'Goals', Icon: Target },
     { to: `${base}/work`, label: 'Submit work', Icon: Upload },
   ] : [
+    { to: `${base}/plans`, label: 'My tasks', Icon: ClipboardCheck },
     { to: `${base}/journal`, label: 'Journal', Icon: Heart },
   ];
   return [...core, ...extra,
@@ -126,14 +128,21 @@ const AcademyApp = () => {
   if (teach && !isMentor) return <Navigate to={`/academy/${slug}`} replace />;
   if (!teach && !isMentor && !entry?.has_access) return <NoAccess entry={entry} slug={slug} />;
 
+  // "See their dashboard": a mentor viewing the student classroom as one student (read-only).
+  const viewAs = !teach && isMentor ? readViewAs(slug) : null;
   const nav = teach ? mentorNav(slug, counts) : studentNav(slug);
   const banner = roles.preview
     ? <div className="ds-banner">Layout preview (development only) — no data is loaded.</div>
+    : viewAs ? <div className="ds-banner"><GraduationCap size={18} /> You’re seeing <strong>{viewAs.name}</strong>’s dashboard, exactly as they see it (read-only).
+        <button className="k-link" style={{ background: 'none', border: 0, cursor: 'pointer', font: 'inherit' }} onClick={() => stopViewAs(slug, `/academy/${slug}/teach/students/${viewAs.id}`)}>Exit</button></div>
     : !teach && isMentor && !entry ? <div className="ds-banner"><GraduationCap size={18} /> You’re viewing the student classroom. <Link to={`/academy/${slug}/teach`} className="k-link">Back to mentor console</Link></div>
     : null;
 
   return (
-    <AcademyContext.Provider value={{ program, user, isMentor, isAdmin: !!roles.admin, preview: !!roles.preview }}>
+    <AcademyContext.Provider value={{
+      program, isMentor, isAdmin: !!roles.admin, preview: !!roles.preview, viewAs: !!viewAs,
+      user: viewAs ? { id: viewAs.id, email: viewAs.email, user_metadata: { full_name: viewAs.name } } : user,
+    }}>
       <DashShell
         theme="light"
         variant={slug}
@@ -152,7 +161,7 @@ const AcademyApp = () => {
           <Route path="messages" element={<StudentMessages />} />
           <Route path="library" element={<StudentLibrary />} />
           <Route path="billing" element={<StudentBilling />} />
-          {slug === 'business' && <Route path="plans" element={<StudentPlans />} />}
+          <Route path="plans" element={<StudentPlans />} />
           {slug === 'business' && <Route path="goals" element={<StudentGoals />} />}
           {slug === 'business' && <Route path="work" element={<StudentWork />} />}
           {slug === 'faith' && <Route path="journal" element={<StudentJournal />} />}

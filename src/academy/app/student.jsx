@@ -33,10 +33,15 @@ const joinSession = async (s) => {
 const bookSession = (user) => openCalendly('session', { name: user?.user_metadata?.full_name || '', email: user?.email || '', source: 'classroom' });
 const sessionEnd = (s) => new Date(new Date(s.starts_at).getTime() + (s.duration_minutes || 60) * 60000);
 
-const useSessions = (program, user) => useRows(
-  () => supabase.from('academy_sessions').select('*').eq('program_id', program.id).order('starts_at', { ascending: true }),
-  [program.id, user?.id],
-);
+// Only this student's sessions (mentors can read every session, which matters in "See their dashboard").
+const forStudent = (s, uid) => (!s.student_id || s.student_id === uid) && (!s.invitees || s.invitees.includes(uid));
+const useSessions = (program, user) => {
+  const res = useRows(
+    () => supabase.from('academy_sessions').select('*').eq('program_id', program.id).order('starts_at', { ascending: true }),
+    [program.id, user?.id],
+  );
+  return { ...res, data: res.data.filter((s) => forStudent(s, user?.id)) };
+};
 const useLessons = (program) => useRows(
   () => supabase.from('academy_lessons').select('id, module_id, title, position, video_url, is_published').eq('program_id', program.id).eq('is_published', true).order('position'),
   [program.id],
@@ -506,14 +511,26 @@ export const StudentJournal = () => {
 
 // ── Library ──────────────────────────────────────────────────
 export const StudentLibrary = () => {
-  const { program } = useAcademy();
+  const { program, user } = useAcademy();
   const files = useRows(() => supabase.from('academy_resources').select('*').eq('program_id', program.id).order('created_at', { ascending: false }), [program.id]);
+  const mine = useRows(() => supabase.from('academy_student_files').select('*').eq('program_id', program.id).eq('student_id', user.id).order('created_at', { ascending: false }), [program.id, user?.id]);
   const [error, setError] = useState('');
   const open = async (f) => { setError(''); try { await openFile(f.file_path); } catch { setError('That file couldn’t be opened — try again in a moment.'); } };
   return (
     <>
       <DashHead eyebrow={program.title} title="Resource" accent="library" lead="Guides, worksheets and downloads from your mentor." />
       {error && <p className="k-error">{error}</p>}
+      {mine.data.length > 0 && (
+        <section style={{ marginBottom: 24 }}>
+          <h2 className="cl-h2">Shared with you</h2>
+          <ul className="ds-list">{mine.data.map((f) => (
+            <li key={f.id}><button className="ds-row" onClick={() => open(f)}>
+              <FileText size={22} /><div><strong>{f.title}</strong><small>{[f.note, f.file_name, fileSize(f.size_bytes), fmtDate(f.created_at)].filter(Boolean).join(' · ')}</small></div><Download size={18} />
+            </button></li>
+          ))}</ul>
+          <h2 className="cl-h2" style={{ marginTop: 24 }}>For everyone</h2>
+        </section>
+      )}
       {files.data.length ? (
         <ul className="ds-list">
           {files.data.map((f) => (

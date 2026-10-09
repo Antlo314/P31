@@ -25,8 +25,9 @@ export const StudentAssignments = () => {
   const list = useRows(() => supabase.from('academy_assignments').select('*, criteria:academy_criteria(max_points)').eq('program_id', program.id).eq('is_published', true).order('due_at', { ascending: true, nullsFirst: false }), [program.id]);
   const subs = useRows(() => supabase.from('academy_submissions').select('id, assignment_id, status, score, max_score, created_at').eq('program_id', program.id).eq('student_id', user.id).order('created_at', { ascending: false }), [program.id, user?.id]);
   const mine = (id) => subs.data.find((s) => s.assignment_id === id);
-  const todo = list.data.filter((a) => !mine(a.id) || mine(a.id).status === 'revise');
-  const done = list.data.filter((a) => mine(a.id) && mine(a.id).status !== 'revise');
+  const forMe = list.data.filter((a) => !a.assigned_to || a.assigned_to.includes(user.id));
+  const todo = forMe.filter((a) => !mine(a.id) || mine(a.id).status === 'revise');
+  const done = forMe.filter((a) => mine(a.id) && mine(a.id).status !== 'revise');
 
   const card = (a) => {
     const s = mine(a.id);
@@ -46,7 +47,7 @@ export const StudentAssignments = () => {
   return (
     <>
       <DashHead eyebrow={program.title} title="Assignments" lead="Real work, clear criteria, and feedback from your mentor." />
-      {list.data.length ? <>
+      {forMe.length ? <>
         <section><h2 className="cl-h2">To do</h2>{todo.length ? <ul className="ds-list">{todo.map(card)}</ul> : <p className="ds-muted">You’re all caught up. Well done.</p>}</section>
         {done.length > 0 && <section className="ds-section"><h2 className="cl-h2">Handed in</h2><ul className="ds-list">{done.map(card)}</ul></section>}
       </> : <DashEmpty Icon={ClipboardList} title="No assignments yet">When your mentor sets one, it shows up here — and you’ll get a notification.</DashEmpty>}
@@ -320,11 +321,11 @@ export const StudentProgress = () => {
 /** "Due soon" for the student home: assignments and quizzes still open. */
 export const DueSoon = () => {
   const { program, user } = useAcademy();
-  const assignments = useRows(() => supabase.from('academy_assignments').select('id, title, due_at').eq('program_id', program.id).eq('is_published', true).order('due_at', { ascending: true, nullsFirst: false }).limit(20), [program.id]);
+  const assignments = useRows(() => supabase.from('academy_assignments').select('id, title, due_at, assigned_to').eq('program_id', program.id).eq('is_published', true).order('due_at', { ascending: true, nullsFirst: false }).limit(20), [program.id]);
   const subs = useRows(() => supabase.from('academy_submissions').select('assignment_id, status').eq('program_id', program.id).eq('student_id', user.id), [program.id, user?.id]);
   const quizzes = useRows(() => supabase.from('academy_quizzes').select('id, title').eq('program_id', program.id).eq('is_published', true), [program.id]);
   const passed = useRows(() => supabase.from('academy_quiz_attempts').select('quiz_id').eq('program_id', program.id).eq('user_id', user.id).eq('passed', true), [program.id, user?.id]);
-  const open = assignments.data.filter((a) => !subs.data.some((s) => s.assignment_id === a.id && s.status !== 'revise')).slice(0, 4);
+  const open = assignments.data.filter((a) => (!a.assigned_to || a.assigned_to.includes(user.id)) && !subs.data.some((s) => s.assignment_id === a.id && s.status !== 'revise')).slice(0, 4);
   const openQuizzes = quizzes.data.filter((q) => !passed.data.some((p) => p.quiz_id === q.id)).slice(0, 3);
   if (!open.length && !openQuizzes.length) return null;
   return (
