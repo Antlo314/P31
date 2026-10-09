@@ -51,7 +51,9 @@ export async function write(promise) {
 export function useRealtime(table, column, value, onChange) {
   useEffect(() => {
     if (!value) return undefined;
-    const ch = supabase.channel(`${table}:${column}:${value}`)
+    // A unique name per listener: Supabase reuses channels by name, and the same
+    // table can be watched twice on one page (e.g. the bell in the sidebar and the top bar).
+    const ch = supabase.channel(`${table}:${column}:${value}:${Math.random().toString(36).slice(2, 10)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table, filter: `${column}=eq.${value}` }, onChange)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
