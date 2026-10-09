@@ -93,19 +93,27 @@ Deno.serve(async (req) => {
       const properties = {
         nbf: w.nbf, exp: w.exp, eject_at_room_exp: true,
         enable_prejoin_ui: true, enable_chat: true, enable_screenshare: true, enable_knocking: false,
-        max_participants: Math.min(200, Number(body.max_participants) || 50),
         ...(s.record ? { enable_recording: 'cloud' } : {}),
+      };
+      // Free Daily plans refuse some settings (recording without a card on file): retry without them.
+      const withPlanFallback = async (call: (props: any) => Promise<any>) => {
+        try { return { result: await call(properties), note: null }; }
+        catch (e) {
+          if (!/plan|not allowed|cannot be set/i.test((e as Error).message) || !properties.enable_recording) throw e;
+          const { enable_recording: _r, ...rest } = properties as any;
+          return { result: await call(rest), note: 'Recording isn’t available on the current Daily plan, so this room opens without it.' };
+        }
       };
       if (body.action === 'update') {
         if (!s.daily_room) return json({ ok: true, skipped: 'no live room' });
-        await daily(`/rooms/${encodeURIComponent(s.daily_room)}`, { method: 'POST', body: JSON.stringify({ properties }) });
+        await withPlanFallback((props) => daily(`/rooms/${encodeURIComponent(s.daily_room)}`, { method: 'POST', body: JSON.stringify({ properties: props }) }));
         return json({ ok: true });
       }
       if (s.daily_room) throw new UserError('This session already has a live room.');
       const name = `p31-${String(s.id).slice(0, 8)}-${crypto.randomUUID().slice(0, 6)}`;
-      const room = await daily('/rooms', { method: 'POST', body: JSON.stringify({ name, privacy: 'private', properties }) });
-      await admin.from('academy_sessions').update({ provider: 'daily', daily_room: room.name, join_url: room.url }).eq('id', s.id);
-      return json({ ok: true, url: room.url });
+      const { result: room, note } = await withPlanFallback((props) => daily('/rooms', { method: 'POST', body: JSON.stringify({ name, privacy: 'private', properties: props }) }));
+      await admin.from('academy_sessions').update({ provider: 'daily', daily_room: room.name, join_url: room.url, ...(note ? { record: false } : {}) }).eq('id', s.id);
+      return json({ ok: true, url: room.url, note });
     }
 
     if (body.action === 'join') {

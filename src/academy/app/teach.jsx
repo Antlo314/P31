@@ -893,7 +893,12 @@ export const GoLiveModal = ({ studentId, onClose }) => {
     const { data, error: err } = await write(supabase.from('academy_sessions').insert(row).select('id').single());
     if (err) { setBusy(false); return setError(err); }
     const res = await fnInvoke('daily-room', { action: 'create', session_id: data.id });
-    if (res?.error) { setBusy(false); return setError(`The class was saved, but the room didn’t open: ${res.error}`); }
+    if (res?.error) {
+      await supabase.from('academy_sessions').delete().eq('id', data.id); // don't leave an empty class behind
+      setBusy(false);
+      return setError(`The room didn’t open: ${res.error}`);
+    }
+    if (res?.note) window.alert(res.note);
     navigate(`/academy/${program.slug}/live/${data.id}`);
   };
 
