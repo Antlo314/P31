@@ -35,7 +35,19 @@ const LiveRoom = () => {
         theme: { colors: { accent: '#D9A93A', accentText: '#2a1a00', background: '#12081d', backgroundAccent: '#22123a', baseText: '#FFFFFF', border: '#3a2457', mainAreaBg: '#0d0616', mainAreaBgAccent: '#22123a', mainAreaText: '#FFFFFF', supportiveText: '#c9b8dc' } },
       });
       callRef.current = call;
-      call.on('left-meeting', () => alive && setState((st) => ({ ...st, status: 'left' })));
+      // Keep Daily's own reason when it closes the call, so problems are easy to fix.
+      let reason = '';
+      call.on('error', (e) => {
+        reason = e?.errorMsg || e?.error?.msg || e?.error?.type || 'The video service closed the call.';
+        console.error('Daily error:', e);
+        if (alive) setState((st) => ({ ...st, status: 'error', error: reason }));
+      });
+      call.on('camera-error', (e) => {
+        console.warn('Daily camera error:', e);
+        if (alive) setState((st) => ({ ...st, notice: 'Your camera or microphone is blocked. Tap the lock icon by the web address, allow Camera and Microphone, then reload.' }));
+      });
+      call.on('nonfatal-error', (e) => console.warn('Daily notice:', e));
+      call.on('left-meeting', () => alive && !reason && setState((st) => ({ ...st, status: 'left' })));
       setState({ status: 'live', title: data.title, error: '', mentor: !!data.mentor });
       try { await call.join({ url: data.url, token: data.token }); } catch (e) { if (alive) setState({ status: 'error', title: data.title, error: e?.message || 'Couldn’t join the room.' }); }
     })();
@@ -60,6 +72,7 @@ const LiveRoom = () => {
         <strong><Video size={16} /> {state.title || 'Live class'}</strong>
         {state.mentor && state.status === 'live' && <button className="k-btn k-btn--sm k-btn--ghost" onClick={endForAll}><PhoneOff size={15} /> End for everyone</button>}
       </div>
+      {state.notice && <div className="ds-banner">{state.notice}</div>}
       <div className={`lv-stage ${state.status === 'live' ? '' : 'is-idle'}`}>
         <div ref={host} className="lv-frame" />
         {state.status === 'loading' && <div className="lv-msg"><span className="lv-spin" /> Opening your class…</div>}
@@ -70,7 +83,8 @@ const LiveRoom = () => {
         )}
         {state.status === 'error' && (
           <div className="lv-msg"><AlertTriangle size={26} /><strong>{state.error}</strong>
-            <p>Rooms open 30 minutes before class. If it’s time and this keeps happening, message your mentor.</p>
+            <p>Rooms open 30 minutes before class. If it’s time and this keeps happening, send this message to your mentor or the P31 team.</p>
+            <button className="k-btn k-btn--gold" onClick={() => window.location.reload()}>Try again</button>
             <Link to={`/academy/${program.slug}/sessions`} className="k-btn k-btn--ghost">Back to sessions</Link></div>
         )}
       </div>
