@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useRoles, dashboardsFor } from '../lib/roles';
 import { CONTACT_EMAIL } from '../lib/academy';
 import { hrefFor, isCollective } from '../lib/site';
+import { usernameToEmail } from '../systems/useOperator';
 import mark from '../assets/academy/collective-mark.png';
 import '../pages/Login.css';
 import './mentorship.css';
@@ -36,6 +37,8 @@ const Portal = () => {
     e.preventDefault();
     setBusy(true); setError(''); setNote('');
     if (creating) {
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.trim())) { setBusy(false); return setError('Enter your full email address, like name@example.com.'); }
+      if (form.password.length < 8) { setBusy(false); return setError('Use a password with at least 8 characters.'); }
       // A plain account — dashboards open once an admin or an enrollment link grants access.
       const { data, error: err } = await supabase.auth.signUp({
         email: form.email.trim(), password: form.password,
@@ -46,15 +49,23 @@ const Portal = () => {
       if (!data.session) setNote('Check your email to confirm your account, then sign in here.');
       return;
     }
-    const { error: err } = await supabase.auth.signInWithPassword({ email: form.email.trim(), password: form.password });
+    // Email, or a Systems username (e.g. Antlo314) like the Systems sign-in accepts.
+    const email = form.email.trim() ? usernameToEmail(form.email) : '';
+    if (!email || !form.password) { setBusy(false); return setError('Enter your email (or Systems username) and your password.'); }
+    const timeout = new Promise((resolve) => setTimeout(() => resolve({ error: { message: 'timeout' } }), 20000));
+    const { error: err } = await Promise.race([supabase.auth.signInWithPassword({ email, password: form.password }), timeout]);
     setBusy(false);
-    if (err) setError(err.message === 'Invalid login credentials' ? 'That email and password don’t match. Try again or reset your password.' : err.message);
+    if (!err) return;
+    if (err.message === 'Invalid login credentials') setError(`That email and password don’t match${form.email.includes('@') ? '' : ` (we tried ${email})`}. Check them, or tap “Forgot password”.`);
+    else if (err.message === 'timeout') setError('Signing in is taking too long — check your connection and try again.');
+    else if (/confirm/i.test(err.message)) setError('This account’s email hasn’t been confirmed yet. Check your inbox for the confirmation link.');
+    else setError(err.message);
   };
 
   const forgot = async () => {
     setError(''); setNote('');
     if (!form.email.trim()) return setError('Enter your email first, then tap “Forgot password”.');
-    const { error: err } = await supabase.auth.resetPasswordForEmail(form.email.trim(), { redirectTo: `${window.location.origin}/portal` });
+    const { error: err } = await supabase.auth.resetPasswordForEmail(usernameToEmail(form.email), { redirectTo: `${window.location.origin}/portal` });
     if (err) setError(err.message); else setNote('Check your inbox for a link to set a new password.');
   };
 
@@ -114,14 +125,14 @@ const Portal = () => {
                   <div className="lg__input"><input required autoComplete="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
                 </label>
               )}
-              <label className="lg__field"><span>Email</span>
+              <label className="lg__field"><span>{creating ? 'Email' : 'Email or Systems username'}</span>
                 <div className="lg__input"><Mail size={18} />
-                  <input type="email" required autoComplete="email" inputMode="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                  <input type="text" autoComplete="username" inputMode="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" />
                 </div>
               </label>
               <label className="lg__field"><span>Password</span>
                 <div className="lg__input"><Lock size={18} />
-                  <input type={show ? 'text' : 'password'} required minLength={creating ? 8 : undefined} autoComplete={creating ? 'new-password' : 'current-password'} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+                  <input type={show ? 'text' : 'password'} minLength={creating ? 8 : undefined} autoComplete={creating ? 'new-password' : 'current-password'} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
                   <button type="button" className="lg__eye" onClick={() => setShow(!show)} aria-label={show ? 'Hide password' : 'Show password'}>{show ? <EyeOff size={18} /> : <Eye size={18} />}</button>
                 </div>
               </label>

@@ -5,14 +5,23 @@ import './styles/kit.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
+import ErrorBoundary from './components/ErrorBoundary'
+import { reloadOnceForNewVersion } from './lib/reload'
+
+// A page opened before a deploy may ask for code files that no longer exist: reload once.
+window.addEventListener('vite:preloadError', (event) => {
+  if (reloadOnceForNewVersion()) event.preventDefault()
+})
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider>
-      <CartProvider>
-        <App />
-      </CartProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <CartProvider>
+          <App />
+        </CartProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )
 
