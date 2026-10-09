@@ -127,7 +127,6 @@ Deno.serve(async (req) => {
         body: JSON.stringify({ properties: {
           room_name: s.daily_room, user_name: String(name).slice(0, 60), user_id: who.user.id.slice(0, 36),
           is_owner: !!isMentor, exp: w.exp, eject_at_token_exp: true,
-          ...(isMentor && s.record ? { enable_recording: 'cloud' } : {}),
         } }),
       });
       return json({ ok: true, url, token, title: s.title, mentor: !!isMentor, ends_at: w.end.toISOString() });

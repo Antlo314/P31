@@ -49,7 +49,24 @@ const LiveRoom = () => {
       call.on('nonfatal-error', (e) => console.warn('Daily notice:', e));
       call.on('left-meeting', () => alive && !reason && setState((st) => ({ ...st, status: 'left' })));
       setState({ status: 'live', title: data.title, error: '', mentor: !!data.mentor });
-      try { await call.join({ url: data.url, token: data.token }); } catch (e) { if (alive) setState({ status: 'error', title: data.title, error: e?.message || 'Couldn’t join the room.' }); }
+      // No camera or microphone on this device? Join anyway — screen share and chat still work.
+      let hasCam = false;
+      let hasMic = false;
+      try {
+        const devices = await navigator.mediaDevices?.enumerateDevices?.() || [];
+        hasCam = devices.some((d) => d.kind === 'videoinput');
+        hasMic = devices.some((d) => d.kind === 'audioinput');
+      } catch { /* unknown: let Daily decide */ hasCam = true; hasMic = true; }
+      if (!hasCam || !hasMic) {
+        setState((st) => ({ ...st, notice: `No ${!hasCam && !hasMic ? 'camera or microphone' : !hasCam ? 'camera' : 'microphone'} found — you’re joining without ${!hasCam && !hasMic ? 'them' : 'it'}. You can still share your screen and use chat.` }));
+      }
+      try {
+        await call.join({ url: data.url, token: data.token, startVideoOff: !hasCam, startAudioOff: !hasMic });
+      } catch (e) {
+        const msg = typeof e === 'string' ? e : e?.errorMsg || e?.error?.msg || e?.message || reason || JSON.stringify(e);
+        console.error('Daily join failed:', e);
+        if (alive) setState((st) => ({ ...st, status: 'error', title: data.title, error: `Couldn’t join the room: ${msg}` }));
+      }
     })();
     return () => {
       alive = false;
@@ -83,7 +100,7 @@ const LiveRoom = () => {
         )}
         {state.status === 'error' && (
           <div className="lv-msg"><AlertTriangle size={26} /><strong>{state.error}</strong>
-            <p>Rooms open 30 minutes before class. If it’s time and this keeps happening, send this message to your mentor or the P31 team.</p>
+            <p>Scheduled rooms open 30 minutes before class. If this keeps happening, send the message above to your mentor or the P31 team.</p>
             <button className="k-btn k-btn--gold" onClick={() => window.location.reload()}>Try again</button>
             <Link to={`/academy/${program.slug}/sessions`} className="k-btn k-btn--ghost">Back to sessions</Link></div>
         )}
