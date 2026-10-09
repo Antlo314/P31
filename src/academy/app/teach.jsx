@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   Inbox, Megaphone, Send, Users, ArrowLeft, Plus, Trash2, Pencil, Eye, EyeOff, ClipboardList, Download, Link2,
-  ListChecks, X, Check, Award, FileText, Target, UserCheck, StickyNote, BarChart3, HelpCircle, ArrowUp, ArrowDown, ExternalLink, Radio, Video,
+  ListChecks, X, Check, Award, FileText, Target, UserCheck, StickyNote, BarChart3, HelpCircle, ArrowUp, ArrowDown, ExternalLink, Radio, Video, Upload,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { fmtDate, fmtDateTime, fileSize, openFile, uploadAcademyFile } from '../../lib/academy';
