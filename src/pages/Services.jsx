@@ -10,8 +10,9 @@ import productVid from '../assets/web/product.mp4';
 import productPoster from '../assets/web/product-poster.webp';
 import visionaryVid from '../assets/web/visionary.mp4';
 import visionaryPoster from '../assets/web/visionary-poster.webp';
+import { EMAIL } from '../lib/team';
 
-const INQUIRE = 'mailto:proverbs31markets@gmail.com?subject=Bespoke%20services';
+const INQUIRE = `mailto:${EMAIL.assistantMarket}?subject=Bespoke%20services`;
 
 const SERVICES = [
   {

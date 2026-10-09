@@ -3,7 +3,7 @@
 const FLUSH = new Set([
   '/', '/shop', '/favorites', '/directory', '/calendar', '/about', '/services', '/partner',
   '/login', '/register', '/unsubscribe', '/onboarding-exclusive',
-  '/mentorship', '/mentorship/business', '/mentorship/faith', '/portal',
+  '/mentorship', '/mentorship/business', '/mentorship/faith', '/portal', '/academy', '/systems',
 ]);
 
 export const isFlushRoute = (pathname) => {

@@ -5,6 +5,8 @@ import { openJoin } from '../lib/join';
 import { collectivePortal, hrefFor } from '../lib/site';
 import logoPath from '../assets/web/logo-160.webp';
 import './Footer.css';
+import { EMAIL } from '../lib/team';
+import { JOIN_COLLECTIVE_URL } from '../lib/academy';
 
 const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
 // Opens the "write a review" box on our Google Business Profile.
@@ -47,7 +49,7 @@ const Footer = () => (
           <Link to="/shop">Shop the marketplace</Link>
           <Link to="/directory">Curators &amp; shops</Link>
           <Link to="/calendar">Market dates</Link>
-          <a href={hrefFor('/mentorship')}>Mentorship</a>
+          <a href={hrefFor('/academy')}>Mentorship</a>
           <Link to="/about">Our story</Link>
         </nav>
         <nav className="ft__col" aria-label="Join">
@@ -57,10 +59,12 @@ const Footer = () => (
           <Link to="/services">Services</Link>
           <Link to="/login">Curator portal</Link>
           <a href={collectivePortal()}>The Collective</a>
+          <a href={JOIN_COLLECTIVE_URL} target="_blank" rel="noopener noreferrer">Join P31 Collective</a>
         </nav>
         <div className="ft__col">
           <h4>Contact</h4>
-          <a href="mailto:proverbs31markets@gmail.com"><Mail size={15} /> Email us</a>
+          <a href={`mailto:${EMAIL.community}`}><Mail size={15} /> Email us</a>
+          <a href={`mailto:${EMAIL.vendors}`}><Mail size={15} /> Curator &amp; vendor help</a>
           <a href="tel:14705622852"><Phone size={15} /> (470) 562-2852</a>
           <span><MapPin size={15} /> Atlanta, GA — touring</span>
           <a href={GOOGLE_REVIEW_URL} target="_blank" rel="noreferrer"><Star size={15} /> Review us on Google</a>

@@ -16,6 +16,8 @@ const COLLECTIVE = /(^|\.)thep31collective\.org$/i;
 
 const PAGES = {
   '/': '/c/home',
+  '/academy': '/c/academy',
+  '/systems': '/c/systems',
   '/mentorship': '/c/mentorship',
   '/mentorship/business': '/c/mentorship/business',
   '/mentorship/faith': '/c/mentorship/faith',

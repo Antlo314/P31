@@ -9,6 +9,7 @@ import { CONTACT_EMAIL } from '../lib/academy';
 import mark from '../assets/academy/collective-mark.png';
 import founder from '../assets/web/melanie23_rm.webp';
 import './mentorship.css';
+import JoinCollective from '../components/JoinCollective';
 
 const ICONS = { calendar: CalendarDays, target: Target, clipboard: ClipboardCheck, chart: TrendingUp, people: Users, crown: Crown, book: BookOpen };
 
@@ -58,9 +59,10 @@ export const MentorshipLanding = () => (
       title="Mentorship that"
       accent="makes room."
       lead="Private mentorship for faith-driven women — for the business you’re building and the woman you’re becoming."
-      media={{ src: founder, portrait: true, alt: 'Melanie Jeffers-Cameron' }}
+      media={{ src: founder, portrait: true, alt: 'Melanie JC' }}
       actions={<>
-        <button type="button" className="k-btn k-btn--gold" onClick={toCall}>Book an intro call <ArrowRight size={18} /></button>
+        <JoinCollective className="k-btn k-btn--gold" />
+        <button type="button" className="k-btn k-btn--light" onClick={toCall}>Book an intro call <ArrowRight size={18} /></button>
         <Link to="/portal" className="k-btn k-btn--light">Member sign in</Link>
       </>}
     />
@@ -109,7 +111,8 @@ export const MentorshipProgram = () => {
         accent={p.accent}
         lead={p.vision}
         actions={<>
-          <button type="button" className="k-btn k-btn--gold" onClick={toCall}>Book an intro call <ArrowRight size={18} /></button>
+          <JoinCollective className="k-btn k-btn--gold" />
+          <button type="button" className="k-btn k-btn--light" onClick={toCall}>Book an intro call <ArrowRight size={18} /></button>
           <a href={`mailto:${CONTACT_EMAIL}`} className="k-btn k-btn--light"><Mail size={16} /> Email us</a>
         </>}
       >

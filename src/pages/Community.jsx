@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link, useLocation, Routes, Route, Navigate } from 'react-router-dom';
+import { Link, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { fetchAdminIds } from '../lib/people';
@@ -14,7 +14,7 @@ const PUBLIC_CHANNELS = [
 
 const Community = () => {
   const { user, profile, curatorData, isAdmin } = useAuth();
-  const [activeTab, setActiveTab] = useState('channels'); // 'channels' or 'dms'
+  const [, setActiveTab] = useState('channels'); // 'channels' or 'dms'
   // Who wears the P31 badge (account emails are private, so ask the server).
   const [adminIds, setAdminIds] = useState(() => new Set());
   useEffect(() => { fetchAdminIds().then(setAdminIds); }, []);

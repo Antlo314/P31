@@ -16,3 +16,12 @@
 /* Long email addresses wrap instead of pushing the page wider on phones. */
 .cl-ft .ft__grid > * { min-width: 0; }
 .cl-ft .ft__col a { overflow-wrap: anywhere; }
+
+/* Header: "Join P31 Collective" leads; Sign in is the quieter pill beside it. */
+.cl-nb__actions { gap: 8px; }
+.cl-nb__signin { background: transparent; box-shadow: none; color: inherit; border: 1px solid rgba(94, 42, 140, 0.3); }
+.nb--clear .cl-nb__signin { color: #fff; border-color: rgba(255, 255, 255, 0.35); }
+.cl-nb__join { white-space: nowrap; }
+/* Phones: every page opens with a full-size Join button, so the bar keeps just the logo and Sign in. */
+@media (max-width: 599px) { .cl-nb .cl-nb__join { display: none; } }
+.cl-ft__join { margin-top: 4px; justify-self: start; width: fit-content; }

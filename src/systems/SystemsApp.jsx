@@ -4,6 +4,7 @@ import { LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useOperator } from './useOperator';
 import SystemsLogin from './SystemsLogin';
+import SystemsShowcase from './SystemsShowcase';
 import Overview from './pages/Overview';
 import { SYSTEMS_NAV } from './nav';
 import './Systems.css';
@@ -39,7 +40,10 @@ const SystemsApp = () => {
     return () => window.removeEventListener('keydown', onKey);
   }, [moreOpen]);
 
+  const atFront = pathname.replace(/\/+$/, '') === '/systems';
   if (status === 'loading') return <div className="sys-boot" aria-busy="true" />;
+  // Visitors (and members without Systems access) at /systems see what Systems is.
+  if (atFront && status !== 'operator') return <SystemsShowcase />;
   if (status === 'signed-out') return <SystemsLogin />;
   if (status === 'not-operator') {
     return (

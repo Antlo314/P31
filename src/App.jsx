@@ -31,6 +31,7 @@ const MentorshipProgram = lazy(() => import('./academy/Mentorship').then((m) => 
 const Portal = lazy(() => import('./academy/Portal'));
 const CollectiveHome = lazy(() => import('./academy/CollectiveHome'));
 const Verify = lazy(() => import('./academy/Verify'));
+const AcademyHome = lazy(() => import('./academy/AcademyHome'));
 const Enroll = lazy(() => import('./academy/Enroll'));
 
 // The team console is its own app: loaded only when someone opens it,
@@ -42,11 +43,21 @@ const StudioApp = lazy(() => import('./studio/StudioApp'));
 // Dev-only studio test bench; compiled out of production builds.
 const Lab = import.meta.env.DEV ? lazy(() => import('./dev/Lab')) : null;
 
+// New page: start at the top, or at the #section the link points to (once it has rendered).
 const ScrollToTop = () => {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+    if (!hash) { window.scrollTo(0, 0); return undefined; }
+    let tries = 0;
+    const id = setInterval(() => {
+      const el = document.getElementById(decodeURIComponent(hash.slice(1)));
+      if (el || ++tries > 40) {
+        clearInterval(id);
+        if (el) el.scrollIntoView({ block: 'start' });
+      }
+    }, 50);
+    return () => clearInterval(id);
+  }, [pathname, hash]);
   return null;
 }
 
@@ -129,6 +140,7 @@ function CollectiveRoutes() {
         <Suspense fallback={<div aria-busy="true" style={{ minHeight: '70vh' }} />}>
           <Routes>
             <Route path="/" element={<CollectiveHome />} />
+            <Route path="/academy" element={<AcademyHome />} />
             <Route path="/mentorship" element={<MentorshipLanding />} />
             <Route path="/mentorship/:program" element={<MentorshipProgram />} />
             <Route path="/portal" element={<Portal />} />

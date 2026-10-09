@@ -32,7 +32,7 @@ const SystemsLogin = ({ notice }) => {
 
   return (
     <div className="sys-login">
-      <Link to="/" className="sys-login__back"><ArrowLeft size={16} /> p31market.com</Link>
+      <Link to="/systems" className="sys-login__back"><ArrowLeft size={16} /> P31 Systems</Link>
       <form className="sys-login__card" onSubmit={submit}>
         <span className="sys-login__lock"><Lock size={20} /></span>
         <p className="sys-eyebrow">Proverbs 31 Marketplace</p>

@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-export const CONTACT_EMAIL = 'members@thep31collective.org';
+export const CONTACT_EMAIL = 'member@thep31collective.org';
 
 export const money = (cents) => (cents == null ? '—' : `$${(cents / 100).toLocaleString('en-US', { minimumFractionDigits: cents % 100 ? 2 : 0 })}`);
 
@@ -102,3 +102,6 @@ export const verseOfTheDay = (date = new Date()) => {
   const dayNumber = Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000);
   return DAILY_VERSES[dayNumber % DAILY_VERSES.length];
 };
+
+// "Join P31 Collective": the Collective's interest form, linked wherever the Collective is featured.
+export const JOIN_COLLECTIVE_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfBZkXVjzeqjq_h5k0Np3ueFZbiYzp19ettlL5CF5uBHYjBTw/viewform?pli=1';

@@ -13,7 +13,7 @@ async function seed() {
     id: melanieProfileId, // Using profile ID as curator ID for consistency
     business_name: 'Incandescent Lily Collection',
     tagline: 'Wellness and body care rooted in purity and divine intention.',
-    bio: 'Transforming the beauty industry by creating wellness and body care rooted in purity, purpose, and divine intention. Founded by Melanie Jeffers-Cameron, IL Collection is a sanctuary for self-care.',
+    bio: 'Transforming the beauty industry by creating wellness and body care rooted in purity, purpose, and divine intention. Founded by Melanie JC, IL Collection is a sanctuary for self-care.',
     instagram: 'ilcollection__',
     website: 'https://www.nebaministry.org/ilcollection',
     status: 'approved',

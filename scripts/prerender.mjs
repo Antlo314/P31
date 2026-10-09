@@ -80,7 +80,7 @@ const organization = {
   sameAs: BUSINESS.sameAs,
   areaServed: BUSINESS.areaServed.map((name) => ({ '@type': 'Place', name })),
   knowsAbout: ['women-owned businesses', 'pop-up markets', 'handmade goods', 'women entrepreneurs', 'vendor markets'],
-  contactPoint: {
+  contactPoint: [{
     '@type': 'ContactPoint',
     contactType: 'customer service',
     telephone: BUSINESS.phone,
@@ -94,6 +94,9 @@ const organization = {
       closes: '18:00',
     },
   },
+  { '@type': 'ContactPoint', contactType: 'vendor support', email: 'vendor@p31market.com', availableLanguage: 'English' },
+  { '@type': 'ContactPoint', contactType: 'partnerships', email: 'grants@p31market.com', availableLanguage: 'English' },
+  { '@type': 'ContactPoint', contactType: 'marketing', email: 'marketing@p31market.com', availableLanguage: 'English' }],
 };
 const website = {
   '@context': 'https://schema.org',
@@ -187,26 +190,46 @@ const collectiveTemplate = template
 const melanie = {
   '@type': 'Person',
   '@id': `${C}/#melanie`,
-  name: 'Melanie Jeffers-Cameron',
-  alternateName: 'Melanie JC',
-  jobTitle: 'Founder',
+  name: 'Melanie JC',
+  jobTitle: 'Founder & CEO',
+  description: 'Servant of God, visionary, mentor and entrepreneur; founder of Not Easily Broken Apart (NEBA) Women’s Ministry and the visionary behind Proverbs 31 Marketplace and The P31 Collective by NEBA.',
   image: `${C}/c/melanie.webp`,
   url: `${C}/#melanie`,
-  worksFor: [{ '@id': `${C}/#organization` }, { '@type': 'Organization', name: SITE_NAME, url: SITE_URL }],
-  knowsAbout: ['business mentorship', 'women entrepreneurs', 'brand strategy', 'faith-based leadership', 'community building'],
+  email: 'founder@thep31collective.org',
+  worksFor: [
+    { '@id': `${C}/#organization` },
+    { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+    { '@type': 'Organization', name: 'Not Easily Broken Apart (NEBA) Women’s Ministry', foundingDate: '2019' },
+    { '@type': 'Organization', name: 'Incandescent Lily Collection', foundingDate: '2023' },
+  ],
+  knowsAbout: ['business mentorship', 'faith-based mentorship', 'women entrepreneurs', 'emotional intelligence', 'leadership', 'women’s ministry', 'community building'],
 };
+// The team directory, as people who work for the Collective.
+const team = [
+  ['Savannah Campbell', 'Executive Assistant', 'secretary@thep31collective.org'],
+  ['Yanni Bratcher', 'Marketing Strategist', 'marketing@p31market.com'],
+  ['Alexia Thomas', 'Member Liaison', 'member@thep31collective.org'],
+  ['Shanay Prince', 'Support Coordinator', 'coordinator@thep31collective.org'],
+  ['Anthony Carr', 'Marketplace Tech Support', 'vendor@p31market.com'],
+].map(([name, jobTitle, email]) => ({ '@type': 'Person', name, jobTitle, email }));
 const collectiveOrg = {
   '@context': 'https://schema.org',
   '@type': 'EducationalOrganization',
   '@id': `${C}/#organization`,
   name: COLLECTIVE_NAME,
-  alternateName: ['P31 Collective', 'Proverbs 31 Collective'],
+  alternateName: ['The P31 Collective by NEBA', 'P31 Collective', 'Proverbs 31 Collective'],
   url: C,
   logo: `${C}/c/icons/icon-512.png`,
   image: COLLECTIVE_IMAGE,
   description: COLLECTIVE_META['/'].description,
-  email: 'members@thep31collective.org',
+  email: 'member@thep31collective.org',
+  telephone: BUSINESS.phone,
   founder: melanie,
+  employee: team,
+  contactPoint: [
+    { '@type': 'ContactPoint', contactType: 'membership', email: 'member@thep31collective.org', telephone: BUSINESS.phone, availableLanguage: 'English' },
+    { '@type': 'ContactPoint', contactType: 'customer support', email: 'coordinator@thep31collective.org', availableLanguage: 'English' },
+  ],
   parentOrganization: { '@type': 'Organization', '@id': `${SITE_URL}/#organization`, name: SITE_NAME, url: SITE_URL },
   sameAs: BUSINESS.sameAs.filter((u) => !u.includes('maps.google')),
   areaServed: { '@type': 'Country', name: 'United States' },
@@ -236,11 +259,22 @@ const programLd = (slug) => {
   }];
 };
 
+const crumb = (name, path) => ({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: COLLECTIVE_NAME, item: C },
+    { '@type': 'ListItem', position: 2, name, item: `${C}${path}` },
+  ],
+});
+
 const collectivePages = [
   { file: 'home', path: '/', ...COLLECTIVE_META['/'], ld: [collectiveOrg, collectiveSite, { '@context': 'https://schema.org', ...melanie }] },
   { file: 'mentorship', path: '/mentorship', ...ROUTE_META['/mentorship'], ld: [collectiveOrg] },
   { file: 'mentorship/business', path: '/mentorship/business', ...ROUTE_META['/mentorship/business'], ld: programLd('business') },
   { file: 'mentorship/faith', path: '/mentorship/faith', ...ROUTE_META['/mentorship/faith'], ld: programLd('faith') },
+  { file: 'academy', path: '/academy', ...COLLECTIVE_META['/academy'], ld: [collectiveOrg, crumb('The P31 Academy', '/academy')] },
+  { file: 'systems', path: '/systems', ...COLLECTIVE_META['/systems'], ld: [collectiveOrg, crumb('P31 Systems', '/systems')] },
   { file: 'verify', path: '/verify', ...COLLECTIVE_META['/verify'] },
   // Every other Collective route (portal, classrooms, Studio, Systems): the app shell, not indexed.
   { file: 'app', path: '/portal', title: COLLECTIVE_NAME, description: COLLECTIVE_META['/'].description, noindex: true },
@@ -250,7 +284,7 @@ for (const page of collectivePages) {
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, render({ ...page, origin: C, image: COLLECTIVE_IMAGE, base: collectiveTemplate }));
 }
-const cUrls = ['/', '/mentorship', '/mentorship/business', '/mentorship/faith'];
+const cUrls = ['/', '/academy', '/mentorship', '/mentorship/business', '/mentorship/faith', '/systems'];
 writeFileSync(join(dist, 'c', 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${cUrls.map((p) => `  <url><loc>${esc(`${C}${p}`)}</loc><priority>${p === '/' ? '1.0' : '0.9'}</priority></url>`).join('\n')}

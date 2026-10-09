@@ -5,7 +5,8 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // dist is built output; scratch/ and the root *.js helpers are one-off Node scripts, not the app.
+  globalIgnores(['dist', 'scratch', 'extract_urls.js', 'fix_colors.js']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [

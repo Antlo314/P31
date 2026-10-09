@@ -4,15 +4,19 @@ import { ArrowRight, GraduationCap, Clapperboard, ShieldCheck, ArrowUpRight, Spa
 import { PROGRAMS } from './content';
 import { marketHome } from '../lib/site';
 import { CALENDLY, openCalendly } from '../lib/calendly';
+import TeamDirectory from '../components/TeamDirectory';
 import mark from '../assets/academy/collective-mark.png';
 import melanie from '../assets/web/melanie23_rm.webp';
 import './mentorship.css';
 import './collective-home.css';
+import './pillars.css';
+import JoinCollective from '../components/JoinCollective';
 
+// The Collective's two pillars, plus the Studio the content team signs in to.
 const DOORS = [
-  { to: '/portal', Icon: GraduationCap, title: 'Mentorship classroom', who: 'Students & mentors', body: 'Lessons, sessions, action plans, your library and the member line.' },
-  { to: '/studio', Icon: Clapperboard, title: 'Content Studio', who: 'P31 content team', body: 'Plan, create and schedule posts, and keep up with DMs and comments.' },
-  { to: '/systems', Icon: ShieldCheck, title: 'Systems', who: 'P31 operations', body: 'Curators, orders, campaigns, analytics and the creative studios.' },
+  { to: '/academy', Icon: GraduationCap, title: 'Academy', who: 'Mentorship', body: 'Business and faith-based mentorship with Melanie: your classroom, live sessions and certificate.', cta: 'Explore the Academy' },
+  { to: '/systems', Icon: ShieldCheck, title: 'Systems', who: 'The P31 tools', body: 'Clip Studio, Photo Studio, the CRM and more, built to help the market and the Collective grow.', cta: 'See the tools' },
+  { to: '/studio', Icon: Clapperboard, title: 'Content Studio', who: 'P31 content team', body: 'Plan, create and schedule posts, and keep up with DMs and comments.', cta: 'Sign in' },
 ];
 
 // thep31collective.org — home of the mentorships and every P31 team sign-in.
@@ -25,11 +29,12 @@ const CollectiveHome = () => (
         <p className="k-eyebrow k-eyebrow--center" data-intro="0.1">The Proverbs 31 Collective</p>
         <h1 className="k-display ch-hero__title" data-split="intro" data-delay="0.15">Rise, build <em>and become.</em></h1>
         <p className="k-lede" data-intro="0.4">
-          Mentorship for faith-driven women — and the home of the P31 team. Classrooms, the Content Studio and Systems, all in one place.
+          Mentorship for faith-driven women, and the home of the P31 team: the Academy for mentorship, and Systems, the tools that help the market and the Collective grow.
         </p>
         <div className="k-actions ch-hero__actions" data-intro="0.55">
-          <button type="button" className="k-btn k-btn--gold k-btn--lg" onClick={() => openCalendly('intro', { source: 'home-hero' })}><CalendarDays size={18} /> Book an intro call</button>
-          <Link to="/mentorship" className="k-btn k-btn--light k-btn--lg">Explore mentorship <ArrowRight size={18} /></Link>
+          <JoinCollective className="k-btn k-btn--gold k-btn--lg" />
+          <button type="button" className="k-btn k-btn--light k-btn--lg" onClick={() => openCalendly('intro', { source: 'home-hero' })}><CalendarDays size={18} /> Book an intro call</button>
+          <Link to="/academy" className="k-btn k-btn--light k-btn--lg">Explore the Academy <ArrowRight size={18} /></Link>
         </div>
       </div>
     </header>
@@ -37,33 +42,63 @@ const CollectiveHome = () => (
     <section className="k-section ch-melanie" id="melanie">
       <div className="k-split k-split--wide-right">
         <div className="ch-melanie__photo" data-reveal="clip">
-          <img src={melanie} alt="Melanie Jeffers-Cameron" loading="lazy" decoding="async" />
+          <img src={melanie} alt="Melanie JC" loading="lazy" decoding="async" />
         </div>
         <div className="k-head" style={{ marginBottom: 0 }}>
           <p className="k-eyebrow" data-reveal="fade">Meet your mentor</p>
-          <h2 className="k-h2" data-split>Melanie <em>Jeffers-Cameron</em></h2>
+          <h2 className="k-h2" data-split>Melanie <em>JC</em></h2>
           <p className="k-lede" data-reveal>
-            Melanie is the founder and lead curator of Proverbs 31 Marketplace, an Atlanta-based, traveling marketplace and
-            community for women creatives and faith-driven entrepreneurs. She built it on a simple conviction: gifted women
-            deserve a stage as excellent as their work.
+            A passionate servant of God, visionary, mentor, and entrepreneur, Melanie JC is a woman driven by purpose,
+            anchored in faith, and led by obedience.
           </p>
           <p className="k-body" data-reveal>
-            The Collective carries that conviction from the market floor into the quieter work of building — a business with
-            strategy, structure and accountability, and a life anchored in faith. In the Business Mentorship, Melanie works
-            with women one-on-one, meeting each of them where they are.
+            In 2019, she founded Not Easily Broken Apart (NEBA) Women’s Ministry, a faith-based ministry dedicated to healing,
+            restoration, and purposeful living through biblical teaching and intentional mentorship. As a spiritual matriarch with
+            a heart for cultivating spiritual and emotional wholeness, Melanie has devoted herself to helping individuals break
+            cycles, discover their God-given identity, and walk boldly in their calling.
           </p>
+          <p className="k-body" data-reveal>
+            As the visionary behind Proverbs 31 Marketplace and The P31 Collective by NEBA, Melanie has expanded that mission to
+            bridge faith, fellowship, purpose, and business. What began as a calling to help women heal has evolved into a
+            movement empowering women to build, lead, and prosper God’s way.
+          </p>
+          <details className="ch-melanie__more" data-reveal>
+            <summary>Read her full story</summary>
+            <p className="k-body">
+              Through marketplace experiences, meaningful connections, business mentorship, and community, she is cultivating an
+              environment where faith-driven women are equipped to turn their gifts into purpose-filled endeavors.
+            </p>
+            <p className="k-body">
+              Melanie is also the CEO of Incandescent Lily Collection, a plant-based body care brand established in 2023. With a
+              foundation in theological education through her seminary studies, complemented by academic achievements in Emotional
+              Intelligence, the Arts and Science of Relationships, and Leadership, she brings both biblical wisdom and practical
+              insight to her work. As a visionary and matriarch, she believes that true leadership is cultivated through spiritual
+              maturity, intentional stewardship, and, above all, obedience to God.
+            </p>
+            <p className="k-body">
+              Her mission extends beyond building businesses; it is about building people. As a matriarch, mentor and Kingdom
+              builder, she is committed to empowering women to heal spiritually, grow emotionally, prosper financially, and
+              establish legacies that will impact generations to come.
+            </p>
+            <p className="k-body">
+              For Melanie, success is not merely measured by what she acquires, but by what she stewards, whom she serves, and
+              what she leaves behind.
+            </p>
+          </details>
           <ul className="k-checks" data-reveal-group>
-            <li><Sparkles size={18} /> Founder &amp; lead curator, Proverbs 31 Marketplace</li>
-            <li><Sparkles size={18} /> Business mentor — strategy, structure, accountability, Kingdom impact</li>
-            <li><Sparkles size={18} /> Building community for women across Atlanta</li>
+            <li><Sparkles size={18} /> Founder, Not Easily Broken Apart (NEBA) Women’s Ministry, 2019</li>
+            <li><Sparkles size={18} /> Visionary behind Proverbs 31 Marketplace and The P31 Collective by NEBA</li>
+            <li><Sparkles size={18} /> CEO, Incandescent Lily Collection, plant-based body care, est. 2023</li>
+            <li><Sparkles size={18} /> Seminary studies; Emotional Intelligence, the Arts &amp; Science of Relationships, and Leadership</li>
           </ul>
           <figure className="ch-melanie__verse" data-reveal>
-            <blockquote>“Give her of the fruit of her hands; and let her own works praise her in the gates.”</blockquote>
-            <figcaption>Proverbs 31:31 · the verse P31 is built on</figcaption>
+            <blockquote>Heal. Rise. Build. Prosper God’s Way.</blockquote>
+            <figcaption>Her mandate is simple · With grace &amp; purpose, Melanie JC</figcaption>
           </figure>
           <div className="k-actions" data-reveal>
+            <JoinCollective className="k-btn k-btn--gold" />
             <button type="button" className="k-btn k-btn--plum" onClick={() => openCalendly('connect', { source: 'meet-melanie' })}><Handshake size={18} /> Connect with Melanie JC</button>
-            <Link to="/mentorship/business" className="k-btn k-btn--ghost">Mentorship with Melanie <ArrowRight size={18} /></Link>
+            <Link to="/academy" className="k-btn k-btn--ghost">Mentorship with Melanie <ArrowRight size={18} /></Link>
             <a href="https://www.instagram.com/proverbs31market" target="_blank" rel="noreferrer" className="k-btn k-btn--ghost"><Instagram size={17} /> Follow along</a>
           </div>
         </div>
@@ -120,10 +155,14 @@ const CollectiveHome = () => (
       </div>
     </section>
 
+    <section className="k-section" id="team">
+      <TeamDirectory eyebrow="The P31 team" lede="Reach the right person directly. We’re here Monday to Friday." />
+    </section>
+
     <section className="k-section k-section--night k-dark">
       <div className="k-head k-center">
-        <p className="k-eyebrow k-eyebrow--center" data-reveal="fade">Members & team</p>
-        <h2 className="k-h2" data-split>Sign in to your <em>dashboard</em></h2>
+        <p className="k-eyebrow k-eyebrow--center" data-reveal="fade">Academy & Systems</p>
+        <h2 className="k-h2" data-split>Where would you <em>like to go?</em></h2>
       </div>
       <div className="k-grid k-grid--3 ch-doors" data-reveal-group>
         {DOORS.map((d) => (
@@ -132,7 +171,7 @@ const CollectiveHome = () => (
             <small>{d.who}</small>
             <h3>{d.title}</h3>
             <p>{d.body}</p>
-            <span className="k-link">Sign in <ArrowRight size={16} /></span>
+            <span className="k-link">{d.cta} <ArrowRight size={16} /></span>
           </Link>
         ))}
       </div>
@@ -146,6 +185,7 @@ const CollectiveHome = () => (
       <p className="k-center ch-market" data-reveal="fade">
         Looking for the market? <a href={marketHome()} className="k-link">Visit Proverbs 31 Marketplace <ArrowUpRight size={15} /></a>
       </p>
+      <div className="k-actions pl-center" data-reveal><JoinCollective className="k-btn k-btn--gold k-btn--lg" /></div>
     </section>
   </div>
 );

@@ -32,3 +32,6 @@ tools/.env.iris
 
 # Supabase CLI local state
 supabase/.temp/
+
+# Real Studio snapshot for local walkthrough screenshots (dev-only sample mode)
+src/dev/demo-studio.json

@@ -6,6 +6,8 @@ import { openJoin } from '../lib/join';
 
 import editorialImg from '../assets/web/p31_partner_hero_editorial.webp';
 import gatherImg from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
+import { EMAIL, OFFICE } from '../lib/team';
+import TeamDirectory from '../components/TeamDirectory';
 
 const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
 
@@ -103,6 +105,10 @@ const About = () => (
       <div style={{ display: 'grid', justifyItems: 'center' }}><FounderNote /></div>
     </section>
 
+    <section className="k-section" id="team">
+      <TeamDirectory eyebrow="The people behind P31" lede="Curators, partners and shoppers: reach the right person directly." />
+    </section>
+
     {/* Contact + CTA */}
     <section className="k-section k-section--mist">
       <div className="k-split" style={{ alignItems: 'start' }}>
@@ -113,8 +119,9 @@ const About = () => (
         </div>
         <div className="k-contact" data-reveal-group>
           <a href="tel:14705622852"><Phone size={18} /> 1 (470) 562-2852</a>
-          <a href="mailto:proverbs31markets@gmail.com"><Mail size={18} /> proverbs31markets@gmail.com</a>
-          <div><MapPin size={18} /> Atlanta, GA — touring</div>
+          <a href={`mailto:${EMAIL.community}`}><Mail size={18} /> {EMAIL.community}</a>
+          <a href={`mailto:${EMAIL.vendors}`}><Mail size={18} /> {EMAIL.vendors} <small>· curator &amp; vendor help</small></a>
+          <div><MapPin size={18} /> Atlanta, GA — touring · mail: {OFFICE.mailing.join(', ')}</div>
         </div>
       </div>
     </section>

@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Mail, ArrowUpRight, ArrowUp, Instagram, Facebook, KeyRound } from 'lucide-react';
+import { Mail, ArrowUpRight, ArrowUp, Instagram, Facebook, KeyRound, Home, GraduationCap, ShieldCheck, Store, Phone, MapPin, Users } from 'lucide-react';
 import { isFlushRoute } from '../lib/routes';
 import { marketHome } from '../lib/site';
-import { CONTACT_EMAIL } from '../lib/academy';
+import { EMAIL, OFFICE } from '../lib/team';
 import mark from '../assets/academy/collective-mark.png';
 import './Navbar.css';
 import './Footer.css';
 import './CollectiveChrome.css';
+import JoinCollective from './JoinCollective';
+
+// The Collective's two pillars: the Academy (mentorship) and Systems (the tools that grow both brands).
+const ACADEMY = /^\/(academy|mentorship|verify|enroll)(\/|$)/;
+const SYSTEMS = /^\/(systems|studio)(\/|$)/;
 
 // Header and footer for thep31collective.org — the mentorship side of P31.
 export const CollectiveNav = () => {
@@ -22,6 +27,7 @@ export const CollectiveNav = () => {
   const overHero = isFlushRoute(pathname) && !scrolled;
 
   return (
+    <>
     <header className={`nb cl-nb ${overHero ? 'nb--clear' : 'nb--glass'}`}>
       <div className="nb__inner">
         <Link to="/" className="nb__brand" aria-label="The Proverbs 31 Collective — home">
@@ -32,16 +38,26 @@ export const CollectiveNav = () => {
           </span>
         </Link>
         <nav className="nb__links" aria-label="Main">
-          <NavLink to="/mentorship" className="nb__link">Mentorship</NavLink>
-          <NavLink to="/studio" className="nb__link">Content Studio</NavLink>
-          <NavLink to="/systems" className="nb__link">Systems</NavLink>
+          <NavLink to="/academy" className={() => `nb__link ${ACADEMY.test(pathname) ? 'active' : ''}`}>Academy</NavLink>
+          <NavLink to="/systems" className={() => `nb__link ${SYSTEMS.test(pathname) ? 'active' : ''}`}>Systems</NavLink>
           <a href={marketHome()} className="nb__link">Marketplace <ArrowUpRight size={13} /></a>
         </nav>
         <div className="nb__actions cl-nb__actions">
-          <Link to="/portal" className="nb__cta"><KeyRound size={16} /> <span>Sign in</span></Link>
+          <JoinCollective className="nb__cta cl-nb__join" size={16} />
+          <Link to="/portal" className="nb__cta cl-nb__signin" aria-label="Sign in"><KeyRound size={16} /> <span>Sign in</span></Link>
         </div>
       </div>
     </header>
+
+    {/* Phones: the same floating tab bar as the market, with the Collective's pillars. */}
+    <nav className="tb" aria-label="Main">
+      <NavLink to="/" end className="tb__item"><Home size={20} /><span>Home</span></NavLink>
+      <NavLink to="/academy" className={() => `tb__item ${ACADEMY.test(pathname) ? 'active' : ''}`}><GraduationCap size={20} /><span>Academy</span></NavLink>
+      <NavLink to="/systems" className={() => `tb__item ${SYSTEMS.test(pathname) ? 'active' : ''}`}><ShieldCheck size={20} /><span>Systems</span></NavLink>
+      <a href={marketHome()} className="tb__item"><Store size={20} /><span>Market</span></a>
+      <NavLink to="/portal" className="tb__item"><KeyRound size={20} /><span>Sign in</span></NavLink>
+    </nav>
+    </>
   );
 };
 
@@ -55,30 +71,38 @@ export const CollectiveFooter = () => (
             <span><strong>The Proverbs 31 Collective</strong><small>Mentorship &amp; team</small></span>
           </Link>
           <p>Private business and faith-based mentorship for faith-driven women — for the business you’re building and the woman you’re becoming.</p>
+          <JoinCollective className="k-btn k-btn--gold k-btn--sm cl-ft__join" size={16} />
           <div className="ft__social">
             <a href="https://www.instagram.com/proverbs31market" target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram size={18} /></a>
             <a href="https://www.facebook.com/share/1LEtAu9AJD/?mibextid=wwXIfr" target="_blank" rel="noreferrer" aria-label="Facebook"><Facebook size={18} /></a>
           </div>
         </div>
-        <nav className="ft__col" aria-label="Mentorship">
-          <h4>Mentorship</h4>
+        <nav className="ft__col" aria-label="Academy">
+          <h4>Academy</h4>
+          <Link to="/academy">The P31 Academy</Link>
           <Link to="/mentorship/business">Business mentorship</Link>
           <Link to="/mentorship/faith">Faith-based mentorship</Link>
+          <Link to="/portal">Classroom sign in</Link>
+          <Link to="/verify">Verify a certificate</Link>
         </nav>
-        <nav className="ft__col" aria-label="Sign in">
-          <h4>Sign in</h4>
-          <Link to="/portal">Mentorship classroom</Link>
+        <nav className="ft__col" aria-label="Systems">
+          <h4>Systems</h4>
+          <Link to="/systems">P31 Systems</Link>
           <Link to="/studio">Content Studio</Link>
-          <Link to="/systems">Systems</Link>
+          <Link to="/systems/sign-in">Team sign in</Link>
         </nav>
         <div className="ft__col">
           <h4>Contact</h4>
-          <a href={`mailto:${CONTACT_EMAIL}`}><Mail size={15} /> {CONTACT_EMAIL}</a>
+          <a href={`mailto:${EMAIL.members}`}><Mail size={15} /> {EMAIL.members}</a>
+          <a href={`mailto:${EMAIL.support}`}><Mail size={15} /> {EMAIL.support}</a>
+          <a href={`tel:${OFFICE.tel}`}><Phone size={15} /> {OFFICE.phone}</a>
+          <span><MapPin size={15} /> {OFFICE.mailing.join(', ')}</span>
+          <Link to="/#team"><Users size={15} /> Meet the team</Link>
           <a href={marketHome()}><ArrowUpRight size={15} /> Proverbs 31 Marketplace</a>
         </div>
       </div>
       <div className="ft__bottom">
-        <span>© {new Date().getFullYear()} The Proverbs 31 Collective · a Proverbs 31 Marketplace ministry</span>
+        <span>© {new Date().getFullYear()} The P31 Collective by NEBA · a Proverbs 31 Marketplace ministry</span>
         <span className="ft__bottom-links">
           <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Back to top <ArrowUp size={14} /></button>
         </span>

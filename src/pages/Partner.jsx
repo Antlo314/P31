@@ -9,6 +9,7 @@ import heroImg from '../assets/web/p31_partner_hero_editorial.webp';
 import groupImg from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
 import visionaryVid from '../assets/web/visionary.mp4';
 import visionaryPoster from '../assets/web/visionary-poster.webp';
+import { EMAIL } from '../lib/team';
 
 const DONATE_URL = 'https://www.paypal.com/donate/?hosted_button_id=WY2ZX3TXDMF5Y';
 
@@ -127,7 +128,8 @@ const Partner = () => {
             <h2 className="k-h2" data-split>Align with the <em>movement</em></h2>
             <p className="k-lede" data-reveal>If you feel led to partner with Proverbs 31 Marketplace, we invite you to connect.</p>
             <div className="k-contact" data-reveal-group>
-              <a href="mailto:proverbs31markets@gmail.com"><Mail size={18} /> proverbs31markets@gmail.com</a>
+              <a href={`mailto:${EMAIL.grants}`}><Mail size={18} /> {EMAIL.grants} <small>· grants &amp; partnerships</small></a>
+              <a href={`mailto:${EMAIL.founder}`}><Mail size={18} /> {EMAIL.founder} <small>· Melanie JC</small></a>
               <a href="tel:14705622852"><Phone size={18} /> 1 (470) 562-2852</a>
             </div>
             <div className="k-actions" data-reveal>

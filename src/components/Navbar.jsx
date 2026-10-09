@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import {
   Home, Store, CalendarDays, Handshake, LayoutGrid, ShoppingBasket, Heart, X, ChevronRight, Sparkles, Info,
-  LayoutDashboard, LogOut, Instagram, Facebook, UserRound, Crown, ShoppingBag, GraduationCap, KeyRound,
+  LayoutDashboard, LogOut, Instagram, Facebook, UserRound, Crown, ShoppingBag, GraduationCap, KeyRound, UserPlus,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -12,6 +12,7 @@ import { useRoles } from '../lib/roles';
 import './Navbar.css';
 
 import logoPath from '../assets/web/logo-160.webp';
+import { JOIN_COLLECTIVE_URL } from '../lib/academy';
 
 const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
 
@@ -27,8 +28,9 @@ const LINKS = [
   { to: '/directory', label: 'Curators & Shops', Icon: Store },
   { to: '/favorites', label: 'Favorites', Icon: Heart },
   { to: '/calendar', label: 'Market Dates', Icon: CalendarDays },
-  { to: '/mentorship', href: hrefFor('/mentorship'), label: 'Mentorship', Icon: GraduationCap },
+  { to: '/academy', href: hrefFor('/academy'), label: 'Mentorship', Icon: GraduationCap },
   { to: '/portal', href: collectivePortal(), label: 'The Collective', Icon: KeyRound },
+  { to: '/join-collective', href: JOIN_COLLECTIVE_URL, label: 'Join P31 Collective', Icon: UserPlus, external: true },
   { to: '/partner', label: 'Partner With Us', Icon: Handshake },
   { to: '/services', label: 'Services', Icon: Sparkles },
   { to: '/about', label: 'Our Story', Icon: Info },
@@ -101,7 +103,7 @@ const Navbar = () => {
             {[['/shop', 'Shop'], ['/directory', 'Curators'], ['/calendar', 'Dates']].map(([to, label]) => (
               <NavLink key={to} to={to} className="nb__link">{label}</NavLink>
             ))}
-            <a href={hrefFor('/mentorship')} className="nb__link">Mentorship</a>
+            <a href={hrefFor('/academy')} className="nb__link">Mentorship</a>
             <NavLink to="/partner" className="nb__link">Partner</NavLink>
           </nav>
 
@@ -185,7 +187,7 @@ const Navbar = () => {
             {LINKS.map((l) => (
               <li key={l.to}>
                 {l.href ? (
-                  <a href={l.href}>
+                  <a href={l.href} {...(l.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
                     <span className="sheet__icon"><l.Icon size={18} /></span>
                     {l.label}
                     <ChevronRight size={18} className="sheet__chev" />

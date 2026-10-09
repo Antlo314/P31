@@ -15,8 +15,9 @@ import './CuratorProfile.css';
 import '../features/store-design/store.css';
 
 import defaultLogo from '../assets/web/p31_botanical_logo-256.webp';
+import { EMAIL } from '../lib/team';
 
-const P31_EMAIL = 'proverbs31markets@gmail.com';
+const P31_EMAIL = EMAIL.vendors;
 const money = (n) => `$${Number(n).toFixed(Number(n) % 1 ? 2 : 0)}`;
 
 const stockLabel = (p) => {

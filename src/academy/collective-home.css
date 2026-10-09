@@ -39,7 +39,7 @@
 .ch-melanie .k-head { display: grid; gap: 18px; }
 .ch-melanie .k-head > * { margin: 0; }
 .ch-melanie__verse { margin: 0; padding: 16px 20px; border-left: 2px solid var(--gold); background: var(--mist); border-radius: 0 16px 16px 0; }
-.ch-melanie__verse blockquote { margin: 0; font-family: var(--font-heading); font-style: italic; font-size: 1.08rem; line-height: 1.45; color: var(--ink); }
+.ch-melanie__verse blockquote { margin: 0; font-family: var(--font-heading); font-style: italic; font-size: 1.3rem; line-height: 1.45; color: var(--ink); }
 .ch-melanie__verse figcaption { margin-top: 6px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-text); }
 
 /* Book a call */
@@ -55,3 +55,13 @@
 .ch-call h3 { font-family: var(--font-heading); font-weight: 400; font-size: 1.45rem; color: var(--plum); line-height: 1.15; }
 .ch-call p { color: var(--ink-2); line-height: 1.6; flex: 1; }
 .ch-call .k-btn { margin-top: 6px; }
+
+.ch-melanie__more summary {
+  cursor: pointer; width: fit-content; font-weight: 800; font-size: 0.9rem; color: var(--plum);
+  border-bottom: 1px solid rgba(94, 42, 140, 0.35); list-style: none;
+}
+.ch-melanie__more summary::-webkit-details-marker { display: none; }
+.ch-melanie__more summary::after { content: ' +'; color: var(--gold-text); }
+.ch-melanie__more[open] summary::after { content: ' −'; }
+.ch-melanie__more[open] { display: grid; gap: 14px; }
+.ch-melanie__more p { margin: 0; }

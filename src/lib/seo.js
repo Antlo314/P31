@@ -15,8 +15,8 @@ export const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
 // linked from structured data so search ties the site to the listing.
 export const BUSINESS = {
   phone: '+1-470-562-2852',
-  email: 'proverbs31markets@gmail.com',
-  founder: 'Melanie Jeffers-Cameron',
+  email: 'outreach@p31market.com',
+  founder: 'Melanie JC',
   googleMaps: 'https://maps.google.com/maps?cid=13044396625073029690',
   sameAs: [
     'https://www.instagram.com/proverbs31market',
@@ -47,7 +47,7 @@ export const ROUTE_META = {
   },
   '/about': {
     title: `Our Story — ${SITE_NAME}`,
-    description: 'Inspired by Proverbs 31, founder Melanie Jeffers-Cameron built a traveling Atlanta marketplace and community for women creatives, rooted in faith and excellence.',
+    description: 'Inspired by Proverbs 31, founder Melanie JC built a traveling Atlanta marketplace and community for women creatives, rooted in faith and excellence.',
   },
   '/services': {
     title: `Vendor Booths, Storefronts & Coaching for Women — ${SITE_NAME}`,
@@ -86,7 +86,19 @@ export const ROUTE_META = {
 export const COLLECTIVE_META = {
   '/': {
     title: `${COLLECTIVE_NAME} — Christian Mentorship for Women in Business & Faith`,
-    description: 'Private business and faith-based mentorship for faith-driven women, founded by Melanie Jeffers-Cameron. Book an intro call — plus classrooms, the Content Studio and Systems for the P31 team.',
+    description: 'Private business and faith-based mentorship for faith-driven women, founded by Melanie JC. Book an intro call — plus classrooms, the Content Studio and Systems for the P31 team.',
+    origin: COLLECTIVE_URL,
+    image: COLLECTIVE_IMAGE,
+  },
+  '/academy': {
+    title: `The P31 Academy — Business & Faith-Based Mentorship for Women`,
+    description: 'Private business and faith-based mentorship with Melanie JC: your own classroom, live sessions, assignments with clear feedback, and a certificate. Begin with an intro call.',
+    origin: COLLECTIVE_URL,
+    image: COLLECTIVE_IMAGE,
+  },
+  '/systems': {
+    title: `P31 Systems — The Tools Behind Proverbs 31 Marketplace & The Collective`,
+    description: 'Clip Studio, Photo Studio, the Content Studio, a CRM and more: the tools P31 builds to help the Marketplace and the Collective grow.',
     origin: COLLECTIVE_URL,
     image: COLLECTIVE_IMAGE,
   },
