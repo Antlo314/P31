@@ -1,4 +1,4 @@
-import { LayoutGrid, Megaphone, Radar, Clapperboard, ImagePlus, Film, Settings, CalendarDays, Mail, Receipt, GraduationCap, Users, UserPlus, Activity, Sparkles, Store, KeyRound } from 'lucide-react';
+import { LayoutGrid, Megaphone, Radar, Clapperboard, ImagePlus, Film, Settings, CalendarDays, Mail, Receipt, GraduationCap, Users, UserPlus, Activity, Sparkles, Store, KeyRound, ClipboardList } from 'lucide-react';
 
 export const SYSTEMS_HOME = { to: '/systems', label: 'Overview', Icon: LayoutGrid, end: true };
 
@@ -24,6 +24,7 @@ export const SYSTEMS_GROUPS = [
   {
     id: 'market', label: 'Market', items: [
       { to: '/systems/events', label: 'Events', Icon: CalendarDays },
+      { to: '/systems/vendors', label: 'Vendor applications', Icon: ClipboardList },
       { to: '/systems/orders', label: 'Orders', Icon: Receipt },
       { to: '/dashboard', label: 'Curators', Icon: Store, away: true },
       { to: '/systems/campaigns', label: 'Campaigns', Icon: Mail },

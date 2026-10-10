@@ -19,6 +19,7 @@ const BLURBS = {
   '/systems/clips': 'Turn raw footage into captioned, edited clips on your phone.',
   '/systems/photos': 'Remove backgrounds, stage products and apply looks.',
   '/systems/pro-edit': 'Long footage in, finished clips out: pick the moments, a look and music for each, and Iris edits them in DaVinci.',
+  '/systems/vendors': 'Vendor applications from p31market.com/apply: review, notes and next steps.',
   '/systems/team': 'Who can open Content Studio and DaVinci. Admins always can.',
   '/systems/health': 'Errors visitors hit on either site, as they happen.',
   '/systems/settings': 'Your password, the team, and connected services.',

@@ -7,7 +7,6 @@ import './Directory.css';
 
 import defaultLogo from '../assets/web/p31_botanical_logo-256.webp';
 
-const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
 
 const Directory = () => {
   const [vendors, setVendors] = useState([]);
@@ -109,7 +108,7 @@ const Directory = () => {
             <p>{query ? 'Try a different word, or clear the search.' : 'Approved curators appear here as they open their storefronts.'}</p>
             {query
               ? <button className="k-btn k-btn--ghost" onClick={() => setQuery('')}>Clear search</button>
-              : <a className="k-btn k-btn--gold" href={APPLY_URL} target="_blank" rel="noopener noreferrer">Become a curator <ArrowUpRight size={16} /></a>}
+              : <Link className="k-btn k-btn--gold" to="/apply">Become a curator <ArrowUpRight size={16} /></Link>}
           </div>
         )}
       </section>

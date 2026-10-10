@@ -39,7 +39,7 @@ Proverbs 31 Marketplace ("P31") is a curated, traveling marketplace and communit
 - Upcoming markets, dates and "notify me": https://www.p31market.com/calendar
 - Shop online: https://www.p31market.com/shop
 - Meet the curators: https://www.p31market.com/directory
-- Become a curator (vendor application): https://forms.gle/vmkK7fhgwiYNYEa38
+- Become a curator (vendor application): https://www.p31market.com/apply
 - Curator services: https://www.p31market.com/services
 - Partner or sponsor: https://www.p31market.com/partner
 - Mentorship overview: https://www.thep31collective.org/academy (mentorship email: members@thep31collective.org)

@@ -53,6 +53,10 @@ export const ROUTE_META = {
     title: `Vendor Booths, Storefronts & Coaching for Women — ${SITE_NAME}`,
     description: 'Become a curator: an online storefront, a booth at our Atlanta-area markets, brand curation and one-on-one coaching for women-owned brands.',
   },
+  '/apply': {
+    title: `Become a Vendor — ${SITE_NAME}`,
+    description: 'Apply to vend at the Proverbs 31 Market: a faith-centered marketplace that uplifts, supports and showcases women-led brands and artisans in Atlanta.',
+  },
   '/partner': {
     title: `Sponsor & Partner With Us — ${SITE_NAME}`,
     description: 'Sponsors, venues and brands: partner with Proverbs 31 Marketplace through financial, in-kind or strategic support and reach Atlanta’s women creatives.',

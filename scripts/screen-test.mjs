@@ -26,7 +26,7 @@ const fa = at('collective', 'faith');
 // [name, url, buttons to click in order, text the page must show]
 const SCREENS = [
   ['market home', mk('/')], ['shop', mk('/shop')], ['curators', mk('/directory')], ['market dates', mk('/calendar')],
-  ['about + team', mk('/about')], ['services', mk('/services')], ['partner', mk('/partner')], ['curator sign-in', mk('/login')],
+  ['about + team', mk('/about')], ['vendor application', mk('/apply'), [], 'What best describes what you sell or offer?'], ['services', mk('/services')], ['partner', mk('/partner')], ['curator sign-in', mk('/login')],
   ['collective home', cl('/')], ['academy', cl('/academy')], ['systems showcase', at('collective', 'student')('/systems')],
   ['join', cl('/join')], ['mentorship', cl('/mentorship')], ['business mentorship', cl('/mentorship/business')],
   ['faith mentorship', cl('/mentorship/faith')], ['verify', cl('/verify')], ['portal', cl('/portal?choose')],
@@ -56,6 +56,7 @@ const SCREENS = [
   ...['', 'crm', 'applications', 'social', 'growth', 'events', 'campaigns', 'orders', 'academy', 'clips', 'photos', 'pro-edit', 'health', 'settings']
     .map((p) => [`systems ${p || 'overview'}`, cl(`/systems${p ? '/' + p : ''}`)]),
   ['team access', cl('/systems/team'), [], 'Give someone access'],
+  ['vendor applications', cl('/systems/vendors'), [], 'Sample Candle Co.'],
   ['davinci clip finder + queue', cl('/systems/pro-edit'), ['Edit queue'], 'Sample Gala'],
   // Team members with one tool (like Anthony → DaVinci, Yanni → Content Studio).
   ['davinci member lands on davinci', at('collective', 'davinci')('/portal'), [], 'Clip finder'],
