@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, Eye, EyeOff, LayoutGrid, LogOut, GraduationCap, Clapperboard, Store, ShieldCheck, Presentation } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Eye, EyeOff, LayoutGrid, LogOut, GraduationCap, Clapperboard, Store, ShieldCheck, Presentation, Sun } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { useRoles, dashboardsFor } from '../lib/roles';
+import { useRoles, dashboardsFor, isTeam } from '../lib/roles';
 import { CONTACT_EMAIL } from '../lib/academy';
 import { hrefFor, isCollective } from '../lib/site';
 import { usernameToEmail } from '../systems/useOperator';
@@ -80,9 +80,14 @@ const Portal = () => {
   };
 
   const dashboards = status === 'ready' ? dashboardsFor(roles) : [];
+  const team = status === 'ready' && isTeam(roles);
   const next = params.get('next');
-  if (status === 'ready' && !recovery && next && /^\/(academy|studio|systems|dashboard)(\/|$)/.test(next)) {
+  if (status === 'ready' && !recovery && next && /^\/(academy|studio|systems|dashboard|today)(\/|$)/.test(next)) {
     return <Navigate to={next} replace />;
+  }
+  // Team members who run more than one dashboard start on Today, which gathers them all.
+  if (team && !recovery && dashboards.length > 1 && !params.has('choose')) {
+    return <Navigate to="/today" replace />;
   }
   // One dashboard on this domain: go straight there. (A dashboard on the other
   // domain is listed instead — signing in there is a separate step.)
@@ -152,6 +157,13 @@ const Portal = () => {
               {note && <p className="k-fine" role="status">{note}</p>}
               {dashboards.length ? (
                 <nav className="pt-list">
+                  {team && (
+                    <Link to="/today" className="pt-item" data-program="today">
+                      <span className="pt-item__icon"><Sun size={20} /></span>
+                      <span><strong>Today</strong><small>What needs you across all your dashboards</small></span>
+                      <ArrowRight size={18} />
+                    </Link>
+                  )}
                   {dashboards.map((d) => {
                     const Icon = KIND_ICON[d.kind] || LayoutGrid;
                     const href = hrefFor(d.to);

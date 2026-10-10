@@ -1,12 +1,13 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
-import { NavLink, Route, Routes, Navigate, useLocation } from 'react-router-dom';
-import { LogOut, Menu, X } from 'lucide-react';
+import { Link, NavLink, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { LogOut, Menu, X, Sun, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useOperator } from './useOperator';
 import SystemsLogin from './SystemsLogin';
 import SystemsShowcase from './SystemsShowcase';
 import Overview from './pages/Overview';
-import { SYSTEMS_NAV } from './nav';
+import { SYSTEMS_HOME, SYSTEMS_GROUPS, SYSTEMS_NAV } from './nav';
+import { hrefFor } from '../lib/site';
 import './Systems.css';
 
 // Heavy tools load on first visit to their tab.
@@ -27,6 +28,14 @@ const Health = lazy(() => import('./pages/Health'));
 // Phones get the four most-used tabs in the bottom bar; "More" opens a
 // sheet with every section.
 const MOBILE_TABS = ['/systems', '/systems/social', '/systems/orders', '/systems/clips'];
+
+// One menu entry: a Systems page, or (marked ↗) a link out to another dashboard.
+const NavItem = ({ n, className, size, onClick }) => {
+  const body = <><n.Icon size={size} /> <span>{n.label}</span>{n.away && <ArrowUpRight size={13} className="sys-away" aria-label="(opens another dashboard)" />}</>;
+  if (!n.away) return <NavLink to={n.to} end={n.end} className={className} onClick={onClick}>{body}</NavLink>;
+  const href = hrefFor(n.to);
+  return href === n.to ? <Link to={n.to} className={className} onClick={onClick}>{body}</Link> : <a href={href} className={className}>{body}</a>;
+};
 
 const SystemsApp = () => {
   const { status, operator } = useOperator();
@@ -66,11 +75,13 @@ const SystemsApp = () => {
           <span className="sys-brand__mark">P31</span>
           <span>Systems</span>
         </div>
-        <nav className="sys-side__nav">
-          {SYSTEMS_NAV.map((n) => (
-            <NavLink key={n.to} to={n.to} end={n.end} className="sys-side__link">
-              <n.Icon size={18} /> {n.label}
-            </NavLink>
+        <nav className="sys-side__nav" aria-label="Systems">
+          <NavItem n={SYSTEMS_HOME} className="sys-side__link" size={18} />
+          {SYSTEMS_GROUPS.map((g) => (
+            <div key={g.id} className="sys-side__group" role="group" aria-labelledby={`sys-g-${g.id}`}>
+              <p id={`sys-g-${g.id}`} className="sys-side__label">{g.label}</p>
+              {g.items.map((n) => <NavItem key={n.to} n={n} className="sys-side__link" size={18} />)}
+            </div>
           ))}
         </nav>
         <div className="sys-side__me">
@@ -78,7 +89,10 @@ const SystemsApp = () => {
             <strong>{operator.display_name || operator.username}</strong>
             <span>{operator.role === 'owner' ? 'Owner' : 'Team'}</span>
           </div>
-          <button className="sys-icon-btn" onClick={signOut} aria-label="Sign out"><LogOut size={18} /></button>
+          <div className="sys-side__actions">
+            <Link to="/today" className="sys-icon-btn" aria-label="Today — everything that needs you" title="Today"><Sun size={18} /></Link>
+            <button className="sys-icon-btn" onClick={signOut} aria-label="Sign out"><LogOut size={18} /></button>
+          </div>
         </div>
       </aside>
 
@@ -124,12 +138,18 @@ const SystemsApp = () => {
               <h2>Systems</h2>
               <button className="sys-icon-btn" onClick={() => setMoreOpen(false)} aria-label="Close"><X size={18} /></button>
             </div>
-            <nav className="sys-more__grid">
-              {SYSTEMS_NAV.map((n) => (
-                <NavLink key={n.to} to={n.to} end={n.end} className="sys-more__link" onClick={() => setMoreOpen(false)}>
-                  <n.Icon size={22} />
-                  <span>{n.label}</span>
-                </NavLink>
+            <nav className="sys-more__nav" aria-label="All Systems sections">
+              <div className="sys-more__grid">
+                <NavItem n={SYSTEMS_HOME} className="sys-more__link" size={22} onClick={() => setMoreOpen(false)} />
+                <Link to="/today" className="sys-more__link"><Sun size={22} /> <span>Today</span></Link>
+              </div>
+              {SYSTEMS_GROUPS.map((g) => (
+                <section key={g.id} className="sys-more__group" aria-labelledby={`sys-mg-${g.id}`}>
+                  <h3 id={`sys-mg-${g.id}`}>{g.label}</h3>
+                  <div className="sys-more__grid">
+                    {g.items.map((n) => <NavItem key={n.to} n={n} className="sys-more__link" size={22} onClick={() => setMoreOpen(false)} />)}
+                  </div>
+                </section>
               ))}
             </nav>
             <div className="sys-more__me">

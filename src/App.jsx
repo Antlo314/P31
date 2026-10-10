@@ -41,6 +41,8 @@ const SystemsApp = lazy(() => import('./systems/SystemsApp'));
 // Member dashboards: mentorship classrooms / mentor consoles, and the Content Studio.
 const AcademyApp = lazy(() => import('./academy/app/AcademyApp'));
 const StudioApp = lazy(() => import('./studio/StudioApp'));
+// The team's home: what needs attention across every dashboard they run.
+const Today = lazy(() => import('./today/Today'));
 // Dev-only studio test bench; compiled out of production builds.
 const Lab = import.meta.env.DEV ? lazy(() => import('./dev/Lab')) : null;
 
@@ -178,6 +180,10 @@ function App() {
           <Route
             path="/studio/*"
             element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#12081d' }} />}><StudioApp /></Suspense>}
+          />
+          <Route
+            path="/today"
+            element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#FCFBFE' }} />}><Today /></Suspense>}
           />
           {Lab && <Route path="/__lab" element={<Suspense fallback={null}><Lab /></Suspense>} />}
           <Route path="/*" element={isCollective ? <CollectiveRoutes /> : <SiteRoutes />} />

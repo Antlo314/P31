@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { SYSTEMS_NAV } from '../nav';
+import { SYSTEMS_GROUPS } from '../nav';
+import { hrefFor } from '../../lib/site';
 
 const BLURBS = {
+  '/systems/crm': 'Everyone who has reached P31, from first form to alumni, with their history.',
+  '/studio': 'Instagram & Facebook: plan, create, schedule and answer messages.',
+  '/dashboard': 'Approve new curators and manage shops on p31market.com.',
   '/systems/applications': 'Review “Join P31 Collective” membership applications.',
   '/systems/social': 'Plan, schedule and share posts across every platform.',
   '/systems/growth': 'Search social media for groups and people who fit P31.',
@@ -66,18 +70,27 @@ const Overview = ({ operator }) => {
         ))}
       </div>
 
-      <div className="sys-tools">
-        {SYSTEMS_NAV.filter((n) => BLURBS[n.to]).map((n) => (
-          <Link to={n.to} className="sys-tool" key={n.to}>
-            <span className="sys-tool__icon"><n.Icon size={22} /></span>
-            <div>
-              <h2>{n.label === 'Clips' ? 'Clip Studio' : n.label === 'Photos' ? 'Photo Studio' : n.label}</h2>
-              <p>{BLURBS[n.to]}</p>
-            </div>
-            <ArrowRight size={18} className="sys-tool__go" />
-          </Link>
-        ))}
-      </div>
+      {SYSTEMS_GROUPS.map((g) => (
+        <section key={g.id} className="sys-group" aria-labelledby={`sys-og-${g.id}`}>
+          <h2 id={`sys-og-${g.id}`} className="sys-group__title">{g.label}</h2>
+          <div className="sys-tools">
+            {g.items.filter((n) => BLURBS[n.to]).map((n) => {
+              const href = hrefFor(n.to);
+              const body = <>
+                <span className="sys-tool__icon"><n.Icon size={22} /></span>
+                <div>
+                  <h3>{n.label === 'Clips' ? 'Clip Studio' : n.label === 'Photos' ? 'Photo Studio' : n.label}</h3>
+                  <p>{BLURBS[n.to]}</p>
+                </div>
+                {n.away ? <ArrowUpRight size={18} className="sys-tool__go" /> : <ArrowRight size={18} className="sys-tool__go" />}
+              </>;
+              return href === n.to
+                ? <Link to={n.to} className="sys-tool" key={n.to}>{body}</Link>
+                : <a href={href} className="sys-tool" key={n.to}>{body}</a>;
+            })}
+          </div>
+        </section>
+      ))}
     </div>
   );
 };

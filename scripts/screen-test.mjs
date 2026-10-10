@@ -23,13 +23,14 @@ const cl = at('collective', 'admin');
 const st = at('collective', 'student');
 const fa = at('collective', 'faith');
 
-// [name, url, buttons to click in order]
+// [name, url, buttons to click in order, text the page must show]
 const SCREENS = [
   ['market home', mk('/')], ['shop', mk('/shop')], ['curators', mk('/directory')], ['market dates', mk('/calendar')],
   ['about + team', mk('/about')], ['services', mk('/services')], ['partner', mk('/partner')], ['curator sign-in', mk('/login')],
   ['collective home', cl('/')], ['academy', cl('/academy')], ['systems showcase', at('collective', 'student')('/systems')],
   ['join', cl('/join')], ['mentorship', cl('/mentorship')], ['business mentorship', cl('/mentorship/business')],
   ['faith mentorship', cl('/mentorship/faith')], ['verify', cl('/verify')], ['portal', cl('/portal?choose')],
+  ['today', cl('/today'), [], 'Collective applications'], ['portal sends the team to today', cl('/portal'), [], 'Work to grade'], ['students skip today', st('/today')],
   ['mentor overview', cl('/academy/business/teach')],
   ['student preview window', cl('/academy/business/teach'), ['Preview', 'Desktop', 'Tablet']], ['mentor inbox', cl('/academy/business/teach/inbox/u-s1')],
   ['students', cl('/academy/business/teach/students')],
@@ -69,7 +70,7 @@ if (!CHROME) { console.error('screen-test: Chrome not found (set CHROME_PATH)');
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
 const failures = [];
 let n = 0;
-for (const [name, url, clicks = []] of SCREENS) {
+for (const [name, url, clicks = [], expect] of SCREENS) {
   const page = await browser.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -85,6 +86,7 @@ for (const [name, url, clicks = []] of SCREENS) {
     const text = await page.evaluate(() => document.body.innerText);
     if (/Something went wrong/.test(text)) failures.push(`${name}: error screen: ${text.match(/team:\s*([^\n]+)/)?.[1] || ''}`);
     else if (text.trim().length < 40) failures.push(`${name}: blank page`);
+    else if (expect && !text.includes(expect)) failures.push(`${name}: missing "${expect}"`);
     if (errors.length) failures.push(`${name}: page error: ${errors[0]}`);
   } catch (e) {
     failures.push(`${name}: ${e.message}`);

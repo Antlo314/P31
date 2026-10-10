@@ -204,6 +204,11 @@ const makeDb = () => ({
     { id: 'er2', fingerprint: 'b', kind: 'chunk', message: 'Failed to fetch dynamically imported module: /assets/Shop-x1y2.js', path: '/shop', site: 'market', release: '75b16c0', count: 2, users: 2, first_seen: day(-1), last_seen: iso(-300), resolved_at: null, stack: null, user_agent: 'Mozilla/5.0 (Windows NT 10.0)' },
     { id: 'er3', fingerprint: 'c', kind: 'promise', message: 'Load failed', path: '/join', site: 'collective', release: '75b16c0', count: 1, users: 1, first_seen: day(-4), last_seen: day(-4), resolved_at: day(-3), stack: null, user_agent: 'Mozilla/5.0 (Macintosh)' },
   ],
+  orders: [
+    { id: 'or1', product_name: 'Sample Candle Trio', buyer_name: 'Sample Shopper', buyer_email: 'shopper@example.com', quantity: 1, amount_total: 4200, amount_subtotal: 4200, order_type: 'request', fulfillment_method: 'pickup', fulfillment_status: 'new', payment_status: 'unpaid', created_at: iso(-95) },
+    { id: 'or2', product_name: 'Sample Tote Bag', buyer_name: 'Sample Buyer', buyer_email: 'buyer@example.com', quantity: 2, amount_total: 5000, amount_subtotal: 5000, order_type: 'request', fulfillment_method: 'shipping', fulfillment_status: 'fulfilled', payment_status: 'paid', created_at: day(-3) },
+  ],
+  curator_data: [{ id: 'cu1', business_name: 'Sample Bakery Co.', status: 'pending', created_at: day(-1), profiles: { full_name: 'Sample Curator' } }],
   campaigns: [{ id: 'cm1', subject: 'The Winter Gala is coming', body: 'Save the date…', audience: 'subscribers', status: 'draft', created_at: day(-1) }],
   market_events: [{ id: 'ev1', title: 'Winter Gala', event_date: day(70).slice(0, 10), date_public: false, is_active: true, venue: null, capacity: 150 }],
 });

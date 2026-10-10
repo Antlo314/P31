@@ -6,7 +6,7 @@ import './dash.css';
 
 /**
  * Shared frame for member dashboards (classrooms, mentor consoles, Content Studio).
- *   nav:   [{ to, label, Icon, end?, badge? }]   — first 4 become the phone tab bar
+ *   nav:   [{ to, label, Icon, end?, badge?, short? }] — first 4 become the phone tab bar (labelled `short` when given)
  *   theme: 'light' (ivory work area) | 'dark' (night, for the studio)
  */
 const DashShell = ({ theme = 'light', variant, brand, nav, account, onSignOut, banner, tools, children }) => {
@@ -66,7 +66,7 @@ const DashShell = ({ theme = 'light', variant, brand, nav, account, onSignOut, b
       <nav className="ds-tabs" aria-label="Quick navigation">
         {tabs.map((n) => (
           <NavLink key={n.to} to={n.to} end={n.end} className="ds-tab">
-            <n.Icon size={20} /><span>{n.label}</span>{n.badge ? <em className="ds-badge">{n.badge}</em> : null}
+            <n.Icon size={20} /><span>{n.short || n.label}</span>{n.badge ? <em className="ds-badge">{n.badge}</em> : null}
           </NavLink>
         ))}
         <button type="button" className={`ds-tab ${inMore ? 'active' : ''}`} onClick={() => setMore(true)} aria-haspopup="dialog">

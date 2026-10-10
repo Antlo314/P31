@@ -50,6 +50,9 @@ export function useRoles() {
   return { ...state, reload: load, user };
 }
 
+/** Team members (mentors, Studio, Systems) get the "Today" home that gathers their dashboards. */
+export const isTeam = (roles) => !!(roles.admin || roles.operator || roles.studio || roles.mentor?.length);
+
 const PROGRAM_NAMES = { business: 'Business Mentorship', faith: 'Faith-Based Mentorship' };
 
 /** Every dashboard this person may open, most specific first. */

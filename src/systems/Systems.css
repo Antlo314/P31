@@ -72,12 +72,15 @@
   background: linear-gradient(135deg, var(--sys-gold), #D9A93A); color: #2a1a00;
   font-family: var(--font-heading); font-size: 0.95rem;
 }
-.sys-side__nav { display: grid; gap: 2px; }
+.sys-side__nav { display: grid; align-content: start; gap: 2px; flex: 1; min-height: 0; overflow-y: auto; margin-inline: -4px; padding-inline: 4px; scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.12) transparent; }
+.sys-side__group { display: grid; gap: 1px; margin-top: 12px; }
+.sys-side__label { margin: 0 0 4px; padding: 0 12px; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sys-gold); opacity: 0.75; }
 .sys-side__link {
   display: flex; align-items: center; gap: 10px;
-  padding: 11px 12px; border-radius: 12px;
-  color: var(--sys-dim); font-weight: 600; text-decoration: none;
+  padding: 8px 12px; border-radius: 11px;
+  color: var(--sys-dim); font-weight: 600; font-size: 0.93rem; text-decoration: none;
 }
+.sys-away { margin-left: auto; opacity: 0.55; flex: none; }
 .sys-side__link:hover { background: rgba(255, 255, 255, 0.04); color: var(--sys-ink); }
 .sys-side__link.active { background: rgba(242, 206, 77, 0.12); color: var(--sys-gold); }
 .sys-side__me {
@@ -86,6 +89,7 @@
 }
 .sys-side__me div { display: grid; }
 .sys-side__me span { font-size: 0.75rem; color: var(--sys-dim); }
+.sys-side__me .sys-side__actions { display: flex; gap: 6px; }
 
 /* ── Page furniture ─────────────────────────────────────── */
 .sys-page { display: grid; gap: 16px; max-width: 1100px; margin-inline: auto; }
@@ -126,6 +130,8 @@
 }
 .sys-stat__n { font-family: var(--font-heading); font-size: 2rem; color: var(--sys-gold); line-height: 1; }
 .sys-stat__l { font-size: 0.8rem; color: var(--sys-dim); font-weight: 600; }
+.sys-group { display: grid; gap: 10px; margin-top: 10px; }
+.sys .sys-group__title { margin: 0; font-family: var(--font-body); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sys-gold); }
 .sys-tools { display: grid; gap: 10px; }
 @media (min-width: 760px) { .sys-tools { grid-template-columns: repeat(2, 1fr); } }
 .sys-tool {
@@ -139,7 +145,7 @@
   display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px;
   background: rgba(168, 85, 232, 0.16); color: #d6b3ff;
 }
-.sys-tool h2 { font-family: var(--font-body); font-size: 1rem; font-weight: 800; margin: 0; }
+.sys-tool h3 { font-family: var(--font-body); font-size: 1rem; font-weight: 800; margin: 0; }
 .sys-tool p { margin: 2px 0 0; font-size: 0.86rem; color: var(--sys-dim); }
 .sys-tool__go { color: var(--sys-dim); }
 
@@ -326,9 +332,12 @@
 button.sys-tabbar__link { border: 0; background: none; font: inherit; font-size: 0.68rem; font-weight: 700; cursor: pointer; }
 button.sys-tabbar__link.active { background: rgba(242, 206, 77, 0.1); }
 .sys-more__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.sys-more__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.sys-more__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+@media (min-width: 440px) { .sys-more__grid { grid-template-columns: repeat(4, 1fr); } }
+.sys-more__group h3 { margin: 16px 0 8px; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sys-gold); opacity: 0.8; font-family: var(--font-body); }
+.sys-more__link .sys-away { position: absolute; top: 8px; right: 8px; margin: 0; }
 .sys-more__link {
-  display: grid; justify-items: center; gap: 8px; padding: 16px 6px; border-radius: 16px;
+  position: relative; display: grid; justify-items: center; gap: 6px; padding: 12px 4px; border-radius: 16px;
   background: var(--sys-panel); border: 1px solid var(--sys-line); color: var(--sys-ink);
   font-size: 0.82rem; font-weight: 700; text-decoration: none; text-align: center;
 }
