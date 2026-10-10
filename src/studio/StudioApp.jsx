@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CalendarClock, PenSquare, MessagesSquare, MessageCircle, Clapperboard, Lock } from 'lucide-react';
+import { LayoutDashboard, CalendarClock, PenSquare, MessagesSquare, MessageCircle, Clapperboard, Lock, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useRoles } from '../lib/roles';
 import DashShell from '../apps/DashShell';
 import { StudioOverview, StudioCalendar, StudioCompose, StudioInbox, StudioComments, StudioCreate } from './pages';
+import StudioEmail from './Email';
+import { supabase } from '../lib/supabase';
 import logo from '../assets/web/p31-mark-192.webp';
 import Tour, { TourButton } from '../components/Tour';
 import { STUDIO_TOUR } from './studioTour';
@@ -13,6 +15,7 @@ import './studio.css';
 
 const NAV = [
   { to: '/studio', label: 'Overview', Icon: LayoutDashboard, end: true },
+  { to: '/studio/email', label: 'Email', Icon: Mail },
   { to: '/studio/calendar', label: 'Calendar', Icon: CalendarClock },
   { to: '/studio/compose', label: 'Create post', Icon: PenSquare },
   { to: '/studio/inbox', label: 'Messages', Icon: MessagesSquare },
@@ -25,6 +28,15 @@ const StudioApp = () => {
   const { signOut } = useAuth();
   const { status, roles, user } = useRoles();
   const { pathname } = useLocation();
+  const [toAnswer, setToAnswer] = useState(0);
+  const canUse = status === 'ready' && (roles.studio || roles.admin);
+
+  // How many emails are waiting for a reply (the Email badge).
+  useEffect(() => {
+    if (!canUse) return;
+    supabase.from('email_threads').select('id', { count: 'exact', head: true }).eq('status', 'needs_reply')
+      .then(({ count, error }) => setToAnswer(error ? 0 : count || 0));
+  }, [canUse, pathname]);
 
   if (status === 'loading') return <div className="ds ds--dark" aria-busy="true" />;
   if (status === 'signed-out') return <Navigate to={`/portal?next=${encodeURIComponent(pathname)}`} replace />;
@@ -45,7 +57,7 @@ const StudioApp = () => {
     <DashShell
       theme="dark"
       brand={{ to: '/studio', mark: logo, title: 'Content Studio', subtitle: 'P31 Marketplace' }}
-      nav={NAV}
+      nav={NAV.map((n) => (n.to === '/studio/email' ? { ...n, badge: toAnswer } : n))}
       account={{ name: user?.user_metadata?.full_name || user?.email || (roles.preview ? 'Preview' : ''), role: roles.admin ? 'Admin' : 'Studio seat' }}
       onSignOut={signOut}
       tools={<TourButton id="studio" />}
@@ -53,6 +65,7 @@ const StudioApp = () => {
     >
       <Routes>
         <Route index element={<StudioOverview />} />
+        <Route path="email" element={<StudioEmail />} />
         <Route path="calendar" element={<StudioCalendar />} />
         <Route path="compose" element={<StudioCompose />} />
         <Route path="inbox" element={<StudioInbox />} />

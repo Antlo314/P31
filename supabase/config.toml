@@ -22,6 +22,14 @@ verify_jwt = false
 [functions.join-notify]
 verify_jwt = false
 
+# Resend calls this for each received email; it checks Resend's signature itself.
+[functions.email-inbound]
+verify_jwt = false
+
+# Content Studio → Email; the function checks the caller is a Studio member.
+[functions.email-send]
+verify_jwt = false
+
 # Signed-in callers; the function verifies the user itself.
 [functions.ai-assist]
 verify_jwt = false

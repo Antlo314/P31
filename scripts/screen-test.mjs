@@ -63,6 +63,8 @@ const SCREENS = [
   ['davinci member: systems is davinci only', at('collective', 'davinci')('/systems/crm'), [], 'Choose footage'],
   ['studio member lands in studio + walkthrough', at('collective', 'studio')('/portal'), [], 'Welcome to Content Studio'],
   ['studio walkthrough steps', cl('/studio'), ['Next', 'Next'], 'Calendar: what’s going out'],
+  ['studio email + send', cl('/studio/email'), ['Sample Applicant', 'Send reply', 'Yes, send it'], 'Sent to sample.applicant@example.com'],
+  ['studio email: needs a person', cl('/studio/email'), ['Sample Vendor'], 'Needs a person: Refund request'],
   ['classroom walkthrough', st('/academy/business'), ['Next'], 'Home: what’s next'],
 ];
 

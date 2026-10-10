@@ -215,6 +215,40 @@ const makeDb = () => ({
     { email: 'davinci@example.com', full_name: 'Sample DaVinci Editor', tools: ['davinci'], note: 'Sample', created_at: day(-2) },
     { email: 'studio@example.com', full_name: 'Sample Studio Seat', tools: ['studio'], note: 'Sample', created_at: day(-1) },
   ],
+  email_threads: [
+    { id: 'et-1', mailbox: 'collective', subject: 'Question about joining', contact_email: 'sample.applicant@example.com', contact_name: 'Sample Applicant', status: 'needs_reply', category: 'applicant', summary: 'Applied last week; asks when she will hear back and whether she can attend the next meetup.', needs_human: false, human_reason: null,
+      draft: `Hi there,
+
+Thank you so much for applying to join the P31 Collective. Our team reviews every application personally, and you will receive the final step by email once yours has been reviewed.
+
+In the meantime, you are always welcome to follow along at https://www.thep31collective.org.
+
+Warmly,
+Carla
+The P31 Collective`, draft_at: iso(-30), last_message_at: iso(-35), last_from_contact: true, created_at: iso(-35) },
+    { id: 'et-2', mailbox: 'market', subject: 'Refund for my booth?', contact_email: 'sample.vendor@example.com', contact_name: 'Sample Vendor', status: 'needs_reply', category: 'vendor', summary: 'Vendor asking about a booth refund after missing the last market.', needs_human: true, human_reason: 'Refund request',
+      draft: `Hi there,
+
+Thank you for reaching out, and I am sorry you could not make it. I have passed your note to our team, and someone will follow up with you personally about your booth.
+
+Warmly,
+Carla
+Proverbs 31 Marketplace`, draft_at: iso(-100), last_message_at: iso(-110), last_from_contact: true, created_at: iso(-110) },
+    { id: 'et-3', mailbox: 'collective', subject: 'Re: Welcome!', contact_email: 'sample.member@example.com', contact_name: 'Sample Member', status: 'sent', category: 'member', summary: 'Member saying thank you.', needs_human: false, draft: null, last_message_at: day(-1), last_from_contact: false, created_at: day(-2) },
+  ],
+  email_messages: [
+    { id: 'em-1', thread_id: 'et-1', direction: 'in', from_email: 'sample.applicant@example.com', from_name: 'Sample Applicant', subject: 'Question about joining', body_text: `Hello! I applied to join last week. When will I hear back, and can I come to the next meetup?
+
+Thank you,
+Sample`, attachments: [], created_at: iso(-35) },
+    { id: 'em-2', thread_id: 'et-2', direction: 'in', from_email: 'sample.vendor@example.com', from_name: 'Sample Vendor', subject: 'Refund for my booth?', body_text: 'Hi, I missed the last market because I was sick. Can I get my booth fee back or move it to the next one?', attachments: [{ filename: 'receipt.pdf' }], created_at: iso(-110) },
+    { id: 'em-3', thread_id: 'et-3', direction: 'in', from_email: 'sample.member@example.com', from_name: 'Sample Member', subject: 'Welcome!', body_text: 'Thank you so much for the warm welcome!', attachments: [], created_at: day(-2) },
+    { id: 'em-4', thread_id: 'et-3', direction: 'out', from_email: 'members@thep31collective.org', from_name: 'The P31 Collective', subject: 'Re: Welcome!', body_text: `We are so glad you are here!
+
+Warmly,
+Carla
+The P31 Collective`, attachments: [], created_at: day(-1) },
+  ],
   vendor_applications: [
     { id: 'va-1', serious: 'Yes', full_name: 'Sample Vendor', business_name: 'Sample Candle Co.', email: 'vendor1@example.com', phone: '(470) 555-0161', website_social: '@samplecandles', referred_by: null, categories: ['Candles & Home fragrance'], notes: 'Sample application.', agreed: true, status: 'new', review_notes: null, created_at: iso(-200) },
     { id: 'va-2', serious: 'Yes', full_name: 'Sample Maker', business_name: 'Sample Crafts', email: 'vendor2@example.com', phone: '(470) 555-0162', website_social: 'samplecrafts.com', referred_by: 'Sample Vendor', categories: ['Handmade crafts, baskets & gifts', 'Art, Painting, Photography'], notes: null, agreed: true, status: 'approved', review_notes: 'Booth 4', created_at: day(-6) },
@@ -282,6 +316,14 @@ const fns = {
     return {};
   },
   'daily-room': () => ({ error: 'Demo mode — live rooms open on the real site.' }),
+  'email-send': (b) => (b.action === 'redraft'
+    ? { ok: true, draft: { reply: `Hi there,
+
+(Demo) Carla rewrote this${b.instruction ? `: ${b.instruction}` : ''}.
+
+Warmly,
+Carla`, category: 'general', summary: 'Demo', needs_human: false, reason: '' } }
+    : { ok: true }),
 };
 
 // ── A tiny query builder that answers like Supabase ─────────

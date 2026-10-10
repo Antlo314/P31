@@ -28,3 +28,27 @@
 .ds--dark .k-segs button[aria-pressed="true"] { background: rgba(242, 206, 77, 0.18); border-color: rgba(242, 206, 77, 0.5); color: var(--gold-hi); }
 .ds--dark .ds-row .ds-check { accent-color: var(--gold); }
 .ds--dark .k-btn--ghost { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.14); color: #fff !important; }
+
+/* Email (Content Studio → Email) */
+.em-boxes { margin-top: -6px; }
+.em-grid > * { min-width: 0; }
+.ds-row .em-meta { display: grid; justify-items: end; gap: 4px; flex: none; margin-left: auto; text-align: right; }
+.ds-row .em-meta small { white-space: nowrap; }
+.em-flag { color: #ffb86b; }
+.em-thread { gap: 14px; }
+.em-who { margin: -6px 0 0; font-size: 0.88rem; overflow-wrap: anywhere; }
+.em-summary, .em-human { display: flex; gap: 8px; align-items: flex-start; margin: 0; padding: 10px 12px; border-radius: 12px; font-size: 0.9rem; }
+.em-summary { background: rgba(242, 206, 77, 0.08); color: var(--ds-ink-2); }
+.em-summary svg { color: var(--gold-hi); flex: none; margin-top: 2px; }
+.em-human { background: rgba(255, 184, 107, 0.12); color: #ffd3a3; }
+.em-human svg { flex: none; margin-top: 2px; }
+.em-msgs { max-height: 420px; overflow-y: auto; }
+.em-body { white-space: pre-wrap; overflow-wrap: anywhere; }
+.em-draft { display: grid; gap: 10px; }
+.em-draft .k-field { margin: 0; }
+.em-text { width: 100%; min-height: 220px; resize: vertical; font: inherit; line-height: 1.55; }
+.em-ask { display: flex; flex-wrap: wrap; gap: 8px; }
+.em-ask .k-input { flex: 1 1 220px; min-width: 0; }
+.em-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px; border-radius: 14px; background: rgba(242, 206, 77, 0.1); border: 1px solid rgba(242, 206, 77, 0.35); }
+.em-confirm span { flex: 1 1 100%; font-size: 0.92rem; overflow-wrap: anywhere; }
+.em-note { margin: 0; color: #7be0b8; font-weight: 700; font-size: 0.9rem; }
