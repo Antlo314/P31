@@ -5,7 +5,9 @@ import { useAuth } from '../context/AuthContext';
 import { useRoles } from '../lib/roles';
 import DashShell from '../apps/DashShell';
 import { StudioOverview, StudioCalendar, StudioCompose, StudioInbox, StudioComments, StudioCreate } from './pages';
-import logo from '../assets/web/logo-160.webp';
+import logo from '../assets/web/p31-mark-192.webp';
+import Tour, { TourButton } from '../components/Tour';
+import { STUDIO_TOUR } from './studioTour';
 import '../pages/Login.css';
 import './studio.css';
 
@@ -32,7 +34,7 @@ const StudioApp = () => {
         <div className="lg__card" style={{ textAlign: 'center', justifyItems: 'center' }}>
           <span className="lg__badge"><Lock size={22} /></span>
           <h1 className="k-h2 lg__title">Studio seats are <em>limited</em></h1>
-          <p className="lg__sub">This account doesn’t have one of the three Content Studio seats. An admin can add you from Systems → Academy.</p>
+          <p className="lg__sub">Content Studio is for the marketing team and admins. If you should have access, ask an admin to switch it on in Systems → Team access for the email you sign in with.</p>
           <Link className="k-btn k-btn--ghost" to="/portal?choose">My dashboards</Link>
         </div>
       </div>
@@ -46,6 +48,7 @@ const StudioApp = () => {
       nav={NAV}
       account={{ name: user?.user_metadata?.full_name || user?.email || (roles.preview ? 'Preview' : ''), role: roles.admin ? 'Admin' : 'Studio seat' }}
       onSignOut={signOut}
+      tools={<TourButton id="studio" />}
       banner={roles.preview ? <div className="ds-banner">Layout preview (development only) — Zernio calls need a real Studio sign-in.</div> : null}
     >
       <Routes>
@@ -57,6 +60,7 @@ const StudioApp = () => {
         <Route path="create" element={<StudioCreate />} />
         <Route path="*" element={<Navigate to="/studio" replace />} />
       </Routes>
+      <Tour id="studio" steps={STUDIO_TOUR} user={user} autoStart={!roles.preview} />
     </DashShell>
   );
 };

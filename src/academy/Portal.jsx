@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, Eye, EyeOff, LayoutGrid, LogOut, GraduationCap, Clapperboard, Store, ShieldCheck, Presentation, Sun } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Eye, EyeOff, LayoutGrid, LogOut, GraduationCap, Clapperboard, Store, ShieldCheck, Presentation, Sun, Film } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useRoles, dashboardsFor, isTeam } from '../lib/roles';
@@ -12,7 +12,7 @@ import '../pages/Login.css';
 import './mentorship.css';
 import { JOIN_PATH } from '../lib/academy';
 
-const KIND_ICON = { student: GraduationCap, mentor: Presentation, studio: Clapperboard, systems: ShieldCheck, curator: Store };
+const KIND_ICON = { student: GraduationCap, mentor: Presentation, studio: Clapperboard, systems: ShieldCheck, curator: Store, davinci: Film };
 
 // /portal — one sign-in for every member dashboard.
 const Portal = () => {

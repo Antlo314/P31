@@ -92,7 +92,7 @@
 .sys-side__me .sys-side__actions { display: flex; gap: 6px; }
 
 /* ── Page furniture ─────────────────────────────────────── */
-.sys-page { display: grid; gap: 16px; max-width: 1100px; margin-inline: auto; }
+.sys-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; max-width: 1100px; margin-inline: auto; }
 .sys-page__head h1 {
   font-family: var(--font-heading); font-weight: 400;
   font-size: clamp(1.8rem, 1.3rem + 2vw, 2.6rem); line-height: 1.1; margin: 0; text-wrap: balance;
@@ -228,7 +228,8 @@
 .sys-result__main { flex: 1; min-width: 0; display: grid; gap: 6px; }
 .sys-result h3 { margin: 0; font-family: var(--font-body); font-size: 1rem; font-weight: 800; overflow-wrap: anywhere; }
 .sys-result p { margin: 0; font-size: 0.88rem; color: var(--sys-dim); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.sys-result__meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; color: var(--sys-dim); }
+.sys-result__meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; color: var(--sys-dim); min-width: 0; }
+.sys-result__meta > * { min-width: 0; overflow-wrap: anywhere; }
 .sys-result__meta a { display: inline-flex; align-items: center; gap: 3px; color: var(--sys-gold); font-weight: 700; }
 
 /* Social */
@@ -399,3 +400,13 @@ button.sys-tabbar__link.active { background: rgba(242, 206, 77, 0.1); }
 @media (max-width: 640px) { .hl-main { flex-wrap: wrap; } .hl-detail { padding-left: 0; } }
 .sys-list > li.hl-row { display: grid; grid-template-columns: minmax(0, 1fr); align-items: stretch; }
 .hl-sites .sys-chip { text-transform: none; }
+
+/* Team access */
+.sys-list > li.ta-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-items: start; }
+@media (min-width: 820px) { .sys-list > li.ta-row { grid-template-columns: minmax(0, 1.3fr) auto auto; align-items: center; } }
+.ta-who { display: grid; gap: 2px; min-width: 0; }
+.ta-who span { font-size: 0.82rem; color: var(--sys-dim); overflow-wrap: anywhere; }
+.ta-who .ta-state { font-weight: 700; color: #ffb86b; }
+.ta-who .ta-state.is-on { color: #7be0b8; }
+.ta-row .sys-chip, .sys-form .sys-chip { display: inline-flex; align-items: center; gap: 6px; text-transform: none; cursor: pointer; }
+.ta-actions { display: flex; align-items: center; gap: 6px; }

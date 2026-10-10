@@ -435,3 +435,8 @@
 /* A 3D accent in the hero's media slot (PageHeader visual) */
 .k-hero__visual { position: relative; width: min(100%, 520px); aspect-ratio: 1; justify-self: center; }
 @media (max-width: 899px) { .k-hero__visual { width: min(100%, 360px); margin-top: -12px; } }
+
+/* Very small phones (≤ 359px): long button labels wrap instead of pushing the page wider. */
+@media (max-width: 359px) {
+  .k-btn { white-space: normal; text-align: center; line-height: 1.2; padding-block: 10px; max-width: 100%; }
+}

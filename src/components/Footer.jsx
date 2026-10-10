@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Instagram, Facebook, Mail, Phone, HeartHandshake, ArrowUpRight, MapPin, ArrowRight, ArrowUp, Star } from 'lucide-react';
 import { openJoin } from '../lib/join';
 import { collectivePortal, hrefFor } from '../lib/site';
-import logoPath from '../assets/web/logo-160.webp';
+import logoPath from '../assets/web/p31-mark-192.webp';
 import './Footer.css';
 import { EMAIL } from '../lib/team';
 import { JOIN_PATH } from '../lib/academy';

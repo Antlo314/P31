@@ -1,0 +1,80 @@
+/* DaVinci clip finder (Systems → DaVinci). Shares the pe- form pieces from ProEdit.css. */
+.cf { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; max-width: 860px; }
+.cf-card {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 18px; border-radius: 20px;
+  background: var(--pe-panel, rgba(255, 255, 255, 0.05)); border: 1px solid var(--pe-line, rgba(127, 127, 127, 0.2));
+}
+.cf-card h3 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.05rem; }
+.pe-drop--sm { min-height: 44px; }
+
+.cf-source { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.cf-source img { width: 96px; height: 54px; object-fit: cover; border-radius: 10px; background: #000; }
+.cf-source div { display: grid; gap: 2px; min-width: 0; }
+.cf-source strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cf-source span { font-size: 0.82rem; opacity: 0.72; }
+.cf-source label { cursor: pointer; }
+
+.cf-lengths { display: flex; flex-wrap: wrap; gap: 6px; }
+.cf-lengths button {
+  min-width: 56px; min-height: 40px; padding: 0 12px; border-radius: 999px; cursor: pointer;
+  font: inherit; font-weight: 800; color: inherit; background: transparent; border: 1px solid var(--pe-line, rgba(127, 127, 127, 0.3));
+}
+.cf-lengths button.is-on { background: rgba(242, 206, 77, 0.16); border-color: #D9A93A; color: #F2CE4D; }
+.cf-lengths button:disabled { opacity: 0.35; cursor: not-allowed; }
+.cf-count { display: grid; gap: 8px; }
+.cf-count > span { display: grid; gap: 2px; font-weight: 700; font-size: 0.9rem; }
+.cf-count b { color: #F2CE4D; font-size: 1.1rem; margin-left: 6px; }
+.cf-count small { font-weight: 500; opacity: 0.7; font-size: 0.8rem; }
+.cf-count input { width: 100%; accent-color: #F2CE4D; }
+
+.cf-tracks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.cf-tracks li {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center;
+  padding: 8px 10px; border-radius: 12px; background: rgba(255, 255, 255, 0.04); font-size: 0.88rem;
+}
+.cf-tracks li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cf-tracks button { background: none; border: 0; color: inherit; cursor: pointer; opacity: 0.7; display: grid; place-items: center; min-width: 32px; min-height: 32px; }
+
+.cf-go { display: grid; gap: 10px; }
+.cf-progress { display: grid; gap: 6px; font-size: 0.88rem; }
+.cf-progress span { display: inline-flex; align-items: center; gap: 8px; }
+.cf-progress progress { width: 100%; height: 8px; accent-color: #F2CE4D; }
+.cf-progress .pe-linkbtn { justify-self: start; }
+
+.cf-review__head, .cf-review__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.cf-review .pe-linkbtn { display: inline-flex; align-items: center; gap: 6px; }
+.cf-player { width: 100%; max-height: 360px; border-radius: 14px; background: #000; }
+.cf-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.cf-clip {
+  display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; padding: 10px; border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03); border: 1px solid var(--pe-line, rgba(127, 127, 127, 0.2));
+}
+.cf-clip__thumb { position: relative; padding: 0; border: 0; border-radius: 12px; overflow: hidden; cursor: pointer; background: #000; aspect-ratio: 16 / 10; align-self: start; }
+.cf-clip__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cf-clip__thumb em {
+  position: absolute; inset: auto 6px 6px auto; display: grid; place-items: center; width: 30px; height: 30px;
+  border-radius: 50%; background: rgba(0, 0, 0, 0.6); color: #fff; font-style: normal;
+}
+.cf-clip__body { display: grid; gap: 8px; min-width: 0; }
+.cf-clip__top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 0.88rem; }
+.cf-clip__top span:not(.pe-pill) { opacity: 0.72; }
+.cf-clip__title, .cf-clip__opts select {
+  width: 100%; min-width: 0; font: inherit; font-size: 16px; padding: 8px 10px; border-radius: 10px; color: inherit;
+  background: var(--pe-input, rgba(255, 255, 255, 0.06)); border: 1px solid var(--pe-line, rgba(127, 127, 127, 0.3));
+}
+.cf-clip__opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.cf-clip__actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.cf-clip__actions button {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 34px; padding: 0 10px; border-radius: 999px; cursor: pointer;
+  font: inherit; font-size: 0.8rem; font-weight: 700; color: inherit; background: transparent; border: 1px solid var(--pe-line, rgba(127, 127, 127, 0.3));
+}
+.cf-clip__actions button:disabled { opacity: 0.5; }
+.cf-sent { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; padding: 12px 14px; border-radius: 14px; background: rgba(23, 166, 115, 0.14); color: #7be0b8; font-weight: 700; font-size: 0.9rem; }
+
+@media (max-width: 560px) {
+  .cf-clip { grid-template-columns: minmax(0, 1fr); }
+  .cf-clip__thumb { aspect-ratio: 16 / 9; }
+  .cf-clip__opts { grid-template-columns: minmax(0, 1fr); }
+  .cf-source { grid-template-columns: auto minmax(0, 1fr); }
+  .cf-source label { grid-column: 1 / -1; justify-self: start; }
+}

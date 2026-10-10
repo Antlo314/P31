@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase } from './supabase';
 import { useAuth } from '../context/AuthContext';
 
-const EMPTY = { signed_in: false, admin: false, operator: false, curator: false, studio: false, mentor: [], student: [] };
+const EMPTY = { signed_in: false, admin: false, operator: false, curator: false, studio: false, tools: [], mentor: [], student: [] };
 
 // Dev-only layout previews, compiled out of production: add ?devRole=student:business,
 // mentor:faith, studio or admin to a URL once; it sticks for the browser tab
@@ -23,6 +23,7 @@ const previewRoles = (r) => {
     ...EMPTY, signed_in: true,
     admin: kind === 'admin',
     studio: kind === 'studio' || kind === 'admin',
+    tools: kind === 'admin' ? ['studio', 'davinci'] : kind === 'studio' ? ['studio'] : kind === 'davinci' ? ['davinci'] : [],
     mentor: kind === 'mentor' ? [program] : kind === 'admin' ? ['business', 'faith'] : [],
     student: kind === 'student' ? [{ program, title: program === 'faith' ? 'Faith-Based Mentorship' : 'Business Mentorship', status: 'active', has_access: true }] : [],
     preview: true,
@@ -50,8 +51,11 @@ export function useRoles() {
   return { ...state, reload: load, user };
 }
 
-/** Team members (mentors, Studio, Systems) get the "Today" home that gathers their dashboards. */
-export const isTeam = (roles) => !!(roles.admin || roles.operator || roles.studio || roles.mentor?.length);
+/** Team members (mentors, Studio, DaVinci, Systems) get the "Today" home that gathers their dashboards. */
+export const isTeam = (roles) => !!(roles.admin || roles.operator || roles.studio || roles.mentor?.length || roles.tools?.length);
+
+/** Team tools this person was given (admins have every tool). */
+export const hasTool = (roles, tool) => !!(roles.admin || roles.tools?.includes(tool));
 
 const PROGRAM_NAMES = { business: 'Business Mentorship', faith: 'Faith-Based Mentorship' };
 
@@ -68,6 +72,7 @@ export function dashboardsFor(roles) {
   }));
   if (roles.studio) out.push({ to: '/studio', kind: 'studio', title: 'Content Studio', note: 'Instagram & Facebook · plan, create, schedule, reply' });
   if (roles.operator || roles.admin) out.push({ to: '/systems', kind: 'systems', title: 'Systems', note: 'P31 operations console' });
+  else if (roles.tools?.includes('davinci')) out.push({ to: '/systems/pro-edit', kind: 'davinci', title: 'DaVinci', note: 'Long footage in, finished clips out' });
   if (roles.curator) out.push({ to: '/dashboard', kind: 'curator', title: 'Curator Studio', note: 'Your shop, products and orders' });
   return out;
 }

@@ -120,8 +120,8 @@
 .cl-ring small { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ds-ink-3); }
 
 /* Inbox */
-.cl-inbox { display: grid; gap: 16px; }
-.cl-inbox__list { display: grid; gap: 10px; align-content: start; }
+.cl-inbox { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.cl-inbox__list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-content: start; min-width: 0; }
 .cl-inbox__thread { min-width: 0; }
 .cl-inbox__head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 .cl-inbox__head h2 { margin: 0 auto 0 0; font-family: var(--font-heading); font-weight: 400; font-size: 1.4rem; }
@@ -151,8 +151,8 @@
 .cl-seg .is-late { background: rgba(242, 206, 77, 0.25); border-color: var(--gold); color: #6b5210; }
 .cl-seg .is-absent { background: #fdecec; border-color: #e8a3a0; color: #b42318; }
 .cl-seg .is-excused { background: var(--mist); border-color: var(--plum); color: var(--plum); }
-.cl-session-row { display: flex; gap: 8px; align-items: center; }
-.cl-session-row > .ds-row { flex: 1; }
+.cl-session-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.cl-session-row > .ds-row { flex: 1 1 220px; min-width: 0; }
 
 /* Discussions */
 .cl-topic > div { min-width: 0; flex: 1; }

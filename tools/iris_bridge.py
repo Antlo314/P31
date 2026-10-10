@@ -4,7 +4,9 @@ P31 → Iris bridge (Pro Edit).
 Runs on the LumenCommand machine next to Iris (DavinciAIEditor, port 8756).
 Every 30 s it claims the oldest queued Pro Edit job from Supabase, downloads
 the footage, joins the clips, and has Iris build an Auto Edit package in the
-requested look (cut, captions, grade, music mix). The package then shows up
+requested look (cut, captions, grade, music mix). Clip-finder jobs (kind
+"clip") are one moment cut from long footage, with their own look and, when
+one was chosen, their own music track (passed to Iris as the music role). The package then shows up
 in Iris → push it into DaVinci Resolve, finish and render, and upload the
 final video from Systems → Pro Edit ("Upload finished edit").
 
@@ -155,7 +157,10 @@ def wait_iris_job(job_id: str) -> dict:
 
 def process(job: dict):
     jid = job["id"]
-    print(f"→ Job {jid}: {job.get('title') or 'Untitled'} ({job.get('style')}, {len(job['source_paths'])} clip(s))")
+    if job.get("kind") == "clip":
+        print(f"→ Job {jid}: {job.get('title') or 'Clip'} (clip {job.get('clip_index')} of {job.get('clip_count')}, {job.get('style')})")
+    else:
+        print(f"→ Job {jid}: {job.get('title') or 'Untitled'} ({job.get('style')}, {len(job['source_paths'])} clip(s))")
     folder = Path(ENV["IRIS_WORKSPACE"]) / "p31" / f"job-{jid}"
     folder.mkdir(parents=True, exist_ok=True)
 
@@ -170,11 +175,18 @@ def process(job: dict):
     print("   joining clips")
     join_clips(clips, picture, job.get('aspect') or '9:16')
 
+    roles = {"picture": str(picture)}
+    if job.get("music_path"):
+        music = folder / f"music{Path(job['music_path']).suffix or '.mp3'}"
+        print(f"   downloading music {job['music_path']}")
+        download(job["music_path"], music)
+        roles["music"] = str(music)
+
     style_id = STYLE_IDS.get(job.get("style") or "", "social_clean")
     name = f"P31 · {job.get('title') or f'Job {jid}'}"
     pkg = http("POST", f"{IRIS}/packages", {
         "name": name,
-        "roles": {"picture": str(picture)},
+        "roles": roles,
         "options": {"style_id": style_id},
     })["package"]
     print(f"   Iris package {pkg['id']} — composing ({style_id})")

@@ -28,6 +28,8 @@ import StudentPreview from './StudentPreview';
 import { framePreviewWho, installPreviewGuard } from './previewMode';
 import './preview.css';
 import mark from '../../assets/academy/collective-mark.webp';
+import Tour, { TourButton } from '../../components/Tour';
+import { CLASSROOM_TOURS } from './classroomTour';
 import './classroom.css';
 
 const NAMES = { business: 'Business Mentorship', faith: 'Faith Mentorship' };
@@ -151,6 +153,8 @@ const AcademyApp = () => {
   // "See their dashboard": a mentor viewing the student classroom as one student (read-only).
   const viewAs = previewing ? frameStudent : !teach && isMentor ? readViewAs(slug) : null;
   const nav = teach ? mentorNav(slug, counts) : studentNav(slug);
+  // Students (not mentors looking in, and never inside a preview) get the first-visit walkthrough.
+  const studentTour = !teach && !isMentor && !readOnly && !viewAs && !roles.preview && !!entry?.has_access;
   const banner = roles.preview
     ? <div className="ds-banner">Layout preview (development only) — no data is loaded.</div>
     : previewing ? <div className="ds-banner"><GraduationCap size={18} /> <span>Student preview: {frameWho === 'new' ? <>what <strong>a new student</strong> sees</> : <><strong>{frameStudent?.name || 'student'}</strong>’s classroom</>}. Actions are turned off.</span></div>
@@ -167,7 +171,7 @@ const AcademyApp = () => {
       <DashShell
         theme="light"
         variant={slug}
-        tools={<>{teach && isMentor && <StudentPreview />}<InstallApp />{!roles.preview && !previewing && <NotificationBell userId={user?.id} />}</>}
+        tools={<>{teach && isMentor && <StudentPreview />}{studentTour && <TourButton id={`classroom-${slug}`} />}<InstallApp />{!roles.preview && !previewing && <NotificationBell userId={user?.id} />}</>}
         brand={{ to: teach ? `/academy/${slug}/teach` : `/academy/${slug}`, mark, title: 'P31 Collective', subtitle: `${NAMES[slug]}${teach ? ' · Mentor' : ''}` }}
         nav={nav}
         account={{ name: previewing ? (frameStudent?.name || 'New student') : user?.user_metadata?.full_name || user?.email || (roles.preview ? 'Preview' : ''), role: teach ? 'Mentor' : 'Member' }}
@@ -214,6 +218,7 @@ const AcademyApp = () => {
           <Route path="teach/discussions/:threadId" element={<DiscussionThread />} />
           <Route path="*" element={<DashEmpty Icon={BookOpen} title="Page not found" action={<Link to={`/academy/${slug}`} className="k-btn k-btn--ghost">Back to your classroom</Link>} />} />
         </Routes>
+        {studentTour && <Tour id={`classroom-${slug}`} steps={CLASSROOM_TOURS[slug] || CLASSROOM_TOURS.business} user={user} />}
       </DashShell>
     </AcademyContext.Provider>
   );

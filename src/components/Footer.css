@@ -26,6 +26,8 @@
 .ft__grid { display: grid; gap: 36px 24px; grid-template-columns: 1fr 1fr; }
 .ft__brand { grid-column: 1 / -1; }
 @media (min-width: 900px) { .ft__grid { grid-template-columns: 1.4fr 1fr 1fr 1fr; } .ft__brand { grid-column: auto; } }
+/* Phones: one column, so Contact reads top to bottom instead of squeezed beside the links. */
+@media (max-width: 599px) { .ft__grid { grid-template-columns: 1fr; gap: 30px; } }
 .ft__logo { display: inline-flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; }
 .ft__logo img { width: 48px; height: 48px; border-radius: 13px; object-fit: cover; }
 .ft__logo span { display: grid; line-height: 1.05; }

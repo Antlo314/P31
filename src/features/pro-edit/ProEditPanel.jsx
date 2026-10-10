@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Film, Upload, Clock, Loader2, CheckCircle2, XCircle, Download, X } from 'lucide-react';
+import { Film, Upload, Clock, Loader2, CheckCircle2, XCircle, Download, X, Music2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { IRIS_STYLES } from './irisStyles';
+import { fmtTime } from './findMoments';
 import './ProEdit.css';
 
 const STATUS = {
@@ -133,7 +134,10 @@ const ProEditPanel = ({ userId, operatorView = false }) => {
               <S.Icon size={20} className={j.status === 'processing' ? 'pe-spin' : ''} />
               <div className="pe-job__main">
                 <strong>{j.title || 'Untitled edit'}</strong>
-                <span>{j.style} · {j.aspect} · {j.source_paths.length} clip{j.source_paths.length > 1 ? 's' : ''} · {new Date(j.created_at).toLocaleDateString()}</span>
+                <span>{j.kind === 'clip'
+                  ? <>Clip {j.clip_index} of {j.clip_count} · {fmtTime(j.clip_start)}–{fmtTime(j.clip_end)}{j.source_name ? ` of ${j.source_name}` : ''}</>
+                  : <>{j.source_paths.length} clip{j.source_paths.length > 1 ? 's' : ''}</>} · {j.style} · {j.aspect} · {new Date(j.created_at).toLocaleDateString()}</span>
+                {j.music_path && <span><Music2 size={12} /> {j.music_path.split('/').pop().replace(/^\d+-/, '').replace(/_/g, ' ')}</span>}
                 <span className="pe-status">{S.label}{j.error ? ` — ${j.error}` : ''}</span>
                 {j.notes && operatorView && <span className="pe-notes">“{j.notes}”</span>}
               </div>

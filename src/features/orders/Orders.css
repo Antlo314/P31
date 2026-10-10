@@ -1,6 +1,6 @@
 /* Orders + Discounts (curator dashboard, light surface). Prefix: ord- / dc- */
-.ord { display: grid; gap: 14px; }
-.ord-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ord { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.ord-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .ord-stats div { display: grid; gap: 2px; padding: 14px; border-radius: 18px; background: #fff; border: 1px solid var(--outline-variant); }
 .ord-stats span { font-family: var(--font-heading); font-size: clamp(1.2rem, 4vw, 1.7rem); color: var(--dark-plum); }
 .ord-stats small { font-size: 0.74rem; font-weight: 700; color: var(--on-surface-muted); }

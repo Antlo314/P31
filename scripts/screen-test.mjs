@@ -55,6 +55,14 @@ const SCREENS = [
   ['studio inbox', cl('/studio/inbox')], ['studio comments', cl('/studio/comments')], ['studio create', cl('/studio/create')],
   ...['', 'crm', 'applications', 'social', 'growth', 'events', 'campaigns', 'orders', 'academy', 'clips', 'photos', 'pro-edit', 'health', 'settings']
     .map((p) => [`systems ${p || 'overview'}`, cl(`/systems${p ? '/' + p : ''}`)]),
+  ['team access', cl('/systems/team'), [], 'Give someone access'],
+  ['davinci clip finder + queue', cl('/systems/pro-edit'), ['Edit queue'], 'Sample Gala'],
+  // Team members with one tool (like Anthony → DaVinci, Yanni → Content Studio).
+  ['davinci member lands on davinci', at('collective', 'davinci')('/portal'), [], 'Clip finder'],
+  ['davinci member: systems is davinci only', at('collective', 'davinci')('/systems/crm'), [], 'Choose footage'],
+  ['studio member lands in studio + walkthrough', at('collective', 'studio')('/portal'), [], 'Welcome to Content Studio'],
+  ['studio walkthrough steps', cl('/studio'), ['Next', 'Next'], 'Calendar: what’s going out'],
+  ['classroom walkthrough', st('/academy/business'), ['Next'], 'Home: what’s next'],
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

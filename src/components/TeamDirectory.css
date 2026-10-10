@@ -28,3 +28,18 @@
 .td-office a { color: var(--plum); font-weight: 700; }
 .td-office small { color: var(--ink-3, #8a7f96); }
 .td-office__hours { color: var(--ink-3, #8a7f96); }
+
+/* Phones: compact cards (icon beside the name) so six people don't fill six screens. */
+@media (max-width: 599px) {
+  .td.k-grid { gap: 12px; }
+  .td-card {
+    grid-template-columns: 48px minmax(0, 1fr); column-gap: 14px; row-gap: 2px;
+    justify-items: start; text-align: left; padding: 16px; margin-top: 0;
+  }
+  .td-card__icon { position: static; transform: none; grid-row: span 2; align-self: center; width: 48px; height: 48px; box-shadow: 0 0 0 2px rgba(217, 169, 58, 0.5); }
+  .td-card h3 { font-size: 1.2rem; align-self: end; }
+  .td-card__role { align-self: start; font-size: 0.88rem; }
+  .td-card ul { grid-column: 1 / -1; margin-top: 8px; padding-top: 8px; display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 0.85rem; }
+  .td-card__mail { grid-column: 1 / -1; justify-items: start; margin-top: 6px; }
+  .td-card__mail a { justify-content: flex-start; }
+}

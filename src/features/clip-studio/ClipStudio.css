@@ -13,6 +13,7 @@
   padding: 16px;
   font-family: var(--font-body, Manrope, system-ui, sans-serif);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
 }
 .cs--center { place-items: center; text-align: center; padding: 48px 24px; color: var(--cs-dim); }
@@ -23,6 +24,7 @@
   border-radius: 18px;
   padding: 16px;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
 }
 .cs-block h3 {
@@ -102,12 +104,12 @@
 .cs-toggle span { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .cs-toggle small { color: var(--cs-dim); font-size: 0.75rem; width: 100%; padding-left: 24px; }
 .cs-toggle input { width: 22px; height: 22px; accent-color: var(--cs-gold); }
-.cs-field { display: grid; gap: 6px; font-size: 0.85rem; color: var(--cs-dim); }
+.cs-field { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; font-size: 0.85rem; color: var(--cs-dim); }
 .cs-field span { display: flex; align-items: center; gap: 6px; }
 .cs-field input {
   font: inherit; font-size: 16px; color: var(--cs-ink);
   background: rgba(255, 255, 255, 0.06); border: 1px solid var(--cs-line); border-radius: 12px;
-  padding: 12px; min-height: 46px;
+  padding: 12px; min-height: 46px; width: 100%; min-width: 0; box-sizing: border-box;
 }
 .cs-field input[type="file"] { padding: 10px; }
 .cs-levels { display: grid; gap: 8px; }
