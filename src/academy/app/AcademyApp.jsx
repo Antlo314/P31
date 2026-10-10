@@ -24,6 +24,9 @@ import { StudentAssignments, StudentAssignment, StudentQuizzes, StudentQuiz, Stu
 import { Discussions, DiscussionThread, CertificateView, NotificationBell, InstallApp } from './shared';
 import LiveRoom from './LiveRoom';
 import { readViewAs, stopViewAs } from './viewAs';
+import StudentPreview from './StudentPreview';
+import { framePreviewWho, installPreviewGuard } from './previewMode';
+import './preview.css';
 import mark from '../../assets/academy/collective-mark.webp';
 import './classroom.css';
 
@@ -101,6 +104,23 @@ const AcademyApp = () => {
   const teach = /\/teach(\/|$)/.test(pathname);
   const isMentor = !!(roles.admin || roles.mentor?.includes(slug));
   const entry = roles.student?.find((s) => s.program === slug);
+  // Inside the mentor console's preview frame: the classroom as a new student, or as one student.
+  const [frameWho] = useState(framePreviewWho);
+  const previewing = !teach && isMentor && !!frameWho;
+  const [frameStudent, setFrameStudent] = useState(null);
+  const [blockedAt, setBlockedAt] = useState(0);
+  const readOnly = previewing || (!teach && isMentor && !!readViewAs(slug));
+
+  useEffect(() => {
+    if (!previewing || frameWho === 'new' || !program.id) return;
+    supabase.rpc('academy_roster', { p_program: program.id }).then(({ data }) => {
+      const s = (data || []).find((r) => r.user_id === frameWho);
+      if (s) setFrameStudent({ id: s.user_id, name: s.full_name || s.email, email: s.email });
+    });
+  }, [previewing, frameWho, program.id]);
+
+  // Previews and "See their dashboard" never change anything (not as the student, not as the mentor).
+  useEffect(() => (readOnly ? installPreviewGuard(() => setBlockedAt(Date.now())) : undefined), [readOnly]);
 
   useEffect(() => {
     if (!PROGRAMS[slug] || roles.preview) return;
@@ -129,10 +149,11 @@ const AcademyApp = () => {
   if (!teach && !isMentor && !entry?.has_access) return <NoAccess entry={entry} slug={slug} />;
 
   // "See their dashboard": a mentor viewing the student classroom as one student (read-only).
-  const viewAs = !teach && isMentor ? readViewAs(slug) : null;
+  const viewAs = previewing ? frameStudent : !teach && isMentor ? readViewAs(slug) : null;
   const nav = teach ? mentorNav(slug, counts) : studentNav(slug);
   const banner = roles.preview
     ? <div className="ds-banner">Layout preview (development only) — no data is loaded.</div>
+    : previewing ? <div className="ds-banner"><GraduationCap size={18} /> <span>Student preview: {frameWho === 'new' ? <>what <strong>a new student</strong> sees</> : <><strong>{frameStudent?.name || 'student'}</strong>’s classroom</>}. Actions are turned off.</span></div>
     : viewAs ? <div className="ds-banner"><GraduationCap size={18} /> You’re seeing <strong>{viewAs.name}</strong>’s dashboard, exactly as they see it (read-only).
         <button className="k-link" style={{ background: 'none', border: 0, cursor: 'pointer', font: 'inherit' }} onClick={() => stopViewAs(slug, `/academy/${slug}/teach/students/${viewAs.id}`)}>Exit</button></div>
     : !teach && isMentor && !entry ? <div className="ds-banner"><GraduationCap size={18} /> You’re viewing the student classroom. <Link to={`/academy/${slug}/teach`} className="k-link">Back to mentor console</Link></div>
@@ -140,19 +161,20 @@ const AcademyApp = () => {
 
   return (
     <AcademyContext.Provider value={{
-      program, isMentor, isAdmin: !!roles.admin, preview: !!roles.preview, viewAs: !!viewAs,
+      program, isMentor: previewing ? false : isMentor, isAdmin: previewing ? false : !!roles.admin, preview: !!roles.preview, viewAs: !!viewAs || previewing,
       user: viewAs ? { id: viewAs.id, email: viewAs.email, user_metadata: { full_name: viewAs.name } } : user,
     }}>
       <DashShell
         theme="light"
         variant={slug}
-        tools={<><InstallApp />{!roles.preview && <NotificationBell userId={user?.id} />}</>}
+        tools={<>{teach && isMentor && <StudentPreview />}<InstallApp />{!roles.preview && !previewing && <NotificationBell userId={user?.id} />}</>}
         brand={{ to: teach ? `/academy/${slug}/teach` : `/academy/${slug}`, mark, title: 'P31 Collective', subtitle: `${NAMES[slug]}${teach ? ' · Mentor' : ''}` }}
         nav={nav}
-        account={{ name: user?.user_metadata?.full_name || user?.email || (roles.preview ? 'Preview' : ''), role: teach ? 'Mentor' : 'Member' }}
+        account={{ name: previewing ? (frameStudent?.name || 'New student') : user?.user_metadata?.full_name || user?.email || (roles.preview ? 'Preview' : ''), role: teach ? 'Mentor' : 'Member' }}
         onSignOut={signOut}
         banner={banner}
       >
+        {blockedAt > 0 && <div key={blockedAt} className="sp-toast" role="status">Preview only: students can do this in their own classroom.</div>}
         <Routes>
           <Route index element={<StudentHome />} />
           <Route path="learn" element={<StudentLearn />} />
