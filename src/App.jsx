@@ -26,6 +26,7 @@ const Onboarding = lazy(() => import('./pages/Onboarding'));
 const Services = lazy(() => import('./pages/Services'));
 const Unsubscribe = lazy(() => import('./pages/Unsubscribe'));
 const Shop = lazy(() => import('./pages/Shop'));
+const VendorApply = lazy(() => import('./pages/VendorApply'));
 const MentorshipLanding = lazy(() => import('./academy/Mentorship').then((m) => ({ default: m.MentorshipLanding })));
 const MentorshipProgram = lazy(() => import('./academy/Mentorship').then((m) => ({ default: m.MentorshipProgram })));
 const Portal = lazy(() => import('./academy/Portal'));
@@ -111,6 +112,7 @@ function SiteRoutes() {
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/directory" element={<Directory />} />
             <Route path="/partner" element={<Partner />} />
+            <Route path="/apply" element={<VendorApply />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Login />} />
             <Route path="/services" element={<Services />} />

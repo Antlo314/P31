@@ -8,7 +8,6 @@ import './Footer.css';
 import { EMAIL } from '../lib/team';
 import { JOIN_PATH } from '../lib/academy';
 
-const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
 // Opens the "write a review" box on our Google Business Profile.
 const GOOGLE_REVIEW_URL = 'https://search.google.com/local/writereview?placeid=ChIJ1TZlBgq_9YgROkLISp4BB7U';
 
@@ -26,7 +25,7 @@ const Footer = () => (
         <h2 className="ft__title">Where her gifts <em>make room.</em></h2>
         <div className="k-actions">
           <button type="button" className="k-btn k-btn--gold" onClick={openJoin}>Join the collective <ArrowRight size={18} /></button>
-          <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--light">Become a curator <ArrowUpRight size={18} /></a>
+          <Link to="/apply" className="k-btn k-btn--light">Become a curator <ArrowUpRight size={18} /></Link>
         </div>
       </section>
 
@@ -54,7 +53,7 @@ const Footer = () => (
         </nav>
         <nav className="ft__col" aria-label="Join">
           <h4>Join</h4>
-          <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">Become a curator</a>
+          <Link to="/apply">Become a curator</Link>
           <Link to="/partner">Partner with us</Link>
           <Link to="/services">Services</Link>
           <Link to="/login">Curator portal</Link>

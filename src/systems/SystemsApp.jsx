@@ -26,6 +26,7 @@ const Crm = lazy(() => import('./pages/Crm'));
 const Applications = lazy(() => import('./pages/Applications'));
 const Health = lazy(() => import('./pages/Health'));
 const TeamAccess = lazy(() => import('./pages/TeamAccess'));
+const VendorApplications = lazy(() => import('./pages/VendorApplications'));
 
 // Phones get the four most-used tabs in the bottom bar; "More" opens a
 // sheet with every section.
@@ -140,6 +141,7 @@ const SystemsApp = () => {
             <Route path="pro-edit" element={<ProEdit />} />
             <Route path="settings" element={<SettingsPage operator={operator} />} />
             <Route path="team" element={<TeamAccess />} />
+            <Route path="vendors" element={<VendorApplications />} />
             <Route path="*" element={<Navigate to="/systems" replace />} />
           </Routes>
           )}

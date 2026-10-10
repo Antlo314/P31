@@ -37,3 +37,12 @@
 .jn-done:focus { outline: none; }
 .jn-done:focus-visible { outline: none; }
 .jn-again { justify-self: center; margin-top: 4px; padding: 8px 4px; background: none; border: 0; font: inherit; font-size: 0.85rem; font-weight: 700; color: var(--ink-3, #8a7f96); text-decoration: underline; cursor: pointer; }
+
+/* Vendor application (/apply) */
+.vp-side { display: grid; gap: 16px; }
+.vp-next ul { margin-top: 8px; }
+.jn-group legend.vp-verse { display: grid; gap: 6px; }
+.vp-verse em { font-family: var(--font-heading); font-weight: 400; font-size: 1.15rem; line-height: 1.35; color: var(--plum); }
+.vp-verse small { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-text); margin: 0; }
+.vp-verse span { margin-top: 6px; }
+.vp-date { margin: 0; }

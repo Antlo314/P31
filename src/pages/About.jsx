@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import React from 'react';
 import { Mail, Phone, MapPin, ArrowUpRight, Gem, HeartHandshake, Users, ArrowRight } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
@@ -9,7 +10,6 @@ import gatherImg from '../assets/web/p31_community_impact_editorial_177654407659
 import { EMAIL, OFFICE } from '../lib/team';
 import TeamDirectory from '../components/TeamDirectory';
 
-const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
 
 const VALUES = [
   { Icon: Gem, title: 'Faith meets luxury', body: 'A stage worthy of her craft — where beauty, purpose and excellence are never an afterthought.' },
@@ -33,7 +33,7 @@ const About = () => (
       lead="An elite, traveling collective of women creatives — defying the standard pop-up to bring a majestic, high-end market to Atlanta and beyond."
       media={{ src: gatherImg, alt: 'Women of the Proverbs 31 community gathered together' }}
       actions={<>
-        <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></a>
+        <Link to="/apply" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></Link>
         <button type="button" className="k-btn k-btn--light" onClick={openJoin}>Join the collective</button>
       </>}
     />
@@ -93,7 +93,7 @@ const About = () => (
           <p className="k-eyebrow" style={{ margin: 0 }} data-reveal="fade">For curators</p>
           <h2 className="k-h2" data-split>From gift to <em>storefront</em></h2>
         </div>
-        <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--plum" data-reveal>Start your application <ArrowUpRight size={18} /></a>
+        <Link to="/apply" className="k-btn k-btn--plum" data-reveal>Start your application <ArrowUpRight size={18} /></Link>
       </div>
       <ol className="k-steps" style={{ '--steps': 4 }} data-reveal-group>
         {STEPS.map(([t, b]) => <li key={t}><h3>{t}</h3><p>{b}</p></li>)}
@@ -133,7 +133,7 @@ const About = () => (
         <h2 className="k-h2">Your gifts deserve a <em>stage.</em></h2>
         <p className="k-lede">Apply to curate, or join the collective to hear about the next market first.</p>
         <div className="k-actions">
-          <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></a>
+          <Link to="/apply" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></Link>
           <button type="button" className="k-btn k-btn--light" onClick={openJoin}>Join the collective</button>
         </div>
       </div>

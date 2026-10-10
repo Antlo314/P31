@@ -215,6 +215,10 @@ const makeDb = () => ({
     { email: 'davinci@example.com', full_name: 'Sample DaVinci Editor', tools: ['davinci'], note: 'Sample', created_at: day(-2) },
     { email: 'studio@example.com', full_name: 'Sample Studio Seat', tools: ['studio'], note: 'Sample', created_at: day(-1) },
   ],
+  vendor_applications: [
+    { id: 'va-1', serious: 'Yes', full_name: 'Sample Vendor', business_name: 'Sample Candle Co.', email: 'vendor1@example.com', phone: '(470) 555-0161', website_social: '@samplecandles', referred_by: null, categories: ['Candles & Home fragrance'], notes: 'Sample application.', agreed: true, status: 'new', review_notes: null, created_at: iso(-200) },
+    { id: 'va-2', serious: 'Yes', full_name: 'Sample Maker', business_name: 'Sample Crafts', email: 'vendor2@example.com', phone: '(470) 555-0162', website_social: 'samplecrafts.com', referred_by: 'Sample Vendor', categories: ['Handmade crafts, baskets & gifts', 'Art, Painting, Photography'], notes: null, agreed: true, status: 'approved', review_notes: 'Booth 4', created_at: day(-6) },
+  ],
   pro_edit_jobs: [
     { id: 41, requested_by: 'u-mel', kind: 'clip', batch_id: 'b1', clip_index: 1, clip_count: 3, title: 'Sample Gala · 1', style: 'Cinematic Teal', aspect: '9:16', source_paths: ['u-mel/davinci/b1/clip-01.mp4'], music_path: 'u-mel/music/1700000000000-Sample_Track.mp3', source_name: 'gala-raw.mov', clip_start: 312, clip_end: 342, status: 'processing', iris_package: 'pkg_demo', created_at: iso(-50), updated_at: iso(-20) },
     { id: 42, requested_by: 'u-mel', kind: 'clip', batch_id: 'b1', clip_index: 2, clip_count: 3, title: 'Sample Gala · 2', style: 'Warm Documentary', aspect: '9:16', source_paths: ['u-mel/davinci/b1/clip-02.mp4'], music_path: null, source_name: 'gala-raw.mov', clip_start: 1204, clip_end: 1234, status: 'queued', created_at: iso(-50), updated_at: iso(-50) },

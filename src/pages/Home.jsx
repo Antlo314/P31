@@ -30,7 +30,6 @@ import partnerImg from '../assets/web/p31_partner_hero_editorial.webp';
 import Scene3D from '../components/three/Scene3D';
 import Ornaments from '../components/Ornaments';
 
-const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
 const CATEGORIES = ['Art', 'Wellness', 'Clothing', 'Food', 'Literature', 'Community', 'Services'];
 const PILLARS = [
   { Icon: Gem, title: 'Artisan crafted', body: 'Elite, hand-selected curators representing the pinnacle of craftsmanship and true beauty.' },
@@ -114,9 +113,9 @@ const Home = () => {
             A premium curated marketplace for women creatives, artisans and visionaries — online and at our seasonal markets.
           </p>
           <div className="k-actions h26-hero__ctas" data-intro="0.6">
-            <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--gold k-btn--lg">
+            <Link to="/apply" className="k-btn k-btn--gold k-btn--lg">
               Become a curator <ArrowUpRight size={18} />
-            </a>
+            </Link>
             <button type="button" className="k-btn k-btn--light k-btn--lg" onClick={openJoin}>Join the Inner Circle</button>
           </div>
         </div>
@@ -177,7 +176,7 @@ const Home = () => {
               stage that treats it as precious.
             </p>
             <div className="k-actions" data-reveal>
-              <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></a>
+              <Link to="/apply" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></Link>
               <Link to="/shop" className="k-btn k-btn--light">Shop the collective</Link>
             </div>
           </div>
@@ -203,7 +202,7 @@ const Home = () => {
             </ul>
             <FounderNote dark />
             <div className="k-actions" data-reveal>
-              <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></a>
+              <Link to="/apply" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></Link>
               <Link to="/about" className="k-btn k-btn--light">Our story</Link>
             </div>
           </div>

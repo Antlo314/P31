@@ -1,6 +1,7 @@
-// P31 Collective: website applications → this Google Sheet ("Form Responses 1").
-// Each application from thep31collective.org/join fills the row right after the last person,
-// in the same columns as the Google Form rows, shaded light purple.
+// P31: website applications → this Google Sheet.
+// Works for the Collective form (thep31collective.org/join) and the vendor form (p31market.com/apply).
+// Each application fills the row right after the last person, in the same columns as the
+// Google Form rows, shaded light purple.
 // Setup: Extensions → Apps Script, paste this, Save, Deploy → Manage deployments → pencil →
 // Version: New version → Deploy. TOKEN must match JOIN_SHEET_TOKEN in Supabase.
 const TOKEN = 'p31-QcUlkPNjapeMxFmynLVi5qXH2toOva8L';
@@ -18,7 +19,7 @@ const ALIASES = {
   'social media handle s': ['social media', 'socials', 'instagram', 'social media handles'],
 };
 // Answers that identify a person: used to find the last filled-in row.
-const IDENTITY = ['first and last name', 'email address'];
+const IDENTITY = ['first and last name', 'full name', 'email address'];
 
 const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
@@ -44,8 +45,9 @@ function doPost(e) {
     lock.waitLock(20000);
 
     const book = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = SHEET_NAME ? book.getSheetByName(SHEET_NAME) : book.getSheets()[0];
-    if (!sheet) return reply({ ok: false, error: 'no tab named ' + SHEET_NAME });
+    const tab = body.tab || SHEET_NAME;
+    const sheet = tab ? book.getSheetByName(tab) : book.getSheets()[0];
+    if (!sheet) return reply({ ok: false, error: 'no tab named ' + tab });
     if (sheet.getLastRow() === 0) sheet.getRange(1, 1, 1, keys.length).setValues([keys]);
 
     // Every column whose heading matches an answer gets it (both "Email Address" columns, too).

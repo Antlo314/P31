@@ -175,7 +175,7 @@ async function services() {
     'Calendly private session': 'https://calendly.com/purposefullydriven7/privatementorship',
     'Calendly connect call': 'https://calendly.com/mjeffers031/connectcall',
     'Join form (Google, fallback)': 'https://docs.google.com/forms/d/e/1FAIpQLSfBZkXVjzeqjq_h5k0Np3ueFZbiYzp19ettlL5CF5uBHYjBTw/viewform',
-    'Curator application form': 'https://forms.gle/vmkK7fhgwiYNYEa38',
+    'Vendor application (Google Form backup)': 'https://forms.gle/vmkK7fhgwiYNYEa38',
     'Instagram profile': 'https://www.instagram.com/proverbs31market/',
   };
   for (const [name, url] of Object.entries(links)) {

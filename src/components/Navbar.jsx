@@ -14,7 +14,6 @@ import './Navbar.css';
 import logoPath from '../assets/web/p31-mark-192.webp';
 import { JOIN_PATH } from '../lib/academy';
 
-const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
 
 const TikTok = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -202,11 +201,11 @@ const Navbar = () => {
               </li>
             ))}
             <li>
-              <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">
+              <Link to="/apply">
                 <span className="sheet__icon sheet__icon--gold"><Sparkles size={18} /></span>
                 Become a Curator
                 <ChevronRight size={18} className="sheet__chev" />
-              </a>
+              </Link>
             </li>
             {user && (
               <li>

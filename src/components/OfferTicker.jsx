@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import './OfferTicker.css';
 
@@ -41,9 +42,9 @@ const OfferTicker = () => {
           Register for June Market now & get your Storefront <strong>FREE</strong>. 
           Limited time offer: <span className="timer-countdown">{timeLeft}</span>
         </p>
-        <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noopener noreferrer" className="ticker-link">
+        <Link to="/apply" className="ticker-link">
           Apply Now →
-        </a>
+        </Link>
       </div>
     </div>
   );

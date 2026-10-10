@@ -101,16 +101,21 @@ async function mentorCards(slug) {
 }
 
 async function systemsCards() {
-  const [apps, curators, orders, errors] = await Promise.all([
+  const [apps, curators, orders, errors, vendors] = await Promise.all([
     supabase.from('collective_applications').select('id, full_name, city_state, created_at', { count: 'exact' }).eq('status', 'new').order('created_at', { ascending: false }).limit(4),
     supabase.from('curator_data').select('id, business_name, created_at', { count: 'exact' }).eq('status', 'pending').order('created_at', { ascending: false }).limit(4),
     supabase.from('orders').select('id, product_name, buyer_name, created_at', { count: 'exact' }).eq('fulfillment_status', 'new').order('created_at', { ascending: false }).limit(4),
     supabase.from('app_errors').select('*', { count: 'exact' }).is('resolved_at', null).order('last_seen', { ascending: false }).limit(4),
+    supabase.from('vendor_applications').select('id, full_name, business_name, created_at', { count: 'exact' }).eq('status', 'new').order('created_at', { ascending: false }).limit(4),
   ]);
   return [
     !apps.error && {
       key: 'applications', Icon: UserPlus, title: 'Collective applications', count: apps.count ?? (apps.data || []).length, to: '/systems/applications', cta: 'Review applications', empty: 'No new applications.',
       items: (apps.data || []).map((a) => ({ key: a.id, title: a.full_name, sub: `${a.city_state} · ${ago(a.created_at)}` })),
+    },
+    !vendors.error && {
+      key: 'vendors', Icon: Store, title: 'Vendor applications', count: vendors.count ?? (vendors.data || []).length, to: '/systems/vendors', cta: 'Review vendors', empty: 'No new vendor applications.',
+      items: (vendors.data || []).map((v) => ({ key: v.id, title: v.business_name, sub: `${v.full_name} · ${ago(v.created_at)}` })),
     },
     !orders.error && {
       key: 'orders', Icon: Receipt, title: 'New orders', count: orders.count ?? (orders.data || []).length, to: '/systems/orders', cta: 'Open orders', empty: 'No new orders.',

@@ -148,7 +148,7 @@ const Login = () => {
           </form>
 
           <p className="lg__foot">
-            Not approved yet? <a href="https://forms.gle/vmkK7fhgwiYNYEa38" target="_blank" rel="noopener noreferrer">Apply to become a curator</a>
+            Not approved yet? <Link to="/apply">Apply to become a curator</Link>
           </p>
         </div>
       </div>
