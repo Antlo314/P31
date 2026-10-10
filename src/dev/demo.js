@@ -1,5 +1,6 @@
 // DEVELOPMENT ONLY — never part of a production build (see src/lib/supabase.js).
-// A stand-in database for walkthrough screenshots: ?demo=admin | student | faith (?demo=off to stop).
+// A stand-in database for walkthrough screenshots: ?demo=admin | student | faith | davinci | studio (?demo=off to stop).
+// davinci and studio sign in as team members with only that tool (like Anthony and Yanni).
 // Students, classes and grades are illustrative SAMPLE data. Content Studio numbers come from a
 // real read-only Zernio snapshot (src/dev/demo-studio.json, not committed); DMs and comments are samples.
 // The Studio snapshot holds real account numbers, so it stays out of git (see .gitignore);
@@ -21,9 +22,11 @@ const PEOPLE = {
   'u-s4': { name: 'Tanya Ellis', email: 'tanya@example.com', program: BUS },
   'u-s5': { name: 'Simone Carter', email: 'simone@example.com', program: FAI },
   'u-s6': { name: 'Renee Lawson', email: 'renee@example.com', program: FAI },
+  'u-dv': { name: 'Sample DaVinci Editor', email: 'davinci@example.com' },
+  'u-st': { name: 'Sample Studio Seat', email: 'studio@example.com' },
 };
 const userFor = (mode) => {
-  const id = mode === 'student' ? 'u-s1' : mode === 'faith' ? 'u-s5' : 'u-mel';
+  const id = mode === 'student' ? 'u-s1' : mode === 'faith' ? 'u-s5' : mode === 'davinci' ? 'u-dv' : mode === 'studio' ? 'u-st' : 'u-mel';
   return { id, email: PEOPLE[id].email, user_metadata: { full_name: PEOPLE[id].name }, app_metadata: {}, aud: 'authenticated' };
 };
 
@@ -208,6 +211,15 @@ const makeDb = () => ({
     { id: 'or1', product_name: 'Sample Candle Trio', buyer_name: 'Sample Shopper', buyer_email: 'shopper@example.com', quantity: 1, amount_total: 4200, amount_subtotal: 4200, order_type: 'request', fulfillment_method: 'pickup', fulfillment_status: 'new', payment_status: 'unpaid', created_at: iso(-95) },
     { id: 'or2', product_name: 'Sample Tote Bag', buyer_name: 'Sample Buyer', buyer_email: 'buyer@example.com', quantity: 2, amount_total: 5000, amount_subtotal: 5000, order_type: 'request', fulfillment_method: 'shipping', fulfillment_status: 'fulfilled', payment_status: 'paid', created_at: day(-3) },
   ],
+  team_access: [
+    { email: 'davinci@example.com', full_name: 'Sample DaVinci Editor', tools: ['davinci'], note: 'Sample', created_at: day(-2) },
+    { email: 'studio@example.com', full_name: 'Sample Studio Seat', tools: ['studio'], note: 'Sample', created_at: day(-1) },
+  ],
+  pro_edit_jobs: [
+    { id: 41, requested_by: 'u-mel', kind: 'clip', batch_id: 'b1', clip_index: 1, clip_count: 3, title: 'Sample Gala · 1', style: 'Cinematic Teal', aspect: '9:16', source_paths: ['u-mel/davinci/b1/clip-01.mp4'], music_path: 'u-mel/music/1700000000000-Sample_Track.mp3', source_name: 'gala-raw.mov', clip_start: 312, clip_end: 342, status: 'processing', iris_package: 'pkg_demo', created_at: iso(-50), updated_at: iso(-20) },
+    { id: 42, requested_by: 'u-mel', kind: 'clip', batch_id: 'b1', clip_index: 2, clip_count: 3, title: 'Sample Gala · 2', style: 'Warm Documentary', aspect: '9:16', source_paths: ['u-mel/davinci/b1/clip-02.mp4'], music_path: null, source_name: 'gala-raw.mov', clip_start: 1204, clip_end: 1234, status: 'queued', created_at: iso(-50), updated_at: iso(-50) },
+    { id: 40, requested_by: 'u-mel', kind: 'edit', title: 'Sample recap', style: 'Social Clean', aspect: '9:16', source_paths: ['u-mel/pro-edit/1/01-a.mp4'], status: 'done', result_path: 'u-mel/pro-edit/results/40-recap.mp4', created_at: day(-3), updated_at: day(-2) },
+  ],
   curator_data: [{ id: 'cu1', business_name: 'Sample Bakery Co.', status: 'pending', created_at: day(-1), profiles: { full_name: 'Sample Curator' } }],
   campaigns: [{ id: 'cm1', subject: 'The Winter Gala is coming', body: 'Save the date…', audience: 'subscribers', status: 'draft', created_at: day(-1) }],
   market_events: [{ id: 'ev1', title: 'Winter Gala', event_date: day(70).slice(0, 10), date_public: false, is_active: true, venue: null, capacity: 150 }],
@@ -218,7 +230,15 @@ const rpc = {
     ? { signed_in: true, admin: false, operator: false, curator: false, studio: false, mentor: [], student: [{ program: 'business', title: 'Business Mentorship', status: 'active', has_access: true }] }
     : mode === 'faith'
       ? { signed_in: true, admin: false, operator: false, curator: false, studio: false, mentor: [], student: [{ program: 'faith', title: 'Faith-Based Mentorship', status: 'active', has_access: true }] }
-      : { signed_in: true, admin: true, operator: true, curator: false, studio: true, mentor: ['business', 'faith'], student: [] }),
+      : mode === 'davinci'
+        ? { signed_in: true, admin: false, operator: false, curator: false, studio: false, tools: ['davinci'], mentor: [], student: [] }
+        : mode === 'studio'
+          ? { signed_in: true, admin: false, operator: false, curator: false, studio: true, tools: ['studio'], mentor: [], student: [] }
+          : { signed_in: true, admin: true, operator: true, curator: false, studio: true, tools: ['studio', 'davinci'], mentor: ['business', 'faith'], student: [] }),
+  team_access_status: () => [
+    { email: 'davinci@example.com', has_account: true, confirmed: true, last_sign_in: day(-1) },
+    { email: 'studio@example.com', has_account: false, confirmed: false, last_sign_in: null },
+  ],
   academy_roster: (a) => roster(a.p_program),
   academy_inbox: (a) => roster(a.p_program).slice(0, 3).map((r, i) => ({
     student_id: r.user_id, full_name: r.full_name, email: r.email, unread: [1, 0, 2][i],
@@ -321,6 +341,7 @@ export function demoClient(mode) {
     },
     channel: () => { const ch = { on: () => ch, subscribe: () => ch }; return ch; },
     removeChannel: () => {},
-    storage: { from: () => ({ upload: async () => ({ error: null }), remove: async () => ({ error: null }), createSignedUrl: async () => ({ data: { signedUrl: '#' }, error: null }), getPublicUrl: () => ({ data: { publicUrl: '#' } }) }) },
+    storage: { from: () => ({ upload: async () => ({ error: null }), remove: async () => ({ error: null }),
+      list: async (folder = '') => ({ data: folder.endsWith('/music') ? [{ name: '1700000000000-Sample_Track.mp3' }] : [], error: null }), createSignedUrl: async () => ({ data: { signedUrl: '#' }, error: null }), getPublicUrl: () => ({ data: { publicUrl: '#' } }) }) },
   };
 }

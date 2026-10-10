@@ -1,4 +1,4 @@
-import { LayoutGrid, Megaphone, Radar, Clapperboard, ImagePlus, Film, Settings, CalendarDays, Mail, Receipt, GraduationCap, Users, UserPlus, Activity, Sparkles, Store } from 'lucide-react';
+import { LayoutGrid, Megaphone, Radar, Clapperboard, ImagePlus, Film, Settings, CalendarDays, Mail, Receipt, GraduationCap, Users, UserPlus, Activity, Sparkles, Store, KeyRound } from 'lucide-react';
 
 export const SYSTEMS_HOME = { to: '/systems', label: 'Overview', Icon: LayoutGrid, end: true };
 
@@ -18,7 +18,7 @@ export const SYSTEMS_GROUPS = [
       { to: '/systems/social', label: 'Social', Icon: Megaphone },
       { to: '/systems/clips', label: 'Clips', Icon: Clapperboard },
       { to: '/systems/photos', label: 'Photos', Icon: ImagePlus },
-      { to: '/systems/pro-edit', label: 'Pro Edit', Icon: Film },
+      { to: '/systems/pro-edit', label: 'DaVinci', Icon: Film },
     ],
   },
   {
@@ -32,6 +32,7 @@ export const SYSTEMS_GROUPS = [
   },
   {
     id: 'admin', label: 'Settings & Health', items: [
+      { to: '/systems/team', label: 'Team access', Icon: KeyRound },
       { to: '/systems/health', label: 'Health', Icon: Activity },
       { to: '/systems/settings', label: 'Settings', Icon: Settings },
     ],

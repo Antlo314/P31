@@ -2,18 +2,18 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import {
   Sun, ClipboardCheck, MessageCircle, PhoneCall, Video, UserPlus, Store, Receipt, Activity, Inbox, CalendarClock,
-  ArrowRight, Presentation, Clapperboard, ShieldCheck, LayoutDashboard, Megaphone, Mail, CalendarDays, CheckCircle2,
+  ArrowRight, Presentation, Clapperboard, ShieldCheck, LayoutDashboard, Megaphone, Mail, CalendarDays, CheckCircle2, Film, Scissors,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { useRoles, dashboardsFor, isTeam } from '../lib/roles';
+import { useRoles, dashboardsFor, isTeam, hasTool } from '../lib/roles';
 import { hrefFor } from '../lib/site';
 import { studio } from '../studio/api';
 import DashShell, { DashHead } from '../apps/DashShell';
 import mark from '../assets/academy/collective-mark.webp';
 import './today.css';
 
-const ICON = { mentor: Presentation, studio: Clapperboard, systems: ShieldCheck, curator: Store };
+const ICON = { mentor: Presentation, studio: Clapperboard, systems: ShieldCheck, curator: Store, davinci: Film };
 const PROGRAM = { business: 'Business Mentorship', faith: 'Faith-Based Mentorship' };
 
 const ago = (iso) => {
@@ -149,11 +149,32 @@ async function studioCards() {
   return out;
 }
 
+async function davinciCards() {
+  const since = new Date(Date.now() - 7 * 864e5).toISOString();
+  const [working, ready] = await Promise.all([
+    supabase.from('pro_edit_jobs').select('id, title, status, error, created_at', { count: 'exact' }).in('status', ['queued', 'processing', 'failed']).order('created_at', { ascending: false }).limit(4),
+    supabase.from('pro_edit_jobs').select('id, title, updated_at', { count: 'exact' }).eq('status', 'done').gte('updated_at', since).order('updated_at', { ascending: false }).limit(4),
+  ]);
+  const label = { queued: 'Waiting for Iris', processing: 'Editing in DaVinci', failed: 'Needs attention' };
+  return [
+    !working.error && {
+      key: 'working', Icon: Film, title: 'In the DaVinci queue', count: working.count ?? (working.data || []).length, to: '/systems/pro-edit', cta: 'Open DaVinci', empty: 'Nothing waiting. Find clips in some new footage.',
+      tone: (working.data || []).some((j) => j.status === 'failed') ? 'alert' : null,
+      items: (working.data || []).map((j) => ({ key: j.id, title: j.title || 'Untitled edit', sub: `${label[j.status]} · ${ago(j.created_at)}` })),
+    },
+    !ready.error && {
+      key: 'ready', Icon: CheckCircle2, title: 'Finished this week', count: ready.count ?? (ready.data || []).length, to: '/systems/pro-edit', cta: 'Download finished clips', empty: 'No finished edits this week yet.',
+      items: (ready.data || []).map((j) => ({ key: j.id, title: j.title || 'Edit', sub: `Ready ${ago(j.updated_at)}` })),
+    },
+  ].filter(Boolean);
+}
+
 // Which dashboards report in, in the order they're shown.
 const sourcesFor = (roles) => [
   ...(roles.mentor || []).map((slug) => ({ key: `mentor-${slug}`, title: PROGRAM[slug] || slug, to: `/academy/${slug}/teach`, load: () => mentorCards(slug) })),
   ...(roles.operator || roles.admin ? [{ key: 'systems', title: 'Systems', to: '/systems', load: systemsCards }] : []),
   ...(roles.studio ? [{ key: 'studio', title: 'Content Studio', to: '/studio', load: studioCards }] : []),
+  ...(hasTool(roles, 'davinci') ? [{ key: 'davinci', title: 'DaVinci', to: '/systems/pro-edit', load: davinciCards }] : []),
 ];
 
 // ── /today — the team's home ──────────────────────────────────
@@ -193,6 +214,7 @@ const Today = () => {
   const quick = [
     ...(roles.mentor || []).slice(0, 1).map((slug) => ({ to: `/academy/${slug}/teach/sessions`, Icon: Video, label: 'Go live' })),
     roles.studio && { to: '/studio/compose', Icon: Megaphone, label: 'New post' },
+    hasTool(roles, 'davinci') && { to: '/systems/pro-edit', Icon: Scissors, label: 'Find clips' },
     admin && { to: '/systems/campaigns', Icon: Mail, label: 'Email campaign' },
     admin && { to: '/systems/events', Icon: CalendarDays, label: 'Add a market date' },
     admin && { to: '/systems/clips', Icon: Clapperboard, label: 'Make a clip' },
