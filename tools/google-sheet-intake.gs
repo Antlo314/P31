@@ -2,9 +2,10 @@
  * P31 Collective: website applications → this Google Sheet.
  *
  * Every "Join P31 Collective" application sent from thep31collective.org/join is added as a
- * new row here. Rows are matched to this sheet's column headings by question
- * (e.g. "First and Last Name", "Email Address"), so an existing sheet keeps its layout.
- * Anything the sheet has no column for gets a new column at the end.
+ * new row here, right after the last person already in the sheet, and shaded purple so
+ * website applications stand out. Answers are matched to this sheet's column headings by
+ * question (e.g. "First and Last Name", "Email Address"), so an existing sheet keeps its
+ * layout. Anything the sheet has no column for gets a new column at the end.
  *
  * Set up once, signed in to the Google account that owns P31's sheet (or one with edit access):
  *   1. Open the sheet → Extensions → Apps Script. Delete what's there and paste this whole file.
@@ -19,6 +20,7 @@
  */
 const TOKEN = 'CHANGE-ME-to-a-long-random-phrase';
 const SHEET_NAME = ''; // the tab to add rows to; leave '' for the first tab
+const WEBSITE_COLOR = '#E9DAFB'; // shading for rows that came from the website; '' for none
 
 // Other headings a sheet might use for the same question.
 const ALIASES = {
@@ -46,35 +48,50 @@ function doPost(e) {
     const book = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = SHEET_NAME ? book.getSheetByName(SHEET_NAME) : book.getSheets()[0];
     if (!sheet) return reply({ ok: false, error: 'no tab named ' + SHEET_NAME });
-    if (sheet.getLastRow() === 0) sheet.appendRow(keys);
+    if (sheet.getLastRow() === 0) sheet.getRange(1, 1, 1, keys.length).setValues([keys]);
 
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(String);
+    // Match each answer to a column heading; anything unmatched gets a new column at the end.
+    const headers = sheet.getRange(1, 1, 1, Math.max(1, sheet.getLastColumn())).getValues()[0].map(String);
     const used = {};
-    const pick = (heading) => {
+    const cells = []; // [column number, value]
+    headers.forEach((heading, i) => {
       const h = norm(heading);
-      if (!h) return null;
-      return keys.find((k) => !used[k] && norm(k) === h)
-        || keys.find((k) => !used[k] && (ALIASES[norm(k)] || []).indexOf(h) !== -1)
-        || null;
-    };
-    const values = headers.map((heading) => {
-      const k = pick(heading);
-      if (!k) return '';
+      if (!h) return;
+      const k = keys.find((x) => !used[x] && norm(x) === h)
+        || keys.find((x) => !used[x] && (ALIASES[norm(x)] || []).indexOf(h) !== -1);
+      if (!k) return;
       used[k] = true;
-      return row[k];
+      cells.push([i + 1, row[k]]);
     });
     keys.filter((k) => !used[k]).forEach((k) => {
-      sheet.getRange(1, headers.length + 1).setValue(k);
       headers.push(k);
-      values.push(row[k]);
+      sheet.getRange(1, headers.length).setValue(k);
+      cells.push([headers.length, row[k]]);
     });
-    sheet.appendRow(values);
+
+    // The row right after the last person in the sheet. Only the answer columns are checked,
+    // so formatting, checkboxes or formulas further down don't push new people to the bottom.
+    const target = nextRow(sheet, cells.map((c) => c[0]));
+    cells.forEach((c) => sheet.getRange(target, c[0]).setValue(c[1]));
+    if (WEBSITE_COLOR) sheet.getRange(target, 1, 1, headers.length).setBackground(WEBSITE_COLOR);
     return reply({ ok: true });
   } catch (err) {
     return reply({ ok: false, error: String(err) });
   } finally {
     try { lock.releaseLock(); } catch (ignored) { /* not held */ }
   }
+}
+
+function nextRow(sheet, cols) {
+  const last = sheet.getLastRow();
+  if (last < 2) return 2;
+  const first = Math.min.apply(null, cols);
+  const width = Math.max.apply(null, cols) - first + 1;
+  const data = sheet.getRange(2, first, last - 1, width).getDisplayValues();
+  for (let r = data.length - 1; r >= 0; r--) {
+    if (cols.some((c) => String(data[r][c - first]).trim() !== '')) return r + 3;
+  }
+  return 2;
 }
 
 // Open the web app URL in a browser to check it's live.
