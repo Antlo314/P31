@@ -4,7 +4,7 @@ import { Mail, Lock, UserRound, ArrowRight, ShieldCheck, CheckCircle2, AlertTria
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { money, BILLING, CONTACT_EMAIL } from '../lib/academy';
-import mark from '../assets/academy/collective-mark.png';
+import mark from '../assets/academy/collective-mark.webp';
 import '../pages/Login.css';
 import './mentorship.css';
 

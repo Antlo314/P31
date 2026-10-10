@@ -7,7 +7,7 @@ import {
 import PageHeader from '../components/PageHeader';
 import { PROGRAMS, STEPS } from './content';
 import { openCalendly } from '../lib/calendly';
-import mark from '../assets/academy/collective-mark.png';
+import mark from '../assets/academy/collective-mark.webp';
 import founder from '../assets/web/melanie23_rm.webp';
 import './mentorship.css';
 import './collective-home.css';

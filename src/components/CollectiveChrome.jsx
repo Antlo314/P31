@@ -4,7 +4,7 @@ import { Mail, ArrowUpRight, ArrowUp, Instagram, Facebook, KeyRound, Home, Gradu
 import { isFlushRoute } from '../lib/routes';
 import { marketHome } from '../lib/site';
 import { EMAIL, OFFICE } from '../lib/team';
-import mark from '../assets/academy/collective-mark.png';
+import mark from '../assets/academy/collective-mark.webp';
 import './Navbar.css';
 import './Footer.css';
 import './CollectiveChrome.css';

@@ -5,7 +5,7 @@ import { PROGRAMS } from './content';
 import { marketHome } from '../lib/site';
 import { CALENDLY, openCalendly } from '../lib/calendly';
 import TeamDirectory from '../components/TeamDirectory';
-import mark from '../assets/academy/collective-mark.png';
+import mark from '../assets/academy/collective-mark.webp';
 import melanie from '../assets/web/melanie23_rm.webp';
 import './mentorship.css';
 import './collective-home.css';

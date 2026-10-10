@@ -6,7 +6,7 @@ import IntroCallForm from './IntroCallForm';
 import CalendlyEmbed from '../components/CalendlyEmbed';
 import { PROGRAMS, STEPS } from './content';
 import { CONTACT_EMAIL } from '../lib/academy';
-import mark from '../assets/academy/collective-mark.png';
+import mark from '../assets/academy/collective-mark.webp';
 import founder from '../assets/web/melanie23_rm.webp';
 import './mentorship.css';
 import JoinCollective from '../components/JoinCollective';

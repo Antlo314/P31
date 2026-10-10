@@ -8,7 +8,7 @@ import { fmtDate, fmtDateTime } from '../../lib/academy';
 import { COLLECTIVE_URL } from '../../lib/seo';
 import { DashHead, DashEmpty } from '../../apps/DashShell';
 import { useAcademy, useRealtime, useRows, write } from './data';
-import mark from '../../assets/academy/collective-mark.png';
+import mark from '../../assets/academy/collective-mark.webp';
 
 const ago = (iso, now) => {
   const m = Math.round((now - new Date(iso).getTime()) / 60000);

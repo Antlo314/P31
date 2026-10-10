@@ -8,6 +8,7 @@
     "build": "vite build && node scripts/prerender.mjs",
     "lint": "eslint . && node scripts/check-jsx.mjs",
     "test:screens": "node scripts/screen-test.mjs",
+    "scan": "node scripts/site-scan.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

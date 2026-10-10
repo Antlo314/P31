@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ShieldCheck, Search, XCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { fmtDate } from '../lib/academy';
-import mark from '../assets/academy/collective-mark.png';
+import mark from '../assets/academy/collective-mark.webp';
 import '../pages/Login.css';
 import './mentorship.css';
 

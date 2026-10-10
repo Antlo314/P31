@@ -24,7 +24,7 @@ import { StudentAssignments, StudentAssignment, StudentQuizzes, StudentQuiz, Stu
 import { Discussions, DiscussionThread, CertificateView, NotificationBell, InstallApp } from './shared';
 import LiveRoom from './LiveRoom';
 import { readViewAs, stopViewAs } from './viewAs';
-import mark from '../../assets/academy/collective-mark.png';
+import mark from '../../assets/academy/collective-mark.webp';
 import './classroom.css';
 
 const NAMES = { business: 'Business Mentorship', faith: 'Faith Mentorship' };

@@ -19,7 +19,7 @@ const LazyVideo = ({ src, poster, className, eager = false, label, ...rest }) =>
       } else {
         el.pause?.();
       }
-    }, { rootMargin: '300px 0px' });
+    }, { rootMargin: '120px 0px' });
     io.observe(el);
     return () => io.disconnect();
   }, [still]);

@@ -7,7 +7,7 @@ import { useRoles, dashboardsFor } from '../lib/roles';
 import { CONTACT_EMAIL } from '../lib/academy';
 import { hrefFor, isCollective } from '../lib/site';
 import { usernameToEmail } from '../systems/useOperator';
-import mark from '../assets/academy/collective-mark.png';
+import mark from '../assets/academy/collective-mark.webp';
 import '../pages/Login.css';
 import './mentorship.css';
 import { JOIN_PATH } from '../lib/academy';

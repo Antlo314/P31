@@ -4,7 +4,7 @@ import PageHeader from '../components/PageHeader';
 import { supabase } from '../lib/supabase';
 import { JOIN_FORM_URL } from '../lib/academy';
 import { EMAIL } from '../lib/team';
-import mark from '../assets/academy/collective-mark.png';
+import mark from '../assets/academy/collective-mark.webp';
 import './mentorship.css';
 import './join.css';
 
