@@ -212,3 +212,26 @@
 .cs-page { grid-template-columns: 54px 1fr; }
 .cs-page.is-sel input { border-color: var(--cs-gold); box-shadow: 0 0 0 1px var(--cs-gold); }
 .cs-page.is-sel span { color: var(--cs-gold); }
+
+/* Looks & filters (FilterPanel.jsx) */
+.fp { display: grid; gap: 16px; }
+@media (min-width: 760px) { .fp { grid-template-columns: minmax(200px, 300px) 1fr; align-items: start; } }
+.fp-preview { display: grid; gap: 8px; justify-items: center; }
+.fp-preview canvas { width: 100%; max-height: 420px; object-fit: contain; border-radius: 16px; background: #111; box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.6); }
+.fp-preview__bar { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.fp-clips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.fp-clips button { width: 38px; height: 38px; padding: 0; border-radius: 10px; overflow: hidden; border: 2px solid transparent; background: #000; cursor: pointer; }
+.fp-clips button.is-on { border-color: var(--gold-hi, #f2ce4d); }
+.fp-clips img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fp-side { display: grid; gap: 14px; min-width: 0; }
+.fp-looks { display: grid; grid-auto-flow: column; grid-auto-columns: 92px; gap: 10px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x mandatory; }
+.fp-look { display: grid; gap: 6px; padding: 0; border: 0; background: none; cursor: pointer; color: inherit; font: inherit; scroll-snap-align: start; text-align: center; }
+.fp-look img, .fp-look__ph { width: 92px; height: 115px; border-radius: 14px; object-fit: cover; display: block; background: rgba(127, 127, 127, 0.18); border: 2px solid transparent; transition: border-color 0.2s, transform 0.2s; }
+.fp-look span { font-size: 0.74rem; font-weight: 700; line-height: 1.2; }
+.fp-look.is-on img, .fp-look.is-on .fp-look__ph { border-color: var(--gold-hi, #f2ce4d); transform: translateY(-2px); }
+.fp-slider { display: grid; gap: 4px; font-size: 0.8rem; font-weight: 700; }
+.fp-slider span { display: flex; justify-content: space-between; }
+.fp-slider b { font-variant-numeric: tabular-nums; opacity: 0.75; }
+.fp-slider input { width: 100%; accent-color: var(--gold, #d9a93a); }
+.fp-tune { display: flex; gap: 14px; align-items: center; }
+.fp-adjust { display: grid; gap: 10px 18px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }

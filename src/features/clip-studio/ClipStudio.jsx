@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Upload, Film, X, ChevronUp, ChevronDown, Wand2, Captions, Music2, Scissors, Download, Share2, RotateCcw, Save, Check, AlertTriangle, Stamp } from 'lucide-react';
+import { Upload, Film, X, ChevronUp, ChevronDown, Wand2, Captions, Music2, Scissors, Download, Share2, RotateCcw, Save, Check, AlertTriangle, Stamp, Palette, Zap } from 'lucide-react';
 import { CLIP_STYLES, ASPECTS, LENGTHS } from './styles';
 import { probeVideo, decodeForMix, toAnalysisPcm, findActiveRanges, buildTimeline, timelinePcm, mapToOutput, MAX_FILE_BYTES } from './analyze';
 import { captionSettings, cleanWords, buildPages } from './captions';
 import CaptionPanel from './CaptionPanel';
-import { renderClip, canRender } from './render';
+import { renderClip, renderFast, FastRenderUnavailable, canRender, canFastRender } from './render';
+import FilterPanel from './FilterPanel';
+import { defaultLook, FILTERS } from './filters';
 import './ClipStudio.css';
 
 const MAX_CLIPS = 12;
@@ -57,6 +59,10 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
   const [extraAspects, setExtraAspects] = useState([]);
   const [brand, setBrand] = useState(null); // { src, img }
   const [brandCorner, setBrandCorner] = useState('tr');
+  const [look, setLook] = useState(() => defaultLook('clean'));
+  const lookTouched = useRef(false);
+  const chooseLook = (update) => { lookTouched.current = true; setLook(update); };
+  const [engine, setEngine] = useState(() => (canFastRender() ? 'fast' : 'live'));
 
   const audioCtxRef = useRef(null);
   const analysisRef = useRef(new Map()); // clip id → { buffer, pcm }
@@ -189,7 +195,7 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
         const total = Object.values(files).reduce((s, f) => s + f.total, 0);
         setProgress({ stage: 'Downloading caption AI (one time)', pct: total ? loaded / total : 0, detail: `${fmtMB(loaded)} of ${fmtMB(total)}` });
       } else if (data.type === 'status') {
-        setProgress({ stage: 'Writing captions', pct: -1 });
+        setProgress({ stage: data.engine === 'webgpu' ? 'Writing captions on your GPU' : 'Writing captions', pct: -1 });
       } else if (data.type === 'done') resolve(data.words);
       else if (data.type === 'error') reject(new Error(data.message));
     };
@@ -257,23 +263,38 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
       for (const [k, size] of sizes.entries()) {
         const stage = sizes.length > 1 ? `Rendering ${size.label} · ${k + 1} of ${sizes.length}` : 'Rendering';
         setProgress({ stage, pct: 0, aspect: size });
-        const out = await renderClip({
+        const job = {
           clips,
           timeline: timelineRef.current,
           style,
           aspect: size,
           pages: captions ? pages : [],
           captionStyle: capStyle,
-          audioCtx: ctx,
           clipBuffers: clips.map((c) => analysisRef.current.get(c.id)?.buffer || null),
           music,
           levels,
           title: title.trim(),
           brand: brand ? { image: brand.img, corner: brandCorner } : null,
+          look,
           canvas: canvasRef.current,
           signal: abort.signal,
           onProgress: (p) => setProgress({ stage, pct: p, aspect: size }),
-        });
+        };
+        let out;
+        // Fast export (WebCodecs) first; the live recorder takes over when this browser or file can't do it.
+        if (engine === 'fast') {
+          try {
+            out = await renderFast(job);
+          } catch (e) {
+            if (!(e instanceof FastRenderUnavailable)) throw e;
+            console.warn('Fast export unavailable, recording live instead:', e.message);
+            setEngine('live');
+          }
+        }
+        if (!out) {
+          setProgress({ stage, pct: 0, aspect: size });
+          out = await renderClip({ ...job, audioCtx: ctx });
+        }
         const ext = out.type.includes('mp4') ? 'mp4' : 'webm';
         const url = URL.createObjectURL(out.blob);
         resultUrls.current.push(url);
@@ -281,7 +302,7 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
           ...out,
           aspect: size,
           url,
-          name: `p31-${style.id}-${size.id.replace(':', 'x')}-${new Date().toISOString().slice(0, 10)}.${ext}`,
+          name: `p31-${style.id}-${look.filter}-${size.id.replace(':', 'x')}-${new Date().toISOString().slice(0, 10)}.${ext}`,
         });
         setResults([...done]);
       }
@@ -302,7 +323,7 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
 
   const save = async (result, i) => {
     try {
-      await onSave(result.blob, { name: result.name, type: result.type, style: style.id, aspect: result.aspect.id, duration: result.duration, title });
+      await onSave(result.blob, { name: result.name, type: result.type, style: style.id, look: look.filter, aspect: result.aspect.id, duration: result.duration, title });
       setSaved((s) => [...s, i]);
     } catch (e) {
       setError(`Couldn’t save: ${e.message}`);
@@ -357,13 +378,20 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
             <h3><Wand2 size={16} /> Style</h3>
             <div className="cs-styles">
               {CLIP_STYLES.map((s) => (
-                <button key={s.id} className={`cs-style ${styleId === s.id ? 'is-on' : ''}`} onClick={() => { setStyleId(s.id); setCapStyle(captionSettings(s.caption)); }} aria-pressed={styleId === s.id}>
+                <button key={s.id} className={`cs-style ${styleId === s.id ? 'is-on' : ''}`} onClick={() => { setStyleId(s.id); setCapStyle(captionSettings(s.caption)); if (!lookTouched.current) setLook(defaultLook(s.id)); }} aria-pressed={styleId === s.id}>
                   <span className="cs-style__sw" style={{ background: `linear-gradient(135deg, ${s.swatch[0]} 0 50%, ${s.swatch[1]} 50% 100%)` }} />
                   <strong>{s.name}</strong>
                   <span>{s.blurb}</span>
                 </button>
               ))}
             </div>
+          </section>
+
+          <section className="cs-block">
+            <h3><Palette size={16} /> Look &amp; filters <span>{FILTERS.find((f) => f.id === look.filter)?.name}{look.filter !== 'original' ? ` · ${Math.round(look.intensity * 100)}%` : ''}</span></h3>
+            {clips.length
+              ? <FilterPanel clips={clips} look={look} setLook={chooseLook} aspect={aspect} />
+              : <p className="cs-note">Add footage to try looks on your own video.</p>}
           </section>
 
           <section className="cs-block">
@@ -458,7 +486,7 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
               <h3><Captions size={16} /> Captions <span>style, timing &amp; text — preview updates live</span></h3>
               <CaptionPanel pages={pages} setPages={setPages} settings={capStyle} setSettings={setCapStyle}
                 onRegroup={(next) => setPages(buildPages(wordsRef.current, next))}
-                clips={clips} timeline={timelineRef.current} aspect={aspect} />
+                clips={clips} timeline={timelineRef.current} aspect={aspect} look={look} />
             </section>
           )}
           <section className="cs-block">
@@ -487,7 +515,11 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
       <div className={`cs-stage ${phase === 'rendering' ? '' : 'is-hidden'}`}>
         <canvas ref={canvasRef} className="cs-canvas" style={{ aspectRatio: `${(progress.aspect || aspect).w} / ${(progress.aspect || aspect).h}` }} />
         <div className="cs-progress"><span style={{ width: `${Math.round(progress.pct * 100)}%` }} /></div>
-        <p className="cs-note">{progress.stage} in real time — keep this screen open. {Math.round(progress.pct * 100)}%</p>
+        <p className="cs-note">
+          {engine === 'fast'
+            ? <><Zap size={13} /> {progress.stage} with fast export, usually quicker than the video plays. {Math.round(progress.pct * 100)}%</>
+            : <>{progress.stage} in real time — keep this screen open. {Math.round(progress.pct * 100)}%</>}
+        </p>
         <button className="cs-btn cs-btn--ghost" onClick={() => abortRef.current?.abort()}>Cancel</button>
       </div>
 
@@ -497,7 +529,7 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
             {results.map((r, i) => (
               <div className="cs-out" key={r.url}>
                 <video className="cs-result" src={r.url} controls playsInline style={{ aspectRatio: `${r.aspect.w} / ${r.aspect.h}` }} />
-                <p className="cs-note">{r.aspect.label} · {fmtTime(r.duration)} · {r.type.includes('mp4') ? 'MP4' : 'WebM'} · {fmtMB(r.blob.size)}</p>
+                <p className="cs-note">{r.aspect.label} · {fmtTime(r.duration)} · {r.type.includes('mp4') ? 'MP4' : 'WebM'} · {fmtMB(r.blob.size)}{r.engine ? ` · ${r.engine}` : ''}</p>
                 <div className="cs-bar cs-bar--wrap cs-bar--inline">
                   <a className="cs-btn cs-btn--gold" href={r.url} download={r.name}><Download size={18} /> Download</a>
                   {navigator.canShare && <button className="cs-btn cs-btn--ghost" onClick={() => share(r)}><Share2 size={16} /> Share</button>}

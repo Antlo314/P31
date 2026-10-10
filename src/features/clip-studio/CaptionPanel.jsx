@@ -3,6 +3,7 @@ import { Captions, Play, Scissors, Merge, Trash2, Plus, Minus, RotateCcw, Type, 
 import {
   CAPTION_FONTS, HIGHLIGHTS, ANIMATIONS, BACKGROUNDS, drawCaption, loadCaptionFont, retimePage, shiftPage, splitPage, mergePages, timePages,
 } from './captions';
+import { createGrader, lookParams, isIdentity } from './filters';
 
 const fmt = (s) => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
 
@@ -18,13 +19,14 @@ const sourceAt = (timeline, t) => {
  *   settings / setSettings: caption look (see captionSettings)
  *   onRegroup(settings): rebuild pages from the original words with these settings
  */
-const CaptionPanel = ({ pages, setPages, settings, setSettings, onRegroup, clips, timeline, aspect }) => {
+const CaptionPanel = ({ pages, setPages, settings, setSettings, onRegroup, clips, timeline, aspect, look }) => {
   const [sel, setSel] = useState(0);
   const [tab, setTab] = useState('look');
   const canvasRef = useRef(null);
   const frameRef = useRef(null);  // current video frame (canvas)
   const videoRef = useRef(null);
   const playRef = useRef(0);
+  const graderRef = useRef(undefined); // made on first use; null if WebGL2 is unavailable
   const page = pages[Math.min(sel, pages.length - 1)];
   const set = (patch) => setSettings((s) => ({ ...s, ...patch }));
   const update = (list) => setPages(timePages(list, settings));
@@ -44,6 +46,11 @@ const CaptionPanel = ({ pages, setPages, settings, setSettings, onRegroup, clips
       const f = frameRef.current;
       const s = Math.max(PW / f.width, PH / f.height);
       ctx.drawImage(f, (PW - f.width * s) / 2, (PH - f.height * s) / 2, f.width * s, f.height * s);
+      const params = lookParams(look);
+      if (!isIdentity(params)) {
+        if (graderRef.current === undefined) { try { graderRef.current = createGrader(); } catch { graderRef.current = null; } }
+        if (graderRef.current?.grade(c, params, t)) ctx.drawImage(graderRef.current.canvas, 0, 0, PW, PH);
+      }
     }
     drawCaption(ctx, pages, t, settings, PW, PH);
   };
@@ -91,7 +98,7 @@ const CaptionPanel = ({ pages, setPages, settings, setSettings, onRegroup, clips
     };
     playRef.current = requestAnimationFrame(step);
   };
-  useEffect(() => () => cancelAnimationFrame(playRef.current), []);
+  useEffect(() => () => { cancelAnimationFrame(playRef.current); graderRef.current?.dispose(); }, []);
 
   if (!pages.length) return <p className="cs-note">No speech was found, so there are no captions.</p>;
 
