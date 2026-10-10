@@ -42,7 +42,7 @@ Proverbs 31 Marketplace ("P31") is a curated, traveling marketplace and communit
 - Become a curator (vendor application): https://forms.gle/vmkK7fhgwiYNYEa38
 - Curator services: https://www.p31market.com/services
 - Partner or sponsor: https://www.p31market.com/partner
-- Mentorship overview: https://www.thep31collective.org/academy (mentorship email: member@thep31collective.org)
+- Mentorship overview: https://www.thep31collective.org/academy (mentorship email: members@thep31collective.org)
 - Join P31 Collective, the membership community for women entrepreneurs ages 18–35, $27/month, cancel anytime (share it whenever someone wants to join or get involved): https://www.thep31collective.org/join
 - Meet Melanie JC and the team: https://www.thep31collective.org/#melanie
 - Book a 30-minute mentorship intro call directly: https://calendly.com/nebamentorship/neba-mentorship-intro-call
@@ -56,7 +56,7 @@ Proverbs 31 Marketplace ("P31") is a curated, traveling marketplace and communit
 - Melanie JC, Founder & CEO (vision, leadership, partnerships and decisions): founder@thep31collective.org · ceo@p31market.com
 - Savannah Campbell, Executive Assistant (administrative support, outreach communications, scheduling with Melanie): secretary@thep31collective.org · secretary@p31market.com
 - Yanni Bratcher, Marketing Strategist (marketing, press, collaborations and awareness): marketing@p31market.com
-- Alexia Thomas, Member Liaison (mentorship members, community experience, event planning, market questions): member@thep31collective.org · outreach@p31market.com
+- Alexia Thomas, Member Liaison (mentorship members, community experience, event planning, market questions): members@thep31collective.org · outreach@p31market.com
 - Shanay Prince, Support Coordinator (grants, partnerships, sponsorships, operations): coordinator@thep31collective.org · grants@p31market.com
 - Anthony Carr, Marketplace Tech Support (curator storefronts, vendor help, website trouble): vendor@p31market.com
 Give one email, the one that fits the question. For general market questions use outreach@p31market.com.

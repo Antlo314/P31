@@ -18,6 +18,10 @@ verify_jwt = false
 [functions.order-request]
 verify_jwt = false
 
+# Called by the Join page after someone applies; it only ever sends each new application once.
+[functions.join-notify]
+verify_jwt = false
+
 # Signed-in callers; the function verifies the user itself.
 [functions.ai-assist]
 verify_jwt = false

@@ -77,6 +77,8 @@ const JoinForm = () => {
       setState('idle');
       return;
     }
+    // Hand it to the team: email to members@ and a row in P31's Google Sheet (each sent once).
+    supabase.functions.invoke('join-notify', { body: {} }).catch(() => {});
     setState('done');
   };
 

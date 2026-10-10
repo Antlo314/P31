@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
   const { data: invite } = await admin.from('academy_invites')
     .select('id, email, full_name, expires_at, used_at, inquiry_id, program:academy_programs(id, slug, title), plan:academy_plans(id, billing, label, price_cents, access_days, is_active)')
     .eq('token', body.token).maybeSingle();
-  if (!invite) return json({ error: 'This enrollment link isn’t valid. Please contact member@thep31collective.org.' }, 404);
+  if (!invite) return json({ error: 'This enrollment link isn’t valid. Please contact members@thep31collective.org.' }, 404);
   if (invite.used_at) return json({ error: 'This enrollment link has already been used.' }, 409);
   if (new Date(invite.expires_at) < new Date()) return json({ error: 'This enrollment link has expired — ask your mentor for a new one.' }, 410);
   if ((user.email || '').toLowerCase() !== invite.email.toLowerCase()) {
@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
   if (stillActive) return json({ already: true, program: program.slug });
 
   if (!env('STRIPE_SECRET_KEY')) {
-    return json({ error: 'Card payments aren’t connected yet. Please email member@thep31collective.org and we’ll help you enroll.' }, 503);
+    return json({ error: 'Card payments aren’t connected yet. Please email members@thep31collective.org and we’ll help you enroll.' }, 503);
   }
   const stripe = new Stripe(env('STRIPE_SECRET_KEY'));
   const appUrl = (env('ACADEMY_URL') || 'https://www.thep31collective.org').replace(/\/$/, '');
