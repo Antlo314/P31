@@ -98,13 +98,13 @@ const Home = () => {
         <span className="k-hero__arch h26-hero__arch" aria-hidden="true" />
 
         <div className="h26-hero__inner">
-          {nextEvent && (
+          <div className="h26-hero__nextwrap">{nextEvent && (
             <a href="#dates" className="k-chip k-chip--glass h26-hero__next" data-intro="0">
               <span className="h26-pulse" aria-hidden="true" />
               Next market · {nextEvent.title} · {showDate(nextEvent) ? formatEventDate(nextEvent.event_date, { month: 'short', day: 'numeric' }) : 'Coming soon'}
               <ArrowRight size={13} />
             </a>
-          )}
+          )}</div>
           <p className="k-eyebrow" data-intro="0.05">Proverbs 31 Marketplace</p>
           <h1 className="k-display h26-hero__title" data-split="intro" data-delay="0.1">
             Where her gifts <em>make room.</em>

@@ -440,3 +440,8 @@
 @media (max-width: 359px) {
   .k-btn { white-space: normal; text-align: center; line-height: 1.2; padding-block: 10px; max-width: 100%; }
 }
+
+/* Press feedback: every button and card link gives a little under the finger, then springs back. */
+.k-btn:active, .k-chip:active, .sys-btn:active, .cs-btn:active, .ds-tab:active, .jn-chip:active, .sys-chip:active, .tour__btn:active { transform: scale(0.97); transition-duration: 0.08s; }
+.k-card--link:active, .ds-row:active, .pt-item:active, .td2-items a:active, .sys-tool:active { transform: scale(0.99); transition-duration: 0.08s; }
+@media (prefers-reduced-motion: reduce) { .k-btn:active, .k-chip:active, .sys-btn:active, .cs-btn:active, .ds-tab:active, .jn-chip:active, .sys-chip:active, .tour__btn:active, .k-card--link:active, .ds-row:active, .pt-item:active, .td2-items a:active, .sys-tool:active { transform: none; } }
