@@ -80,8 +80,6 @@ Return exactly 2 parts separated by ---: first a subject line (max 60 characters
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
-  if (!Deno.env.get('ANTHROPIC_API_KEY')) return json({ error: 'AI writing isn’t switched on yet (add the ANTHROPIC_API_KEY secret).' });
-
   try {
     const admin = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -100,6 +98,8 @@ Deno.serve(async (req) => {
     ]);
     const role = op ? 'operator' : cur ? 'curator' : null;
     if (!role) return json({ error: 'AI writing is available to curators and the P31 team.' }, 403);
+    // Only people allowed to use it learn whether it's switched on.
+    if (!Deno.env.get('ANTHROPIC_API_KEY')) return json({ error: 'AI writing isn’t switched on yet (add the ANTHROPIC_API_KEY secret).' });
 
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { count } = await admin.from('ai_usage').select('id', { count: 'exact', head: true })

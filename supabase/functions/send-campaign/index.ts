@@ -28,8 +28,6 @@ const toHtml = (body: string) => body.split(/\n{2,}/).map((para) => {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
-  if (!emailConfigured()) return json({ error: 'Email isn’t connected yet — add the RESEND_API_KEY secret.' });
-
   try {
     const admin = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -42,6 +40,8 @@ Deno.serve(async (req) => {
     if (!user) return json({ error: 'Sign in to Systems first.' }, 401);
     const { data: op } = await admin.from('system_operators').select('user_id').eq('user_id', user.id).maybeSingle();
     if (!op) return json({ error: 'Systems access required.' }, 403);
+    // Only the Systems team learns whether email is connected.
+    if (!emailConfigured()) return json({ error: 'Email isn’t connected yet — add the RESEND_API_KEY secret.' });
 
     const { campaignId, test } = await req.json();
     const { data: c } = await admin.from('campaigns').select('*').eq('id', campaignId).single();
