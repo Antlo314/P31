@@ -199,6 +199,11 @@ const makeDb = () => ({
     heard_from, business_description: business_name ? `Sample business: ${business_name}.` : null, inspiration: 'Sample answer: I want a community of women who build with faith.',
     growth_areas, interests, agreed: true, status, notes: null, created_at: day(-ago), reviewed_at: status === 'new' ? null : day(-ago + 1),
   })),
+  app_errors: [
+    { id: 'er1', fingerprint: 'a', kind: 'render', message: "Cannot read properties of undefined (reading 'map')", path: '/academy/business/teach/gradebook', site: 'collective', release: 'b3ca818', count: 7, users: 3, first_seen: day(-2), last_seen: iso(-45), resolved_at: null, stack: "TypeError: Cannot read properties of undefined (reading 'map')\n    at Gradebook (teach.jsx:812)", user_agent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)' },
+    { id: 'er2', fingerprint: 'b', kind: 'chunk', message: 'Failed to fetch dynamically imported module: /assets/Shop-x1y2.js', path: '/shop', site: 'market', release: '75b16c0', count: 2, users: 2, first_seen: day(-1), last_seen: iso(-300), resolved_at: null, stack: null, user_agent: 'Mozilla/5.0 (Windows NT 10.0)' },
+    { id: 'er3', fingerprint: 'c', kind: 'promise', message: 'Load failed', path: '/join', site: 'collective', release: '75b16c0', count: 1, users: 1, first_seen: day(-4), last_seen: day(-4), resolved_at: day(-3), stack: null, user_agent: 'Mozilla/5.0 (Macintosh)' },
+  ],
   campaigns: [{ id: 'cm1', subject: 'The Winter Gala is coming', body: 'Save the date…', audience: 'subscribers', status: 'draft', created_at: day(-1) }],
   market_events: [{ id: 'ev1', title: 'Winter Gala', event_date: day(70).slice(0, 10), date_public: false, is_active: true, venue: null, capacity: 150 }],
 });

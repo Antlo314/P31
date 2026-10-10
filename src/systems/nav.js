@@ -1,4 +1,4 @@
-import { LayoutGrid, Megaphone, Radar, Clapperboard, ImagePlus, Film, Settings, CalendarDays, Mail, Receipt, GraduationCap, Users, UserPlus } from 'lucide-react';
+import { LayoutGrid, Megaphone, Radar, Clapperboard, ImagePlus, Film, Settings, CalendarDays, Mail, Receipt, GraduationCap, Users, UserPlus, Activity } from 'lucide-react';
 
 export const SYSTEMS_NAV = [
   { to: '/systems', label: 'Overview', Icon: LayoutGrid, end: true },
@@ -13,5 +13,6 @@ export const SYSTEMS_NAV = [
   { to: '/systems/clips', label: 'Clips', Icon: Clapperboard },
   { to: '/systems/photos', label: 'Photos', Icon: ImagePlus },
   { to: '/systems/pro-edit', label: 'Pro Edit', Icon: Film },
+  { to: '/systems/health', label: 'Health', Icon: Activity },
   { to: '/systems/settings', label: 'Settings', Icon: Settings },
 ];

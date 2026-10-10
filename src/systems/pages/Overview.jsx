@@ -15,6 +15,7 @@ const BLURBS = {
   '/systems/clips': 'Turn raw footage into captioned, edited clips on your phone.',
   '/systems/photos': 'Remove backgrounds, stage products and apply looks.',
   '/systems/pro-edit': 'Premium DaVinci Resolve edits, handled by Iris.',
+  '/systems/health': 'Errors visitors hit on either site, as they happen.',
   '/systems/settings': 'Your password, the team, and connected services.',
 };
 
@@ -35,7 +36,8 @@ const Overview = ({ operator }) => {
       count('pro_edit_jobs', (q) => q.in('status', ['queued', 'processing'])),
       count('curator_data', (q) => q.eq('status', 'pending')),
       count('collective_applications', (q) => q.eq('status', 'new')),
-    ]).then(([prospects, scheduled, edits, pending, applications]) => setStats({ prospects, scheduled, edits, pending, applications }));
+      count('app_errors', (q) => q.is('resolved_at', null)),
+    ]).then(([prospects, scheduled, edits, pending, applications, errors]) => setStats({ prospects, scheduled, edits, pending, applications, errors }));
   }, []);
 
   const hour = new Date().getHours();
@@ -55,6 +57,7 @@ const Overview = ({ operator }) => {
           ['Posts scheduled', stats?.scheduled, '/systems/social'],
           ['Pro edits in queue', stats?.edits, '/systems/pro-edit'],
           ['Curators awaiting review', stats?.pending, '/dashboard'],
+          ['Open site errors', stats?.errors, '/systems/health'],
         ].map(([label, n, to]) => (
           <Link to={to} className="sys-stat" key={label}>
             <span className="sys-stat__n">{n ?? '—'}</span>

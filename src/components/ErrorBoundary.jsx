@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { CHUNK_ERROR, reloadOnceForNewVersion } from '../lib/reload';
+import { reportError } from '../lib/errorLog';
 
 /** Shows a friendly message (with the actual error) instead of a blank page. */
 export default class ErrorBoundary extends React.Component {
@@ -15,6 +16,7 @@ export default class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, info) {
     console.error('Page error:', error, info?.componentStack);
+    reportError(error, 'render', { componentStack: info?.componentStack });
     if (CHUNK_ERROR.test(String(error?.message || error))) reloadOnceForNewVersion();
   }
 

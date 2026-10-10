@@ -1,0 +1,50 @@
+# Automatic checks on every push and every pull request into main:
+#   1. lint  — code problems, plus any component used without being imported
+#   2. build — the production build of both sites (no secrets needed)
+#   3. screen test — opens every main screen on both sites in sample-data mode and
+#      fails on any crash, error screen, blank page or missing button
+name: Checks
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Screen test
+        env:
+          P31_BASE: http://127.0.0.1:5180
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          npx vite --host 127.0.0.1 --port 5180 --strictPort > vite.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:5180/ > /dev/null && break; sleep 1; done
+          npm run test:screens
+
+      - name: Dev server log (on failure)
+        if: failure()
+        run: tail -n 80 vite.log || true

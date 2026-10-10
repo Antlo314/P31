@@ -7,6 +7,10 @@ import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import { reloadOnceForNewVersion } from './lib/reload'
+import { installErrorReporting } from './lib/errorLog'
+
+// Crashes on either site are reported to Systems → Health (production only).
+installErrorReporting()
 
 // A page opened before a deploy may ask for code files that no longer exist: reload once.
 window.addEventListener('vite:preloadError', (event) => {

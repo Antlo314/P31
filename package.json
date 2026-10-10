@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build && node scripts/prerender.mjs",
     "lint": "eslint . && node scripts/check-jsx.mjs",
+    "test:screens": "node scripts/screen-test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -30,6 +31,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "puppeteer-core": "^23.11.1",
     "vite": "^8.0.1"
   }
 }
