@@ -168,7 +168,7 @@ Role-based dashboards:
    - Stripe → Settings → Billing → Customer portal: turn it on (students use it to update cards or cancel).
 5. **Deploy the site** (merge `feature/academy-studio` into `main`).
 
-Until Stripe is connected, invite links explain that card payments aren’t ready and point to member@thep31collective.org, and admins can enroll people manually in Systems → Academy.
+Until Stripe is connected, invite links explain that card payments aren’t ready and point to members@thep31collective.org, and admins can enroll people manually in Systems → Academy.
 
 ## What's where
 

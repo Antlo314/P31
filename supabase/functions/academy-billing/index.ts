@@ -18,7 +18,7 @@ const env = (k: string) => Deno.env.get(k) || '';
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
-  if (!env('STRIPE_SECRET_KEY')) return json({ error: 'Billing isn’t connected yet — email member@thep31collective.org.' }, 503);
+  if (!env('STRIPE_SECRET_KEY')) return json({ error: 'Billing isn’t connected yet — email members@thep31collective.org.' }, 503);
 
   const db = createClient(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'), { auth: { persistSession: false } });
   const { data: userData } = await db.auth.getUser((req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, ''));

@@ -5,7 +5,7 @@
 
 export const emailConfigured = () => !!Deno.env.get('RESEND_API_KEY');
 
-export async function sendEmail(to: string | string[], subject: string, html: string, replyTo?: string) {
+export async function sendEmail(to: string | string[], subject: string, html: string, replyTo?: string, from?: string) {
   const key = Deno.env.get('RESEND_API_KEY');
   if (!key) {
     console.log(`[email skipped — no RESEND_API_KEY] ${subject} → ${to}`);
@@ -15,7 +15,7 @@ export async function sendEmail(to: string | string[], subject: string, html: st
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      from: Deno.env.get('EMAIL_FROM') || 'P31 Marketplace <onboarding@resend.dev>',
+      from: from || Deno.env.get('EMAIL_FROM') || 'P31 Marketplace <onboarding@resend.dev>',
       to: Array.isArray(to) ? to : [to],
       subject,
       html,
@@ -37,11 +37,11 @@ export const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 type Item = { name: string; quantity: number; price_cents: number; options?: Record<string, string> };
 
 // Branded, email-client-safe layout.
-export function layout(title: string, body: string, footer = '') {
+export function layout(title: string, body: string, footer = '', brand = 'PROVERBS 31 MARKETPLACE') {
   return `<!doctype html><html><body style="margin:0;background:#f5f1fb;font-family:Arial,Helvetica,sans-serif;color:#201431">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:18px;overflow:hidden">
-<tr><td style="background:#2a1544;padding:22px 24px;color:#F2CE4D;font-size:12px;letter-spacing:3px;font-weight:bold">PROVERBS 31 MARKETPLACE</td></tr>
+<tr><td style="background:#2a1544;padding:22px 24px;color:#F2CE4D;font-size:12px;letter-spacing:3px;font-weight:bold">${esc(brand)}</td></tr>
 <tr><td style="padding:26px 24px">
 <h1 style="margin:0 0 14px;font-family:Georgia,serif;font-weight:normal;color:#5E2A8C;font-size:24px">${esc(title)}</h1>
 ${body}

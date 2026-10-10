@@ -18,7 +18,7 @@ export const EMAIL = {
   assistant: 'secretary@thep31collective.org',
   assistantMarket: 'secretary@p31market.com',
   marketing: 'marketing@p31market.com',
-  members: 'member@thep31collective.org',
+  members: 'members@thep31collective.org',
   community: 'outreach@p31market.com',
   support: 'coordinator@thep31collective.org',
   grants: 'grants@p31market.com',

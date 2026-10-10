@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-export const CONTACT_EMAIL = 'member@thep31collective.org';
+export const CONTACT_EMAIL = 'members@thep31collective.org';
 
 export const money = (cents) => (cents == null ? '—' : `$${(cents / 100).toLocaleString('en-US', { minimumFractionDigits: cents % 100 ? 2 : 0 })}`);
 

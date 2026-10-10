@@ -208,7 +208,7 @@ const melanie = {
 const team = [
   ['Savannah Campbell', 'Executive Assistant', 'secretary@thep31collective.org'],
   ['Yanni Bratcher', 'Marketing Strategist', 'marketing@p31market.com'],
-  ['Alexia Thomas', 'Member Liaison', 'member@thep31collective.org'],
+  ['Alexia Thomas', 'Member Liaison', 'members@thep31collective.org'],
   ['Shanay Prince', 'Support Coordinator', 'coordinator@thep31collective.org'],
   ['Anthony Carr', 'Marketplace Tech Support', 'vendor@p31market.com'],
 ].map(([name, jobTitle, email]) => ({ '@type': 'Person', name, jobTitle, email }));
@@ -222,12 +222,12 @@ const collectiveOrg = {
   logo: `${C}/c/icons/icon-512.png`,
   image: COLLECTIVE_IMAGE,
   description: COLLECTIVE_META['/'].description,
-  email: 'member@thep31collective.org',
+  email: 'members@thep31collective.org',
   telephone: BUSINESS.phone,
   founder: melanie,
   employee: team,
   contactPoint: [
-    { '@type': 'ContactPoint', contactType: 'membership', email: 'member@thep31collective.org', telephone: BUSINESS.phone, availableLanguage: 'English' },
+    { '@type': 'ContactPoint', contactType: 'membership', email: 'members@thep31collective.org', telephone: BUSINESS.phone, availableLanguage: 'English' },
     { '@type': 'ContactPoint', contactType: 'customer support', email: 'coordinator@thep31collective.org', availableLanguage: 'English' },
   ],
   parentOrganization: { '@type': 'Organization', '@id': `${SITE_URL}/#organization`, name: SITE_NAME, url: SITE_URL },
