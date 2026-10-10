@@ -113,7 +113,7 @@ const StudioPlanner = () => {
               <div key={key} className={`pl-day ${inMonth ? '' : 'is-out'} ${key === todayISO() ? 'is-today' : ''}`} role="gridcell">
                 <div className="pl-day__head"><span>{d.getDate()}</span><button type="button" className="pl-add" onClick={() => add(key)} aria-label={`Add a post on ${key}`}><Plus size={13} /></button></div>
                 {ev && <span className="pl-event" title={ev.title}><CalendarDays size={11} /> {ev.title}</span>}
-                {list.map((it) => { const [, Icon] = KIND[it.kind] || KIND.reel; return (
+                {list.map((it) => { const Icon = (KIND[it.kind] || KIND.reel)[1]; return (
                   <button type="button" key={it.id} className={`pl-item pl-item--${it.status}`} onClick={() => setOpen(it)} title={it.theme || it.hook || ''}>
                     <Icon size={11} /> <span>{it.hook || it.theme || 'Untitled'}</span>
                   </button>
@@ -124,7 +124,7 @@ const StudioPlanner = () => {
         </div>
       ) : (
         <ul className="ds-list">
-          {items.map((it) => { const [, Icon] = KIND[it.kind] || KIND.reel; return (
+          {items.map((it) => { const Icon = (KIND[it.kind] || KIND.reel)[1]; return (
             <li key={it.id}><button className="ds-row" onClick={() => setOpen(it)}>
               <Icon size={18} />
               <div><strong>{it.hook || it.theme || 'Untitled'}</strong><small>{new Date(`${it.post_date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}{it.post_time ? ` · ${it.post_time.slice(0, 5)}` : ''}{it.pillar ? ` · ${it.pillar}` : ''}</small></div>
@@ -203,7 +203,7 @@ const PlanItem = ({ item, events, onClose, onChanged }) => {
   };
 
   const remove = async () => { await supabase.from('content_plan').delete().eq('id', f.id); onChanged(null); onClose(); };
-  const [, KindIcon] = KIND[f.kind] || KIND.reel;
+  const KindIcon = (KIND[f.kind] || KIND.reel)[1];
 
   return (
     <div className="ds-sheet" role="dialog" aria-modal="true" aria-label="Planned post" onClick={(e) => e.target === e.currentTarget && onClose()}>
