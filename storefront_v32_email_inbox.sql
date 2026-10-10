@@ -6,7 +6,7 @@
    is forwarded (a copy) to a private Resend address. The email-inbound
    function files each one into a conversation here and Carla writes a
    draft reply. Yanni and the admins (Content Studio, Email) read it,
-   edit if needed and press Send; email-send sends it from the right
+   edit if needed and press Send. email-send sends it from the right
    inbox, in the same thread. Nothing is ever sent without a person.
 
    Only Content Studio people (admins, Studio seats and anyone given

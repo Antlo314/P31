@@ -8,7 +8,10 @@
 //   overview                      accounts, 30-day insights, follower trend, best times
 //   posts                         scheduled + recently published posts
 //   presign  {filename, contentType, size}
-//   create   {platforms, content, igContent?, fbContent?, media[], scheduledFor, timezone}
+//   create   {platforms, content, igContent?, fbContent?, media[], scheduledFor, timezone,
+//             audioId?, audioVolume?, videoVolume?, firstComment?, coverUrl?, shareToFeed?}
+//   audio    {q?, type?: music|original_sound}  → Instagram catalog audio (trending when q is empty)
+//   limit                                        → Instagram publishing quota for the rolling day
 //   update   {postId, content?, scheduledFor?, timezone?}
 //   remove   {postId}
 //   inbox                         recent DM conversations (read-only)
@@ -133,11 +136,22 @@ async function handle(action: string, b: any) {
       if (!b.scheduledFor) throw new UserError('Choose when it should go out.');
       const when = new Date(b.timezone ? `${b.scheduledFor}` : b.scheduledFor);
       if (Number.isNaN(when.getTime())) throw new UserError('That date and time doesn’t look right.');
+      const isReel = media.length === 1 && media[0].type === 'video';
       const platforms = wanted.map((p) => {
         const acct = accounts.find((a: any) => a.platform === p);
         if (!acct) throw new UserError(`${p} isn’t connected in Zernio.`);
         const custom = p === 'instagram' ? b.igContent : b.fbContent;
-        return { platform: p, accountId: acct.id, ...(custom ? { customContent: String(custom).slice(0, 2200) } : {}) };
+        // Instagram extras: a catalog track on a reel, a cover frame, the first comment, feed sharing.
+        const extra: Record<string, unknown> = {};
+        if (p === 'instagram') {
+          if (isReel && b.audioId) {
+            extra.audioConfiguration = { audioId: String(b.audioId), audioVolume: Math.max(0, Math.min(100, Number(b.audioVolume ?? 100))), videoVolume: Math.max(0, Math.min(100, Number(b.videoVolume ?? 100))) };
+          }
+          if (isReel && /^https:\/\//.test(String(b.coverUrl || ''))) extra.instagramThumbnail = String(b.coverUrl);
+          if (isReel && b.shareToFeed === false) extra.shareToFeed = false;
+          if (!isReel && String(b.firstComment || '').trim()) extra.firstComment = String(b.firstComment).trim().slice(0, 2200);
+        }
+        return { platform: p, accountId: acct.id, ...(custom ? { customContent: String(custom).slice(0, 2200) } : {}), ...(Object.keys(extra).length ? { platformSpecificData: extra } : {}) };
       });
       const body = {
         title: String(b.title || content.split('\n')[0] || 'Studio post').slice(0, 100),
@@ -147,6 +161,40 @@ async function handle(action: string, b: any) {
       };
       const out = await zernio('/posts', { method: 'POST', body: JSON.stringify(body) });
       return { post: slimPost(out.post || out) };
+    }
+
+    // Instagram catalog audio: trending when there is no search, otherwise a search. Needs the
+    // Instagram account connected to Zernio through Facebook Login (Meta's rule, not ours).
+    case 'audio': {
+      const accounts = await ourAccounts();
+      const ig = accounts.find((a: any) => a.platform === 'instagram');
+      if (!ig) throw new UserError('Instagram isn’t connected in Zernio.');
+      const q = String(b.q || '').trim().slice(0, 80);
+      const type = b.type === 'original_sound' ? 'original_sound' : 'music';
+      try {
+        const out = await zernio(`/accounts/${encodeURIComponent(ig.id)}/instagram/audio?audioType=${type}${q ? `&q=${encodeURIComponent(q)}` : ''}`);
+        return {
+          trending: !q,
+          audio: (out.audio || []).map((a: any) => ({
+            id: a.audioId, title: a.title, artist: a.displayArtist || a.igUsername || null, type: a.audioType, durationMs: a.durationInMs,
+            artwork: a.coverArtworkThumbnailUrl || a.profilePictureUrl || null, preview: a.downloadUrl || null, adsEligible: a.isAdsEligible ?? null,
+          })),
+        };
+      } catch (err) {
+        const msg = String((err as Error).message || '');
+        if (/facebook|login|permission|not supported|403/i.test(msg)) {
+          throw new UserError('Trending audio needs the Instagram account reconnected in Zernio with “Facebook Login” (Zernio → Accounts → Instagram → Reconnect).');
+        }
+        throw err;
+      }
+    }
+
+    case 'limit': {
+      const accounts = await ourAccounts();
+      const ig = accounts.find((a: any) => a.platform === 'instagram');
+      if (!ig) throw new UserError('Instagram isn’t connected in Zernio.');
+      const out = await zernio(`/accounts/${encodeURIComponent(ig.id)}/instagram/publishing-limit`);
+      return { used: out.quotaUsage ?? null, total: out.quotaTotal ?? null, windowSeconds: out.quotaDurationSeconds ?? null };
     }
 
     case 'update': {
