@@ -109,6 +109,9 @@ html {
   font-size: 16px;
 }
 
+/* Every page is locked to the screen's width: nothing can push it sideways on a phone. */
+#root { overflow-x: clip; max-width: 100%; }
+
 body {
   font-family: var(--font-body);
   background-color: var(--surface);
@@ -465,6 +468,10 @@ body { -webkit-tap-highlight-color: transparent; }
 /* Leave room for the floating tab bar on phones. */
 @media (max-width: 1023px) {
   .app-container { padding-bottom: calc(var(--tb-h, 64px) + 20px + env(safe-area-inset-bottom)); }
+  /* Pages that end in the dark footer: the footer itself runs down behind the tab bar,
+     so there's no pale strip under it. */
+  .app-container:has(> .ft) { padding-bottom: 0; }
+  .app-container > .ft { padding-bottom: calc(28px + var(--tb-h, 64px) + 20px + env(safe-area-inset-bottom)); }
 }
 
 /* Inputs never trigger iOS zoom. */

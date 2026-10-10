@@ -11,7 +11,7 @@ import { collectivePortal, hrefFor } from '../lib/site';
 import { useRoles } from '../lib/roles';
 import './Navbar.css';
 
-import logoPath from '../assets/web/logo-160.webp';
+import logoPath from '../assets/web/p31-mark-192.webp';
 import { JOIN_PATH } from '../lib/academy';
 
 const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';

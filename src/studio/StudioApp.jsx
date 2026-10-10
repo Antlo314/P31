@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useRoles } from '../lib/roles';
 import DashShell from '../apps/DashShell';
 import { StudioOverview, StudioCalendar, StudioCompose, StudioInbox, StudioComments, StudioCreate } from './pages';
-import logo from '../assets/web/logo-160.webp';
+import logo from '../assets/web/p31-mark-192.webp';
 import '../pages/Login.css';
 import './studio.css';
 

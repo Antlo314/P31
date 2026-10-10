@@ -85,6 +85,10 @@
 
 /* ── MISSION ─────────────────────────────────────────────── */
 .h26-mission__media { max-width: 480px; width: 100%; justify-self: center; }
+/* The mission film is framed tight to her head: sit it lower in the arch (whole figure, feet on
+   the bottom edge) and fill the space above with the film's own white so the head is never cut. */
+.h26-mission__media { background: #fefefe; }
+.h26-mission__media video { top: auto; bottom: 0; height: 89%; object-fit: contain; object-position: center bottom; }
 .h26-tags { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .h26-tags li {
   padding: 8px 14px; border-radius: 999px; font-size: 0.85rem; font-weight: 700;

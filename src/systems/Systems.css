@@ -92,7 +92,7 @@
 .sys-side__me .sys-side__actions { display: flex; gap: 6px; }
 
 /* ── Page furniture ─────────────────────────────────────── */
-.sys-page { display: grid; gap: 16px; max-width: 1100px; margin-inline: auto; }
+.sys-page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; max-width: 1100px; margin-inline: auto; }
 .sys-page__head h1 {
   font-family: var(--font-heading); font-weight: 400;
   font-size: clamp(1.8rem, 1.3rem + 2vw, 2.6rem); line-height: 1.1; margin: 0; text-wrap: balance;
@@ -228,7 +228,8 @@
 .sys-result__main { flex: 1; min-width: 0; display: grid; gap: 6px; }
 .sys-result h3 { margin: 0; font-family: var(--font-body); font-size: 1rem; font-weight: 800; overflow-wrap: anywhere; }
 .sys-result p { margin: 0; font-size: 0.88rem; color: var(--sys-dim); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.sys-result__meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; color: var(--sys-dim); }
+.sys-result__meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; color: var(--sys-dim); min-width: 0; }
+.sys-result__meta > * { min-width: 0; overflow-wrap: anywhere; }
 .sys-result__meta a { display: inline-flex; align-items: center; gap: 3px; color: var(--sys-gold); font-weight: 700; }
 
 /* Social */

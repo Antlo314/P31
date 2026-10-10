@@ -25,3 +25,13 @@
 /* Phones: every page opens with a full-size Join button, so the bar keeps just the logo and Sign in. */
 @media (max-width: 599px) { .cl-nb .cl-nb__join { display: none; } }
 .cl-ft__join { margin-top: 4px; justify-self: start; width: fit-content; }
+
+/* ── Collective pages on phones ─────────────────────────────
+   Calls to action stack at one full width (no ragged button sizes),
+   and sections sit closer together so pages read as one flow. */
+@media (max-width: 599px) {
+  .cl-site .k-section { padding-block: 56px; }
+  .cl-site .k-section--tight { padding-block: 36px; }
+  .cl-site .k-actions { flex-direction: column; align-items: stretch; }
+  .cl-site .k-actions > .k-btn { width: 100%; }
+}

@@ -106,12 +106,12 @@
 @media (min-width: 760px) and (max-width: 1099px) { .ds-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .ds-grid > * { min-width: 0; }
 
-.ds-card { display: grid; gap: 12px; align-content: start; padding: 20px; border-radius: var(--r-lg); background: var(--ds-panel); border: 1px solid var(--ds-line); box-shadow: var(--shadow-1); }
+.ds-card { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 12px; align-content: start; padding: 20px; border-radius: var(--r-lg); background: var(--ds-panel); border: 1px solid var(--ds-line); box-shadow: var(--shadow-1); }
 .ds--dark .ds-card { box-shadow: none; }
 .ds-card h2, .ds-card h3 { margin: 0; font-family: var(--font-heading); font-weight: 400; color: var(--ds-ink); }
 .ds-card h2 { font-size: 1.4rem; }
 .ds-card h3 { font-size: 1.15rem; }
-.ds-card__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ds-card__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
 .ds-card__head h2 { display: flex; align-items: center; gap: 8px; }
 .ds-card p { margin: 0; color: var(--ds-ink-2); }
 .ds-card--night { background: var(--night-bg); border-color: transparent; color: #fff; }
@@ -126,7 +126,7 @@
 .ds--dark .ds-stat strong { color: var(--gold-hi); }
 .ds-stat span { font-size: 0.8rem; font-weight: 700; color: var(--ds-ink-3); }
 
-.ds-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ds-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .ds-row {
   display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r-md);
   background: var(--ds-panel); border: 1px solid var(--ds-line); color: var(--ds-ink); text-decoration: none; min-width: 0;
