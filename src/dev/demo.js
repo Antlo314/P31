@@ -215,6 +215,48 @@ const makeDb = () => ({
     { email: 'davinci@example.com', full_name: 'Sample DaVinci Editor', tools: ['davinci'], note: 'Sample', created_at: day(-2) },
     { email: 'studio@example.com', full_name: 'Sample Studio Seat', tools: ['studio'], note: 'Sample', created_at: day(-1) },
   ],
+  email_threads: [
+    { id: 'et-1', mailbox: 'collective', subject: 'Question about joining', contact_email: 'sample.applicant@example.com', contact_name: 'Sample Applicant', status: 'needs_reply', category: 'applicant', summary: 'Applied last week; asks when she will hear back and whether she can attend the next meetup.', needs_human: false, human_reason: null,
+      draft: `Hi there,
+
+Thank you so much for applying to join the P31 Collective. Our team reviews every application personally, and you will receive the final step by email once yours has been reviewed.
+
+In the meantime, you are always welcome to follow along at https://www.thep31collective.org.
+
+Warmly,
+Carla
+The P31 Collective`, draft_at: iso(-30), last_message_at: iso(-35), last_from_contact: true, created_at: iso(-35) },
+    { id: 'et-2', mailbox: 'market', subject: 'Refund for my booth?', contact_email: 'sample.vendor@example.com', contact_name: 'Sample Vendor', status: 'needs_reply', category: 'vendor', summary: 'Vendor asking about a booth refund after missing the last market.', needs_human: true, human_reason: 'Refund request',
+      draft: `Hi there,
+
+Thank you for reaching out, and I am sorry you could not make it. I have passed your note to our team, and someone will follow up with you personally about your booth.
+
+Warmly,
+Carla
+Proverbs 31 Marketplace`, draft_at: iso(-100), last_message_at: iso(-110), last_from_contact: true, created_at: iso(-110) },
+    { id: 'et-3', mailbox: 'collective', subject: 'Re: Welcome!', contact_email: 'sample.member@example.com', contact_name: 'Sample Member', status: 'sent', category: 'member', summary: 'Member saying thank you.', needs_human: false, draft: null, last_message_at: day(-1), last_from_contact: false, created_at: day(-2) },
+  ],
+  email_messages: [
+    { id: 'em-1', thread_id: 'et-1', direction: 'in', from_email: 'sample.applicant@example.com', from_name: 'Sample Applicant', subject: 'Question about joining', body_text: `Hello! I applied to join last week. When will I hear back, and can I come to the next meetup?
+
+Thank you,
+Sample`, attachments: [], created_at: iso(-35) },
+    { id: 'em-2', thread_id: 'et-2', direction: 'in', from_email: 'sample.vendor@example.com', from_name: 'Sample Vendor', subject: 'Refund for my booth?', body_text: 'Hi, I missed the last market because I was sick. Can I get my booth fee back or move it to the next one?', attachments: [{ filename: 'receipt.pdf' }], created_at: iso(-110) },
+    { id: 'em-3', thread_id: 'et-3', direction: 'in', from_email: 'sample.member@example.com', from_name: 'Sample Member', subject: 'Welcome!', body_text: 'Thank you so much for the warm welcome!', attachments: [], created_at: day(-2) },
+    { id: 'em-4', thread_id: 'et-3', direction: 'out', from_email: 'members@thep31collective.org', from_name: 'The P31 Collective', subject: 'Re: Welcome!', body_text: `We are so glad you are here!
+
+Warmly,
+Carla
+The P31 Collective`, attachments: [], created_at: day(-1) },
+  ],
+  content_plan: [
+    { id: 'cp-1', post_date: day(2).slice(0, 10), post_time: '18:00:00', platforms: ['instagram', 'facebook'], kind: 'reel', pillar: 'Market countdown', theme: 'Setting up the Winter Gala', hook: 'Two weeks until the Gala', caption: 'Sample caption: the room is almost ready.', hashtags: '#p31market #atlantamarkets', first_comment: null, media: [], audio_id: null, audio_title: null, status: 'draft', notes: null, created_at: day(-1) },
+    { id: 'cp-2', post_date: day(5).slice(0, 10), post_time: '12:00:00', platforms: ['instagram'], kind: 'photo', pillar: 'Curator spotlight', theme: 'Sample curator spotlight', hook: 'Meet the maker', caption: 'Sample caption about a candle maker.', hashtags: '#womenowned #handmade', first_comment: 'Shop her storefront: link in bio', media: [], audio_id: null, audio_title: null, status: 'approved', notes: null, created_at: day(-1) },
+    { id: 'cp-3', post_date: day(9).slice(0, 10), post_time: '19:00:00', platforms: ['instagram', 'facebook'], kind: 'reel', pillar: 'Faith & encouragement', theme: 'Monday encouragement', hook: 'She is clothed with strength', caption: 'Sample caption with Proverbs 31:25.', hashtags: '#proverbs31', first_comment: null, media: [], audio_id: 'demo-audio-1', audio_title: 'Sample Track · Sample Artist', status: 'scheduled', notes: null, scheduled_for: day(9, 19), created_at: day(-2) },
+  ],
+  sound_board: [
+    { id: 'sb-1', audio_id: 'demo-audio-1', title: 'Sample Track', artist: 'Sample Artist', audio_type: 'music', duration_ms: 31000, artwork_url: null, mood: 'uplifting', note: 'Good for countdowns', trending_seen_at: day(-1), used_count: 2, created_at: day(-3) },
+  ],
   vendor_applications: [
     { id: 'va-1', serious: 'Yes', full_name: 'Sample Vendor', business_name: 'Sample Candle Co.', email: 'vendor1@example.com', phone: '(470) 555-0161', website_social: '@samplecandles', referred_by: null, categories: ['Candles & Home fragrance'], notes: 'Sample application.', agreed: true, status: 'new', review_notes: null, created_at: iso(-200) },
     { id: 'va-2', serious: 'Yes', full_name: 'Sample Maker', business_name: 'Sample Crafts', email: 'vendor2@example.com', phone: '(470) 555-0162', website_social: 'samplecrafts.com', referred_by: 'Sample Vendor', categories: ['Handmade crafts, baskets & gifts', 'Art, Painting, Photography'], notes: null, agreed: true, status: 'approved', review_notes: 'Booth 4', created_at: day(-6) },
@@ -226,7 +268,11 @@ const makeDb = () => ({
   ],
   curator_data: [{ id: 'cu1', business_name: 'Sample Bakery Co.', status: 'pending', created_at: day(-1), profiles: { full_name: 'Sample Curator' } }],
   campaigns: [{ id: 'cm1', subject: 'The Winter Gala is coming', body: 'Save the date…', audience: 'subscribers', status: 'draft', created_at: day(-1) }],
-  market_events: [{ id: 'ev1', title: 'Winter Gala', event_date: day(70).slice(0, 10), date_public: false, is_active: true, venue: null, capacity: 150 }],
+  market_events: [{ id: 'ev1', title: 'Winter Gala', event_date: day(70).slice(0, 10), date_public: true, is_active: true, venue: 'Embassy Suites Gwinnett', capacity: 150, lineup_public: true }],
+  event_vendors: [
+    { id: 'evv-1', event_id: 'ev1', application_id: 'va-2', business_name: 'Sample Crafts', contact_name: 'Sample Maker', email: 'vendor2@example.com', website_social: 'samplecrafts.com', categories: ['Handmade crafts, baskets & gifts'], booth: 'A4', status: 'paid', is_public: true, notes: null, created_at: day(-3) },
+    { id: 'evv-2', event_id: 'ev1', application_id: null, business_name: 'Sample Candle Co.', contact_name: 'Sample Vendor', email: 'vendor1@example.com', website_social: '@samplecandles', categories: ['Candles & Home fragrance'], booth: 'B2', status: 'confirmed', is_public: true, notes: null, created_at: day(-2) },
+  ],
 });
 
 const rpc = {
@@ -249,6 +295,11 @@ const rpc = {
     last_body: ['Thank you!! See you Monday at 7.', 'Got it — working on it tonight.', 'Can we move our 1:1 to Friday?'][i], last_at: iso(-120 - i * 300), last_from_student: i !== 1,
   })),
   academy_awaiting_review: () => 2,
+  event_lineup: () => [
+    { business_name: 'Sample Crafts', website_social: 'samplecrafts.com', categories: ['Handmade crafts, baskets & gifts'], booth: 'A4' },
+    { business_name: 'Sample Candle Co.', website_social: '@samplecandles', categories: ['Candles & Home fragrance'], booth: 'B2' },
+  ],
+  lineup_add_application: () => 'evv-new',
   academy_progress_summary: (a) => ({ lessons_done: 4, lessons_total: 6, assignments_passed: 2, assignments_total: a.p_user && a.p_user !== 'u-s1' ? 2 : 3, quizzes_passed: 1, quizzes_total: 2, sessions_attended: 4, sessions_total: 4, custom_checked: [] }),
   academy_call_report: () => [
     { user_id: 'u-s1', full_name: 'Danielle Brooks', email: 'danielle@example.com', joins: 1, first_join: day(-6, 19, 1), last_leave: day(-6, 20), minutes: 59, attendance: 'present' },
@@ -279,9 +330,28 @@ const fns = {
     ] };
     if (b.action === 'comments') return { posts: (studio.posts.published[0]?.posts || []).slice(0, 5).map((p, i) => ({ id: p.id, accountId: 'ig', platform: 'instagram', text: p.message, picture: p.picture, comments: [3, 1, 4, 2, 0][i], at: p.createdTime, permalink: p.permalink })) };
     if (b.action === 'postComments') return { comments: [{ id: 'cm1', text: 'Can’t wait! 🤍', from: 'sample.follower', at: iso(-60), likes: 2, replies: 1 }] };
+    if (b.action === 'audio') return { trending: !b.q, audio: [
+      { id: 'demo-audio-1', title: 'Sample Track', artist: 'Sample Artist', type: 'music', durationMs: 31000, artwork: null, preview: null },
+      { id: 'demo-audio-2', title: 'Another Sample', artist: 'Sample Band', type: 'music', durationMs: 28000, artwork: null, preview: null },
+    ] };
+    if (b.action === 'limit') return { used: 3, total: 100, windowSeconds: 86400 };
+    if (b.action === 'create') return { post: { id: 'demo-post', scheduledFor: b.scheduledFor, status: 'scheduled', platforms: (b.platforms || []).map((p) => ({ platform: p, status: 'scheduled' })) } };
     return {};
   },
+  'ai-assist': (b) => {
+    if (b.task === 'post_pack') return { options: [JSON.stringify({ hooks: ['Two weeks until the Gala', 'The room is almost ready', 'You have to see this'], captions: ['Sample caption one.', 'Sample caption two.', 'Sample caption three.'], hashtags: ['#p31market', '#atlantamarkets', '#womenowned'], first_comment: 'Save your spot: link in bio', best_time: 'Evenings midweek tend to do best (sample).' })] };
+    if (b.task === 'month_plan') return { options: [JSON.stringify([{ day: 3, kind: 'reel', pillar: 'Market countdown', theme: 'Sample idea', hook: 'Sample hook', caption: 'Sample caption', hashtags: '#sample' }, { day: 10, kind: 'photo', pillar: 'Curator spotlight', theme: 'Sample idea two', hook: 'Sample hook two', caption: 'Sample caption two', hashtags: '#sample' }])] };
+    return { options: ['Sample draft one.', 'Sample draft two.'] };
+  },
   'daily-room': () => ({ error: 'Demo mode — live rooms open on the real site.' }),
+  'email-send': (b) => (b.action === 'redraft'
+    ? { ok: true, draft: { reply: `Hi there,
+
+(Demo) Carla rewrote this${b.instruction ? `: ${b.instruction}` : ''}.
+
+Warmly,
+Carla`, category: 'general', summary: 'Demo', needs_human: false, reason: '' } }
+    : { ok: true }),
 };
 
 // ── A tiny query builder that answers like Supabase ─────────

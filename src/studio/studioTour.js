@@ -12,6 +12,11 @@ export const STUDIO_TOUR = [
     body: 'Followers, reach and engagement for the last 30 days, plus the best times to post (Eastern). Glance at it at the start of the week before you plan.',
   },
   {
+    to: '/studio/planner', targets: at('/studio/planner'),
+    title: 'Planner: months ahead',
+    body: 'The social calendar. Tap “Plan this month with AI” for a month of ideas spread across the pillars, or add a day yourself. Each post gets a hook, caption and hashtags drafted for you; pick a trending track for reels; approve it, and “Schedule it” sends it to Instagram and Facebook for that day.',
+  },
+  {
     to: '/studio/calendar', targets: at('/studio/calendar'),
     title: 'Calendar: what’s going out',
     body: 'Every scheduled post in order, and how recent posts performed. Open a scheduled post to change or delete it before it goes out.',
@@ -37,12 +42,17 @@ export const STUDIO_TOUR = [
     body: 'Your recent posts with their comments, so you can see what people are saying in one place. Reply from the app.',
   },
   {
+    to: '/studio/email', targets: at('/studio/email'),
+    title: 'Email: Carla drafts, you send',
+    body: 'Everything sent to members@ and vendor@ lands here with a reply Carla already drafted. Read it, edit anything, or ask her to rewrite it ("shorter", "mention the gala"), then tap Send. Nothing goes out without you. The orange flag means a person needs to answer it properly.',
+  },
+  {
     title: 'The fast-post routine',
     list: [
       'Film a short moment on your phone.',
       'Creative tools: cut it into a captioned clip with the P31 look.',
       'Send it to Create post, write the caption, pick a suggested time, schedule.',
-      'Once a day, check Messages and Comments.',
+      'Once a day, answer Email, then check Messages and Comments.',
     ],
     body: 'That’s it. Replay this walkthrough any time from the ? button at the top.',
   },

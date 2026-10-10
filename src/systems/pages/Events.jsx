@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, CalendarClock, Eye, EyeOff, Users, Download, Pencil, X, Check, Ticket } from 'lucide-react';
+import { Plus, CalendarClock, Eye, EyeOff, Users, Download, Pencil, X, Check, Ticket, Store } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import EventLineup from './EventLineup';
 import { formatEventDate } from '../../lib/events';
 
 const blank = {
@@ -21,6 +22,7 @@ const Events = () => {
   const [regs, setRegs] = useState([]);
   const [editing, setEditing] = useState(null); // event object or blank
   const [viewing, setViewing] = useState(null); // event id for registrations
+  const [lineupFor, setLineupFor] = useState(null); // event id whose vendor lineup is open
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
 
@@ -126,7 +128,9 @@ const Events = () => {
             <Users size={15} /> {c.confirmed} going{ev.capacity ? ` of ${ev.capacity}` : ''}{c.waitlist ? ` · ${c.waitlist} waitlist` : ''}
           </button>
           {c.confirmed + c.waitlist > 0 && <button className="sys-linkbtn" onClick={() => exportCsv(ev)}><Download size={15} /> CSV</button>}
+          <button className="sys-linkbtn" onClick={() => setLineupFor(lineupFor === ev.id ? null : ev.id)}><Store size={15} /> Lineup{ev.lineup_public ? ' · public' : ''}</button>
         </div>
+        {lineupFor === ev.id && <EventLineup event={ev} onEventChanged={(patch) => quick(ev, patch)} />}
         {viewing === ev.id && (
           <ul className="sys-list sys-event__regs">
             {regs.filter((r) => r.event_id === ev.id).map((r) => (

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>P31 Brand Kit</title>
+<style>
+  @page { size: Letter; margin: 0.5in 0.55in; }
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; src: url(../../public/fonts/NotoSerif-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; font-style: italic; src: url(../../public/fonts/NotoSerif-400-italic.woff2) format('woff2'); }
+  @font-face { font-family: 'Noto Serif'; font-weight: 700; src: url(../../public/fonts/NotoSerif-700.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 400; src: url(../../public/fonts/Manrope-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 600; src: url(../../public/fonts/Manrope-600.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 800; src: url(../../public/fonts/Manrope-800.woff2) format('woff2'); }
+  :root { --plum: #5E2A8C; --night: #1d0f2e; --deep: #2a1544; --gold: #D9A93A; --gold-hi: #F2CE4D; --ivory: #FCFBFE; --mist: #F5F1FB; --ink: #201431; --ink2: #4A3B5C; --line: #E7DCF4; --amethyst: #A855E8; --emerald: #17A673; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 10.2pt/1.45 Manrope, Arial, sans-serif; color: var(--ink); background: #fff; }
+  .page { page-break-after: always; min-height: 9.6in; }
+  .page:last-child { page-break-after: auto; }
+  .cover { position: relative; overflow: hidden; border-radius: 18px; padding: 54px 48px; color: #fff; min-height: 9.6in; background: radial-gradient(700px 500px at 90% 10%, rgba(242,206,77,0.22), transparent 60%), linear-gradient(135deg, #4a1f78, #2a1544 55%, #1d0f2e); display: grid; align-content: space-between; }
+  .cover .arch { position: absolute; left: 50%; bottom: -200px; width: 760px; height: 560px; transform: translateX(-50%); border: 1px solid rgba(242,206,77,0.25); border-bottom: 0; border-radius: 380px 380px 0 0; }
+  .cover img { width: 190px; height: 190px; filter: drop-shadow(0 16px 30px rgba(0,0,0,0.35)); }
+  .eyebrow { margin: 0 0 8px; font-size: 8.4pt; font-weight: 800; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold-hi); }
+  h1 { margin: 0; font: 400 40pt/1.02 'Noto Serif', Georgia, serif; letter-spacing: -0.02em; }
+  h1 em, h2 em { font-style: italic; color: var(--gold-hi); }
+  h2 { margin: 0 0 6px; font: 400 21pt/1.1 'Noto Serif', Georgia, serif; color: var(--plum); }
+  h2 em { color: var(--gold); }
+  h3 { margin: 16px 0 6px; font-size: 11.5pt; font-weight: 800; }
+  p { margin: 0 0 8px; color: var(--ink2); }
+  .lead { font-size: 12pt; color: rgba(255,255,255,0.82); max-width: 32em; }
+  .meta { display: flex; gap: 24px; font-size: 9pt; color: rgba(255,255,255,0.7); }
+  .grid { display: grid; gap: 14px; }
+  .g2 { grid-template-columns: 1fr 1fr; } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
+  .card { border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .card.dark { background: var(--night); color: #fff; border-color: transparent; }
+  .card.dark p { color: rgba(255,255,255,0.75); }
+  .logo-tile { display: grid; place-items: center; height: 150px; border-radius: 14px; }
+  .logo-tile img { height: 108px; }
+  .sw { height: 86px; border-radius: 12px; display: grid; align-content: end; padding: 10px; color: #fff; font-weight: 800; font-size: 9pt; }
+  .sw small { display: block; font-weight: 600; opacity: 0.85; font-family: ui-monospace, Consolas, monospace; letter-spacing: 0.04em; }
+  .sw.light { color: var(--ink); border: 1px solid var(--line); }
+  .type-sample { display: grid; gap: 4px; }
+  .serif { font-family: 'Noto Serif', Georgia, serif; }
+  .do, .dont { padding: 10px 12px; border-radius: 10px; font-size: 9.4pt; }
+  .do { background: #eaf7f1; color: #0f5d3f; } .dont { background: #fdecec; color: #8a1f1f; }
+  ul { margin: 4px 0 0; padding-left: 18px; color: var(--ink2); } li { margin: 2px 0; }
+  .clear { position: relative; display: grid; place-items: center; height: 170px; border: 1px dashed var(--line); border-radius: 14px; }
+  .clear img { height: 90px; }
+  .clear span { position: absolute; font-size: 8pt; color: var(--ink2); }
+  .foot { margin-top: 22px; font-size: 8.4pt; color: var(--ink2); border-top: 1px solid var(--line); padding-top: 8px; }
+</style>
+</head>
+<body>
+
+<section class="page cover">
+  <span class="arch"></span>
+  <div><img src="mark.png" alt="" /></div>
+  <div>
+    <p class="eyebrow">Proverbs 31 Marketplace · The Proverbs 31 Collective by NEBA</p>
+    <h1>Brand <em>kit</em></h1>
+    <p class="lead">One mark, two doors. How the P31 brand looks, sounds and holds together across the marketplace, the Collective, social media and print.</p>
+  </div>
+  <div class="meta"><span>Version 1 · October 2026</span><span>p31market.com · thep31collective.org</span></div>
+</section>
+
+<section class="page">
+  <p class="eyebrow">01 · The mark</p>
+  <h2>Two hands, <em>one circle</em></h2>
+  <p>The hands are the whole story: one lifting, one receiving, inside a ring that is never closed. Plum for the hand that gives, gold for the hand that is raised. It is the single brand mark for everything P31 does.</p>
+  <div class="grid g4" style="margin-top:14px">
+    <div class="card" style="padding:6px"><div class="logo-tile" style="background:#fff"><img src="mark.png" alt="" /></div><p style="margin:8px 6px 4px"><b>Full color</b><br />On white, ivory and photos</p></div>
+    <div class="card" style="padding:6px"><div class="logo-tile" style="background:var(--night)"><img src="mark.png" alt="" /></div><p style="margin:8px 6px 4px"><b>Full color on night</b><br />Dark sections, video end cards</p></div>
+    <div class="card" style="padding:6px"><div class="logo-tile" style="background:var(--plum)"><img src="mark-white.png" alt="" /></div><p style="margin:8px 6px 4px"><b>White</b><br />On plum, gold or busy photos</p></div>
+    <div class="card" style="padding:6px"><div class="logo-tile" style="background:var(--ivory)"><img src="mark-plum.png" alt="" /></div><p style="margin:8px 6px 4px"><b>Plum</b><br />Single-color print, stamps, embroidery</p></div>
+  </div>
+  <div class="grid g2" style="margin-top:14px">
+    <div>
+      <h3>Clear space and size</h3>
+      <div class="clear"><img src="mark.png" alt="" /><span style="top:8px">keep a space the width of the gold hand's thumb on every side</span><span style="bottom:8px">smallest: 24 px on screen · 0.4 in in print</span></div>
+    </div>
+    <div>
+      <h3>App icon and favicon</h3>
+      <div class="grid g3">
+        <div class="logo-tile" style="height:100px;background:var(--mist)"><img src="icon-1024.png" style="height:84px;border-radius:18px" alt="" /></div>
+        <div class="logo-tile" style="height:100px;background:var(--mist)"><img src="avatar-1024.png" style="height:84px;border-radius:50%" alt="" /></div>
+        <div class="logo-tile" style="height:100px;background:var(--mist)"><img src="icon-1024.png" style="height:32px;border-radius:7px" alt="" /></div>
+      </div>
+      <p style="margin-top:8px">The mark sits on a plum-to-night tile for icons and profile pictures, so it reads at 32 px. Use the round version for Instagram, Facebook, Google and email avatars.</p>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="do"><b>Do</b> use the mark exactly as supplied · give it room · put it on plum, night, ivory, white or a calm photo · use white on busy backgrounds.</div>
+    <div class="dont"><b>Don't</b> stretch, rotate or recolor it · add drop shadows or outlines · place it over text · redraw the hands · use the old emblems next to it.</div>
+  </div>
+</section>
+
+<section class="page">
+  <p class="eyebrow">02 · Color</p>
+  <h2>Plum, gold and <em>ivory</em></h2>
+  <p>Plum is the lead. Gold is the accent, used sparingly, where the eye should land. Ivory is the ground on the marketplace; night is the ground on the Collective and in video.</p>
+  <div class="grid g4" style="margin-top:12px">
+    <div class="sw" style="background:#5E2A8C">Royal plum<small>#5E2A8C</small></div>
+    <div class="sw" style="background:#2a1544">Deep plum<small>#2A1544</small></div>
+    <div class="sw" style="background:#1d0f2e">Night<small>#1D0F2E</small></div>
+    <div class="sw" style="background:#A855E8">Amethyst<small>#A855E8</small></div>
+    <div class="sw" style="background:#D9A93A;color:#2a1a00">Gold<small>#D9A93A</small></div>
+    <div class="sw" style="background:#F2CE4D;color:#2a1a00">Gold light<small>#F2CE4D</small></div>
+    <div class="sw light" style="background:#FCFBFE">Ivory<small>#FCFBFE</small></div>
+    <div class="sw light" style="background:#F5F1FB">Mist<small>#F5F1FB</small></div>
+    <div class="sw" style="background:#17A673">Emerald · success<small>#17A673</small></div>
+    <div class="sw light" style="background:#ECDDFA">Thistle · tint<small>#ECDDFA</small></div>
+    <div class="sw light" style="background:#E7DCF4">Line<small>#E7DCF4</small></div>
+    <div class="sw" style="background:#201431">Ink · text<small>#201431</small></div>
+  </div>
+  <h3>Pairings that always work</h3>
+  <ul>
+    <li>Ivory page · ink text · plum headings · gold for one accent per screen (a button, a line, an italic word).</li>
+    <li>Night section · white text · gold-light accent · plum only as a soft glow or gradient.</li>
+    <li>Gold buttons carry dark text (#2A1A00). Plum buttons carry white. Never gold text on plum below 18 pt.</li>
+  </ul>
+
+  <p class="eyebrow" style="margin-top:22px">03 · Type</p>
+  <h2>Noto Serif and <em>Manrope</em></h2>
+  <div class="grid g2">
+    <div class="card type-sample">
+      <span class="serif" style="font-size:26pt;line-height:1.05;color:var(--plum)">Where her gifts <em style="color:var(--gold)">make room.</em></span>
+      <p><b>Noto Serif</b> for headlines and pull quotes. Regular weight, tight line height, one italic word in gold for emphasis. Never bold headlines; the italic does the work.</p>
+    </div>
+    <div class="card type-sample">
+      <span style="font-size:11pt;font-weight:800;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold)">Eyebrow label</span>
+      <span style="font-size:11.5pt;font-weight:600">Body copy in Manrope, 15–17 px on screen, comfortable line height.</span>
+      <p><b>Manrope</b> for everything else: body, buttons (800 weight), labels (uppercase, letter-spaced), numbers. Buttons are pills with no borders.</p>
+    </div>
+  </div>
+</section>
+
+<section class="page">
+  <p class="eyebrow">04 · Voice</p>
+  <h2>Warm, elegant, <em>confident</em></h2>
+  <div class="grid g2">
+    <div class="card">
+      <h3 style="margin-top:0">How we sound</h3>
+      <ul>
+        <li>Faith-rooted without preaching. All are welcome.</li>
+        <li>Celebrates the woman and her craft. Specific over clever.</li>
+        <li>Short sentences. Plain words. One idea at a time.</li>
+        <li>Scripture with care: KJV, quoted exactly, one verse at most. Anchor: Proverbs 31:31.</li>
+        <li>We never invent prices, dates or claims. If it's not confirmed, we don't say it.</li>
+      </ul>
+    </div>
+    <div class="card dark">
+      <h3 style="margin-top:0;color:#F2CE4D">Lines we return to</h3>
+      <p class="serif" style="font-size:13pt;color:#fff">“Where her gifts make room.”</p>
+      <p class="serif" style="font-size:13pt;color:#fff">“Heal. Rise. Build. Prosper God’s way.”</p>
+      <p class="serif" style="font-size:11pt;color:#fff">“Give her of the fruit of her hands; and let her own works praise her in the gates.” — Proverbs 31:31</p>
+    </div>
+  </div>
+  <h3>Names, written the same way every time</h3>
+  <ul>
+    <li><b>Proverbs 31 Marketplace</b> (short: P31, P31 Marketplace) · <b>The Proverbs 31 Collective by NEBA</b> (short: the Collective, P31 Collective) · vendors are <b>curators</b> on the marketplace.</li>
+    <li><b>Melanie JC</b>, Founder &amp; CEO. Carla is the virtual assistant (DMs, comments, email drafts).</li>
+  </ul>
+
+  <p class="eyebrow" style="margin-top:22px">05 · Social and video</p>
+  <h2>Reels that <em>hold</em></h2>
+  <div class="grid g3">
+    <div class="card"><h3 style="margin-top:0">The first 2 seconds</h3><p>A hook on screen in big words: a promise, a question or a number. No intros, no logos first. Cut or change the shot every 1.5–3 seconds.</p></div>
+    <div class="card"><h3 style="margin-top:0">Captions on, safe zone</h3><p>Captions always on, inside the safe zone (clear of the bottom 22% and right 10% where Instagram draws its own buttons). Bold caps or karaoke styles for energy, serif italic for story.</p></div>
+    <div class="card"><h3 style="margin-top:0">Caption copy</h3><p>Hook first, keywords people search, "link in bio" on Instagram, 3–5 specific hashtags. Post when the audience is active (Studio shows the best times), then reply fast.</p></div>
+  </div>
+  <div class="grid g3" style="margin-top:12px">
+    <div class="sw" style="background:#1d0f2e;height:64px">Profile picture<small>round tile, mark centered</small></div>
+    <div class="sw" style="background:#5E2A8C;height:64px">Reel end card<small>night → plum gradient, gold line, URL</small></div>
+    <div class="sw light" style="background:#FCFBFE;height:64px">Feed photo<small>4:5, ivory space, one gold accent</small></div>
+  </div>
+  <p class="foot">Files: marketing/brand (mark.png, mark-white.png, mark-plum.png, mark-gold.png, icon-1024.png, avatar-1024.png, og.html) · public/icons and public/c/icons (favicons and app icons) · public/fonts (Noto Serif, Manrope). Keep this kit next to the site; update it when the brand changes.</p>
+</section>
+
+</body>
+</html>

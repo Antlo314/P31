@@ -214,6 +214,7 @@
   .h26-marquee__track, .h26-pulse, .h26-scroll { animation: none; }
 }
 
+.h26-hero__nextwrap { min-height: 36px; }
 .h26-hero__next { text-transform: none; letter-spacing: 0.01em; font-size: 0.8rem; font-weight: 700; padding: 8px 14px; max-width: 100%; }
 
 /* Far above rubies — the 3D gem band */

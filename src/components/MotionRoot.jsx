@@ -68,6 +68,9 @@ const MotionRoot = () => {
 
     const root = document.querySelector('.site-main') || document.body;
     const seen = new WeakSet();
+    // On a slow connection the prerendered page has been readable for a while before this runs:
+    // skip the entrance animations rather than blink the content out and back in.
+    const late = performance.now() > 2200;
     const groups = new Map(); // element → { entered }
     const ctx = gsap.context(() => {});
 
@@ -77,10 +80,11 @@ const MotionRoot = () => {
     const fresh = (sel) => [...root.querySelectorAll(sel)].filter((el) => !seen.has(el) && seen.add(el));
 
     const scan = () => ctx.add(() => {
-      fresh('[data-intro]').forEach((el) => play(el, 'up', { delay: 0.15 + (parseFloat(el.dataset.intro) || 0), duration: 1.2 }));
+      fresh('[data-intro]').forEach((el) => (late ? el.classList.add('is-in') : play(el, 'up', { delay: 0.15 + (parseFloat(el.dataset.intro) || 0), duration: 1.2 })));
 
       fresh('[data-split]').forEach((el) => {
         const intro = el.dataset.split === 'intro';
+        if (intro && late) { el.classList.add('is-in'); return; }
         SplitText.create(el, {
           type: 'lines', mask: 'lines', linesClass: 'k-line', autoSplit: true,
           onSplit(self) {

@@ -4,6 +4,27 @@ import { supabase } from '../lib/supabase';
 import { fetchUpcomingEvents, parseEventDate, formatEventDate, showDate } from '../lib/events';
 import PageHeader from '../components/PageHeader';
 import { openJoin } from '../lib/join';
+
+// Who's vending: shown once the team publishes the lineup for a market.
+const Lineup = ({ eventId }) => {
+  const [rows, setRows] = useState(null);
+  useEffect(() => { supabase.rpc('event_lineup', { p_event: eventId }).then(({ data }) => setRows(data || [])); }, [eventId]);
+  if (!rows?.length) return null;
+  return (
+    <div className="cal-lineup" data-reveal>
+      <p className="k-eyebrow">Vendors at this market · {rows.length}</p>
+      <ul>
+        {rows.map((v) => (
+          <li key={v.business_name}>
+            <strong>{v.business_name}</strong>
+            {v.booth && <span className="cal-lineup__booth">Booth {v.booth}</span>}
+            {(v.categories || []).length > 0 && <small>{v.categories.join(' · ')}</small>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 import './Calendar.css';
 
 import featuredImg from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
@@ -198,6 +219,7 @@ const Calendar = () => {
                   </a>
                 )}
               </div>
+              <Lineup eventId={next.id} />
             </div>
           </article>
         )}

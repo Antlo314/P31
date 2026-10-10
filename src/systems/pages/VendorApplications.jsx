@@ -98,7 +98,19 @@ const VendorApplication = ({ app, onBack }) => {
     if (!error) { setA(data); setSaved('Saved'); setTimeout(() => setSaved(''), 1400); }
   };
   const first = a.full_name.split(' ')[0];
-  const nextStep = `mailto:${a.email}?subject=${encodeURIComponent('Your Proverbs 31 Market vendor application')}&body=${encodeURIComponent(`Hi ${first},\n\nThank you for applying to vend at the Proverbs 31 Market with ${a.business_name}. `)}`;
+  const [note, setNote] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState('');
+  const decision = ['approved', 'waitlist', 'declined'].includes(a.status) ? a.status : null;
+  const emailDecision = async () => {
+    setSending(true); setSent('');
+    const { data, error } = await supabase.functions.invoke('vendor-decision', { body: { application_id: a.id, decision, note } });
+    let msg = error ? error.message : data?.error;
+    if (error) { try { msg = (await error.context.json()).error || msg; } catch { /* keep */ } }
+    setSending(false);
+    setSent(msg ? `Not sent: ${msg}` : `Emailed ${a.email}.`);
+    if (!msg) { const { data: fresh } = await supabase.from('vendor_applications').select('*').eq('id', a.id).single(); if (fresh) setA(fresh); }
+  };
 
   return (
     <div className="sys-page">
@@ -139,8 +151,17 @@ const VendorApplication = ({ app, onBack }) => {
           <label className="sys-field"><span>Team notes (private)</span>
             <textarea rows={5} defaultValue={a.review_notes || ''} onBlur={(e) => e.target.value !== (a.review_notes || '') && patch({ review_notes: e.target.value || null })} placeholder="Booth size, follow-ups, payment…" />
           </label>
-          <a className="sys-btn sys-btn--gold" href={nextStep}><Mail size={15} /> Email {first}</a>
-          <p className="sys-muted" style={{ margin: 0 }}>Opens your email with their address filled in. Send acceptance and event details from there.</p>
+          {decision ? (
+            <>
+              <label className="sys-field"><span>A personal line for the email (optional)</span>
+                <textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder={decision === 'approved' ? 'e.g. Load-in opens at 1:30pm; your booth is by the entrance.' : 'e.g. We hope to see you at the spring market.'} />
+              </label>
+              <button className="sys-btn sys-btn--gold" onClick={emailDecision} disabled={sending}><Mail size={15} /> {sending ? 'Sending…' : `Email ${first}: ${LABEL[decision].toLowerCase()}`}</button>
+              <p className="sys-muted" style={{ margin: 0 }}>{sent || `Sends the ${decision} note from vendor@p31market.com with next steps (storefront sign-up for approved vendors), and records it here.`}</p>
+            </>
+          ) : (
+            <p className="sys-muted" style={{ margin: 0 }}>Set the status to Approved, Waitlist or Declined and the email button appears here.</p>
+          )}
         </section>
       </div>
     </div>

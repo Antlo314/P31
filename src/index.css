@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Manrope:wght@300;400;500;600;800&display=swap');
+/* Fonts are self-hosted and declared in index.html (public/fonts), so nothing here blocks the first paint. */
 
 /* ============================================================
    P31 Design System — Brand Kit
@@ -458,11 +458,14 @@ a:hover {
 }
 
 html { -webkit-text-size-adjust: 100%; }
-body { -webkit-tap-highlight-color: transparent; }
+body { -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
+a, button, [role="button"], input, select, textarea, label { touch-action: manipulation; }
+img, video { -webkit-touch-callout: none; }
 :focus-visible { outline: 3px solid var(--amethyst); outline-offset: 2px; }
 
-/* Content starts below the fixed top bar (the home hero sits under it). */
-.site-main { padding-top: var(--nb-h, 64px); }
+/* Content starts below the fixed top bar (the home hero sits under it). It also keeps a full
+   screen of height before the app has drawn, so the footer never flashes up top and then jumps. */
+.site-main { padding-top: var(--nb-h, 64px); min-height: 100dvh; }
 .site-main.is-flush { padding-top: 0; }
 
 /* Leave room for the floating tab bar on phones. */

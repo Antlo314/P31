@@ -5,6 +5,8 @@ import {
   ExternalLink, AlertTriangle, RefreshCw, Clapperboard, Inbox, MessagesSquare, X, Check, Clock, Upload,
 } from 'lucide-react';
 import { DashHead, DashEmpty } from '../apps/DashShell';
+import SoundPicker from './SoundPicker';
+import { postPack } from './ai';
 import { studio, uploadMedia, bestSlotsET, nextOccurrence, fmtET } from './api';
 
 const ClipStudio = lazy(() => import('../features/clip-studio/ClipStudio'));
@@ -238,6 +240,24 @@ export const StudioCompose = () => {
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [done, setDone] = useState(null);
+  const [topic, setTopic] = useState('');
+  const [pack, setPack] = useState(null);
+  const [firstComment, setFirstComment] = useState('');
+  const [audio, setAudio] = useState(null);
+  const [showSound, setShowSound] = useState(false);
+  const isReel = media.length === 1 && media[0].type === 'video';
+
+  // Hook, captions, hashtags and a first comment from the writing helper.
+  const draft = async () => {
+    setError(''); setBusy('Drafting…');
+    try {
+      const p = await postPack({ platforms: platforms.join(' and '), kind: isReel ? 'reel' : media.length > 1 ? 'carousel' : 'photo', topic: topic || content || 'a post for Proverbs 31 Marketplace' });
+      setPack(p);
+      if (!content) setContent(`${p.captions[0] || ''}\n\n${p.hashtags.join(' ')}`.trim());
+      if (!firstComment) setFirstComment(p.firstComment);
+    } catch (err) { setError(err.message); }
+    setBusy('');
+  };
 
   const toggle = (p) => setPlatforms((ps) => (ps.includes(p) ? ps.filter((x) => x !== p) : [...ps, p]));
   const addFiles = async (files) => {
@@ -263,6 +283,7 @@ export const StudioCompose = () => {
       const out = await studio('create', {
         platforms, content, fbContent: split ? fbContent : undefined, scheduledFor: when, timezone: 'America/New_York',
         media: media.map(({ type, url, altText }) => ({ type, url, altText })),
+        audioId: isReel && audio ? audio.id : undefined, firstComment: !isReel && firstComment ? firstComment : undefined,
       });
       setDone(out.post);
     } catch (err) { setError(err.message); }
@@ -288,6 +309,19 @@ export const StudioCompose = () => {
               {Object.entries(PLATFORM).map(([k, P]) => <button type="button" key={k} aria-pressed={platforms.includes(k)} onClick={() => toggle(k)}><P.Icon size={15} style={{ verticalAlign: '-3px' }} /> {P.label}</button>)}
             </div>
           </div>
+          <div className="k-field st-ai"><span>Write it with help</span>
+            <div className="st-ai__row">
+              <input className="k-input" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="What’s the post about? e.g. new candle curator, Winter Gala countdown" />
+              <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={draft} disabled={!!busy}><Sparkles size={14} /> Draft</button>
+            </div>
+            {pack && (
+              <div className="st-ai__picks">
+                {pack.hooks.length > 0 && <small>Hook ideas for the video: {pack.hooks.join(' · ')}</small>}
+                <div className="k-segs">{pack.captions.map((c, i) => <button type="button" key={i} onClick={() => setContent(`${c}\n\n${pack.hashtags.join(' ')}`)}>Caption {i + 1}</button>)}</div>
+                {pack.bestTime && <small>{pack.bestTime}</small>}
+              </div>
+            )}
+          </div>
           <label className="k-field"><span>Caption <em className="ds-muted" style={{ fontStyle: 'normal' }}>{content.length}/2200</em></span>
             <textarea rows={9} maxLength={2200} value={content} onChange={(e) => setContent(e.target.value)} placeholder="Write your caption — Instagram links aren’t clickable, so say “link in bio”." />
           </label>
@@ -295,6 +329,7 @@ export const StudioCompose = () => {
             <label className="ds-row" style={{ cursor: 'pointer' }}><input type="checkbox" className="ds-check" checked={split} onChange={(e) => { setSplit(e.target.checked); if (e.target.checked && !fbContent) setFbContent(content); }} /><div><strong>Different caption for Facebook</strong><small>Use real links and names instead of @handles</small></div></label>
           )}
           {split && <label className="k-field"><span>Facebook caption</span><textarea rows={6} value={fbContent} onChange={(e) => setFbContent(e.target.value)} /></label>}
+          {!isReel && <label className="k-field"><span>First comment <em className="ds-muted" style={{ fontStyle: 'normal' }}>posted right after (Instagram photos & carousels)</em></span><input value={firstComment} onChange={(e) => setFirstComment(e.target.value)} placeholder="A link, a detail, or a question" /></label>}
         </div>
 
         <div className="ds-grid">
@@ -314,6 +349,11 @@ export const StudioCompose = () => {
                     <button type="button" className="ds-icon-btn" onClick={() => setMedia(media.filter((_, j) => j !== i))} aria-label="Remove"><X size={14} /></button>
                   </figure>
                 ))}
+              </div>
+            )}
+            {isReel && (
+              <div className="k-field"><span>Instagram audio {audio ? `· ${audio.title}` : ''}</span>
+                {showSound ? <SoundPicker compact value={audio} onChange={setAudio} /> : <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => setShowSound(true)}>{audio ? 'Change track' : 'Pick a trending track'}</button>}
               </div>
             )}
             <p className="ds-muted"><Link to="/studio/create" className="k-link"><Clapperboard size={14} /> Make a reel or product photo in the creative tools</Link></p>

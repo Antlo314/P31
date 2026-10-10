@@ -57,19 +57,25 @@ const SCREENS = [
     .map((p) => [`systems ${p || 'overview'}`, cl(`/systems${p ? '/' + p : ''}`)]),
   ['team access', cl('/systems/team'), [], 'Give someone access'],
   ['vendor applications', cl('/systems/vendors'), [], 'Sample Candle Co.'],
+  ['vendor decision email', cl('/systems/vendors'), ['All', 'Sample Crafts'], 'Sends the approved note from vendor@p31market.com'],
+  ['event lineup', cl('/systems/events'), ['Lineup'], 'Sample Candle Co.'],
+  ['market dates lineup', mk('/calendar'), [], 'Handmade crafts, baskets & gifts'],
   ['davinci clip finder + queue', cl('/systems/pro-edit'), ['Edit queue'], 'Sample Gala'],
   // Team members with one tool (like Anthony → DaVinci, Yanni → Content Studio).
   ['davinci member lands on davinci', at('collective', 'davinci')('/portal'), [], 'Clip finder'],
   ['davinci member: systems is davinci only', at('collective', 'davinci')('/systems/crm'), [], 'Choose footage'],
   ['studio member lands in studio + walkthrough', at('collective', 'studio')('/portal'), [], 'Welcome to Content Studio'],
-  ['studio walkthrough steps', cl('/studio'), ['Next', 'Next'], 'Calendar: what’s going out'],
+  ['studio walkthrough steps', cl('/studio'), ['Next', 'Next'], 'Planner: months ahead'],
+  ['studio planner', cl('/studio/planner'), [], 'Plan this month with AI'], ['studio planner: open a post', cl('/studio/planner'), ['Two weeks until the Gala'], 'Draft hook, caption & hashtags'],
+  ['studio email + send', cl('/studio/email'), ['Sample Applicant', 'Send reply', 'Yes, send it'], 'Sent to sample.applicant@example.com'],
+  ['studio email: needs a person', cl('/studio/email'), ['Sample Vendor'], 'Needs a person: Refund request'],
   ['classroom walkthrough', st('/academy/business'), ['Next'], 'Home: what’s next'],
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const clickText = (page, text) => page.evaluate((t) => {
   const els = [...document.querySelectorAll('button, a, [role="tab"]')].filter((e) => e.offsetParent);
-  const el = els.find((e) => e.textContent.trim() === t) || els.find((e) => e.textContent.trim().startsWith(t));
+  const el = els.find((e) => e.textContent.trim() === t) || els.find((e) => e.textContent.trim().startsWith(t)) || els.find((e) => e.textContent.includes(t));
   if (!el) return false;
   el.click();
   return true;

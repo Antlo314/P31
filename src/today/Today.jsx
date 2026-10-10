@@ -133,8 +133,15 @@ async function systemsCards() {
 }
 
 async function studioCards() {
-  const [inbox, posts] = await Promise.allSettled([studio('inbox'), studio('posts')]);
+  const [inbox, posts, mail] = await Promise.allSettled([studio('inbox'), studio('posts'),
+    supabase.from('email_threads').select('id, contact_name, contact_email, subject, needs_human, last_message_at', { count: 'exact' }).eq('status', 'needs_reply').order('last_message_at', { ascending: false }).limit(4)]);
   const out = [];
+  if (mail.status === 'fulfilled' && !mail.value.error) {
+    out.push({
+      key: 'email', Icon: Mail, title: 'Emails to answer', count: mail.value.count ?? (mail.value.data || []).length, to: '/studio/email', cta: 'Open Email', empty: 'No emails waiting. Carla drafts replies as they arrive.',
+      items: (mail.value.data || []).map((m) => ({ key: m.id, title: `${m.needs_human ? '⚑ ' : ''}${m.contact_name || m.contact_email}`, sub: `${m.subject} · ${ago(m.last_message_at)}` })),
+    });
+  }
   if (inbox.status === 'fulfilled') {
     const unread = (inbox.value?.conversations || []).filter((c) => c.unread > 0);
     out.push({
