@@ -12,6 +12,12 @@ import { gsap, ScrollTrigger, SplitText, reducedMotion } from '../lib/motion';
  *   data-reveal-group       its children animate in one after another
  *   data-scrub              words light up as you scroll past
  *   data-parallax="8"       drifts ±8% while scrolling (put it on media)
+ *   data-depth="0.3"        layered parallax: moves against the scroll by 30% of its section's height
+ *                           (bigger = feels closer). Heroes start still and float up as you leave.
+ *   data-drift="-20"        slides sideways (xPercent) as its section scrolls past
+ *   data-tilt               card leans toward the pointer in 3D and lifts on hover (desktop pointers)
+ *   data-mouse="16"         follows the pointer by up to 16px (CSS `translate`, so it stacks with
+ *                           the scroll effects; desktop pointers only)
  *   data-count              counts up to its number ("1K+", "100%" keep their symbols)
  * Content only starts hidden when motion is allowed and this is running
  * (the html.motion-ok class), so nothing can get stuck invisible.
@@ -133,8 +139,61 @@ const MotionRoot = () => {
         });
       });
 
+      fresh('[data-depth]').forEach((el) => {
+        const depth = parseFloat(el.dataset.depth) || 0.2;
+        const section = el.closest('section, header') || el.parentElement;
+        const atTop = section.getBoundingClientRect().top + window.scrollY < window.innerHeight * 0.5;
+        const dist = () => section.offsetHeight * depth;
+        gsap.fromTo(el, { y: () => (atTop ? 0 : dist() * 0.5) }, {
+          y: () => (atTop ? -dist() : -dist() * 0.5), ease: 'none',
+          scrollTrigger: { trigger: section, start: atTop ? 'top top' : 'top bottom', end: 'bottom top', scrub: true, invalidateOnRefresh: true },
+        });
+      });
+
+      fresh('[data-drift]').forEach((el) => {
+        const amt = parseFloat(el.dataset.drift) || -15;
+        gsap.fromTo(el, { xPercent: -amt / 2 }, {
+          xPercent: amt / 2, ease: 'none',
+          scrollTrigger: { trigger: el.closest('section') || el.parentElement, start: 'top bottom', end: 'bottom top', scrub: true },
+        });
+      });
+
+      fresh('[data-mouse]').forEach((el) => { el.style.setProperty('--m', el.dataset.mouse || '12'); el.classList.add('k-mouse'); });
+
+      if (window.matchMedia('(pointer: fine)').matches) {
+        fresh('[data-tilt]').forEach((el) => {
+          el.classList.add('k-tilt');
+          el.addEventListener('pointermove', (e) => {
+            const r = el.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width - 0.5;
+            const y = (e.clientY - r.top) / r.height - 0.5;
+            el.style.setProperty('--ry', `${(x * 9).toFixed(2)}deg`);
+            el.style.setProperty('--rx', `${(-y * 7).toFixed(2)}deg`);
+            el.style.setProperty('--gx', `${((x + 0.5) * 100).toFixed(1)}%`);
+            el.style.setProperty('--gy', `${((y + 0.5) * 100).toFixed(1)}%`);
+          });
+          el.addEventListener('pointerleave', () => { el.style.setProperty('--rx', '0deg'); el.style.setProperty('--ry', '0deg'); });
+        });
+      }
+
       fresh('[data-count]').forEach(countUp);
     });
+
+    // Pointer position as CSS variables (-1…1 and %), for data-mouse layers and hero spotlights.
+    let pending = false;
+    const onPointer = (e) => {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(() => {
+        pending = false;
+        html.style.setProperty('--mx', ((e.clientX / window.innerWidth) * 2 - 1).toFixed(3));
+        html.style.setProperty('--my', ((e.clientY / window.innerHeight) * 2 - 1).toFixed(3));
+        html.style.setProperty('--sx', `${((e.clientX / window.innerWidth) * 100).toFixed(1)}%`);
+        html.style.setProperty('--sy', `${((e.clientY / window.innerHeight) * 100).toFixed(1)}%`);
+      });
+    };
+    const fine = window.matchMedia('(pointer: fine)').matches;
+    if (fine) window.addEventListener('pointermove', onPointer, { passive: true });
 
     let timer;
     const rescan = () => { clearTimeout(timer); timer = setTimeout(() => { scan(); ScrollTrigger.refresh(); }, 60); };
@@ -152,6 +211,7 @@ const MotionRoot = () => {
 
     return () => {
       clearTimeout(timer);
+      window.removeEventListener('pointermove', onPointer);
       observer.disconnect();
       root.removeEventListener('load', onLoad, true);
       ctx.revert();

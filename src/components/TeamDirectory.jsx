@@ -17,7 +17,7 @@ const TeamDirectory = ({ eyebrow = 'Our team', title = 'Meet the', accent = 'tea
       {TEAM.map((p) => {
         const Icon = ICONS[p.icon];
         return (
-          <article key={p.name} className="td-card">
+          <article key={p.name} className="td-card" data-tilt>
             <span className="td-card__icon" aria-hidden="true"><Icon size={22} /></span>
             <h3>{p.name}</h3>
             <p className="td-card__role">{p.role}</p>

@@ -65,3 +65,9 @@
 .ch-melanie__more[open] summary::after { content: ' −'; }
 .ch-melanie__more[open] { display: grid; gap: 14px; }
 .ch-melanie__more p { margin: 0; }
+
+/* 3D arches take over from the flat arch once they're running. */
+.ch-hero { min-height: min(100svh, 980px); display: grid; align-items: center; }
+.ch-hero__arch { transition: opacity 1.2s ease; }
+.ch-hero:has(.s3d.is-live) .ch-hero__arch { opacity: 0; }
+.ch-hero__inner { text-shadow: 0 2px 30px rgba(18, 8, 29, 0.85); }

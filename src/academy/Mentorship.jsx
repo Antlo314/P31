@@ -75,7 +75,7 @@ export const MentorshipLanding = () => (
       </div>
       <div className="k-grid k-grid--2" data-reveal-group>
         {Object.values(PROGRAMS).map((p, i) => (
-          <Link key={p.slug} to={`/mentorship/${p.slug}`} className={`k-card k-card--link mt-program ${i === 0 ? 'k-card--night' : ''}`}>
+          <Link key={p.slug} to={`/mentorship/${p.slug}`} className={`k-card k-card--link mt-program ${i === 0 ? 'k-card--night' : ''}`} data-tilt>
             <span className="k-num">0{i + 1}</span>
             <p className="mt-program__pillars">{p.pillars.join(' · ')}</p>
             <h3>{p.title} {p.accent}</h3>

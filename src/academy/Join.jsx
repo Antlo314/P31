@@ -7,6 +7,7 @@ import { EMAIL } from '../lib/team';
 import mark from '../assets/academy/collective-mark.webp';
 import './mentorship.css';
 import './join.css';
+import Scene3D from '../components/three/Scene3D';
 
 // Word for word from the P31 Collective membership form.
 const HEARD = ['P31 Vendor', 'P31 Panelist', 'P31 Collective Member', 'Social Media'];
@@ -185,6 +186,7 @@ const Join = () => (
       accent="P31 Collective"
       lead="A faith-centered community for women entrepreneurs who desire to grow spiritually, purposefully, and professionally while building meaningful relationships with like-minded women."
       actions={<a href="#apply" className="k-btn k-btn--gold">Apply to join <ArrowRight size={18} /></a>}
+      visual={<Scene3D variant="gem" />}
     />
 
     <section className="k-section">

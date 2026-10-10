@@ -11,6 +11,12 @@ import './mentorship.css';
 import './collective-home.css';
 import './pillars.css';
 import JoinCollective from '../components/JoinCollective';
+import Scene3D from '../components/three/Scene3D';
+import Ornaments from '../components/Ornaments';
+import ParallaxStory from '../components/ParallaxStory';
+import community from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
+import partner from '../assets/web/p31_partner_hero_editorial.webp';
+import jewelry from '../assets/web/vendor_jewelry.webp';
 
 // The Collective's two pillars, plus the Studio the content team signs in to.
 const DOORS = [
@@ -23,6 +29,8 @@ const DOORS = [
 const CollectiveHome = () => (
   <div className="k-page ch">
     <header className="k-hero k-dark ch-hero">
+      <Scene3D variant="arches" />
+      <Ornaments />
       <span className="k-hero__arch ch-hero__arch" aria-hidden="true" data-reveal="fade" />
       <div className="ch-hero__inner k-center">
         <img src={mark} alt="" className="mt-mark ch-hero__mark" data-intro="0" />
@@ -113,7 +121,7 @@ const CollectiveHome = () => (
       </div>
       <div className="k-grid k-grid--2" data-reveal-group>
         {Object.values(PROGRAMS).map((p, i) => (
-          <Link key={p.slug} to={`/mentorship/${p.slug}`} className={`k-card k-card--link mt-program ${i === 0 ? 'k-card--night' : ''}`}>
+          <Link key={p.slug} to={`/mentorship/${p.slug}`} className={`k-card k-card--link mt-program ${i === 0 ? 'k-card--night' : ''}`} data-tilt>
             <span className="k-num">0{i + 1}</span>
             <p className="mt-program__pillars">{p.pillars.join(' · ')}</p>
             <h3>{p.title} {p.accent}</h3>
@@ -123,6 +131,25 @@ const CollectiveHome = () => (
         ))}
       </div>
     </section>
+
+    <ParallaxStory
+      id="mandate"
+      words={['Heal.', 'Rise.', 'Build.', 'Prosper.']}
+      images={[
+        { src: community, alt: 'Women gathered at a P31 event' },
+        { src: melanie, alt: 'Melanie JC' },
+        { src: jewelry, alt: 'Handmade jewelry from a P31 curator' },
+        { src: partner, alt: 'A P31 partner' },
+      ]}
+    >
+      <p className="k-eyebrow k-eyebrow--center">Her mandate</p>
+      <h2 className="k-h2">Heal. Rise. Build. <em>Prosper God’s Way.</em></h2>
+      <p className="k-lede">From a calling to help women heal to a movement of women who build, lead and prosper, the Collective is where that journey continues.</p>
+      <div className="k-actions">
+        <JoinCollective className="k-btn k-btn--gold" />
+        <Link to="/academy" className="k-btn k-btn--light">Explore the Academy <ArrowRight size={17} /></Link>
+      </div>
+    </ParallaxStory>
 
     <section className="k-section k-section--mist" id="book">
       <div className="k-head k-center">
@@ -166,7 +193,7 @@ const CollectiveHome = () => (
       </div>
       <div className="k-grid k-grid--3 ch-doors" data-reveal-group>
         {DOORS.map((d) => (
-          <Link key={d.to} to={d.to} className="ch-door">
+          <Link key={d.to} to={d.to} className="ch-door" data-tilt>
             <span className="k-icon"><d.Icon size={22} /></span>
             <small>{d.who}</small>
             <h3>{d.title}</h3>

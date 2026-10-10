@@ -27,6 +27,8 @@ import bentoCandles from '../assets/web/vendor_candles.webp';
 import bentoSkincare from '../assets/web/vendor_skincare.webp';
 import bentoCommunity from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
 import partnerImg from '../assets/web/p31_partner_hero_editorial.webp';
+import Scene3D from '../components/three/Scene3D';
+import Ornaments from '../components/Ornaments';
 
 const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
 const CATEGORIES = ['Art', 'Wellness', 'Clothing', 'Food', 'Literature', 'Community', 'Services'];
@@ -93,6 +95,7 @@ const Home = () => {
       <section className="h26-hero k-dark" ref={heroRef}>
         <LazyVideo src={heroVid} poster={heroPoster} className="h26-hero__media" eager />
         <div className="h26-hero__scrim" />
+        <Ornaments />
         <span className="k-hero__arch h26-hero__arch" aria-hidden="true" />
 
         <div className="h26-hero__inner">
@@ -148,7 +151,7 @@ const Home = () => {
         </div>
         <div className="k-grid k-grid--3" data-reveal-group>
           {PILLARS.map((p, i) => (
-            <article className={`k-card ${i === 1 ? 'k-card--night' : ''}`} key={p.title}>
+            <article className={`k-card ${i === 1 ? 'k-card--night' : ''}`} key={p.title} data-tilt>
               <span className="k-num">0{i + 1}</span>
               <span className="k-icon"><p.Icon size={22} /></span>
               <h3>{p.title}</h3>
@@ -159,6 +162,26 @@ const Home = () => {
         <dl className="k-stats" style={{ marginTop: 'clamp(20px, 3vw, 36px)' }} data-reveal>
           {STATS.map(([n, l]) => <div key={l}><dt data-count>{n}</dt><dd>{l}</dd></div>)}
         </dl>
+      </section>
+
+      {/* ── FAR ABOVE RUBIES (3D gem) ─────────────────────────── */}
+      <section className="h26-gem k-dark">
+        <Ornaments variant="gem" />
+        <div className="h26-gem__inner">
+          <div className="h26-gem__visual"><Scene3D variant="gem" /></div>
+          <div className="h26-gem__copy">
+            <p className="k-eyebrow" data-reveal="fade">Proverbs 31:10</p>
+            <blockquote className="h26-gem__verse" data-scrub>“Who can find a virtuous woman? for her price is far above rubies.”</blockquote>
+            <p className="k-lede" data-reveal>
+              Every curator is chosen like a rare stone: for her craft, her story and her purpose. Bring your gift to a
+              stage that treats it as precious.
+            </p>
+            <div className="k-actions" data-reveal>
+              <a href={APPLY_URL} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></a>
+              <Link to="/shop" className="k-btn k-btn--light">Shop the collective</Link>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* ── MISSION ─────────────────────────────────────────── */}
