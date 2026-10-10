@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>P31 share image</title>
+<style>
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; src: url(../../public/fonts/NotoSerif-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; font-style: italic; src: url(../../public/fonts/NotoSerif-400-italic.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 800; src: url(../../public/fonts/Manrope-800.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 400; src: url(../../public/fonts/Manrope-400.woff2) format('woff2'); }
+  html, body { margin: 0; }
+  .og { position: relative; width: 1200px; height: 630px; overflow: hidden; color: #fff; font-family: Manrope, sans-serif;
+    background: radial-gradient(900px 600px at 85% 15%, rgba(242, 206, 77, 0.22), transparent 60%), linear-gradient(135deg, #4a1f78 0%, #2a1544 55%, #1d0f2e 100%); }
+  .og::before { content: ''; position: absolute; inset: 0; background: radial-gradient(500px 500px at 20% 110%, rgba(168, 85, 232, 0.25), transparent 60%); }
+  .arch { position: absolute; left: 50%; bottom: -120px; width: 1100px; height: 700px; transform: translateX(-50%); border: 1px solid rgba(242, 206, 77, 0.22); border-bottom: 0; border-radius: 550px 550px 0 0; }
+  .inner { position: absolute; inset: 0; display: grid; grid-template-columns: 300px 1fr; gap: 56px; align-items: center; padding: 0 90px; }
+  .mark { width: 300px; height: 300px; filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.35)); }
+  .eyebrow { margin: 0 0 14px; font-size: 20px; font-weight: 800; letter-spacing: 0.3em; text-transform: uppercase; color: #F2CE4D; }
+  h1 { margin: 0; font-family: 'Noto Serif', Georgia, serif; font-weight: 400; font-size: 84px; line-height: 1.02; letter-spacing: -0.02em; }
+  h1 em { font-style: italic; color: #F2CE4D; }
+  .lead { margin: 22px 0 0; font-size: 26px; line-height: 1.4; color: rgba(255, 255, 255, 0.78); max-width: 640px; }
+  .url { position: absolute; right: 90px; bottom: 48px; font-size: 22px; font-weight: 800; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.8); }
+</style>
+</head>
+<body>
+  <div class="og" id="market">
+    <span class="arch"></span>
+    <div class="inner">
+      <img class="mark" src="mark.png" alt="" />
+      <div>
+        <p class="eyebrow">Proverbs 31 Marketplace</p>
+        <h1>Where her gifts<br /><em>make room.</em></h1>
+        <p class="lead">A premium curated marketplace for women creatives, artisans and visionaries. Online and at our seasonal Atlanta markets.</p>
+      </div>
+    </div>
+    <span class="url">P31MARKET.COM</span>
+  </div>
+  <div class="og" id="collective">
+    <span class="arch"></span>
+    <div class="inner">
+      <img class="mark" src="mark.png" alt="" />
+      <div>
+        <p class="eyebrow">The Proverbs 31 Collective by NEBA</p>
+        <h1>Heal. Rise. Build.<br /><em>Prosper God’s way.</em></h1>
+        <p class="lead">Mentorship, community and the P31 Academy for faith-driven women entrepreneurs.</p>
+      </div>
+    </div>
+    <span class="url">THEP31COLLECTIVE.ORG</span>
+  </div>
+</body>
+</html>
