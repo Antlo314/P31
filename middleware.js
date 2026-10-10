@@ -7,7 +7,7 @@
 
 export const config = {
   matcher: [
-    '/', '/join', '/mentorship/:path*', '/verify/:path*', '/portal/:path*', '/academy/:path*', '/studio/:path*',
+    '/', '/join', '/today', '/mentorship/:path*', '/verify/:path*', '/portal/:path*', '/academy/:path*', '/studio/:path*',
     '/systems/:path*', '/enroll/:path*', '/robots.txt', '/sitemap.xml', '/favicon.ico', '/favicon.png', '/manifest.webmanifest',
   ],
 };

@@ -112,6 +112,17 @@
       "permanent": false
     },
     {
+      "source": "/today",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.p31market.com"
+        }
+      ],
+      "destination": "https://www.thep31collective.org/today",
+      "permanent": false
+    },
+    {
       "source": "/verify/:path*",
       "has": [
         {
