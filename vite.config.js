@@ -12,8 +12,8 @@ export default defineConfig({
         codeSplitting: {
           minSize: 24_000,
           groups: [
-            { name: 'react', test: /node_modules[/\](react|react-dom|scheduler|react-router|react-router-dom)[/\]/, priority: 20 },
-            { name: 'icons', test: /node_modules[/\]lucide-react[/\]/, priority: 10, minSize: 0 },
+            { name: 'react', test: /node_modules[/\\](react|react-dom|scheduler|react-router|react-router-dom)[/\\]/, priority: 20 },
+            { name: 'icons', test: /node_modules[/\\]lucide-react[/\\]/, priority: 10, minSize: 0 },
           ],
         },
       },
