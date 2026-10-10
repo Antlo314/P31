@@ -33,4 +33,7 @@
 .jn-agree { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink); cursor: pointer; }
 .jn-agree input { width: 20px; height: 20px; accent-color: var(--plum); }
 .jn-alt { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; }
-.jn-done { max-width: 640px; margin-inline: auto; }
+.jn-done { max-width: 640px; margin-inline: auto; scroll-margin-top: calc(var(--nb-h, 64px) + 24px); }
+.jn-done:focus { outline: none; }
+.jn-done:focus-visible { outline: none; }
+.jn-again { justify-self: center; margin-top: 4px; padding: 8px 4px; background: none; border: 0; font: inherit; font-size: 0.85rem; font-weight: 700; color: var(--ink-3, #8a7f96); text-decoration: underline; cursor: pointer; }
