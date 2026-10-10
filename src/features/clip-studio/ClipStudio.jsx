@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Upload, Film, X, ChevronUp, ChevronDown, Wand2, Captions, Music2, Scissors, Download, Share2, RotateCcw, Save, Check, AlertTriangle, Stamp, Palette, Zap } from 'lucide-react';
 import { CLIP_STYLES, ASPECTS, LENGTHS } from './styles';
 import { probeVideo, decodeForMix, toAnalysisPcm, findActiveRanges, buildTimeline, timelinePcm, mapToOutput, MAX_FILE_BYTES } from './analyze';
-import { captionSettings, cleanWords, buildPages } from './captions';
+import { captionSettings, cleanWords, buildPages, snapWordsToSpeech, HOOK_SECONDS } from './captions';
 import CaptionPanel from './CaptionPanel';
 import { renderClip, renderFast, FastRenderUnavailable, canRender, canFastRender } from './render';
 import FilterPanel from './FilterPanel';
@@ -43,6 +43,7 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
   const [aspectId, setAspectId] = useState('9:16');
   const [length, setLength] = useState(30);
   const [captions, setCaptions] = useState(true);
+  const [hook, setHook] = useState(''); // big words for the first seconds
   const [removeSilence, setRemoveSilence] = useState(true);
   const [title, setTitle] = useState('');
   const [music, setMusic] = useState(null);
@@ -233,7 +234,9 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
         } else {
           setProgress({ stage: 'Preparing captions', pct: -1 });
           const { pcm, map } = timelinePcm(timeline, clips.map((c) => analysisRef.current.get(c.id).pcm));
-          const raw = await transcribe(pcm);
+          // Snap each word to the sound itself before mapping to the output clock, so captions
+          // start on the voice and clear when it stops (speech-to-text pads words with the pause after them).
+          const raw = snapWordsToSpeech(await transcribe(pcm), pcm);
           words = raw.map((w) => ({ ...w, start: mapToOutput(w.start, map), end: mapToOutput(w.end, map) }));
           captionCache.current.set(sig, words);
         }
@@ -274,6 +277,7 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
           music,
           levels,
           title: title.trim(),
+          hook: hook.trim(),
           brand: brand ? { image: brand.img, corner: brandCorner } : null,
           look,
           canvas: canvasRef.current,
@@ -420,6 +424,10 @@ const ClipStudio = ({ onSave, saveLabel = 'Save', initialFiles, brandLogo }) => 
             <label className="cs-toggle">
               <span><Scissors size={16} /> Cut silences &amp; dead air</span>
               <input type="checkbox" checked={removeSilence} onChange={(e) => setRemoveSilence(e.target.checked)} />
+            </label>
+            <label className="cs-field">
+              <span><Zap size={14} /> Hook · the first {HOOK_SECONDS}s <small>Most viewers decide in 1–3 seconds. Big words, one promise or question.</small></span>
+              <input value={hook} maxLength={60} onChange={(e) => setHook(e.target.value)} placeholder="e.g. She started with $200 and a folding table" />
             </label>
             {(style.titleCard || style.endCard) && (
               <label className="cs-field">

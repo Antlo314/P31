@@ -6,7 +6,7 @@
 //   renderClip()  — the original real-time path: plays the edit onto a canvas and records it
 //                   with MediaRecorder. Used when the browser can't do the fast path.
 
-import { drawCaption, loadCaptionFont } from './captions';
+import { drawCaption, drawHook, loadCaptionFont } from './captions';
 import { createGrader, lookParams, isIdentity, cssFallback } from './filters';
 
 const MIME_CANDIDATES = [
@@ -45,7 +45,7 @@ async function loadFonts(base, pages, captionStyle) {
 }
 
 /** Draws output frames onto `canvas`. frame(T, imageForShot) → imageForShot(i) returns a video/canvas or null. */
-function createCompositor({ canvas, aspect, style, timeline, pages, captionStyle, title, brand, look }) {
+function createCompositor({ canvas, aspect, style, timeline, pages, captionStyle, title, hook, brand, look }) {
   const W = aspect.w;
   const H = aspect.h;
   canvas.width = W;
@@ -213,6 +213,7 @@ function createCompositor({ canvas, aspect, style, timeline, pages, captionStyle
         drawBrand();
         drawTitle(t);
         if (pages?.length && t <= editEnd) drawCaption(ctx, pages, t, captionStyle, W, H);
+        if (hook && !(style.titleCard && title)) drawHook(ctx, hook, t, W, H);
       }
       drawEndCard(t);
     },
@@ -272,11 +273,11 @@ export class FastRenderUnavailable extends Error {}
 
 // ── Fast path: WebCodecs ──────────────────────────────────────
 export async function renderFast({
-  clips, timeline, style, aspect, pages, captionStyle, clipBuffers, music, levels, title, brand, look, canvas, onProgress, signal,
+  clips, timeline, style, aspect, pages, captionStyle, clipBuffers, music, levels, title, hook, brand, look, canvas, onProgress, signal,
 }) {
   if (!canFastRender()) throw new FastRenderUnavailable('WebCodecs not available');
   const mb = await import('mediabunny');
-  const comp = createCompositor({ canvas, aspect, style, timeline, pages, captionStyle, title, brand, look });
+  const comp = createCompositor({ canvas, aspect, style, timeline, pages, captionStyle, title, hook, brand, look });
   const { W, H, total } = comp;
   await loadFonts(comp.base, pages, captionStyle);
 
@@ -405,12 +406,12 @@ const waitFor = (el, event, ms = 4000) =>
 
 export async function renderClip({
   clips, timeline, style, aspect, pages, captionStyle, audioCtx, clipBuffers, music, levels,
-  title, brand, look, canvas, onProgress, signal,
+  title, hook, brand, look, canvas, onProgress, signal,
 }) {
   // Browsers stop drawing hidden pages, which would freeze the render.
   if (document.hidden) throw new Error('Keep Clip Studio on screen while it renders.');
 
-  const comp = createCompositor({ canvas, aspect, style, timeline, pages, captionStyle, title, brand, look });
+  const comp = createCompositor({ canvas, aspect, style, timeline, pages, captionStyle, title, hook, brand, look });
   const { total } = comp;
   await loadFonts(comp.base, pages, captionStyle);
 

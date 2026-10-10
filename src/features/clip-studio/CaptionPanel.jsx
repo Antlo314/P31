@@ -1,8 +1,35 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Captions, Play, Scissors, Merge, Trash2, Plus, Minus, RotateCcw, Type, Clock, SlidersHorizontal } from 'lucide-react';
+import { Captions, Play, Scissors, Merge, Trash2, Plus, Minus, RotateCcw, Type, Clock, SlidersHorizontal, Sparkles, Smartphone } from 'lucide-react';
 import {
-  CAPTION_FONTS, HIGHLIGHTS, ANIMATIONS, BACKGROUNDS, drawCaption, loadCaptionFont, retimePage, shiftPage, splitPage, mergePages, timePages,
+  CAPTION_FONTS, HIGHLIGHTS, ANIMATIONS, BACKGROUNDS, FILLS, CAPTION_PRESETS, drawCaption, drawSafeZone, loadCaptionFont, retimePage, shiftPage, splitPage, mergePages, timePages,
 } from './captions';
+
+// A small live sample of one preset, drawn with the real caption engine.
+const SAMPLE = { words: [{ text: 'Her', start: 0, end: 0.3 }, { text: 'gifts', start: 0.3, end: 0.7 }, { text: 'make', start: 0.7, end: 1 }, { text: 'room', start: 1, end: 1.5 }], start: 0, end: 1.5, showStart: 0, showEnd: 1.6 };
+const PresetThumb = ({ preset, base, on, onPick }) => {
+  const ref = useRef(null);
+  useEffect(() => {
+    const c = ref.current;
+    if (!c) return undefined;
+    let live = true;
+    const s = { ...base, ...preset.patch, y: 0.5, animation: 'none', lines: 2, words: 4, size: Math.min(preset.patch.size || base.size, 0.11) * 1.9 };
+    loadCaptionFont(s).then(() => {
+      if (!live) return;
+      const ctx = c.getContext('2d');
+      const g = ctx.createLinearGradient(0, 0, c.width, c.height);
+      g.addColorStop(0, '#3b2a4a'); g.addColorStop(1, '#17111f');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, c.width, c.height);
+      drawCaption(ctx, [SAMPLE], 0.85, s, c.width, c.height);
+    });
+    return () => { live = false; };
+  }, [preset, base]);
+  return (
+    <button type="button" className={`cp-preset ${on ? 'is-on' : ''}`} onClick={onPick} aria-pressed={on} title={preset.note}>
+      <canvas ref={ref} width={168} height={94} />
+      <strong>{preset.name}</strong>
+    </button>
+  );
+};
 import { createGrader, lookParams, isIdentity } from './filters';
 
 const fmt = (s) => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
@@ -21,7 +48,9 @@ const sourceAt = (timeline, t) => {
  */
 const CaptionPanel = ({ pages, setPages, settings, setSettings, onRegroup, clips, timeline, aspect, look }) => {
   const [sel, setSel] = useState(0);
-  const [tab, setTab] = useState('look');
+  const [tab, setTab] = useState('styles');
+  const [safe, setSafe] = useState(aspect.h / aspect.w > 1.5);
+  const [presetId, setPresetId] = useState('');
   const canvasRef = useRef(null);
   const frameRef = useRef(null);  // current video frame (canvas)
   const videoRef = useRef(null);
@@ -53,7 +82,9 @@ const CaptionPanel = ({ pages, setPages, settings, setSettings, onRegroup, clips
       }
     }
     drawCaption(ctx, pages, t, settings, PW, PH);
+    if (safe) drawSafeZone(ctx, PW, PH);
   };
+  const applyPreset = (p) => { setPresetId(p.id); set({ ...p.patch, y: Math.min(settings.y, 0.7) }); };
 
   // Grab the footage frame under the selected caption.
   useEffect(() => {
@@ -117,25 +148,34 @@ const CaptionPanel = ({ pages, setPages, settings, setSettings, onRegroup, clips
         <canvas ref={canvasRef} width={PW} height={PH} style={{ aspectRatio: `${PW} / ${PH}` }} />
         <div className="cp-preview__bar">
           <button type="button" className="cs-btn cs-btn--ghost cs-btn--sm" onClick={playPage}><Play size={15} /> Play caption</button>
+          <button type="button" className={`cs-btn cs-btn--ghost cs-btn--sm ${safe ? 'is-on' : ''}`} onClick={() => setSafe(!safe)} aria-pressed={safe} title="Where Instagram draws its own buttons and caption"><Smartphone size={15} /> Safe zone</button>
           <span>{sel + 1} / {pages.length}</span>
         </div>
       </div>
 
       <div className="cp-side">
-        <div className="cs-seg cs-seg--tight" role="tablist">
+        <div className="cs-seg cs-seg--tight cp-tabs" role="tablist">
+          <button role="tab" className={tab === 'styles' ? 'is-on' : ''} onClick={() => setTab('styles')}><Sparkles size={14} /> Styles</button>
           <button role="tab" className={tab === 'look' ? 'is-on' : ''} onClick={() => setTab('look')}><Type size={14} /> Look</button>
           <button role="tab" className={tab === 'timing' ? 'is-on' : ''} onClick={() => setTab('timing')}><Clock size={14} /> Timing</button>
           <button role="tab" className={tab === 'text' ? 'is-on' : ''} onClick={() => setTab('text')}><Captions size={14} /> Text</button>
         </div>
 
+        {tab === 'styles' && (
+          <div className="cp-presets">
+            {CAPTION_PRESETS.map((p) => <PresetThumb key={p.id} preset={p} base={settings} on={presetId === p.id} onPick={() => applyPreset(p)} />)}
+            <p className="cs-note cp-span">Pick a style, then fine-tune it under Look. Size, position and timing are yours to keep.</p>
+          </div>
+        )}
+
         {tab === 'look' && (
           <div className="cp-grid">
             <label className="cs-field"><span>Font</span>
-              <select value={settings.font} onChange={(e) => set({ font: e.target.value })}>{CAPTION_FONTS.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}</select>
+              <select value={settings.font} onChange={(e) => { const f = CAPTION_FONTS.find((x) => x.id === e.target.value); set({ font: f.id, weight: f.weights.includes(settings.weight) ? settings.weight : f.weights[f.weights.length - 1], italic: settings.italic && !!f.italic }); }}>{CAPTION_FONTS.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}</select>
             </label>
             <label className="cs-field"><span>Weight</span>
               <select value={settings.weight} onChange={(e) => set({ weight: Number(e.target.value) })}>
-                {(settings.font === 'Noto Serif' ? [400, 700] : [400, 600, 800]).map((w) => <option key={w} value={w}>{w === 400 ? 'Regular' : w === 600 ? 'Semibold' : 'Bold'}</option>)}
+                {(CAPTION_FONTS.find((f) => f.id === settings.font)?.weights || [400]).map((w) => <option key={w} value={w}>{w <= 400 ? 'Regular' : w === 600 ? 'Semibold' : w === 700 ? 'Bold' : w === 800 ? 'Extra bold' : 'Black'}</option>)}
               </select>
             </label>
             <label className="cs-field cp-span"><span>Size · {Math.round(settings.size * 1000) / 10}%</span>
@@ -155,13 +195,20 @@ const CaptionPanel = ({ pages, setPages, settings, setSettings, onRegroup, clips
             <label className="cs-field"><span>Animation</span>
               <select value={settings.animation} onChange={(e) => set({ animation: e.target.value })}>{ANIMATIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
             </label>
+            <label className="cs-field"><span>Text fill</span>
+              <select value={settings.fill || 'solid'} onChange={(e) => set({ fill: e.target.value })}>{FILLS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
+            </label>
+            <label className="cs-field"><span>Letter spacing · {Math.round((settings.letterSpacing || 0) * 100)}</span>
+              <input type="range" min="0" max="0.12" step="0.01" value={settings.letterSpacing || 0} onChange={(e) => set({ letterSpacing: Number(e.target.value) })} />
+            </label>
+            <label className="cs-toggle"><span>Soft shadow</span><input type="checkbox" checked={!!settings.shadow} onChange={(e) => set({ shadow: e.target.checked })} /></label>
             <label className="cs-toggle cp-span"><span>Outline</span><input type="checkbox" checked={settings.outline} onChange={(e) => set({ outline: e.target.checked })} /></label>
             {settings.outline && <>
               <label className="cs-field"><span>Outline color</span><input type="color" value={settings.outlineColor} onChange={(e) => set({ outlineColor: e.target.value })} /></label>
               <label className="cs-field"><span>Thickness</span><input type="range" min="0.04" max="0.26" step="0.01" value={settings.outlineWidth} onChange={(e) => set({ outlineWidth: Number(e.target.value) })} /></label>
             </>}
             <label className="cs-toggle"><span>ALL CAPS</span><input type="checkbox" checked={settings.upper} onChange={(e) => set({ upper: e.target.checked })} /></label>
-            {settings.font === 'Noto Serif' && <label className="cs-toggle"><span><em>Italic</em></span><input type="checkbox" checked={settings.italic} onChange={(e) => set({ italic: e.target.checked, weight: e.target.checked ? 400 : settings.weight })} /></label>}
+            {CAPTION_FONTS.find((f) => f.id === settings.font)?.italic && <label className="cs-toggle"><span><em>Italic</em></span><input type="checkbox" checked={settings.italic} onChange={(e) => set({ italic: e.target.checked })} /></label>}
           </div>
         )}
 
@@ -175,6 +222,9 @@ const CaptionPanel = ({ pages, setPages, settings, setSettings, onRegroup, clips
             </label>
             <label className="cs-field"><span>Shortest on screen</span>
               <select value={settings.minShow} onChange={(e) => { const next = { ...settings, minShow: Number(e.target.value) }; setSettings(next); setPages(timePages(pages, next)); }}>{[0.4, 0.7, 1, 1.4].map((v) => <option key={v} value={v}>{v}s</option>)}</select>
+            </label>
+            <label className="cs-field"><span>Clears after the last word</span>
+              <select value={settings.hang ?? 0.3} onChange={(e) => { const next = { ...settings, hang: Number(e.target.value) }; setSettings(next); setPages(timePages(pages, next)); }}>{[[0.1, 'Right away'], [0.3, 'Quick (0.3s)'], [0.6, 'Relaxed (0.6s)'], [1, 'Slow (1s)']].map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
             </label>
             <label className="cs-field cp-span"><span>Sync all captions · {settings.offset > 0 ? '+' : ''}{settings.offset.toFixed(2)}s {settings.offset ? (settings.offset > 0 ? '(later)' : '(earlier)') : ''}</span>
               <input type="range" min="-1" max="1" step="0.05" value={settings.offset} onChange={(e) => set({ offset: Number(e.target.value) })} />
