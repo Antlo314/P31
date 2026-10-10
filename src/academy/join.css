@@ -1,0 +1,36 @@
+/* /join — P31 Collective membership application */
+.jn-about { display: grid; gap: 16px; }
+.jn-about > * { margin: 0; }
+.jn-about .mt-mark { justify-self: start; }
+.jn-price {
+  display: grid; gap: 6px; padding: 18px 20px; border-radius: var(--r-lg);
+  background: linear-gradient(150deg, #2a1240, #12081d); color: rgba(255, 255, 255, 0.82);
+}
+.jn-price strong { font-family: var(--font-heading); font-weight: 400; font-size: 2.4rem; line-height: 1; color: var(--gold-hi); }
+.jn-price small { font-family: var(--font-body, inherit); font-size: 1rem; color: rgba(255, 255, 255, 0.7); margin-left: 4px; }
+.jn-elig { font-size: 0.92rem; color: var(--ink-2); padding: 12px 14px; border-left: 3px solid var(--gold); background: var(--mist); border-radius: 0 12px 12px 0; }
+
+.jn-benefits { padding: clamp(20px, 3vw, 30px); border-radius: var(--r-lg); background: #fff; border: 1px solid var(--line); box-shadow: var(--shadow-1); }
+.jn-benefits ul { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
+.jn-benefits li { display: flex; align-items: center; gap: 12px; color: var(--ink); line-height: 1.4; }
+.jn-benefits .k-icon { width: 34px; height: 34px; flex: none; }
+
+.jn-card { max-width: 860px; margin-inline: auto; padding: clamp(20px, 4vw, 40px); border-radius: var(--r-lg); background: #fff; border: 1px solid var(--line); box-shadow: var(--shadow-1); }
+.jn-group { border: 0; padding: 0; margin: 0; min-width: 0; }
+.jn-group legend { padding: 0; margin-bottom: 8px; font-weight: 700; font-size: 0.9rem; color: var(--ink); }
+.jn-group legend small { font-weight: 800; color: var(--gold-text); margin-left: 6px; }
+.jn-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.jn-chip {
+  font: inherit; font-size: 0.88rem; font-weight: 600; padding: 9px 14px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: #fff; color: var(--ink-2); transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.jn-chip[aria-pressed='true'] { background: var(--plum); border-color: var(--plum); color: #fff; }
+.jn-chip:disabled { opacity: 0.45; cursor: not-allowed; }
+.jn-other { margin-top: 10px; width: 100%; }
+.jn-terms { padding: 16px 18px; border-radius: 16px; background: var(--mist); border: 1px solid var(--line); font-size: 0.92rem; color: var(--ink-2); }
+.jn-terms p { margin: 0 0 6px; color: var(--ink); }
+.jn-terms ul { margin: 0 0 12px; padding-left: 18px; display: grid; gap: 4px; }
+.jn-agree { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink); cursor: pointer; }
+.jn-agree input { width: 20px; height: 20px; accent-color: var(--plum); }
+.jn-alt { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; }
+.jn-done { max-width: 640px; margin-inline: auto; }

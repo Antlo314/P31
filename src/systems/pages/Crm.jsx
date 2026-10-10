@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Users, Search, Download, ArrowLeft, Mail, Phone, CalendarDays, Video, GraduationCap, Heart, Handshake, Store, Award, StickyNote,
-  Sparkles, PhoneCall, Send, Check, X,
+  Sparkles, PhoneCall, Send, Check, X, UserPlus,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { fmtDate, fmtDateTime } from '../../lib/academy';
@@ -11,7 +11,7 @@ const ICON = {
   subscribed: Heart, partnership_request: Handshake, market_rsvp: Store, intro_request: PhoneCall, intro_status: PhoneCall,
   calendly_intro: CalendarDays, calendly_session: CalendarDays, calendly_connect: Handshake, calendly_unknown: CalendarDays,
   invite_sent: Send, enrolled: GraduationCap, session_joined: Video, attendance: Check, zoom_joined: Video, zoom_left: Video,
-  certificate: Award, note: StickyNote,
+  certificate: Award, note: StickyNote, collective_application: UserPlus,
 };
 const iconFor = (kind) => ICON[kind] || (kind.startsWith('membership_') ? GraduationCap : Sparkles);
 

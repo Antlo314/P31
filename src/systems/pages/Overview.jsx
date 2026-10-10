@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { SYSTEMS_NAV } from '../nav';
 
 const BLURBS = {
+  '/systems/applications': 'Review “Join P31 Collective” membership applications.',
   '/systems/social': 'Plan, schedule and share posts across every platform.',
   '/systems/growth': 'Search social media for groups and people who fit P31.',
   '/systems/events': 'Create markets, announce dates, and manage RSVPs.',
@@ -33,7 +34,8 @@ const Overview = ({ operator }) => {
       count('social_posts', (q) => q.eq('status', 'scheduled')),
       count('pro_edit_jobs', (q) => q.in('status', ['queued', 'processing'])),
       count('curator_data', (q) => q.eq('status', 'pending')),
-    ]).then(([prospects, scheduled, edits, pending]) => setStats({ prospects, scheduled, edits, pending }));
+      count('collective_applications', (q) => q.eq('status', 'new')),
+    ]).then(([prospects, scheduled, edits, pending, applications]) => setStats({ prospects, scheduled, edits, pending, applications }));
   }, []);
 
   const hour = new Date().getHours();
@@ -46,8 +48,9 @@ const Overview = ({ operator }) => {
         <h1>{greeting}, {operator.display_name || operator.username}.</h1>
       </header>
 
-      <div className="sys-stats">
+      <div className="sys-stats sys-stats--5">
         {[
+          ['New applications', stats?.applications, '/systems/applications'],
           ['Prospects', stats?.prospects, '/systems/growth'],
           ['Posts scheduled', stats?.scheduled, '/systems/social'],
           ['Pro edits in queue', stats?.edits, '/systems/pro-edit'],

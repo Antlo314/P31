@@ -32,6 +32,7 @@ const Portal = lazy(() => import('./academy/Portal'));
 const CollectiveHome = lazy(() => import('./academy/CollectiveHome'));
 const Verify = lazy(() => import('./academy/Verify'));
 const AcademyHome = lazy(() => import('./academy/AcademyHome'));
+const Join = lazy(() => import('./academy/Join'));
 const Enroll = lazy(() => import('./academy/Enroll'));
 
 // The team console is its own app: loaded only when someone opens it,
@@ -141,6 +142,7 @@ function CollectiveRoutes() {
           <Routes>
             <Route path="/" element={<CollectiveHome />} />
             <Route path="/academy" element={<AcademyHome />} />
+            <Route path="/join" element={<Join />} />
             <Route path="/mentorship" element={<MentorshipLanding />} />
             <Route path="/mentorship/:program" element={<MentorshipProgram />} />
             <Route path="/portal" element={<Portal />} />

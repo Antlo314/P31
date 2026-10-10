@@ -12,7 +12,7 @@ import { useRoles } from '../lib/roles';
 import './Navbar.css';
 
 import logoPath from '../assets/web/logo-160.webp';
-import { JOIN_COLLECTIVE_URL } from '../lib/academy';
+import { JOIN_PATH } from '../lib/academy';
 
 const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
 
@@ -30,7 +30,7 @@ const LINKS = [
   { to: '/calendar', label: 'Market Dates', Icon: CalendarDays },
   { to: '/academy', href: hrefFor('/academy'), label: 'Mentorship', Icon: GraduationCap },
   { to: '/portal', href: collectivePortal(), label: 'The Collective', Icon: KeyRound },
-  { to: '/join-collective', href: JOIN_COLLECTIVE_URL, label: 'Join P31 Collective', Icon: UserPlus, external: true },
+  { to: '/join', href: hrefFor(JOIN_PATH), label: 'Join P31 Collective', Icon: UserPlus },
   { to: '/partner', label: 'Partner With Us', Icon: Handshake },
   { to: '/services', label: 'Services', Icon: Sparkles },
   { to: '/about', label: 'Our Story', Icon: Info },

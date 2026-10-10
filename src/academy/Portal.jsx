@@ -10,7 +10,7 @@ import { usernameToEmail } from '../systems/useOperator';
 import mark from '../assets/academy/collective-mark.png';
 import '../pages/Login.css';
 import './mentorship.css';
-import { JOIN_COLLECTIVE_URL } from '../lib/academy';
+import { JOIN_PATH } from '../lib/academy';
 
 const KIND_ICON = { student: GraduationCap, mentor: Presentation, studio: Clapperboard, systems: ShieldCheck, curator: Store };
 
@@ -142,7 +142,7 @@ const Portal = () => {
               <button className="k-btn k-btn--plum k-btn--lg k-btn--block" disabled={busy}>{busy ? 'One moment…' : creating ? 'Create account' : <>Sign in <ArrowRight size={18} /></>}</button>
               {!creating && <button type="button" className="lg__forgot" onClick={forgot}>Forgot password?</button>}
               <button type="button" className="lg__forgot" onClick={() => { setCreating(!creating); setError(''); setNote(''); }}>{creating ? 'I already have an account' : 'Mentor or Studio team? Create an account'}</button>
-              <p className="lg__foot">New here? <a href={JOIN_COLLECTIVE_URL} target="_blank" rel="noopener noreferrer">Join P31 Collective</a> or <a href={hrefFor('/academy')}>book an intro call</a></p>
+              <p className="lg__foot">New here? <a href={hrefFor(JOIN_PATH)}>Join P31 Collective</a> or <a href={hrefFor('/academy')}>book an intro call</a></p>
             </form>
           )}
 

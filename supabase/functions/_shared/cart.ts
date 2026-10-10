@@ -56,6 +56,10 @@ export async function buildLines(admin: any, curatorId: string | null, items: Ca
     lines.push({ product_id: p.id, name: p.name, price_cents, quantity, options, image_url: p.image_url || null });
   }
 
+  // Only approved shops can take orders (pending applications stay closed, even to hand-made requests).
+  const { data: open } = await admin.from('curator_data').select('id').eq('id', shop).eq('status', 'approved').maybeSingle();
+  if (!open) throw new CartError('This shop isn’t open for orders yet.');
+
   const subtotal = lines.reduce((s, l) => s + l.price_cents * l.quantity, 0);
   return { shop, lines, subtotal };
 }

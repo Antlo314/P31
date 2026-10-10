@@ -6,7 +6,7 @@ import { collectivePortal, hrefFor } from '../lib/site';
 import logoPath from '../assets/web/logo-160.webp';
 import './Footer.css';
 import { EMAIL } from '../lib/team';
-import { JOIN_COLLECTIVE_URL } from '../lib/academy';
+import { JOIN_PATH } from '../lib/academy';
 
 const APPLY_URL = 'https://forms.gle/vmkK7fhgwiYNYEa38';
 // Opens the "write a review" box on our Google Business Profile.
@@ -59,7 +59,7 @@ const Footer = () => (
           <Link to="/services">Services</Link>
           <Link to="/login">Curator portal</Link>
           <a href={collectivePortal()}>The Collective</a>
-          <a href={JOIN_COLLECTIVE_URL} target="_blank" rel="noopener noreferrer">Join P31 Collective</a>
+          <a href={hrefFor(JOIN_PATH)}>Join P31 Collective</a>
         </nav>
         <div className="ft__col">
           <h4>Contact</h4>

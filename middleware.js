@@ -7,7 +7,7 @@
 
 export const config = {
   matcher: [
-    '/', '/mentorship/:path*', '/verify/:path*', '/portal/:path*', '/academy/:path*', '/studio/:path*',
+    '/', '/join', '/mentorship/:path*', '/verify/:path*', '/portal/:path*', '/academy/:path*', '/studio/:path*',
     '/systems/:path*', '/enroll/:path*', '/robots.txt', '/sitemap.xml', '/favicon.ico', '/favicon.png', '/manifest.webmanifest',
   ],
 };
@@ -17,6 +17,7 @@ const COLLECTIVE = /(^|\.)thep31collective\.org$/i;
 const PAGES = {
   '/': '/c/home',
   '/academy': '/c/academy',
+  '/join': '/c/join',
   '/systems': '/c/systems',
   '/mentorship': '/c/mentorship',
   '/mentorship/business': '/c/mentorship/business',

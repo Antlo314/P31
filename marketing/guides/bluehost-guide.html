@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>P31 — Bluehost Guide: Domains &amp; Team Email</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  @page { size: Letter; margin: 0.45in 0.55in 0.45in; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: Manrope, Arial, sans-serif; color: #201431; font-size: 9.8pt; line-height: 1.4; }
+  .head { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-radius: 18px;
+    background: radial-gradient(90% 120% at 100% 0%, rgba(150,70,210,.55), transparent 60%), linear-gradient(150deg, #2a1240, #12081d); color: #fff; }
+  .head img { width: 58px; height: 58px; border-radius: 50%; }
+  .head h1 { margin: 0; font-family: 'Noto Serif', serif; font-weight: 400; font-size: 24pt; letter-spacing: -.01em; line-height: 1.05; }
+  .head h1 em { color: #F2CE4D; }
+  .head p { margin: 5px 0 0; font-size: 9pt; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; color: #F2CE4D; }
+  .lead { margin: 12px 2px 4px; font-size: 10.6pt; color: #4a3b5c; }
+  h2 { font-family: 'Noto Serif', serif; font-weight: 400; color: #5E2A8C; font-size: 14.5pt; margin: 10px 0 5px; display: flex; align-items: center; gap: 10px; }
+  h2 .n { display: inline-grid; place-items: center; width: 30px; height: 34px; border-radius: 999px 999px 9px 9px; background: #1d0f2e; color: #F2CE4D; font-family: Manrope, sans-serif; font-size: 11pt; font-weight: 800; }
+  h3 { margin: 8px 0 4px; font-size: 10.4pt; color: #201431; }
+  ol, ul { margin: 0; padding-left: 20px; }
+  li { margin: 2px 0; }
+  .card { border: 1px solid #E7DCF4; border-radius: 14px; padding: 9px 14px; background: #FCFBFE; break-inside: avoid; }
+  .gold { border-color: rgba(217,169,58,.6); background: #fffaf0; }
+  .tip { margin-top: 8px; padding: 9px 12px; border-left: 3px solid #D9A93A; background: #FBF6EA; border-radius: 0 10px 10px 0; font-size: 9.6pt; }
+  .warn { margin-top: 8px; padding: 9px 12px; border-left: 3px solid #c0392b; background: #fdf0ee; border-radius: 0 10px 10px 0; font-size: 9.6pt; }
+  .btn { display: inline-block; padding: 1px 9px; border-radius: 999px; background: #F2CE4D; color: #2a1a00; font-weight: 800; font-size: 9pt; white-space: nowrap; }
+  .path { font-weight: 800; color: #5E2A8C; }
+  .url { font-weight: 800; color: #5E2A8C; }
+  code { font-family: Consolas, 'Courier New', monospace; font-size: 8.8pt; background: #F5F1FB; padding: 1px 5px; border-radius: 5px; color: #3d1a5e; }
+  .small { font-size: 8.8pt; color: #6d5d7a; }
+  .blk { break-inside: avoid; }
+  .page-break { break-before: page; }
+  .run { display:flex; justify-content:space-between; align-items:center; padding-bottom:6px; border-bottom:2px solid #F2CE4D; font-family:'Noto Serif',serif; color:#5E2A8C; font-size:13pt; margin-bottom: 4px; }
+  .run small { font-family: Manrope, sans-serif; font-size: 8pt; font-weight: 800; letter-spacing: .2em; color: #8a6d1a; }
+  table { width: 100%; border-collapse: collapse; font-size: 9.2pt; }
+  th { text-align: left; font-size: 7.6pt; letter-spacing: .16em; text-transform: uppercase; color: #8a6d1a; padding: 5px 8px; border-bottom: 2px solid #F2CE4D; }
+  td { padding: 6px 8px; border-bottom: 1px solid #EFE6F8; vertical-align: top; }
+  td b { color: #5E2A8C; }
+  .ok { color: #1f7a3d; font-weight: 800; }
+  .todo { color: #9a6a00; font-weight: 800; }
+  .box { display: inline-block; width: 11px; height: 11px; border: 1.5px solid #5E2A8C; border-radius: 3px; vertical-align: -1px; }
+  .map { display: grid; grid-template-columns: 1fr 1.1fr 1fr; gap: 10px; align-items: center; margin: 10px 0 4px; }
+  .map > div { border-radius: 14px; padding: 10px 12px; text-align: center; }
+  .map .bh { background: #2a1240; color: #fff; }
+  .map .bh b { color: #F2CE4D; display: block; font-size: 11pt; }
+  .map .side { background: #F5F1FB; border: 1px solid #E7DCF4; }
+  .map .side b { color: #5E2A8C; display: block; }
+  .arrow { font-size: 18pt; color: #D9A93A; text-align: center; }
+  .foot { margin-top: 8px; padding-top: 7px; break-inside: avoid; border-top: 1px solid #E7DCF4; display: flex; justify-content: space-between; font-size: 8.5pt; color: #8a7a96; }
+</style></head>
+<body>
+
+<div class="head">
+  <img src="guide-mark.png" alt="">
+  <div><h1>P31 <em>Marketplace &amp; Collective</em></h1><p>Bluehost guide · domains &amp; team email</p></div>
+</div>
+
+<p class="lead">Bluehost is where both P31 web addresses, <b>p31market.com</b> and <b>thep31collective.org</b>, are registered and managed. It doesn’t run the websites themselves (they run on Vercel), but it holds the “address book” that tells the internet where everything lives: the websites, every team inbox, and the proof that our emails are really from us. If a setting here is wrong, a site can stop loading, emails can bounce, and messages can land in spam.</p>
+
+<section class="blk"><h2><span class="n">1</span> Why Bluehost needs to stay connected</h2>
+<div class="map">
+  <div class="side"><b>Visitors &amp; Google</b>type p31market.com or thep31collective.org</div>
+  <div class="bh"><b>Bluehost</b>the address book (DNS) for both domains, plus team email</div>
+  <div class="side"><b>Where it sends them</b>websites → Vercel · email → Bluehost inboxes</div>
+</div>
+<table>
+  <tr><th style="width:26%">What Bluehost does</th><th>What it means for P31</th><th style="width:28%">If it breaks</th></tr>
+  <tr><td><b>Points to the websites</b></td><td>Sends every visitor to the live P31 websites, which run on Vercel.</td><td>The sites stop loading.</td></tr>
+  <tr><td><b>Holds the team inboxes</b></td><td>founder@, member@, vendor@, grants@ and the rest all live in Bluehost email. The websites, Carla (our DM assistant) and every contact page now send people to these addresses.</td><td>Emails bounce and leads are lost.</td></tr>
+  <tr><td><b>Proves our email is real</b></td><td>Three records (SPF, DKIM, DMARC) tell Gmail and Outlook that mail from our domains is genuine.</td><td>Our emails land in spam.</td></tr>
+  <tr><td><b>Verifies us with services</b></td><td>Google Search Console (so new pages show up in Google) and our email-sending service for alerts and campaigns both confirm ownership with a record here.</td><td>New pages aren’t found on Google; alerts and campaigns can’t send.</td></tr>
+  <tr><td><b>Keeps the names ours</b></td><td>Both domain names are renewed through Bluehost.</td><td>If a renewal lapses, everything above stops at once.</td></tr>
+</table>
+</section>
+
+<section class="blk"><h2><span class="n">2</span> Where things stand today</h2>
+<div class="card">
+<table>
+  <tr><th>Check</th><th style="width:22%">p31market.com</th><th style="width:22%">thep31collective.org</th></tr>
+  <tr><td>Website points to Vercel</td><td class="ok">✓ Connected</td><td class="ok">✓ Connected</td></tr>
+  <tr><td>Email server (MX) set up</td><td class="ok">✓ Bluehost mail</td><td class="ok">✓ Bluehost mail</td></tr>
+  <tr><td>SPF and DKIM (anti-spam proof)</td><td class="ok">✓ In place</td><td class="ok">✓ In place</td></tr>
+  <tr><td>DMARC (anti-spoofing policy)</td><td class="ok">✓ Monitoring mode</td><td class="ok">✓ Monitoring mode</td></tr>
+  <tr><td>Each team address exists</td><td class="todo">To confirm (step 4)</td><td class="todo">To confirm (step 4)</td></tr>
+</table>
+<p class="small" style="margin:6px 0 0">Checked October 9, 2026. Nothing needs to be changed. The steps below are about confirming the inboxes and knowing what to leave alone.</p>
+</div></section>
+
+<div class="page-break"></div>
+<div class="run">Bluehost guide <small>Team email</small></div>
+
+<section class="blk"><h2><span class="n">3</span> Sign in to Bluehost</h2>
+<div class="card">
+  <ol>
+    <li>Go to <span class="url">bluehost.com</span> and click <b>Login</b>.</li>
+    <li>Sign in with the account that owns both domains. You’ll land in the <b>Bluehost Portal</b>.</li>
+  </ol>
+  <div class="tip"><b>Turn on two-step login for this account</b> (in your Bluehost profile or security settings). Whoever controls this login controls both websites and every team inbox.</div>
+</div></section>
+
+<section class="blk"><h2><span class="n">4</span> Check the team inboxes</h2>
+<div class="card gold">
+  <p style="margin:0 0 6px">Open the list of email addresses:</p>
+  <ol>
+    <li>In the left menu, click <span class="path">Hosting</span>, then <span class="path">My Plans</span>.</li>
+    <li>On the right, click <span class="btn">cPanel Email</span>.</li>
+    <li>In the pop-up, click <span class="path">Email Accounts</span>, then <b>Continue</b>.</li>
+    <li>Use the search box to find each address below. Tick it off when you see it.</li>
+  </ol>
+  <table style="margin-top:8px">
+    <tr><th style="width:5%"></th><th style="width:38%">Address</th><th style="width:25%">Who reads it</th><th>What it’s for</th></tr>
+    <tr><td><span class="box"></span></td><td><code>founder@thep31collective.org</code></td><td>Melanie JC</td><td>Vision, leadership, partnerships</td></tr>
+    <tr><td><span class="box"></span></td><td><code>ceo@p31market.com</code></td><td>Melanie JC</td><td>Marketplace leadership</td></tr>
+    <tr><td><span class="box"></span></td><td><code>secretary@thep31collective.org</code></td><td>Savannah Campbell</td><td>Admin support, scheduling</td></tr>
+    <tr><td><span class="box"></span></td><td><code>secretary@p31market.com</code></td><td>Savannah Campbell</td><td>Services inquiries, outreach</td></tr>
+    <tr><td><span class="box"></span></td><td><code>marketing@p31market.com</code></td><td>Yanni Bratcher</td><td>Marketing, press, collaborations</td></tr>
+    <tr><td><span class="box"></span></td><td><code>member@thep31collective.org</code></td><td>Alexia Thomas</td><td>Mentorship members (main Collective contact)</td></tr>
+    <tr><td><span class="box"></span></td><td><code>outreach@p31market.com</code></td><td>Alexia Thomas</td><td>Community, events (main market contact)</td></tr>
+    <tr><td><span class="box"></span></td><td><code>coordinator@thep31collective.org</code></td><td>Shanay Prince</td><td>Support and operations</td></tr>
+    <tr><td><span class="box"></span></td><td><code>grants@p31market.com</code></td><td>Shanay Prince</td><td>Grants, sponsors, partnerships</td></tr>
+    <tr><td><span class="box"></span></td><td><code>vendor@p31market.com</code></td><td>Anthony Carr</td><td>Curator and vendor help</td></tr>
+  </table>
+</div></section>
+
+<section class="blk"><h2><span class="n">5</span> Add any missing address</h2>
+<div class="card">
+  <h3>Option A: a full inbox (the person logs in to read it)</h3>
+  <ol>
+    <li>In <span class="path">Email Accounts</span>, click <span class="btn">+ Create</span> (top right).</li>
+    <li>Pick the <b>Domain</b>, type the <b>Username</b> (for example <code>vendor</code>), and set a strong <b>Password</b>.</li>
+    <li>Click <b>Edit Settings</b> and raise the <b>storage</b>. Starter plans allow only 100 MB, and a full inbox bounces new mail.</li>
+    <li>Click <span class="btn">+ Create</span>.</li>
+  </ol>
+  <h3>Option B: a forwarder (mail goes to an inbox they already use)</h3>
+  <ol>
+    <li>Go back to <span class="btn">cPanel Email</span> and choose <span class="path">Forwarders</span>.</li>
+    <li>Click <b>Add Forwarder</b>. Type the address (for example <code>grants</code>), choose the domain, then enter the inbox it should go to.</li>
+    <li>Click <b>Add Forwarder</b>.</li>
+  </ol>
+  <div class="tip">Bluehost turns off “catch-all” addresses on shared plans, so <b>every address the website uses must exist as an inbox or a forwarder</b>. Mail to an address that doesn’t exist simply bounces.</div>
+</div></section>
+
+<section class="blk"><h2><span class="n">6</span> Test every inbox (5 minutes)</h2>
+<div class="card">
+  <ol>
+    <li>From a personal email (Gmail, iCloud…), send one message with the subject <b>“P31 inbox test”</b> to all ten addresses above.</li>
+    <li>A reply saying <i>“Address not found”</i> or <i>“Undeliverable”</i> means that address is missing. Go back to step 5.</li>
+    <li>Ask each person to <b>reply “got it”</b> from their P31 address. That proves the inbox can both receive and send.</li>
+    <li>If a reply lands in your spam folder, mark it <b>Not spam</b> and let us know.</li>
+  </ol>
+</div></section>
+
+<div class="run" style="margin-top:14px">Bluehost guide <small>Domain settings (DNS)</small></div>
+
+<section class="blk"><h2><span class="n">7</span> Find the domain settings (DNS)</h2>
+<div class="card">
+  <ol>
+    <li>In the Bluehost Portal’s left menu, click <span class="path">Domains</span>.</li>
+    <li>Click the domain (<b>p31market.com</b> or <b>thep31collective.org</b>).</li>
+    <li>Open the <span class="path">DNS</span> tab. This is the list of records described below.</li>
+  </ol>
+  <p class="small" style="margin:6px 0 0">The same records also appear in cPanel under <b>Domains → Zone Editor</b>. Use either one; they’re the same settings.</p>
+</div></section>
+
+<section class="blk"><h2><span class="n">8</span> Records to leave alone</h2>
+<div class="card">
+<table>
+  <tr><th style="width:24%">Record</th><th style="width:36%">What you’ll see</th><th>What it does</th></tr>
+  <tr><td><b>A</b> · host <code>@</code></td><td><code>216.198.79.1</code></td><td>Sends <b>p31market.com</b> / <b>thep31collective.org</b> to the websites (Vercel).</td></tr>
+  <tr><td><b>CNAME</b> · host <code>www</code></td><td>ends in <code>vercel-dns-017.com</code></td><td>Sends the <b>www.</b> address to the websites.</td></tr>
+  <tr><td><b>MX</b></td><td><code>mail.p31market.com</code> / <code>mail.thep31collective.org</code></td><td>Delivers all team email to Bluehost.</td></tr>
+  <tr><td><b>TXT</b> · starts with <code>v=spf1</code></td><td>…include:websitewelcome.com ~all</td><td>SPF: lists who may send email for us.</td></tr>
+  <tr><td><b>TXT</b> · host <code>default._domainkey</code></td><td>a long key</td><td>DKIM: signs our email so it’s trusted.</td></tr>
+  <tr><td><b>TXT</b> · host <code>_dmarc</code></td><td><code>v=DMARC1; p=none</code></td><td>DMARC: tells inboxes how to treat fakes.</td></tr>
+</table>
+<div class="warn"><b>Never delete or edit these</b> unless P31’s developer asks you to. Deleting the MX record stops all team email. Deleting the A or CNAME record takes the website offline.</div>
+</div></section>
+
+<section class="blk"><h2><span class="n">9</span> Adding a record when asked</h2>
+<div class="card gold">
+  <p style="margin:0 0 6px">Two services will each ask for a record. They change nothing else:</p>
+  <ul>
+    <li><b>Google Search Console</b> gives a <b>TXT</b> record starting with <code>google-site-verification=</code>. It proves we own the domain so Google lists our new pages.</li>
+    <li><b>Our email-sending service</b> (for alerts, receipts and campaigns) gives a few records on its own sub-name, such as <code>send</code> or <code>resend._domainkey</code>.</li>
+  </ul>
+  <ol style="margin-top:6px">
+    <li>On the <span class="path">DNS</span> tab, click <span class="btn">+ Add record</span>.</li>
+    <li>Choose the <b>Type</b> (TXT, MX or CNAME) exactly as the service shows it.</li>
+    <li>Copy the <b>Host / Name</b> and the <b>Value</b> exactly. Use <code>@</code> when the service says “root” or leaves the name blank.</li>
+    <li>Click <b>Add</b>. Changes usually work within minutes, but can take up to a few hours.</li>
+  </ol>
+  <div class="warn"><b>Only one SPF record per domain.</b> If a service asks you to add a record starting with <code>v=spf1</code> on <code>@</code>, don’t create a second one. Send it to P31’s developer to merge into the existing record. Two SPF records make email fail.</div>
+</div></section>
+
+<section class="blk"><h2><span class="n">10</span> Keep it safe</h2>
+<div class="card">
+  <ul>
+    <li><b>Auto-renew on:</b> in <span class="path">Domains</span>, confirm both domains are set to renew automatically and the card on file is current.</li>
+    <li><b>Two-step login</b> on the Bluehost account (step 3).</li>
+    <li><b>Share access, not passwords:</b> give the developer or team their own access instead of the main login.</li>
+    <li><b>Help is 24/7:</b> Bluehost chat (bubble at the bottom right of bluehost.com) or phone <b>888-401-4678</b> (7am–midnight ET).</li>
+  </ul>
+</div></section>
+
+<div class="foot"><span>Prepared for Proverbs 31 Marketplace &amp; The P31 Collective by NEBA · October 2026</span><span class="verse">“She considereth a field, and buyeth it.” Proverbs 31:16</span></div>
+
+</body></html>

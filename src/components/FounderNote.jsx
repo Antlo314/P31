@@ -1,9 +1,9 @@
 import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
-import { collectiveHome } from '../lib/site';
+import { collectiveHome, hrefFor } from '../lib/site';
 import founder from '../assets/web/melanie23_rm.webp';
 import './FounderNote.css';
-import { JOIN_COLLECTIVE_URL } from '../lib/academy';
+import { JOIN_PATH } from '../lib/academy';
 
 // A small "why she started it" insert for the marketplace. Melanie's full story
 // lives on the Collective.
@@ -17,7 +17,7 @@ const FounderNote = ({ dark = false }) => (
         Melanie JC, founder ·{' '}
         <a href={`${collectiveHome()}#melanie`}>Meet Melanie <ArrowUpRight size={14} /></a>
         {' · '}
-        <a href={JOIN_COLLECTIVE_URL} target="_blank" rel="noopener noreferrer">Join P31 Collective <ArrowUpRight size={14} /></a>
+        <a href={hrefFor(JOIN_PATH)}>Join P31 Collective <ArrowUpRight size={14} /></a>
       </p>
     </div>
   </aside>

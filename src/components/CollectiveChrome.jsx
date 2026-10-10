@@ -93,8 +93,8 @@ export const CollectiveFooter = () => (
         </nav>
         <div className="ft__col">
           <h4>Contact</h4>
-          <a href={`mailto:${EMAIL.members}`}><Mail size={15} /> {EMAIL.members}</a>
-          <a href={`mailto:${EMAIL.support}`}><Mail size={15} /> {EMAIL.support}</a>
+          <a href={`mailto:${EMAIL.members}`}><Mail size={15} /> <span>{EMAIL.members.split('@')[0]}@<wbr />{EMAIL.members.split('@')[1]}</span></a>
+          <a href={`mailto:${EMAIL.support}`}><Mail size={15} /> <span>{EMAIL.support.split('@')[0]}@<wbr />{EMAIL.support.split('@')[1]}</span></a>
           <a href={`tel:${OFFICE.tel}`}><Phone size={15} /> {OFFICE.phone}</a>
           <span><MapPin size={15} /> {OFFICE.mailing.join(', ')}</span>
           <Link to="/#team"><Users size={15} /> Meet the team</Link>

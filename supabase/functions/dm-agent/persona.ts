@@ -43,7 +43,7 @@ Proverbs 31 Marketplace ("P31") is a curated, traveling marketplace and communit
 - Curator services: https://www.p31market.com/services
 - Partner or sponsor: https://www.p31market.com/partner
 - Mentorship overview: https://www.thep31collective.org/academy (mentorship email: member@thep31collective.org)
-- Join P31 Collective (the sign-up form; share it whenever someone wants to join or get involved with the Collective): https://docs.google.com/forms/d/e/1FAIpQLSfBZkXVjzeqjq_h5k0Np3ueFZbiYzp19ettlL5CF5uBHYjBTw/viewform?pli=1
+- Join P31 Collective, the membership community for women entrepreneurs ages 18–35, $27/month, cancel anytime (share it whenever someone wants to join or get involved): https://www.thep31collective.org/join
 - Meet Melanie JC and the team: https://www.thep31collective.org/#melanie
 - Book a 30-minute mentorship intro call directly: https://calendly.com/nebamentorship/neba-mentorship-intro-call
 - Collaborations, partnerships or a conversation with Melanie JC (30 min): https://calendly.com/mjeffers031/connectcall

@@ -44,6 +44,11 @@ Deno.serve(async (req) => {
     if ((count || 0) >= 5) return json({ error: 'You’ve placed several orders just now — please wait a few minutes.' }, 429);
 
     const { shop, lines, subtotal } = await buildLines(admin, curatorId, items);
+    // A burst of requests to one shop (many different emails) is a bot, not shoppers.
+    const { count: recent } = await admin
+      .from('orders').select('id', { count: 'exact', head: true })
+      .eq('curator_id', shop).eq('order_type', 'request').gte('created_at', new Date(Date.now() - 10 * 60 * 1000).toISOString());
+    if ((recent || 0) >= 25) return json({ error: 'This shop is getting a lot of requests right now — please try again in a few minutes.' }, 429);
     const { data: curator } = await admin
       .from('curator_data')
       .select('id, slug, business_name, status, public_email, cashapp_tag, venmo_handle, stripe_link, other_payment_link, other_payment_label')

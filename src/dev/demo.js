@@ -188,6 +188,17 @@ const makeDb = () => ({
     ['Atlanta Women in Business', 'facebook', 'group', 18400, 'new'], ['Gwinnett Makers Market', 'facebook', 'group', 5200, 'contacted'],
     ['#atlantasmallbusiness', 'instagram', 'hashtag', 92000, 'new'], ['Faith & Hustle Collective', 'instagram', 'creator', 12700, 'new'],
   ].map(([name, platform, kind, audience_size, status], i) => ({ id: `sp${i}`, name, platform, kind, audience_size, status, url: '#', description: 'Sample prospect', source_query: 'women entrepreneurs Atlanta', created_at: day(-i) })),
+  collective_applications: [
+    ['Jordan Ellis', 'Glow & Grace Skincare', 'Snellville, GA', 'new', ['Marketing', 'Networking', 'Faith/Obedience', 'Business Development'], ['P31 Marketplace virtual storefront'], 'Social Media', 0],
+    ['Brianna Hughes', 'Rooted Ministries', 'Decatur, GA', 'new', ['Leadership', 'Public Speaking', 'Accountability'], ['Private Faith-Based Mentorship'], 'P31 Panelist', 1],
+    ['Kayla Simmons', null, 'Duluth, GA', 'reviewing', ['Personal Growth/Purpose', 'Healthy Lifestyle'], ['Healthy Lifestyle Coaching'], 'P31 Vendor', 3],
+    ['Nia Freeman', 'Freeman Events', 'Atlanta, GA', 'approved', ['Business Development', 'Marketing'], ['Marketing Strategy Coaching'], 'P31 Collective Member', 9],
+  ].map(([full_name, business_name, city_state, status, growth_areas, interests, heard_from, ago], i) => ({
+    id: `ca-${i}`, full_name, business_name, email: `${full_name.split(' ')[0].toLowerCase()}@example.com`, phone: '(470) 555-01' + (40 + i), city_state,
+    birthday: ['March 14', 'July 2', 'November 21', 'May 9'][i], socials: business_name ? '@' + business_name.toLowerCase().replace(/[^a-z]/g, '') : null,
+    heard_from, business_description: business_name ? `Sample business: ${business_name}.` : null, inspiration: 'Sample answer: I want a community of women who build with faith.',
+    growth_areas, interests, agreed: true, status, notes: null, created_at: day(-ago), reviewed_at: status === 'new' ? null : day(-ago + 1),
+  })),
   campaigns: [{ id: 'cm1', subject: 'The Winter Gala is coming', body: 'Save the date…', audience: 'subscribers', status: 'draft', created_at: day(-1) }],
   market_events: [{ id: 'ev1', title: 'Winter Gala', event_date: day(70).slice(0, 10), date_public: false, is_active: true, venue: null, capacity: 150 }],
 });

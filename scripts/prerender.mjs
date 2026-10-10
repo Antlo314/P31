@@ -274,6 +274,7 @@ const collectivePages = [
   { file: 'mentorship/business', path: '/mentorship/business', ...ROUTE_META['/mentorship/business'], ld: programLd('business') },
   { file: 'mentorship/faith', path: '/mentorship/faith', ...ROUTE_META['/mentorship/faith'], ld: programLd('faith') },
   { file: 'academy', path: '/academy', ...COLLECTIVE_META['/academy'], ld: [collectiveOrg, crumb('The P31 Academy', '/academy')] },
+  { file: 'join', path: '/join', ...COLLECTIVE_META['/join'], ld: [collectiveOrg, crumb('Join P31 Collective', '/join')] },
   { file: 'systems', path: '/systems', ...COLLECTIVE_META['/systems'], ld: [collectiveOrg, crumb('P31 Systems', '/systems')] },
   { file: 'verify', path: '/verify', ...COLLECTIVE_META['/verify'] },
   // Every other Collective route (portal, classrooms, Studio, Systems): the app shell, not indexed.
@@ -284,7 +285,7 @@ for (const page of collectivePages) {
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, render({ ...page, origin: C, image: COLLECTIVE_IMAGE, base: collectiveTemplate }));
 }
-const cUrls = ['/', '/academy', '/mentorship', '/mentorship/business', '/mentorship/faith', '/systems'];
+const cUrls = ['/', '/join', '/academy', '/mentorship', '/mentorship/business', '/mentorship/faith', '/systems'];
 writeFileSync(join(dist, 'c', 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${cUrls.map((p) => `  <url><loc>${esc(`${C}${p}`)}</loc><priority>${p === '/' ? '1.0' : '0.9'}</priority></url>`).join('\n')}

@@ -89,6 +89,9 @@ Deno.serve(async (req) => {
   const ts = req.headers.get('X-Webhook-Timestamp') || '';
   const sig = req.headers.get('X-Webhook-Signature') || '';
   if (!ts || !safeEqual(sig, await sign(secret, `${ts}.${body}`))) return new Response('Bad signature', { status: 401 });
+  // Signed but old: a replayed event. (Daily sends seconds; accept milliseconds too.)
+  const sentMs = Number(ts) > 1e12 ? Number(ts) : Number(ts) * 1000;
+  if (!Number.isFinite(sentMs) || Math.abs(Date.now() - sentMs) > 5 * 60 * 1000) return new Response('Stale', { status: 401 });
   let evt: any;
   try { evt = JSON.parse(body); } catch { return new Response('Bad JSON', { status: 400 }); }
   if (evt?.test) return ok(); // Daily's check when the webhook is registered

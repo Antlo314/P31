@@ -363,3 +363,15 @@ button.sys-tabbar__link.active { background: rgba(242, 206, 77, 0.1); }
 .crm-timeline strong { display: block; font-size: 0.92rem; }
 .crm-timeline small { color: rgba(255, 255, 255, 0.55); font-size: 0.78rem; }
 .crm-timeline p { margin: 6px 0 0; font-size: 0.88rem; color: rgba(255, 255, 255, 0.78); white-space: pre-wrap; }
+
+/* Applications (Join P31 Collective) */
+.app-status--new { background: rgba(242, 206, 77, 0.18) !important; color: var(--gold-hi) !important; }
+.app-status--reviewing { background: rgba(168, 85, 232, 0.2) !important; color: #d7b3f7 !important; }
+.app-status--approved { background: rgba(23, 166, 115, 0.18) !important; color: #6fe0b4 !important; }
+.app-status--waitlist { background: rgba(120, 160, 255, 0.16) !important; color: #b9ccff !important; }
+.app-status--declined { background: rgba(255, 255, 255, 0.08) !important; color: rgba(255, 255, 255, 0.6) !important; }
+.app-field { display: grid; gap: 2px; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.app-field:last-child { border-bottom: 0; }
+.app-field span { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-hi); }
+.app-field p { margin: 0; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (min-width: 1100px) { .sys-stats--5 { grid-template-columns: repeat(5, 1fr); } }

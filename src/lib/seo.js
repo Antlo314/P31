@@ -96,6 +96,12 @@ export const COLLECTIVE_META = {
     origin: COLLECTIVE_URL,
     image: COLLECTIVE_IMAGE,
   },
+  '/join': {
+    title: `Join P31 Collective — A Faith-Centered Community for Women Entrepreneurs`,
+    description: 'Apply to join the Proverbs 31 Collective by NEBA: monthly meetups, prayer and fasting, member rates on mentorship and coaching, and a supportive community of Kingdom women in business.',
+    origin: COLLECTIVE_URL,
+    image: COLLECTIVE_IMAGE,
+  },
   '/systems': {
     title: `P31 Systems — The Tools Behind Proverbs 31 Marketplace & The Collective`,
     description: 'Clip Studio, Photo Studio, the Content Studio, a CRM and more: the tools P31 builds to help the Marketplace and the Collective grow.',

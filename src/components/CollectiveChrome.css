@@ -15,7 +15,7 @@
 }
 /* Long email addresses wrap instead of pushing the page wider on phones. */
 .cl-ft .ft__grid > * { min-width: 0; }
-.cl-ft .ft__col a { overflow-wrap: anywhere; }
+.cl-ft .ft__col a { overflow-wrap: break-word; }
 
 /* Header: "Join P31 Collective" leads; Sign in is the quieter pill beside it. */
 .cl-nb__actions { gap: 8px; }
