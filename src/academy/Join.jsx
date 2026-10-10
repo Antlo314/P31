@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ArrowRight, CheckCircle2, Mail, Sparkles, CalendarHeart, BadgePercent, Mic, Store, HeartHandshake, Users, Star } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { supabase } from '../lib/supabase';
@@ -42,9 +42,32 @@ const BLANK = {
   heard: '', heard_other: '', business_description: '', inspiration: '', growth_areas: [], interests: [], agreed: false, trap: '',
 };
 
+// After applying, this device shows the confirmation (not a blank form) for 30 days.
+const SENT_KEY = 'p31_join_sent';
+const readSent = () => {
+  try {
+    const v = JSON.parse(localStorage.getItem(SENT_KEY) || 'null');
+    return v && Date.now() - v.at < 30 * 864e5 ? v : null;
+  } catch { return null; }
+};
+
 const JoinForm = () => {
-  const [f, setF] = useState(BLANK);
-  const [state, setState] = useState('idle'); // idle | sending | done
+  const [sent] = useState(readSent);
+  const [f, setF] = useState(() => (sent ? { ...BLANK, full_name: sent.name || '' } : BLANK));
+  const [state, setState] = useState(sent ? 'done' : 'idle'); // idle | sending | done
+  const doneRef = useRef(null);
+  const justSent = useRef(false);
+
+  // Bring the confirmation into view (the form above it was long) and give it focus.
+  useEffect(() => {
+    if (state !== 'done' || !justSent.current || !doneRef.current) return;
+    // After the page has settled to its new (much shorter) height; scroll-margin-top keeps it clear of the top bar.
+    const el = doneRef.current;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.scrollIntoView({ block: 'start', behavior: 'instant' });
+      el.focus({ preventScroll: true });
+    }));
+  }, [state]);
   const [error, setError] = useState('');
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
 
@@ -79,16 +102,25 @@ const JoinForm = () => {
     }
     // Hand it to the team: email to members@ and a row in P31's Google Sheet (each sent once).
     supabase.functions.invoke('join-notify', { body: {} }).catch(() => {});
+    try { localStorage.setItem(SENT_KEY, JSON.stringify({ name: f.full_name.split(' ')[0], at: Date.now() })); } catch { /* private mode */ }
+    justSent.current = true;
     setState('done');
+  };
+
+  const startOver = () => {
+    try { localStorage.removeItem(SENT_KEY); } catch { /* private mode */ }
+    setF(BLANK);
+    setState('idle');
   };
 
   if (state === 'done') {
     return (
-      <div className="k-success jn-done">
+      <div className="k-success jn-done" ref={doneRef} tabIndex={-1} role="status" aria-live="polite">
         <span className="k-icon"><CheckCircle2 size={28} /></span>
         <h3>Your application is in</h3>
         <p>Thank you, {f.full_name.split(' ')[0] || 'sister'}. Once your application has been reviewed, you’ll receive the final step via email.</p>
         <p className="k-fine">Questions in the meantime? Email <a href={`mailto:${EMAIL.members}`}>{EMAIL.members}</a>.</p>
+        <button type="button" className="jn-again" onClick={startOver}>Applying for someone else? Start a new application</button>
       </div>
     );
   }
