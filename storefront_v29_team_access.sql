@@ -10,7 +10,7 @@
          davinci  → DaVinci (Pro Edit + the long-footage clip finder)
        Access starts the first time they sign in with that email at
        /portal, and only once the email address is confirmed, so nobody
-       can claim someone else's address.
+       can claim an address that is not theirs.
      - Students keep their own classroom (faith or business).
 
    Starting grants (from the team directory):
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS public.team_access (
 );
 ALTER TABLE public.team_access ENABLE ROW LEVEL SECURITY;
 
--- The signed-in person's address, only once they've confirmed it.
+-- The signed-in person: email address, only after it is confirmed.
 CREATE OR REPLACE FUNCTION public.my_confirmed_email()
 RETURNS TEXT LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, auth
 AS $fn$
@@ -141,8 +141,8 @@ DROP POLICY IF EXISTS "Operators update pro edits" ON public.pro_edit_jobs;
 CREATE POLICY "Operators update pro edits" ON public.pro_edit_jobs FOR UPDATE TO authenticated
   USING (public.has_team_tool('davinci')) WITH CHECK (public.has_team_tool('davinci'));
 
--- Footage and music live in the private 'studio' bucket under <user id>/…
--- DaVinci team members can open everyone's footage and post finished edits.
+-- Footage and music live in the private studio bucket under <user id>/…
+-- DaVinci team members can open all footage and post finished edits.
 DROP POLICY IF EXISTS "Studio read own or operator" ON storage.objects;
 CREATE POLICY "Studio read own or operator" ON storage.objects FOR SELECT TO authenticated
   USING (bucket_id = 'studio' AND ((storage.foldername(name))[1] = auth.uid()::text OR public.has_team_tool('davinci')));
