@@ -172,6 +172,17 @@ BEGIN
 END;
 $ext$;
 
+-- An earlier copy of this script granted cron permissions to postgres by hand. Supabase manages
+-- those, and the hand-made copies break its own setup, so only those copies are removed here.
+DO $tidy$
+BEGIN
+  REVOKE ALL ON ALL TABLES IN SCHEMA cron FROM postgres GRANTED BY postgres;
+  REVOKE USAGE ON SCHEMA cron FROM postgres GRANTED BY postgres;
+EXCEPTION WHEN others THEN
+  RAISE NOTICE 'cron permissions left as they were: %', SQLERRM;
+END;
+$tidy$;
+
 -- Replace any earlier copies of these jobs, then schedule them (times are UTC).
 SELECT cron.unschedule(jobid) FROM cron.job WHERE jobname IN ('p31-join-notify', 'p31-team-digest', 'p31-studio-autocreate');
 
