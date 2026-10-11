@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CalendarClock, PenSquare, MessagesSquare, MessageCircle, Clapperboard, Lock, Mail, CalendarRange } from 'lucide-react';
+import { LayoutDashboard, CalendarClock, PenSquare, MessagesSquare, MessageCircle, Clapperboard, Lock, Mail, CalendarRange, Wand2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useRoles } from '../lib/roles';
 import DashShell from '../apps/DashShell';
 import { StudioOverview, StudioCalendar, StudioCompose, StudioInbox, StudioComments, StudioCreate } from './pages';
 import StudioEmail from './Email';
 import StudioPlanner from './Planner';
+import StudioFactory from './Factory';
 import { supabase } from '../lib/supabase';
 import logo from '../assets/web/p31-mark-192.webp';
 import Tour, { TourButton } from '../components/Tour';
@@ -18,6 +19,7 @@ const NAV = [
   { to: '/studio', label: 'Overview', Icon: LayoutDashboard, end: true },
   { to: '/studio/email', label: 'Email', Icon: Mail },
   { to: '/studio/planner', label: 'Planner', Icon: CalendarRange },
+  { to: '/studio/autocreate', label: 'Auto-create', Icon: Wand2 },
   { to: '/studio/calendar', label: 'Calendar', Icon: CalendarClock },
   { to: '/studio/compose', label: 'Create post', Icon: PenSquare },
   { to: '/studio/inbox', label: 'Messages', Icon: MessagesSquare },
@@ -69,6 +71,7 @@ const StudioApp = () => {
         <Route index element={<StudioOverview />} />
         <Route path="email" element={<StudioEmail />} />
         <Route path="planner" element={<StudioPlanner />} />
+        <Route path="autocreate" element={<StudioFactory />} />
         <Route path="calendar" element={<StudioCalendar />} />
         <Route path="compose" element={<StudioCompose />} />
         <Route path="inbox" element={<StudioInbox />} />

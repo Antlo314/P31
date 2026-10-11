@@ -1,0 +1,191 @@
+// The starter library the auto-create draws from: post types, card styles, and the verses,
+// prompts, choices, quizzes, invitations and tips. The team adds its own in Studio →
+// Auto-create → Library (content_library); these ship with the app so it works from day one.
+// Scripture is KJV, quoted exactly; `text` is the verse with the blanked word removed.
+
+export const TYPES = {
+  fill: { label: 'Bible fill-in-the-blank', short: 'Fill-in', blurb: 'A KJV verse with one word missing. Your best-performing format.', share: 40 },
+  prompt: { label: 'Finish the sentence', short: 'Finish', blurb: 'An open sentence people complete in the comments.', share: 15 },
+  choice: { label: 'This or that', short: 'This/that', blurb: 'Two options, comment A or B. Doubles as vendor and shopper research.', share: 12 },
+  quiz: { label: 'Pop quiz', short: 'Quiz', blurb: 'Four options, one right answer. People love to be first.', share: 8 },
+  amen: { label: 'Sunday word', short: 'Sunday', blurb: 'A full verse and “comment Amen”. Sundays only.', share: 10 },
+  cta: { label: 'Invitation', short: 'Invite', blurb: 'Vendor applications, the Collective, the next market. At most one a week.', share: 10 },
+  tip: { label: 'Business tip', short: 'Tip', blurb: 'One sharp line for women who build, with a question back.', share: 5 },
+};
+
+export const STYLES = [
+  { id: 'night', name: 'Night', blurb: 'Deep plum and gold. The P31 look.', swatch: ['#1e1031', '#F2CE4D', '#fff'] },
+  { id: 'lavender', name: 'Lavender', blurb: 'Soft lavender, plum type, gold rules.', swatch: ['#F3ECFB', '#5E2A8C', '#D9A93A'] },
+  { id: 'ivory', name: 'Ivory', blurb: 'Cream, editorial serif, quiet gold.', swatch: ['#FBF7EF', '#2A1544', '#B8860B'] },
+  { id: 'gold', name: 'Gold', blurb: 'Warm amber with cream type. Bold in a feed.', swatch: ['#7a5410', '#FFF4D6', '#2a1a00'] },
+  { id: 'plum', name: 'Royal', blurb: 'Brighter plum, white type, gold accents.', swatch: ['#5E2A8C', '#fff', '#F2CE4D'] },
+];
+
+export const DEFAULT_SLOTS = { 0: [13, 19], 1: [19, 12.5], 2: [20, 12.5], 3: [12.5, 19], 4: [13, 20], 5: [13, 20], 6: [18, 16] };
+
+const v = (key, ref, text, answer) => ({ key: `verse:${key}`, kind: 'verse', ref, text, answer });
+const a = (key, ref, text) => ({ key: `amen:${key}`, kind: 'amen', ref, text });
+const p = (key, text, ask) => ({ key: `prompt:${key}`, kind: 'prompt', text, ask: ask || 'Your answer below 👇' });
+const c = (key, text, A, B) => ({ key: `choice:${key}`, kind: 'choice', text, options: [A, B] });
+const q = (key, text, options, answer) => ({ key: `quiz:${key}`, kind: 'quiz', text, options, answer });
+const t = (key, text, ask) => ({ key: `tip:${key}`, kind: 'tip', text, ask });
+
+export const LIBRARY = {
+  verse: [
+    v('prov-31-10', 'Proverbs 31:10', 'Who can find a virtuous woman? for her price is far above', 'rubies'),
+    v('prov-31-13', 'Proverbs 31:13', 'She seeketh wool, and flax, and worketh willingly with her', 'hands'),
+    v('prov-31-16', 'Proverbs 31:16', 'She considereth a field, and buyeth it: with the fruit of her hands she planteth a', 'vineyard'),
+    v('prov-31-17', 'Proverbs 31:17', 'She girdeth her loins with strength, and strengtheneth her', 'arms'),
+    v('prov-31-18', 'Proverbs 31:18', 'She perceiveth that her merchandise is good: her candle goeth not out by', 'night'),
+    v('prov-31-20', 'Proverbs 31:20', 'She stretcheth out her hand to the poor; yea, she reacheth forth her hands to the', 'needy'),
+    v('prov-31-21', 'Proverbs 31:21', 'She is not afraid of the snow for her household: for all her household are clothed with', 'scarlet'),
+    v('prov-31-24', 'Proverbs 31:24', 'She maketh fine linen, and selleth it; and delivereth girdles unto the', 'merchant'),
+    v('prov-31-25', 'Proverbs 31:25', 'Strength and honour are her clothing; and she shall rejoice in time to', 'come'),
+    v('prov-31-26', 'Proverbs 31:26', 'She openeth her mouth with wisdom; and in her tongue is the law of', 'kindness'),
+    v('prov-31-27', 'Proverbs 31:27', 'She looketh well to the ways of her household, and eateth not the bread of', 'idleness'),
+    v('prov-31-28', 'Proverbs 31:28', 'Her children arise up, and call her', 'blessed'),
+    v('prov-31-29', 'Proverbs 31:29', 'Many daughters have done virtuously, but thou excellest them', 'all'),
+    v('prov-31-30', 'Proverbs 31:30', 'Favour is deceitful, and beauty is vain: but a woman that feareth the LORD, she shall be', 'praised'),
+    v('prov-31-31', 'Proverbs 31:31', 'Give her of the fruit of her hands; and let her own works praise her in the', 'gates'),
+    v('prov-3-5', 'Proverbs 3:5', 'Trust in the LORD with all thine heart; and lean not unto thine own', 'understanding'),
+    v('prov-16-3', 'Proverbs 16:3', 'Commit thy works unto the LORD, and thy thoughts shall be', 'established'),
+    v('prov-18-16', 'Proverbs 18:16', 'A man’s gift maketh room for him, and bringeth him before great', 'men'),
+    v('prov-19-21', 'Proverbs 19:21', 'There are many devices in a man’s heart; nevertheless the counsel of the LORD, that shall', 'stand'),
+    v('prov-22-29', 'Proverbs 22:29', 'Seest thou a man diligent in his business? he shall stand before', 'kings'),
+    v('prov-27-17', 'Proverbs 27:17', 'Iron sharpeneth iron; so a man sharpeneth the countenance of his', 'friend'),
+    v('ps-23-1', 'Psalm 23:1', 'The LORD is my shepherd; I shall not', 'want'),
+    v('ps-37-4', 'Psalm 37:4', 'Delight thyself also in the LORD; and he shall give thee the desires of thine', 'heart'),
+    v('ps-46-5', 'Psalm 46:5', 'God is in the midst of her; she shall not be', 'moved'),
+    v('ps-90-17', 'Psalm 90:17', 'And let the beauty of the LORD our God be upon us: and establish thou the work of our', 'hands'),
+    v('eccl-9-10', 'Ecclesiastes 9:10', 'Whatsoever thy hand findeth to do, do it with thy', 'might'),
+    v('isa-40-31', 'Isaiah 40:31', 'But they that wait upon the LORD shall renew their strength; they shall mount up with wings as', 'eagles'),
+    v('jer-29-11', 'Jeremiah 29:11', 'For I know the thoughts that I think toward you, saith the LORD, thoughts of peace, and not of evil, to give you an expected', 'end'),
+    v('lam-3-23', 'Lamentations 3:23', 'They are new every morning: great is thy', 'faithfulness'),
+    v('esth-4-14', 'Esther 4:14', 'And who knoweth whether thou art come to the kingdom for such a time as', 'this'),
+    v('ruth-1-16', 'Ruth 1:16', 'Whither thou goest, I will go; and where thou lodgest, I will lodge: thy people shall be my people, and thy God my', 'God'),
+    v('deut-8-18', 'Deuteronomy 8:18', 'But thou shalt remember the LORD thy God: for it is he that giveth thee power to get', 'wealth'),
+    v('josh-1-9', 'Joshua 1:9', 'Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou', 'goest'),
+    v('matt-5-16', 'Matthew 5:16', 'Let your light so shine before men, that they may see your good works, and glorify your Father which is in', 'heaven'),
+    v('luke-1-45', 'Luke 1:45', 'And blessed is she that believed: for there shall be a performance of those things which were told her from the', 'Lord'),
+    v('gal-6-9', 'Galatians 6:9', 'And let us not be weary in well doing: for in due season we shall reap, if we faint', 'not'),
+    v('phil-1-6', 'Philippians 1:6', 'Being confident of this very thing, that he which hath begun a good work in you will perform it until the day of Jesus', 'Christ'),
+    v('phil-4-13', 'Philippians 4:13', 'I can do all things through Christ which', 'strengtheneth me'),
+    v('col-3-23', 'Colossians 3:23', 'And whatsoever ye do, do it heartily, as to the Lord, and not unto', 'men'),
+    v('2tim-1-7', '2 Timothy 1:7', 'For God hath not given us the spirit of fear; but of power, and of love, and of a sound', 'mind'),
+    v('heb-11-1', 'Hebrews 11:1', 'Now faith is the substance of things hoped for, the evidence of things not', 'seen'),
+    v('1cor-15-58', '1 Corinthians 15:58', 'Forasmuch as ye know that your labour is not in vain in the', 'Lord'),
+  ],
+  amen: [
+    a('isa-40-31', 'Isaiah 40:31', 'But they that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles; they shall run, and not be weary; and they shall walk, and not faint.'),
+    a('ps-90-17', 'Psalm 90:17', 'And let the beauty of the LORD our God be upon us: and establish thou the work of our hands upon us; yea, the work of our hands establish thou it.'),
+    a('jer-29-11', 'Jeremiah 29:11', 'For I know the thoughts that I think toward you, saith the LORD, thoughts of peace, and not of evil, to give you an expected end.'),
+    a('prov-3-5-6', 'Proverbs 3:5–6', 'Trust in the LORD with all thine heart; and lean not unto thine own understanding. In all thy ways acknowledge him, and he shall direct thy paths.'),
+    a('ps-46-5', 'Psalm 46:5', 'God is in the midst of her; she shall not be moved: God shall help her, and that right early.'),
+    a('lam-3-22-23', 'Lamentations 3:22–23', 'It is of the LORD’s mercies that we are not consumed, because his compassions fail not. They are new every morning: great is thy faithfulness.'),
+    a('josh-1-9', 'Joshua 1:9', 'Have not I commanded thee? Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou goest.'),
+    a('2cor-12-9', '2 Corinthians 12:9', 'My grace is sufficient for thee: for my strength is made perfect in weakness.'),
+    a('rom-8-28', 'Romans 8:28', 'And we know that all things work together for good to them that love God, to them who are the called according to his purpose.'),
+    a('matt-11-28', 'Matthew 11:28', 'Come unto me, all ye that labour and are heavy laden, and I will give you rest.'),
+    a('ps-37-5', 'Psalm 37:5', 'Commit thy way unto the LORD; trust also in him; and he shall bring it to pass.'),
+    a('phil-4-13', 'Philippians 4:13', 'I can do all things through Christ which strengtheneth me.'),
+    a('prov-31-25', 'Proverbs 31:25', 'Strength and honour are her clothing; and she shall rejoice in time to come.'),
+    a('ps-121-1-2', 'Psalm 121:1–2', 'I will lift up mine eyes unto the hills, from whence cometh my help. My help cometh from the LORD, which made heaven and earth.'),
+  ],
+  prompt: [
+    p('woman', 'A Proverbs 31 woman is', 'Your word below 👇'),
+    p('why', 'My business exists because', 'Tell us your why 👇'),
+    p('money', 'The best money advice a woman ever gave me:', 'Pass it on below 👇'),
+    p('believing', 'This season I’m believing God for', 'Say it out loud below 👇'),
+    p('hands', 'The thing I make with my own hands:', 'Show us in the comments 👇'),
+    p('proud', 'One thing I did this year that I’m proud of:', 'Brag a little 👇'),
+    p('younger', 'I wish someone had told me when I started:', 'Tell her now 👇'),
+    p('rest', 'My Sunday reset looks like', 'Share yours 👇'),
+    p('table', 'At my market table you’ll always find', 'Makers, tell us 👇'),
+    p('gift', 'The gift God gave me that keeps making room:', 'Name it 👇'),
+    p('prayer', 'The prayer I keep praying over my business:', 'Share it if you want to 👇'),
+    p('mentor', 'The woman who taught me the most about business taught me', 'Honor her below 👇'),
+  ],
+  choice: [
+    c('market-time', 'Which market is more you?', 'Morning market ☕ · coffee, sunshine, first pick', 'Evening market 🌙 · lights, music, date night'),
+    c('bag', 'First thing in your market bag?', 'Handmade candle 🕯️', 'Handmade jewelry 💍'),
+    c('gift', 'Gift for your best friend?', 'Something handmade 🎁', 'Something she can wear 👗'),
+    c('reset', 'Sunday reset?', 'Journal and tea ✍️', 'Long walk and worship 🎧'),
+    c('skin', 'Self-care pick?', 'Body butter and a bath 🛁', 'A candle and quiet 🕯️'),
+    c('start', 'Starting a business, which first?', 'Perfect the product 🧪', 'Find the first customer 🤝'),
+    c('shop', 'How do you shop women-owned?', 'In person at a market 🏷️', 'Online, from the couch 📱'),
+    c('scent', 'Candle scent for the season?', 'Warm vanilla and amber 🍂', 'Fresh eucalyptus and sage 🌿'),
+    c('treat', 'Market treat?', 'Pound cake 🍰', 'Cookies 🍪'),
+    c('style', 'Your table style?', 'Minimal and clean ◻️', 'Layered and lush 🌸'),
+  ],
+  quiz: [
+    q('not-in-31', 'Which one is NOT in Proverbs 31?', ['She planteth a vineyard', 'She maketh fine linen', 'She feareth the LORD', 'She buildeth her house'], 'D'),
+    q('our-verse', 'Which verse is our marketplace built on?', ['Proverbs 31:10', 'Proverbs 31:25', 'Proverbs 31:31', 'Proverbs 31:26'], 'C'),
+    q('rubies', 'Her price is far above…', ['Gold', 'Rubies', 'Pearls', 'Silver'], 'B'),
+    q('clothing', 'What is her clothing, in Proverbs 31:25?', ['Fine linen and purple', 'Strength and honour', 'Scarlet', 'Wisdom and kindness'], 'B'),
+    q('candle', 'In Proverbs 31:18, what goeth not out by night?', ['Her lamp', 'Her fire', 'Her candle', 'Her light'], 'C'),
+    q('field', 'In Proverbs 31:16, what does she buy?', ['A house', 'A field', 'A vineyard', 'A ship'], 'B'),
+    q('merchant', 'In Proverbs 31:24, she delivereth girdles unto the…', ['King', 'Merchant', 'Poor', 'Elders'], 'B'),
+  ],
+  invite: [
+    { key: 'invite:vendors', kind: 'invite', eyebrow: 'Vendor applications open', title: 'Your table at the<br /><em>next market</em>', items: ['Hand-selected women-owned brands', 'Art, beauty, clothing, food, more', 'Apply in five minutes', 'We reply to every application'], pill: 'P31MARKET.COM/APPLY', url: 'https://www.p31market.com/apply',
+      caption: 'Makers, this one’s for you. 🕯️💍🧁\n\nVendor applications are open for our next market. If you make it with your hands, we want to see it: art, beauty, clothing, food, wellness, home.\n\nThe form takes five minutes and we reply to every single one. Apply at p31market.com/apply (link in bio).\n\nKnow a woman whose work belongs on a P31 table? Send her this.' },
+    { key: 'invite:collective', kind: 'invite', eyebrow: 'The P31 Collective by NEBA', title: 'Mentorship for<br /><em>women who build</em>', items: ['Business mentorship', 'Faith-based mentorship', 'Private classrooms and live sessions', 'Start with a free intro call'], pill: 'THEP31COLLECTIVE.ORG/JOIN', url: 'https://www.thep31collective.org/join',
+      caption: 'Some of you are not waiting on a sign. You’re waiting on a mentor. 💜\n\nThe P31 Collective by NEBA is private mentorship for faith-driven women entrepreneurs: business mentorship and faith-based mentorship, with live sessions and a classroom built for you.\n\nIt starts with a free intro call. Apply at thep31collective.org/join (link in bio).' },
+    { key: 'invite:notify', kind: 'invite', eyebrow: 'Proverbs 31 Marketplace presents', title: 'The next<br /><em>market</em>', items: ['Hand-selected women-owned brands', 'Art, beauty, clothing, food and more', 'All are welcome', 'Dates announced to our list first'], pill: 'GET NOTIFIED · P31MARKET.COM/CALENDAR', url: 'https://www.p31market.com/calendar',
+      caption: 'The next market is coming. ✨\n\nHand-selected women-owned brands under one roof: art, beauty, clothing, food and more. All are welcome.\n\nThe people on our list hear the date first. Get notified at p31market.com/calendar (link in bio).\n\nWho are you bringing? Tell us below 👇' },
+    { key: 'invite:partner', kind: 'invite', eyebrow: 'Sponsors · Venues · Brands', title: 'Partner with<br /><em>the movement</em>', items: ['Financial giving', 'In-kind: space, tables, tents, services', 'Strategic partnership', 'Volunteer at a market'], pill: 'P31MARKET.COM/PARTNER', url: 'https://www.p31market.com/partner',
+      caption: 'Every vision needs people willing to stand behind it. 🤝\n\nProverbs 31 Marketplace is built with partners: sponsors, venues, brands and volunteers who believe women’s gifts deserve room.\n\nIf that’s you or your company, start the conversation at p31market.com/partner (link in bio).' },
+    { key: 'invite:curator', kind: 'invite', eyebrow: 'Now accepting applications', title: 'Become a<br /><em>curator</em>', items: ['Your own storefront on p31market.com', 'A seat at our seasonal Atlanta markets', 'Brand curation, design and coaching', 'A community of women who build'], pill: 'APPLY · P31MARKET.COM/APPLY', url: 'https://www.p31market.com/apply',
+      caption: 'Your gift was never meant to stay hidden. 💜\n\nCurators get their own storefront on p31market.com, a seat at our seasonal Atlanta markets, brand curation and coaching, and a community of women who build.\n\nApplications are open at p31market.com/apply (link in bio).' },
+  ],
+  tip: [
+    t('price', 'Price for the woman you’re becoming, not the one who started.', 'What did you charge for your first sale?'),
+    t('first-ten', 'Your first ten customers are a conversation, not a campaign.', 'Who was your very first customer?'),
+    t('table', 'At a market, the table that talks sells. Say hello before they look away.', 'What’s your opening line?'),
+    t('photo', 'One clean photo in daylight beats ten busy ones.', 'Phone or camera: what do you shoot with?'),
+    t('list', 'Social media rents you an audience. An email list is yours.', 'Do you have one yet? Be honest 😅'),
+    t('rest', 'Rest is part of the plan, not the reward for finishing it.', 'When was your last real day off?'),
+    t('story', 'People buy the story first and the product second. Tell it on every tag.', 'What’s the one-line story behind what you make?'),
+    t('repeat', 'The second sale costs a fraction of the first. Follow up like you mean it.', 'How do you stay in touch with past customers?'),
+    t('no', 'Every yes to the wrong customer is a no to the right one.', 'What did you stop offering, and why?'),
+    t('tithe', 'Build the giving into the budget on day one, not when it’s comfortable.', 'How do you give back through your business?'),
+  ],
+};
+
+// Caption openers, rotated so a month of the same format never reads the same twice.
+export const OPENERS = {
+  fill: ['Bible fill-in-the-blank 📖', 'No peeking, Bible check 📖', 'Finish the verse 💜', 'Lunch-break Bible fill-in-the-blank 📖', 'Monday fill-in-the-blank for everyone building something 🌱', 'Friday fill-in-the-blank, for the women who do it heartily 💪🏾'],
+  fillAsk: ['Drop the missing word in the comments 👇', 'Comment the word before you look it up 👇', 'No peeking. Comment your answer 👇', 'Comment the missing word 👇 and tell us what it means to you this week.'],
+  prompt: ['Finish the sentence:', 'Complete it for us:', 'Fill this in, honestly:'],
+  choice: ['Settle it for us:', 'Quick one:', 'You have to pick:'],
+  quiz: ['P31 pop quiz 🧐', 'Pop quiz, no peeking 🧐', 'Quick quiz for the Proverbs 31 women 🧐'],
+  amen: ['Sunday word 🕊️', 'For the woman who needs this today 🕊️', 'A verse to carry into the week 🙌🏾'],
+  tip: ['For the women who build 🛠️', 'A note for your business 📌', 'Small business, Sunday thought 💭'],
+};
+
+export const HASHTAGS = {
+  fill: '#P31Marketplace #Proverbs31Woman #BibleChallenge #FaithAndBusiness #WomenWhoBuild',
+  prompt: '#P31Marketplace #Proverbs31Woman #WomenWhoBuild #KingdomEntrepreneur #AtlantaMarkets',
+  choice: '#P31Marketplace #WomenOwned #AtlantaMarkets #ShopSmall #WomenWhoBuild',
+  quiz: '#P31Marketplace #Proverbs31Woman #BibleChallenge #FaithAndBusiness',
+  amen: '#P31Marketplace #Proverbs31Woman #SundayWord #FaithAndBusiness',
+  cta: '#P31Marketplace #WomenOwnedBusiness #AtlantaMarkets #KingdomEntrepreneur',
+  tip: '#P31Marketplace #WomenWhoBuild #SmallBusinessTips #KingdomEntrepreneur',
+};
+
+/** Library items grouped by kind, with the team's saved items layered over the starter set. */
+export function mergeLibrary(rows = []) {
+  const out = Object.fromEntries(Object.entries(LIBRARY).map(([k, list]) => [k, list.map((i) => ({ ...i, active: true, used_count: 0 }))]));
+  for (const r of rows) {
+    const list = out[r.kind] || (out[r.kind] = []);
+    const item = {
+      key: r.key, kind: r.kind, text: r.text, answer: r.answer || undefined, ref: r.ref || undefined,
+      options: Array.isArray(r.options) ? r.options : undefined, caption: r.caption || undefined,
+      active: r.active !== false, used_count: r.used_count || 0, last_used: r.last_used || null, id: r.id, custom: !LIBRARY[r.kind]?.some((i) => i.key === r.key),
+      ...(r.kind === 'invite' && r.options && !Array.isArray(r.options) ? r.options : {}),
+    };
+    const i = list.findIndex((x) => x.key === r.key);
+    if (i >= 0) list[i] = { ...list[i], ...item }; else list.push(item);
+  }
+  return out;
+}

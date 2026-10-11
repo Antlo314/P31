@@ -2,6 +2,13 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 11 — Auto-create in Content Studio
+
+- **Auto-create.** A new room in Content Studio: choose the kinds of posts and their share (Bible fill-in-the-blank, finish the sentence, this or that, pop quiz, Sunday word, invitations, business tips), the look (five card styles: Night, Lavender, Ivory, Gold, Royal), the start date, how many days (7 to 90) and how often (daily to twice a week), and the times (from Zernio’s own engagement data, P31 defaults, or typed in per weekday). It skips days that already have a post. One tap drafts every card and caption.
+- **Pre-posts.** The preview shows each card drawn in the browser with its caption and time; any can be swapped for another from the library, rewritten with AI, edited, retimed or removed. Then “Save as drafts” puts them in the Planner for review, or “Schedule all” draws, uploads and books the whole run to Instagram and Facebook with a progress bar. A Pre-posts tab lists everything generated and not yet sent, with approve and schedule-all-approved.
+- **The library.** A starter set of 42 KJV verses with their blanked word, 14 Sunday verses, 12 sentence starters, 10 this-or-that choices, 7 quizzes, 5 invitations and 10 business tips, each used once before any repeats. The team adds its own in the Library tab and can switch any item off. Captions open with rotating hooks so a month of the same format never reads the same twice.
+- **Behind it.** Cards are drawn in the browser with html-to-image (open source, MIT) using the site’s own fonts, so what you preview is what posts. Database v36 adds the library, the series record and the card on each planned post.
+
 ## October 11 — Thirty days of posts
 
 - **24 posts scheduled, Oct 12 – Nov 10,** on every day the October calendar did not already cover, so Instagram and Facebook get something daily for a month. Ten are the Bible fill-in-the-blank format that drew the most replies; the rest are finish-the-sentence prompts, this-or-that choices, two pop quizzes, three Sunday "comment Amen" verses, and one honest invitation a week (vendor applications for the Winter Gala, the Collective's mentorship, the Gala notify list). Every card is drawn in the P31 look with the new mark; every caption opens with a hook and asks one real question. Times come from 28 days of Instagram "followers online" data: weekdays 12–3 PM and 7–9 PM, Saturday 6 PM, Sunday 1 PM Eastern.

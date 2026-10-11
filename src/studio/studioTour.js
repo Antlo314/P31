@@ -17,6 +17,11 @@ export const STUDIO_TOUR = [
     body: 'The social calendar. Tap “Plan this month with AI” for a month of ideas spread across the pillars, or add a day yourself. Each post gets a hook, caption and hashtags drafted for you; pick a trending track for reels; approve it, and “Schedule it” sends it to Instagram and Facebook for that day.',
   },
   {
+    to: '/studio/autocreate', targets: at('/studio/autocreate'),
+    title: 'Auto-create: a month in a minute',
+    body: 'Choose the kinds of posts (Bible fill-in-the-blank, finish the sentence, this or that, quizzes, a Sunday word, invitations), the look, and how many days. The Studio drafts every card and caption from the library at the hours your followers are online. Look them over, swap or rewrite any, then save them to the Planner or schedule the whole run.',
+  },
+  {
     to: '/studio/calendar', targets: at('/studio/calendar'),
     title: 'Calendar: what’s going out',
     body: 'Every scheduled post in order, and how recent posts performed. Open a scheduled post to change or delete it before it goes out.',
