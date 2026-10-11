@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CalendarPlus, CalendarClock, MapPin, Clock, ArrowUpRight, Bell, Ticket, X, Check, Users } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { fetchUpcomingEvents, parseEventDate, formatEventDate, showDate } from '../lib/events';
+import { fetchUpcomingEvents, parseEventDate, formatEventDate, showDate, showMonth, monthLabel, ticketLabel } from '../lib/events';
 import PageHeader from '../components/PageHeader';
 import { openJoin } from '../lib/join';
 
@@ -15,10 +15,13 @@ const Lineup = ({ eventId }) => {
       <p className="k-eyebrow">Vendors at this market · {rows.length}</p>
       <ul>
         {rows.map((v) => (
-          <li key={v.business_name}>
-            <strong>{v.business_name}</strong>
-            {v.booth && <span className="cal-lineup__booth">Booth {v.booth}</span>}
-            {(v.categories || []).length > 0 && <small>{v.categories.join(' · ')}</small>}
+          <li key={v.business_name} className={v.logo_url ? 'has-logo' : ''}>
+            {v.logo_url && <img className="cal-lineup__logo" src={v.logo_url} alt="" loading="lazy" decoding="async" />}
+            <div>
+              <strong>{v.business_name}</strong>
+              {v.booth && <span className="cal-lineup__booth">Booth {v.booth}</span>}
+              {(v.categories || []).length > 0 && <small>{v.categories.join(' · ')}</small>}
+            </div>
           </li>
         ))}
       </ul>
@@ -73,7 +76,7 @@ const DateBadge = ({ ev, big }) => {
   ) : (
     <>
       <CalendarClock size={big ? 26 : 22} />
-      <small>Soon</small>
+      <small>{showMonth(ev) ? d.toLocaleDateString('en-US', { month: 'short' }) : 'Soon'}</small>
     </>
   );
 };
@@ -119,7 +122,7 @@ const RsvpSheet = ({ ev, onClose }) => {
           <form onSubmit={submit} className="cal-form">
             <p className="k-eyebrow" style={{ margin: 0 }}>Free RSVP</p>
             <h2 className="k-h2" style={{ fontSize: '2.2rem' }}>Save my <em>spot</em></h2>
-            <p className="cal-form__sub">{ev.title}{showDate(ev) ? ` · ${formatEventDate(ev.event_date, { month: 'long', day: 'numeric' })}` : ' · date coming soon'}</p>
+            <p className="cal-form__sub">{ev.title}{showDate(ev) ? ` · ${formatEventDate(ev.event_date, { month: 'long', day: 'numeric' })}` : showMonth(ev) ? ` · ${monthLabel(ev)} · date coming soon` : ' · date coming soon'}</p>
             <label><span>Full name</span>
               <input required autoComplete="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
             </label>
@@ -195,7 +198,7 @@ const Calendar = () => {
                     {next.start_time && <li><Clock size={16} /> {next.start_time}</li>}
                   </>
                 ) : (
-                  <li><CalendarClock size={16} /> Date coming soon</li>
+                  <li><CalendarClock size={16} /> {showMonth(next) ? `${monthLabel(next, { month: 'long', year: 'numeric' })} · date coming soon` : 'Date coming soon'}</li>
                 )}
                 <li><MapPin size={16} /> {where(next)}{next.address ? ` · ${next.address}` : ''}</li>
                 {spotsText(next) && <li><Users size={16} /> {spotsText(next)}</li>}
@@ -203,7 +206,7 @@ const Calendar = () => {
               {next.description && <p>{next.description}</p>}
               <div className="cal-actions">
                 {next.rsvp_url && (
-                  <a className="k-btn k-btn--gold" href={next.rsvp_url} target="_blank" rel="noreferrer">RSVP <ArrowUpRight size={16} /></a>
+                  <a className="k-btn k-btn--gold" href={next.rsvp_url} target="_blank" rel="noreferrer">{ticketLabel(next.rsvp_url)} <ArrowUpRight size={16} /></a>
                 )}
                 {canRsvp(next) && (
                   <button className="k-btn k-btn--gold" onClick={() => setRsvpFor(next)}><Ticket size={16} /> Save my spot</button>
@@ -233,7 +236,7 @@ const Calendar = () => {
                   <div className="cal-row__date"><DateBadge ev={ev} /></div>
                   <div className="cal-row__info">
                     <h4>{ev.title}</h4>
-                    <p>{showDate(ev) ? [ev.start_time, where(ev)].filter(Boolean).join(' · ') : 'Date coming soon'}</p>
+                    <p>{showDate(ev) ? [ev.start_time, where(ev)].filter(Boolean).join(' · ') : showMonth(ev) ? `${monthLabel(ev)} · date coming soon` : 'Date coming soon'}</p>
                   </div>
                   {canRsvp(ev) ? (
                     <button className="cal-icon-btn" onClick={() => setRsvpFor(ev)} aria-label={`RSVP for ${ev.title}`}><Ticket size={18} /></button>

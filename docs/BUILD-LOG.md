@@ -2,6 +2,20 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 11 — The December event: Business and Leadership Luncheon
+
+- **Renamed and connected.** The December event on p31market.com is now the **Business and Leadership Luncheon** (was "Winter Gala"), with the Eventbrite ticket link, The Four Event Center and its address on the record, so the home page and Market dates show "Get tickets" instead of a free RSVP.
+- **"December · date coming soon."** Markets can now announce their month before the day is set (a new "Announce the month" switch in Systems → Markets & events). The site reads "December · date coming soon" on the home page, Market dates, the vendor application and the registration form, and switches to the full date the moment "Date announced" is turned on. The hero chip reads "Up next" so it fits a luncheon as well as a market.
+- **Still to decide.** Three scheduled Instagram/Facebook posts (Oct 17, Oct 24, Nov 7) still say "Winter Gala"; they are listed for Melanie JC to approve replacements.
+
+## October 11 — JotForm retired: the vendor forms live on the site
+
+- **Four forms moved onto p31market.com, word for word.** The Storefront Agreement (`/vendors/agreement`), the Vendor Reservation with the full Vendor Rules & Regulations (`/vendors/register`), the Vendor Feedback Survey (`/vendors/feedback`) and the Volunteer Day-of-Event Acknowledgment (`/volunteer`), plus a hub at `/vendors` that lists them with the vendor application. Every question, every rule, every acknowledgment is the same text vendors signed on JotForm; the agreement carries a version stamp so future changes are traceable.
+- **Signed on a phone or a computer.** A draw-to-sign box (open-source signature_pad) with the typed name and date kept alongside; the registration takes the business logo too. Each person gets a copy of what they signed by email, from vendor@ (volunteers from outreach@); the team gets the submission in its inbox with one link into Systems.
+- **Connected, not just collected.** A signed agreement attaches to the vendor's curator account the moment the emails match (now, or when she registers later); her studio shows a reminder and a checklist step until it is signed. A market registration can be dropped into that market's lineup in one tap, logo included, and the logo shows on the public Market dates page. A survey answer of "I'm in for the next market" can invite her straight into the next lineup. Everyone who signs is in the CRM with what they did.
+- **Systems → Market → Vendor forms.** Four tabs (Agreements, Registrations, Feedback, Volunteers) with search, status, CSV export, the signature and logo on each record, and the actions: pre-approve and email the account link (the "7–10 days" promise on the agreement), confirm / waitlist / decline a registration with the market's details in the email, invite from the survey, average scores per market. New submissions show on the Overview and on Today.
+- **Behind it.** Database v37 (four tables, the `submit_form` door with bot trap and rate limits, the lineup and pre-approval actions, a public logo bucket); `join-notify` learned the four flows and sends the signer's copy; `vendor-decision` sends the account link and the registration decisions; the approval email for applications now points vendors to the registration and the agreement. 23 new screens in the automated screen test.
+
 ## October 11 — Auto-create in Content Studio
 
 - **Auto-create.** A new room in Content Studio: choose the kinds of posts and their share (Bible fill-in-the-blank, finish the sentence, this or that, pop quiz, Sunday word, invitations, business tips), the look (five card styles: Night, Lavender, Ivory, Gold, Royal), the start date, how many days (7 to 90) and how often (daily to twice a week), and the times (from Zernio’s own engagement data, P31 defaults, or typed in per weekday). It skips days that already have a post. One tap drafts every card and caption.

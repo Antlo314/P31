@@ -28,6 +28,7 @@ const Applications = lazy(() => import('./pages/Applications'));
 const Health = lazy(() => import('./pages/Health'));
 const TeamAccess = lazy(() => import('./pages/TeamAccess'));
 const VendorApplications = lazy(() => import('./pages/VendorApplications'));
+const Forms = lazy(() => import('./pages/Forms'));
 
 // Team members who aren't Systems admins get only the pages for the tools they were given.
 const TEAM_PAGES = { davinci: '/systems/pro-edit' };
@@ -176,6 +177,7 @@ const SystemsApp = () => {
             <Route path="settings" element={<SettingsPage operator={operator} />} />
             <Route path="team" element={<TeamAccess />} />
             <Route path="vendors" element={<VendorApplications />} />
+            <Route path="forms" element={<Forms />} />
             <Route path="*" element={<Navigate to="/systems" replace />} />
           </Routes>
           )}

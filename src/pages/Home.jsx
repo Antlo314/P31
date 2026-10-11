@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, CalendarClock, ArrowRight, ArrowUpRight, Sparkles, Gem, Users, Music4, Check, ArrowDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { fetchUpcomingEvents, formatEventDate, parseEventDate, showDate } from '../lib/events';
+import { fetchUpcomingEvents, formatEventDate, parseEventDate, showDate, showMonth, monthLabel, ticketLabel } from '../lib/events';
 import { gsap, reducedMotion } from '../lib/motion';
 import { openJoin } from '../lib/join';
 import LazyVideo from '../components/LazyVideo';
@@ -101,7 +101,7 @@ const Home = () => {
           <div className="h26-hero__nextwrap">{nextEvent && (
             <a href="#dates" className="k-chip k-chip--glass h26-hero__next" data-intro="0">
               <span className="h26-pulse" aria-hidden="true" />
-              Next market · {nextEvent.title} · {showDate(nextEvent) ? formatEventDate(nextEvent.event_date, { month: 'short', day: 'numeric' }) : 'Coming soon'}
+              Up next · {nextEvent.title} · {showDate(nextEvent) ? formatEventDate(nextEvent.event_date, { month: 'short', day: 'numeric' }) : showMonth(nextEvent) ? monthLabel(nextEvent) : 'Coming soon'}
               <ArrowRight size={13} />
             </a>
           )}</div>
@@ -328,16 +328,16 @@ const Home = () => {
                   ) : (
                     <>
                       <CalendarClock size={24} className="h26-date__icon" />
-                      <span className="h26-date__mon">Soon</span>
+                      <span className="h26-date__mon">{showMonth(ev) ? monthShort(ev.event_date) : 'Soon'}</span>
                     </>
                   )}
                 </div>
                 <div className="h26-date__info">
                   <h3>{ev.title}</h3>
-                  <p>{showDate(ev) ? ([ev.start_time, ev.venue].filter(Boolean).join(' · ') || 'Details coming soon') : 'Date coming soon'}</p>
+                  <p>{showDate(ev) ? ([ev.start_time, ev.venue].filter(Boolean).join(' · ') || 'Details coming soon') : showMonth(ev) ? `${monthLabel(ev)} · date coming soon` : 'Date coming soon'}</p>
                 </div>
                 {ev.rsvp_url ? (
-                  <a href={ev.rsvp_url} target="_blank" rel="noreferrer" className="k-btn k-btn--sm k-btn--gold">RSVP</a>
+                  <a href={ev.rsvp_url} target="_blank" rel="noreferrer" className="k-btn k-btn--sm k-btn--gold">{ticketLabel(ev.rsvp_url)}</a>
                 ) : ev.rsvp_enabled !== false ? (
                   <Link to="/calendar" className="k-btn k-btn--sm k-btn--light">RSVP</Link>
                 ) : i < 2 ? (
@@ -364,7 +364,7 @@ const Home = () => {
             <h3>{nextEvent?.venue || 'Venue to be announced'}</h3>
             {(nextEvent?.address || nextEvent?.location) && <p className="h26-visit__addr">{nextEvent.address || nextEvent.location}</p>}
             <p className="h26-visit__date">
-              {showDate(nextEvent) ? formatEventDate(nextEvent.event_date) : 'Date coming soon'}
+              {showDate(nextEvent) ? formatEventDate(nextEvent.event_date) : showMonth(nextEvent) ? `${monthLabel(nextEvent, { month: 'long', year: 'numeric' })} · date coming soon` : 'Date coming soon'}
               {showDate(nextEvent) && nextEvent?.start_time ? ` · ${nextEvent.start_time}` : ''}
             </p>
             {nextEvent?.address && (

@@ -12,6 +12,8 @@ Start to finish, in plain steps. Part A is what the P31 team does; Part B is wha
 
 That is all the team does until her shop is built. (Someone who never applied through the form can still be let in by hand: Curator Studio → **Vendor Approvals** → name and email.)
 
+4. **The Storefront Agreement.** Before or after she registers, she signs the agreement at **p31market.com/vendors/agreement** (the former JotForm, word for word: benefits, responsibilities, the 3 complimentary months, the 5% fee, the $14.99 option, liability). It lands in Systems → Market → **Vendor forms → Agreements**, she gets a signed copy by email, and it attaches to her curator account automatically when the emails match. If she signed before having an account, press **Pre-approve & email the account link** there and she can register straight away. Her studio shows a reminder and a checklist step until the agreement is on file.
+
 ---
 
 ## Part B — The vendor

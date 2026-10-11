@@ -4,7 +4,7 @@ import { ArrowRight, CheckCircle2, Mail, CalendarDays, MapPin, Store, HeartHands
 import PageHeader from '../components/PageHeader';
 import { supabase } from '../lib/supabase';
 import { EMAIL } from '../lib/team';
-import { fetchUpcomingEvents, formatEventDate, showDate } from '../lib/events';
+import { fetchUpcomingEvents, formatEventDate, showDate, showMonth, monthLabel } from '../lib/events';
 import '../academy/mentorship.css';
 import '../academy/join.css';
 
@@ -193,7 +193,7 @@ const NextMarket = () => {
       {ev ? (
         <ul>
           <li><span className="k-icon"><Store size={16} /></span><b>{ev.title}</b></li>
-          <li><span className="k-icon"><CalendarDays size={16} /></span>{showDate(ev) ? formatEventDate(ev.event_date, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) : 'Date coming soon'}</li>
+          <li><span className="k-icon"><CalendarDays size={16} /></span>{showDate(ev) ? formatEventDate(ev.event_date, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) : showMonth(ev) ? `${monthLabel(ev, { month: 'long', year: 'numeric' })} · date coming soon` : 'Date coming soon'}</li>
           {ev.venue && <li><span className="k-icon"><MapPin size={16} /></span>{ev.venue}</li>}
         </ul>
       ) : <p className="k-body">New dates are announced on <Link to="/calendar">Market dates</Link>.</p>}

@@ -6,7 +6,7 @@ import { formatEventDate } from '../../lib/events';
 
 const blank = {
   title: '', event_date: '', start_time: '', venue: '', address: '', description: '',
-  capacity: '', rsvp_enabled: true, date_public: false, rsvp_url: '', is_active: true,
+  capacity: '', rsvp_enabled: true, date_public: false, month_public: false, rsvp_url: '', is_active: true,
 };
 
 const toCsv = (rows) => {
@@ -65,6 +65,7 @@ const Events = () => {
       capacity: editing.capacity === '' || editing.capacity === null ? null : Number(editing.capacity),
       rsvp_enabled: !!editing.rsvp_enabled,
       date_public: !!editing.date_public,
+      month_public: !!editing.month_public,
       rsvp_url: editing.rsvp_url || null,
       is_active: !!editing.is_active,
     };
@@ -114,8 +115,13 @@ const Events = () => {
         </div>
         <div className="sys-event__chips">
           <button className={`sys-chip ${ev.date_public ? 'is-on' : ''}`} onClick={() => quick(ev, { date_public: !ev.date_public })}>
-            {ev.date_public ? <Eye size={14} /> : <EyeOff size={14} />} {ev.date_public ? 'Date announced' : 'Shows “Coming soon”'}
+            {ev.date_public ? <Eye size={14} /> : <EyeOff size={14} />} {ev.date_public ? 'Date announced' : ev.month_public ? 'Shows the month only' : 'Shows “Coming soon”'}
           </button>
+          {!ev.date_public && (
+            <button className={`sys-chip ${ev.month_public ? 'is-on' : ''}`} onClick={() => quick(ev, { month_public: !ev.month_public })} title="Say which month it is in before the date is set">
+              <CalendarClock size={14} /> {ev.month_public ? `${formatEventDate(ev.event_date, { month: 'long' })} announced` : 'Announce the month'}
+            </button>
+          )}
           <button className={`sys-chip ${ev.rsvp_enabled !== false ? 'is-on' : ''}`} onClick={() => quick(ev, { rsvp_enabled: ev.rsvp_enabled === false })}>
             <Ticket size={14} /> RSVPs {ev.rsvp_enabled !== false ? 'open' : 'closed'}
           </button>
@@ -211,6 +217,7 @@ const Events = () => {
             </div>
             <div className="sys-toggles">
               <label><input type="checkbox" checked={!!editing.date_public} onChange={(e) => setEditing({ ...editing, date_public: e.target.checked })} /> Date announced (show date &amp; time publicly)</label>
+              <label><input type="checkbox" checked={!!editing.month_public} onChange={(e) => setEditing({ ...editing, month_public: e.target.checked })} /> Month announced (the site says “December · date coming soon” until the date is)</label>
               <label><input type="checkbox" checked={editing.rsvp_enabled !== false} onChange={(e) => setEditing({ ...editing, rsvp_enabled: e.target.checked })} /> Accept RSVPs on the site</label>
               <label><input type="checkbox" checked={!!editing.is_active} onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })} /> Published</label>
             </div>

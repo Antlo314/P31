@@ -27,6 +27,12 @@ const Services = lazy(() => import('./pages/Services'));
 const Unsubscribe = lazy(() => import('./pages/Unsubscribe'));
 const Shop = lazy(() => import('./pages/Shop'));
 const VendorApply = lazy(() => import('./pages/VendorApply'));
+// The vendor forms that replaced JotForm: hub, storefront agreement, market registration, feedback, volunteers.
+const VendorHub = lazy(() => import('./pages/vendors/VendorHub'));
+const StorefrontAgreement = lazy(() => import('./pages/vendors/StorefrontAgreement'));
+const VendorRegistration = lazy(() => import('./pages/vendors/VendorRegistration'));
+const VendorFeedback = lazy(() => import('./pages/vendors/VendorFeedback'));
+const Volunteer = lazy(() => import('./pages/vendors/Volunteer'));
 const MentorshipLanding = lazy(() => import('./academy/Mentorship').then((m) => ({ default: m.MentorshipLanding })));
 const MentorshipProgram = lazy(() => import('./academy/Mentorship').then((m) => ({ default: m.MentorshipProgram })));
 const Portal = lazy(() => import('./academy/Portal'));
@@ -113,6 +119,11 @@ function SiteRoutes() {
             <Route path="/directory" element={<Directory />} />
             <Route path="/partner" element={<Partner />} />
             <Route path="/apply" element={<VendorApply />} />
+            <Route path="/vendors" element={<VendorHub />} />
+            <Route path="/vendors/agreement" element={<StorefrontAgreement />} />
+            <Route path="/vendors/register" element={<VendorRegistration />} />
+            <Route path="/vendors/feedback" element={<VendorFeedback />} />
+            <Route path="/volunteer" element={<Volunteer />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Login />} />
             <Route path="/services" element={<Services />} />

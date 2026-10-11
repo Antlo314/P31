@@ -4,6 +4,12 @@ import { supabase } from './supabase';
 // "Date announced" for it in Systems → Events (market_events.date_public).
 // Until then the site says "Coming soon".
 export const showDate = (ev) => !!ev?.date_public;
+// A market can say which month it is in before the day is set (market_events.month_public):
+// the site then reads "December · date coming soon".
+export const showMonth = (ev) => !!ev && !ev.date_public && !!ev.month_public;
+export const monthLabel = (ev, opts = { month: 'long' }) => (ev?.event_date ? parseEventDate(ev.event_date).toLocaleDateString('en-US', opts) : '');
+/** What to call the outside link: ticketed events (Eventbrite) say so. */
+export const ticketLabel = (url) => (/eventbrite|ticket|tix/i.test(url || '') ? 'Get tickets' : 'RSVP');
 
 // Today's date as YYYY-MM-DD in the visitor's local time zone.
 const todayISO = () => {

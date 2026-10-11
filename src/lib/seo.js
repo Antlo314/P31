@@ -61,6 +61,26 @@ export const ROUTE_META = {
     title: `Sponsor & Partner With Us — ${SITE_NAME}`,
     description: 'Sponsors, venues and brands: partner with Proverbs 31 Marketplace through financial, in-kind or strategic support and reach Atlanta’s women creatives.',
   },
+  '/vendors': {
+    title: `Vendor Forms — ${SITE_NAME}`,
+    description: 'Every Proverbs 31 Marketplace vendor form in one place: apply to vend, register for a market, sign the storefront agreement, share feedback, or volunteer.',
+  },
+  '/vendors/agreement': {
+    title: `Storefront Agreement — ${SITE_NAME}`,
+    description: 'Finalize your business storefront on P31 Virtual Marketplace: benefits, vendor responsibilities, terms and subscription, signed online.',
+  },
+  '/vendors/register': {
+    title: `Vendor Registration & Market Rules — ${SITE_NAME}`,
+    description: 'Reserve your vendor space at a Proverbs 31 Marketplace market: registration, the Vendor Rules & Regulations, your signature and your logo.',
+  },
+  '/vendors/feedback': {
+    title: `Vendor Feedback Survey — ${SITE_NAME}`,
+    description: 'Vendors: tell Proverbs 31 Marketplace how the market went. Honest feedback shapes the next one.',
+  },
+  '/volunteer': {
+    title: `Volunteer at a Market — ${SITE_NAME}`,
+    description: 'Serve at a Proverbs 31 Marketplace market in Atlanta: welcome guests, support vendors, help the day run beautifully. Sign the Day-of-Event Acknowledgment online.',
+  },
   '/mentorship': {
     origin: COLLECTIVE_URL,
     image: COLLECTIVE_IMAGE,
