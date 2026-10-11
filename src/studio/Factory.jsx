@@ -23,7 +23,8 @@ const missingTable = (msg = '') => /does not exist|schema cache|column/i.test(ms
  * Planner or schedule the whole run to Instagram and Facebook in one go.
  */
 const StudioFactory = () => {
-  const [tab, setTab] = useState('make');
+  // ?tab=queue opens the pre-posts (the monthly review email links there).
+  const [tab, setTab] = useState(() => { const t = new URLSearchParams(window.location.search).get('tab'); return ['make', 'queue', 'library'].includes(t) ? t : 'make'; });
   const [settings, setSettings] = useState(() => ({ start: tomorrow(), days: 30, cadence: 'daily', mix: defaultMix(), style: 'night', platforms: ['instagram', 'facebook'], timing: 'best', slots: DEFAULT_SLOTS, skipTaken: true }));
   const [library, setLibrary] = useState(() => mergeLibrary([]));
   const [libOk, setLibOk] = useState(null); // null unknown, true table present, false run v36
@@ -54,6 +55,24 @@ const StudioFactory = () => {
     } catch { /* Zernio unreachable: plan from the Planner alone */ }
     setTaken({ dates, keys });
   }, []);
+  // Draft a whole month on the server (the same job the scheduler runs on the 20th).
+  const months = useMemo(() => {
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const key = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const name = (d) => d.toLocaleDateString('en-US', { month: 'long' });
+    const nxt = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    return [{ key: key(now), label: `the rest of ${name(now)}` }, { key: key(nxt), label: name(nxt) }];
+  }, []);
+  const draftMonth = async (m) => {
+    setBusy(`month-${m.key}`); setError(''); setDone('');
+    const { data, error: err } = await supabase.functions.invoke('studio-autocreate', { body: { month: m.key } });
+    let msg = err ? err.message : data?.error;
+    if (err) { try { msg = (await err.context.json()).error || msg; } catch { /* keep */ } }
+    if (msg) setError(/not found|Failed to send/i.test(msg) ? 'Deploy the studio-autocreate function first (see the build notes).' : msg);
+    else setDone(data?.drafted ? `${data.drafted} posts drafted for ${m.label}. They are below, waiting for review.` : (data?.note || 'Nothing to draft: every day already has a post.'));
+    setBusy('');
+    await loadQueue(); await loadTaken();
+  };
   const loadQueue = useCallback(async () => {
     const { data } = await supabase.from('content_plan').select('*').not('card', 'is', null).in('status', ['draft', 'ready', 'approved']).order('post_date').limit(200);
     setQueue(data || []);
@@ -271,7 +290,13 @@ const StudioFactory = () => {
             <span>Drafts and approved cards not yet sent. Open any in the Planner to edit; approve there or here.</span>
             <div className="fc-summary__btns">
               <button className="k-btn k-btn--gold k-btn--sm" onClick={() => approvedQueue.length && scheduleRows(approvedQueue.map((q) => ({ ...q, type: q.card?.type })), true)} disabled={!!busy || !approvedQueue.length}><Send size={14} /> Schedule {approvedQueue.length} approved</button>
+              {months.map((m) => (
+                <button key={m.key} className="k-btn k-btn--ghost k-btn--sm" onClick={() => draftMonth(m)} disabled={!!busy}>
+                  {busy === `month-${m.key}` ? <Loader2 size={14} className="spin" /> : <CalendarDays size={14} />} Draft {m.label}
+                </button>
+              ))}
             </div>
+            <span className="fc-auto">Every 20th, next month is drafted here automatically from your last settings, and the team gets an email to review it.</span>
           </div>
           <div className="fc-list">
             {queue.map((q) => (

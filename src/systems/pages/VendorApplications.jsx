@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Search, Download, ArrowLeft, Mail, Phone, AtSign, Check, Store } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { fmtDate, fmtDateTime } from '../../lib/academy';
+import { formatEventDate, showDate } from '../../lib/events';
 
 const STATUSES = [['new', 'New'], ['reviewing', 'Reviewing'], ['approved', 'Approved'], ['waitlist', 'Waitlist'], ['declined', 'Declined'], ['all', 'All']];
 const LABEL = Object.fromEntries(STATUSES);
@@ -102,13 +103,27 @@ const VendorApplication = ({ app, onBack }) => {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState('');
   const decision = ['approved', 'waitlist', 'declined'].includes(a.status) ? a.status : null;
+  // Approving can place her in a market at the same time: lineup row + the market named in her email.
+  const [markets, setMarkets] = useState([]);
+  const [market, setMarket] = useState('');
+  useEffect(() => {
+    supabase.from('market_events').select('id, title, event_date, date_public, venue, has_vendors')
+      .eq('is_active', true).gte('event_date', new Date().toISOString().slice(0, 10)).order('event_date')
+      .then(({ data }) => setMarkets((data || []).filter((e) => e.has_vendors !== false)));
+  }, []);
   const emailDecision = async () => {
     setSending(true); setSent('');
-    const { data, error } = await supabase.functions.invoke('vendor-decision', { body: { application_id: a.id, decision, note } });
+    const ev = decision === 'approved' ? markets.find((m) => m.id === market) : null;
+    if (ev) {
+      const { error: lineupErr } = await supabase.rpc('lineup_add_application', { p_event: ev.id, p_application: a.id });
+      if (lineupErr) { setSending(false); setSent(`Not sent: ${lineupErr.message}`); return; }
+    }
+    const event = ev ? { title: ev.title, date: showDate(ev) ? formatEventDate(ev.event_date, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) : '', venue: ev.venue || '' } : undefined;
+    const { data, error } = await supabase.functions.invoke('vendor-decision', { body: { application_id: a.id, decision, note, event } });
     let msg = error ? error.message : data?.error;
     if (error) { try { msg = (await error.context.json()).error || msg; } catch { /* keep */ } }
     setSending(false);
-    setSent(msg ? `Not sent: ${msg}` : `Emailed ${a.email}.`);
+    setSent(msg ? `Not sent: ${msg}` : `Emailed ${a.email}${ev ? ` and added her to the ${ev.title} lineup` : ''}.`);
     if (!msg) { const { data: fresh } = await supabase.from('vendor_applications').select('*').eq('id', a.id).single(); if (fresh) setA(fresh); }
   };
 
@@ -153,11 +168,21 @@ const VendorApplication = ({ app, onBack }) => {
           </label>
           {decision ? (
             <>
+              {decision === 'approved' && markets.length > 0 && (
+                <label className="sys-field"><span>Add her to a market (optional)</span>
+                  <select value={market} onChange={(e) => setMarket(e.target.value)}>
+                    <option value="">Not yet: just welcome her</option>
+                    {markets.map((m) => <option key={m.id} value={m.id}>{m.title} · {showDate(m) ? formatEventDate(m.event_date, { month: 'short', day: 'numeric' }) : 'date coming soon'}</option>)}
+                  </select>
+                </label>
+              )}
               <label className="sys-field"><span>A personal line for the email (optional)</span>
                 <textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder={decision === 'approved' ? 'e.g. Load-in opens at 1:30pm; your booth is by the entrance.' : 'e.g. We hope to see you at the spring market.'} />
               </label>
               <button className="sys-btn sys-btn--gold" onClick={emailDecision} disabled={sending}><Mail size={15} /> {sending ? 'Sending…' : `Email ${first}: ${LABEL[decision].toLowerCase()}`}</button>
-              <p className="sys-muted" style={{ margin: 0 }}>{sent || `Sends the ${decision} note from vendor@p31market.com with next steps (storefront sign-up for approved vendors), and records it here.`}</p>
+              <p className="sys-muted" style={{ margin: 0 }}>{sent || (decision === 'approved'
+                ? `Sends the welcome from vendor@p31market.com with her next steps: confirm, register for the market, create her account, sign the storefront agreement${market ? ', and puts her in that market’s lineup' : ''}.`
+                : `Sends the ${decision} note from vendor@p31market.com and records it here.`)}</p>
               {decision === 'approved' && (
                 <p className="sys-ok" style={{ margin: 0 }}><Check size={13} /> {a.email} is pre-approved: when she registers at p31market.com/register with this email, her studio opens straight away.</p>
               )}

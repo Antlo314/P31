@@ -8,8 +8,10 @@ const deferEager = () => {
   return window.matchMedia('(max-width: 767px)').matches || (c?.effectiveType && c.effectiveType !== '4g');
 };
 
-const LazyVideo = ({ src, poster, className, eager = false, label, ...rest }) => {
+const LazyVideo = ({ src, phoneSrc, poster, className, eager = false, label, ...rest }) => {
   const ref = useRef(null);
+  // Phones get the lighter encode when there is one (picked once, so it never swaps mid-play).
+  const [file] = useState(() => (phoneSrc && window.matchMedia('(max-width: 767px)').matches ? phoneSrc : src));
   const [still] = useState(() =>
     window.matchMedia('(prefers-reduced-motion: reduce)').matches || !!navigator.connection?.saveData);
   const [active, setActive] = useState(eager && !still && !deferEager());
@@ -42,7 +44,7 @@ const LazyVideo = ({ src, poster, className, eager = false, label, ...rest }) =>
     <video
       ref={ref}
       className={className}
-      src={active ? src : undefined}
+      src={active ? file : undefined}
       poster={poster}
       muted
       loop

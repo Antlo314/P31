@@ -292,6 +292,10 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
   ],
   testimonials: [],
   discount_codes: [],
+  site_admins: [
+    { email: 'info@lumenlabsatl.com', full_name: 'Lumen Labs', added_by: null, created_at: day(-200) },
+    { email: 'proverbs31markets@gmail.com', full_name: 'Proverbs 31 Marketplace', added_by: null, created_at: day(-200) },
+  ],
   campaigns: [{ id: 'cm1', subject: 'The Business and Leadership Luncheon is coming', body: 'Save the date…', audience: 'subscribers', status: 'draft', created_at: day(-1) }],
   market_events: [{ id: 'ev1', title: 'Business and Leadership Luncheon', event_date: day(70).slice(0, 10), date_public: false, month_public: true, is_active: true, venue: 'The Four Event Center', address: '8599 Roswell Rd, Suite B, Atlanta, GA 30350', rsvp_url: 'https://www.eventbrite.com/e/proverbs-31-business-leadership-luncheon-tickets-2002850002272', capacity: 150, lineup_public: true }],
   event_vendors: [
@@ -348,6 +352,15 @@ const rpc = {
   ],
   lineup_add_application: () => 'evv-new',
   submit_form: () => 'demo-form',
+  is_admin: (_a, mode) => mode === 'admin',
+  my_markets: () => ({
+    events: [
+      { id: 'ev1', title: 'Business and Leadership Luncheon', event_date: day(70).slice(0, 10), date_public: false, month_public: true, start_time: '1:30 PM', venue: 'The Four Event Center', load_in: null, has_vendors: true },
+      { id: 'ev2', title: 'Spring Market', event_date: day(150).slice(0, 10), date_public: false, month_public: false, start_time: null, venue: null, load_in: '3:15 PM', has_vendors: true },
+    ],
+    lineup: [{ event_id: 'ev1', status: 'paid', booth: 'A4', checked_in: false }],
+    registrations: [{ id: 'rg-9', event_id: 'ev1', event_label: 'Business and Leadership Luncheon · December 2026', status: 'confirmed', in_lineup: true, created_at: day(-4) }],
+  }),
   agreement_preapprove: () => ({ has_account: false, curator_id: null, preapproved: true }),
   registration_to_lineup: () => 'evv-new',
   feedback_to_lineup: () => 'evv-new',
@@ -398,6 +411,7 @@ const fns = {
   },
   'daily-room': () => ({ error: 'Demo mode — live rooms open on the real site.' }),
   'shop-broadcast': (b) => ({ ok: true, sent: b.test ? 1 : 3, test: !!b.test }),
+  'studio-autocreate': (b) => ({ ok: true, drafted: 18, month: b.month, start: `${b.month}-12` }),
   'email-send': (b) => (b.action === 'redraft'
     ? { ok: true, draft: { reply: `Hi there,
 

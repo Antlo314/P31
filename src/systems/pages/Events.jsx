@@ -6,7 +6,7 @@ import { formatEventDate } from '../../lib/events';
 
 const blank = {
   title: '', event_date: '', start_time: '', venue: '', address: '', description: '',
-  capacity: '', rsvp_enabled: true, date_public: false, month_public: false, rsvp_url: '', is_active: true,
+  capacity: '', rsvp_enabled: true, date_public: false, month_public: false, rsvp_url: '', is_active: true, has_vendors: true, load_in: '',
 };
 
 const toCsv = (rows) => {
@@ -66,6 +66,8 @@ const Events = () => {
       rsvp_enabled: !!editing.rsvp_enabled,
       date_public: !!editing.date_public,
       month_public: !!editing.month_public,
+      has_vendors: editing.has_vendors !== false,
+      load_in: editing.has_vendors !== false && editing.load_in ? editing.load_in : null,
       rsvp_url: editing.rsvp_url || null,
       is_active: !!editing.is_active,
     };
@@ -198,6 +200,11 @@ const Events = () => {
                 <input value={editing.start_time || ''} onChange={(e) => setEditing({ ...editing, start_time: e.target.value })} placeholder="3:30 PM" />
               </label>
             </div>
+            <div className="sys-row">
+              <label className="sys-field sys-grow"><span>Vendors check in by</span>
+                <input value={editing.load_in || ''} onChange={(e) => setEditing({ ...editing, load_in: e.target.value })} placeholder="3:15 PM" disabled={editing.has_vendors === false} />
+              </label>
+            </div>
             <label className="sys-field"><span>Venue</span>
               <input value={editing.venue || ''} onChange={(e) => setEditing({ ...editing, venue: e.target.value })} placeholder="Embassy Suites" />
             </label>
@@ -219,6 +226,7 @@ const Events = () => {
               <label><input type="checkbox" checked={!!editing.date_public} onChange={(e) => setEditing({ ...editing, date_public: e.target.checked })} /> Date announced (show date &amp; time publicly)</label>
               <label><input type="checkbox" checked={!!editing.month_public} onChange={(e) => setEditing({ ...editing, month_public: e.target.checked })} /> Month announced (the site says “December · date coming soon” until the date is)</label>
               <label><input type="checkbox" checked={editing.rsvp_enabled !== false} onChange={(e) => setEditing({ ...editing, rsvp_enabled: e.target.checked })} /> Accept RSVPs on the site</label>
+              <label><input type="checkbox" checked={editing.has_vendors !== false} onChange={(e) => setEditing({ ...editing, has_vendors: e.target.checked })} /> Has vendors (lineup, registrations, survey invitations when the date is announced)</label>
               <label><input type="checkbox" checked={!!editing.is_active} onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })} /> Published</label>
             </div>
             <button className="sys-btn sys-btn--gold">Save market</button>

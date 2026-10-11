@@ -13,7 +13,6 @@ import '../academy/mentorship.css';
 import '../academy/collective-home.css';
 import '../academy/pillars.css';
 import JoinCollective from '../components/JoinCollective';
-import Scene3D from '../components/three/Scene3D';
 
 const M = 'Marketplace';
 const C = 'Collective';
@@ -60,7 +59,6 @@ const SystemsShowcase = () => {
             title="The engine behind"
             accent="both brands."
             lead="The tools we build to help the Marketplace and the Collective grow: content, video, photos, people and markets, working together."
-            visual={<Scene3D variant="engine" />}
             actions={<>
               <a href="#tools" className="k-btn k-btn--gold">See the tools <ArrowRight size={18} /></a>
               <Link to="/systems/sign-in" className="k-btn k-btn--light"><KeyRound size={17} /> Team sign in</Link>

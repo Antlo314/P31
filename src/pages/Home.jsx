@@ -12,6 +12,7 @@ import './Home.css';
 // Web-optimised copies of the original footage and photos (same media,
 // re-encoded: no audio track, 720px, fast-start). See src/assets/web/.
 import heroVid from '../assets/web/hero.mp4';
+import heroPhoneVid from '../assets/web/hero-phone.mp4';
 import heroPoster from '../assets/web/hero-poster.webp';
 import faithVid from '../assets/web/faith.mp4';
 import faithPoster from '../assets/web/faith-poster.webp';
@@ -91,7 +92,7 @@ const Home = () => {
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="h26-hero k-dark" ref={heroRef}>
-        <LazyVideo src={heroVid} poster={heroPoster} className="h26-hero__media" eager />
+        <LazyVideo src={heroVid} phoneSrc={heroPhoneVid} poster={heroPoster} className="h26-hero__media" eager />
         <div className="h26-hero__scrim" />
         <Ornaments />
         <span className="k-hero__arch h26-hero__arch" aria-hidden="true" />

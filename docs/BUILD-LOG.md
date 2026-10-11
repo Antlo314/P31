@@ -2,6 +2,19 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 11 — Faster pages, and a site that runs itself a little more
+
+- **Lighter and quicker.** The 3D engine (Three.js, about half a megabyte) is gone from the site entirely now that no page uses it. Phones get a hero film a third the size (0.5 MB instead of 1.4 MB). The browser opens its connection to the database while the page is still loading, and fonts and icons are cached for a long time instead of re-checked. Pointing at a link (or touching it on a phone) starts loading that page before the click, so the next page appears almost at once.
+- **No form email can get lost.** Until now the team only heard about a form if the visitor’s browser stayed open long enough to trigger the email. A scheduler now sweeps every 10 minutes, so every agreement, registration, survey, volunteer and application email goes out.
+- **A morning email at 8 AM.** One summary of the last day across both sites: orders, applications, agreements, registrations, survey answers, volunteers, emails waiting, site errors, the posts going out today, and how many days until the next event, with one button into Today.
+- **Approving a vendor places her in a market.** In Vendor applications, choosing a market while approving adds her to that lineup and names the market in her welcome email, which now walks her through confirm, register, create her account and sign the storefront agreement.
+- **Already-approved vendors skip the wait.** When someone the team has already approved signs the Storefront Agreement, her copy includes the link to create her account right away instead of “within 7–10 days”, and the agreement is marked as sent.
+- **Survey answers become invitations.** When a vendor market turns on “Date announced”, every business that said “I’m in for the next market” in the last six months is added to its lineup as invited and emailed a registration link. Markets now say whether they take vendors (the Luncheon does not) and when vendors check in.
+- **My markets, in every vendor’s studio.** Each vendor sees her own markets: registered, confirmed, paid or waitlisted, her booth, the date and venue, and the check-in time, so “am I confirmed?” no longer needs an email.
+- **Next month drafts itself.** On the 20th, Content Studio drafts next month’s engagement posts from the team’s last Auto-create settings, skipping days already booked, and emails marketing@ and founder@ to review them. Nothing posts until someone approves it. Two buttons on the Pre-posts tab do the same on demand (the rest of this month, or next month).
+- **One admin list.** Admins were written into the code; they now live in the database and are added or removed in Systems → Team access (the site always keeps at least one).
+- **Behind it.** Database v38 (site_admins, market vendors and check-in, survey invitations, my_markets, the digest log, and three scheduled jobs), two new functions (`team-digest`, `studio-autocreate`), and an updated `join-notify`. The Auto-create planner is shared between the Studio and the server, with a check that fails the build if the two copies drift. 143 screens in the automated test.
+
 ## October 11 — The Collective, warmer and quieter
 
 - **Less aerospace, more sanctuary.** Across thep31collective.org the celestial elements are gone: the 3D arches and drifting motes, the spinning gem on the Join page, the orbital gold rings, the floating sparkles and the 3D card tilt. In their place: a soft plum gradient with one warm gold glow at the base of each dark section, a gold hairline, and the brand mark. Plum, gold, the logo and the type are unchanged. The marketplace keeps its own look.

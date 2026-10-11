@@ -9,47 +9,95 @@ import OfferTicker from './components/OfferTicker';
 import AnnouncementBanner from './components/AnnouncementBanner';
 import { ROUTE_META, SITE_NAME, COLLECTIVE_URL, COLLECTIVE_NAME, COLLECTIVE_META, applyMeta } from './lib/seo';
 import { isFlushRoute } from './lib/routes';
+import { startIntentPreload } from './lib/preload';
 import { isCollective, crossSiteTarget } from './lib/site';
 import MotionRoot from './components/MotionRoot';
 import { CollectiveNav, CollectiveFooter } from './components/CollectiveChrome';
 
 // Everything but the landing page loads on demand, so phones only download
-// what they open.
-const About = lazy(() => import('./pages/About'));
-const Calendar = lazy(() => import('./pages/Calendar'));
-const Directory = lazy(() => import('./pages/Directory'));
-const CuratorProfile = lazy(() => import('./pages/CuratorProfile'));
-const Partner = lazy(() => import('./pages/Partner'));
-const Login = lazy(() => import('./pages/Login'));
-const CuratorDashboard = lazy(() => import('./pages/CuratorDashboard'));
-const Onboarding = lazy(() => import('./pages/Onboarding'));
-const Services = lazy(() => import('./pages/Services'));
-const Unsubscribe = lazy(() => import('./pages/Unsubscribe'));
-const Shop = lazy(() => import('./pages/Shop'));
-const VendorApply = lazy(() => import('./pages/VendorApply'));
-// The vendor forms that replaced JotForm: hub, storefront agreement, market registration, feedback, volunteers.
-const VendorHub = lazy(() => import('./pages/vendors/VendorHub'));
-const StorefrontAgreement = lazy(() => import('./pages/vendors/StorefrontAgreement'));
-const VendorRegistration = lazy(() => import('./pages/vendors/VendorRegistration'));
-const VendorFeedback = lazy(() => import('./pages/vendors/VendorFeedback'));
-const Volunteer = lazy(() => import('./pages/vendors/Volunteer'));
-const MentorshipLanding = lazy(() => import('./academy/Mentorship').then((m) => ({ default: m.MentorshipLanding })));
-const MentorshipProgram = lazy(() => import('./academy/Mentorship').then((m) => ({ default: m.MentorshipProgram })));
-const Portal = lazy(() => import('./academy/Portal'));
-const CollectiveHome = lazy(() => import('./academy/CollectiveHome'));
-const Verify = lazy(() => import('./academy/Verify'));
-const AcademyHome = lazy(() => import('./academy/AcademyHome'));
-const Join = lazy(() => import('./academy/Join'));
-const Enroll = lazy(() => import('./academy/Enroll'));
+// what they open. The loaders are named so a link can start one early (see INTENT below).
+const load = {
+  about: () => import('./pages/About'),
+  calendar: () => import('./pages/Calendar'),
+  directory: () => import('./pages/Directory'),
+  curator: () => import('./pages/CuratorProfile'),
+  partner: () => import('./pages/Partner'),
+  login: () => import('./pages/Login'),
+  dashboard: () => import('./pages/CuratorDashboard'),
+  onboarding: () => import('./pages/Onboarding'),
+  services: () => import('./pages/Services'),
+  unsubscribe: () => import('./pages/Unsubscribe'),
+  shop: () => import('./pages/Shop'),
+  apply: () => import('./pages/VendorApply'),
+  // The vendor forms that replaced JotForm: hub, storefront agreement, market registration, feedback, volunteers.
+  vendorHub: () => import('./pages/vendors/VendorHub'),
+  agreement: () => import('./pages/vendors/StorefrontAgreement'),
+  registration: () => import('./pages/vendors/VendorRegistration'),
+  feedback: () => import('./pages/vendors/VendorFeedback'),
+  volunteer: () => import('./pages/vendors/Volunteer'),
+  mentorship: () => import('./academy/Mentorship'),
+  portal: () => import('./academy/Portal'),
+  collective: () => import('./academy/CollectiveHome'),
+  verify: () => import('./academy/Verify'),
+  academy: () => import('./academy/AcademyHome'),
+  join: () => import('./academy/Join'),
+  enroll: () => import('./academy/Enroll'),
+  // The team console is its own app: loaded only when someone opens it,
+  // and drawn without the public site's header, footer and popups.
+  systems: () => import('./systems/SystemsApp'),
+  // Member dashboards: mentorship classrooms / mentor consoles, and the Content Studio.
+  classroom: () => import('./academy/app/AcademyApp'),
+  studio: () => import('./studio/StudioApp'),
+  // The team's home: what needs attention across every dashboard they run.
+  today: () => import('./today/Today'),
+};
+const About = lazy(load.about);
+const Calendar = lazy(load.calendar);
+const Directory = lazy(load.directory);
+const CuratorProfile = lazy(load.curator);
+const Partner = lazy(load.partner);
+const Login = lazy(load.login);
+const CuratorDashboard = lazy(load.dashboard);
+const Onboarding = lazy(load.onboarding);
+const Services = lazy(load.services);
+const Unsubscribe = lazy(load.unsubscribe);
+const Shop = lazy(load.shop);
+const VendorApply = lazy(load.apply);
+const VendorHub = lazy(load.vendorHub);
+const StorefrontAgreement = lazy(load.agreement);
+const VendorRegistration = lazy(load.registration);
+const VendorFeedback = lazy(load.feedback);
+const Volunteer = lazy(load.volunteer);
+const MentorshipLanding = lazy(() => load.mentorship().then((m) => ({ default: m.MentorshipLanding })));
+const MentorshipProgram = lazy(() => load.mentorship().then((m) => ({ default: m.MentorshipProgram })));
+const Portal = lazy(load.portal);
+const CollectiveHome = lazy(load.collective);
+const Verify = lazy(load.verify);
+const AcademyHome = lazy(load.academy);
+const Join = lazy(load.join);
+const Enroll = lazy(load.enroll);
+const SystemsApp = lazy(load.systems);
+const AcademyApp = lazy(load.classroom);
+const StudioApp = lazy(load.studio);
+const Today = lazy(load.today);
 
-// The team console is its own app: loaded only when someone opens it,
-// and drawn without the public site's header, footer and popups.
-const SystemsApp = lazy(() => import('./systems/SystemsApp'));
-// Member dashboards: mentorship classrooms / mentor consoles, and the Content Studio.
-const AcademyApp = lazy(() => import('./academy/app/AcademyApp'));
-const StudioApp = lazy(() => import('./studio/StudioApp'));
-// The team's home: what needs attention across every dashboard they run.
-const Today = lazy(() => import('./today/Today'));
+// Which code a link leads to, for preloading on hover / touch / focus. The catch-all shop
+// slug comes last so fixed paths win.
+const INTENT = [
+  [/^\/about$/, load.about], [/^\/calendar$/, load.calendar], [/^\/directory$/, load.directory], [/^\/partner$/, load.partner],
+  [/^\/(login|register)$/, load.login], [/^\/dashboard(\/|$)/, load.dashboard], [/^\/services$/, load.services],
+  [/^\/(shop|favorites)$/, load.shop], [/^\/apply$/, load.apply], [/^\/vendors$/, load.vendorHub],
+  [/^\/vendors\/agreement$/, load.agreement], [/^\/vendors\/register$/, load.registration], [/^\/vendors\/feedback$/, load.feedback],
+  [/^\/volunteer$/, load.volunteer], [/^\/mentorship(\/|$)/, load.mentorship], [/^\/portal$/, load.portal],
+  [/^\/verify(\/|$)/, load.verify], [/^\/academy$/, load.academy], [/^\/academy\/[^/]+/, load.classroom], [/^\/join$/, load.join],
+  [/^\/systems(\/|$)/, load.systems], [/^\/studio(\/|$)/, load.studio], [/^\/today$/, load.today],
+  [/^\/[a-z0-9][a-z0-9_-]{0,80}$/i, load.curator],
+];
+const IntentPreload = () => {
+  useEffect(() => startIntentPreload(INTENT), []);
+  return null;
+};
+
 // Dev-only studio test bench; compiled out of production builds.
 const Lab = import.meta.env.DEV ? lazy(() => import('./dev/Lab')) : null;
 
@@ -176,6 +224,7 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
+      <IntentPreload />
       <SiteGate>
         <Routes>
           <Route

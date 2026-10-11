@@ -28,12 +28,16 @@ const TeamAccess = () => {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState('');
   const [saving, setSaving] = useState(false);
+  const [siteAdmins, setSiteAdmins] = useState(null); // null until loaded; [] if v38 has not run
+  const [newAdmin, setNewAdmin] = useState({ email: '', full_name: '' });
 
   const load = () => Promise.all([
     supabase.from('team_access').select('*').order('created_at'),
     supabase.rpc('team_access_status'),
     supabase.from('system_operators').select('username, display_name, role').order('created_at'),
-  ]).then(([a, s, o]) => {
+    supabase.from('site_admins').select('email, full_name, added_by, created_at').order('created_at'),
+  ]).then(([a, s, o, sa]) => {
+    setSiteAdmins(sa.error ? [] : sa.data || []);
     if (a.error) setError(/relation|does not exist/i.test(a.error.message) ? 'Run storefront_v29_team_access.sql in Supabase first.' : a.error.message);
     setRows(a.data || []);
     setStatus(Object.fromEntries((s.data || []).map((r) => [r.email, r])));
@@ -63,6 +67,26 @@ const TeamAccess = () => {
     await save({ ...form, email });
     setSaving(false);
     setForm(EMPTY);
+  };
+
+  // Site admins (v38): the curator studio and every admin-only screen read this list.
+  const addAdmin = async (e) => {
+    e.preventDefault();
+    setError('');
+    const email = newAdmin.email.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return setError('Enter the new admin’s full email address.');
+    if (!window.confirm(`Make ${email} a site admin? Admins can approve vendors, manage every shop and change this list.`)) return;
+    const { data: who } = await supabase.auth.getUser();
+    const { error: err } = await supabase.from('site_admins').insert({ email, full_name: newAdmin.full_name.trim() || null, added_by: who?.user?.id });
+    if (err) setError(/duplicate|already/i.test(err.message) ? `${email} is already an admin.` : err.message);
+    else setNewAdmin({ email: '', full_name: '' });
+    load();
+  };
+  const removeAdmin = async (a) => {
+    if (!window.confirm(`Remove ${a.full_name || a.email} as a site admin? They keep their account and any tools above.`)) return;
+    const { error: err } = await supabase.from('site_admins').delete().eq('email', a.email);
+    if (err) setError(err.message);
+    load();
   };
 
   const copy = async (row) => {
@@ -141,7 +165,34 @@ const TeamAccess = () => {
       </section>
 
       <section className="sys-card">
-        <h2><ShieldCheck size={18} /> Admins (full control)</h2>
+        <h2><ShieldCheck size={18} /> Site admins</h2>
+        <p className="sys-muted">Approve vendors, manage every shop in the curator studio, and change this list. They sign in with this email (a new admin needs to have confirmed it). The site always keeps at least one.</p>
+        {siteAdmins === null ? <p className="sys-muted">Loading…</p> : siteAdmins.length === 0 ? (
+          <p className="sys-muted">Run storefront_v38_automation.sql in Supabase to manage admins here.</p>
+        ) : (
+          <ul className="sys-list">
+            {siteAdmins.map((a) => (
+              <li key={a.email}>
+                <span><strong>{a.full_name || a.email}</strong>{a.full_name && <span className="sys-muted"> · {a.email}</span>}</span>
+                <span className="sys-row sys-row--center" style={{ gap: 8 }}>
+                  <span className="sys-muted">{a.added_by ? `added ${new Date(a.created_at).toLocaleDateString()}` : 'original'}</span>
+                  {siteAdmins.length > 1 && <button type="button" className="sys-icon-btn" onClick={() => removeAdmin(a)} aria-label={`Remove ${a.email} as admin`}><Trash2 size={15} /></button>}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {siteAdmins?.length > 0 && (
+          <form className="sys-row" onSubmit={addAdmin}>
+            <label className="sys-field sys-grow"><span>Name</span><input value={newAdmin.full_name} onChange={(e) => setNewAdmin({ ...newAdmin, full_name: e.target.value })} /></label>
+            <label className="sys-field sys-grow"><span>Email</span><input type="email" value={newAdmin.email} onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })} placeholder="name@example.com" /></label>
+            <button className="sys-btn sys-btn--ghost" style={{ alignSelf: 'end' }}><UserPlus size={15} /> Add admin</button>
+          </form>
+        )}
+      </section>
+
+      <section className="sys-card">
+        <h2><ShieldCheck size={18} /> Systems sign-ins (full control)</h2>
         <p className="sys-muted">Systems sign-ins can open every dashboard and tool, and manage this page.</p>
         <ul className="sys-list">
           {admins.map((a) => <li key={a.username}><span>{a.display_name || a.username}</span><span className="sys-muted">{a.role === 'owner' ? 'Owner' : 'Admin'}</span></li>)}

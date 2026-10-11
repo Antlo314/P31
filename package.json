@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/prerender.mjs",
-    "lint": "eslint . && node scripts/check-jsx.mjs",
+    "lint": "eslint . && node scripts/check-jsx.mjs && node scripts/sync-factory.mjs --check",
     "test:screens": "node scripts/screen-test.mjs",
     "scan": "node scripts/site-scan.mjs",
     "preview": "vite preview"
@@ -24,8 +24,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.1",
-    "signature_pad": "^5.0.4",
-    "three": "^0.170.0"
+    "signature_pad": "^5.0.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

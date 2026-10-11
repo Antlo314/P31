@@ -10,8 +10,6 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const adminEmails = ['info@lumenlabsatl.com', 'proverbs31markets@gmail.com'];
-
   useEffect(() => {
     if (!supabase) {
       setLoading(false);
@@ -21,10 +19,7 @@ export const AuthProvider = ({ children }) => {
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) {
-        setIsAdmin(adminEmails.includes(session.user.email?.toLowerCase() || ''));
-        fetchUserData(session.user.id);
-      }
+      if (session?.user) fetchUserData(session.user.id);
       else setLoading(false);
     });
 
@@ -32,7 +27,6 @@ export const AuthProvider = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        setIsAdmin(adminEmails.includes(session.user.email?.toLowerCase() || ''));
         fetchUserData(session.user.id);
       }
       else {
@@ -46,8 +40,10 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Admins come from the database (site_admins, managed in Systems → Team access), not from this file.
   const fetchUserData = async (userId) => {
     try {
+      const adminCheck = supabase.rpc('is_admin').then(({ data }) => setIsAdmin(data === true), () => setIsAdmin(false));
       const { data: profileData, error: pError } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url, created_at')
@@ -68,6 +64,7 @@ export const AuthProvider = ({ children }) => {
         console.warn('Curator data fetch error:', cError.message);
       }
         
+      await adminCheck;
       setProfile(profileData || null);
       setCuratorData(cData || null);
     } catch (error) {

@@ -6,7 +6,9 @@
 //   • Market registrations (p31market.com/vendors/register) → email the market team + a confirmation to the vendor
 //   • Vendor feedback surveys (p31market.com/vendors/feedback) → email the market team (+ a thank-you when an email was left)
 //   • Volunteer acknowledgments (p31market.com/volunteer)   → email outreach@ + a copy to the volunteer
-// Every page calls it right after someone submits; calling it again sends nothing new.
+//   • Survey invitations (v38): businesses that said "I'm in for the next market" get invited when a market announces its date
+// Every page calls it right after someone submits, and the scheduler calls it every 10 minutes (v38),
+// so nothing waits on a visitor's browser. Calling it again sends nothing new.
 //
 // Secrets (Supabase → Edge Functions → Secrets):
 //   RESEND_API_KEY, EMAIL_FROM            email (EMAIL_FROM is the marketplace sender)
@@ -70,10 +72,21 @@ const address = (a: Row) => {
 const AGAIN: Record<string, string> = { in: 'I’m in for the next market!', waitlist: 'Keep me on the waitlist for the future events.', no: 'No thank you P31 is not the right fit for me.' };
 
 // ── The form types ────────────────────────────────────────────
+// deno-lint-ignore no-explicit-any
+type Admin = any; // the service-role client (typed loosely: the generated schema types are not used here)
 type Flow = {
   name: string; table: string; fields: string;
-  to: () => string[]; from: () => string | undefined;
+  to: (a: Row) => string[]; from: () => string | undefined;
   subject: (a: Row) => string; email: (a: Row) => string;
+  /** Who a reply goes to (default: the person on the row). */
+  replyTo?: (a: Row) => string | undefined;
+  /** Only rows that match (e.g. survey invitations, not every lineup row). */
+  // deno-lint-ignore no-explicit-any
+  scope?: (q: any) => any;
+  /** Look up what the emails need beyond the row itself. */
+  enrich?: (admin: Admin, a: Row) => Promise<Row>;
+  /** After the emails went out. */
+  after?: (admin: Admin, a: Row) => Promise<unknown>;
   /** A copy for the person who submitted (their email is on the row). */
   confirm?: (a: Row) => { subject: string; html: string; replyTo: string } | null;
   sheet: () => { url: string; token: string; tab?: string } | null;
@@ -167,8 +180,10 @@ const FLOWS: Flow[] = [
     email: (a) => layout(`Storefront agreement: ${a.business_name}`, intro(a, `signed the Proverbs 31 Marketplace Storefront Agreement for ${a.business_name}`) + table(
       tr('Business', esc(a.business_name)) + tr('Contact', esc(fullName(a))) + tr('Email', mail(a.email)) + tr('Phone', tel(a.phone))
       + tr('Business address', address(a)) + tr('Signed as', esc(a.signed_name)) + tr('Date signed', esc(longDate(a.signed_on))) + tr('Terms version', esc(a.terms_version))
-      + tr('Curator account', a.curator_id ? '<span style="color:#17603C">Already has one: her storefront is linked</span>' : 'None yet: pre-approve and send the account link from Systems'),
-    ) + `<p style="margin:16px 0 0;font-size:13px;color:#6E6580">She was told she will receive a link to create her account within 7–10 days.</p>`
+      + tr('Curator account', a.curator_id ? '<span style="color:#17603C">Already has one: her storefront is linked</span>'
+      : a.preapproved ? '<span style="color:#17603C">Already approved: the link to create her account went out with her copy</span>'
+        : 'None yet: pre-approve and send the account link from Systems'),
+    ) + (a.curator_id || a.preapproved ? '' : `<p style="margin:16px 0 0;font-size:13px;color:#6E6580">She was told she will receive a link to create her account within 7–10 days.</p>`)
       + button(`${SYSTEMS}/forms?tab=agreements`, 'Open in Systems → Vendor forms')),
     confirm: (a) => ({
       replyTo: VENDOR_EMAIL,
@@ -200,9 +215,24 @@ const FLOWS: Flow[] = [
 <p>The full agreement, including liability, termination, legal compliance and food-product terms, is at ${link(`${MARKET}/vendors/agreement`, 'p31market.com/vendors/agreement')}.</p>
 <p><b>What happens next.</b> ${a.curator_id
           ? `You already have a curator account with this email, so your storefront agreement is now on file. Sign in at ${link(`${MARKET}/login`, 'p31market.com/login')}.`
-          : `Within 7–10 days you will receive a link to create your account and set up your storefront. Use this same email (<b>${esc(a.email)}</b>) when you register.`}</p>
+          : a.preapproved
+            ? `You are already approved, so there is no wait: create your curator account at ${link(`${MARKET}/register`, 'p31market.com/register')} using this same email (<b>${esc(a.email)}</b>) and your studio opens straight away.`
+            : `Within 7–10 days you will receive a link to create your account and set up your storefront. Use this same email (<b>${esc(a.email)}</b>) when you register.`}</p>
 <p>Questions? Reply to this email or write to ${mail(VENDOR_EMAIL)}.</p>`, MARKET_FOOT),
     }),
+    // Approved through the vendor application already (v35 pre-approval)? Then the account link goes out now.
+    enrich: async (admin, a) => {
+      if (a.curator_id) return a;
+      const { data } = await admin.from('vendor_approvals').select('id').ilike('email', a.email).limit(1);
+      return { ...a, preapproved: !!data?.length };
+    },
+    after: async (admin, a) => {
+      if (a.preapproved && !a.curator_id) {
+        await admin.from('vendor_agreements')
+          .update({ status: 'account_sent', review_notes: `${new Date().toLocaleDateString('en-US')}: account link sent automatically (already approved)` })
+          .eq('id', a.id).eq('status', 'new');
+      }
+    },
     sheet: () => null,
     sheetRow: (a) => ({ 'Timestamp': eastern(a.created_at), 'Business Name': a.business_name, 'Contact': fullName(a), 'Email': a.email, 'Phone': a.phone }),
   },
@@ -292,6 +322,29 @@ ${a.again === 'in' ? `<p>You said you are in for the next market. The team will 
   },
 ];
 
+// Survey invitations: v38 adds them to a lineup when a vendor market announces its date.
+FLOWS.push({
+  name: 'invite',
+  table: 'event_vendors',
+  fields: 'id, event_id, business_name, email, created_at',
+  scope: (q) => q.eq('source', 'feedback').not('email', 'is', null),
+  to: (a) => [a.email],
+  replyTo: () => VENDOR_EMAIL,
+  from: marketFrom,
+  enrich: async (admin, a) => {
+    const { data } = await admin.from('market_events').select('title, event_date, start_time, venue, address, load_in').eq('id', a.event_id).maybeSingle();
+    return { ...a, ev: data || {} };
+  },
+  subject: (a) => `You're invited: ${a.ev.title || 'the next Proverbs 31 Market'}`,
+  email: (a) => layout('You said you were in. Here is your invitation.', `<p>Hi ${esc(a.business_name)},</p>
+<p>After the last market you told us you were in for the next one. It is here: <b>${esc(a.ev.title || 'the next Proverbs 31 Market')}</b>${a.ev.event_date ? `, ${esc(longDate(a.ev.event_date))}` : ''}${a.ev.start_time ? ` at ${esc(a.ev.start_time)}` : ''}${a.ev.venue ? `, ${esc(a.ev.venue)}` : ''}.</p>
+<p>Your business is on the invitation list. To reserve your space, complete the market registration and sign the Vendor Rules &amp; Regulations (have your logo handy):</p>
+${button(`${MARKET}/vendors/register`, 'Register for this market')}
+<p style="margin-top:18px">${a.ev.load_in ? `Vendors check in by ${esc(a.ev.load_in)} on the day. ` : ''}Booth placement and payment details follow once you are confirmed. Questions? Reply to this email.</p>`, MARKET_FOOT),
+  sheet: () => null,
+  sheetRow: (a) => ({ 'Business Name': a.business_name }),
+});
+
 async function addToSheet(target: { url: string; token: string; tab?: string }, row: Row) {
   const res = await fetch(target.url, {
     method: 'POST',
@@ -305,15 +358,17 @@ async function addToSheet(target: { url: string; token: string; tab?: string }, 
 
 // Take the recent rows not yet handled. The update only matches rows still unhandled,
 // so two calls at once can't both take (and send) the same one.
-async function claim(admin: ReturnType<typeof createClient>, f: Flow, column: 'notified_at' | 'sheet_synced_at') {
+async function claim(admin: Admin, f: Flow, column: 'notified_at' | 'sheet_synced_at') {
   const since = new Date(Date.now() - 2 * 864e5).toISOString();
-  const { data, error } = await admin.from(f.table)
+  let q = admin.from(f.table)
     .update({ [column]: new Date().toISOString() })
-    .is(column, null).gte('created_at', since).select(f.fields);
+    .is(column, null).gte('created_at', since);
+  if (f.scope) q = f.scope(q);
+  const { data, error } = await q.select(f.fields);
   if (error) throw new Error(error.message);
   return (data || []) as Row[];
 }
-const release = (admin: ReturnType<typeof createClient>, f: Flow, column: string, id: string) =>
+const release = (admin: Admin, f: Flow, column: string, id: string) =>
   admin.from(f.table).update({ [column]: null }).eq('id', id);
 
 Deno.serve(async (req) => {
@@ -327,10 +382,12 @@ Deno.serve(async (req) => {
     // Email (left waiting until Resend is set up; they go out on the next call).
     if (emailConfigured()) {
       try {
-        for (const a of await claim(admin, f, 'notified_at')) {
-          const res = await sendEmail(f.to(), f.subject(a), f.email(a), a.email || undefined, f.from());
+        for (const raw of await claim(admin, f, 'notified_at')) {
+          const a = f.enrich ? await f.enrich(admin, raw).catch(() => raw) : raw;
+          const res = await sendEmail(f.to(a), f.subject(a), f.email(a), (f.replyTo ? f.replyTo(a) : a.email) || undefined, f.from());
           if (!res.ok) { await release(admin, f, 'notified_at', a.id); continue; }
           r.emailed += 1;
+          if (f.after) await f.after(admin, a).catch((e) => console.error(`join-notify ${f.name} after`, e));
           // Their copy: best effort, never blocks the team email.
           const c = f.confirm?.(a);
           if (c && a.email) {

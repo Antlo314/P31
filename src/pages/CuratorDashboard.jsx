@@ -17,6 +17,7 @@ import DiscountsPanel from '../features/orders/DiscountsPanel';
 import MarketingPanel from '../features/marketing/MarketingPanel';
 import StudioNav from '../features/dashboard/StudioNav';
 import SetupChecklist from '../features/dashboard/SetupChecklist';
+import MyMarkets from '../features/dashboard/MyMarkets';
 import Tour from '../components/Tour';
 import { CURATOR_TOUR, CURATOR_TOUR_ID } from '../features/dashboard/studioTour';
 import { PRODUCT_TEMPLATES, PRODUCT_BADGES, applyTemplate } from '../features/marketing/productTemplates';
@@ -1239,6 +1240,7 @@ const CuratorDashboard = () => {
 
               <div className="dashboard-sidebar-panels">
                 <SetupChecklist curator={curatorData} editData={editData} products={products} onGo={setActiveTab} />
+                <MyMarkets />
                 <section className="dashboard-card status-card glass-card">
                   <h3 className="card-title text-forest"><Sparkles size={18} /> Market Status</h3>
                   <div className="status-indicator">

@@ -68,7 +68,7 @@ const SCREENS = [
   ['today on a phone', cl('/today'), [], 'Join applications', { phone: true }],
   ['team access', cl('/systems/team'), [], 'Give someone access'],
   ['vendor applications', cl('/systems/vendors'), [], 'Sample Candle Co.'],
-  ['vendor decision email', cl('/systems/vendors'), ['All', 'Sample Crafts'], 'Sends the approved note from vendor@p31market.com'],
+  ['vendor decision email', cl('/systems/vendors'), ['All', 'Sample Crafts'], 'Sends the welcome from vendor@p31market.com'],
   ['event lineup', cl('/systems/events'), ['Lineup'], 'Sample Candle Co.'],
   ['market dates lineup', mk('/calendar'), [], 'Handmade crafts, baskets & gifts'],
   ['davinci paused', cl('/systems/pro-edit'), [], 'DaVinci is paused for now'],
@@ -121,6 +121,12 @@ const SCREENS = [
   ['market home: month announced', mk('/'), [], '· date coming soon'],
   ['market dates: month announced + tickets', mk('/calendar'), [], 'Get tickets'],
   ['systems overview: vendor forms card', cl('/systems'), [], 'Vendor forms'],
+  // Efficiency round: admins from the database, one-step approval into a market, My markets, monthly drafting.
+  ['team access: site admins', cl('/systems/team'), [], 'proverbs31markets@gmail.com'],
+  ['vendor approval: pick a market', cl('/systems/vendors'), ['All', 'Sample Crafts'], 'Add her to a market'],
+  ['curator: my markets', at('market', 'curator')('/dashboard/identity'), [], 'Booth A4'],
+  ['studio pre-posts: draft a month', cl('/studio/autocreate?tab=queue'), ['Draft the rest of'], 'posts drafted for'],
+  ['systems showcase without 3D', at('collective', 'student')('/systems'), [], 'The engine behind'],
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
