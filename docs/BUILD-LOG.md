@@ -2,6 +2,11 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 11 — Thirty days of posts
+
+- **24 posts scheduled, Oct 12 – Nov 10,** on every day the October calendar did not already cover, so Instagram and Facebook get something daily for a month. Ten are the Bible fill-in-the-blank format that drew the most replies; the rest are finish-the-sentence prompts, this-or-that choices, two pop quizzes, three Sunday "comment Amen" verses, and one honest invitation a week (vendor applications for the Winter Gala, the Collective's mentorship, the Gala notify list). Every card is drawn in the P31 look with the new mark; every caption opens with a hook and asks one real question. Times come from 28 days of Instagram "followers online" data: weekdays 12–3 PM and 7–9 PM, Saturday 6 PM, Sunday 1 PM Eastern.
+- **Google Business Profile logo and cover** redrawn with the new mark and ready to push; the Google connection in Zernio has lapsed, so it is one reconnect and one command.
+
 ## October 11 — Cleaner mark, DaVinci paused
 
 - **The hands mark, cleaned.** The original art (only 381 pixels wide) had a beaded light outline along every curve, which showed as white dots on dark backgrounds, in texted links and on the app icon. The mark was rebuilt from the original: outline smoothed, the beads and a ribbed texture removed, flat colour and the finger lines kept. Every icon, favicon, share image, the brand kit and the in-app marks were regenerated, and phones are told to fetch the new icons.
