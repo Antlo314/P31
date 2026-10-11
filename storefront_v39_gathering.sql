@@ -621,6 +621,11 @@ INSERT INTO public.chat_scriptures (id, ref, text) VALUES
   (49, 'Psalm 121:1–2', 'I will lift up mine eyes unto the hills, from whence cometh my help. My help cometh from the LORD, which made heaven and earth.')
 ON CONFLICT (id) DO UPDATE SET ref = EXCLUDED.ref, text = EXCLUDED.text;
 
+-- The scheduler has to be on (v38 turns it on; repeating this is harmless).
+CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
+GRANT USAGE ON SCHEMA cron TO postgres;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cron TO postgres;
+
 -- 11:30 UTC every day (7:30 AM Eastern in summer, 6:30 AM in winter), and once now for today.
 SELECT cron.unschedule(jobid) FROM cron.job WHERE jobname = 'p31-daily-word';
 SELECT cron.schedule('p31-daily-word', '30 11 * * *', $job$ SELECT public.chat_post_daily_word(); $job$);

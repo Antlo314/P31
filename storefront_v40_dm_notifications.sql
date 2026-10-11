@@ -57,6 +57,12 @@ AS $fn$
                             'dm_email', coalesce((SELECT dm_email FROM chat_prefs WHERE user_id = auth.uid()), true));
 $fn$;
 
+-- The scheduler has to be on (v38 turns it on; repeating this is harmless).
+CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
+GRANT USAGE ON SCHEMA cron TO postgres;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cron TO postgres;
+CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
+
 -- Every 5 minutes: email anyone who missed a direct message.
 SELECT cron.unschedule(jobid) FROM cron.job WHERE jobname = 'p31-chat-notify';
 SELECT cron.schedule('p31-chat-notify', '*/5 * * * *', $job$

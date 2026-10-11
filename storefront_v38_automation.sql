@@ -159,7 +159,10 @@ CREATE POLICY "Team reads digests" ON public.team_digests FOR SELECT TO authenti
 -- 6. The scheduler
 -- ──────────────────────────────────────────────────────────
 -- Supabase ships both extensions; this turns them on (Database -> Extensions shows them too).
-CREATE EXTENSION IF NOT EXISTS pg_cron;
+-- pg_cron lives in pg_catalog, and the postgres role is given the cron schema, as in the Supabase install steps.
+CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
+GRANT USAGE ON SCHEMA cron TO postgres;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cron TO postgres;
 CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
 
 -- Replace any earlier copies of these jobs, then schedule them (times are UTC).
