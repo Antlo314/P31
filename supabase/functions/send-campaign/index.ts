@@ -20,7 +20,7 @@ const json = (body: unknown, status = 200) =>
 const toHtml = (body: string) => body.split(/\n{2,}/).map((para) => {
   const html = esc(para)
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" style="color:#5E2A8C">$1</a>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" style="color:#3A1C36">$1</a>')
     .replace(/\n/g, '<br>');
   return `<p style="margin:0 0 14px;line-height:1.6;font-size:15px">${html}</p>`;
 }).join('');
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
     const appUrl = (Deno.env.get('APP_URL') || 'https://p31market.com').replace(/\/$/, '');
     const body = toHtml(c.body);
     const footer = (unsubUrl?: string) =>
-      `You’re receiving this from Proverbs 31 Marketplace · Atlanta, GA.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#6E6580">Unsubscribe</a>` : ''}`;
+      `You’re receiving this from Proverbs 31 Marketplace · Atlanta, GA.${unsubUrl ? ` <a href="${unsubUrl}" style="color:#74657A">Unsubscribe</a>` : ''}`;
 
     if (test) {
       await sendEmail(user.email!, `[Test] ${c.subject}`, layout(c.subject, body, footer(`${appUrl}/unsubscribe`)));

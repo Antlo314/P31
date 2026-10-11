@@ -6,7 +6,7 @@ import FounderNote from '../components/FounderNote';
 import { openJoin } from '../lib/join';
 
 import editorialImg from '../assets/web/p31_partner_hero_editorial.webp';
-import gatherImg from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
+import { GROUP, PORTRAITS } from '../lib/teamPhotos';
 import { EMAIL, OFFICE } from '../lib/team';
 import TeamDirectory from '../components/TeamDirectory';
 
@@ -31,7 +31,7 @@ const About = () => (
       title="Where her gifts"
       accent="make room."
       lead="An elite, traveling collective of women creatives — defying the standard pop-up to bring a majestic, high-end market to Atlanta and beyond."
-      media={{ src: gatherImg, alt: 'Women of the Proverbs 31 community gathered together' }}
+      media={{ src: GROUP.tall, alt: 'The Proverbs 31 Marketplace team together at a market' }}
       actions={<>
         <Link to="/apply" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></Link>
         <button type="button" className="k-btn k-btn--light" onClick={openJoin}>Subscribe to our newsletter</button>
@@ -106,7 +106,7 @@ const About = () => (
     </section>
 
     <section className="k-section" id="team">
-      <TeamDirectory eyebrow="The people behind P31" lede="Curators, partners and shoppers: reach the right person directly." />
+      <TeamDirectory eyebrow="The people behind P31" lede="Curators, partners and shoppers: reach the right person directly." photo={GROUP.wide} gallery={PORTRAITS} />
     </section>
 
     {/* Contact + CTA */}
@@ -128,7 +128,7 @@ const About = () => (
 
     <section className="k-section k-section--tight">
       <div className="k-cta k-dark" data-reveal="scale">
-        <img src={gatherImg} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.18, zIndex: -2 }} />
+        <img src={GROUP.wide} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.18, zIndex: -2 }} />
         <p className="k-eyebrow">Your seat at the table</p>
         <h2 className="k-h2">Your gifts deserve a <em>stage.</em></h2>
         <p className="k-lede">Apply to curate, or join the collective to hear about the next market first.</p>

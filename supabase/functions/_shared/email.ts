@@ -38,29 +38,29 @@ type Item = { name: string; quantity: number; price_cents: number; options?: Rec
 
 // Branded, email-client-safe layout.
 export function layout(title: string, body: string, footer = '', brand = 'PROVERBS 31 MARKETPLACE') {
-  return `<!doctype html><html><body style="margin:0;background:#f5f1fb;font-family:Arial,Helvetica,sans-serif;color:#201431">
+  return `<!doctype html><html><body style="margin:0;background:#EFE4F3;font-family:Arial,Helvetica,sans-serif;color:#2A1526">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:18px;overflow:hidden">
-<tr><td style="background:#2a1544;padding:22px 24px;color:#F2CE4D;font-size:12px;letter-spacing:3px;font-weight:bold">${esc(brand)}</td></tr>
+<tr><td style="background:#3A1C36;padding:22px 24px;color:#F2CE4D;font-size:12px;letter-spacing:3px;font-weight:bold">${esc(brand)}</td></tr>
 <tr><td style="padding:26px 24px">
-<h1 style="margin:0 0 14px;font-family:Georgia,serif;font-weight:normal;color:#5E2A8C;font-size:24px">${esc(title)}</h1>
+<h1 style="margin:0 0 14px;font-family:Georgia,serif;font-weight:normal;color:#3A1C36;font-size:24px">${esc(title)}</h1>
 ${body}
 </td></tr>
-<tr><td style="padding:16px 24px;background:#f5f1fb;color:#6E6580;font-size:12px">${footer || 'p31market.com · Where her gifts make room.'}</td></tr>
+<tr><td style="padding:16px 24px;background:#EFE4F3;color:#74657A;font-size:12px">${footer || 'p31market.com · Where her gifts make room.'}</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
 export function itemsTable(items: Item[], discountCents = 0, totalCents?: number) {
   const rows = items.map((i) => {
     const opts = i.options && Object.keys(i.options).length
-      ? `<br><span style="color:#6E6580;font-size:12px">${esc(Object.entries(i.options).map(([k, v]) => `${k}: ${v}`).join(' · '))}</span>` : '';
+      ? `<br><span style="color:#74657A;font-size:12px">${esc(Object.entries(i.options).map(([k, v]) => `${k}: ${v}`).join(' · '))}</span>` : '';
     return `<tr><td style="padding:8px 0;border-bottom:1px solid #eee">${esc(i.name)} × ${i.quantity}${opts}</td>
 <td align="right" style="padding:8px 0;border-bottom:1px solid #eee">${money(i.price_cents * i.quantity)}</td></tr>`;
   }).join('');
   const sub = items.reduce((s, i) => s + i.price_cents * i.quantity, 0);
   const total = totalCents ?? sub - discountCents;
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px">${rows}
-${discountCents ? `<tr><td style="padding:8px 0;color:#17603C">Discount</td><td align="right" style="color:#17603C">−${money(discountCents)}</td></tr>` : ''}
+${discountCents ? `<tr><td style="padding:8px 0;color:#374126">Discount</td><td align="right" style="color:#374126">−${money(discountCents)}</td></tr>` : ''}
 <tr><td style="padding:10px 0;font-weight:bold">Total</td><td align="right" style="font-weight:bold">${money(total)}</td></tr></table>`;
 }
 

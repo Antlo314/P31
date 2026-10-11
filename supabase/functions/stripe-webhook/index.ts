@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
             if (curatorEmail) {
               await sendEmail(curatorEmail, `New paid order #${ref} — ${money(order.amount_total || 0)}`, layout('You made a sale!', `
 <p>${esc(order.buyer_name || 'A shopper')} just paid for an order.</p>${table}
-<p><a href="${appUrl}/dashboard/orders" style="display:inline-block;background:#5E2A8C;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:bold">Fulfil this order</a></p>`), order.buyer_email || undefined);
+<p><a href="${appUrl}/dashboard/orders" style="display:inline-block;background:#3A1C36;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:bold">Fulfil this order</a></p>`), order.buyer_email || undefined);
             }
             if (order.buyer_email) {
               await sendEmail(order.buyer_email, `Your order from ${curator?.business_name || 'P31 Marketplace'} (#${ref})`, layout('Thank you for your order', `

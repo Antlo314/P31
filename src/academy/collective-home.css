@@ -32,10 +32,10 @@
 .ch-melanie__photo {
   position: relative; width: min(100%, 440px); justify-self: center; aspect-ratio: 4 / 5; overflow: hidden;
   border-radius: var(--r-arch);
-  background: radial-gradient(80% 60% at 50% 100%, rgba(242, 206, 77, 0.3), transparent 70%), linear-gradient(180deg, #4a1f78, #2a1544);
-  box-shadow: 0 40px 90px -40px rgba(29, 15, 46, 0.6), 0 0 0 1px rgba(242, 206, 77, 0.35);
+  background: radial-gradient(80% 60% at 50% 100%, rgba(242, 206, 77, 0.3), transparent 70%), linear-gradient(180deg, #4C2546, #3A1C36);
+  box-shadow: 0 40px 90px -40px rgba(42, 21, 38, 0.6), 0 0 0 1px rgba(242, 206, 77, 0.35);
 }
-.ch-melanie__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
+.ch-melanie__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .ch-melanie .k-head { display: grid; gap: 18px; }
 .ch-melanie .k-head > * { margin: 0; }
 .ch-melanie__verse { margin: 0; padding: 16px 20px; border-left: 2px solid var(--gold); background: var(--mist); border-radius: 0 16px 16px 0; }
@@ -58,7 +58,7 @@
 
 .ch-melanie__more summary {
   cursor: pointer; width: fit-content; font-weight: 800; font-size: 0.9rem; color: var(--plum);
-  border-bottom: 1px solid rgba(94, 42, 140, 0.35); list-style: none;
+  border-bottom: 1px solid rgba(58, 28, 54, 0.35); list-style: none;
 }
 .ch-melanie__more summary::-webkit-details-marker { display: none; }
 .ch-melanie__more summary::after { content: ' +'; color: var(--gold-text); }
@@ -67,7 +67,7 @@
 .ch-melanie__more p { margin: 0; }
 
 .ch-hero { min-height: min(92svh, 900px); display: grid; align-items: center; }
-.ch-hero__inner { text-shadow: 0 2px 30px rgba(18, 8, 29, 0.85); }
+.ch-hero__inner { text-shadow: 0 2px 30px rgba(33, 16, 30, 0.85); }
 
 /* ── The Collective look: warm, refined, still ──────────────
    Scoped to thep31collective.org (.cl-site): no orbital rings, sparkles or
@@ -75,13 +75,13 @@
 .cl-site .k-hero, .cl-site .k-section--night, .cl-site .k-dark.k-section, .cl-site .k-cta.k-dark {
   background:
     radial-gradient(70% 55% at 50% 112%, rgba(217, 169, 58, 0.22), transparent 70%),
-    linear-gradient(170deg, #33195a 0%, #23123b 50%, #170c27 100%);
+    linear-gradient(170deg, #4C2546 0%, #3A1C36 50%, #21101E 100%);
 }
 .cl-site .k-hero::before, .cl-site .k-section--night::before { opacity: 0.35; }
 .cl-site .k-hero::after, .cl-site .ch-hero::after { background: radial-gradient(640px circle at 50% 100%, rgba(242, 206, 77, 0.1), transparent 62%); }
 .cl-site .k-hero { box-shadow: inset 0 -1px 0 rgba(242, 206, 77, 0.35); }
 .cl-site .orn__arch, .cl-site .orn__spark, .cl-site .k-hero__arch { display: none; }
-.cl-site .orn__orb--1 { background: radial-gradient(closest-side, rgba(120, 60, 170, 0.32), transparent); }
+.cl-site .orn__orb--1 { background: radial-gradient(closest-side, rgba(155, 113, 178, 0.32), transparent); }
 .cl-site .orn__orb--2 { background: radial-gradient(closest-side, rgba(242, 206, 77, 0.16), transparent); }
 .cl-site .k-tilt, .cl-site .k-tilt.k-tilt:hover { transform: none; }
 .cl-site .ch-hero__mark { filter: drop-shadow(0 12px 28px rgba(242, 206, 77, 0.28)); }

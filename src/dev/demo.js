@@ -367,7 +367,8 @@ const gatherAud = (mode) => {
 const gatherPerson = (id) => ({ id, name: PEOPLE[id]?.name || 'P31 member', avatar_url: null, roles: GATHER_ROLES[id] || {} });
 
 const rpc = {
-  chat_me: (_a, mode) => { const id = userFor(mode).id; return { id, member: gatherAud(mode).length > 0, moderator: !!(GATHER_ROLES[id]?.admin || GATHER_ROLES[id]?.team), overseer: !!GATHER_ROLES[id]?.admin, audiences: gatherAud(mode), roles: GATHER_ROLES[id] || null }; },
+  chat_me: (_a, mode) => { const id = userFor(mode).id; return { id, member: gatherAud(mode).length > 0, moderator: !!(GATHER_ROLES[id]?.admin || GATHER_ROLES[id]?.team), overseer: !!GATHER_ROLES[id]?.admin, audiences: gatherAud(mode), roles: GATHER_ROLES[id] || null, dm_email: true }; },
+  chat_set_prefs: (a) => ({ dm_email: a.p_dm_email }),
   chat_my_channels: (_a, mode) => {
     const aud = gatherAud(mode); const me = userFor(mode).id;
     return db.chat_channels.filter((c) => (c.kind === 'dm' ? (me === 'u-mel' || me === 'u-cu') : aud.includes(c.audience)))

@@ -24,13 +24,13 @@
 .dir-card__badges span {
   display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 999px;
   font-size: 0.66rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
-  background: rgba(20, 10, 34, 0.7); color: var(--gold-hi); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  background: rgba(33, 16, 30, 0.7); color: var(--gold-hi); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
 .dir-card__body { position: relative; padding: 0 22px 22px; display: grid; gap: 6px; flex: 1; }
 .dir-card__logo {
   width: 64px; height: 72px; object-fit: cover; margin-top: -36px; margin-bottom: 6px;
   border-radius: 999px 999px 16px 16px; border: 3px solid #fff; background: #fff;
-  box-shadow: 0 12px 24px -12px rgba(29, 15, 46, 0.55);
+  box-shadow: 0 12px 24px -12px rgba(42, 21, 38, 0.55);
 }
 .dir-card h2 { margin: 0; font-family: var(--font-heading); font-weight: 400; font-size: 1.5rem; color: var(--ink); line-height: 1.12; }
 .dir-card__tag { margin: 0; font-size: 0.82rem; font-weight: 800; color: var(--gold-text); }

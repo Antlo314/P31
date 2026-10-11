@@ -4,7 +4,7 @@
 .jn-about .mt-mark { justify-self: start; }
 .jn-price {
   display: grid; gap: 6px; padding: 18px 20px; border-radius: var(--r-lg);
-  background: linear-gradient(150deg, #2a1240, #12081d); color: rgba(255, 255, 255, 0.82);
+  background: linear-gradient(150deg, #3A1C36, #21101E); color: rgba(255, 255, 255, 0.82);
 }
 .jn-price strong { font-family: var(--font-heading); font-weight: 400; font-size: 2.4rem; line-height: 1; color: var(--gold-hi); }
 .jn-price small { font-family: var(--font-body, inherit); font-size: 1rem; color: rgba(255, 255, 255, 0.7); margin-left: 4px; }
@@ -36,7 +36,7 @@
 .jn-done { max-width: 640px; margin-inline: auto; scroll-margin-top: calc(var(--nb-h, 64px) + 24px); }
 .jn-done:focus { outline: none; }
 .jn-done:focus-visible { outline: none; }
-.jn-again { justify-self: center; margin-top: 4px; padding: 8px 4px; background: none; border: 0; font: inherit; font-size: 0.85rem; font-weight: 700; color: var(--ink-3, #8a7f96); text-decoration: underline; cursor: pointer; }
+.jn-again { justify-self: center; margin-top: 4px; padding: 8px 4px; background: none; border: 0; font: inherit; font-size: 0.85rem; font-weight: 700; color: var(--ink-3, #8C7E92); text-decoration: underline; cursor: pointer; }
 
 /* Vendor application (/apply) */
 .vp-side { display: grid; gap: 16px; }

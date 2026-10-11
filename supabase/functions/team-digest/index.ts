@@ -35,11 +35,11 @@ const list = (k: string, fallback: string[]) => { const v = env(k).split(',').ma
 const section = (title: string, n: number, link: string, rows: string[]) => `
 <tr><td style="padding:18px 0 6px;border-top:1px solid #eee">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-    <td style="font-size:15px;font-weight:bold;color:#201431">${esc(title)}</td>
-    <td align="right" style="font-size:22px;font-family:Georgia,serif;color:${n ? '#5E2A8C' : '#B9AFC6'}">${n}</td>
+    <td style="font-size:15px;font-weight:bold;color:#2A1526">${esc(title)}</td>
+    <td align="right" style="font-size:22px;font-family:Georgia,serif;color:${n ? '#3A1C36' : '#B9AFC6'}">${n}</td>
   </tr></table>
-  ${rows.length ? `<ul style="margin:6px 0 0;padding-left:18px;color:#4a3b5c;font-size:13px;line-height:1.55">${rows.map((r) => `<li>${r}</li>`).join('')}</ul>` : ''}
-  ${n ? `<p style="margin:6px 0 0;font-size:12px"><a href="${link}" style="color:#5E2A8C">Open in Systems</a></p>` : ''}
+  ${rows.length ? `<ul style="margin:6px 0 0;padding-left:18px;color:#4E3A4B;font-size:13px;line-height:1.55">${rows.map((r) => `<li>${r}</li>`).join('')}</ul>` : ''}
+  ${n ? `<p style="margin:6px 0 0;font-size:12px"><a href="${link}" style="color:#3A1C36">Open in Systems</a></p>` : ''}
 </td></tr>`;
 
 async function zernioToday(today: string): Promise<Row[]> {
@@ -97,7 +97,7 @@ function render(g: Row) {
     section('Posts going out today', g.posts.length, 'https://www.thep31collective.org/studio/calendar', g.posts.map((p: Row) => `${esc(time(p.scheduledFor))} · ${esc(String(p.content || p.title || '').split('\n')[0].slice(0, 90))}`)),
     g.errors.count ? section('Site errors (new or still happening)', n(g.errors), `${SYSTEMS}/health`, (g.errors.data || []).map((e: Row) => `${esc(String(e.message).slice(0, 100))} · ${e.count}×`)) : '',
   ].join('');
-  const next = g.next ? `<p style="margin:0 0 6px;font-size:14px;color:#4a3b5c"><b>${esc(g.next.title)}</b> ${days === 0 ? 'is today' : days === 1 ? 'is tomorrow' : `is in ${days} days`}${g.lineup != null ? ` · ${g.lineup} vendor${g.lineup === 1 ? '' : 's'} confirmed` : ''}.</p>` : '';
+  const next = g.next ? `<p style="margin:0 0 6px;font-size:14px;color:#4E3A4B"><b>${esc(g.next.title)}</b> ${days === 0 ? 'is today' : days === 1 ? 'is tomorrow' : `is in ${days} days`}${g.lineup != null ? ` · ${g.lineup} vendor${g.lineup === 1 ? '' : 's'} confirmed` : ''}.</p>` : '';
   const lead = total ? `${total} new ${total === 1 ? 'thing' : 'things'} came in over the last day${paid ? `, with ${money(paid)} in paid orders` : ''}.` : 'A quiet night: nothing new came in.';
   const html = layout(`Good morning. Here is your P31 day.`, `<p style="margin:0 0 10px;font-size:15px;line-height:1.5">${lead}</p>${next}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table>

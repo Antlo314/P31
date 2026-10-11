@@ -11,6 +11,6 @@
 .mm__row--ok .mm__pill { background: rgba(23, 166, 115, 0.14); color: #126b4a; }
 .mm__row small { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; opacity: 0.85; }
 .mm__row p { margin: 2px 0 0; font-size: 0.8rem; opacity: 0.75; }
-.mm__go { display: inline-flex; align-items: center; gap: 4px; justify-self: start; font-weight: 800; font-size: 0.8rem; color: var(--dark-plum); text-decoration: none; border-bottom: 1px solid rgba(94, 42, 140, 0.35); }
+.mm__go { display: inline-flex; align-items: center; gap: 4px; justify-self: start; font-weight: 800; font-size: 0.8rem; color: var(--dark-plum); text-decoration: none; border-bottom: 1px solid rgba(58, 28, 54, 0.35); }
 .mm__go--next { margin-top: 2px; }
 .mm__empty { margin: 0; font-size: 0.85rem; opacity: 0.75; }

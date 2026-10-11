@@ -7,7 +7,7 @@ import CalendlyEmbed from '../components/CalendlyEmbed';
 import { PROGRAMS, STEPS } from './content';
 import { CONTACT_EMAIL } from '../lib/academy';
 import mark from '../assets/academy/collective-mark.webp';
-import founder from '../assets/web/melanie23_rm.webp';
+import { MELANIE } from '../lib/teamPhotos';
 import './mentorship.css';
 import JoinCollective from '../components/JoinCollective';
 
@@ -59,7 +59,7 @@ export const MentorshipLanding = () => (
       title="Mentorship that"
       accent="makes room."
       lead="Private mentorship for faith-driven women — for the business you’re building and the woman you’re becoming."
-      media={{ src: founder, portrait: true, alt: 'Melanie JC' }}
+      media={{ src: MELANIE.portrait, alt: 'Melanie JC, founder of The P31 Collective' }}
       actions={<>
         <JoinCollective className="k-btn k-btn--gold" />
         <button type="button" className="k-btn k-btn--light" onClick={toCall}>Book an intro call <ArrowRight size={18} /></button>

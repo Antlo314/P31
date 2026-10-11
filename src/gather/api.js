@@ -31,6 +31,27 @@ export const react = (id, emoji) => call('chat_react', { p_id: id, p_emoji: emoj
 export const markRead = (channel) => supabase.rpc('chat_mark_read', { p_channel: channel }).then(() => {}, () => {});
 export const openDm = (userId) => call('chat_open_dm', { p_user: userId });
 export const setTitle = (userId, title) => call('chat_set_title', { p_user: userId, p_title: title });
+export const setPrefs = (dmEmail) => call('chat_set_prefs', { p_dm_email: dmEmail });
+
+// ── Notifications on this device (while The Gathering is open in a tab) ──
+const DEVICE_KEY = 'p31_gather_notify';
+export const deviceNotify = () => { try { return localStorage.getItem(DEVICE_KEY) === 'on' && typeof Notification !== 'undefined' && Notification.permission === 'granted'; } catch { return false; } };
+export async function setDeviceNotify(on) {
+  if (typeof Notification === 'undefined') throw new Error('This browser cannot show notifications.');
+  if (on && Notification.permission !== 'granted') {
+    const p = await Notification.requestPermission();
+    if (p !== 'granted') throw new Error('Notifications are blocked for this site in your browser settings.');
+  }
+  try { localStorage.setItem(DEVICE_KEY, on ? 'on' : 'off'); } catch { /* private mode */ }
+  return on && Notification.permission === 'granted';
+}
+export function showDeviceNotification(title, body, onClick) {
+  if (!deviceNotify()) return;
+  try {
+    const n = new Notification(title, { body, icon: '/icons/icon-192.png', tag: `gather-${title}` });
+    n.onclick = () => { window.focus(); onClick?.(); n.close(); };
+  } catch { /* some browsers only allow notifications from a service worker */ }
+}
 
 /** The newest top-level messages in a channel (or older than `before`), oldest first. */
 export async function getMessages(channelId, before) {

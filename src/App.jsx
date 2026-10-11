@@ -233,26 +233,26 @@ function App() {
           <Route
             path="/systems/*"
             element={
-              <Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#12081d' }} />}>
+              <Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#21101E' }} />}>
                 <SystemsApp />
               </Suspense>
             }
           />
           <Route
             path="/academy/:program/*"
-            element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#FCFBFE' }} />}><AcademyApp /></Suspense>}
+            element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#F8F3FA' }} />}><AcademyApp /></Suspense>}
           />
           <Route
             path="/studio/*"
-            element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#12081d' }} />}><StudioApp /></Suspense>}
+            element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#21101E' }} />}><StudioApp /></Suspense>}
           />
           <Route
             path="/today"
-            element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#FCFBFE' }} />}><Today /></Suspense>}
+            element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#F8F3FA' }} />}><Today /></Suspense>}
           />
           <Route
             path="/gather/:slug?"
-            element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#150a24' }} />}><Gather /></Suspense>}
+            element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#21101E' }} />}><Gather /></Suspense>}
           />
           {Lab && <Route path="/__lab" element={<Suspense fallback={null}><Lab /></Suspense>} />}
           <Route path="/*" element={isCollective ? <CollectiveRoutes /> : <SiteRoutes />} />

@@ -128,6 +128,8 @@ const Gather = () => {
   // ── Live: new messages, edits, reactions, new replies, other channels lighting up ──
   const channelsRef = useRef(channels);
   useEffect(() => { channelsRef.current = channels; }, [channels]);
+  const peopleRef = useRef(people);
+  useEffect(() => { peopleRef.current = people; }, [people]);
   useEffect(() => {
     if (state !== 'ready') return undefined;
     const upsert = (list, row) => (list.some((x) => x.id === row.id) ? list.map((x) => (x.id === row.id ? row : x)) : [...list, row]);
@@ -147,6 +149,14 @@ const Gather = () => {
         } else if (eventType === 'INSERT' && row.author_id !== me?.id) {
           setChannels((cs) => cs.map((c) => (c.id === row.channel_id ? { ...c, unread: (c.unread || 0) + 1, last_message_at: row.created_at } : c)));
           if (!channelsRef.current.some((c) => c.id === row.channel_id)) loadChannels(); // a brand-new DM
+        }
+        // A direct message for me, while I am looking elsewhere: a notification on this device.
+        if (eventType === 'INSERT' && row.author_id !== me?.id && (row.channel_id !== here || document.hidden)) {
+          const ch = channelsRef.current.find((c) => c.id === row.channel_id);
+          if (ch?.kind === 'dm') {
+            const who = peopleRef.current.get(row.author_id)?.name || 'Someone';
+            api.showDeviceNotification(`${who} · The Gathering`, (row.body || 'Sent you a photo').replace(/\*\*?/g, '').slice(0, 120), () => navigate(`/gather/${ch.slug}`));
+          }
         }
       })
       .subscribe();
@@ -386,6 +396,7 @@ const Gather = () => {
       </div>
 
       {person && <PersonCard person={person} me={me} onClose={() => setPerson(null)} onMessage={messagePerson}
+        onSetPrefs={async (dmEmail) => { const r = await api.setPrefs(dmEmail); setMe((m) => ({ ...m, dm_email: r?.dm_email ?? dmEmail })); }}
         onSetTitle={async (p, title) => { await api.setTitle(p.id, title); const [fresh] = await api.getPeople([p.id]); if (fresh) { setPeople((m) => new Map(m).set(fresh.id, fresh)); setPerson(fresh); } }} />}
       {light && <Lightbox items={light.items} index={light.index} urls={urls} onClose={() => setLight(null)} />}
       {word && (

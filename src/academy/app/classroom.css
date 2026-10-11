@@ -81,7 +81,7 @@
 .cl-table td.is-todo button { background: rgba(242, 206, 77, 0.28); color: #6b5210; }
 .cl-table td.is-revise button { background: #fdecec; color: #b42318; }
 .cl-table td.is-low { color: #b42318; }
-.cl-table td.is-done { color: #0f7a54; }
+.cl-table td.is-done { color: #4F6B2E; }
 
 /* Quiz builder */
 .cl-question { display: grid; gap: 8px; padding: 14px; border-radius: 18px; border: 1px solid var(--line); background: #fff; }
@@ -147,7 +147,7 @@
 .cl-attend > div:first-of-type { flex: 1; }
 .cl-seg { display: flex; flex-wrap: wrap; gap: 4px; }
 .cl-seg button { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 7px 12px; font: inherit; font-size: 0.78rem; font-weight: 800; cursor: pointer; color: var(--ink-2); min-height: 36px; }
-.cl-seg .is-present { background: rgba(23, 166, 115, 0.14); border-color: #17A673; color: #0f7a54; }
+.cl-seg .is-present { background: rgba(23, 166, 115, 0.14); border-color: #17A673; color: #4F6B2E; }
 .cl-seg .is-late { background: rgba(242, 206, 77, 0.25); border-color: var(--gold); color: #6b5210; }
 .cl-seg .is-absent { background: #fdecec; border-color: #e8a3a0; color: #b42318; }
 .cl-seg .is-excused { background: var(--mist); border-color: var(--plum); color: var(--plum); }
@@ -176,7 +176,7 @@
 .cl-cert__mark { width: 84px; height: 84px; object-fit: contain; }
 .cl-cert__org { margin: 0; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.32em; text-transform: uppercase; color: #8a6d1a; }
 .cl-cert__title { margin: 4px 0 6px; font-family: var(--font-heading); font-weight: 400; font-size: clamp(1.9rem, 1.4rem + 2.4vw, 3.2rem); color: #3a1757; }
-.cl-cert__lead { margin: 0; font-size: 1rem; color: #4a3b5c; }
+.cl-cert__lead { margin: 0; font-size: 1rem; color: #4E3A4B; }
 .cl-cert__name { margin: 4px 0; font-family: var(--font-heading); font-style: italic; font-size: clamp(2rem, 1.4rem + 3vw, 3.6rem); color: #8a6d1a; border-bottom: 1px solid rgba(169, 122, 34, 0.45); padding: 0 24px 6px; }
 .cl-cert__foot { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 18px; width: 100%; margin-top: 18px; }
 .cl-cert__foot > div:not(.cl-cert__seal) { display: grid; gap: 2px; font-size: 0.9rem; color: #3a1757; }
@@ -198,7 +198,7 @@
 .cl-bell__panel {
   position: fixed; z-index: 80; right: 12px; top: calc(56px + env(safe-area-inset-top)); width: min(380px, calc(100vw - 24px)); max-height: min(70dvh, 560px);
   overflow-y: auto; border-radius: 22px; background: var(--ivory); color: var(--ink); border: 1px solid var(--line);
-  box-shadow: 0 30px 70px -20px rgba(18, 8, 29, 0.5); animation: k-pop 0.25s var(--ease-fluid) both;
+  box-shadow: 0 30px 70px -20px rgba(33, 16, 30, 0.5); animation: k-pop 0.25s var(--ease-fluid) both;
 }
 @media (min-width: 980px) { .cl-bell__panel { left: 280px; right: auto; top: auto; bottom: 24px; } }
 .cl-bell__head { position: sticky; top: 0; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--ivory); border-bottom: 1px solid var(--line); }
@@ -214,7 +214,7 @@
 .cl-bell li small { font-size: 0.72rem; color: var(--ink-3); }
 
 .cl-install { position: relative; }
-.cl-install__hint { position: absolute; right: 0; top: 44px; z-index: 80; width: 220px; padding: 12px; border-radius: 14px; background: var(--ivory); color: var(--ink); font-size: 0.82rem; box-shadow: 0 20px 50px -20px rgba(18, 8, 29, 0.5); }
+.cl-install__hint { position: absolute; right: 0; top: 44px; z-index: 80; width: 220px; padding: 12px; border-radius: 14px; background: var(--ivory); color: var(--ink); font-size: 0.82rem; box-shadow: 0 20px 50px -20px rgba(33, 16, 30, 0.5); }
 @media (min-width: 980px) { .cl-install__hint { right: auto; left: 0; top: auto; bottom: 46px; } }
 
 /* Radio/checkbox rows inside forms: keep the control small (it inherited full-width input styles). */

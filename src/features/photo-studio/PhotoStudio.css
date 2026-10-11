@@ -1,7 +1,7 @@
 /* Photo Studio — same dark studio surface as Clip Studio. Prefix: ps- */
 .ps {
-  --ps-bg: #160a24;
-  --ps-panel: #22123a;
+  --ps-bg: #21101E;
+  --ps-panel: #2D1529;
   --ps-line: rgba(255, 255, 255, 0.1);
   --ps-dim: rgba(255, 255, 255, 0.66);
   --ps-gold: #F2CE4D;
@@ -32,7 +32,7 @@
   position: relative;
   display: grid; place-items: center;
   border-radius: 18px; overflow: hidden;
-  background: #0d0616;
+  background: #21101E;
   min-height: 200px;
 }
 .ps-preview canvas {
@@ -57,7 +57,7 @@
 }
 @keyframes ps-spin { to { transform: rotate(360deg); } }
 .ps-progress { width: 220px; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
-.ps-progress span { display: block; height: 100%; background: linear-gradient(90deg, #A855E8, var(--ps-gold)); }
+.ps-progress span { display: block; height: 100%; background: linear-gradient(90deg, #9B71B2, var(--ps-gold)); }
 
 .ps-error {
   display: flex; gap: 8px; margin: 0; padding: 12px; border-radius: 12px;
@@ -88,13 +88,13 @@
 .ps-stage--transparent .ps-stage__sw { background: repeating-conic-gradient(#ddd 0 25%, #fff 0 50%) 0 0 / 12px 12px; }
 .ps-stage--white .ps-stage__sw { background: #fff; }
 .ps-stage--studio .ps-stage__sw { background: radial-gradient(circle at 50% 40%, #f7f6f8, #c9c6ce); }
-.ps-stage--blush .ps-stage__sw { background: linear-gradient(135deg, #fbf3ff, #ecddfa 55%, #f6d9e6); }
+.ps-stage--blush .ps-stage__sw { background: linear-gradient(135deg, #F8F3FA, #E3D0EA 55%, #f6d9e6); }
 .ps-stage--linen .ps-stage__sw { background: linear-gradient(#f4ece0, #e6d8c4); }
 .ps-stage--marble .ps-stage__sw { background: linear-gradient(120deg, #fbfaf8 40%, #cfcad3 42%, #fbfaf8 46%, #ebe8e4); }
 .ps-stage--botanical .ps-stage__sw { background: radial-gradient(ellipse at 80% 20%, rgba(60, 70, 40, 0.3), transparent 50%), linear-gradient(135deg, #fbf6ec, #efe4d0); }
-.ps-stage--pedestal .ps-stage__sw { background: linear-gradient(transparent 60%, #F2CE4D 60% 63%, #4a1f78 63%), radial-gradient(circle at 50% 35%, #6b3299, #1d0f2e); }
-.ps-stage--night .ps-stage__sw { background: radial-gradient(circle at 50% 50%, rgba(242, 206, 77, 0.45), transparent 55%), linear-gradient(#2a1544, #12081d); }
-.ps-stage--emerald .ps-stage__sw { background: radial-gradient(circle at 50% 35%, #2bb07c, #0f3d28); }
+.ps-stage--pedestal .ps-stage__sw { background: linear-gradient(transparent 60%, #F2CE4D 60% 63%, #4C2546 63%), radial-gradient(circle at 50% 35%, #6b3299, #2D1529); }
+.ps-stage--night .ps-stage__sw { background: radial-gradient(circle at 50% 50%, rgba(242, 206, 77, 0.45), transparent 55%), linear-gradient(#3A1C36, #21101E); }
+.ps-stage--emerald .ps-stage__sw { background: radial-gradient(circle at 50% 35%, #2bb07c, #374126); }
 @media (min-width: 640px) { .ps-stages { grid-template-columns: repeat(6, 1fr); } }
 
 .ps-filters, .ps-outputs { display: flex; flex-wrap: wrap; gap: 6px; }

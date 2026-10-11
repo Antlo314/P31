@@ -23,9 +23,9 @@
   --sf-ink: #10291C; --sf-ink-2: #2F4A3B; --sf-muted: #567061; --sf-line: #CFEEDD;
 }
 .store-tpl-noir {
-  --sf-bg: #120A1A; --sf-surface: #1B1026; --sf-soft: #241536;
+  --sf-bg: #21101E; --sf-surface: #1B1026; --sf-soft: #241536;
   --sf-ink: #F4EEF8; --sf-ink-2: #CBBFD6; --sf-muted: #A99BB6; --sf-line: rgba(255, 255, 255, 0.1);
-  --sf-on-accent: #120A1A;
+  --sf-on-accent: #21101E;
 }
 
 /* Headings */

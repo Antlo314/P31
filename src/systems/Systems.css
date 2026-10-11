@@ -4,14 +4,14 @@
    sidebar from 960px. Prefix: sys-
    ============================================================ */
 .sys, .sys-login, .sys-boot {
-  --sys-bg: #12081d;
-  --sys-panel: #1d0f2e;
-  --sys-panel-2: #26143c;
+  --sys-bg: #21101E;
+  --sys-panel: #2D1529;
+  --sys-panel-2: #3A1C36;
   --sys-line: rgba(255, 255, 255, 0.09);
-  --sys-ink: #f6f1fb;
+  --sys-ink: #EFE4F3;
   --sys-dim: rgba(246, 241, 251, 0.64);
   --sys-gold: #F2CE4D;
-  --sys-plum: #A855E8;
+  --sys-plum: #9B71B2;
   --sys-green: #17A673;
   --pe-panel: var(--sys-panel);
   --pe-line: var(--sys-line);
@@ -19,7 +19,7 @@
   color-scheme: dark;
   min-height: 100dvh;
   background:
-    radial-gradient(60% 40% at 100% 0%, rgba(168, 85, 232, 0.16), transparent 70%),
+    radial-gradient(60% 40% at 100% 0%, rgba(155, 113, 178, 0.16), transparent 70%),
     radial-gradient(50% 40% at 0% 100%, rgba(242, 206, 77, 0.07), transparent 70%),
     var(--sys-bg);
   color: var(--sys-ink);
@@ -41,7 +41,7 @@
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
   display: grid; grid-template-columns: repeat(5, 1fr);
   padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
-  background: rgba(18, 8, 29, 0.88);
+  background: rgba(33, 16, 30, 0.88);
   backdrop-filter: blur(16px) saturate(1.4);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
   border-top: 1px solid var(--sys-line);
@@ -61,7 +61,7 @@
     display: flex; flex-direction: column; gap: 18px;
     position: sticky; top: 0; height: 100dvh;
     padding: 22px 14px;
-    background: rgba(29, 15, 46, 0.7);
+    background: rgba(42, 21, 38, 0.7);
     border-right: 1px solid var(--sys-line);
   }
   .sys-main { padding: 36px clamp(24px, 4vw, 56px) 56px; }
@@ -143,7 +143,7 @@
 .sys-tool:hover { border-color: rgba(242, 206, 77, 0.4); transform: translateY(-2px); }
 .sys-tool__icon {
   display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px;
-  background: rgba(168, 85, 232, 0.16); color: #d6b3ff;
+  background: rgba(155, 113, 178, 0.16); color: #d6b3ff;
 }
 .sys-tool h3 { font-family: var(--font-body); font-size: 1rem; font-weight: 800; margin: 0; }
 .sys-tool p { margin: 2px 0 0; font-size: 0.86rem; color: var(--sys-dim); }
@@ -269,7 +269,7 @@
   width: min(100%, 400px);
   display: grid; gap: 14px;
   padding: 28px 22px; border-radius: 26px;
-  background: linear-gradient(170deg, rgba(42, 21, 68, 0.95), rgba(29, 15, 46, 0.95));
+  background: linear-gradient(170deg, rgba(58, 28, 54, 0.95), rgba(42, 21, 38, 0.95));
   border: 1px solid rgba(242, 206, 77, 0.22);
   box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.7);
 }
@@ -361,7 +361,7 @@ button.sys-tabbar__link.active { background: rgba(242, 206, 77, 0.1); }
 .crm-stage { text-transform: capitalize; }
 .crm-stage--member { background: rgba(23, 166, 115, 0.18) !important; color: #6fe0b4 !important; }
 .crm-stage--prospect { background: rgba(242, 206, 77, 0.18) !important; color: var(--gold-hi) !important; }
-.crm-stage--partner { background: rgba(168, 85, 232, 0.2) !important; color: #d7b3f7 !important; }
+.crm-stage--partner { background: rgba(155, 113, 178, 0.2) !important; color: #C9A8DA !important; }
 .crm-grid { display: grid; gap: 14px; }
 @media (min-width: 980px) { .crm-grid { grid-template-columns: 340px minmax(0, 1fr); align-items: start; } }
 .crm-tag-input, .crm-note { min-height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.05); color: inherit; font: inherit; font-size: 16px; }
@@ -376,7 +376,7 @@ button.sys-tabbar__link.active { background: rgba(242, 206, 77, 0.1); }
 
 /* Applications (Join P31 Collective) */
 .app-status--new { background: rgba(242, 206, 77, 0.18) !important; color: var(--gold-hi) !important; }
-.app-status--reviewing { background: rgba(168, 85, 232, 0.2) !important; color: #d7b3f7 !important; }
+.app-status--reviewing { background: rgba(155, 113, 178, 0.2) !important; color: #C9A8DA !important; }
 .app-status--approved { background: rgba(23, 166, 115, 0.18) !important; color: #6fe0b4 !important; }
 .app-status--waitlist { background: rgba(120, 160, 255, 0.16) !important; color: #b9ccff !important; }
 .app-status--declined { background: rgba(255, 255, 255, 0.08) !important; color: rgba(255, 255, 255, 0.6) !important; }
@@ -442,7 +442,7 @@ button.sys-tabbar__link.active { background: rgba(242, 206, 77, 0.1); }
   background: rgba(255, 255, 255, 0.08); color: var(--sys-dim);
 }
 .sys-site--market { background: rgba(242, 206, 77, 0.16); color: var(--sys-gold); }
-.sys-site--collective { background: rgba(168, 85, 232, 0.22); color: #dcbcff; }
+.sys-site--collective { background: rgba(155, 113, 178, 0.22); color: #C9A8DA; }
 .sys-tag {
   display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; padding: 2px 8px; border-radius: 999px; vertical-align: middle;
   font-size: 0.62rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
@@ -451,7 +451,7 @@ button.sys-tabbar__link.active { background: rgba(242, 206, 77, 0.1); }
 .sys-desk { opacity: 0.7; }
 .sys-side__label small { display: block; font-size: 0.6rem; letter-spacing: 0.04em; text-transform: none; opacity: 0.6; font-weight: 600; }
 .sys-side__group--market .sys-side__label { color: var(--sys-gold); }
-.sys-side__group--collective .sys-side__label { color: #dcbcff; }
+.sys-side__group--collective .sys-side__label { color: #C9A8DA; }
 
 .sys-crumb {
   display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 0 auto 14px; max-width: 1100px;
@@ -471,8 +471,8 @@ button.sys-tabbar__link.active { background: rgba(242, 206, 77, 0.1); }
   background: rgba(242, 206, 77, 0.12); border: 1px solid rgba(242, 206, 77, 0.35); color: var(--sys-ink); font-size: 0.82rem; font-weight: 600;
 }
 .sys-needs__chip strong { color: var(--sys-gold); }
-.sys-needs__chip--collective { background: rgba(168, 85, 232, 0.14); border-color: rgba(168, 85, 232, 0.4); }
-.sys-needs__chip--collective strong { color: #dcbcff; }
+.sys-needs__chip--collective { background: rgba(155, 113, 178, 0.14); border-color: rgba(155, 113, 178, 0.4); }
+.sys-needs__chip--collective strong { color: #C9A8DA; }
 .sys-needs__chip.is-alert { background: rgba(226, 85, 85, 0.14); border-color: rgba(226, 85, 85, 0.45); }
 .sys-needs__chip.is-alert strong { color: #ff9b9b; }
 @media (max-width: 640px) {
@@ -482,7 +482,7 @@ button.sys-tabbar__link.active { background: rgba(242, 206, 77, 0.1); }
 }
 .sys-sitesec { display: grid; gap: 14px; padding: 18px; border-radius: 24px; border: 1px solid var(--sys-line); background: rgba(255, 255, 255, 0.025); }
 .sys-sitesec--market { border-color: rgba(242, 206, 77, 0.22); background: linear-gradient(180deg, rgba(242, 206, 77, 0.05), transparent 40%); }
-.sys-sitesec--collective { border-color: rgba(168, 85, 232, 0.28); background: linear-gradient(180deg, rgba(168, 85, 232, 0.07), transparent 40%); }
+.sys-sitesec--collective { border-color: rgba(155, 113, 178, 0.28); background: linear-gradient(180deg, rgba(155, 113, 178, 0.07), transparent 40%); }
 @media (min-width: 960px) { .sys-sitesec { padding: 24px; } }
 .sys-sitehead { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .sys-sitehead > div { display: grid; gap: 4px; justify-items: start; }

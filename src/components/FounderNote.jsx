@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { collectiveHome, hrefFor } from '../lib/site';
-import founder from '../assets/web/melanie23_rm.webp';
+import { MELANIE } from '../lib/teamPhotos';
 import './FounderNote.css';
 import { JOIN_PATH } from '../lib/academy';
 
@@ -9,7 +9,7 @@ import { JOIN_PATH } from '../lib/academy';
 // lives on the Collective.
 const FounderNote = ({ dark = false }) => (
   <aside className={`fn ${dark ? 'fn--dark' : ''}`} data-reveal>
-    <span className="fn__photo"><img src={founder} alt="Melanie JC" loading="lazy" decoding="async" /></span>
+    <span className="fn__photo"><img src={MELANIE.square} alt="Melanie JC" loading="lazy" decoding="async" /></span>
     <div className="fn__copy">
       <p className="fn__eyebrow">Why it began</p>
       <p className="fn__quote">Melanie started P31 with a simple conviction: gifted women deserve a stage as excellent as their work.</p>

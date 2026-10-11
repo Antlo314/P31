@@ -2,6 +2,15 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 11 — The brand palette, the team's faces, and direct-message alerts
+
+- **The P31 palette, across both sites.** Thistle (#E3D0EA) is now the primary surface, Dark Purple (#3A1C36) the sub colour for text, buttons and dark sections, Amethyst (#9B71B2) the lift between them, Olive (#6C6D11) and Gold the accents, and Cal Poly Green (#374126) the deep accent. Every older colour (the royal purple, the near-black nights, the emerald greens) was mapped onto these in one pass: pages, the Systems console, Content Studio and its post cards (a new Olive card style too), The Gathering, the curator studio, the pop-up, and the email templates. Both footers and the two verse bands (the "far above rubies" band on the marketplace, the vision scripture on the Collective) now sit on Cal Poly green.
+- **The Collective's vision scripture** is now Proverbs 31:29: "Many daughters have done virtuously, But thou excellest them all."
+- **Melanie JC, everywhere.** The new portrait (marble dress, olive studio) replaces the old cut-out on the Collective home, the Academy and mentorship pages, and the founder note on the marketplace, each from its own crop.
+- **The team on both sites.** The group photo from the market opens the About page, the Join page and the Partner page, heads the team directory on both sites, and is the picture in the marketplace pop-up. The four team portraits run under the directory as a strip. Names are not attached to those four until Melanie JC confirms who is who (one line in `src/lib/teamPhotos.js`); the directory shows each person’s photo the moment her name is filled in.
+- **The pop-up** now reads “Follow the P31 Movement”.
+- **Direct-message alerts in The Gathering.** A private message that goes unread for a few minutes becomes one email to the recipient with the newest lines and a link straight back into the conversation on the site she signs in to; one email per conversation every 30 minutes at most, and none if she read it first. With The Gathering open in a tab, a message for her shows as a notification on that device. Both switches are on her own card. Database v40 and a `chat-notify` function that the scheduler calls every 5 minutes.
+
 ## October 11 — The Gathering: P31's community space
 
 - **One place for the whole P31 family to talk.** The Gathering (`/gather`, on both p31market.com and thep31collective.org) brings vendors, mentorship students and alumnae, mentors, the team and the site overseers together, in the plum-and-gold P31 look. It replaces the old curator-only chat, and that chat’s history comes with it.

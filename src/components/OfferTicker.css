@@ -8,10 +8,10 @@
   width: min(calc(100% - 24px), 720px);
   border-radius: 18px;
   padding: 10px 14px;
-  background: linear-gradient(120deg, #2a1544, #4a1f78);
+  background: linear-gradient(120deg, #3A1C36, #4C2546);
   color: #fff;
   border: 1px solid rgba(242, 206, 77, 0.35);
-  box-shadow: 0 18px 40px -18px rgba(18, 8, 29, 0.7);
+  box-shadow: 0 18px 40px -18px rgba(33, 16, 30, 0.7);
   font-family: var(--font-body);
 }
 .ticker-content { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 12px; text-align: center; }

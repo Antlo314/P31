@@ -94,7 +94,7 @@
 .pl-item--idea { opacity: 0.7; }
 .pl-item--ready { background: rgba(242, 206, 77, 0.22); color: #fbe7a1; }
 .pl-item--approved, .pl-item--scheduled { background: rgba(23, 166, 115, 0.22); color: #9ae6c8; }
-.pl-item--posted { background: rgba(168, 85, 232, 0.22); }
+.pl-item--posted { background: rgba(155, 113, 178, 0.22); }
 .pl-item--skipped { text-decoration: line-through; opacity: 0.5; }
 .pl-sheet { max-width: 760px; }
 .pl-form { display: grid; gap: 10px; }

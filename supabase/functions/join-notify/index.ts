@@ -50,13 +50,13 @@ const OUTREACH_EMAIL = 'outreach@p31market.com';
 
 // ── Email pieces ──────────────────────────────────────────────
 const tr = (label: string, value: string) =>
-  `<tr><td style="padding:7px 12px 7px 0;color:#6E6580;font-size:13px;vertical-align:top;white-space:nowrap">${esc(label)}</td>`
-  + `<td style="padding:7px 0;font-size:14px;color:#201431">${value}</td></tr>`;
-const lines = (items: string[]) => (items?.length ? items.map((i) => esc(i)).join('<br>') : '<span style="color:#6E6580">—</span>');
-const text = (v: string | null) => (v && String(v).trim() ? esc(v).replace(/\n/g, '<br>') : '<span style="color:#6E6580">—</span>');
-const mail = (e: string) => `<a href="mailto:${esc(e)}" style="color:#5E2A8C">${esc(e)}</a>`;
-const tel = (p: string) => `<a href="tel:${esc(String(p).replace(/[^\d+]/g, ''))}" style="color:#5E2A8C">${esc(p)}</a>`;
-const link = (href: string, label?: string) => `<a href="${esc(href)}" style="color:#5E2A8C">${esc(label || href)}</a>`;
+  `<tr><td style="padding:7px 12px 7px 0;color:#74657A;font-size:13px;vertical-align:top;white-space:nowrap">${esc(label)}</td>`
+  + `<td style="padding:7px 0;font-size:14px;color:#2A1526">${value}</td></tr>`;
+const lines = (items: string[]) => (items?.length ? items.map((i) => esc(i)).join('<br>') : '<span style="color:#74657A">—</span>');
+const text = (v: string | null) => (v && String(v).trim() ? esc(v).replace(/\n/g, '<br>') : '<span style="color:#74657A">—</span>');
+const mail = (e: string) => `<a href="mailto:${esc(e)}" style="color:#3A1C36">${esc(e)}</a>`;
+const tel = (p: string) => `<a href="tel:${esc(String(p).replace(/[^\d+]/g, ''))}" style="color:#3A1C36">${esc(p)}</a>`;
+const link = (href: string, label?: string) => `<a href="${esc(href)}" style="color:#3A1C36">${esc(label || href)}</a>`;
 const button = (href: string, label: string) =>
   `<p style="margin:22px 0 0"><a href="${href}" style="display:inline-block;background:#F2CE4D;color:#2a1a00;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:999px">${esc(label)}</a></p>`;
 const fullName = (a: Row) => a.full_name || [a.first_name, a.last_name].filter(Boolean).join(' ') || a.business_name || 'Someone';
@@ -64,7 +64,7 @@ const intro = (a: Row, what: string) =>
   `<p style="margin:0 0 16px;font-size:15px;line-height:1.5">${esc(fullName(a))} ${what} on ${esc(eastern(a.created_at))} (Eastern).${a.email ? ' Reply to this email to write back to them directly.' : ''}</p>`;
 const table = (rows: string) => `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-top:1px solid #eee">${rows}</table>`;
 const bullets = (items: string[]) => `<ul style="margin:6px 0 14px;padding-left:20px;line-height:1.55">${items.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`;
-const stars = (n: number | null) => (n ? `${'★'.repeat(n)}${'☆'.repeat(5 - n)} <span style="color:#6E6580">(${n}/5)</span>` : '<span style="color:#6E6580">—</span>');
+const stars = (n: number | null) => (n ? `${'★'.repeat(n)}${'☆'.repeat(5 - n)} <span style="color:#74657A">(${n}/5)</span>` : '<span style="color:#74657A">—</span>');
 const address = (a: Row) => {
   const x = a.address || {};
   return lines([x.street, x.line2, [x.city, x.state, x.zip].filter(Boolean).join(', '), x.country].filter(Boolean));
@@ -180,10 +180,10 @@ const FLOWS: Flow[] = [
     email: (a) => layout(`Storefront agreement: ${a.business_name}`, intro(a, `signed the Proverbs 31 Marketplace Storefront Agreement for ${a.business_name}`) + table(
       tr('Business', esc(a.business_name)) + tr('Contact', esc(fullName(a))) + tr('Email', mail(a.email)) + tr('Phone', tel(a.phone))
       + tr('Business address', address(a)) + tr('Signed as', esc(a.signed_name)) + tr('Date signed', esc(longDate(a.signed_on))) + tr('Terms version', esc(a.terms_version))
-      + tr('Curator account', a.curator_id ? '<span style="color:#17603C">Already has one: her storefront is linked</span>'
-      : a.preapproved ? '<span style="color:#17603C">Already approved: the link to create her account went out with her copy</span>'
+      + tr('Curator account', a.curator_id ? '<span style="color:#374126">Already has one: her storefront is linked</span>'
+      : a.preapproved ? '<span style="color:#374126">Already approved: the link to create her account went out with her copy</span>'
         : 'None yet: pre-approve and send the account link from Systems'),
-    ) + (a.curator_id || a.preapproved ? '' : `<p style="margin:16px 0 0;font-size:13px;color:#6E6580">She was told she will receive a link to create her account within 7–10 days.</p>`)
+    ) + (a.curator_id || a.preapproved ? '' : `<p style="margin:16px 0 0;font-size:13px;color:#74657A">She was told she will receive a link to create her account within 7–10 days.</p>`)
       + button(`${SYSTEMS}/forms?tab=agreements`, 'Open in Systems → Vendor forms')),
     confirm: (a) => ({
       replyTo: VENDOR_EMAIL,
@@ -246,7 +246,7 @@ const FLOWS: Flow[] = [
     email: (a) => layout(`Market registration: ${a.business_name}`, intro(a, `registered ${a.business_name} for ${a.event_label} and signed the Vendor Rules & Regulations`) + table(
       tr('Event', esc(a.event_label)) + tr('Business', esc(a.business_name)) + tr('Contact', esc(fullName(a))) + tr('Email', mail(a.email)) + tr('Phone', tel(a.phone))
       + tr('Website', text(a.website)) + tr('Social media', text(a.social)) + tr('Products or services', text(a.products))
-      + tr('Logo', a.logo_url ? link(a.logo_url, 'Open the logo') : '<span style="color:#6E6580">Not uploaded</span>')
+      + tr('Logo', a.logo_url ? link(a.logo_url, 'Open the logo') : '<span style="color:#74657A">Not uploaded</span>')
       + tr('Signed as', esc(a.signed_name)) + tr('Date', esc(longDate(a.signed_on))),
     ) + button(`${SYSTEMS}/forms?tab=registrations`, 'Confirm and add to the lineup in Systems')),
     confirm: (a) => ({

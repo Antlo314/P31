@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { gsap, reducedMotion } from '../lib/motion';
 import './LeadPopup.css';
 
-import gatherImg from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
+import { GROUP } from '../lib/teamPhotos';
 
 const QUIET = ['/login', '/register', '/dashboard', '/systems', '/onboarding-exclusive', '/unsubscribe', '/portal', '/enroll', '/academy', '/studio'];
 
@@ -179,7 +179,7 @@ const LeadPopup = () => {
         <button className="k-close lp2__close" onClick={close} aria-label="Close"><X size={18} /></button>
 
         <aside className="lp2__side">
-          <div className="lp2__media"><img src={gatherImg} alt="" /><span className="lp2__sheen" aria-hidden="true" /></div>
+          <div className="lp2__media"><img src={GROUP.tall} alt="" /><span className="lp2__sheen" aria-hidden="true" /></div>
           {[0, 1, 2, 3].map((i) => <i key={i} className="lp2__glint" aria-hidden="true" />)}
           <figure className="lp2__verse lp2__in">
             <blockquote>“Give her of the fruit of her hands.”</blockquote>
@@ -205,7 +205,7 @@ const LeadPopup = () => {
           ) : (
             <>
               <p className="k-eyebrow lp2__in">Stay connected</p>
-              <h2 id="lp2-title" className="k-h2 lp2__title lp2__in">Stay in the <em>Know</em></h2>
+              <h2 id="lp2-title" className="k-h2 lp2__title lp2__in">Follow the <em>P31 Movement</em></h2>
               <p className="k-body lp2__in">Be part of what’s happening at Proverbs 31 Marketplace! Subscribe to our newsletter for the latest news, marketplace highlights, upcoming events, and exclusive opportunities for faith-driven women in business and purpose.</p>
 
               <form className="k-form lp2__form lp2__in" onSubmit={submit}>

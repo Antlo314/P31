@@ -46,7 +46,7 @@ export const BACKGROUNDS = [
   ['gold', 'Gold box'],
   ['band', 'Full-width band'],
 ];
-const BG = { dark: 'rgba(0,0,0,0.72)', light: 'rgba(255,255,255,0.92)', plum: 'rgba(42,21,68,0.78)', gold: 'rgba(242,206,77,0.95)', band: 'rgba(0,0,0,0.55)' };
+const BG = { dark: 'rgba(0,0,0,0.72)', light: 'rgba(255,255,255,0.92)', plum: 'rgba(58, 28, 54,0.78)', gold: 'rgba(242,206,77,0.95)', band: 'rgba(0,0,0,0.55)' };
 
 export const FILLS = [['solid', 'Solid color'], ['gold', 'Gold shimmer'], ['plum', 'Plum gradient']];
 
@@ -56,13 +56,13 @@ export const FILLS = [['solid', 'Solid color'], ['gold', 'Gold shimmer'], ['plum
  */
 export const CAPTION_PRESETS = [
   { id: 'bold', name: 'Bold caps', note: 'The classic Reels look', patch: { font: 'Bebas Neue', weight: 400, italic: false, upper: true, size: 0.085, color: '#FFFFFF', active: '#F2CE4D', highlight: 'color', outline: true, outlineColor: '#000000', outlineWidth: 0.16, background: 'none', animation: 'pop', shadow: false, fill: 'solid', letterSpacing: 0.02, lines: 2 } },
-  { id: 'karaoke', name: 'Karaoke', note: 'Color sweeps as each word is said', patch: { font: 'Montserrat', weight: 900, italic: false, upper: true, size: 0.07, color: '#FFFFFF', active: '#F2CE4D', highlight: 'none', outline: true, outlineColor: '#1d0f2e', outlineWidth: 0.14, background: 'none', animation: 'karaoke', shadow: true, fill: 'solid', letterSpacing: 0, lines: 2 } },
+  { id: 'karaoke', name: 'Karaoke', note: 'Color sweeps as each word is said', patch: { font: 'Montserrat', weight: 900, italic: false, upper: true, size: 0.07, color: '#FFFFFF', active: '#F2CE4D', highlight: 'none', outline: true, outlineColor: '#2D1529', outlineWidth: 0.14, background: 'none', animation: 'karaoke', shadow: true, fill: 'solid', letterSpacing: 0, lines: 2 } },
   { id: 'bounce', name: 'Bounce', note: 'Each word jumps as it lands', patch: { font: 'Poppins', weight: 800, italic: false, upper: false, size: 0.072, color: '#FFFFFF', active: '#17A673', highlight: 'color', outline: true, outlineColor: '#000000', outlineWidth: 0.14, background: 'none', animation: 'bounce', shadow: false, fill: 'solid', letterSpacing: 0, lines: 2 } },
-  { id: 'boxed', name: 'Boxed', note: 'Dark box, spoken word in plum', patch: { font: 'Manrope', weight: 800, italic: false, upper: false, size: 0.06, color: '#FFFFFF', active: '#FFFFFF', activeBox: '#5E2A8C', highlight: 'box', outline: false, background: 'dark', animation: 'fade', shadow: false, fill: 'solid', letterSpacing: 0, lines: 2 } },
+  { id: 'boxed', name: 'Boxed', note: 'Dark box, spoken word in plum', patch: { font: 'Manrope', weight: 800, italic: false, upper: false, size: 0.06, color: '#FFFFFF', active: '#FFFFFF', activeBox: '#3A1C36', highlight: 'box', outline: false, background: 'dark', animation: 'fade', shadow: false, fill: 'solid', letterSpacing: 0, lines: 2 } },
   { id: 'elegant', name: 'Elegant', note: 'Serif italic with a gold accent', patch: { font: 'Playfair Display', weight: 700, italic: true, upper: false, size: 0.058, color: '#FFF8E6', active: '#F2CE4D', highlight: 'color', outline: false, background: 'none', animation: 'rise', shadow: true, fill: 'solid', letterSpacing: 0, lines: 2 } },
   { id: 'gold', name: 'Gold shimmer', note: 'Gradient gold, P31 luxe', patch: { font: 'Noto Serif', weight: 700, italic: false, upper: false, size: 0.064, color: '#F2CE4D', active: '#FFFFFF', highlight: 'color', outline: false, background: 'plum', animation: 'pop', shadow: true, fill: 'gold', letterSpacing: 0.01, lines: 2 } },
   { id: 'typewriter', name: 'Typewriter', note: 'Letters arrive as they are spoken', patch: { font: 'Space Grotesk', weight: 700, italic: false, upper: false, size: 0.06, color: '#FFFFFF', active: '#F2CE4D', highlight: 'none', outline: false, background: 'band', animation: 'typewriter', shadow: false, fill: 'solid', letterSpacing: 0.03, lines: 2 } },
-  { id: 'hand', name: 'Handwritten', note: 'Warm and personal', patch: { font: 'Caveat', weight: 700, italic: false, upper: false, size: 0.085, color: '#FFFFFF', active: '#F2CE4D', highlight: 'underline', outline: true, outlineColor: '#2a1544', outlineWidth: 0.12, background: 'none', animation: 'words', shadow: false, fill: 'solid', letterSpacing: 0, lines: 2 } },
+  { id: 'hand', name: 'Handwritten', note: 'Warm and personal', patch: { font: 'Caveat', weight: 700, italic: false, upper: false, size: 0.085, color: '#FFFFFF', active: '#F2CE4D', highlight: 'underline', outline: true, outlineColor: '#3A1C36', outlineWidth: 0.12, background: 'none', animation: 'words', shadow: false, fill: 'solid', letterSpacing: 0, lines: 2 } },
   { id: 'minimal', name: 'Minimal', note: 'Small, quiet, lower case', patch: { font: 'Manrope', weight: 600, italic: false, upper: false, size: 0.046, color: '#FFFFFF', active: '#FFFFFF', highlight: 'none', outline: false, background: 'dark', animation: 'fade', shadow: false, fill: 'solid', letterSpacing: 0.04, lines: 1 } },
   { id: 'impact', name: 'Impact', note: 'Huge, tall, unmissable', patch: { font: 'Anton', weight: 400, italic: false, upper: true, size: 0.1, color: '#FFFFFF', active: '#F2CE4D', highlight: 'scale', outline: true, outlineColor: '#000000', outlineWidth: 0.1, background: 'none', animation: 'bounce', shadow: true, fill: 'solid', letterSpacing: 0.01, lines: 2 } },
 ];
@@ -79,7 +79,7 @@ export function captionSettings(preset) {
     color: preset.color,
     active: preset.active,
     highlight: preset.activeBox ? 'box' : 'color',
-    activeBox: preset.activeBox || '#5E2A8C',
+    activeBox: preset.activeBox || '#3A1C36',
     outline: !!preset.stroke,
     outlineColor: '#000000',
     outlineWidth: 0.14,           // fraction of the font size
@@ -359,7 +359,7 @@ const textFill = (ctx, s, x, y, w, size, spoken) => {
   }
   if (s.fill === 'plum') {
     const g = ctx.createLinearGradient(x, y - size * 0.5, x + w, y + size * 0.5);
-    g.addColorStop(0, '#A855E8'); g.addColorStop(1, '#5E2A8C');
+    g.addColorStop(0, '#9B71B2'); g.addColorStop(1, '#3A1C36');
     return g;
   }
   return spoken && s.highlight === 'color' ? s.active : s.color;

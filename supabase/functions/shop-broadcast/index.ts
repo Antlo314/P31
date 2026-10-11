@@ -21,7 +21,7 @@ const MAX_RECIPIENTS = 500;
 const toHtml = (body: string) => body.split(/\n{2,}/).map((para) => {
   const html = esc(para)
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" style="color:#5E2A8C">$1</a>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" style="color:#3A1C36">$1</a>')
     .replace(/\n/g, '<br>');
   return `<p style="margin:0 0 14px;line-height:1.6;font-size:15px">${html}</p>`;
 }).join('');
@@ -65,21 +65,21 @@ Deno.serve(async (req) => {
       if (p) {
         const url = `${SITE}/${shop.slug || shop.id}?p=${p.id}`;
         const onSale = Number(p.compare_at_price) > Number(p.price);
-        product = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 18px;border:1px solid #e7dcf4;border-radius:14px;overflow:hidden">
+        product = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:6px 0 18px;border:1px solid #DCCBE3;border-radius:14px;overflow:hidden">
 <tr>${p.image_url ? `<td width="120" style="vertical-align:top"><a href="${url}"><img src="${esc(p.image_url)}" width="120" height="120" alt="" style="display:block;width:120px;height:120px;object-fit:cover"></a></td>` : ''}
 <td style="padding:14px 16px;vertical-align:middle">
-<div style="font-weight:bold;font-size:16px;color:#201431">${esc(p.name)}</div>
-<div style="margin:4px 0 10px;color:#5E2A8C;font-weight:bold">${money(p.price)}${onSale ? ` <s style="color:#6E6580;font-weight:normal">${money(p.compare_at_price)}</s>` : ''}</div>
-<a href="${url}" style="display:inline-block;padding:9px 16px;border-radius:999px;background:#5E2A8C;color:#fff;text-decoration:none;font-weight:bold;font-size:13px">Shop it</a>
+<div style="font-weight:bold;font-size:16px;color:#2A1526">${esc(p.name)}</div>
+<div style="margin:4px 0 10px;color:#3A1C36;font-weight:bold">${money(p.price)}${onSale ? ` <s style="color:#74657A;font-weight:normal">${money(p.compare_at_price)}</s>` : ''}</div>
+<a href="${url}" style="display:inline-block;padding:9px 16px;border-radius:999px;background:#3A1C36;color:#fff;text-decoration:none;font-weight:bold;font-size:13px">Shop it</a>
 </td></tr></table>`;
       }
     }
 
     const shopUrl = `${SITE}/${shop.slug || shop.id}`;
-    const body = `${toHtml(String(c.body))}${product}<p style="margin:18px 0 0"><a href="${shopUrl}" style="color:#5E2A8C;font-weight:bold">Visit ${esc(shop.business_name)} on P31 →</a></p>`;
+    const body = `${toHtml(String(c.body))}${product}<p style="margin:18px 0 0"><a href="${shopUrl}" style="color:#3A1C36;font-weight:bold">Visit ${esc(shop.business_name)} on P31 →</a></p>`;
     const brand = String(shop.business_name || 'Proverbs 31 Marketplace').toUpperCase();
     const footer = (unsub?: string) =>
-      `You asked ${esc(shop.business_name)} for updates on Proverbs 31 Marketplace.${unsub ? ` <a href="${unsub}" style="color:#6E6580">Unsubscribe</a>` : ''}`;
+      `You asked ${esc(shop.business_name)} for updates on Proverbs 31 Marketplace.${unsub ? ` <a href="${unsub}" style="color:#74657A">Unsubscribe</a>` : ''}`;
     const from = env('EMAIL_FROM') || 'Proverbs 31 Marketplace <vendor@p31market.com>';
     const replyTo = shop.public_email || undefined;
 

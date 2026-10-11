@@ -19,7 +19,7 @@ export async function renderCard(spec, name = 'p31-card.jpg') {
     if (document.fonts?.ready) await document.fonts.ready;
     await sleep(60);
     const node = host.querySelector('.pc');
-    const dataUrl = await toJpeg(node, { quality: 0.92, pixelRatio: 1, width: CARD_W, height: CARD_H, cacheBust: true, backgroundColor: '#140a22' });
+    const dataUrl = await toJpeg(node, { quality: 0.92, pixelRatio: 1, width: CARD_W, height: CARD_H, cacheBust: true, backgroundColor: '#21101E' });
     const blob = await (await fetch(dataUrl)).blob();
     return new File([blob], name, { type: 'image/jpeg' });
   } finally {

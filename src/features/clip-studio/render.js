@@ -170,8 +170,8 @@ function createCompositor({ canvas, aspect, style, timeline, pages, captionStyle
     ctx.save();
     ctx.globalAlpha = a;
     const g = ctx.createLinearGradient(0, 0, W, H);
-    g.addColorStop(0, '#4a1f78');
-    g.addColorStop(1, '#1d0f2e');
+    g.addColorStop(0, '#4C2546');
+    g.addColorStop(1, '#2D1529');
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
     const rg = ctx.createRadialGradient(W * 0.85, H * 0.1, 0, W * 0.85, H * 0.1, base * 0.9);

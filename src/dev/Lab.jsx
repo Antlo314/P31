@@ -12,7 +12,7 @@ const Lab = () => {
   const [photo, setPhoto] = useState(null);
 
   return (
-    <div style={{ padding: 16, display: 'grid', gap: 16, maxWidth: 900, margin: '0 auto', background: '#0d0616', minHeight: '100vh' }}>
+    <div style={{ padding: 16, display: 'grid', gap: 16, maxWidth: 900, margin: '0 auto', background: '#21101E', minHeight: '100vh' }}>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <button id="lab-load-clips" onClick={async () => setClipFiles([await asFile('/__lab/talking.mp4', 'talking.mp4', 'video/mp4'), await asFile('/__lab/multishot.mp4', 'multishot.mp4', 'video/mp4')])}>Load sample clips</button>
         <button id="lab-load-photo" onClick={async () => setPhoto(await asFile('/__lab/product.png', 'product.png', 'image/png'))}>Load sample photo</button>

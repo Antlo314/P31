@@ -31,7 +31,7 @@
   border-radius: 999px 999px 16px 16px; background: var(--night-bg); color: var(--gold-hi);
 }
 .lg__title { font-size: clamp(2.1rem, 1.7rem + 1.6vw, 2.8rem) !important; color: var(--plum) !important; }
-.lg__title em { background-image: linear-gradient(100deg, var(--plum) 10%, #8B3FD0 90%) !important; }
+.lg__title em { background-image: linear-gradient(100deg, var(--plum) 10%, #9B71B2 90%) !important; }
 .lg__sub { margin: 6px 0 16px; color: var(--ink-2); font-size: 0.97rem; }
 .lg__switch {
   display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 5px; margin-bottom: 12px;
@@ -42,7 +42,7 @@
   background: transparent; color: var(--ink-2); font: inherit; font-weight: 800; font-size: 0.9rem;
   transition: background 0.25s, color 0.25s, box-shadow 0.25s;
 }
-.lg__switch button[aria-selected="true"] { background: #fff; color: var(--plum); box-shadow: 0 6px 16px -8px rgba(29, 15, 46, 0.35); }
+.lg__switch button[aria-selected="true"] { background: #fff; color: var(--plum); box-shadow: 0 6px 16px -8px rgba(42, 21, 38, 0.35); }
 .lg__form { display: grid; gap: 14px; }
 .lg__field { display: grid; gap: 7px; }
 .lg__field > span { font-size: 0.76rem; font-weight: 800; letter-spacing: 0.04em; color: var(--ink-2); }
@@ -50,7 +50,7 @@
   display: flex; align-items: center; gap: 10px; min-height: 54px; padding: 0 6px 0 16px; border-radius: 14px;
   border: 1px solid var(--line-2); background: #fff; color: var(--ink-3); transition: border-color 0.2s, box-shadow 0.2s;
 }
-.lg__input:focus-within { border-color: var(--plum); box-shadow: 0 0 0 4px rgba(168, 85, 232, 0.16); }
+.lg__input:focus-within { border-color: var(--plum); box-shadow: 0 0 0 4px rgba(155, 113, 178, 0.16); }
 .lg__input input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: inherit; font-size: 16px; color: var(--ink); }
 .lg__eye { width: 42px; height: 42px; border: 0; background: none; color: var(--ink-3); cursor: pointer; border-radius: 10px; display: grid; place-items: center; }
 .lg__foot { margin: 16px 0 0; text-align: center; font-size: 0.88rem; color: var(--ink-2); }

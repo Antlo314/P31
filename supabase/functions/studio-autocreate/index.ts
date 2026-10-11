@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
     await sendEmail(list('AUTOCREATE_TO', ['marketing@p31market.com', 'founder@thep31collective.org']),
       `${rows.length} posts drafted for ${monthName(month)}: ready for review`,
       layout(`${monthName(month)} is drafted`, `<p>Content Studio drafted <b>${rows.length} posts</b> for ${esc(label(start))} through ${esc(label(last))}, on every day that did not already have one, using your last Auto-create settings.</p>
-<ul style="padding-left:18px;line-height:1.6;color:#4a3b5c">${sample}</ul>
+<ul style="padding-left:18px;line-height:1.6;color:#4E3A4B">${sample}</ul>
 <p>Nothing is published yet. Look them over, swap or rewrite any, then press Schedule all approved.</p>
 <p style="margin:22px 0 0"><a href="https://www.thep31collective.org/studio/autocreate?tab=queue" style="display:inline-block;background:#F2CE4D;color:#2a1a00;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:999px">Review the pre-posts</a></p>`,
       'thep31collective.org · Content Studio', 'THE PROVERBS 31 COLLECTIVE'),

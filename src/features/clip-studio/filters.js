@@ -21,8 +21,8 @@ const P = (o) => ({ exposure: 0, contrast: 0, saturation: 0, vibrance: 0, warmth
 export const FILTERS = [
   { id: 'original', name: 'Original', p: P({}) },
   { id: 'natural', name: 'Natural', p: P({ contrast: 0.06, saturation: 0.06, sharpen: 0.15 }) },
-  { id: 'gold', name: 'Golden Hour', p: P({ warmth: 0.5, contrast: 0.1, saturation: 0.08, highlights: 0.12, glow: 0.18, vignette: 0.22, split: 0.35, shadowTint: '#5e2a8c', highTint: '#f2ce4d' }) },
-  { id: 'plum', name: 'Plum Night', p: P({ warmth: -0.1, tint: 0.15, contrast: 0.22, shadows: -0.12, saturation: -0.04, split: 0.55, shadowTint: '#4a1f78', highTint: '#f2ce4d', vignette: 0.42 }) },
+  { id: 'gold', name: 'Golden Hour', p: P({ warmth: 0.5, contrast: 0.1, saturation: 0.08, highlights: 0.12, glow: 0.18, vignette: 0.22, split: 0.35, shadowTint: '#3A1C36', highTint: '#f2ce4d' }) },
+  { id: 'plum', name: 'Plum Night', p: P({ warmth: -0.1, tint: 0.15, contrast: 0.22, shadows: -0.12, saturation: -0.04, split: 0.55, shadowTint: '#4C2546', highTint: '#f2ce4d', vignette: 0.42 }) },
   { id: 'vivid', name: 'Vivid', p: P({ contrast: 0.18, saturation: 0.25, vibrance: 0.35, sharpen: 0.35, highlights: -0.05 }) },
   { id: 'film', name: 'Film', p: P({ contrast: 0.12, saturation: -0.12, warmth: 0.2, fade: 0.35, grain: 0.45, vignette: 0.3 }) },
   { id: 'cinema', name: 'Teal & Orange', p: P({ contrast: 0.16, saturation: -0.04, split: 0.6, shadowTint: '#1f5f6b', highTint: '#e9a35a', vignette: 0.32, sharpen: 0.15 }) },

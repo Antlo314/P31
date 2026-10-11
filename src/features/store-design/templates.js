@@ -5,8 +5,8 @@
 export const STORE_TEMPLATES = [
   {
     id: 'atelier', name: 'Atelier', blurb: 'The signature P31 look — lavender light, plum and gold.',
-    preview: ['#FCFBFE', '#5E2A8C', '#D9A93A'],
-    defaults: { accent: '#5E2A8C', heading: 'serif', hero: 'banner', columns: 3, cards: 'soft', buttons: 'pill', productsFirst: false },
+    preview: ['#F8F3FA', '#3A1C36', '#D9A93A'],
+    defaults: { accent: '#3A1C36', heading: 'serif', hero: 'banner', columns: 3, cards: 'soft', buttons: 'pill', productsFirst: false },
   },
   {
     id: 'boutique', name: 'Boutique', blurb: 'Warm cream, framed cards and gold — for jewelry & beauty.',
@@ -20,22 +20,22 @@ export const STORE_TEMPLATES = [
   },
   {
     id: 'editorial', name: 'Editorial', blurb: 'Magazine layout with large two-up product spreads.',
-    preview: ['#F6F1EA', '#2A1544', '#C8B8A4'],
-    defaults: { accent: '#2A1544', heading: 'serif', hero: 'tall', columns: 2, cards: 'framed', buttons: 'square', productsFirst: false },
+    preview: ['#F6F1EA', '#3A1C36', '#C8B8A4'],
+    defaults: { accent: '#3A1C36', heading: 'serif', hero: 'tall', columns: 2, cards: 'framed', buttons: 'square', productsFirst: false },
   },
   {
     id: 'market', name: 'Market', blurb: 'Fresh and friendly, shop-first — for food, wellness & goods.',
-    preview: ['#F6FFF9', '#17603C', '#17A673'],
-    defaults: { accent: '#17603C', heading: 'sans', hero: 'banner', columns: 3, cards: 'soft', buttons: 'rounded', productsFirst: true },
+    preview: ['#F6FFF9', '#374126', '#17A673'],
+    defaults: { accent: '#374126', heading: 'sans', hero: 'banner', columns: 3, cards: 'soft', buttons: 'rounded', productsFirst: true },
   },
   {
     id: 'noir', name: 'Noir Luxe', blurb: 'Dark, dramatic and gold — for evening wear & fragrance.',
-    preview: ['#120A1A', '#F2CE4D', '#2A1544'],
+    preview: ['#21101E', '#F2CE4D', '#3A1C36'],
     defaults: { accent: '#F2CE4D', heading: 'serif', hero: 'tall', columns: 3, cards: 'soft', buttons: 'pill', productsFirst: false },
   },
 ];
 
-export const ACCENTS = ['#5E2A8C', '#A855E8', '#D9A93A', '#8A6D1A', '#17603C', '#17A673', '#B83C6E', '#2A1544', '#111111', '#F2CE4D'];
+export const ACCENTS = ['#3A1C36', '#9B71B2', '#D9A93A', '#8A6D1A', '#374126', '#17A673', '#B83C6E', '#3A1C36', '#111111', '#F2CE4D'];
 
 export const DEFAULT_DESIGN = { template: 'atelier', ...STORE_TEMPLATES[0].defaults, showAbout: true, showTestimonials: true };
 

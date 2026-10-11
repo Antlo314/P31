@@ -17,7 +17,7 @@ const cors = {
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
 const SITE = 'https://www.p31market.com';
 const FOOT = 'p31market.com · Where her gifts make room.';
-const a = (path: string, label?: string) => `<a href="${SITE}${path}" style="color:#5E2A8C">${esc(label || `p31market.com${path}`)}</a>`;
+const a = (path: string, label?: string) => `<a href="${SITE}${path}" style="color:#3A1C36">${esc(label || `p31market.com${path}`)}</a>`;
 const para = (note: string) => (note ? `<p>${esc(note).replace(/\n/g, '<br>')}</p>` : '');
 const longDate = (d: string) => new Date(`${String(d).slice(0, 10)}T12:00:00`).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 

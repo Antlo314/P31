@@ -31,14 +31,14 @@
   display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px;
   font-size: 0.7rem; font-weight: 800; text-transform: capitalize; background: var(--surface-container-low); color: var(--dark-plum);
 }
-.ord-pill.is-paid { background: rgba(23, 166, 115, 0.14); color: #146b4a; }
+.ord-pill.is-paid { background: rgba(23, 166, 115, 0.14); color: #4F6B2E; }
 .ord-pill.is-new { background: rgba(242, 206, 77, 0.25); color: #6b5310; }
-.ord-pill.is-fulfilled { background: rgba(23, 166, 115, 0.14); color: #146b4a; }
+.ord-pill.is-fulfilled { background: rgba(23, 166, 115, 0.14); color: #4F6B2E; }
 .ord-pill.is-cancelled { background: #f1f1f1; color: #666; }
 .ord-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 0.92rem; }
 .ord-items li { display: flex; justify-content: space-between; gap: 10px; }
 .ord-items em { color: var(--on-surface-muted); font-style: normal; font-size: 0.82rem; }
-.ord-items .is-disc { color: #17603C; }
+.ord-items .is-disc { color: #374126; }
 .ord-items .is-total { font-weight: 800; padding-top: 6px; border-top: 1px solid var(--outline-variant); }
 .ord-buyer { display: grid; gap: 4px; font-size: 0.88rem; padding: 12px; border-radius: 16px; background: var(--surface-alt); }
 .ord-buyer a, .ord-buyer span { display: flex; align-items: flex-start; gap: 6px; color: var(--on-surface-variant); text-decoration: none; overflow-wrap: anywhere; }

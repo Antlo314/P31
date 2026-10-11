@@ -49,5 +49,5 @@
 .pe-linkbtn { background: none; border: 0; color: #D9A93A; font: inherit; font-weight: 700; cursor: pointer; padding: 4px; }
 .pe-spin { animation: pe-spin 1.2s linear infinite; }
 @keyframes pe-spin { to { transform: rotate(360deg); } }
-.pe-pill { font-size: 0.72rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: rgba(168, 85, 232, 0.16); }
+.pe-pill { font-size: 0.72rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: rgba(155, 113, 178, 0.16); }
 label.pe-btn { cursor: pointer; }

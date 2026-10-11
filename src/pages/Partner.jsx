@@ -7,7 +7,7 @@ import PageHeader from '../components/PageHeader';
 import LazyVideo from '../components/LazyVideo';
 
 import heroImg from '../assets/web/p31_partner_hero_editorial.webp';
-import groupImg from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
+import { GROUP } from '../lib/teamPhotos';
 import visionaryVid from '../assets/web/visionary.mp4';
 import visionaryPoster from '../assets/web/visionary-poster.webp';
 import { EMAIL } from '../lib/team';
@@ -74,7 +74,7 @@ const Partner = () => {
             </ul>
           </div>
           <div className="k-arch k-arch--ring" data-reveal="clip">
-            <img src={groupImg} alt="Women gathering at a Proverbs 31 market" loading="lazy" decoding="async" data-parallax="7" style={{ height: '116%', top: '-8%' }} />
+            <img src={GROUP.tall} alt="The Proverbs 31 Marketplace team at a market" loading="lazy" decoding="async" data-parallax="7" style={{ height: '116%', top: '-8%' }} />
           </div>
         </div>
       </section>

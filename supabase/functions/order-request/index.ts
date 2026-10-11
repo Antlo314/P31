@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
 ${itemsTable(lines, disc.ok ? disc.amount_cents : 0, total)}
 <p><strong>Delivery:</strong> ${methodLabel}<br><strong>Email:</strong> ${esc(email)}${buyer.phone ? `<br><strong>Phone:</strong> ${esc(buyer.phone)}` : ''}</p>
 ${note ? `<p><strong>Note:</strong> ${esc(note)}</p>` : ''}
-<p><a href="${appUrl}/dashboard/orders" style="display:inline-block;background:#5E2A8C;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:bold">Open your orders</a></p>`), email);
+<p><a href="${appUrl}/dashboard/orders" style="display:inline-block;background:#3A1C36;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:bold">Open your orders</a></p>`), email);
     }
 
     const payWays = [
@@ -107,7 +107,7 @@ ${note ? `<p><strong>Note:</strong> ${esc(note)}</p>` : ''}
 <p>Thank you, ${esc(String(buyer.name).split(' ')[0])}! <strong>${esc(curator.business_name)}</strong> has your request and will confirm it shortly.</p>
 ${itemsTable(lines, disc.ok ? disc.amount_cents : 0, total)}
 <p><strong>Delivery:</strong> ${methodLabel}</p>
-${payWays.length ? `<p><strong>How to pay</strong><br>${payWays.join('<br>')}</p><p style="color:#6E6580;font-size:13px">Please include #${ref} with your payment.</p>` : ''}`), curatorEmail || undefined);
+${payWays.length ? `<p><strong>How to pay</strong><br>${payWays.join('<br>')}</p><p style="color:#74657A;font-size:13px">Please include #${ref} with your payment.</p>` : ''}`), curatorEmail || undefined);
 
     return json({ ok: true, orderId: order.id, ref, total });
   } catch (err) {

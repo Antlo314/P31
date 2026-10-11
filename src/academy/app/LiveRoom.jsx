@@ -29,10 +29,10 @@ const LiveRoom = () => {
       const { default: Daily } = await import('@daily-co/daily-js');
       if (!alive || !host.current) return;
       const call = Daily.createFrame(host.current, {
-        iframeStyle: { width: '100%', height: '100%', border: '0', borderRadius: '18px', background: '#12081d' },
+        iframeStyle: { width: '100%', height: '100%', border: '0', borderRadius: '18px', background: '#21101E' },
         showLeaveButton: true,
         showFullscreenButton: true,
-        theme: { colors: { accent: '#D9A93A', accentText: '#2a1a00', background: '#12081d', backgroundAccent: '#22123a', baseText: '#FFFFFF', border: '#3a2457', mainAreaBg: '#0d0616', mainAreaBgAccent: '#22123a', mainAreaText: '#FFFFFF', supportiveText: '#c9b8dc' } },
+        theme: { colors: { accent: '#D9A93A', accentText: '#2a1a00', background: '#21101E', backgroundAccent: '#2D1529', baseText: '#FFFFFF', border: '#3a2457', mainAreaBg: '#21101E', mainAreaBgAccent: '#2D1529', mainAreaText: '#FFFFFF', supportiveText: '#c9b8dc' } },
       });
       callRef.current = call;
       // Keep Daily's own reason when it closes the call, so problems are easy to fix.

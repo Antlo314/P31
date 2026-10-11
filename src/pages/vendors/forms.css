@@ -12,7 +12,7 @@
 .vf-card p { margin: 0; color: var(--ink-2); line-height: 1.55; font-size: 0.95rem; }
 .vf-card .k-link { margin-top: 4px; justify-self: start; }
 .vf-card small { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-text); }
-.vf-card--night { background: linear-gradient(150deg, #2a1240, #12081d); border-color: transparent; }
+.vf-card--night { background: linear-gradient(150deg, #3A1C36, #21101E); border-color: transparent; }
 .vf-card--night h3, .vf-card--night p { color: #fff; }
 .vf-card--night p { color: rgba(255, 255, 255, 0.78); }
 .vf-card--night .k-link { color: var(--gold-hi); }
@@ -36,7 +36,7 @@
   font: inherit; font-weight: 800; font-size: 1.05rem; color: var(--ink); transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 .vf-scale__n[aria-checked='true'] { background: var(--plum); border-color: var(--plum); color: #fff; }
-.vf-scale__ends { display: flex; justify-content: space-between; max-width: 440px; font-size: 0.74rem; font-weight: 700; color: var(--ink-3, #8a7f96); }
+.vf-scale__ends { display: flex; justify-content: space-between; max-width: 440px; font-size: 0.74rem; font-weight: 700; color: var(--ink-3, #8C7E92); }
 
 /* Logo upload */
 .vf-upload {
@@ -47,7 +47,7 @@
 .vf-upload input { display: none; }
 .vf-upload img { width: 120px; height: 120px; object-fit: contain; border-radius: 12px; background: var(--mist); }
 .vf-upload strong { color: var(--ink); font-size: 0.95rem; }
-.vf-upload small { color: var(--ink-3, #8a7f96); font-size: 0.8rem; }
+.vf-upload small { color: var(--ink-3, #8C7E92); font-size: 0.8rem; }
 .vf-upload .k-icon { width: 46px; height: 46px; }
 
 /* Small notes */

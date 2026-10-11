@@ -4,7 +4,7 @@
   background: rgba(255, 255, 255, 0.95);
   border-radius: 50% !important;
   padding: 4px;
-  box-shadow: 0 0 0 1px rgba(242, 206, 77, 0.5), 0 4px 14px -6px rgba(29, 15, 46, 0.5) !important;
+  box-shadow: 0 0 0 1px rgba(242, 206, 77, 0.5), 0 4px 14px -6px rgba(42, 21, 38, 0.5) !important;
 }
 .cl-ft__mark { padding: 5px; }
 .cl-nb .nb__link { display: inline-flex; align-items: center; gap: 4px; }
@@ -19,7 +19,7 @@
 
 /* Header: "Join P31 Collective" leads; Sign in is the quieter pill beside it. */
 .cl-nb__actions { gap: 8px; }
-.cl-nb__signin { background: transparent; box-shadow: none; color: inherit; border: 1px solid rgba(94, 42, 140, 0.3); }
+.cl-nb__signin { background: transparent; box-shadow: none; color: inherit; border: 1px solid rgba(58, 28, 54, 0.3); }
 .nb--clear .cl-nb__signin { color: #fff; border-color: rgba(255, 255, 255, 0.35); }
 .cl-nb__join { white-space: nowrap; }
 /* Phones: every page opens with a full-size Join button, so the bar keeps just the logo and Sign in. */

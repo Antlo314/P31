@@ -1297,7 +1297,7 @@
   white-space: nowrap;
 }
 .stripe-status-pill.live {
-  color: #2e7d32;
+  color: #4F6B2E;
   background: rgba(46, 125, 50, 0.1);
   border: 1px solid rgba(46, 125, 50, 0.3);
 }
@@ -1321,7 +1321,7 @@
   border-radius: 999px;
   border: 1px solid currentColor;
 }
-.order-status-pill.paid { color: #2e7d32; background: rgba(46, 125, 50, 0.08); }
+.order-status-pill.paid { color: #4F6B2E; background: rgba(46, 125, 50, 0.08); }
 .order-status-pill.pending { color: #b26a00; background: rgba(178, 106, 0, 0.08); }
 .order-status-pill.refunded { color: #c62828; background: rgba(198, 40, 40, 0.08); }
 
@@ -1341,8 +1341,8 @@
 }
 .order-fulfill-btn:hover { background: rgba(203, 167, 47, 0.12); }
 .order-fulfill-btn.done {
-  border-color: #2e7d32;
-  color: #2e7d32;
+  border-color: #4F6B2E;
+  color: #4F6B2E;
   background: rgba(46, 125, 50, 0.08);
 }
 
@@ -1545,7 +1545,7 @@
     height: auto;
     overflow: visible;
     padding: 10px 0;
-    background: rgba(29, 15, 46, 0.94);
+    background: rgba(42, 21, 38, 0.94);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     box-shadow: 0 10px 24px -18px rgba(0, 0, 0, 0.6);
@@ -1637,7 +1637,7 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .premium-form :is(input, select, textarea):focus, .dashboard-form :is(input, select, textarea):focus {
-  outline: 0; border-color: var(--plum); box-shadow: 0 0 0 4px rgba(168, 85, 232, 0.16);
+  outline: 0; border-color: var(--plum); box-shadow: 0 0 0 4px rgba(155, 113, 178, 0.16);
 }
 .product-card { border-radius: var(--r-lg); border: 1px solid var(--line); box-shadow: var(--shadow-1); transition: transform 0.45s var(--ease-fluid), box-shadow 0.45s var(--ease-fluid); }
 @media (hover: hover) { .product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-2); } }

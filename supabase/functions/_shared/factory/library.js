@@ -15,11 +15,12 @@ export const TYPES = {
 };
 
 export const STYLES = [
-  { id: 'night', name: 'Night', blurb: 'Deep plum and gold. The P31 look.', swatch: ['#1e1031', '#F2CE4D', '#fff'] },
-  { id: 'lavender', name: 'Lavender', blurb: 'Soft lavender, plum type, gold rules.', swatch: ['#F3ECFB', '#5E2A8C', '#D9A93A'] },
-  { id: 'ivory', name: 'Ivory', blurb: 'Cream, editorial serif, quiet gold.', swatch: ['#FBF7EF', '#2A1544', '#B8860B'] },
+  { id: 'night', name: 'Night', blurb: 'Dark purple and gold. The P31 look.', swatch: ['#2D1529', '#F2CE4D', '#fff'] },
+  { id: 'lavender', name: 'Thistle', blurb: 'Thistle, dark purple type, gold rules.', swatch: ['#E3D0EA', '#3A1C36', '#D9A93A'] },
+  { id: 'ivory', name: 'Ivory', blurb: 'Cream, editorial serif, quiet gold.', swatch: ['#FBF7EF', '#3A1C36', '#B8860B'] },
   { id: 'gold', name: 'Gold', blurb: 'Warm amber with cream type. Bold in a feed.', swatch: ['#7a5410', '#FFF4D6', '#2a1a00'] },
-  { id: 'plum', name: 'Royal', blurb: 'Brighter plum, white type, gold accents.', swatch: ['#5E2A8C', '#fff', '#F2CE4D'] },
+  { id: 'plum', name: 'Royal', blurb: 'Amethyst, white type, gold accents.', swatch: ['#7E5A94', '#fff', '#F2CE4D'] },
+  { id: 'olive', name: 'Olive', blurb: 'Olive and gold, like the team photoshoot.', swatch: ['#6C6D11', '#FFF8E1', '#F2CE4D'] },
 ];
 
 export const DEFAULT_SLOTS = { 0: [13, 19], 1: [19, 12.5], 2: [20, 12.5], 3: [12.5, 19], 4: [13, 20], 5: [13, 20], 6: [18, 16] };

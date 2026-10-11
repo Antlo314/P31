@@ -139,6 +139,11 @@ const SCREENS = [
   ['gathering on a phone', cl('/gather/the-gathering'), [], 'Welcome to the family', { phone: true }],
   ['curator studio opens the gathering', at('market', 'curator')('/dashboard/community'), [], 'Market talk'],
   ['today: the daily word', cl('/today'), [], 'Strength and honour are her clothing'],
+  ['gathering: my card has notification switches', cl('/gather/the-gathering'), ['Melanie JC'], 'Email me if I have not read it'],
+  // Team photos and the reworded pop-up.
+  ['about: team photo and portraits', mk('/about'), [], 'Savannah Campbell'],
+  ['pop-up opens from the footer', mk('/'), ['Subscribe to our newsletter'], 'You’re subscribed'],
+  ['collective: melanie and the team', cl('/'), [], 'Melanie JC'],
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

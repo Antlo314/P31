@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { CornerUpLeft, MessageSquareText, SmilePlus, Pencil, Trash2, Pin, PinOff, X, ImagePlus, Send, Loader2, BookOpen, Store, MessageCircle, Sparkles } from 'lucide-react';
-import { REACTIONS, timeOf, dayOf, ago } from './api';
+import { CornerUpLeft, MessageSquareText, SmilePlus, Pencil, Trash2, Pin, PinOff, X, ImagePlus, Send, Loader2, BookOpen, Store, MessageCircle, Sparkles, Bell, Mail } from 'lucide-react';
+import { REACTIONS, timeOf, dayOf, ago, deviceNotify, setDeviceNotify } from './api';
 import { badgesFor, initials } from './badges';
 import mark from '../assets/academy/collective-mark.webp';
 
@@ -266,9 +266,16 @@ export const Composer = ({ placeholder, onSend, replyTo, replyName, onCancelRepl
 };
 
 // ── About a member ──────────────────────────────────────
-export const PersonCard = ({ person, me, onClose, onMessage, onSetTitle }) => {
+export const PersonCard = ({ person, me, onClose, onMessage, onSetTitle, onSetPrefs }) => {
   const [title, setTitle] = useState(person?.roles?.title || '');
   const [saved, setSaved] = useState('');
+  const [device, setDevice] = useState(() => deviceNotify());
+  const [note, setNote] = useState('');
+  const mine = person?.id === me.id;
+  const toggleDevice = async () => {
+    setNote('');
+    try { const on = await setDeviceNotify(!device); setDevice(on); } catch (e) { setNote(e.message); }
+  };
   const vendor = person.roles?.vendor;
   return (
     <div className="gt-sheet" role="dialog" aria-modal="true" aria-label={person.name} onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -279,6 +286,20 @@ export const PersonCard = ({ person, me, onClose, onMessage, onSetTitle }) => {
         <Badges roles={person.roles} max={6} size="md" />
         {vendor?.slug && <a className="gt-person__shop" href={`https://www.p31market.com/${vendor.slug}`} target="_blank" rel="noreferrer"><Store size={14} /> {vendor.shop || 'Visit her shop'}</a>}
         {person.id !== me.id && <button type="button" className="gt-btn gt-btn--gold" onClick={() => onMessage(person)}><MessageCircle size={15} /> Message {person.name.split(' ')[0]}</button>}
+        {mine && (
+          <div className="gt-person__prefs">
+            <p className="gt-person__prefs-title">When someone messages you privately</p>
+            <label className="gt-switch">
+              <input type="checkbox" checked={me.dm_email !== false} onChange={(e) => onSetPrefs?.(e.target.checked)} />
+              <span><Mail size={14} /> Email me if I have not read it within a few minutes</span>
+            </label>
+            <label className="gt-switch">
+              <input type="checkbox" checked={device} onChange={toggleDevice} />
+              <span><Bell size={14} /> Notify me on this device while The Gathering is open</span>
+            </label>
+            {note && <small>{note}</small>}
+          </div>
+        )}
         {me.overseer && (
           <form className="gt-person__title" onSubmit={async (e) => { e.preventDefault(); try { await onSetTitle(person, title); setSaved('Saved'); } catch (err) { setSaved(err.message); } }}>
             <label><span>Title (overseers)</span><input value={title} maxLength={40} onChange={(e) => { setTitle(e.target.value); setSaved(''); }} placeholder="e.g. Founder & CEO" /></label>

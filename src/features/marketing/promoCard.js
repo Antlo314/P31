@@ -3,10 +3,10 @@
 // Also a booth sign (QR + "Scan to shop") for the physical market.
 
 export const PROMO_LOOKS = [
-  { id: 'clean', name: 'Clean', blurb: 'Cream, serif, lots of air', bg: '#FCFBFE', ink: '#201431', accent: '#5E2A8C', soft: '#F3ECFB' },
-  { id: 'plum', name: 'Plum', blurb: 'Deep plum and gold', bg: '#2A1544', ink: '#FFFFFF', accent: '#F2CE4D', soft: 'rgba(255,255,255,0.08)' },
-  { id: 'sale', name: 'Sale', blurb: 'Gold burst, strike-through price', bg: '#FFF7E0', ink: '#2A1544', accent: '#B8860B', soft: '#F6E7B5' },
-  { id: 'noir', name: 'Noir', blurb: 'Black and gold, evening', bg: '#120A1A', ink: '#F5EFE6', accent: '#D9A93A', soft: 'rgba(255,255,255,0.06)' },
+  { id: 'clean', name: 'Clean', blurb: 'Cream, serif, lots of air', bg: '#F8F3FA', ink: '#2A1526', accent: '#3A1C36', soft: '#EFE4F3' },
+  { id: 'plum', name: 'Plum', blurb: 'Deep plum and gold', bg: '#3A1C36', ink: '#FFFFFF', accent: '#F2CE4D', soft: 'rgba(255,255,255,0.08)' },
+  { id: 'sale', name: 'Sale', blurb: 'Gold burst, strike-through price', bg: '#FFF7E0', ink: '#3A1C36', accent: '#B8860B', soft: '#F6E7B5' },
+  { id: 'noir', name: 'Noir', blurb: 'Black and gold, evening', bg: '#21101E', ink: '#F5EFE6', accent: '#D9A93A', soft: 'rgba(255,255,255,0.06)' },
 ];
 
 export const PROMO_SIZES = [
@@ -85,7 +85,7 @@ export function drawPromo(canvas, opts) {
   ctx.fillRect(0, 0, W, H);
   if (look.id === 'plum' || look.id === 'noir') {
     const g = ctx.createRadialGradient(W * 0.8, H * 0.1, 0, W * 0.8, H * 0.1, W * 0.9);
-    g.addColorStop(0, look.id === 'plum' ? 'rgba(168,85,232,0.35)' : 'rgba(217,169,58,0.18)');
+    g.addColorStop(0, look.id === 'plum' ? 'rgba(155, 113, 178,0.35)' : 'rgba(217,169,58,0.18)');
     g.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   }
@@ -110,9 +110,9 @@ export function drawPromo(canvas, opts) {
   if (ribbon) {
     ctx.font = `800 34px ${SANS}`;
     const tw = ctx.measureText(ribbon.toUpperCase()).width + 56;
-    ctx.fillStyle = look.id === 'sale' ? '#2A1544' : look.accent;
+    ctx.fillStyle = look.id === 'sale' ? '#3A1C36' : look.accent;
     rr(ctx, imgX + 28, top + 28, tw, 64, 32); ctx.fill();
-    ctx.fillStyle = look.id === 'sale' || look.id === 'plum' || look.id === 'noir' ? (look.id === 'sale' ? '#F2CE4D' : '#2A1544') : '#fff';
+    ctx.fillStyle = look.id === 'sale' || look.id === 'plum' || look.id === 'noir' ? (look.id === 'sale' ? '#F2CE4D' : '#3A1C36') : '#fff';
     ctx.fillText(ribbon.toUpperCase(), imgX + 56, top + 72);
   }
 
@@ -132,7 +132,7 @@ export function drawPromo(canvas, opts) {
   if (onSale) {
     const pw = ctx.measureText(priceText).width;
     ctx.font = `500 34px ${SANS}`;
-    ctx.fillStyle = look.id === 'plum' || look.id === 'noir' ? 'rgba(255,255,255,0.6)' : '#6E6580';
+    ctx.fillStyle = look.id === 'plum' || look.id === 'noir' ? 'rgba(255,255,255,0.6)' : '#74657A';
     const was = money(p.compare_at_price);
     ctx.fillText(was, pad + pw + 22, y + 38);
     const ww = ctx.measureText(was).width;
@@ -151,7 +151,7 @@ export function drawPromo(canvas, opts) {
   }
   ctx.fillStyle = look.ink; ctx.font = `700 30px ${SANS}`;
   ctx.fillText(shopName, sx, y + 20);
-  ctx.fillStyle = look.id === 'plum' || look.id === 'noir' ? 'rgba(255,255,255,0.7)' : '#6E6580';
+  ctx.fillStyle = look.id === 'plum' || look.id === 'noir' ? 'rgba(255,255,255,0.7)' : '#74657A';
   ctx.font = `500 26px ${SANS}`;
   ctx.fillText(`p31market.com/${shop?.slug || ''}`.replace(/\/$/, ''), sx, y + 56);
 
@@ -161,7 +161,7 @@ export function drawPromo(canvas, opts) {
     const qx = W - pad - q; const qy = H - (story ? 300 : pad) - q;
     ctx.fillStyle = '#fff'; rr(ctx, qx - 14, qy - 14, q + 28, q + 28, 24); ctx.fill();
     ctx.drawImage(qrCanvas, qx, qy, q, q);
-    ctx.fillStyle = look.id === 'plum' || look.id === 'noir' ? 'rgba(255,255,255,0.7)' : '#6E6580';
+    ctx.fillStyle = look.id === 'plum' || look.id === 'noir' ? 'rgba(255,255,255,0.7)' : '#74657A';
     ctx.font = `700 22px ${SANS}`; ctx.textAlign = 'center';
     ctx.fillText('SCAN TO SHOP', qx + q / 2, qy + q + 50); ctx.textAlign = 'left';
   }
@@ -169,7 +169,7 @@ export function drawPromo(canvas, opts) {
   // Market mark
   ctx.fillStyle = look.accent; ctx.font = `800 22px ${SANS}`;
   ctx.fillText('PROVERBS 31 MARKETPLACE', pad, H - (story ? 230 : pad) + 8);
-  ctx.fillStyle = look.id === 'plum' || look.id === 'noir' ? 'rgba(255,255,255,0.6)' : '#6E6580';
+  ctx.fillStyle = look.id === 'plum' || look.id === 'noir' ? 'rgba(255,255,255,0.6)' : '#74657A';
   ctx.font = `500 22px ${SANS}`;
   ctx.fillText('Where her gifts make room.', pad, H - (story ? 230 : pad) + 42);
 }
@@ -179,9 +179,9 @@ export function drawSign(canvas, { shop, qrCanvas, logoImg, line = 'Scan to shop
   const W = 1500; const H = 2100;
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#FCFBFE'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#F8F3FA'; ctx.fillRect(0, 0, W, H);
   ctx.strokeStyle = '#D9A93A'; ctx.lineWidth = 10; rr(ctx, 60, 60, W - 120, H - 120, 48); ctx.stroke();
-  ctx.strokeStyle = '#5E2A8C'; ctx.lineWidth = 3; rr(ctx, 90, 90, W - 180, H - 180, 36); ctx.stroke();
+  ctx.strokeStyle = '#3A1C36'; ctx.lineWidth = 3; rr(ctx, 90, 90, W - 180, H - 180, 36); ctx.stroke();
 
   let y = 300;
   if (logoImg) {
@@ -190,22 +190,22 @@ export function drawSign(canvas, { shop, qrCanvas, logoImg, line = 'Scan to shop
     y += 200;
   }
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#201431'; ctx.font = `400 96px ${SERIF}`;
+  ctx.fillStyle = '#2A1526'; ctx.font = `400 96px ${SERIF}`;
   const n = wrap(ctx, shop?.business_name || 'My shop', W / 2, y + 40, W - 300, 110, 2);
   y += n * 110 + 60;
-  ctx.fillStyle = '#5E2A8C'; ctx.font = `700 54px ${SANS}`;
+  ctx.fillStyle = '#3A1C36'; ctx.font = `700 54px ${SANS}`;
   ctx.fillText(line, W / 2, y);
   y += 90;
   const q = 760;
   ctx.fillStyle = '#fff'; rr(ctx, W / 2 - q / 2 - 30, y - 30, q + 60, q + 60, 40); ctx.fill();
-  ctx.strokeStyle = '#E7DCF4'; ctx.lineWidth = 4; rr(ctx, W / 2 - q / 2 - 30, y - 30, q + 60, q + 60, 40); ctx.stroke();
+  ctx.strokeStyle = '#DCCBE3'; ctx.lineWidth = 4; rr(ctx, W / 2 - q / 2 - 30, y - 30, q + 60, q + 60, 40); ctx.stroke();
   if (qrCanvas) ctx.drawImage(qrCanvas, W / 2 - q / 2, y, q, q);
   y += q + 130;
-  ctx.fillStyle = '#201431'; ctx.font = `600 46px ${SANS}`;
+  ctx.fillStyle = '#2A1526'; ctx.font = `600 46px ${SANS}`;
   ctx.fillText(`p31market.com/${shop?.slug || ''}`.replace(/\/$/, ''), W / 2, y);
   ctx.fillStyle = '#D9A93A'; ctx.font = `800 34px ${SANS}`;
   ctx.fillText('PROVERBS 31 MARKETPLACE', W / 2, H - 230);
-  ctx.fillStyle = '#6E6580'; ctx.font = `500 32px ${SANS}`;
+  ctx.fillStyle = '#74657A'; ctx.font = `500 32px ${SANS}`;
   ctx.fillText('Where her gifts make room.  ·  Proverbs 31:31', W / 2, H - 175);
   ctx.textAlign = 'left';
 }

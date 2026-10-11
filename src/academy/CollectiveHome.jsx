@@ -6,16 +6,13 @@ import { marketHome } from '../lib/site';
 import { CALENDLY, openCalendly } from '../lib/calendly';
 import TeamDirectory from '../components/TeamDirectory';
 import mark from '../assets/academy/collective-mark.webp';
-import melanie from '../assets/web/melanie23_rm.webp';
+import { MELANIE, GROUP, PORTRAITS } from '../lib/teamPhotos';
 import './mentorship.css';
 import './collective-home.css';
 import './pillars.css';
 import JoinCollective from '../components/JoinCollective';
 import Ornaments from '../components/Ornaments';
 import ParallaxStory from '../components/ParallaxStory';
-import community from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
-import partner from '../assets/web/p31_partner_hero_editorial.webp';
-import jewelry from '../assets/web/vendor_jewelry.webp';
 
 // What the Collective is for: the heart of the home page.
 const PILLARS = [
@@ -68,7 +65,7 @@ const CollectiveHome = () => (
     <section className="k-section k-section--mist ch-melanie" id="melanie">
       <div className="k-split k-split--wide-right">
         <div className="ch-melanie__photo" data-reveal="clip">
-          <img src={melanie} alt="Melanie JC" loading="lazy" decoding="async" />
+          <img src={MELANIE.portrait} alt="Melanie JC, founder of The P31 Collective" loading="lazy" decoding="async" />
         </div>
         <div className="k-head" style={{ marginBottom: 0 }}>
           <p className="k-eyebrow" data-reveal="fade">Meet your mentor</p>
@@ -154,10 +151,10 @@ const CollectiveHome = () => (
       id="mandate"
       words={['Heal.', 'Rise.', 'Build.', 'Prosper.']}
       images={[
-        { src: community, alt: 'Women gathered at a P31 event' },
-        { src: melanie, alt: 'Melanie JC' },
-        { src: jewelry, alt: 'Handmade jewelry from a P31 curator' },
-        { src: partner, alt: 'A P31 partner' },
+        { src: GROUP.tall, alt: 'The P31 team together at an event' },
+        { src: MELANIE.portrait, alt: 'Melanie JC' },
+        { src: PORTRAITS[0], alt: 'A member of the P31 team' },
+        { src: PORTRAITS[1], alt: 'A member of the P31 team' },
       ]}
     >
       <p className="k-eyebrow k-eyebrow--center">Her mandate</p>
@@ -201,13 +198,14 @@ const CollectiveHome = () => (
     </section>
 
     <section className="k-section" id="team">
-      <TeamDirectory eyebrow="The P31 team" lede="Reach the right person directly. We’re here Monday to Friday." />
+      <TeamDirectory eyebrow="The P31 team" lede="Reach the right person directly. We’re here Monday to Friday." photo={GROUP.wide} gallery={PORTRAITS} />
     </section>
 
-    <section className="k-section k-section--night k-dark k-section--tight">
+    <section className="k-section k-section--forest k-dark k-section--tight">
       <figure className="k-quote k-center" style={{ maxWidth: 980 }}>
-        <blockquote data-scrub>“Strength and honour are her clothing; and she shall rejoice in time to come.”</blockquote>
-        <figcaption data-reveal="fade">Proverbs 31:25 KJV</figcaption>
+        <p className="k-eyebrow k-eyebrow--center" data-reveal="fade">Our vision scripture</p>
+        <blockquote data-scrub>“Many daughters have done virtuously,<br />But thou excellest them all.”</blockquote>
+        <figcaption data-reveal="fade">Proverbs 31:29 KJV</figcaption>
       </figure>
       <div className="k-actions pl-center" data-reveal><JoinCollective className="k-btn k-btn--gold k-btn--lg" /></div>
       <p className="k-center ch-market" data-reveal="fade">

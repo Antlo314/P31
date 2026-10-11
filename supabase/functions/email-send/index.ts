@@ -53,9 +53,9 @@ Deno.serve(async (req) => {
   const subject = /^re:/i.test(thread.subject) ? thread.subject : `Re: ${thread.subject}`;
   const when = last ? new Date(last.created_at).toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'medium', timeStyle: 'short' }) : '';
   const quoteText = last ? `\n\nOn ${when}, ${last.from_name || last.from_email} wrote:\n${String(last.body_text).split('\n').map((l: string) => `> ${l}`).join('\n')}` : '';
-  const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#201431">${paragraphs(text)}</div>`
-    + (last ? `<div style="margin-top:18px;color:#6E6580;font-size:13px">On ${esc(when)}, ${esc(last.from_name || last.from_email)} wrote:</div>`
-      + `<blockquote style="margin:6px 0 0;padding-left:12px;border-left:3px solid #e7dcf4;color:#6E6580;font-size:13px">${paragraphs(String(last.body_text).slice(0, 8000))}</blockquote>` : '');
+  const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#2A1526">${paragraphs(text)}</div>`
+    + (last ? `<div style="margin-top:18px;color:#74657A;font-size:13px">On ${esc(when)}, ${esc(last.from_name || last.from_email)} wrote:</div>`
+      + `<blockquote style="margin:6px 0 0;padding-left:12px;border-left:3px solid #DCCBE3;color:#74657A;font-size:13px">${paragraphs(String(last.body_text).slice(0, 8000))}</blockquote>` : '');
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',

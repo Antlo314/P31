@@ -6,11 +6,23 @@
    ============================================================ */
 :root {
   /* === Core Brand Palette — BRIGHT & VIVID === */
-  --dark-plum:       #5E2A8C;           /* Vivid royal purple (brighter lead) */
-  --amethyst:        #A855E8;           /* Bright amethyst accent */
-  --thistle:         #ECDDFA;           /* Light lavender */
-  --cal-poly-green:  #1B6E44;           /* Emerald-forest accent */
-  --olive:           #7E8C1E;           /* Brightened olive */
+  /* ── The P31 palette (October 2026) ──
+     Thistle is the primary surface, Dark Purple the sub colour for text, buttons and dark
+     sections, Amethyst the lift between them, Olive and Gold the accents, Cal Poly Green the deep
+     accent (footer, verse bands). scripts/palette.mjs maps older colours onto these. */
+  --p31-thistle:     #E3D0EA;
+  --p31-dark-purple: #3A1C36;
+  --p31-amethyst:    #9B71B2;
+  --p31-olive:       #6C6D11;
+  --p31-green:       #374126;
+  --p31-gold:        #D9A93A;
+  --p31-gold-hi:     #F2CE4D;
+
+  --dark-plum:       #3A1C36;           /* Vivid royal purple (brighter lead) */
+  --amethyst:        #9B71B2;           /* Bright amethyst accent */
+  --thistle:         #E3D0EA;           /* Light lavender */
+  --cal-poly-green:  #374126;           /* Emerald-forest accent */
+  --olive:           #6C6D11;           /* Brightened olive */
   --metallic-gold:   #D9A93A;           /* Warm bright gold */
   --gold-light:      #F2CE4D;
   --gold-glow:       rgba(217, 169, 58, 0.38);
@@ -19,42 +31,42 @@
   --emerald:         #17A673;           /* Vivid fresh emerald */
   --sage:            #79C36F;           /* Bright sage */
   --fern:            #3E8E5A;           /* Mid green */
-  --forest-deep:     #123D28;           /* Deep green (dark sections) */
+  --forest-deep:     #374126;           /* Deep green (dark sections) */
 
   /* === Semantic Roles === */
   --primary:                var(--dark-plum);
-  --primary-container:      rgba(94, 42, 140, 0.08);
+  --primary-container:      rgba(58, 28, 54, 0.08);
   --secondary:              var(--cal-poly-green);
-  --secondary-light:        #2E9E63;
+  --secondary-light:        #8A8B2A;
   --accent-earth:           var(--olive);
   --accent-deep:            var(--cal-poly-green);
   --accent-royal:           var(--dark-plum);
 
   /* === Surfaces — bright & airy (faint lavender, never stark) === */
-  --surface:                #FCFBFE;           /* bright near-white */
-  --surface-alt:            #F5F1FB;           /* light lavender */
-  --surface-container-low:  #F1EBFA;           /* soft lavender */
-  --surface-container:      #E9E0F6;           /* lavender-tinted */
-  --surface-dark:           #241533;           /* deep purple (dark sections) */
+  --surface:                #F8F3FA;           /* bright near-white */
+  --surface-alt:            #EFE4F3;           /* light lavender */
+  --surface-container-low:  #EADBF0;           /* soft lavender */
+  --surface-container:      #E3D0EA;           /* lavender-tinted */
+  --surface-dark:           #2D1529;           /* deep purple (dark sections) */
 
   /* === Text — high legibility (AA+ on light surfaces) === */
-  --on-surface:             #201431;           /* dark purple-black */
-  --on-surface-variant:     #4A3B5C;           /* legible secondary */
-  --on-surface-muted:       #6E6580;           /* muted but readable */
+  --on-surface:             #2A1526;           /* dark purple-black */
+  --on-surface-variant:     #4E3A4B;           /* legible secondary */
+  --on-surface-muted:       #74657A;           /* muted but readable */
   --on-primary:             #FFFFFF;
   --on-tertiary-fixed:      #2a1a00;
 
   /* === Borders / Outlines === */
-  --outline:                #CBB9E2;
-  --outline-variant:        #E7DCF4;
-  --outline-subtle:         rgba(94, 42, 140, 0.14);
+  --outline:                #C3A9CE;
+  --outline-variant:        #DCCBE3;
+  --outline-subtle:         rgba(58, 28, 54, 0.14);
 
   /* === Legacy compat aliases === */
   --royal-plum:      var(--dark-plum);
   --soft-plum:       var(--amethyst);
   --plum-light:      var(--thistle);
   --pure-white:      #FFFFFF;
-  --primary-container-legacy: #27341B;
+  --primary-container-legacy: #374126;
 
   /* === Typography === */
   --font-heading:    'Noto Serif', Georgia, serif;
@@ -87,12 +99,12 @@
   --elev-gold: 0 20px 50px rgba(203, 167, 47, 0.28);
 
   /* Signature gradient meshes for premium dark/plush sections */
-  --mesh-plum: radial-gradient(120% 120% at 12% 8%, rgba(168,85,232,0.45) 0%, transparent 46%),
+  --mesh-plum: radial-gradient(120% 120% at 12% 8%, rgba(155, 113, 178,0.45) 0%, transparent 46%),
                radial-gradient(120% 120% at 92% 16%, rgba(242,206,77,0.26) 0%, transparent 52%),
-               linear-gradient(155deg, #4a1f78 0%, #2c1450 100%);
+               linear-gradient(155deg, #4C2546 0%, #2c1450 100%);
   --mesh-forest: radial-gradient(120% 120% at 80% 0%, rgba(23,166,115,0.42) 0%, transparent 52%),
                  radial-gradient(100% 100% at 8% 100%, rgba(126,140,30,0.22) 0%, transparent 48%),
-                 linear-gradient(155deg, #17603c 0%, #0f3d28 100%);
+                 linear-gradient(155deg, #374126 0%, #374126 100%);
 }
 
 /* ============================================================
@@ -214,7 +226,7 @@ a:hover {
   border: 1px solid var(--outline-variant);
   border-radius: 26px;
   padding: 3rem;
-  box-shadow: 0 1px 2px rgba(29, 15, 46, 0.05), 0 8px 24px -16px rgba(29, 15, 46, 0.25);
+  box-shadow: 0 1px 2px rgba(42, 21, 38, 0.05), 0 8px 24px -16px rgba(42, 21, 38, 0.25);
 }
 
 /* Darker glass for hero overlays */
@@ -270,7 +282,7 @@ a:hover {
   background: linear-gradient(135deg, var(--gold-light) 0%, var(--metallic-gold) 100%); color: #2a1a00 !important;
   box-shadow: 0 14px 30px -16px rgba(217, 169, 58, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
-.btn-solid-plum { background: var(--dark-plum); color: #fff !important; box-shadow: 0 14px 30px -18px rgba(94, 42, 140, 0.9); }
+.btn-solid-plum { background: var(--dark-plum); color: #fff !important; box-shadow: 0 14px 30px -18px rgba(58, 28, 54, 0.9); }
 .btn-outline-primary, .btn-primary { background: #fff; color: var(--dark-plum) !important; border-color: var(--outline); }
 .btn-outline-gold { background: transparent; color: #8a6d1a !important; border-color: var(--metallic-gold); }
 @media (hover: hover) {
@@ -293,7 +305,7 @@ a:hover {
    ============================================================ */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--surface); }
-::-webkit-scrollbar-thumb { background: rgba(94, 42, 140, 0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(58, 28, 54, 0.3); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--dark-plum); }
 
 /* ============================================================

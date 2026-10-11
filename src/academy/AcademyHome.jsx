@@ -8,7 +8,7 @@ import PageHeader from '../components/PageHeader';
 import { PROGRAMS, STEPS } from './content';
 import { openCalendly } from '../lib/calendly';
 import mark from '../assets/academy/collective-mark.webp';
-import founder from '../assets/web/melanie23_rm.webp';
+import { MELANIE } from '../lib/teamPhotos';
 import './mentorship.css';
 import './collective-home.css';
 import './pillars.css';
@@ -34,7 +34,7 @@ const AcademyHome = () => (
       title="Mentorship,"
       accent="made personal."
       lead="Private business and faith-based mentorship with Melanie JC: your own classroom, live sessions and a mentor who knows your name."
-      media={{ src: founder, portrait: true, alt: 'Melanie JC' }}
+      media={{ src: MELANIE.portrait, alt: 'Melanie JC, founder of The P31 Collective' }}
       actions={<>
         <JoinCollective className="k-btn k-btn--gold" />
         <button type="button" className="k-btn k-btn--light" onClick={() => openCalendly('intro', { source: 'academy-hero' })}><CalendarDays size={18} /> Book an intro call</button>

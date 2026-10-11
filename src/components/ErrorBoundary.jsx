@@ -24,7 +24,7 @@ export default class ErrorBoundary extends React.Component {
     const { error } = this.state;
     if (!error) return this.props.children;
     return (
-      <div style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center', padding: 24, background: '#12081d', color: '#fff', fontFamily: 'Manrope, system-ui, sans-serif' }}>
+      <div style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center', padding: 24, background: '#21101E', color: '#fff', fontFamily: 'Manrope, system-ui, sans-serif' }}>
         <div style={{ maxWidth: 460, textAlign: 'center', display: 'grid', gap: 14 }}>
           <h1 style={{ margin: 0, fontFamily: '"Noto Serif", serif', fontWeight: 400, fontSize: '2rem' }}>Something went <em style={{ color: '#F2CE4D' }}>wrong</em></h1>
           <p style={{ margin: 0, color: 'rgba(255,255,255,.75)' }}>Reloading usually fixes it. If it keeps happening, send this message to the P31 team:</p>

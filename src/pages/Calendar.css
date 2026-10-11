@@ -64,7 +64,7 @@
   min-height: 52px; padding: 0 16px; border-radius: 14px; border: 1px solid var(--line-2);
   background: #fff; color: var(--ink); font: inherit; font-size: 16px;
 }
-.cal-form input:focus-visible, .cal-form select:focus-visible { outline: 0; border-color: var(--plum); box-shadow: 0 0 0 4px rgba(168, 85, 232, 0.16); }
+.cal-form input:focus-visible, .cal-form select:focus-visible { outline: 0; border-color: var(--plum); box-shadow: 0 0 0 4px rgba(155, 113, 178, 0.16); }
 .cal-sheet__done { display: grid; justify-items: center; gap: 12px; text-align: center; padding: 14px 0; }
 .cal-sheet__done > span { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: var(--mist); color: var(--plum); }
 .cal-sheet__done > span.is-ok { background: rgba(23, 166, 115, 0.14); color: #17A673; }
@@ -80,5 +80,5 @@
 .cal-lineup li.has-logo { grid-template-columns: 44px minmax(0, 1fr); gap: 10px; align-items: center; }
 .cal-lineup__logo { width: 44px; height: 44px; border-radius: 10px; object-fit: contain; background: #fff; border: 1px solid var(--line); }
 .cal-lineup strong { font-size: 0.95rem; overflow-wrap: anywhere; }
-.cal-lineup small { color: var(--ink-3, #8a7f96); font-size: 0.78rem; }
+.cal-lineup small { color: var(--ink-3, #8C7E92); font-size: 0.78rem; }
 .cal-lineup__booth { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-text, #8a6d1a); }

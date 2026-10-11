@@ -81,9 +81,9 @@ export const drawBackdrop = (ctx, stage, W, H) => {
       floorBand(ctx, W, H, fy, 'rgba(0,0,0,0.0)', 'rgba(0,0,0,0.06)');
       break;
     case 'blush':
-      linear(ctx, W, H, 0, 0, W, H, [[0, '#fbf3ff'], [0.55, '#ecddfa'], [1, '#f6d9e6']]);
+      linear(ctx, W, H, 0, 0, W, H, [[0, '#F8F3FA'], [0.55, '#E3D0EA'], [1, '#f6d9e6']]);
       radial(ctx, W, H, W * 0.75, H * 0.2, m * 0.5, [[0, 'rgba(255,255,255,0.75)'], [1, 'rgba(255,255,255,0)']]);
-      floorBand(ctx, W, H, fy, 'rgba(94,42,140,0.0)', 'rgba(94,42,140,0.08)');
+      floorBand(ctx, W, H, fy, 'rgba(58, 28, 54,0.0)', 'rgba(58, 28, 54,0.08)');
       break;
     case 'linen': {
       linear(ctx, W, H, 0, 0, 0, H, [[0, '#f4ece0'], [1, '#e6d8c4']]);
@@ -144,7 +144,7 @@ export const drawBackdrop = (ctx, stage, W, H) => {
       break;
     }
     case 'pedestal': {
-      radial(ctx, W, H, W / 2, H * 0.35, m * 0.8, [[0, '#6b3299'], [0.55, '#3d1a63'], [1, '#1d0f2e']]);
+      radial(ctx, W, H, W / 2, H * 0.35, m * 0.8, [[0, '#6b3299'], [0.55, '#3d1a63'], [1, '#2D1529']]);
       radial(ctx, W, H, W / 2, H * 0.3, m * 0.35, [[0, 'rgba(242,206,77,0.22)'], [1, 'rgba(242,206,77,0)']]);
       const top = H * stage.floor;
       const pw = Math.min(W * 0.62, m * 0.5);
@@ -152,13 +152,13 @@ export const drawBackdrop = (ctx, stage, W, H) => {
       const rx = pw / 2;
       const ry = pw * 0.09;
       const body = ctx.createLinearGradient(W / 2 - rx, 0, W / 2 + rx, 0);
-      body.addColorStop(0, '#2a1544'); body.addColorStop(0.45, '#56287f'); body.addColorStop(1, '#22113a');
+      body.addColorStop(0, '#3A1C36'); body.addColorStop(0.45, '#56287f'); body.addColorStop(1, '#22113a');
       ctx.fillStyle = body;
       ctx.fillRect(W / 2 - rx, top, pw, ph);
       ctx.beginPath();
       ctx.ellipse(W / 2, top, rx, ry, 0, 0, Math.PI * 2);
       const cap = ctx.createLinearGradient(0, top - ry, 0, top + ry);
-      cap.addColorStop(0, '#7a45a8'); cap.addColorStop(1, '#4a1f78');
+      cap.addColorStop(0, '#7a45a8'); cap.addColorStop(1, '#4C2546');
       ctx.fillStyle = cap;
       ctx.fill();
       ctx.lineWidth = Math.max(2, m * 0.004);
@@ -167,12 +167,12 @@ export const drawBackdrop = (ctx, stage, W, H) => {
       break;
     }
     case 'night':
-      linear(ctx, W, H, 0, 0, 0, H, [[0, '#2a1544'], [1, '#12081d']]);
+      linear(ctx, W, H, 0, 0, 0, H, [[0, '#3A1C36'], [1, '#21101E']]);
       radial(ctx, W, H, W / 2, H * 0.48, m * 0.45, [[0, 'rgba(242,206,77,0.28)'], [1, 'rgba(242,206,77,0)']]);
       floorBand(ctx, W, H, fy, 'rgba(0,0,0,0.0)', 'rgba(0,0,0,0.35)');
       break;
     case 'emerald':
-      radial(ctx, W, H, W * 0.5, H * 0.35, m * 0.85, [[0, '#2bb07c'], [0.5, '#17603c'], [1, '#0f3d28']]);
+      radial(ctx, W, H, W * 0.5, H * 0.35, m * 0.85, [[0, '#2bb07c'], [0.5, '#374126'], [1, '#374126']]);
       floorBand(ctx, W, H, fy, 'rgba(0,0,0,0)', 'rgba(0,0,0,0.22)');
       break;
     default:

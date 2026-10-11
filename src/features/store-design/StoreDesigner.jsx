@@ -25,7 +25,7 @@ const Preview = ({ d, name, products }) => {
   const hero = (
     <div className="sd-prev__hero" style={{
       height: d.hero === 'tall' ? 120 : d.hero === 'minimal' ? 64 : 88,
-      background: d.hero === 'minimal' ? d.accent : `linear-gradient(135deg, ${d.accent}, #1d0f2e)`,
+      background: d.hero === 'minimal' ? d.accent : `linear-gradient(135deg, ${d.accent}, #2D1529)`,
     }}>
       <span style={{ fontFamily: d.heading === 'serif' ? 'var(--font-heading)' : 'var(--font-body)', fontWeight: d.heading === 'serif' ? 400 : 800 }}>{name || 'Your Shop'}</span>
     </div>

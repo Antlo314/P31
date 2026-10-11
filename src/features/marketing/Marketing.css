@@ -23,7 +23,7 @@
 .mk-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .mk-row > input { flex: 1 1 220px; }
 .mk-err { display: flex; gap: 6px; align-items: center; margin: 0; color: #b42318; font-weight: 600; font-size: 0.88rem; }
-.mk-ok { display: flex; gap: 6px; align-items: center; margin: 0; color: #146b4a; font-weight: 600; font-size: 0.88rem; }
+.mk-ok { display: flex; gap: 6px; align-items: center; margin: 0; color: #4F6B2E; font-weight: 600; font-size: 0.88rem; }
 
 .mk-chip {
   display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 999px; cursor: pointer;
@@ -64,7 +64,7 @@
 .mk-promo { display: grid; gap: 14px; }
 @media (min-width: 700px) { .mk-promo { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
 .mk-promo__preview { display: grid; place-items: center; padding: 10px; border-radius: 16px; background: var(--surface-container-low); }
-.mk-canvas { width: 100%; max-width: 360px; height: auto; border-radius: 10px; box-shadow: 0 10px 30px -18px rgba(42, 21, 68, 0.5); }
+.mk-canvas { width: 100%; max-width: 360px; height: auto; border-radius: 10px; box-shadow: 0 10px 30px -18px rgba(58, 28, 54, 0.5); }
 .mk-canvas--story { max-width: 240px; }
 .mk-promo__controls { display: grid; gap: 8px; align-content: start; }
 .mk-seg { display: flex; flex-wrap: wrap; gap: 6px; }

@@ -8,10 +8,10 @@
 .fn--dark { background: rgba(255, 255, 255, 0.05); border-color: rgba(242, 206, 77, 0.22); }
 .fn__photo {
   width: 84px; height: 84px; border-radius: 50%; overflow: hidden; flex: none;
-  background: radial-gradient(80% 70% at 50% 100%, rgba(242, 206, 77, 0.35), transparent 70%), linear-gradient(180deg, #4a1f78, #2a1544);
+  background: radial-gradient(80% 70% at 50% 100%, rgba(242, 206, 77, 0.35), transparent 70%), linear-gradient(180deg, #4C2546, #3A1C36);
   box-shadow: 0 0 0 2px rgba(242, 206, 77, 0.55);
 }
-.fn__photo img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.fn__photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
 .fn__copy { display: grid; gap: 4px; }
 .fn__copy > p { margin: 0; }
 .fn__eyebrow { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-text); }
