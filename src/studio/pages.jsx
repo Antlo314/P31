@@ -8,6 +8,8 @@ import { DashHead, DashEmpty } from '../apps/DashShell';
 import SoundPicker from './SoundPicker';
 import { postPack } from './ai';
 import { studio, uploadMedia, bestSlotsET, nextOccurrence, fmtET } from './api';
+import DesktopOnly, { DesktopTag } from '../components/DesktopOnly';
+import { isPhone, useIsPhone } from '../lib/device';
 
 const ClipStudio = lazy(() => import('../features/clip-studio/ClipStudio'));
 const PhotoStudio = lazy(() => import('../features/photo-studio/PhotoStudio'));
@@ -467,7 +469,8 @@ export const StudioComments = () => {
 // ── Creative tools → straight into a post ────────────────────
 export const StudioCreate = () => {
   const navigate = useNavigate();
-  const [tool, setTool] = useState('clip');
+  const phone = useIsPhone();
+  const [tool, setTool] = useState(() => (isPhone() ? 'photo' : 'clip'));
   const useIt = async (blob, meta) => {
     const file = new File([blob], meta.name || `p31-${Date.now()}`, { type: blob.type || meta.type });
     const url = await uploadMedia(file);
@@ -477,11 +480,19 @@ export const StudioCreate = () => {
     <>
       <DashHead eyebrow="Content Studio" title="Creative" accent="tools" lead="Auto-edit a reel from raw footage, or style a product photo — then send it straight to the composer." />
       <div className="ds-tabs-inline" role="tablist">
-        <button role="tab" aria-selected={tool === 'clip'} onClick={() => setTool('clip')}><Video size={15} style={{ verticalAlign: '-3px' }} /> Clip Studio</button>
+        <button role="tab" aria-selected={tool === 'clip'} onClick={() => setTool('clip')}><Video size={15} style={{ verticalAlign: '-3px' }} /> Clip Studio {phone && <DesktopTag />}</button>
         <button role="tab" aria-selected={tool === 'photo'} onClick={() => setTool('photo')}><ImagePlus size={15} style={{ verticalAlign: '-3px' }} /> Photo Studio</button>
       </div>
       <Suspense fallback={<p className="ds-muted">Loading…</p>}>
-        {tool === 'clip' ? <ClipStudio onSave={useIt} saveLabel="Use in a post" /> : <PhotoStudio onSave={useIt} saveLabel="Use in a post" />}
+        {tool === 'clip' ? (
+          <DesktopOnly
+            title="Clip Studio"
+            what="Turns raw footage into a captioned reel with a look, music and the P31 mark, then sends it to Create post."
+            instead={[{ to: '/studio/create', label: 'Style a product photo in Photo Studio' }, { to: '/studio/compose', label: 'Write and schedule a post' }]}
+          >
+            <ClipStudio onSave={useIt} saveLabel="Use in a post" />
+          </DesktopOnly>
+        ) : <PhotoStudio onSave={useIt} saveLabel="Use in a post" />}
       </Suspense>
     </>
   );

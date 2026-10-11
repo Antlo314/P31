@@ -1,0 +1,25 @@
+/* "Needs a computer" card (DesktopOnly.jsx). Works on light and dark surfaces. */
+.dko {
+  display: grid; gap: 10px; justify-items: start;
+  padding: 22px 20px; border-radius: 22px;
+  background: rgba(127, 127, 127, 0.08); border: 1px solid rgba(127, 127, 127, 0.25); color: inherit;
+}
+.dko__icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px; background: rgba(217, 169, 58, 0.18); color: #D9A93A; }
+.dko h2 { margin: 0; font-family: var(--font-heading); font-weight: 400; font-size: 1.5rem; line-height: 1.15; color: inherit; }
+.dko p { margin: 0; line-height: 1.5; font-size: 0.95rem; }
+.dko__why { opacity: 0.75; font-size: 0.88rem; }
+.dko__instead { display: grid; gap: 6px; margin-top: 4px; }
+.dko__instead p { font-size: 0.74rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; }
+.dko__instead ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.dko__instead a { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: #D9A93A; text-decoration: none; }
+.dko__actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 6px; }
+.dko__btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; text-decoration: none;
+  background: linear-gradient(135deg, #F2CE4D, #D9A93A); color: #2a1a00; font-weight: 800; font-size: 0.9rem;
+}
+.dko__link { background: none; border: 0; padding: 8px 4px; cursor: pointer; font: inherit; font-size: 0.84rem; font-weight: 700; color: inherit; opacity: 0.7; text-decoration: underline; }
+.dko-tag {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px;
+  font-size: 0.64rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+  background: rgba(217, 169, 58, 0.16); color: #D9A93A; white-space: nowrap;
+}

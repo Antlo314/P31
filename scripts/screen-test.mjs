@@ -30,7 +30,7 @@ const SCREENS = [
   ['collective home', cl('/')], ['academy', cl('/academy')], ['systems showcase', at('collective', 'student')('/systems')],
   ['join', cl('/join')], ['mentorship', cl('/mentorship')], ['business mentorship', cl('/mentorship/business')],
   ['faith mentorship', cl('/mentorship/faith')], ['verify', cl('/verify')], ['portal', cl('/portal?choose')],
-  ['today', cl('/today'), [], 'Collective applications'], ['portal sends the team to today', cl('/portal'), [], 'Work to grade'], ['students skip today', st('/today')],
+  ['today', cl('/today'), [], 'Join applications'], ['portal sends the team to today', cl('/portal'), [], 'Work to grade'], ['students skip today', st('/today')],
   ['mentor overview', cl('/academy/business/teach')],
   ['student preview window', cl('/academy/business/teach'), ['Preview', 'Desktop', 'Tablet']], ['mentor inbox', cl('/academy/business/teach/inbox/u-s1')],
   ['students', cl('/academy/business/teach/students')],
@@ -55,6 +55,18 @@ const SCREENS = [
   ['studio inbox', cl('/studio/inbox')], ['studio comments', cl('/studio/comments')], ['studio create', cl('/studio/create')],
   ...['', 'crm', 'applications', 'social', 'growth', 'events', 'campaigns', 'orders', 'academy', 'clips', 'photos', 'pro-edit', 'health', 'settings']
     .map((p) => [`systems ${p || 'overview'}`, cl(`/systems${p ? '/' + p : ''}`)]),
+  ['systems overview by site', cl('/systems'), [], 'Paid this month'],
+  ['systems overview: collective numbers', cl('/systems'), [], 'Students active'],
+  // Phones: the admin console folds to what works on the go; video tools wait for a computer.
+  ['systems overview on a phone', cl('/systems'), [], 'Proverbs 31 Marketplace', { phone: true }],
+  ['systems more sheet on a phone', cl('/systems/orders'), ['More'], 'On your computer', { phone: true }],
+  ['systems clip studio on a phone', cl('/systems/clips'), [], 'Clip Studio needs a computer', { phone: true }],
+  ['systems davinci on a phone opens the queue', cl('/systems/pro-edit'), [], 'Edit queue', { phone: true }],
+  ['systems davinci finder on a phone', cl('/systems/pro-edit'), ['Clip finder'], 'needs a computer', { phone: true }],
+  ['systems orders on a phone', cl('/systems/orders'), [], 'Marketplace orders', { phone: true }],
+  ['studio creative tools on a phone', cl('/studio/create'), ['Clip Studio'], 'Clip Studio needs a computer', { phone: true }],
+  ['curator creative studio on a phone', at('market', 'curator')('/dashboard/studio'), ['Clip Studio'], 'Clip Studio needs a computer', { phone: true }],
+  ['today on a phone', cl('/today'), [], 'Join applications', { phone: true }],
   ['team access', cl('/systems/team'), [], 'Give someone access'],
   ['vendor applications', cl('/systems/vendors'), [], 'Sample Candle Co.'],
   ['vendor decision email', cl('/systems/vendors'), ['All', 'Sample Crafts'], 'Sends the approved note from vendor@p31market.com'],
@@ -94,24 +106,40 @@ const clickText = (page, text) => page.evaluate((t) => {
   return true;
 }, text);
 
+// Wait (up to ~5 s) for the page to show real text, then return it.
+const settle = async (page) => {
+  let text = '';
+  for (let i = 0; i < 12; i++) {
+    text = await page.evaluate(() => document.body.innerText);
+    if (text.trim().length >= 40) break;
+    await sleep(400);
+  }
+  return text;
+};
+
 if (!CHROME) { console.error('screen-test: Chrome not found (set CHROME_PATH)'); process.exit(1); }
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
 const failures = [];
 let n = 0;
-for (const [name, url, clicks = [], expect] of SCREENS) {
+for (const [name, url, clicks = [], expect, opts = {}] of SCREENS) {
   const page = await browser.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   try {
-    await page.setViewport({ width: 1280, height: 800 });
+    // A 5th element { phone: true } runs the screen at iPhone size.
+    await page.setViewport(opts.phone ? { width: 390, height: 844, isMobile: true, hasTouch: true } : { width: 1280, height: 800 });
     await page.evaluateOnNewDocument(() => { try { localStorage.setItem('p31_subscribed', '1'); } catch { /* ignore */ } });
     await page.goto(url, { waitUntil: 'load', timeout: 60000 });
-    await sleep(2000);
+    await sleep(2000); // walkthroughs open on their own after ~1 s
+    await settle(page);
     for (const c of clicks) {
-      if (!(await clickText(page, c))) failures.push(`${name}: no "${c}" button`);
+      // The dev server compiles a page's code on first visit, so a button can take a moment to appear.
+      let hit = false;
+      for (let i = 0; i < 10 && !hit; i++) { hit = await clickText(page, c); if (!hit) await sleep(400); }
+      if (!hit) failures.push(`${name}: no "${c}" button`);
       await sleep(700);
     }
-    const text = await page.evaluate(() => document.body.innerText);
+    const text = await settle(page);
     if (/Something went wrong/.test(text)) failures.push(`${name}: error screen: ${text.match(/team:\s*([^\n]+)/)?.[1] || ''}`);
     else if (text.trim().length < 40) failures.push(`${name}: blank page`);
     else if (expect && !text.includes(expect)) failures.push(`${name}: missing "${expect}"`);

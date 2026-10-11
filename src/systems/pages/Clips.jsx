@@ -1,5 +1,6 @@
 import React from 'react';
 import ClipStudio from '../../features/clip-studio/ClipStudio';
+import DesktopOnly from '../../components/DesktopOnly';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 
@@ -24,11 +25,17 @@ const Clips = () => {
   return (
     <div className="sys-page">
       <header className="sys-page__head">
-        <p className="sys-eyebrow">Clips</p>
+        <p className="sys-eyebrow">Create</p>
         <h1>Clip Studio</h1>
         <p className="sys-muted">Drop in raw footage — it cuts the dead air, adds transitions, a look and captions.</p>
       </header>
-      <ClipStudio onSave={save} saveLabel="Save to Social drafts" />
+      <DesktopOnly
+        title="Clip Studio"
+        what="Cuts raw footage into a captioned reel with a look, music and the P31 mark, then saves it to Social drafts."
+        instead={[{ to: '/systems/photos', label: 'Style a product photo in Photo Studio' }, { to: '/systems/social', label: 'Caption and schedule a saved clip' }]}
+      >
+        <ClipStudio onSave={save} saveLabel="Save to Social drafts" />
+      </DesktopOnly>
     </div>
   );
 };
