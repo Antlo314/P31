@@ -3,7 +3,6 @@ import { useNavigate, Link, useLocation, Routes, Route, Navigate } from 'react-r
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { fetchUpcomingEvents, formatEventDate } from '../lib/events';
-import Community from './Community'; // Nested import
 import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, ShieldCheck, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Calendar, Users, Search, DollarSign, RefreshCw, Megaphone } from 'lucide-react';
 import { invokePayment, CARD_PAYMENTS_ENABLED } from '../lib/payments';
 import HelpTip from '../components/HelpTip';
@@ -1979,11 +1978,7 @@ const CuratorDashboard = () => {
             </div>
           } />
 
-          <Route path="community" element={
-            <div className="dashboard-chat-view">
-               <Community />
-            </div>
-          } />
+          <Route path="community" element={<Navigate to="/gather" replace />} />
 
           <Route path="governance" element={
             isAdmin ? (

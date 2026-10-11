@@ -104,6 +104,7 @@ export const ROUTE_META = {
   '/login': { title: `Sign in — ${SITE_NAME}`, description: 'Curator sign in.', noindex: true },
   '/register': { title: `Join — ${SITE_NAME}`, description: 'Create your curator account.', noindex: true },
   '/unsubscribe': { title: `Unsubscribe — ${SITE_NAME}`, description: 'Manage your email preferences.', noindex: true },
+  '/gather': { title: 'The Gathering — Proverbs 31', description: 'The P31 community space for vendors, mentorship students, mentors and the team.', noindex: true },
 };
 
 // The Collective's own titles (www.thep31collective.org).

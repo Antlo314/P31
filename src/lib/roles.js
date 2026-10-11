@@ -75,5 +75,8 @@ export function dashboardsFor(roles) {
   if (roles.operator || roles.admin) out.push({ to: '/systems', kind: 'systems', title: 'Systems', note: 'P31 operations console' });
   else if (DAVINCI_ON && roles.tools?.includes('davinci')) out.push({ to: '/systems/pro-edit', kind: 'davinci', title: 'DaVinci', note: 'Long footage in, finished clips out' });
   if (roles.curator) out.push({ to: '/dashboard', kind: 'curator', title: 'Curator Studio', note: 'Your shop, products and orders' });
+  if (roles.admin || roles.operator || roles.studio || roles.curator || roles.mentor?.length || roles.student?.length || roles.tools?.length) {
+    out.push({ to: '/gather', kind: 'gather', title: 'The Gathering', note: 'Talk with P31 vendors, students and the team · Daily Word' });
+  }
   return out;
 }

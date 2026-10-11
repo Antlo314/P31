@@ -57,3 +57,15 @@
 .td2-site--market { background: rgba(217, 169, 58, 0.18); color: #8a6d1a; }
 .td2-site--collective { background: rgba(94, 42, 140, 0.12); color: #5E2A8C; }
 .td2-card--night .td2-site { background: rgba(255, 255, 255, 0.14); color: #fff; }
+
+/* The Daily Word from The Gathering */
+.td2-word {
+  display: grid; gap: 8px; margin: 0 0 18px; padding: 18px 20px; border-radius: 20px; text-decoration: none; color: #fff;
+  background: radial-gradient(70% 70% at 50% 130%, rgba(242, 206, 77, 0.22), transparent 70%), linear-gradient(160deg, #351a5b, #1d0f33);
+  border: 1px solid rgba(242, 206, 77, 0.35); transition: transform 0.25s;
+}
+.td2-word:hover { transform: translateY(-2px); }
+.td2-word__eyebrow { display: inline-flex; align-items: center; gap: 6px; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #F2CE4D; }
+.td2-word blockquote { margin: 0; font-family: var(--font-heading); font-style: italic; font-size: clamp(1.1rem, 0.95rem + 0.8vw, 1.45rem); line-height: 1.4; }
+.td2-word__ref { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(242, 206, 77, 0.85); }
+.td2-word__go { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 800; color: rgba(255, 255, 255, 0.85); }

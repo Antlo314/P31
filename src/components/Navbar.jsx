@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import {
   Home, Store, CalendarDays, Handshake, LayoutGrid, ShoppingBasket, Heart, X, ChevronRight, Sparkles, Info,
-  LayoutDashboard, LogOut, Instagram, Facebook, UserRound, Crown, ShoppingBag, GraduationCap, KeyRound, UserPlus,
+  LayoutDashboard, LogOut, Instagram, Facebook, UserRound, Crown, ShoppingBag, GraduationCap, KeyRound, UserPlus, MessagesSquare,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -123,6 +123,7 @@ const Navbar = () => {
                     {isCurator
                       ? <Link to="/dashboard" role="menuitem"><LayoutDashboard size={16} /> Curator dashboard</Link>
                       : <a href={collectivePortal()} role="menuitem"><LayoutDashboard size={16} /> My dashboards</a>}
+                    {isCurator && <Link to="/gather" role="menuitem"><MessagesSquare size={16} /> The Gathering</Link>}
                     <button role="menuitem" onClick={signOut}><LogOut size={16} /> Sign out</button>
                   </div>
                 )}

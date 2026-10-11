@@ -22,6 +22,9 @@ const Login = () => {
   useEffect(() => {
     if (location.pathname === '/register') setIsSignUp(true);
   }, [location]);
+  // ?next=/gather (and other in-site pages) returns there after signing in.
+  const next = new URLSearchParams(location.search).get('next');
+  const after = next && /^\/(gather|dashboard)(\/[\w-]*)*$/.test(next) ? next : '/dashboard';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -70,7 +73,7 @@ const Login = () => {
         });
 
         if (authError) throw authError;
-        navigate('/dashboard');
+        navigate(after);
       }
     } catch (err) {
       setError(err.message === 'Invalid login credentials' 

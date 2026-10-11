@@ -27,7 +27,7 @@ const GROUPS = [
   ] },
   { id: 'help', label: 'Help', items: [
     { id: 'concierge', label: 'Concierge', Icon: Bell },
-    { id: 'community', label: 'Collective Chat', Icon: MessageSquare },
+    { id: 'community', label: 'The Gathering', Icon: MessageSquare },
     { id: 'guide', label: 'Help & Guide', Icon: HelpCircle, tour: true },
     { id: 'directory', label: 'View Directory', Icon: ExternalLink, to: '/directory' },
   ] },

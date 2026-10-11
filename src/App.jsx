@@ -50,6 +50,8 @@ const load = {
   studio: () => import('./studio/StudioApp'),
   // The team's home: what needs attention across every dashboard they run.
   today: () => import('./today/Today'),
+  // The Gathering: P31's community space (vendors, students, mentors, team, overseers).
+  gather: () => import('./gather/Gather'),
 };
 const About = lazy(load.about);
 const Calendar = lazy(load.calendar);
@@ -80,6 +82,7 @@ const SystemsApp = lazy(load.systems);
 const AcademyApp = lazy(load.classroom);
 const StudioApp = lazy(load.studio);
 const Today = lazy(load.today);
+const Gather = lazy(load.gather);
 
 // Which code a link leads to, for preloading on hover / touch / focus. The catch-all shop
 // slug comes last so fixed paths win.
@@ -90,7 +93,7 @@ const INTENT = [
   [/^\/vendors\/agreement$/, load.agreement], [/^\/vendors\/register$/, load.registration], [/^\/vendors\/feedback$/, load.feedback],
   [/^\/volunteer$/, load.volunteer], [/^\/mentorship(\/|$)/, load.mentorship], [/^\/portal$/, load.portal],
   [/^\/verify(\/|$)/, load.verify], [/^\/academy$/, load.academy], [/^\/academy\/[^/]+/, load.classroom], [/^\/join$/, load.join],
-  [/^\/systems(\/|$)/, load.systems], [/^\/studio(\/|$)/, load.studio], [/^\/today$/, load.today],
+  [/^\/systems(\/|$)/, load.systems], [/^\/studio(\/|$)/, load.studio], [/^\/today$/, load.today], [/^\/gather(\/|$)/, load.gather],
   [/^\/[a-z0-9][a-z0-9_-]{0,80}$/i, load.curator],
 ];
 const IntentPreload = () => {
@@ -246,6 +249,10 @@ function App() {
           <Route
             path="/today"
             element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#FCFBFE' }} />}><Today /></Suspense>}
+          />
+          <Route
+            path="/gather/:slug?"
+            element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#150a24' }} />}><Gather /></Suspense>}
           />
           {Lab && <Route path="/__lab" element={<Suspense fallback={null}><Lab /></Suspense>} />}
           <Route path="/*" element={isCollective ? <CollectiveRoutes /> : <SiteRoutes />} />

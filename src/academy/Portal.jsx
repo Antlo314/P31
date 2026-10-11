@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, Eye, EyeOff, LayoutGrid, LogOut, GraduationCap, Clapperboard, Store, ShieldCheck, Presentation, Sun, Film } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Eye, EyeOff, LayoutGrid, LogOut, GraduationCap, Clapperboard, Store, ShieldCheck, Presentation, Sun, Film, MessagesSquare } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useRoles, dashboardsFor, isTeam } from '../lib/roles';
@@ -12,7 +12,7 @@ import '../pages/Login.css';
 import './mentorship.css';
 import { JOIN_PATH } from '../lib/academy';
 
-const KIND_ICON = { student: GraduationCap, mentor: Presentation, studio: Clapperboard, systems: ShieldCheck, curator: Store, davinci: Film };
+const KIND_ICON = { student: GraduationCap, mentor: Presentation, studio: Clapperboard, systems: ShieldCheck, curator: Store, davinci: Film, gather: MessagesSquare };
 
 // /portal — one sign-in for every member dashboard.
 const Portal = () => {
@@ -80,19 +80,21 @@ const Portal = () => {
   };
 
   const dashboards = status === 'ready' ? dashboardsFor(roles) : [];
+  // The Gathering is listed for everyone but is not a workspace: it never decides where sign-in lands.
+  const workspaces = dashboards.filter((d) => d.kind !== 'gather');
   const team = status === 'ready' && isTeam(roles);
   const next = params.get('next');
-  if (status === 'ready' && !recovery && next && /^\/(academy|studio|systems|dashboard|today)(\/|$)/.test(next)) {
+  if (status === 'ready' && !recovery && next && /^\/(academy|studio|systems|dashboard|today|gather)(\/|$)/.test(next)) {
     return <Navigate to={next} replace />;
   }
   // Team members who run more than one dashboard start on Today, which gathers them all.
-  if (team && !recovery && dashboards.length > 1 && !params.has('choose')) {
+  if (team && !recovery && workspaces.length > 1 && !params.has('choose')) {
     return <Navigate to="/today" replace />;
   }
   // One dashboard on this domain: go straight there. (A dashboard on the other
   // domain is listed instead — signing in there is a separate step.)
-  if (status === 'ready' && !recovery && dashboards.length === 1 && !params.has('choose') && !dashboards[0].locked && hrefFor(dashboards[0].to) === dashboards[0].to) {
-    return <Navigate to={dashboards[0].to} replace />;
+  if (status === 'ready' && !recovery && workspaces.length === 1 && !params.has('choose') && !workspaces[0].locked && hrefFor(workspaces[0].to) === workspaces[0].to) {
+    return <Navigate to={workspaces[0].to} replace />;
   }
 
   return (

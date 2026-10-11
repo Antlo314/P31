@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import {
-  Sun, Video, ArrowRight, Presentation, Clapperboard, ShieldCheck, LayoutDashboard, Megaphone, Mail, CalendarDays, Film, Scissors, Store,
+  Sun, Video, ArrowRight, Presentation, Clapperboard, ShieldCheck, LayoutDashboard, Megaphone, Mail, CalendarDays, Film, Scissors, Store, MessagesSquare,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useRoles, dashboardsFor, isTeam, hasTool } from '../lib/roles';
@@ -9,11 +9,12 @@ import { useIsPhone } from '../lib/device';
 import { DAVINCI_ON } from '../lib/features';
 import { mentorCards, systemsCards, studioCards, davinciCards } from './cards';
 import AttentionCard, { Go } from './AttentionCard';
+import TodaysWord from './TodaysWord';
 import DashShell, { DashHead } from '../apps/DashShell';
 import mark from '../assets/academy/collective-mark.webp';
 import './today.css';
 
-const ICON = { mentor: Presentation, studio: Clapperboard, systems: ShieldCheck, curator: Store, davinci: Film };
+const ICON = { mentor: Presentation, studio: Clapperboard, systems: ShieldCheck, curator: Store, davinci: Film, gather: MessagesSquare };
 const PROGRAM = { business: 'Business Mentorship', faith: 'Faith-Based Mentorship' };
 
 // Which dashboards report in, in the order they're shown.
@@ -85,6 +86,8 @@ const Today = () => {
           : total ? `${total} thing${total === 1 ? '' : 's'} could use your attention across your dashboards.`
             : pending ? 'Still checking a few places…' : 'Everything’s handled. Enjoy the quiet.'}
       />
+
+      <TodaysWord />
 
       {quick.length > 0 && (
         <div className="td2-quick" role="group" aria-label="Quick actions">

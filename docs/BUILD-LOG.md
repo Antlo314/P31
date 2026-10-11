@@ -2,6 +2,16 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 11 — The Gathering: P31's community space
+
+- **One place for the whole P31 family to talk.** The Gathering (`/gather`, on both p31market.com and thep31collective.org) brings vendors, mentorship students and alumnae, mentors, the team and the site overseers together, in the plum-and-gold P31 look. It replaces the old curator-only chat, and that chat’s history comes with it.
+- **Channels by who they are for.** Everyone: Welcome, Daily Word, The Gathering, Prayer requests, Wins & celebrations. Vendors and the team: Market talk, Market day. Students, alumnae and mentors: Academy lounge. The team and overseers: Team room. Each person only sees the rooms that are theirs.
+- **Like Discord, made for P31.** Direct messages between any two members, threads under any message, inline replies, reactions (🙏🏾 ❤️ 🙌🏾 🔥 😂 👏🏾 ✨ 💜 😭 💯), photos and videos (shared privately, only members can see them; large photos are resized before upload), edit and remove, pinned messages, unread counts, and everything updating live.
+- **Badges that match each person.** Founder & CEO and other titles an overseer gives (Executive Assistant, Marketing Strategist…), Overseer, P31 Team, Mentor, Business or Faith Mentorship student, Alumna, and Vendor (with a link to her shop). A members list groups everyone the same way, and anyone’s card has a Message button.
+- **The Daily Word.** Every morning a KJV verse appears in Daily Word with a question, and it pops up the first time someone opens The Gathering that day: “Join the discussion” opens its thread, “Amen” adds a 🙏🏾. The team sees it on their Today page too.
+- **Everywhere people already are.** The curator studio’s chat tab, every classroom menu (students and mentors), the member portal, Systems, Today and the marketplace account menu all open The Gathering.
+- **Behind it.** Database v39 (channels, messages, threads, reactions, read markers, titles, 49 KJV verses, a private media bucket, live updates, and a 7:30 AM Eastern Daily Word job). Every message goes through checks (who may post where, attachments, a gentle rate limit). 154 screens in the automated test.
+
 ## October 11 — Faster pages, and a site that runs itself a little more
 
 - **Lighter and quicker.** The 3D engine (Three.js, about half a megabyte) is gone from the site entirely now that no page uses it. Phones get a hero film a third the size (0.5 MB instead of 1.4 MB). The browser opens its connection to the database while the page is still loading, and fonts and icons are cached for a long time instead of re-checked. Pointing at a link (or touching it on a phone) starts loading that page before the click, so the next page appears almost at once.

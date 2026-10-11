@@ -38,6 +38,19 @@ const roster = (program) => Object.entries(PEOPLE).filter(([, p]) => p.program =
 }));
 
 let db = null;
+const etDay = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+const GATHER_CHANNELS = [
+  ['welcome', 'Welcome', 'Start here: what The Gathering is for, and how we treat one another.', 'announcements', 'everyone', 'gather', 'sparkles'],
+  ['daily-word', 'Daily Word', 'A new verse every morning. Share what it speaks to you in the discussion beneath it.', 'scripture', 'everyone', 'gather', 'book'],
+  ['the-gathering', 'The Gathering', 'Talk with the whole P31 family: vendors, students, mentors and the team.', 'text', 'everyone', 'gather', 'hash'],
+  ['prayer', 'Prayer requests', 'Share what you are carrying. We stand with you in prayer.', 'text', 'everyone', 'gather', 'heart'],
+  ['wins', 'Wins & celebrations', 'Launches, sales, milestones, answered prayers.', 'text', 'everyone', 'gather', 'party'],
+  ['market', 'Market talk', 'For P31 vendors and the team.', 'text', 'vendors', 'market', 'store'],
+  ['market-day', 'Market day', 'Load-in, booths, what to bring.', 'text', 'vendors', 'market', 'calendar'],
+  ['academy', 'Academy lounge', 'For mentorship students, alumnae and mentors.', 'text', 'students', 'academy', 'graduation'],
+  ['team', 'Team room', 'The P31 team, mentors and overseers only.', 'text', 'team', 'team', 'shield'],
+  ['dm-demo', 'Direct message', null, 'dm', 'dm', 'dm', null],
+];
 const makeDb = () => ({
   academy_programs: [
     { id: BUS, slug: 'business', title: 'Business Mentorship', is_active: true, sort_order: 1 },
@@ -302,6 +315,22 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
     { id: 'evv-1', event_id: 'ev1', application_id: 'va-2', business_name: 'Sample Crafts', contact_name: 'Sample Maker', email: 'vendor2@example.com', website_social: 'samplecrafts.com', categories: ['Handmade crafts, baskets & gifts'], booth: 'A4', status: 'paid', is_public: true, notes: null, logo_url: null, created_at: day(-3) },
     { id: 'evv-2', event_id: 'ev1', application_id: null, business_name: 'Sample Candle Co.', contact_name: 'Sample Vendor', email: 'vendor1@example.com', website_social: '@samplecandles', categories: ['Candles & Home fragrance'], booth: 'B2', status: 'confirmed', is_public: true, notes: null, logo_url: null, created_at: day(-2) },
   ],
+  // The Gathering (v39).
+  chat_channels: GATHER_CHANNELS.map((c, i) => ({ id: `ch-${c[0]}`, slug: c[0], name: c[1], topic: c[2], kind: c[3], audience: c[4], section: c[5], icon: c[6], sort_order: i, last_message_at: iso(-20) })),
+  chat_messages: [
+    { id: 'gm-sys', channel_id: 'ch-welcome', author_id: null, kind: 'system', body: 'Welcome to The Gathering, the home of the P31 family online.\n\n• Speak life. She openeth her mouth with wisdom; and in her tongue is the law of kindness (Proverbs 31:26).\n• Celebrate one another in Wins & celebrations.', attachments: [], reactions: {}, meta: {}, pinned: true, reply_count: 0, thread_root: null, reply_to: null, created_at: day(-3) },
+    { id: 'gm-word', channel_id: 'ch-daily-word', author_id: null, kind: 'scripture', body: 'What is this word speaking to you today?', attachments: [], reactions: { '🙏🏾': ['u-s1', 'u-cu'] }, meta: { day: etDay(), ref: 'Proverbs 31:25', text: 'Strength and honour are her clothing; and she shall rejoice in time to come.' }, pinned: false, reply_count: 2, last_reply_at: iso(-15), thread_root: null, reply_to: null, created_at: iso(-300) },
+    { id: 'gm-w1', channel_id: 'ch-daily-word', author_id: 'u-s1', kind: 'message', body: 'Rejoice in time to come. I needed that reminder before my launch this week.', attachments: [], reactions: { '💜': ['u-mel'] }, meta: {}, pinned: false, reply_count: 0, thread_root: 'gm-word', reply_to: null, created_at: iso(-60) },
+    { id: 'gm-w2', channel_id: 'ch-daily-word', author_id: 'u-mel', kind: 'message', body: 'Strength is something she wears, not something she has to find. Praying over every launch this week. 🙏🏾', attachments: [], reactions: {}, meta: {}, pinned: false, reply_count: 0, thread_root: 'gm-word', reply_to: null, created_at: iso(-15) },
+    { id: 'gm-1', channel_id: 'ch-the-gathering', author_id: 'u-mel', kind: 'message', body: 'Welcome to the family, everyone! This is our space to encourage one another. Introduce yourself below 💜', attachments: [], reactions: { '🙌🏾': ['u-cu', 'u-s1'], '💜': ['u-s2'] }, meta: {}, pinned: true, reply_count: 1, last_reply_at: iso(-90), thread_root: null, reply_to: null, created_at: iso(-240) },
+    { id: 'gm-1r', channel_id: 'ch-the-gathering', author_id: 'u-cu', kind: 'message', body: 'So grateful to be here!', attachments: [], reactions: {}, meta: {}, pinned: false, reply_count: 0, thread_root: 'gm-1', reply_to: null, created_at: iso(-90) },
+    { id: 'gm-2', channel_id: 'ch-the-gathering', author_id: 'u-cu', kind: 'message', body: 'Hi all! Sample Bakery Co. here. Here is the table from our last market. **Lemon pound cake** sold out in an hour!', attachments: [{ type: 'image', path: 'u-cu/sample-table.jpg', name: 'table.jpg', width: 1200, height: 630 }], reactions: { '🔥': ['u-mel', 'u-s1'] }, meta: {}, pinned: false, reply_count: 0, thread_root: null, reply_to: null, created_at: iso(-200) },
+    { id: 'gm-3', channel_id: 'ch-the-gathering', author_id: 'u-s1', kind: 'message', body: 'That table is gorgeous. Business Mentorship student here, launching my candle line in November.', attachments: [], reactions: {}, meta: {}, pinned: false, reply_count: 0, thread_root: null, reply_to: 'gm-2', created_at: iso(-180) },
+    { id: 'gm-4', channel_id: 'ch-market', author_id: 'u-cu', kind: 'message', body: 'Anyone have a favorite table-cover supplier? Need floor-length for the next market.', attachments: [], reactions: {}, meta: {}, pinned: false, reply_count: 0, thread_root: null, reply_to: null, created_at: iso(-120) },
+    { id: 'gm-5', channel_id: 'ch-academy', author_id: 'u-s1', kind: 'message', body: 'Accountability check: who finished this week’s action plan?', attachments: [], reactions: {}, meta: {}, pinned: false, reply_count: 0, thread_root: null, reply_to: null, created_at: iso(-110) },
+    { id: 'gm-6', channel_id: 'ch-team', author_id: 'u-mel', kind: 'message', body: 'Team: luncheon run-of-show draft is in the shared folder.', attachments: [], reactions: {}, meta: {}, pinned: false, reply_count: 0, thread_root: null, reply_to: null, created_at: iso(-100) },
+    { id: 'gm-dm', channel_id: 'ch-dm-demo', author_id: 'u-cu', kind: 'message', body: 'Thank you for the feedback on my booth!', attachments: [], reactions: {}, meta: {}, pinned: false, reply_count: 0, thread_root: null, reply_to: null, created_at: iso(-50) },
+  ],
   // The four vendor forms that replaced JotForm (v37).
   vendor_agreements: [
     { id: 'ag-1', business_name: 'Sample Candle Co.', first_name: 'Sample', last_name: 'Vendor', email: 'vendor1@example.com', phone: '(470) 555-0161', address: { street: '12 Market Street', line2: '', city: 'Duluth', state: 'GA', zip: '30097', country: 'United States' }, agreed: true, signature: null, signed_name: 'Sample Vendor', signed_on: day(-1).slice(0, 10), terms_version: '2026-10', status: 'new', curator_id: null, review_notes: null, reviewed_at: null, created_at: iso(-95) },
@@ -320,7 +349,48 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
   ],
 });
 
+// The Gathering: who is who (roles drive the badges), and which channels each sample person sees.
+const GATHER_ROLES = {
+  'u-mel': { admin: true, team: true, mentor: ['business', 'faith'], student: [], vendor: null, title: 'Founder & CEO' },
+  'u-cu': { admin: false, team: false, mentor: [], student: [], vendor: { shop: 'Sample Bakery Co.', slug: 'sample-bakery' }, title: null },
+  'u-s1': { admin: false, team: false, mentor: [], student: [{ program: 'business', alum: false }], vendor: null, title: null },
+  'u-s2': { admin: false, team: false, mentor: [], student: [{ program: 'business', alum: true }], vendor: null, title: null },
+  'u-s5': { admin: false, team: false, mentor: [], student: [{ program: 'faith', alum: false }], vendor: null, title: null },
+  'u-st': { admin: false, team: true, mentor: [], student: [], vendor: null, title: 'Marketing Strategist' },
+};
+const gatherAud = (mode) => {
+  const id = userFor(mode).id; const r = GATHER_ROLES[id];
+  if (!r) return [];
+  if (r.admin || r.team || r.mentor.length) return ['everyone', 'vendors', 'students', 'team'];
+  return ['everyone', ...(r.vendor ? ['vendors'] : []), ...(r.student.length ? ['students'] : [])];
+};
+const gatherPerson = (id) => ({ id, name: PEOPLE[id]?.name || 'P31 member', avatar_url: null, roles: GATHER_ROLES[id] || {} });
+
 const rpc = {
+  chat_me: (_a, mode) => { const id = userFor(mode).id; return { id, member: gatherAud(mode).length > 0, moderator: !!(GATHER_ROLES[id]?.admin || GATHER_ROLES[id]?.team), overseer: !!GATHER_ROLES[id]?.admin, audiences: gatherAud(mode), roles: GATHER_ROLES[id] || null }; },
+  chat_my_channels: (_a, mode) => {
+    const aud = gatherAud(mode); const me = userFor(mode).id;
+    return db.chat_channels.filter((c) => (c.kind === 'dm' ? (me === 'u-mel' || me === 'u-cu') : aud.includes(c.audience)))
+      .map((c) => ({ ...c, unread: c.slug === 'market' ? 1 : 0, other_user: c.kind === 'dm' ? (me === 'u-mel' ? 'u-cu' : 'u-mel') : null }));
+  },
+  chat_people: (a) => (a.p_ids || Object.keys(GATHER_ROLES)).map(gatherPerson),
+  chat_post: (a, mode) => {
+    const row = { id: `gm-${Math.random().toString(36).slice(2, 8)}`, channel_id: a.p_channel, author_id: userFor(mode).id, kind: 'message', body: a.p_body, attachments: a.p_attachments || [], reactions: {}, meta: {}, pinned: false, reply_count: 0, thread_root: a.p_thread || null, reply_to: a.p_reply_to || null, created_at: new Date().toISOString() };
+    db.chat_messages.push(row); return row;
+  },
+  chat_react: (a, mode) => {
+    const m = db.chat_messages.find((x) => x.id === a.p_id); if (!m) return {};
+    const me = userFor(mode).id; const list = m.reactions[a.p_emoji] || [];
+    m.reactions = { ...m.reactions, [a.p_emoji]: list.includes(me) ? list.filter((x) => x !== me) : [...list, me] };
+    if (!m.reactions[a.p_emoji].length) delete m.reactions[a.p_emoji];
+    return m.reactions;
+  },
+  chat_edit: (a) => { const m = db.chat_messages.find((x) => x.id === a.p_id); if (m) { m.body = a.p_body; m.edited_at = new Date().toISOString(); } return m; },
+  chat_delete: (a) => { const m = db.chat_messages.find((x) => x.id === a.p_id); if (m) Object.assign(m, { body: null, attachments: [], deleted_at: new Date().toISOString() }); return m; },
+  chat_pin: (a) => { const m = db.chat_messages.find((x) => x.id === a.p_id); if (m) m.pinned = a.p_on; return m; },
+  chat_mark_read: () => null,
+  chat_open_dm: () => 'dm-demo',
+  chat_set_title: () => null,
   shop_follower_count: () => 3,
   shop_subscribe: () => true,
   shop_unsubscribe: () => true,
@@ -484,6 +554,7 @@ export function demoClient(mode) {
     channel: () => { const ch = { on: () => ch, subscribe: () => ch }; return ch; },
     removeChannel: () => {},
     storage: { from: () => ({ upload: async () => ({ error: null }), remove: async () => ({ error: null }),
-      list: async (folder = '') => ({ data: folder.endsWith('/music') ? [{ name: '1700000000000-Sample_Track.mp3' }] : [], error: null }), createSignedUrl: async () => ({ data: { signedUrl: '#' }, error: null }), getPublicUrl: () => ({ data: { publicUrl: '#' } }) }) },
+      list: async (folder = '') => ({ data: folder.endsWith('/music') ? [{ name: '1700000000000-Sample_Track.mp3' }] : [], error: null }), createSignedUrl: async () => ({ data: { signedUrl: '#' }, error: null }),
+      createSignedUrls: async (paths) => ({ data: paths.map((path) => ({ path, signedUrl: '/og-image.jpg' })), error: null }), getPublicUrl: () => ({ data: { publicUrl: '#' } }) }) },
   };
 }

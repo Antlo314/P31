@@ -127,6 +127,18 @@ const SCREENS = [
   ['curator: my markets', at('market', 'curator')('/dashboard/identity'), [], 'Booth A4'],
   ['studio pre-posts: draft a month', cl('/studio/autocreate?tab=queue'), ['Draft the rest of'], 'posts drafted for'],
   ['systems showcase without 3D', at('collective', 'student')('/systems'), [], 'The engine behind'],
+  // The Gathering: community messaging for vendors, students, mentors, the team and overseers.
+  ['gathering: the room', cl('/gather/the-gathering'), [], 'Welcome to the family'],
+  ['gathering: badges', cl('/gather/the-gathering'), [], 'Founder & CEO'],
+  ['gathering: daily word discussion', cl('/gather/daily-word'), ['Join the discussion'], 'I needed that reminder before my launch'],
+  ['gathering: members', cl('/gather/the-gathering'), ['Members'], 'Aaliyah Grant'],
+  ['gathering: thread', cl('/gather/the-gathering'), ['1 reply'], 'So grateful to be here!'],
+  ['gathering: prayer channel', cl('/gather/prayer'), [], 'Share what you are carrying'],
+  ['gathering as a vendor', at('market', 'curator')('/gather'), [], 'Market talk'],
+  ['gathering as a student', st('/gather/academy'), [], 'Academy lounge'],
+  ['gathering on a phone', cl('/gather/the-gathering'), [], 'Welcome to the family', { phone: true }],
+  ['curator studio opens the gathering', at('market', 'curator')('/dashboard/community'), [], 'Market talk'],
+  ['today: the daily word', cl('/today'), [], 'Strength and honour are her clothing'],
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

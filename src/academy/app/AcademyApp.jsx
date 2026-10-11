@@ -3,7 +3,7 @@ import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-rou
 import {
   Home, BookOpen, CalendarDays, ClipboardCheck, MessageCircle, Target, Upload, Library, CreditCard, Heart,
   LayoutDashboard, Users, PhoneCall, Megaphone, Send, GraduationCap, Lock, Inbox, ClipboardList, BarChart3, HelpCircle,
-  MessagesSquare, Award, TrendingUp,
+  MessagesSquare, Award, TrendingUp, Sparkles,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
@@ -56,7 +56,8 @@ const studentNav = (slug) => {
   ];
   return [...core, ...extra,
     { to: `${base}/library`, label: 'Library', Icon: Library },
-    { to: `${base}/billing`, label: 'Billing', Icon: CreditCard }];
+    { to: `${base}/billing`, label: 'Billing', Icon: CreditCard },
+    { to: '/gather', label: 'The Gathering', Icon: Sparkles }];
 };
 
 const mentorNav = (slug, counts) => {
@@ -76,6 +77,7 @@ const mentorNav = (slug, counts) => {
     { to: `${t}/calls`, label: 'Intro calls', Icon: PhoneCall, badge: counts.newCalls },
     { to: `${t}/invites`, label: 'Invites', Icon: Send },
     { to: `/academy/${slug}`, label: 'Student view', Icon: GraduationCap, end: true },
+    { to: '/gather', label: 'The Gathering', Icon: Sparkles },
   ];
 };
 

@@ -1,6 +1,6 @@
 import {
   LayoutGrid, Megaphone, Radar, Clapperboard, ImagePlus, Film, Settings, CalendarDays, Mail, Receipt, GraduationCap, Users, UserPlus,
-  Activity, Sparkles, Store, KeyRound, ClipboardList, Inbox, FileSignature,
+  Activity, Sparkles, Store, KeyRound, ClipboardList, Inbox, FileSignature, MessagesSquare,
 } from 'lucide-react';
 import { DAVINCI_ON } from '../lib/features';
 
@@ -33,6 +33,7 @@ export const SYSTEMS_GROUPS = [
       { to: '/systems/crm', label: 'People', Icon: Users, site: 'collective', blurb: 'Everyone who has reached P31, first form to alumni, with their history.' },
       { to: '/studio', label: 'Content Studio', Icon: Sparkles, away: true, site: 'collective', blurb: 'Instagram & Facebook: plan the month, create, schedule, answer DMs.' },
       { to: '/studio/email', label: 'Email inbox', Icon: Inbox, away: true, site: 'collective', blurb: 'members@ and vendor@, with Carla’s drafted replies.' },
+      { to: '/gather', label: 'The Gathering', Icon: MessagesSquare, away: true, site: 'collective', blurb: 'Community chat for vendors, students, mentors and the team, with the Daily Word.' },
     ],
   },
   {
