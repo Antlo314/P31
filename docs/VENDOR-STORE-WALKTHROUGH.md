@@ -7,10 +7,10 @@ Start to finish, in plain steps. Part A is what the P31 team does; Part B is wha
 ## Part A — The team (before the vendor touches anything)
 
 1. **She applies.** She fills in the vendor form at **p31market.com/apply** (or the team enters her from the Google Form). It lands in Systems → Market → **Vendor applications**.
-2. **Say yes.** Open her application, set it to **Approved**, press **Email them**. She gets the welcome email from vendor@p31market.com with the link to create her account.
-3. **Unlock her email address.** Sign in at p31market.com/login as an admin → Curator Studio → **Vendor Approvals** → add her first name, last name and **the exact email she will sign up with**. This is the step that matters: when that email registers, her studio opens automatically (approved, verified, published). Without it she sees "Establishment Pending" after signing up.
+2. **Say yes.** Open her application, set it to **Approved**, press **Email them**. She gets the welcome email from vendor@p31market.com with the link to create her account and a reminder to use the same email.
+3. **Nothing else.** Approving the application pre-approves her email automatically: when she registers with it, her studio opens (approved, verified, published). If she had already made an account while waiting, it opens the moment she is approved.
 
-That is all the team does until her shop is built.
+That is all the team does until her shop is built. (Someone who never applied through the form can still be let in by hand: Curator Studio → **Vendor Approvals** → name and email.)
 
 ---
 

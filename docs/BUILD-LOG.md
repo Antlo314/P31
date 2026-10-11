@@ -2,6 +2,11 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 10 (night) — One-step vendor approval, share previews
+
+- **Approving an application is the whole job.** Setting a vendor application to Approved in Systems now pre-approves her email on its own: she registers at p31market.com/register with that email and her studio opens at once (and if she had already signed up while waiting, it opens the moment she is approved). The welcome email reminds her to use the same email. Declining later removes the pre-approval. No more second step in Vendor Approvals.
+- **Shop and product links look like the thing being sold.** When a vendor shares p31market.com/her-shop or a product link in an Instagram story, a text, WhatsApp, Facebook or X, the preview now shows that shop's banner, or that product's photo, name and price, instead of the generic marketplace card. Google sees the same, with proper Store and Product data. Served at the edge for link crawlers only; shoppers get the normal app.
+
 ## October 10 (evening) — Studio walkthrough, menus, Pro Edit hidden
 
 - **A walkthrough inside the studio.** New vendors now get a guided tour the first time they sign in: nine steps that open each room (Identity, banner and logo, payments, products, Store Design, Marketing, Orders) and point at the actual buttons. It replays from Help & Guide or the setup list.
