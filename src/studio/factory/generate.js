@@ -1,0 +1,140 @@
+// Turns the team's choices (mix, style, dates, times) plus the library into planned posts:
+// one card spec and caption per day. Pure and deterministic for a given seed, so "Preview"
+// shows exactly what "Schedule" will post.
+import { TYPES, OPENERS, HASHTAGS, DEFAULT_SLOTS } from './library';
+
+const pad = (n) => String(n).padStart(2, '0');
+export const isoDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const hourToTime = (h) => `${pad(Math.floor(h))}:${pad(Math.round((h % 1) * 60))}`;
+
+// Small seeded random so the same settings give the same plan.
+const rng = (seed) => { let s = seed >>> 0 || 1; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; };
+
+const dayLabel = (date) => new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'long' });
+
+/** Caption for a library item of a type. `n` rotates the openers. */
+export function captionFor(type, item, n = 0) {
+  const pick = (list) => list[n % list.length];
+  switch (type) {
+    case 'fill':
+      return `${pick(OPENERS.fill)}\n\n"${item.text} ______." ${item.ref}\n\n${pick(OPENERS.fillAsk)}\n\n${HASHTAGS.fill}`;
+    case 'prompt':
+      return `${pick(OPENERS.prompt)} ${item.text.replace(/:$/, '')} ______.\n\n${item.ask || 'Drop it below 👇'} We read every one.\n\n${HASHTAGS.prompt}`;
+    case 'choice':
+      return `${pick(OPENERS.choice)} ${item.text}\n\nA) ${item.options[0]}\nB) ${item.options[1]}\n\nComment A or B, and tell us why 👇\n\n${HASHTAGS.choice}`;
+    case 'quiz':
+      return `${pick(OPENERS.quiz)} ${item.text}\n\n${item.options.map((o, i) => `${'ABCD'[i]}) ${o}`).join('\n')}\n\nAnswer in the comments before you look it up 👇\n\n${HASHTAGS.quiz}`;
+    case 'amen':
+      return `${pick(OPENERS.amen)}\n\n"${item.text}" ${item.ref}\n\nIf this is your prayer this week, comment Amen 🙏🏾\n\n${HASHTAGS.amen}`;
+    case 'tip':
+      return `${pick(OPENERS.tip)}\n\n${item.text}\n\n${item.ask || 'Agree or disagree? Tell us below 👇'}\n\n${HASHTAGS.tip}`;
+    default:
+      return `${item.caption || ''}\n\n${HASHTAGS.cta}`.trim();
+  }
+}
+
+/** The card spec drawn by <Card>, from a library item. */
+export function cardFor(type, item, style) {
+  const base = { type, style, key: item.key };
+  switch (type) {
+    case 'fill': return { ...base, text: item.text, answer: item.answer, ref: item.ref };
+    case 'prompt': return { ...base, text: item.text, ask: item.ask };
+    case 'choice': return { ...base, text: item.text, options: item.options };
+    case 'quiz': return { ...base, text: item.text, options: item.options, answer: item.answer };
+    case 'amen': return { ...base, text: item.text, ref: item.ref };
+    case 'tip': return { ...base, text: item.text, ask: item.ask };
+    default: return { ...base, eyebrow: item.eyebrow, title: item.title, items: item.items, pill: item.pill };
+  }
+}
+
+const LIB_KIND = { fill: 'verse', prompt: 'prompt', choice: 'choice', quiz: 'quiz', amen: 'amen', cta: 'invite', tip: 'tip' };
+const HOOK = {
+  fill: (i) => `${i.ref}: fill in the blank`, prompt: (i) => i.text.replace(/:$/, '') + ' ___', choice: (i) => i.text, quiz: (i) => i.text,
+  amen: (i) => `Sunday word · ${i.ref}`, tip: (i) => i.text.slice(0, 56), cta: (i) => i.eyebrow,
+};
+const PILLAR = { fill: 'Faith & encouragement', amen: 'Faith & encouragement', prompt: 'Community', choice: 'Community', quiz: 'Faith & encouragement', tip: 'Mentorship & Collective', cta: 'Shop the marketplace' };
+
+/**
+ * Build the plan.
+ *   start: 'YYYY-MM-DD'; days: how many days to cover; cadence: 'daily' | number per week
+ *   mix: { fill: 40, prompt: 15, ... } percent shares (0 turns a type off)
+ *   style: card style id; platforms: ['instagram','facebook']
+ *   slots: { 0..6: [hours] } Eastern hours per weekday; skipDates: Set of 'YYYY-MM-DD' already taken
+ *   library: merged library; usedKeys: Set of source keys to avoid; seed: number
+ */
+export function buildPlan({ start, days = 30, cadence = 'daily', mix, style = 'night', platforms = ['instagram', 'facebook'], slots = DEFAULT_SLOTS, skipDates = new Set(), library, usedKeys = new Set(), seed = 1 }) {
+  const rand = rng(seed);
+  const on = Object.entries(mix).filter(([, w]) => w > 0).map(([k]) => k);
+  if (!on.length) return [];
+
+  // Which days get a post.
+  const dates = [];
+  const first = new Date(`${start}T12:00:00`);
+  const perWeek = cadence === 'daily' ? 7 : Math.max(1, Math.min(7, Number(cadence) || 5));
+  const prefer = [2, 4, 6, 1, 3, 5, 0]; // Tue, Thu, Sat, Mon, Wed, Fri, Sun
+  const allowed = new Set(perWeek === 7 ? [0, 1, 2, 3, 4, 5, 6] : prefer.slice(0, perWeek));
+  if (perWeek < 7 && mix.amen > 0 && !allowed.has(0)) { allowed.delete(prefer[perWeek - 1]); allowed.add(0); } // keep a Sunday for the Sunday word
+  for (let i = 0; i < days; i++) {
+    const d = new Date(first); d.setDate(first.getDate() + i);
+    const key = isoDate(d);
+    if (skipDates.has(key) || !allowed.has(d.getDay())) continue;
+    dates.push({ date: key, dow: d.getDay() });
+  }
+
+  // Type per day: Sunday word on Sundays, at most one invitation a week, the rest by share.
+  const weekday = on.filter((k) => k !== 'amen' && k !== 'cta');
+  const deficit = Object.fromEntries(weekday.map((k) => [k, 0]));
+  const total = weekday.reduce((s, k) => s + mix[k], 0) || 1;
+  const used = new Set(usedKeys);
+  const counters = Object.fromEntries(Object.keys(TYPES).map((k) => [k, 0]));
+  const taken = new Set();
+  let lastCtaWeek = -1;
+  const slotTurn = {};
+  const out = [];
+
+  // The same scripture should not appear twice in one run, even across formats (a fill-in and a
+  // Sunday word on Proverbs 3:5 look like a repeat), so references are tracked too.
+  const takenRefs = new Set();
+  const refKey = (i) => (i.ref || '').toLowerCase().replace(/[–-]\d+$/, '').replace(/\s+/g, '');
+  const pickItem = (type) => {
+    const all = (library[LIB_KIND[type]] || []).filter((i) => i.active !== false && !taken.has(i.key));
+    const list = all.filter((i) => !used.has(i.key) && !(i.ref && takenRefs.has(refKey(i))));
+    const pool = list.length ? list : all.filter((i) => !(i.ref && takenRefs.has(refKey(i))));
+    const final = pool.length ? pool : all;
+    if (!final.length) return null;
+    const least = Math.min(...final.map((i) => i.used_count || 0));
+    const fresh = final.filter((i) => (i.used_count || 0) === least);
+    const item = fresh[Math.floor(rand() * fresh.length)];
+    taken.add(item.key);
+    if (item.ref) takenRefs.add(refKey(item));
+    return item;
+  };
+
+  for (const { date, dow } of dates) {
+    const week = Math.floor((new Date(`${date}T12:00:00`) - first) / (7 * 864e5));
+    let type;
+    if (dow === 0 && mix.amen > 0) type = 'amen';
+    else if (mix.cta > 0 && lastCtaWeek !== week && (dow === 6 || (dow === 5 && !allowed.has(6)))) { type = 'cta'; lastCtaWeek = week; }
+    else if (weekday.length) {
+      weekday.forEach((k) => { deficit[k] += mix[k] / total; });
+      type = weekday.reduce((best, k) => (deficit[k] > deficit[best] ? k : best), weekday[0]);
+      deficit[type] -= 1;
+    } else type = on[0];
+
+    const item = pickItem(type);
+    if (!item) continue;
+    const hours = slots[dow]?.length ? slots[dow] : DEFAULT_SLOTS[dow];
+    const hour = hours[(slotTurn[dow] = (slotTurn[dow] || 0) + 1) % hours.length];
+    const n = counters[type]++;
+    out.push({
+      post_date: date, post_time: hourToTime(hour), platforms, kind: 'photo',
+      pillar: PILLAR[type], theme: `${TYPES[type].label} · ${dayLabel(date)}`, hook: HOOK[type](item),
+      caption: captionFor(type, item, n), hashtags: null, status: 'draft',
+      card: cardFor(type, item, style), source_key: item.key, type,
+    });
+  }
+  return out;
+}
+
+/** Facebook text: same as the caption, with "link in bio" swapped for the link when there is one. */
+export const facebookText = (caption, url) => (url ? caption.replace(/\(link in bio\)/i, url).replace(/Link in bio\.?/i, url) : caption);

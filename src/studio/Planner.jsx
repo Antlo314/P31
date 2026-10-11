@@ -9,6 +9,8 @@ import { studio, uploadMedia, fmtET } from './api';
 import { postPack, monthPlan } from './ai';
 import SoundPicker from './SoundPicker';
 import { fetchUpcomingEvents, formatEventDate, showDate } from '../lib/events';
+import Card from './factory/Card';
+import { renderCard } from './factory/render';
 
 const KIND = { reel: ['Reel', Clapperboard], photo: ['Photo', ImageIcon], carousel: ['Carousel', Images], story: ['Story', CircleDot] };
 const STATUS = {
@@ -187,17 +189,24 @@ const PlanItem = ({ item, events, onClose, onChanged }) => {
 
   const schedule = async () => {
     setError('');
-    if (!media.length && f.platforms.includes('instagram')) return setError('Instagram needs a photo or video. Add media first.');
+    if (!media.length && !f.card && f.platforms.includes('instagram')) return setError('Instagram needs a photo or video. Add media first.');
     if (!f.caption) return setError('Write (or draft) the caption first.');
     setBusy('schedule');
     try {
+      // A generated card is drawn and uploaded on the way out.
+      let items = media;
+      if (!items.length && f.card) {
+        const file = await renderCard(f.card, `p31-${f.post_date}-${f.card.type}.jpg`);
+        const url = await uploadMedia(file, file.name);
+        items = [{ type: 'image', url, name: file.name }];
+      }
       const when = `${f.post_date}T${(f.post_time || '18:00').slice(0, 5)}`;
       const out = await studio('create', {
         platforms: f.platforms, content: `${f.caption}${f.hashtags ? `\n\n${f.hashtags}` : ''}`.trim(), scheduledFor: when, timezone: 'America/New_York',
-        media: media.map((m) => ({ type: m.type, url: m.url })), audioId: f.audio_id || undefined, firstComment: f.first_comment || undefined,
+        media: items.map((m) => ({ type: m.type, url: m.url })), audioId: f.audio_id || undefined, firstComment: f.first_comment || undefined,
         title: f.hook || f.theme || undefined,
       });
-      await save({ status: 'scheduled', zernio_post_id: out.post?.id || null, scheduled_for: out.post?.scheduledFor || null });
+      await save({ status: 'scheduled', media: items, zernio_post_id: out.post?.id || null, scheduled_for: out.post?.scheduledFor || null });
     } catch (e) { setError(e.message); }
     setBusy('');
   };
@@ -237,6 +246,7 @@ const PlanItem = ({ item, events, onClose, onChanged }) => {
           </div>
           <div className="k-field"><span>Media {f.platforms.includes('instagram') ? '(needed for Instagram)' : ''}</span>
             <div className="pl-media">
+              {f.card && !media.length && <Card spec={f.card} scale={0.0667} />}
               {media.map((m, i) => <figure key={m.url}>{m.type === 'video' ? <video src={m.url} muted playsInline /> : <img src={m.url} alt="" />}<button type="button" className="ds-icon-btn" onClick={() => setF({ ...f, media: media.filter((_, j) => j !== i) })} aria-label="Remove"><X size={12} /></button></figure>)}
               <label className="pl-drop"><Plus size={16} /> Add<input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime" multiple hidden onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }} /></label>
               <button type="button" className="pl-drop" onClick={() => navigate('/studio/create', { state: { planId: f.id } })}><Clapperboard size={16} /> Make a reel</button>
