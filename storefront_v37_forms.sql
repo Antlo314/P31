@@ -513,8 +513,8 @@ ALTER TABLE public.market_events ADD COLUMN IF NOT EXISTS month_public BOOLEAN N
 
 -- ──────────────────────────────────────────────────────────
 -- 10. The December event is the Business and Leadership Luncheon
---     Tickets are on Eventbrite. The site shows "December · date coming soon"
---     until the team turns on "Date announced" in Systems -> Markets & events.
+--     Saturday December 19 2026, 1:30 PM, The Four Event Center; tickets on Eventbrite.
+--     The date is announced (date_public), so the site shows it in full.
 -- ──────────────────────────────────────────────────────────
 UPDATE public.market_events
    SET title = 'Business and Leadership Luncheon',
@@ -524,10 +524,10 @@ UPDATE public.market_events
        address = '8599 Roswell Rd, Suite B, Atlanta, GA 30350',
        description = 'An afternoon for women in business and leadership, rooted in faith and inspired by the Proverbs 31 woman: connection, encouragement, leadership tips and business moves. Open to business owners, aspiring entrepreneurs and anyone ready to start. Your ticket includes a seated meal; business casual attire.',
        rsvp_url = 'https://www.eventbrite.com/e/proverbs-31-business-leadership-luncheon-tickets-2002850002272',
-       date_public = false,
+       date_public = true,
        month_public = true,
        is_active = true
- WHERE title = 'Winter Gala';
+ WHERE title IN ('Winter Gala', 'Business and Leadership Luncheon');
 
 -- ──────────────────────────────────────────────────────────
 -- 11. New site paths are not available as shop links

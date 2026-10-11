@@ -1,0 +1,23 @@
+{
+  "removed": {
+    "6ac698c89c0848637b73b1cf": "2026-10/gala",
+    "6acb0039439761dc7453c84c": "2026-10-12/cta-vendors",
+    "6acb0052718e1f13c86b136d": "2026-10-12/cta-gala"
+  },
+  "uploads": {
+    "out/lunch-announce.jpg": "https://media.zernio.com/temp/1791710293422_w3ahemkp_p31-lunch-announce.jpg",
+    "out/lunch-who.jpg": "https://media.zernio.com/temp/1791710295910_sl83f1zz_p31-lunch-who.jpg",
+    "out/lunch-tickets.jpg": "https://media.zernio.com/temp/1791710297719_sq0nf836_p31-lunch-tickets.jpg",
+    "out/lunch-prompt.jpg": "https://media.zernio.com/temp/1791710300515_0i48ih21_p31-lunch-prompt.jpg",
+    "out/lunch-countdown.jpg": "https://media.zernio.com/temp/1791710302097_060fh3mu_p31-lunch-countdown.jpg",
+    "out/lunch-dress.jpg": "https://media.zernio.com/temp/1791710304153_lavxa5xr_p31-lunch-dress.jpg"
+  },
+  "posts": {
+    "lunch-announce": "6acb5456296ddce5f1ebce58",
+    "lunch-who": "6acb5458af2769efab1c656b",
+    "lunch-tickets": "6acb545aa8da14fdf042f344",
+    "lunch-prompt": "6acb545daf2769efab1c6572",
+    "lunch-countdown": "6acb545faf2769efab1c6579",
+    "lunch-dress": "6acb54614ec932eb2dbf4010"
+  }
+}

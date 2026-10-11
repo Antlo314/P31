@@ -4,9 +4,10 @@ A running record of what has been built for Proverbs 31 Marketplace and The P31 
 
 ## October 11 — The December event: Business and Leadership Luncheon
 
-- **Renamed and connected.** The December event on p31market.com is now the **Business and Leadership Luncheon** (was "Winter Gala"), with the Eventbrite ticket link, The Four Event Center and its address on the record, so the home page and Market dates show "Get tickets" instead of a free RSVP.
-- **"December · date coming soon."** Markets can now announce their month before the day is set (a new "Announce the month" switch in Systems → Markets & events). The site reads "December · date coming soon" on the home page, Market dates, the vendor application and the registration form, and switches to the full date the moment "Date announced" is turned on. The hero chip reads "Up next" so it fits a luncheon as well as a market.
-- **Still to decide.** Three scheduled Instagram/Facebook posts (Oct 17, Oct 24, Nov 7) still say "Winter Gala"; they are listed for Melanie JC to approve replacements.
+- **Renamed and connected.** The December event on p31market.com is now the **Business and Leadership Luncheon** (was "Winter Gala"): Saturday, December 19, 1:30 to 5 PM at The Four Event Center, 8599 Roswell Rd Suite B, Atlanta, with the Eventbrite ticket link, so the home page and Market dates show the date, the venue, directions and "Get tickets" instead of a free RSVP.
+- **"December · date coming soon."** Markets can now announce their month before the day is set (a new "Announce the month" switch in Systems → Markets & events). The site reads "December · date coming soon" until "Date announced" is turned on. The hero chip reads "Up next" so it fits a luncheon as well as a market.
+- **The Luncheon on Instagram and Facebook.** The three scheduled "Winter Gala" posts (Oct 17, Oct 24, Nov 7) were removed and replaced with Luncheon posts at the same times, and three more follow on Saturdays Nov 14, 21 and 28: the announcement with date and venue, "which seat is yours", what the ticket includes, a finish-the-sentence on business advice, a four-Saturdays countdown, and a business-casual this-or-that. Every caption carries the ticket link (`marketing/social/2026-10-17-luncheon`).
+- **The Collective's Instagram.** The Instagram icon on thep31collective.org now opens @the.p31collective instead of the marketplace account.
 
 ## October 11 — JotForm retired: the vendor forms live on the site
 
