@@ -11,7 +11,6 @@ import './mentorship.css';
 import './collective-home.css';
 import './pillars.css';
 import JoinCollective from '../components/JoinCollective';
-import Scene3D from '../components/three/Scene3D';
 import Ornaments from '../components/Ornaments';
 import ParallaxStory from '../components/ParallaxStory';
 import community from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
@@ -29,7 +28,7 @@ const DOORS = [
 const CollectiveHome = () => (
   <div className="k-page ch">
     <header className="k-hero k-dark ch-hero">
-      <Scene3D variant="arches" />
+      {/* Kept still on purpose: no 3D arches or drifting motes here, just the brand arch and soft accents. */}
       <Ornaments />
       <span className="k-hero__arch ch-hero__arch" aria-hidden="true" data-reveal="fade" />
       <div className="ch-hero__inner k-center">
