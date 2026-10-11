@@ -27,7 +27,6 @@ import bentoCandles from '../assets/web/vendor_candles.webp';
 import bentoSkincare from '../assets/web/vendor_skincare.webp';
 import bentoCommunity from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
 import partnerImg from '../assets/web/p31_partner_hero_editorial.webp';
-import Scene3D from '../components/three/Scene3D';
 import Ornaments from '../components/Ornaments';
 
 const CATEGORIES = ['Art', 'Wellness', 'Clothing', 'Food', 'Literature', 'Community', 'Services'];
@@ -163,11 +162,10 @@ const Home = () => {
         </dl>
       </section>
 
-      {/* ── FAR ABOVE RUBIES (3D gem) ─────────────────────────── */}
+      {/* ── FAR ABOVE RUBIES ──────────────────────────────────── */}
       <section className="h26-gem k-dark">
         <Ornaments variant="gem" />
         <div className="h26-gem__inner">
-          <div className="h26-gem__visual"><Scene3D variant="gem" /></div>
           <div className="h26-gem__copy">
             <p className="k-eyebrow" data-reveal="fade">Proverbs 31:10</p>
             <blockquote className="h26-gem__verse" data-scrub>“Who can find a virtuous woman? for her price is far above rubies.”</blockquote>

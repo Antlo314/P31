@@ -220,10 +220,9 @@
 /* Far above rubies — the 3D gem band */
 .h26-gem { position: relative; isolation: isolate; overflow: hidden; padding: clamp(72px, 10vw, 140px) var(--gutter);
   background: radial-gradient(70% 90% at 25% 50%, rgba(94, 42, 140, 0.55), transparent 70%), var(--night, #12081d); color: #fff; }
-.h26-gem__inner { position: relative; z-index: 2; max-width: var(--max); margin-inline: auto; display: grid; gap: clamp(20px, 4vw, 56px); align-items: center; }
-@media (min-width: 900px) { .h26-gem__inner { grid-template-columns: 1fr 1.05fr; } }
-.h26-gem__visual { position: relative; aspect-ratio: 1; width: min(100%, 560px); justify-self: center; }
-@media (max-width: 899px) { .h26-gem__visual { width: min(100%, 380px); } }
-.h26-gem__copy { display: grid; gap: 20px; }
+.h26-gem__inner { position: relative; z-index: 2; max-width: 880px; margin-inline: auto; display: grid; gap: clamp(20px, 4vw, 56px); align-items: center; }
+.h26-gem__copy { display: grid; gap: 20px; justify-items: center; text-align: center; }
+.h26-gem__copy .k-eyebrow::after { content: ''; width: 30px; height: 1.5px; background: linear-gradient(270deg, var(--gold), var(--gold-hi)); }
+.h26-gem__copy .k-actions { justify-content: center; }
 .h26-gem__copy > * { margin: 0; }
 .h26-gem__verse { margin: 0; font-family: var(--font-heading); font-style: italic; font-size: clamp(1.7rem, 1rem + 2.6vw, 3rem); line-height: 1.15; color: #fff; }
