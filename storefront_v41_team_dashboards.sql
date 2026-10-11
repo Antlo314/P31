@@ -128,6 +128,32 @@ INSERT INTO public.site_admins (email, full_name) VALUES
   ('ceo@p31market.com', 'Melanie JC')
 ON CONFLICT (email) DO NOTHING;
 
+-- Every admin must have confirmed her email, except the two original admins (as before).
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, auth
+AS $fn$
+  SELECT EXISTS (
+    SELECT 1 FROM auth.users u JOIN public.site_admins a ON a.email = lower(u.email)
+    WHERE u.id = auth.uid()
+      AND (u.email_confirmed_at IS NOT NULL OR a.email IN ('info@lumenlabsatl.com', 'proverbs31markets@gmail.com'))
+  );
+$fn$;
+GRANT EXECUTE ON FUNCTION public.is_admin() TO anon, authenticated;
+
+CREATE OR REPLACE FUNCTION public.chat_member_ids()
+RETURNS SETOF UUID LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, auth
+AS $fn$
+  SELECT u.id FROM auth.users u JOIN site_admins a ON a.email = lower(u.email)
+   WHERE u.email_confirmed_at IS NOT NULL OR a.email IN ('info@lumenlabsatl.com', 'proverbs31markets@gmail.com')
+  UNION SELECT user_id FROM system_operators
+  UNION SELECT user_id FROM studio_members
+  UNION SELECT u.id FROM auth.users u JOIN team_access t ON t.email = lower(u.email) WHERE u.email_confirmed_at IS NOT NULL AND cardinality(t.tools) > 0
+  UNION SELECT user_id FROM academy_mentors
+  UNION SELECT user_id FROM academy_enrollments WHERE status <> 'canceled'
+  UNION SELECT id FROM curator_data WHERE status = 'approved';
+$fn$;
+REVOKE ALL ON FUNCTION public.chat_member_ids() FROM public, anon, authenticated;
+
 INSERT INTO public.team_access (email, full_name, tools, note, role_title, photo_key, site, sort_order) VALUES
   ('founder@thep31collective.org', 'Melanie JC', '{}', 'Site admin: every dashboard', 'Founder & CEO', 'melanie', 'collective', 10),
   ('ceo@p31market.com', 'Melanie JC', '{}', 'Site admin: every dashboard', 'Founder & CEO', 'melanie', 'market', 11),
@@ -295,7 +321,7 @@ RETURNS JSONB LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, aut
 AS $fn$
   WITH u AS (SELECT id, lower(email) AS email, email_confirmed_at IS NOT NULL AS confirmed FROM auth.users WHERE id = p_user)
   SELECT jsonb_build_object(
-    'admin', EXISTS (SELECT 1 FROM u JOIN site_admins a ON a.email = u.email WHERE u.confirmed OR a.added_by IS NULL),
+    'admin', EXISTS (SELECT 1 FROM u JOIN site_admins a ON a.email = u.email WHERE u.confirmed OR a.email IN ('info@lumenlabsatl.com', 'proverbs31markets@gmail.com')),
     'team', EXISTS (SELECT 1 FROM system_operators WHERE user_id = p_user)
          OR EXISTS (SELECT 1 FROM studio_members WHERE user_id = p_user)
          OR EXISTS (SELECT 1 FROM u JOIN team_access t ON t.email = u.email WHERE u.confirmed AND (cardinality(t.tools) > 0 OR EXISTS (SELECT 1 FROM site_admins a WHERE a.email = u.email))),
