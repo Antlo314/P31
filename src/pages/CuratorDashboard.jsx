@@ -12,10 +12,13 @@ import AiAssist from '../components/AiAssist';
 import { QRCodeSVG } from 'qrcode.react';
 import StudioTab from '../features/dashboard/StudioTab';
 import StoreDesigner from '../features/store-design/StoreDesigner';
-import ProEditPanel from '../features/pro-edit/ProEditPanel';
 import OrdersPanel from '../features/orders/OrdersPanel';
 import DiscountsPanel from '../features/orders/DiscountsPanel';
 import MarketingPanel from '../features/marketing/MarketingPanel';
+import StudioNav from '../features/dashboard/StudioNav';
+import SetupChecklist from '../features/dashboard/SetupChecklist';
+import Tour from '../components/Tour';
+import { CURATOR_TOUR, CURATOR_TOUR_ID } from '../features/dashboard/studioTour';
 import { PRODUCT_TEMPLATES, PRODUCT_BADGES, applyTemplate } from '../features/marketing/productTemplates';
 import './CuratorDashboard.css';
 
@@ -97,8 +100,6 @@ const CuratorDashboard = () => {
   const [newMessage, setNewMessage] = useState('');
   const [selectedRecipient, setSelectedRecipient] = useState(null); // For admin to pick curator
   
-  const [showWalkthrough, setShowWalkthrough] = useState(false);
-  const [walkthroughStep, setWalkthroughStep] = useState(1);
   
   const [allEvents, setAllEvents] = useState([]);
   const [rsvps, setRsvps] = useState([]);
@@ -163,13 +164,6 @@ const CuratorDashboard = () => {
         shopAnnouncement: curatorData.shop_announcement || '',
         customTitle: curatorData.custom_title || ''
       });
-    }
-  }, [curatorData]);
-
-  useEffect(() => {
-    // Show walkthrough if first time or incomplete
-    if (curatorData && !curatorData.status && !localStorage.getItem('p31_walkthrough_seen')) {
-      setShowWalkthrough(true);
     }
   }, [curatorData]);
 
@@ -981,123 +975,7 @@ const CuratorDashboard = () => {
           {isAdmin && <span className="admin-status-pill"><Crown size={12} /> Architect</span>}
         </div>
         
-        <nav className="sidebar-nav">
-          <button 
-            onClick={() => setActiveTab('identity')} 
-            className={`nav-item ${activeTab === 'identity' ? 'active' : ''}`}
-          >
-            <Layout size={20} /> Identity
-          </button>
-          <button 
-            onClick={() => setActiveTab('community')} 
-            className={`nav-item ${activeTab === 'community' ? 'active' : ''}`}
-          >
-            <MessageSquare size={20} /> Collective Chat
-          </button>
-          <button 
-            onClick={() => setActiveTab('storefront')} 
-            className={`nav-item ${activeTab === 'storefront' ? 'active' : ''}`}
-          >
-                        <ShoppingBag size={20} /> Storefront
-          </button>
-
-          <button
-            onClick={() => setActiveTab('design')}
-            className={`nav-item ${activeTab === 'design' ? 'active' : ''}`}
-          >
-            <Layout size={20} /> Store Design
-          </button>
-
-          <button
-            onClick={() => setActiveTab('studio')}
-            className={`nav-item ${activeTab === 'studio' ? 'active' : ''}`}
-          >
-            <Camera size={20} /> Creative Studio
-          </button>
-
-          <button
-            onClick={() => setActiveTab('pro-edit')}
-            className={`nav-item ${activeTab === 'pro-edit' ? 'active' : ''}`}
-          >
-            <Crown size={20} /> Pro Edit {curatorData?.plan !== 'premium' && <span className="nav-premium-tag">Premium</span>}
-          </button>
-
-
-          <button
-            onClick={() => setActiveTab('orders')}
-            className={`nav-item ${activeTab === 'orders' || activeTab === 'sales' ? 'active' : ''}`}
-          >
-            <DollarSign size={20} /> Orders
-          </button>
-
-          <button
-            onClick={() => setActiveTab('discounts')}
-            className={`nav-item ${activeTab === 'discounts' ? 'active' : ''}`}
-          >
-            <Sparkles size={20} /> Discounts
-          </button>
-
-          <button
-            onClick={() => setActiveTab('testimonials')}
-            className={`nav-item ${activeTab === 'testimonials' ? 'active' : ''}`}
-          >
-            <MessageSquare size={20} /> Testimonials
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('concierge')} 
-            className={`nav-item ${activeTab === 'concierge' ? 'active' : ''}`}
-          >
-            <Bell size={20} /> Concierge
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('analytics')} 
-            className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`}
-          >
-            <Sparkles size={20} /> Intelligence
-          </button>
-
-          <button
-            onClick={() => setActiveTab('marketing')}
-            className={`nav-item ${activeTab === 'marketing' || activeTab === 'toolkit' ? 'active' : ''}`}
-          >
-            <Megaphone size={20} /> Marketing
-          </button>
-
-          {isAdmin && (
-            <>
-              <button 
-                onClick={() => setActiveTab('governance')} 
-                className={`nav-item ${activeTab === 'governance' ? 'active' : ''}`}
-              >
-                <Crown size={20} /> Governance
-              </button>
-              <button 
-                onClick={() => setActiveTab('approvals')} 
-                className={`nav-item ${activeTab === 'approvals' ? 'active' : ''}`}
-              >
-                <ShieldCheck size={20} /> Vendor Approvals
-              </button>
-            </>
-          )}
-
-          <button
-            onClick={() => { setWalkthroughStep(1); setShowWalkthrough(true); }}
-            className="nav-item"
-          >
-            <ShieldCheck size={20} /> Help & Guide
-          </button>
-
-          <div className="nav-item-with-badge">
-            <Link to="/directory" className="nav-item"><ExternalLink size={20} /> View Directory</Link>
-            <span className="sidebar-construction-tag">Under Construction</span>
-          </div>
-        </nav>
-
-        <div className="sidebar-footer">
-          <button onClick={handleSignOut} className="logout-btn"><LogOut size={18} /> Exit Studio</button>
-        </div>
+        <StudioNav activeTab={activeTab} onSelect={setActiveTab} isAdmin={isAdmin} onSignOut={handleSignOut} />
       </aside>
 
       {/* Main Content Area */}
@@ -1158,7 +1036,7 @@ const CuratorDashboard = () => {
                   </div>
                 </div>
                 
-                <form onSubmit={handleSave} className="premium-form dashboard-form">
+                <form onSubmit={handleSave} className="premium-form dashboard-form" data-tour="identity-form">
                   <div className="form-group">
                     <label>Business Name</label>
                     <input 
@@ -1348,6 +1226,7 @@ const CuratorDashboard = () => {
               </section>
 
               <div className="dashboard-sidebar-panels">
+                <SetupChecklist curator={curatorData} editData={editData} products={products} onGo={setActiveTab} />
                 <section className="dashboard-card status-card glass-card">
                   <h3 className="card-title text-forest"><Sparkles size={18} /> Market Status</h3>
                   <div className="status-indicator">
@@ -1382,27 +1261,6 @@ const CuratorDashboard = () => {
                   
                    <div className="divider-thistle"></div>
                   
-                  {/* Submission Checklist */}
-                  <div className="submission-checklist mb-4">
-                    <h4 className="text-[10px] uppercase tracking-widest opacity-40 mb-3">Sanctuary Progress</h4>
-                    <div className={`check-item ${editData.businessName ? 'success' : 'pending'}`}>
-                      {editData.businessName ? '✓' : '○'} Brand Identity
-                    </div>
-                    <div className={`check-item ${products.length >= 1 ? 'success' : 'pending'}`}>
-                      {products.length >= 1 ? '✓' : '○'} Artisan Collection ({products.length})
-                    </div>
-                    <div className={`check-item ${editData.bannerUrl && editData.logoUrl ? 'success' : 'pending'}`}>
-                      {editData.bannerUrl && editData.logoUrl ? '✓' : '○'} Shop Aesthetics
-                    </div>
-                    <div className={`check-item ${(curatorData?.stripe_charges_enabled || editData.stripeLink || editData.cashappTag || editData.venmoHandle) ? 'success' : 'pending'}`}>
-                      {(curatorData?.stripe_charges_enabled || editData.stripeLink || editData.cashappTag || editData.venmoHandle) ? '✓' : '○'} Payment Connectivity
-                    </div>
-                  </div>
-
-                  <div className="onboarding-guide-trigger" onClick={() => setShowWalkthrough(true)}>
-                    <Sparkles size={14} /> Need architectural guidance?
-                  </div>
-
                   {curatorData?.status === 'pending' && (
                     <div className="botanical-badge text-gold animate-pulse">
                       <ShieldAlert size={12} /> Under Review
@@ -1584,6 +1442,7 @@ const CuratorDashboard = () => {
                     setIsProductModalOpen(true);
                   }}
                   className="btn-solid-gold flex-center gap-2"
+                  data-tour="add-product"
                 >
                   <Plus size={18} /> Add Artifact
                 </button>
@@ -1610,7 +1469,7 @@ const CuratorDashboard = () => {
             )}
 
             {/* Storefront Aesthetic & Payment Manager */}
-            <section className="storefront-aesthetics glass-card mb-8">
+            <section className="storefront-aesthetics glass-card mb-8" data-tour="aesthetics">
               <div className="flex-between mb-6">
                 <h2 className="card-title text-gold m-0">
                   <Sparkles size={20} /> Shop Aesthetics & Payments
@@ -1652,7 +1511,7 @@ const CuratorDashboard = () => {
 
               {/* Stripe Connect — native card payments with direct payouts */}
               {CARD_PAYMENTS_ENABLED && (
-              <div className="stripe-connect-panel">
+              <div className="stripe-connect-panel" data-tour="payments">
                 <div className="flex-between mb-4">
                   <h3 className="card-title text-gold m-0" style={{fontSize: '1rem'}}>
                     <CreditCard size={18} /> Card Payments (Stripe)
@@ -2071,27 +1930,6 @@ const CuratorDashboard = () => {
             </div>
           } />
           <Route path="studio" element={<StudioTab onUsePhoto={startProductFromPhoto} brandLogo={curatorData?.logo_url} />} />
-          <Route path="pro-edit" element={
-            <div className="dashboard-view">
-              <header className="dashboard-header">
-                <div>
-                  <span className="section-kicker">Premium</span>
-                  <h1 className="font-headline">Pro Edit</h1>
-                  <p className="text-muted">Send raw footage; our editor Iris returns a polished, colour-graded DaVinci Resolve edit.</p>
-                </div>
-              </header>
-              {curatorData?.plan === 'premium' ? (
-                <ProEditPanel userId={user.id} />
-              ) : (
-                <div className="premium-upsell glass-card">
-                  <Crown size={28} className="text-gold" />
-                  <h2 className="font-headline">Part of P31 Premium</h2>
-                  <p>Pro Edit is included with Premium. Ask the P31 team to upgrade your storefront — in the meantime, Creative Studio’s Clip Studio makes quick edits on your phone for free.</p>
-                  <button className="btn-solid-gold" onClick={() => setActiveTab('studio')}>Open Creative Studio</button>
-                </div>
-              )}
-            </div>
-          } />
           <Route path="sales" element={<Navigate to="../orders" replace />} />
           <Route path="toolkit" element={<Navigate to="../marketing" replace />} />
           <Route path="marketing" element={
@@ -2940,76 +2778,7 @@ const CuratorDashboard = () => {
         </Routes>
       </main>
 
-      {/* STUDIO WALKTHROUGH OVERLAY */}
-      {showWalkthrough && (
-        <div className="walkthrough-overlay flex-center">
-          <div className="walkthrough-card glass-card shadow-2xl p-10 max-w-md w-full relative">
-            <button className="absolute top-4 right-4 opacity-40 hover:opacity-100" onClick={() => {
-              setShowWalkthrough(false);
-              localStorage.setItem('p31_walkthrough_seen', 'true');
-            }}><X size={20} /></button>
-            
-            <div className="walkthrough-icon-ring mb-6">
-              {walkthroughStep === 1 && <Sparkles size={32} className="text-gold" />}
-              {walkthroughStep === 2 && <User size={32} className="text-gold" />}
-              {walkthroughStep === 3 && <ShoppingBag size={32} className="text-gold" />}
-              {walkthroughStep === 4 && <Layout size={32} className="text-gold" />}
-              {walkthroughStep === 5 && <CreditCard size={32} className="text-gold" />}
-              {walkthroughStep === 6 && <Megaphone size={32} className="text-gold" />}
-              {walkthroughStep === 7 && <ShieldAlert size={32} className="text-gold" />}
-            </div>
-
-            <h2 className="font-headline text-2xl text-primary mb-4">
-              {walkthroughStep === 1 && "Welcome, Curator"}
-              {walkthroughStep === 2 && "Identity First"}
-              {walkthroughStep === 3 && "Curate Artifacts"}
-              {walkthroughStep === 4 && "Visual Excellence"}
-              {walkthroughStep === 5 && "Accept Payments"}
-              {walkthroughStep === 6 && "Get Seen"}
-              {walkthroughStep === 7 && "Master Review"}
-            </h2>
-
-            <p className="opacity-80 leading-relaxed mb-8">
-              {walkthroughStep === 1 && "Welcome to the P31 Curator Studio. We have created this space for you to build a sanctuary for your brand. Let's walk through the initialization process."}
-              {walkthroughStep === 2 && "Start in the 'Identity' tab. Define your business name, story, and vanity URL. This is the foundation of your digital presence."}
-              {walkthroughStep === 3 && "In the 'Storefront' tab, upload your first artifacts. Each item represents your craftsmanship. You can list up to 10 products."}
-              {walkthroughStep === 4 && "Elevate your shop by uploading a premium banner and logo. Consistent aesthetics build trust and prestige with your customers."}
-              {walkthroughStep === 5 && (CARD_PAYMENTS_ENABLED
-                ? "Ensure you can receive the fruits of your labor. In the Storefront tab, click 'Connect with Stripe' — no API keys needed — and customers can pay by card right on your page, with earnings deposited straight to your bank. Track every sale in your Sales tab. You can also add Cash App or Venmo links as backups."
-                : "Ensure you can receive the fruits of your labor. In the Storefront tab, add your payment links — a Stripe Payment Link, CashApp tag, or Venmo handle. Customers pay you directly through your own accounts; the marketplace never touches your money.")}
-              {walkthroughStep === 6 && "The 'Marketing' tab turns every product into a post: its own link and QR code, a ready-made promo image in four looks, captions and hashtags written for you, and your own email list of shoppers who follow your shop. The Insights tab shows what people open and buy."}
-              {walkthroughStep === 7 && "Once your sanctuary is complete, click 'Submit for Review'. Our architects will vet your shop for the upcoming Marketplace."}
-            </p>
-
-            <div className="flex-between">
-              <div className="walkthrough-dots">
-                {[1,2,3,4,5,6,7].map(s => (
-                  <span key={s} className={`dot ${walkthroughStep === s ? 'active' : ''}`}></span>
-                ))}
-              </div>
-              <button
-                onClick={() => {
-                  if (walkthroughStep < 7) {
-                    const nextStep = walkthroughStep + 1;
-                    setWalkthroughStep(nextStep);
-                    // Show the area being described behind the guide
-                    const tabForStep = { 2: 'identity', 3: 'storefront', 4: 'storefront', 5: 'storefront', 6: 'marketing', 7: 'identity' };
-                    if (tabForStep[nextStep]) setActiveTab(tabForStep[nextStep]);
-                  }
-                  else {
-                    setShowWalkthrough(false);
-                    localStorage.setItem('p31_walkthrough_seen', 'true');
-                    setActiveTab('identity');
-                  }
-                }}
-                className="btn-solid-gold"
-              >
-                {walkthroughStep === 7 ? "Begin Curation" : "Next Step"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Tour id={CURATOR_TOUR_ID} steps={CURATOR_TOUR} user={user} autoStart={!!curatorData} />
     </div>
   );
 };

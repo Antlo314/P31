@@ -24,7 +24,6 @@ const GROUPS = [
     eyebrow: 'Create', title: 'Make the content', tools: [
       { Icon: Clapperboard, name: 'Clip Studio', serves: [M, C], body: 'Raw phone footage in, a finished reel out: it cuts the dead air, adds transitions, a look and timed captions you can style.' },
       { Icon: ImagePlus, name: 'Photo Studio', serves: [M, C], body: 'Removes backgrounds, stages products on a backdrop and frames them for every channel. Curators use it from their phones.' },
-      { Icon: Film, name: 'Pro Edit', serves: [M, C], body: 'Premium DaVinci Resolve edits for curators and the team, handled by Iris and delivered back to the dashboard.' },
     ],
   },
   {

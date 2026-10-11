@@ -78,6 +78,9 @@ const SCREENS = [
   ['curator marketing: followers', at('market', 'curator')('/dashboard/marketing'), ['Followers & email'], 'Email your followers'],
   ['curator marketing: share kit', at('market', 'curator')('/dashboard/marketing'), ['Share kit'], 'Table sign for the market'],
   ['curator marketing: insights', at('market', 'curator')('/dashboard/marketing'), ['Insights'], 'What’s working'],
+  ['curator setup list + walkthrough', at('market', 'curator')('/dashboard/identity'), ['Start the walkthrough', 'Next', 'Next'], 'Your banner and logo'],
+  ['curator walkthrough reaches marketing', at('market', 'curator')('/dashboard/identity'), ['Start the walkthrough', 'Next', 'Next', 'Next', 'Next', 'Next', 'Next'], 'Get seen'],
+  ['curator menu groups fold', at('market', 'curator')('/dashboard/identity'), ['Sell', 'Grow', 'Help & Guide'], 'Welcome to your studio'],
   ['storefront: badges, timer, follow box', mk('/sample-bakery'), [], 'Get updates from Sample Bakery Co.'],
   ['storefront: product sheet', mk('/sample-bakery?p=101'), [], 'Sale ends in'],
 ];

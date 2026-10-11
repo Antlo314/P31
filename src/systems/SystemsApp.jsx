@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes, Navigate, useLocation } from 'react-router-dom';
-import { LogOut, Menu, X, Sun, ArrowUpRight } from 'lucide-react';
+import { LogOut, Menu, X, Sun, ArrowUpRight, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useOperator } from './useOperator';
 import { useRoles } from '../lib/roles';
@@ -49,6 +49,9 @@ const SystemsApp = () => {
   const { signOut } = useAuth();
   const { pathname } = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
+  // Which sidebar groups the person folded away (kept on this device).
+  const [folded, setFolded] = useState(() => { try { return JSON.parse(localStorage.getItem('p31_sys_nav')) || {}; } catch { return {}; } });
+  useEffect(() => { try { localStorage.setItem('p31_sys_nav', JSON.stringify(folded)); } catch { /* private mode */ } }, [folded]);
 
   // Admins (Systems operators) see everything; team members see only their tools.
   const full = opStatus === 'operator';
@@ -98,12 +101,18 @@ const SystemsApp = () => {
         </div>
         <nav className="sys-side__nav" aria-label="Systems">
           {full && <NavItem n={SYSTEMS_HOME} className="sys-side__link" size={18} />}
-          {groups.map((g) => (
-            <div key={g.id} className="sys-side__group" role="group" aria-labelledby={`sys-g-${g.id}`}>
-              <p id={`sys-g-${g.id}`} className="sys-side__label">{g.label}</p>
-              {g.items.map((n) => <NavItem key={n.to} n={n} className="sys-side__link" size={18} />)}
-            </div>
-          ))}
+          {groups.map((g) => {
+            // A group folds unless the current page is inside it.
+            const shut = !!folded[g.id] && !g.items.some((n) => pathname.replace(/\/+$/, '').startsWith(n.to));
+            return (
+              <div key={g.id} className={`sys-side__group ${shut ? 'is-shut' : ''}`} role="group" aria-labelledby={`sys-g-${g.id}`}>
+                <button type="button" id={`sys-g-${g.id}`} className="sys-side__label" onClick={() => setFolded((f) => ({ ...f, [g.id]: !f[g.id] }))} aria-expanded={!shut}>
+                  <span>{g.label}</span><ChevronDown size={13} />
+                </button>
+                {!shut && g.items.map((n) => <NavItem key={n.to} n={n} className="sys-side__link" size={18} />)}
+              </div>
+            );
+          })}
         </nav>
         <div className="sys-side__me">
           <div>
