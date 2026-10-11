@@ -1657,3 +1657,11 @@
 .product-marketing { padding: 12px 14px; border-radius: 14px; background: var(--surface-container-low); }
 .product-marketing > label:first-child { display: flex; align-items: center; gap: 6px; color: var(--dark-plum); }
 .product-marketing .form-row-grid { margin-top: 6px; }
+
+/* Storefront agreement reminder (until it is signed at /vendors/agreement) */
+.agreement-nudge { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px 14px; align-items: center; padding: 16px 18px; margin-bottom: 24px; border-left: 3px solid var(--metallic-gold, #D9A93A); }
+.agreement-nudge > svg { flex: none; }
+.agreement-nudge strong { display: block; color: var(--dark-plum); }
+.agreement-nudge p { margin: 2px 0 0; font-size: 0.88rem; opacity: 0.8; }
+.agreement-nudge a { grid-column: 1 / -1; justify-self: start; text-decoration: none; }
+@media (min-width: 760px) { .agreement-nudge { grid-template-columns: auto minmax(0, 1fr) auto; } .agreement-nudge a { grid-column: auto; } }

@@ -252,7 +252,7 @@ Carla
 The P31 Collective`, attachments: [], created_at: day(-1) },
   ],
   content_plan: [
-    { id: 'cp-1', post_date: day(2).slice(0, 10), post_time: '18:00:00', platforms: ['instagram', 'facebook'], kind: 'reel', pillar: 'Market countdown', theme: 'Setting up the Winter Gala', hook: 'Two weeks until the Gala', caption: 'Sample caption: the room is almost ready.', hashtags: '#p31market #atlantamarkets', first_comment: null, media: [], audio_id: null, audio_title: null, status: 'draft', notes: null, created_at: day(-1) },
+    { id: 'cp-1', post_date: day(2).slice(0, 10), post_time: '18:00:00', platforms: ['instagram', 'facebook'], kind: 'reel', pillar: 'Market countdown', theme: 'Setting up the Business and Leadership Luncheon', hook: 'Two weeks until the Luncheon', caption: 'Sample caption: the room is almost ready.', hashtags: '#p31market #atlantamarkets', first_comment: null, media: [], audio_id: null, audio_title: null, status: 'draft', notes: null, created_at: day(-1) },
     { id: 'cp-2', post_date: day(5).slice(0, 10), post_time: '12:00:00', platforms: ['instagram'], kind: 'photo', pillar: 'Curator spotlight', theme: 'Sample curator spotlight', hook: 'Meet the maker', caption: 'Sample caption about a candle maker.', hashtags: '#womenowned #handmade', first_comment: 'Shop her storefront: link in bio', media: [], audio_id: null, audio_title: null, status: 'approved', notes: null, created_at: day(-1) },
     { id: 'cp-3', post_date: day(9).slice(0, 10), post_time: '19:00:00', platforms: ['instagram', 'facebook'], kind: 'reel', pillar: 'Faith & encouragement', theme: 'Monday encouragement', hook: 'She is clothed with strength', caption: 'Sample caption with Proverbs 31:25.', hashtags: '#proverbs31', first_comment: null, media: [], audio_id: 'demo-audio-1', audio_title: 'Sample Track · Sample Artist', status: 'scheduled', notes: null, scheduled_for: day(9, 19), created_at: day(-2) },
   ],
@@ -270,7 +270,7 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
   ],
   curator_data: [
     { id: 'cu1', business_name: 'Sample Pending Shop', slug: 'sample-pending', status: 'pending', created_at: day(-1), profiles: { full_name: 'Sample Applicant' } },
-    { id: 'u-cu', business_name: 'Sample Bakery Co.', slug: 'sample-bakery', is_paid: true, plan: 'free', tagline: 'Small-batch treats, baked with love', bio: 'Sample bio: a home bakery in Gwinnett making pound cakes and cookies for markets and gifts.', status: 'approved', is_published: true, public_email: 'curator@example.com', location: 'Gwinnett, GA', instagram: 'samplebakery', store_design: { template: 'boutique' }, logo_url: null, banner_url: null, created_at: day(-120), profiles: { full_name: 'Sample Curator' } },
+    { id: 'u-cu', business_name: 'Sample Bakery Co.', slug: 'sample-bakery', is_paid: true, plan: 'free', tagline: 'Small-batch treats, baked with love', bio: 'Sample bio: a home bakery in Gwinnett making pound cakes and cookies for markets and gifts.', status: 'approved', is_published: true, public_email: 'curator@example.com', location: 'Gwinnett, GA', instagram: 'samplebakery', store_design: { template: 'boutique' }, logo_url: null, banner_url: null, agreement_signed_at: day(-100), agreement_id: 'ag-2', created_at: day(-120), profiles: { full_name: 'Sample Curator' } },
   ],
   products: [
     { id: 101, curator_id: 'u-cu', name: 'Lemon Pound Cake', description: 'Sample: a dense, buttery pound cake with a bright lemon glaze.', price: 28, compare_at_price: 34, sale_ends_at: day(4), badge: 'Bestseller', is_featured: true, category: 'Wellness', stock_status: 'in_stock', inventory: 6, image_url: null, image_urls: [], tags: ['cake', 'gift'], variants: [{ name: 'Size', options: ['Loaf', 'Bundt'] }], is_active: true, sort_order: 0, created_at: day(-40) },
@@ -292,11 +292,27 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
   ],
   testimonials: [],
   discount_codes: [],
-  campaigns: [{ id: 'cm1', subject: 'The Winter Gala is coming', body: 'Save the date…', audience: 'subscribers', status: 'draft', created_at: day(-1) }],
-  market_events: [{ id: 'ev1', title: 'Winter Gala', event_date: day(70).slice(0, 10), date_public: true, is_active: true, venue: 'Embassy Suites Gwinnett', capacity: 150, lineup_public: true }],
+  campaigns: [{ id: 'cm1', subject: 'The Business and Leadership Luncheon is coming', body: 'Save the date…', audience: 'subscribers', status: 'draft', created_at: day(-1) }],
+  market_events: [{ id: 'ev1', title: 'Business and Leadership Luncheon', event_date: day(70).slice(0, 10), date_public: false, month_public: true, is_active: true, venue: 'The Four Event Center', address: '8599 Roswell Rd, Suite B, Atlanta, GA 30350', rsvp_url: 'https://www.eventbrite.com/e/proverbs-31-business-leadership-luncheon-tickets-2002850002272', capacity: 150, lineup_public: true }],
   event_vendors: [
-    { id: 'evv-1', event_id: 'ev1', application_id: 'va-2', business_name: 'Sample Crafts', contact_name: 'Sample Maker', email: 'vendor2@example.com', website_social: 'samplecrafts.com', categories: ['Handmade crafts, baskets & gifts'], booth: 'A4', status: 'paid', is_public: true, notes: null, created_at: day(-3) },
-    { id: 'evv-2', event_id: 'ev1', application_id: null, business_name: 'Sample Candle Co.', contact_name: 'Sample Vendor', email: 'vendor1@example.com', website_social: '@samplecandles', categories: ['Candles & Home fragrance'], booth: 'B2', status: 'confirmed', is_public: true, notes: null, created_at: day(-2) },
+    { id: 'evv-1', event_id: 'ev1', application_id: 'va-2', business_name: 'Sample Crafts', contact_name: 'Sample Maker', email: 'vendor2@example.com', website_social: 'samplecrafts.com', categories: ['Handmade crafts, baskets & gifts'], booth: 'A4', status: 'paid', is_public: true, notes: null, logo_url: null, created_at: day(-3) },
+    { id: 'evv-2', event_id: 'ev1', application_id: null, business_name: 'Sample Candle Co.', contact_name: 'Sample Vendor', email: 'vendor1@example.com', website_social: '@samplecandles', categories: ['Candles & Home fragrance'], booth: 'B2', status: 'confirmed', is_public: true, notes: null, logo_url: null, created_at: day(-2) },
+  ],
+  // The four vendor forms that replaced JotForm (v37).
+  vendor_agreements: [
+    { id: 'ag-1', business_name: 'Sample Candle Co.', first_name: 'Sample', last_name: 'Vendor', email: 'vendor1@example.com', phone: '(470) 555-0161', address: { street: '12 Market Street', line2: '', city: 'Duluth', state: 'GA', zip: '30097', country: 'United States' }, agreed: true, signature: null, signed_name: 'Sample Vendor', signed_on: day(-1).slice(0, 10), terms_version: '2026-10', status: 'new', curator_id: null, review_notes: null, reviewed_at: null, created_at: iso(-95) },
+    { id: 'ag-2', business_name: 'Sample Bakery Co.', first_name: 'Sample', last_name: 'Curator', email: 'curator@example.com', phone: '(470) 555-0170', address: { street: '400 Peachtree Industrial Blvd', line2: 'Suite 4', city: 'Suwanee', state: 'GA', zip: '30024', country: 'United States' }, agreed: true, signature: null, signed_name: 'Sample Curator', signed_on: day(-100).slice(0, 10), terms_version: '2026-10', status: 'active', curator_id: 'u-cu', review_notes: null, reviewed_at: day(-99), created_at: day(-100) },
+  ],
+  vendor_registrations: [
+    { id: 'rg-1', event_id: 'ev1', event_label: 'Business and Leadership Luncheon · December 2026', business_name: 'Sample Candle Co.', first_name: 'Sample', last_name: 'Vendor', email: 'vendor1@example.com', phone: '(470) 555-0161', website: null, social: '@samplecandles', products: 'Hand-poured soy candles, wax melts and room sprays.', logo_url: null, agreed: true, signature: null, signed_name: 'Sample Vendor', signed_on: day(-1).slice(0, 10), status: 'new', lineup_id: null, application_id: 'va-1', review_notes: null, reviewed_at: null, created_at: iso(-70) },
+    { id: 'rg-2', event_id: 'ev1', event_label: 'Business and Leadership Luncheon · December 2026', business_name: 'Sample Crafts', first_name: 'Sample', last_name: 'Maker', email: 'vendor2@example.com', phone: '(470) 555-0162', website: 'https://samplecrafts.com', social: '@samplecrafts', products: 'Woven baskets, ornaments and gift sets.', logo_url: null, agreed: true, signature: null, signed_name: 'Sample Maker', signed_on: day(-4).slice(0, 10), status: 'confirmed', lineup_id: 'evv-1', application_id: 'va-2', review_notes: 'Booth A4', reviewed_at: day(-3), created_at: day(-4) },
+  ],
+  vendor_feedback: [
+    { id: 'fb-1', event_id: null, market_label: 'September 2026', business_name: 'Sample Crafts', email: 'vendor2@example.com', overall: 5, venue: 4, dj: 5, organization: 5, sales: 'Good', again: 'in', enjoyed: 'The community and the steady traffic all afternoon.', improve: 'More signage at the hotel entrance.', comments: null, lineup_id: null, created_at: day(-20) },
+    { id: 'fb-2', event_id: null, market_label: 'September 2026', business_name: 'Sample Candle Co.', email: null, overall: 4, venue: 5, dj: null, organization: 4, sales: 'Below my expectations', again: 'waitlist', enjoyed: 'The venue and the DJ.', improve: 'Start the marketing earlier.', comments: 'Thank you for having us!', lineup_id: null, created_at: day(-19) },
+  ],
+  volunteer_signups: [
+    { id: 'vo-1', event_id: 'ev1', first_name: 'Sample', last_name: 'Volunteer', phone: '(470) 555-0180', email: 'volunteer@example.com', emergency_contact: 'Sample Parent · (470) 555-0181', acknowledged: true, signature: null, signed_name: 'Sample Volunteer', signed_on: day(-1).slice(0, 10), status: 'new', review_notes: null, reviewed_at: null, created_at: iso(-30) },
   ],
 });
 
@@ -327,10 +343,14 @@ const rpc = {
   })),
   academy_awaiting_review: () => 2,
   event_lineup: () => [
-    { business_name: 'Sample Crafts', website_social: 'samplecrafts.com', categories: ['Handmade crafts, baskets & gifts'], booth: 'A4' },
-    { business_name: 'Sample Candle Co.', website_social: '@samplecandles', categories: ['Candles & Home fragrance'], booth: 'B2' },
+    { business_name: 'Sample Crafts', website_social: 'samplecrafts.com', categories: ['Handmade crafts, baskets & gifts'], booth: 'A4', logo_url: null },
+    { business_name: 'Sample Candle Co.', website_social: '@samplecandles', categories: ['Candles & Home fragrance'], booth: 'B2', logo_url: null },
   ],
   lineup_add_application: () => 'evv-new',
+  submit_form: () => 'demo-form',
+  agreement_preapprove: () => ({ has_account: false, curator_id: null, preapproved: true }),
+  registration_to_lineup: () => 'evv-new',
+  feedback_to_lineup: () => 'evv-new',
   academy_progress_summary: (a) => ({ lessons_done: 4, lessons_total: 6, assignments_passed: 2, assignments_total: a.p_user && a.p_user !== 'u-s1' ? 2 : 3, quizzes_passed: 1, quizzes_total: 2, sessions_attended: 4, sessions_total: 4, custom_checked: [] }),
   academy_call_report: () => [
     { user_id: 'u-s1', full_name: 'Danielle Brooks', email: 'danielle@example.com', joins: 1, first_join: day(-6, 19, 1), last_leave: day(-6, 20), minutes: 59, attendance: 'present' },
@@ -357,7 +377,7 @@ const fns = {
     ] };
     if (b.action === 'thread') return { messages: [
       { id: 'tm1', text: 'When is the next market? 😍', direction: 'incoming', at: iso(-31), attachments: [] },
-      { id: 'tm2', text: 'Hey there! Our Winter Gala date is coming soon — you can get notified at p31market.com/calendar. — Carla', direction: 'outgoing', at: iso(-30), attachments: [] },
+      { id: 'tm2', text: 'Hey there! Our Business and Leadership Luncheon date is coming soon — you can get notified at p31market.com/calendar. — Carla', direction: 'outgoing', at: iso(-30), attachments: [] },
     ] };
     if (b.action === 'comments') return { posts: (studio.posts.published[0]?.posts || []).slice(0, 5).map((p, i) => ({ id: p.id, accountId: 'ig', platform: 'instagram', text: p.message, picture: p.picture, comments: [3, 1, 4, 2, 0][i], at: p.createdTime, permalink: p.permalink })) };
     if (b.action === 'postComments') return { comments: [{ id: 'cm1', text: 'Can’t wait! 🤍', from: 'sample.follower', at: iso(-60), likes: 2, replies: 1 }] };
@@ -370,7 +390,7 @@ const fns = {
     return {};
   },
   'ai-assist': (b) => {
-    if (b.task === 'post_pack') return { options: [JSON.stringify({ hooks: ['Two weeks until the Gala', 'The room is almost ready', 'You have to see this'], captions: ['Sample caption one.', 'Sample caption two.', 'Sample caption three.'], hashtags: ['#p31market', '#atlantamarkets', '#womenowned'], first_comment: 'Save your spot: link in bio', best_time: 'Evenings midweek tend to do best (sample).' })] };
+    if (b.task === 'post_pack') return { options: [JSON.stringify({ hooks: ['Two weeks until the Luncheon', 'The room is almost ready', 'You have to see this'], captions: ['Sample caption one.', 'Sample caption two.', 'Sample caption three.'], hashtags: ['#p31market', '#atlantamarkets', '#womenowned'], first_comment: 'Save your spot: link in bio', best_time: 'Evenings midweek tend to do best (sample).' })] };
     if (b.task === 'product_promo') return { options: [JSON.stringify({ hooks: ['The cake that sells out first', 'Lemon, butter, Sunday', 'Gift it before it is gone'], captions: ['Sample caption one about the cake.', 'Sample caption two.', 'Sample caption three.'], story: 'Back this week: lemon pound cake', hashtags: ['#poundcake', '#gwinnettbakery', '#womenowned', '#p31market', '#handmadegifts'], email_subject: 'Lemon pound cake is back', email_body: 'Sample email body from the maker.', sms: 'Lemon pound cake is back this week. Grab yours:', best_time: 'Sunday afternoon and weekday evenings (sample).' })] };
     if (b.task === 'shop_email') return { options: ['Lemon pound cake is back\nSample email body, paragraph one.\n\nParagraph two with a call to action.'] };
     if (b.task === 'month_plan') return { options: [JSON.stringify([{ day: 3, kind: 'reel', pillar: 'Market countdown', theme: 'Sample idea', hook: 'Sample hook', caption: 'Sample caption', hashtags: '#sample' }, { day: 10, kind: 'photo', pillar: 'Curator spotlight', theme: 'Sample idea two', hook: 'Sample hook two', caption: 'Sample caption two', hashtags: '#sample' }])] };

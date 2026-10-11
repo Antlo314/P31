@@ -77,7 +77,7 @@ const SCREENS = [
   ['davinci member: systems is davinci only', at('collective', 'davinci')('/systems/crm'), [], 'DaVinci is paused for now'],
   ['studio member lands in studio + walkthrough', at('collective', 'studio')('/portal'), [], 'Welcome to Content Studio'],
   ['studio walkthrough steps', cl('/studio'), ['Next', 'Next'], 'Planner: months ahead'],
-  ['studio planner', cl('/studio/planner'), [], 'Plan this month with AI'], ['studio planner: open a post', cl('/studio/planner'), ['Two weeks until the Gala'], 'Draft hook, caption & hashtags'],
+  ['studio planner', cl('/studio/planner'), [], 'Plan this month with AI'], ['studio planner: open a post', cl('/studio/planner'), ['Two weeks until the Luncheon'], 'Draft hook, caption & hashtags'],
   ['studio auto-create', cl('/studio/autocreate'), [], 'Choose the mix'],
   ['studio auto-create: preview', cl('/studio/autocreate'), ['Preview the posts'], 'Save as drafts'],
   ['studio auto-create: library', cl('/studio/autocreate'), ['Library'], 'Add your own'],
@@ -98,6 +98,29 @@ const SCREENS = [
   ['curator menu groups fold', at('market', 'curator')('/dashboard/identity'), ['Sell', 'Grow', 'Help & Guide'], 'Welcome to your studio'],
   ['storefront: badges, timer, follow box', mk('/sample-bakery'), [], 'Get updates from Sample Bakery Co.'],
   ['storefront: product sheet', mk('/sample-bakery?p=101'), [], 'Sale ends in'],
+  // The vendor forms that replaced JotForm (word for word), and the Systems page that receives them.
+  ['vendor forms hub', mk('/vendors'), [], 'Storefront Agreement'],
+  ['storefront agreement', mk('/vendors/agreement'), [], 'Account Setup Timeline'],
+  ['storefront agreement: form + signature', mk('/vendors/agreement'), ['I agree'], 'Submit Agreement'],
+  ['market registration', mk('/vendors/register'), [], 'Vendor Setup & Arrival Policy'],
+  ['market registration: pick the market', mk('/vendors/register'), ['Business and Leadership'], 'Upload your Business logo'],
+  ['vendor feedback survey', mk('/vendors/feedback'), ['Excellent'], 'Are you interested in vending with P31 again?'],
+  ['volunteer acknowledgment', mk('/volunteer'), [], 'I acknowledge and agree to the five statements above'],
+  ['volunteer on a phone', mk('/volunteer'), [], 'In the case of an emergency, who should we contact for you?', { phone: true }],
+  ['registration on a phone', mk('/vendors/register'), [], 'Vendor Child Policy', { phone: true }],
+  ['partner → volunteer link', mk('/partner'), ['Volunteer'], 'Day-of-Event Acknowledgment'],
+  ['curator checklist: agreement step', at('market', 'curator')('/dashboard/identity'), [], 'Sign the Storefront Agreement'],
+  ['systems vendor forms: agreements', cl('/systems/forms'), [], 'Sample Candle Co.'],
+  ['systems vendor forms: agreement detail', cl('/systems/forms'), ['Sample Candle Co.'], 'Pre-approve & email Sample the account link'],
+  ['systems vendor forms: registrations', cl('/systems/forms?tab=registrations'), ['Sample Candle Co.'], 'Add to lineup'],
+  ['systems vendor forms: feedback', cl('/systems/forms?tab=feedback'), [], 'September 2026'],
+  ['systems vendor forms: feedback detail', cl('/systems/forms?tab=feedback'), ['Sample Crafts'], 'Invite into the lineup'],
+  ['systems vendor forms: volunteers', cl('/systems/forms?tab=volunteers'), ['Sample Volunteer'], 'Sample Parent · (470) 555-0181'],
+  ['systems vendor forms on a phone', cl('/systems/forms?tab=registrations'), [], 'Business and Leadership Luncheon', { phone: true }],
+  // A market whose month is announced but not its day reads "December · date coming soon" (Eventbrite link says Get tickets).
+  ['market home: month announced', mk('/'), [], '· date coming soon'],
+  ['market dates: month announced + tickets', mk('/calendar'), [], 'Get tickets'],
+  ['systems overview: vendor forms card', cl('/systems'), [], 'Vendor forms'],
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

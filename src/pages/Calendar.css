@@ -76,6 +76,9 @@
 .cal-lineup { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
 .cal-lineup ul { list-style: none; margin: 10px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
 .cal-lineup li { display: grid; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--mist); min-width: 0; }
+.cal-lineup li > div { display: grid; gap: 2px; min-width: 0; }
+.cal-lineup li.has-logo { grid-template-columns: 44px minmax(0, 1fr); gap: 10px; align-items: center; }
+.cal-lineup__logo { width: 44px; height: 44px; border-radius: 10px; object-fit: contain; background: #fff; border: 1px solid var(--line); }
 .cal-lineup strong { font-size: 0.95rem; overflow-wrap: anywhere; }
 .cal-lineup small { color: var(--ink-3, #8a7f96); font-size: 0.78rem; }
 .cal-lineup__booth { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-text, #8a6d1a); }

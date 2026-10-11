@@ -107,7 +107,7 @@ const CollectiveHome = () => (
             <JoinCollective className="k-btn k-btn--gold" />
             <button type="button" className="k-btn k-btn--plum" onClick={() => openCalendly('connect', { source: 'meet-melanie' })}><Handshake size={18} /> Connect with Melanie JC</button>
             <Link to="/academy" className="k-btn k-btn--ghost">Mentorship with Melanie <ArrowRight size={18} /></Link>
-            <a href="https://www.instagram.com/proverbs31market" target="_blank" rel="noreferrer" className="k-btn k-btn--ghost"><Instagram size={17} /> Follow along</a>
+            <a href="https://www.instagram.com/the.p31collective" target="_blank" rel="noreferrer" className="k-btn k-btn--ghost"><Instagram size={17} /> Follow along</a>
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@
 // AttentionCard; a card whose data this person can't read is left out. Shared by
 // Today (the team's home) and the Systems overview.
 import {
-  ClipboardCheck, MessageCircle, PhoneCall, Video, UserPlus, Store, Receipt, Activity, Inbox, CalendarClock, Mail, Film, CheckCircle2,
+  ClipboardCheck, MessageCircle, PhoneCall, Video, UserPlus, Store, Receipt, Activity, Inbox, CalendarClock, Mail, Film, CheckCircle2, FileSignature,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { studio } from '../studio/api';
@@ -61,13 +61,25 @@ export async function mentorCards(slug) {
   ].filter(Boolean);
 }
 
-/** p31market.com: orders, vendor applications, shops waiting for review. */
+/** p31market.com: orders, vendor applications, shops waiting for review, and the signed forms waiting on the team. */
 export async function marketCards() {
-  const [orders, vendors, curators] = await Promise.all([
+  const [orders, vendors, curators, agreements, registrations, volunteers] = await Promise.all([
     supabase.from('orders').select('id, product_name, buyer_name, created_at', { count: 'exact' }).eq('fulfillment_status', 'new').order('created_at', { ascending: false }).limit(4),
     supabase.from('vendor_applications').select('id, full_name, business_name, created_at', { count: 'exact' }).eq('status', 'new').order('created_at', { ascending: false }).limit(4),
     supabase.from('curator_data').select('id, business_name, created_at', { count: 'exact' }).eq('status', 'pending').order('created_at', { ascending: false }).limit(4),
+    supabase.from('vendor_agreements').select('id, business_name, created_at', { count: 'exact' }).eq('status', 'new').order('created_at', { ascending: false }).limit(4),
+    supabase.from('vendor_registrations').select('id, business_name, event_label, created_at', { count: 'exact' }).eq('status', 'new').order('created_at', { ascending: false }).limit(4),
+    supabase.from('volunteer_signups').select('id, first_name, last_name, created_at', { count: 'exact' }).eq('status', 'new').order('created_at', { ascending: false }).limit(4),
   ]);
+  const forms = [agreements, registrations, volunteers].every((x) => !x.error) && {
+    key: 'forms', site: 'market', Icon: FileSignature, title: 'Vendor forms', to: '/systems/forms', cta: 'Open vendor forms', empty: 'No new agreements, registrations or volunteers.',
+    count: (agreements.count ?? 0) + (registrations.count ?? 0) + (volunteers.count ?? 0),
+    items: [
+      ...(agreements.data || []).map((a) => ({ key: a.id, title: a.business_name, sub: `Storefront agreement · ${ago(a.created_at)}`, to: '/systems/forms?tab=agreements', at: a.created_at })),
+      ...(registrations.data || []).map((r) => ({ key: r.id, title: r.business_name, sub: `Registered for ${r.event_label} · ${ago(r.created_at)}`, to: '/systems/forms?tab=registrations', at: r.created_at })),
+      ...(volunteers.data || []).map((v) => ({ key: v.id, title: `${v.first_name} ${v.last_name}`, sub: `Volunteer · ${ago(v.created_at)}`, to: '/systems/forms?tab=volunteers', at: v.created_at })),
+    ].sort((a, b) => new Date(b.at) - new Date(a.at)).slice(0, 4),
+  };
   return [
     !orders.error && {
       key: 'orders', site: 'market', Icon: Receipt, title: 'New orders', count: orders.count ?? (orders.data || []).length, to: '/systems/orders', cta: 'Open orders', empty: 'No new orders.',
@@ -81,6 +93,7 @@ export async function marketCards() {
       key: 'curators', site: 'market', Icon: Store, title: 'Shops to review', count: curators.count ?? (curators.data || []).length, to: '/dashboard/governance', cta: 'Review on p31market.com', empty: 'No shops waiting for review.',
       items: (curators.data || []).map((c) => ({ key: c.id, title: c.business_name || 'New shop', sub: `Applied ${ago(c.created_at)}` })),
     },
+    forms,
   ].filter(Boolean);
 }
 

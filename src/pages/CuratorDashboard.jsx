@@ -989,6 +989,18 @@ const CuratorDashboard = () => {
               <p>Welcome back, {profile?.full_name}. Refine your sanctuary’s professional presence.</p>
             </header>
 
+            {/* The storefront agreement (moved from JotForm) is signed once, on the site. */}
+            {curatorData && !curatorData.agreement_signed_at && !isAdmin && (
+              <div className="agreement-nudge glass-card" role="status">
+                <ShieldCheck size={20} className="text-gold" />
+                <div>
+                  <strong>Sign your Storefront Agreement</strong>
+                  <p>Benefits, fees and your responsibilities, word for word. Two minutes, signed on your phone or computer.</p>
+                </div>
+                <Link to="/vendors/agreement" className="btn-solid-gold">Read and sign</Link>
+              </div>
+            )}
+
             {/* Identity Stats Overview */}
             <div className="stats-row mb-8">
               <div className="stat-pill glass-card">

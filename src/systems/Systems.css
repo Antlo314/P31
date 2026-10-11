@@ -526,3 +526,16 @@ button.sys-tabbar__link.active { background: rgba(242, 206, 77, 0.1); }
 .sys-paused p { margin: 0; color: var(--sys-dim); grid-column: 2; }
 .sys-paused .sys-chips { grid-column: 2; }
 .sys-paused .sys-chip { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; text-transform: none; }
+
+/* Vendor forms (agreements, registrations, feedback, volunteers) */
+.fm-tabs { margin-bottom: 14px; }
+.fm-tabs .sys-chip { text-transform: none; }
+.fm-sig { display: block; width: 100%; max-width: 320px; background: #fff; border-radius: 12px; padding: 8px; margin: 4px 0 6px; }
+.fm-logo { width: 44px; height: 44px; flex: none; border-radius: 10px; object-fit: contain; background: #fff; }
+.fm-logo--lg { width: 96px; height: 96px; border-radius: 14px; margin-top: 4px; }
+.fm-markets { display: grid; gap: 10px; }
+@media (min-width: 900px) { .fm-markets { grid-template-columns: repeat(2, 1fr); } }
+.fm-avgs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.fm-avgs div { display: grid; gap: 2px; padding: 10px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); text-align: center; }
+.fm-avgs strong { font-size: 1.3rem; color: var(--sys-gold); }
+.fm-avgs span { font-size: 0.72rem; color: var(--sys-dim); font-weight: 700; }

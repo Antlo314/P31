@@ -73,7 +73,7 @@ export const CollectiveFooter = () => (
           <p>Private business and faith-based mentorship for faith-driven women — for the business you’re building and the woman you’re becoming.</p>
           <JoinCollective className="k-btn k-btn--gold k-btn--sm cl-ft__join" size={16} />
           <div className="ft__social">
-            <a href="https://www.instagram.com/proverbs31market" target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram size={18} /></a>
+            <a href="https://www.instagram.com/the.p31collective" target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram size={18} /></a>
             <a href="https://www.facebook.com/share/1LEtAu9AJD/?mibextid=wwXIfr" target="_blank" rel="noreferrer" aria-label="Facebook"><Facebook size={18} /></a>
           </div>
         </div>

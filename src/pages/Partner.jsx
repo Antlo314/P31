@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { HandCoins, Gift, TrendingUp, HandHeart, Heart, CheckCircle2, Mail, Phone, ArrowUpRight, ArrowDown, ArrowRight, CalendarDays } from 'lucide-react';
 import { openCalendly } from '../lib/calendly';
 import { supabase } from '../lib/supabase';
@@ -17,7 +18,7 @@ const WAYS = [
   { Icon: HandCoins, title: 'Financial giving', tone: 'night', body: 'Your contribution helps us host markets, expand resources and sustain the vision.', cta: 'Give now', href: DONATE_URL },
   { Icon: Gift, title: 'In-kind giving', tone: 'gold', body: 'Event space, tables and tents, artisan products, or services like photography and marketing.', cta: 'Offer resources', type: 'In-Kind' },
   { Icon: TrendingUp, title: 'Strategic partnership', body: 'Businesses and organizations collaborating at scale to expand our reach and impact.', cta: 'Collaborate', type: 'Strategic' },
-  { Icon: HandHeart, title: 'Volunteer', body: 'Serve at a market — welcome guests, support curators, help the day run beautifully.', cta: 'Volunteer', type: 'Volunteer' },
+  { Icon: HandHeart, title: 'Volunteer', body: 'Serve at a market — welcome guests, support curators, help the day run beautifully.', cta: 'Volunteer', to: '/volunteer' },
 ];
 const TYPES = [['Financial', 'Financial'], ['In-Kind', 'In-kind'], ['Strategic', 'Strategic'], ['Volunteer', 'Volunteer']];
 const blankForm = { full_name: '', email: '', phone: '', partnership_type: 'Strategic', message: '', trap: '' };
@@ -102,6 +103,10 @@ const Partner = () => {
                 <a href={w.href} target="_blank" rel="noreferrer" className={`k-btn k-btn--sm ${w.tone === 'night' ? 'k-btn--gold' : 'k-btn--plum'}`} style={{ justifySelf: 'start', marginTop: 8 }}>
                   {w.cta} <ArrowUpRight size={16} />
                 </a>
+              ) : w.to ? (
+                <Link to={w.to} className="k-btn k-btn--sm k-btn--outline" style={{ justifySelf: 'start', marginTop: 8 }}>
+                  {w.cta} <ArrowRight size={16} />
+                </Link>
               ) : (
                 <button onClick={() => choose(w.type)} className={`k-btn k-btn--sm ${w.tone === 'gold' ? 'k-btn--plum' : 'k-btn--outline'}`} style={{ justifySelf: 'start', marginTop: 8 }}>
                   {w.cta} <ArrowRight size={16} />

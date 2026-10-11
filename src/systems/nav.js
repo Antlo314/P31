@@ -1,6 +1,6 @@
 import {
   LayoutGrid, Megaphone, Radar, Clapperboard, ImagePlus, Film, Settings, CalendarDays, Mail, Receipt, GraduationCap, Users, UserPlus,
-  Activity, Sparkles, Store, KeyRound, ClipboardList, Inbox,
+  Activity, Sparkles, Store, KeyRound, ClipboardList, Inbox, FileSignature,
 } from 'lucide-react';
 import { DAVINCI_ON } from '../lib/features';
 
@@ -20,6 +20,7 @@ export const SYSTEMS_GROUPS = [
     id: 'market', site: 'market', label: 'Market', sub: 'p31market.com', items: [
       { to: '/systems/orders', label: 'Orders', Icon: Receipt, site: 'market', blurb: 'Every order across the marketplace, live: confirm, fulfil, cancel, export.' },
       { to: '/systems/vendors', label: 'Vendor applications', short: 'Vendors', Icon: ClipboardList, site: 'market', blurb: 'Applications from p31market.com/apply: approve, email, and her studio unlocks.' },
+      { to: '/systems/forms', label: 'Vendor forms', short: 'Forms', Icon: FileSignature, site: 'market', blurb: 'Storefront agreements, market registrations, feedback surveys and volunteer sign-ups, signed on the site.' },
       { to: '/systems/events', label: 'Markets & events', short: 'Events', Icon: CalendarDays, site: 'market', blurb: 'Market dates, RSVPs, vendor lineups, booths and check-in on the day.' },
       { to: '/dashboard/governance', label: 'Curators & shops', Icon: Store, away: true, site: 'market', blurb: 'Review new shops, feature curators, badges and by-hand pre-approvals.' },
       { to: '/systems/campaigns', label: 'Campaigns', Icon: Mail, site: 'market', blurb: 'Email shoppers and curators, with AI drafts.' },

@@ -131,7 +131,8 @@ const pages = Object.keys(ROUTE_META).map((path) => ({
 // Slugs that would collide with real files or app routes are left to the SPA.
 const RESERVED = new Set(['index', 'assets', 'icons', 'shop', 'directory', 'calendar', 'about', 'services', 'partner',
   'favorites', 'login', 'register', 'unsubscribe', 'dashboard', 'systems', 'offline', 'sw', 'sitemap', 'robots', 'manifest',
-  'mentorship', 'portal', 'enroll', 'academy', 'studio', 'verify', 'c']);
+  'mentorship', 'portal', 'enroll', 'academy', 'studio', 'verify', 'c', 'apply', 'join', 'today', 'onboarding-exclusive', 'community', 'fonts',
+  'vendors', 'volunteer']);
 const safeSlug = (s) => /^[a-z0-9][a-z0-9_-]{0,80}$/i.test(s || '') && !RESERVED.has(s.toLowerCase());
 
 const shops = curators.filter((c) => safeSlug(c.slug) && c.business_name);

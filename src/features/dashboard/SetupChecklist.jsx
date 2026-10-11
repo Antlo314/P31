@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Check, ArrowRight, PlayCircle, Sparkles } from 'lucide-react';
 import { startCuratorTour } from './studioTour';
 
@@ -10,6 +11,7 @@ const SetupChecklist = ({ curator, editData, products = [], onGo }) => {
   const paid = !!(curator?.stripe_charges_enabled || editData.stripeLink || editData.cashappTag || editData.venmoHandle || editData.otherPaymentLink);
   const steps = [
     { id: 'identity', tab: 'identity', label: 'Name, story and shop link', done: !!(editData.businessName && editData.slug && editData.bio), hint: 'Identity' },
+    { id: 'agreement', href: '/vendors/agreement', label: 'Sign the Storefront Agreement', done: !!curator?.agreement_signed_at, hint: 'Benefits, fees and your responsibilities' },
     { id: 'look', tab: 'storefront', label: 'Banner and logo', done: !!(editData.bannerUrl && editData.logoUrl), hint: 'Storefront' },
     { id: 'pay', tab: 'storefront', label: 'How you get paid', done: paid, hint: 'Storefront · payments' },
     { id: 'product', tab: 'storefront', label: products.length ? `${products.length} product${products.length === 1 ? '' : 's'} listed` : 'Your first product', done: products.length > 0, hint: 'Storefront · Add Artifact' },
@@ -34,7 +36,9 @@ const SetupChecklist = ({ curator, editData, products = [], onGo }) => {
           <li key={s.id} className={s.done ? 'is-done' : s === next ? 'is-next' : ''}>
             <span className="sc__tick" aria-hidden="true">{s.done ? <Check size={13} /> : null}</span>
             <div><strong>{s.label}</strong><small>{s.hint}</small></div>
-            {!s.done && <button type="button" className="sc__go" onClick={() => onGo(s.tab)}>{s === next ? 'Do this' : 'Open'} <ArrowRight size={13} /></button>}
+            {!s.done && (s.href
+              ? <Link to={s.href} className="sc__go">{s === next ? 'Do this' : 'Open'} <ArrowRight size={13} /></Link>
+              : <button type="button" className="sc__go" onClick={() => onGo(s.tab)}>{s === next ? 'Do this' : 'Open'} <ArrowRight size={13} /></button>)}
           </li>
         ))}
       </ol>
