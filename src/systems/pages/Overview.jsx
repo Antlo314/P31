@@ -61,12 +61,13 @@ const Tools = ({ group, phone }) => (
       const body = <>
         <span className="sys-tool__icon"><n.Icon size={22} /></span>
         <div>
-          <h3>{n.label}{n.desktop && <span className="sys-tag"><Monitor size={11} /> Computer</span>}</h3>
+          <h3>{n.label}{n.paused ? <span className="sys-tag sys-tag--dim">Paused</span> : n.desktop && <span className="sys-tag"><Monitor size={11} /> Computer</span>}</h3>
           <p>{n.blurb}</p>
         </div>
-        {n.away ? <ArrowUpRight size={18} className="sys-tool__go" /> : <ArrowRight size={18} className="sys-tool__go" />}
+        {n.paused ? null : n.away ? <ArrowUpRight size={18} className="sys-tool__go" /> : <ArrowRight size={18} className="sys-tool__go" />}
       </>;
       const cls = `sys-tool ${n.desktop && phone ? 'is-desktop' : ''}`;
+      if (n.paused) return <div className={`${cls} is-paused`} key={n.to} aria-disabled="true">{body}</div>;
       return href === n.to ? <Link to={n.to} className={cls} key={n.to}>{body}</Link> : <a href={href} className={cls} key={n.to}>{body}</a>;
     })}
   </div>

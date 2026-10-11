@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from './supabase';
 import { useAuth } from '../context/AuthContext';
+import { DAVINCI_ON } from './features';
 
 const EMPTY = { signed_in: false, admin: false, operator: false, curator: false, studio: false, tools: [], mentor: [], student: [] };
 
@@ -72,7 +73,7 @@ export function dashboardsFor(roles) {
   }));
   if (roles.studio) out.push({ to: '/studio', kind: 'studio', title: 'Content Studio', note: 'Instagram & Facebook · plan, create, schedule, reply' });
   if (roles.operator || roles.admin) out.push({ to: '/systems', kind: 'systems', title: 'Systems', note: 'P31 operations console' });
-  else if (roles.tools?.includes('davinci')) out.push({ to: '/systems/pro-edit', kind: 'davinci', title: 'DaVinci', note: 'Long footage in, finished clips out' });
+  else if (DAVINCI_ON && roles.tools?.includes('davinci')) out.push({ to: '/systems/pro-edit', kind: 'davinci', title: 'DaVinci', note: 'Long footage in, finished clips out' });
   if (roles.curator) out.push({ to: '/dashboard', kind: 'curator', title: 'Curator Studio', note: 'Your shop, products and orders' });
   return out;
 }

@@ -515,3 +515,14 @@ button.sys-tabbar__link.active { background: rgba(242, 206, 77, 0.1); }
 
 /* Today's cards can say which site they belong to */
 .td2-site { padding: 2px 8px; border-radius: 999px; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; background: rgba(127, 127, 127, 0.12); color: inherit; opacity: 0.8; }
+
+/* Paused tools: still listed, greyed out, not clickable */
+.sys-tag--dim { background: rgba(255, 255, 255, 0.08); color: var(--sys-dim); }
+.sys-side__link.is-paused, .sys-more__link.is-paused, .sys-tool.is-paused { opacity: 0.45; cursor: not-allowed; }
+.sys-side__link.is-paused .sys-tag { margin-left: auto; }
+.sys-more__link.is-paused .sys-tag { position: absolute; top: 6px; right: 6px; margin: 0; }
+.sys-paused { grid-template-columns: auto 1fr; align-items: start; }
+.sys-paused__icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: rgba(255, 255, 255, 0.06); color: var(--sys-dim); }
+.sys-paused p { margin: 0; color: var(--sys-dim); grid-column: 2; }
+.sys-paused .sys-chips { grid-column: 2; }
+.sys-paused .sys-chip { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; text-transform: none; }

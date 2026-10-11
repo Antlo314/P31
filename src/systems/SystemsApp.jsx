@@ -39,8 +39,11 @@ const NavItem = ({ n, className, size, onClick, tag = false }) => {
   const body = <>
     <n.Icon size={size} /> <span>{n.label}</span>
     {n.away && <ArrowUpRight size={13} className="sys-away" aria-label="(opens another dashboard)" />}
-    {tag && n.desktop && <Monitor size={13} className="sys-away sys-desk" aria-label="(needs a computer)" />}
+    {tag && n.desktop && !n.paused && <Monitor size={13} className="sys-away sys-desk" aria-label="(needs a computer)" />}
+    {n.paused && <span className="sys-tag sys-tag--dim">Paused</span>}
   </>;
+  // Paused tools stay in the menu, greyed out, so nobody wonders where they went.
+  if (n.paused) return <span className={`${className} is-paused`} aria-disabled="true" title="Paused for now">{body}</span>;
   if (!n.away) return <NavLink to={n.to} end={n.end} className={className} onClick={onClick}>{body}</NavLink>;
   const href = hrefFor(n.to);
   return href === n.to ? <Link to={n.to} className={className} onClick={onClick}>{body}</Link> : <a href={href} className={className}>{body}</a>;
@@ -143,7 +146,7 @@ const SystemsApp = () => {
             <>
               <ChevronRight size={13} className="sys-crumb__sep" /><span>{here.group.label}</span>
               <ChevronRight size={13} className="sys-crumb__sep" /><strong>{here.item.label}</strong>
-              {here.item.desktop && <span className="sys-tag"><Monitor size={11} /> Computer</span>}
+              {here.item.paused ? <span className="sys-tag sys-tag--dim">Paused</span> : here.item.desktop && <span className="sys-tag"><Monitor size={11} /> Computer</span>}
             </>
           ) : <strong>Overview</strong>}
           {site !== 'both' && <span className="sys-crumb__host">{SITES[site]?.host}</span>}
@@ -212,8 +215,8 @@ const SystemsApp = () => {
                   </div>
                 </section>
               ))}
-              {phone && groups.some((g) => g.items.some((n) => n.desktop)) && (
-                <p className="sys-more__note"><Monitor size={13} /> On your computer: Clip Studio and DaVinci edit video on the device itself. Everything else works right here.</p>
+              {phone && groups.some((g) => g.items.some((n) => n.desktop && !n.paused)) && (
+                <p className="sys-more__note"><Monitor size={13} /> On your computer: {groups.flatMap((g) => g.items).filter((n) => n.desktop && !n.paused).map((n) => n.label).join(' and ')} {groups.flatMap((g) => g.items).filter((n) => n.desktop && !n.paused).length === 1 ? 'edits' : 'edit'} video on the device itself. Everything else works right here.</p>
               )}
             </nav>
             <div className="sys-more__me">

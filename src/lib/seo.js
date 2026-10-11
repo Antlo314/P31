@@ -8,8 +8,8 @@ export const SITE_NAME = 'Proverbs 31 Marketplace';
 // (same app, same Supabase): see src/lib/site.js.
 export const COLLECTIVE_URL = 'https://www.thep31collective.org';
 export const COLLECTIVE_NAME = 'The Proverbs 31 Collective';
-export const COLLECTIVE_IMAGE = `${COLLECTIVE_URL}/c/og-image.jpg`;
-export const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
+export const COLLECTIVE_IMAGE = `${COLLECTIVE_URL}/c/og-image.jpg?v=2`;
+export const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg?v=2`;
 
 // The business as Google knows it — the Google Business Profile and socials,
 // linked from structured data so search ties the site to the listing.

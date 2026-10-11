@@ -2,6 +2,7 @@ import {
   LayoutGrid, Megaphone, Radar, Clapperboard, ImagePlus, Film, Settings, CalendarDays, Mail, Receipt, GraduationCap, Users, UserPlus,
   Activity, Sparkles, Store, KeyRound, ClipboardList, Inbox,
 } from 'lucide-react';
+import { DAVINCI_ON } from '../lib/features';
 
 // The two sites the team runs, and the console's rooms, sorted by site.
 export const SITES = {
@@ -39,7 +40,7 @@ export const SYSTEMS_GROUPS = [
       { to: '/systems/growth', label: 'Growth', Icon: Radar, site: 'both', blurb: 'Find groups, creators and events that fit P31, and track the outreach.' },
       { to: '/systems/photos', label: 'Photo Studio', Icon: ImagePlus, site: 'both', blurb: 'Remove backgrounds, stage products, apply looks. Works on a phone.' },
       { to: '/systems/clips', label: 'Clip Studio', Icon: Clapperboard, site: 'both', desktop: true, blurb: 'Raw footage in, a captioned reel out.' },
-      { to: '/systems/pro-edit', label: 'DaVinci', Icon: Film, site: 'both', desktop: true, blurb: 'Long footage in, finished clips out, built by Iris in DaVinci Resolve.' },
+      { to: '/systems/pro-edit', label: 'DaVinci', Icon: Film, site: 'both', desktop: true, paused: !DAVINCI_ON, blurb: DAVINCI_ON ? 'Long footage in, finished clips out, built by Iris in DaVinci Resolve.' : 'Paused for now. Long footage in, finished clips out, once the DaVinci bridge is on.' },
     ],
   },
   {

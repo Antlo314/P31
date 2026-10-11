@@ -2,6 +2,12 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 11 — Cleaner mark, DaVinci paused
+
+- **The hands mark, cleaned.** The original art (only 381 pixels wide) had a beaded light outline along every curve, which showed as white dots on dark backgrounds, in texted links and on the app icon. The mark was rebuilt from the original: outline smoothed, the beads and a ribbed texture removed, flat colour and the finger lines kept. Every icon, favicon, share image, the brand kit and the in-app marks were regenerated, and phones are told to fetch the new icons.
+- **Profile picture for Instagram and Facebook.** A square tile with the mark (`marketing/brand/profile-1024.png`) for the @proverbs31market accounts, which currently show a blank avatar. Instagram offers no way to set it through an API, so it is a one-minute upload in the app.
+- **DaVinci paused.** The DaVinci clip finder and Iris queue are greyed out everywhere (console menu, Overview, Today, the portal) with a "paused for now" page, kept behind one switch (`src/lib/features.js`) for when the bridge is ready.
+
 ## October 11 — The admin console, by site, on any screen
 
 - **Systems is now split by site.** The team console (thep31collective.org/systems) is organized as Market (p31market.com: orders, vendor applications, markets & events, curators & shops, campaigns), Collective (thep31collective.org: join applications, mentorship, people, Content Studio, email inbox), Create (social, growth, Photo Studio, Clip Studio, DaVinci) and Team (access, health, settings). Every page carries a line saying which site and room it belongs to.

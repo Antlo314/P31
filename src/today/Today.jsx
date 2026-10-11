@@ -6,6 +6,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useRoles, dashboardsFor, isTeam, hasTool } from '../lib/roles';
 import { useIsPhone } from '../lib/device';
+import { DAVINCI_ON } from '../lib/features';
 import { mentorCards, systemsCards, studioCards, davinciCards } from './cards';
 import AttentionCard, { Go } from './AttentionCard';
 import DashShell, { DashHead } from '../apps/DashShell';
@@ -20,7 +21,7 @@ const sourcesFor = (roles) => [
   ...(roles.mentor || []).map((slug) => ({ key: `mentor-${slug}`, title: PROGRAM[slug] || slug, to: `/academy/${slug}/teach`, load: () => mentorCards(slug) })),
   ...(roles.operator || roles.admin ? [{ key: 'systems', title: 'Systems', to: '/systems', load: systemsCards, sites: true }] : []),
   ...(roles.studio ? [{ key: 'studio', title: 'Content Studio', to: '/studio', load: studioCards }] : []),
-  ...(hasTool(roles, 'davinci') ? [{ key: 'davinci', title: 'DaVinci', to: '/systems/pro-edit', load: davinciCards }] : []),
+  ...(DAVINCI_ON && hasTool(roles, 'davinci') ? [{ key: 'davinci', title: 'DaVinci', to: '/systems/pro-edit', load: davinciCards }] : []),
 ];
 
 // ── /today — the team's home ──────────────────────────────────
@@ -62,7 +63,7 @@ const Today = () => {
   const quick = [
     ...(roles.mentor || []).slice(0, 1).map((slug) => ({ to: `/academy/${slug}/teach/sessions`, Icon: Video, label: 'Go live' })),
     roles.studio && { to: '/studio/compose', Icon: Megaphone, label: 'New post' },
-    hasTool(roles, 'davinci') && { to: '/systems/pro-edit', Icon: Scissors, label: 'Find clips', desktop: true },
+    DAVINCI_ON && hasTool(roles, 'davinci') && { to: '/systems/pro-edit', Icon: Scissors, label: 'Find clips', desktop: true },
     admin && { to: '/systems/campaigns', Icon: Mail, label: 'Email campaign' },
     admin && { to: '/systems/events', Icon: CalendarDays, label: 'Add a market date' },
     admin && { to: '/systems/clips', Icon: Clapperboard, label: 'Make a clip', desktop: true },
