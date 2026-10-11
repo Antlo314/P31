@@ -70,6 +70,16 @@ const SCREENS = [
   ['studio email + send', cl('/studio/email'), ['Sample Applicant', 'Send reply', 'Yes, send it'], 'Sent to sample.applicant@example.com'],
   ['studio email: needs a person', cl('/studio/email'), ['Sample Vendor'], 'Needs a person: Refund request'],
   ['classroom walkthrough', st('/academy/business'), ['Next'], 'Home: what’s next'],
+  // A vendor (curator) with an approved shop.
+  ['curator storefront tab', at('market', 'curator')('/dashboard/storefront'), [], 'Lemon Pound Cake'],
+  ['curator product templates', at('market', 'curator')('/dashboard/storefront'), ['Add Artifact'], 'Start from a template'],
+  ['curator marketing', at('market', 'curator')('/dashboard/marketing'), [], 'Which product?'],
+  ['curator marketing: write the kit', at('market', 'curator')('/dashboard/marketing'), ['Write the kit'], 'The cake that sells out first'],
+  ['curator marketing: followers', at('market', 'curator')('/dashboard/marketing'), ['Followers & email'], 'Email your followers'],
+  ['curator marketing: share kit', at('market', 'curator')('/dashboard/marketing'), ['Share kit'], 'Table sign for the market'],
+  ['curator marketing: insights', at('market', 'curator')('/dashboard/marketing'), ['Insights'], 'What’s working'],
+  ['storefront: badges, timer, follow box', mk('/sample-bakery'), [], 'Get updates from Sample Bakery Co.'],
+  ['storefront: product sheet', mk('/sample-bakery?p=101'), [], 'Sale ends in'],
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

@@ -1,5 +1,6 @@
 // DEVELOPMENT ONLY — never part of a production build (see src/lib/supabase.js).
-// A stand-in database for walkthrough screenshots: ?demo=admin | student | faith | davinci | studio (?demo=off to stop).
+// A stand-in database for walkthrough screenshots: ?demo=admin | student | faith | davinci | studio | curator (?demo=off to stop).
+// curator signs in as a vendor with an approved shop (Sample Bakery Co.).
 // davinci and studio sign in as team members with only that tool (like Anthony and Yanni).
 // Students, classes and grades are illustrative SAMPLE data. Content Studio numbers come from a
 // real read-only Zernio snapshot (src/dev/demo-studio.json, not committed); DMs and comments are samples.
@@ -24,9 +25,10 @@ const PEOPLE = {
   'u-s6': { name: 'Renee Lawson', email: 'renee@example.com', program: FAI },
   'u-dv': { name: 'Sample DaVinci Editor', email: 'davinci@example.com' },
   'u-st': { name: 'Sample Studio Seat', email: 'studio@example.com' },
+  'u-cu': { name: 'Sample Curator', email: 'curator@example.com' },
 };
 const userFor = (mode) => {
-  const id = mode === 'student' ? 'u-s1' : mode === 'faith' ? 'u-s5' : mode === 'davinci' ? 'u-dv' : mode === 'studio' ? 'u-st' : 'u-mel';
+  const id = mode === 'student' ? 'u-s1' : mode === 'faith' ? 'u-s5' : mode === 'davinci' ? 'u-dv' : mode === 'studio' ? 'u-st' : mode === 'curator' ? 'u-cu' : 'u-mel';
   return { id, email: PEOPLE[id].email, user_metadata: { full_name: PEOPLE[id].name }, app_metadata: {}, aud: 'authenticated' };
 };
 
@@ -266,7 +268,30 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
     { id: 42, requested_by: 'u-mel', kind: 'clip', batch_id: 'b1', clip_index: 2, clip_count: 3, title: 'Sample Gala · 2', style: 'Warm Documentary', aspect: '9:16', source_paths: ['u-mel/davinci/b1/clip-02.mp4'], music_path: null, source_name: 'gala-raw.mov', clip_start: 1204, clip_end: 1234, status: 'queued', created_at: iso(-50), updated_at: iso(-50) },
     { id: 40, requested_by: 'u-mel', kind: 'edit', title: 'Sample recap', style: 'Social Clean', aspect: '9:16', source_paths: ['u-mel/pro-edit/1/01-a.mp4'], status: 'done', result_path: 'u-mel/pro-edit/results/40-recap.mp4', created_at: day(-3), updated_at: day(-2) },
   ],
-  curator_data: [{ id: 'cu1', business_name: 'Sample Bakery Co.', status: 'pending', created_at: day(-1), profiles: { full_name: 'Sample Curator' } }],
+  curator_data: [
+    { id: 'cu1', business_name: 'Sample Pending Shop', slug: 'sample-pending', status: 'pending', created_at: day(-1), profiles: { full_name: 'Sample Applicant' } },
+    { id: 'u-cu', business_name: 'Sample Bakery Co.', slug: 'sample-bakery', is_paid: true, plan: 'free', tagline: 'Small-batch treats, baked with love', bio: 'Sample bio: a home bakery in Gwinnett making pound cakes and cookies for markets and gifts.', status: 'approved', is_published: true, public_email: 'curator@example.com', location: 'Gwinnett, GA', instagram: 'samplebakery', store_design: { template: 'boutique' }, logo_url: null, banner_url: null, created_at: day(-120), profiles: { full_name: 'Sample Curator' } },
+  ],
+  products: [
+    { id: 101, curator_id: 'u-cu', name: 'Lemon Pound Cake', description: 'Sample: a dense, buttery pound cake with a bright lemon glaze.', price: 28, compare_at_price: 34, sale_ends_at: day(4), badge: 'Bestseller', is_featured: true, category: 'Wellness', stock_status: 'in_stock', inventory: 6, image_url: null, image_urls: [], tags: ['cake', 'gift'], variants: [{ name: 'Size', options: ['Loaf', 'Bundt'] }], is_active: true, sort_order: 0, created_at: day(-40) },
+    { id: 102, curator_id: 'u-cu', name: 'Brown Butter Cookies (dozen)', description: 'Sample: chewy brown-butter cookies with flaky salt.', price: 18, compare_at_price: null, badge: 'New', is_featured: false, category: 'Wellness', stock_status: 'in_stock', inventory: null, image_url: null, image_urls: [], tags: ['cookies'], variants: [], is_active: true, sort_order: 1, created_at: day(-10) },
+    { id: 103, curator_id: 'u-cu', name: 'Market Gift Box', description: 'Sample: a cake slice, six cookies and a handwritten card.', price: 45, compare_at_price: null, badge: 'Market exclusive', is_featured: false, category: 'Collection', stock_status: 'limited_edition', inventory: 3, image_url: null, image_urls: [], tags: ['gift', 'box'], variants: [], is_active: true, sort_order: 2, created_at: day(-5) },
+  ],
+  shop_subscribers: [
+    { id: 1, curator_id: 'u-cu', email: 'sample.fan@example.com', name: 'Sample Fan', source: 'storefront', unsubscribed: false, created_at: day(-12) },
+    { id: 2, curator_id: 'u-cu', email: 'another.shopper@example.com', name: null, source: 'storefront', unsubscribed: false, created_at: day(-6) },
+    { id: 3, curator_id: 'u-cu', email: 'market.guest@example.com', name: 'Market Guest', source: 'market', unsubscribed: false, created_at: day(-1) },
+  ],
+  shop_campaigns: [
+    { id: 1, curator_id: 'u-cu', subject: 'Lemon pound cake is back', body: 'Sample email body.', product_id: 101, status: 'sent', sent_count: 2, error: null, sent_at: day(-9), created_at: day(-9) },
+  ],
+  curator_analytics: [
+    { id: 1, curator_id: 'u-cu', product_id: 101, event_type: 'product_click', created_at: day(-1) },
+    { id: 2, curator_id: 'u-cu', product_id: 101, event_type: 'payment_click', created_at: day(-1) },
+    { id: 3, curator_id: 'u-cu', product_id: 102, event_type: 'product_click', created_at: day(-2) },
+  ],
+  testimonials: [],
+  discount_codes: [],
   campaigns: [{ id: 'cm1', subject: 'The Winter Gala is coming', body: 'Save the date…', audience: 'subscribers', status: 'draft', created_at: day(-1) }],
   market_events: [{ id: 'ev1', title: 'Winter Gala', event_date: day(70).slice(0, 10), date_public: true, is_active: true, venue: 'Embassy Suites Gwinnett', capacity: 150, lineup_public: true }],
   event_vendors: [
@@ -276,6 +301,10 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
 });
 
 const rpc = {
+  shop_follower_count: () => 3,
+  shop_subscribe: () => true,
+  shop_unsubscribe: () => true,
+  my_product_stats: () => [{ product_id: 101, opens: 14, buys: 5, shares: 3 }, { product_id: 102, opens: 6, buys: 1, shares: 0 }],
   my_roles: (_a, mode) => (mode === 'student'
     ? { signed_in: true, admin: false, operator: false, curator: false, studio: false, mentor: [], student: [{ program: 'business', title: 'Business Mentorship', status: 'active', has_access: true }] }
     : mode === 'faith'
@@ -284,6 +313,8 @@ const rpc = {
         ? { signed_in: true, admin: false, operator: false, curator: false, studio: false, tools: ['davinci'], mentor: [], student: [] }
         : mode === 'studio'
           ? { signed_in: true, admin: false, operator: false, curator: false, studio: true, tools: ['studio'], mentor: [], student: [] }
+        : mode === 'curator'
+          ? { signed_in: true, admin: false, operator: false, curator: true, studio: false, tools: [], mentor: [], student: [] }
           : { signed_in: true, admin: true, operator: true, curator: false, studio: true, tools: ['studio', 'davinci'], mentor: ['business', 'faith'], student: [] }),
   team_access_status: () => [
     { email: 'davinci@example.com', has_account: true, confirmed: true, last_sign_in: day(-1) },
@@ -340,10 +371,13 @@ const fns = {
   },
   'ai-assist': (b) => {
     if (b.task === 'post_pack') return { options: [JSON.stringify({ hooks: ['Two weeks until the Gala', 'The room is almost ready', 'You have to see this'], captions: ['Sample caption one.', 'Sample caption two.', 'Sample caption three.'], hashtags: ['#p31market', '#atlantamarkets', '#womenowned'], first_comment: 'Save your spot: link in bio', best_time: 'Evenings midweek tend to do best (sample).' })] };
+    if (b.task === 'product_promo') return { options: [JSON.stringify({ hooks: ['The cake that sells out first', 'Lemon, butter, Sunday', 'Gift it before it is gone'], captions: ['Sample caption one about the cake.', 'Sample caption two.', 'Sample caption three.'], story: 'Back this week: lemon pound cake', hashtags: ['#poundcake', '#gwinnettbakery', '#womenowned', '#p31market', '#handmadegifts'], email_subject: 'Lemon pound cake is back', email_body: 'Sample email body from the maker.', sms: 'Lemon pound cake is back this week. Grab yours:', best_time: 'Sunday afternoon and weekday evenings (sample).' })] };
+    if (b.task === 'shop_email') return { options: ['Lemon pound cake is back\nSample email body, paragraph one.\n\nParagraph two with a call to action.'] };
     if (b.task === 'month_plan') return { options: [JSON.stringify([{ day: 3, kind: 'reel', pillar: 'Market countdown', theme: 'Sample idea', hook: 'Sample hook', caption: 'Sample caption', hashtags: '#sample' }, { day: 10, kind: 'photo', pillar: 'Curator spotlight', theme: 'Sample idea two', hook: 'Sample hook two', caption: 'Sample caption two', hashtags: '#sample' }])] };
     return { options: ['Sample draft one.', 'Sample draft two.'] };
   },
   'daily-room': () => ({ error: 'Demo mode — live rooms open on the real site.' }),
+  'shop-broadcast': (b) => ({ ok: true, sent: b.test ? 1 : 3, test: !!b.test }),
   'email-send': (b) => (b.action === 'redraft'
     ? { ok: true, draft: { reply: `Hi there,
 

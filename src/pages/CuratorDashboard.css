@@ -1646,3 +1646,14 @@
 .studio-switch button.is-on { background: var(--plum); }
 .payment-nudge-banner { border-radius: var(--r-lg); }
 .modal-content { border-radius: var(--r-xl); }
+
+/* Product templates + marketing block in the product form */
+.product-templates__row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.product-tpl {
+  display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--outline-variant); background: #fff; color: var(--on-surface); font: inherit; font-weight: 700; font-size: 0.8rem;
+}
+.product-tpl.is-on { background: var(--dark-plum); border-color: var(--dark-plum); color: #fff; }
+.product-marketing { padding: 12px 14px; border-radius: 14px; background: var(--surface-container-low); }
+.product-marketing > label:first-child { display: flex; align-items: center; gap: 6px; color: var(--dark-plum); }
+.product-marketing .form-row-grid { margin-top: 6px; }

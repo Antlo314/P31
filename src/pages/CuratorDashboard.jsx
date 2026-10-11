@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { fetchUpcomingEvents, formatEventDate } from '../lib/events';
 import Community from './Community'; // Nested import
-import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, ShieldCheck, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Calendar, Users, Search, DollarSign, RefreshCw } from 'lucide-react';
+import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, ShieldCheck, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Calendar, Users, Search, DollarSign, RefreshCw, Megaphone } from 'lucide-react';
 import { invokePayment, CARD_PAYMENTS_ENABLED } from '../lib/payments';
 import HelpTip from '../components/HelpTip';
 import { withEmails } from '../lib/people';
@@ -15,6 +15,8 @@ import StoreDesigner from '../features/store-design/StoreDesigner';
 import ProEditPanel from '../features/pro-edit/ProEditPanel';
 import OrdersPanel from '../features/orders/OrdersPanel';
 import DiscountsPanel from '../features/orders/DiscountsPanel';
+import MarketingPanel from '../features/marketing/MarketingPanel';
+import { PRODUCT_TEMPLATES, PRODUCT_BADGES, applyTemplate } from '../features/marketing/productTemplates';
 import './CuratorDashboard.css';
 
 const PhotoStudio = lazy(() => import('../features/photo-studio/PhotoStudio'));
@@ -24,6 +26,15 @@ const BLANK_PRODUCT = {
   name: '', description: '', price: '', image_url: '', image_urls: [], category: 'Collection',
   external_url: '', stock_status: 'in_stock',
   compare_at_price: '', inventory: '', sku: '', tags: '', is_active: true, variants: [],
+  badge: '', is_featured: false, sale_ends_at: '',
+};
+
+// Timestamp → value for a datetime-local input, in the maker's own time zone.
+const toLocalInput = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
 const productToForm = (p) => ({
@@ -34,10 +45,14 @@ const productToForm = (p) => ({
   compare_at_price: p.compare_at_price ?? '', inventory: p.inventory ?? '', sku: p.sku || '',
   tags: (p.tags || []).join(', '), is_active: p.is_active !== false,
   variants: (Array.isArray(p.variants) ? p.variants : []).map((g) => ({ name: g.name, options: (g.options || []).join(', ') })),
+  badge: p.badge || '', is_featured: !!p.is_featured, sale_ends_at: toLocalInput(p.sale_ends_at),
 });
 
 const formToProduct = (f) => ({
   ...f,
+  badge: f.badge || null,
+  is_featured: !!f.is_featured,
+  sale_ends_at: f.sale_ends_at ? new Date(f.sale_ends_at).toISOString() : null,
   compare_at_price: f.compare_at_price === '' ? null : parseFloat(f.compare_at_price),
   inventory: f.inventory === '' ? null : parseInt(f.inventory, 10),
   sku: f.sku?.trim() || null,
@@ -1043,11 +1058,11 @@ const CuratorDashboard = () => {
             <Sparkles size={20} /> Intelligence
           </button>
 
-          <button 
-            onClick={() => setActiveTab('toolkit')} 
-            className={`nav-item ${activeTab === 'toolkit' ? 'active' : ''}`}
+          <button
+            onClick={() => setActiveTab('marketing')}
+            className={`nav-item ${activeTab === 'marketing' || activeTab === 'toolkit' ? 'active' : ''}`}
           >
-            <Download size={20} /> Toolkit
+            <Megaphone size={20} /> Marketing
           </button>
 
           {isAdmin && (
@@ -1851,6 +1866,19 @@ const CuratorDashboard = () => {
                 <div className="modal-content glass-card shadow-2xl p-8 max-w-lg w-full">
                   <h2 className="font-headline text-primary mb-6">{editingProduct ? 'Refine Artifact' : 'New Artisan Item'}</h2>
                   <form onSubmit={saveProduct} className="premium-form">
+                    {!editingProduct && (
+                      <div className="form-group product-templates">
+                        <label>Start from a template (optional)</label>
+                        <div className="product-templates__row">
+                          {PRODUCT_TEMPLATES.map((t) => (
+                            <button type="button" key={t.id} className={`product-tpl ${productForm.category === t.category && productForm.tags === t.tags ? 'is-on' : ''}`} onClick={() => setProductForm((f) => applyTemplate(f, t))}>
+                              <span aria-hidden="true">{t.emoji}</span> {t.name}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="help-text">Fills the category, the options shoppers pick, tags and a description you edit. Nothing is locked.</p>
+                      </div>
+                    )}
                     <div className="product-image-uploader mb-6">
                       <div className="avatar-preview-wrapper bg-muted flex-center" onClick={() => document.getElementById('prod-img-input').click()}>
                         {productImageLoading ? <Loader2 className="animate-spin text-gold" /> : (
@@ -1994,6 +2022,27 @@ const CuratorDashboard = () => {
                       )}
                       <p className="help-text">Shoppers must pick one of each before adding to their bag.</p>
                     </div>
+                    <div className="form-group product-marketing">
+                      <label><Megaphone size={14} /> Marketing</label>
+                      <div className="form-row-grid">
+                        <div className="form-group">
+                          <label>Badge on the photo</label>
+                          <select className="premium-select" value={productForm.badge} onChange={e => setProductForm({...productForm, badge: e.target.value})}>
+                            <option value="">None</option>
+                            {PRODUCT_BADGES.map((b) => <option key={b} value={b}>{b}</option>)}
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label>Sale ends (optional)</label>
+                          <input type="datetime-local" value={productForm.sale_ends_at} onChange={e => setProductForm({...productForm, sale_ends_at: e.target.value})} />
+                          <p className="help-text">With a compare-at price, shoppers see a countdown; the sale tag drops when it passes.</p>
+                        </div>
+                      </div>
+                      <label className="product-visible-toggle">
+                        <input type="checkbox" checked={!!productForm.is_featured} onChange={e => setProductForm({...productForm, is_featured: e.target.checked})} />
+                        Feature it first in my shop
+                      </label>
+                    </div>
                     <label className="product-visible-toggle">
                       <input type="checkbox" checked={productForm.is_active} onChange={e => setProductForm({...productForm, is_active: e.target.checked})} />
                       Visible in my storefront
@@ -2044,6 +2093,15 @@ const CuratorDashboard = () => {
             </div>
           } />
           <Route path="sales" element={<Navigate to="../orders" replace />} />
+          <Route path="toolkit" element={<Navigate to="../marketing" replace />} />
+          <Route path="marketing" element={
+            <MarketingPanel
+              curator={curatorData}
+              products={products}
+              user={user}
+              onEditProduct={(p) => { setEditingProduct(p); setProductForm(productToForm(p)); setIsProductModalOpen(true); setActiveTab('storefront'); }}
+            />
+          } />
           <Route path="orders" element={
             <div className="dashboard-view">
               <header className="dashboard-header">
@@ -2897,7 +2955,8 @@ const CuratorDashboard = () => {
               {walkthroughStep === 3 && <ShoppingBag size={32} className="text-gold" />}
               {walkthroughStep === 4 && <Layout size={32} className="text-gold" />}
               {walkthroughStep === 5 && <CreditCard size={32} className="text-gold" />}
-              {walkthroughStep === 6 && <ShieldAlert size={32} className="text-gold" />}
+              {walkthroughStep === 6 && <Megaphone size={32} className="text-gold" />}
+              {walkthroughStep === 7 && <ShieldAlert size={32} className="text-gold" />}
             </div>
 
             <h2 className="font-headline text-2xl text-primary mb-4">
@@ -2906,7 +2965,8 @@ const CuratorDashboard = () => {
               {walkthroughStep === 3 && "Curate Artifacts"}
               {walkthroughStep === 4 && "Visual Excellence"}
               {walkthroughStep === 5 && "Accept Payments"}
-              {walkthroughStep === 6 && "Master Review"}
+              {walkthroughStep === 6 && "Get Seen"}
+              {walkthroughStep === 7 && "Master Review"}
             </h2>
 
             <p className="opacity-80 leading-relaxed mb-8">
@@ -2917,22 +2977,23 @@ const CuratorDashboard = () => {
               {walkthroughStep === 5 && (CARD_PAYMENTS_ENABLED
                 ? "Ensure you can receive the fruits of your labor. In the Storefront tab, click 'Connect with Stripe' — no API keys needed — and customers can pay by card right on your page, with earnings deposited straight to your bank. Track every sale in your Sales tab. You can also add Cash App or Venmo links as backups."
                 : "Ensure you can receive the fruits of your labor. In the Storefront tab, add your payment links — a Stripe Payment Link, CashApp tag, or Venmo handle. Customers pay you directly through your own accounts; the marketplace never touches your money.")}
-              {walkthroughStep === 6 && "Once your sanctuary is complete, click 'Submit for Review'. Our architects will vet your shop for the upcoming Marketplace."}
+              {walkthroughStep === 6 && "The 'Marketing' tab turns every product into a post: its own link and QR code, a ready-made promo image in four looks, captions and hashtags written for you, and your own email list of shoppers who follow your shop. The Insights tab shows what people open and buy."}
+              {walkthroughStep === 7 && "Once your sanctuary is complete, click 'Submit for Review'. Our architects will vet your shop for the upcoming Marketplace."}
             </p>
 
             <div className="flex-between">
               <div className="walkthrough-dots">
-                {[1,2,3,4,5,6].map(s => (
+                {[1,2,3,4,5,6,7].map(s => (
                   <span key={s} className={`dot ${walkthroughStep === s ? 'active' : ''}`}></span>
                 ))}
               </div>
               <button
                 onClick={() => {
-                  if (walkthroughStep < 6) {
+                  if (walkthroughStep < 7) {
                     const nextStep = walkthroughStep + 1;
                     setWalkthroughStep(nextStep);
                     // Show the area being described behind the guide
-                    const tabForStep = { 2: 'identity', 3: 'storefront', 4: 'storefront', 5: 'storefront', 6: 'identity' };
+                    const tabForStep = { 2: 'identity', 3: 'storefront', 4: 'storefront', 5: 'storefront', 6: 'marketing', 7: 'identity' };
                     if (tabForStep[nextStep]) setActiveTab(tabForStep[nextStep]);
                   }
                   else {
@@ -2943,7 +3004,7 @@ const CuratorDashboard = () => {
                 }}
                 className="btn-solid-gold"
               >
-                {walkthroughStep === 6 ? "Begin Curation" : "Next Step"}
+                {walkthroughStep === 7 ? "Begin Curation" : "Next Step"}
               </button>
             </div>
           </div>

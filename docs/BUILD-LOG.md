@@ -2,6 +2,14 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 10 (later) — Vendor marketing
+
+- **Marketing tab for every vendor.** Each curator's studio now has a Marketing tab with four rooms. *Promote a product*: pick any product and get its own link (opens the item directly), a QR code, a promo image drawn on the spot in four looks (Clean, Plum, Sale, Noir) and three sizes (post, portrait, story) with a ribbon and a scan-to-shop QR, and one tap that writes three captions, hook lines, a story line, hashtags, an email and a text message for that product. *Followers & email*: the shop's own email list, with an AI-written email, a test send, one real send a day (from the market address, replies go to the vendor), and a history. *Share kit*: shop link, bio line, ready-to-post lines, and a printable 5×7 table sign with the QR for the physical market. *Insights*: opens, buy taps and shares per product over 7/30/90 days, which products are quiet, and six plain-language tips on what sells on P31.
+- **Product templates.** Adding a product starts from a template (candle, jewelry, skincare, apparel, art print, baked goods, wellness, home goods, digital/service) that fills the category, the options shoppers pick, tags and a description scaffold.
+- **Badges, featured, sale timers.** Products can carry a badge (New, Bestseller, Limited, Handmade, Gift, Back in stock, Small batch, Market exclusive), be pinned first in the shop, and run a sale with an end time; shoppers see "Sale ends in 3 days" and the sale tag drops by itself when it passes.
+- **Storefront.** Every shop now has a "Get updates from this shop" box (with the follower count), a share button on every product that copies its own link, and badges on the product cards. One-click unsubscribe per shop.
+- **Behind it.** Database v34 (badge, featured, sale end; shop followers; shop emails; per-product numbers), a `shop-broadcast` sender, two new AI writing tasks, and a sample vendor in the walkthrough data so every screen is tested on each push (100 screens now).
+
 ## October 10 — Studio, brand, speed, vendors
 
 - **Speed on phones.** Both sites' fonts are now served from our own domain (nothing from Google blocks the first paint any more), React ships as one cached file, dozens of tiny icon files became one, and the hero film waits for the page to load on phones. The Collective home no longer "jumps" when it loads. Everything is locked to the screen width.
