@@ -1,11 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   BookOpen, CalendarDays, CheckCircle2, Circle, ClipboardCheck, Download, ExternalLink, FileText, Flag, Heart, Library,
   MessageCircle, Plus, Send, Sparkles, Target, Trash2, Upload, Video, ArrowRight, ArrowLeft, CalendarPlus, CreditCard, Megaphone,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { CONTACT_EMAIL, fileSize, fmtDate, fmtDateTime, openFile, uploadAcademyFile, videoEmbed, downloadIcs, verseOfTheDay, BILLING } from '../../lib/academy';
+import { CONTACT_EMAIL, fileSize, fmtDate, fmtDateTime, openFile, uploadAcademyFile, videoEmbed, mediaUrl, downloadIcs, verseOfTheDay, BILLING } from '../../lib/academy';
 import { DashHead, DashEmpty } from '../../apps/DashShell';
 import RichText from '../RichText';
 import Thread from './Thread';
@@ -43,7 +43,7 @@ const useSessions = (program, user) => {
   return { ...res, data: res.data.filter((s) => forStudent(s, user?.id)) };
 };
 const useLessons = (program) => useRows(
-  () => supabase.from('academy_lessons').select('id, module_id, title, position, video_url, is_published').eq('program_id', program.id).eq('is_published', true).order('position'),
+  () => supabase.from('academy_lessons').select('id, module_id, title, position, video_url, video_path, is_published').eq('program_id', program.id).eq('is_published', true).order('position'),
   [program.id],
 );
 const useProgress = (program, user) => useRows(
@@ -73,6 +73,7 @@ const SessionCard = ({ s, compact }) => {
         )}
         {sessionEnd(s) > new Date() && <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => downloadIcs(s)}><CalendarPlus size={16} /> Add to calendar</button>}
         {s.recording_url && <a href={s.recording_url} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--sm k-btn--ghost"><ExternalLink size={16} /> Recording</a>}
+        {s.recording_path && <button type="button" className="k-btn k-btn--sm k-btn--ghost" onClick={() => mediaUrl(s.recording_path).then((u) => window.open(u, '_blank', 'noopener')).catch(() => window.alert('The recording could not be opened. Try again in a moment.'))}><Video size={16} /> Watch the recording</button>}
         {s.has_recording && !s.recording_url && <button type="button" className="k-btn k-btn--sm k-btn--ghost" onClick={() => watchRecording(s)}><ExternalLink size={16} /> Watch recording</button>}
       </div>
     </article>
@@ -197,7 +198,7 @@ export const StudentLearn = () => {
                     <li key={l.id}>
                       <Link to={l.id} className={`ds-row ${done.has(l.id) ? 'is-done' : ''}`}>
                         {done.has(l.id) ? <CheckCircle2 size={20} color="#17A673" /> : <Circle size={20} />}
-                        <div><strong>{l.title}</strong>{l.video_url && <small><Video size={12} /> Video</small>}</div>
+                        <div><strong>{l.title}</strong>{(l.video_url || l.video_path) && <small><Video size={12} /> Video</small>}</div>
                         <ArrowRight size={16} />
                       </Link>
                     </li>
@@ -229,6 +230,15 @@ export const StudentLesson = () => {
   const prev = idx > 0 ? all.data[idx - 1] : null;
   const next = idx >= 0 && idx < all.data.length - 1 ? all.data[idx + 1] : null;
   const embed = videoEmbed(l?.video_url);
+  // An uploaded video streams through a short-lived link (kept with the path it belongs to).
+  const [stream, setStream] = useState(null);
+  useEffect(() => {
+    let live = true;
+    if (!l?.video_path) return undefined;
+    mediaUrl(l.video_path).then((u) => live && setStream({ path: l.video_path, url: u })).catch(() => {});
+    return () => { live = false; };
+  }, [l?.video_path]);
+  const fileUrl = l?.video_path && stream?.path === l.video_path ? stream.url : null;
 
   const toggle = async () => {
     if (done) await write(supabase.from('academy_progress').delete().eq('user_id', user.id).eq('lesson_id', lessonId));
@@ -250,8 +260,9 @@ export const StudentLesson = () => {
       <Link to=".." relative="path" className="k-link" style={{ marginBottom: 12 }}><ArrowLeft size={16} /> All lessons</Link>
       <DashHead eyebrow={program.title} title={l.title} />
       <div className="ds-grid" style={{ maxWidth: 860 }}>
-        {embed ? <div className="ds-video"><iframe src={embed} title={l.title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen /></div>
-          : l.video_url && <a href={l.video_url} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--plum" style={{ justifySelf: 'start' }}><Video size={18} /> Watch the video</a>}
+        {fileUrl ? <div className="ds-video"><video controls playsInline preload="metadata" src={fileUrl} title={l.title} /></div>
+          : embed ? <div className="ds-video"><iframe src={embed} title={l.title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen /></div>
+            : l.video_url && <a href={l.video_url} target="_blank" rel="noopener noreferrer" className="k-btn k-btn--plum" style={{ justifySelf: 'start' }}><Video size={18} /> Watch the video</a>}
         {l.body && <article className="ds-card"><RichText text={l.body} /></article>}
         {files.data.length > 0 && (
           <article className="ds-card">

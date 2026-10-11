@@ -1,4 +1,5 @@
-/* Guided walkthrough (Tour.jsx): a spotlight on the menu item and a card that explains it. */
+/* Guided walkthrough (Tour.jsx): a spotlight on the target, a pointer that glides to it and taps,
+   and a card that explains it. In autoplay a progress bar runs along the top of the card. */
 .tour { position: fixed; inset: 0; z-index: 400; pointer-events: none; }
 .tour__dim { position: absolute; inset: 0; background: rgba(12, 6, 20, 0.55); }
 .tour__spot {
@@ -6,15 +7,32 @@
   box-shadow: 0 0 0 3px #F2CE4D, 0 0 0 9999px rgba(12, 6, 20, 0.55);
   transition: top 0.35s var(--ease-fluid, ease), left 0.35s var(--ease-fluid, ease), width 0.35s var(--ease-fluid, ease), height 0.35s var(--ease-fluid, ease);
 }
+
+/* The pointer. */
+.tour__cursor { position: fixed; top: 0; left: 0; width: 0; height: 0; z-index: 2; transition: transform 0.72s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.tour__cursor.is-new { transition: none; animation: tour-cursor-in 0.4s ease-out; }
+.tour__dot { position: absolute; left: -10px; top: -10px; width: 20px; height: 20px; border-radius: 50%; background: #F2CE4D; border: 3px solid #fff; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45); }
+.tour__ring { position: absolute; left: -10px; top: -10px; width: 20px; height: 20px; border-radius: 50%; border: 2px solid #F2CE4D; opacity: 0; }
+.tour__cursor.is-tap .tour__ring { animation: tour-tap 0.5s ease-out; }
+.tour__cursor.is-tap .tour__dot { animation: tour-press 0.5s ease-out; }
+@keyframes tour-tap { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(3.4); opacity: 0; } }
+@keyframes tour-press { 0% { transform: scale(1); } 40% { transform: scale(0.7); } 100% { transform: scale(1); } }
+@keyframes tour-cursor-in { from { opacity: 0; } }
+
 .tour__card {
-  position: fixed; right: 24px; bottom: 24px; width: min(400px, calc(100vw - 32px)); pointer-events: auto;
+  position: fixed; right: 24px; bottom: 24px; width: min(400px, calc(100vw - 32px)); pointer-events: auto; overflow: hidden;
   display: grid; gap: 10px; padding: 20px; border-radius: 22px;
   background: #fff; color: #2A1526; box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.55); border: 1px solid rgba(217, 169, 58, 0.5);
   animation: tour-in 0.35s var(--ease-fluid, ease);
 }
 .tour__card.is-center { right: 50%; bottom: 50%; transform: translate(50%, 50%); }
 @keyframes tour-in { from { opacity: 0; translate: 0 12px; } }
+.tour__progress { position: absolute; left: 0; right: 0; top: 0; height: 4px; background: #EFE4F3; }
+.tour__progress span { display: block; height: 100%; width: 100%; transform-origin: left; background: linear-gradient(90deg, #D9A93A, #F2CE4D); animation: tour-progress linear forwards; }
+.tour__progress span.is-paused { animation-play-state: paused; }
+@keyframes tour-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .tour__head { display: flex; align-items: center; justify-content: space-between; }
+.tour__head-actions { display: flex; gap: 6px; }
 .tour__count { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: #8a6d1a; }
 .tour__x { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; border: 0; background: #EFE4F3; color: #5a4d68; cursor: pointer; }
 .tour__card h2 { margin: 0; font-family: var(--font-heading); font-weight: 400; font-size: 1.45rem; line-height: 1.15; color: var(--plum, #4b1f74); }
@@ -22,6 +40,7 @@
 .tour__card ol { margin: 4px 0 0; padding-left: 20px; display: grid; gap: 6px; font-size: 0.93rem; line-height: 1.45; color: #3d3150; }
 .tour__dots { display: flex; gap: 5px; }
 .tour__dots span { width: 6px; height: 6px; border-radius: 50%; background: #DCCBE3; transition: width 0.3s; }
+.tour__dots span.is-done { background: #C3A9CE; }
 .tour__dots span.is-on { width: 18px; border-radius: 3px; background: #D9A93A; }
 .tour__foot { display: flex; justify-content: space-between; gap: 10px; margin-top: 4px; }
 .tour__btn {
@@ -34,4 +53,8 @@
 @media (max-width: 979px) {
   .tour__card, .tour__card.is-center { right: 16px; left: 16px; width: auto; bottom: calc(var(--tb-h, 72px) + 24px + env(safe-area-inset-bottom)); transform: none; }
 }
-@media (prefers-reduced-motion: reduce) { .tour__card { animation: none; } .tour__spot { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .tour__card { animation: none; }
+  .tour__spot, .tour__cursor { transition: none; }
+  .tour__cursor.is-tap .tour__ring, .tour__cursor.is-tap .tour__dot { animation: none; }
+}

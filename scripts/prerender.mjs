@@ -210,7 +210,7 @@ const team = [
   ['Savannah Campbell', 'Executive Assistant', 'secretary@thep31collective.org'],
   ['Yanni Bratcher', 'Marketing Strategist', 'marketing@p31market.com'],
   ['Alexia Thomas', 'Member Liaison', 'members@thep31collective.org'],
-  ['Shanay Prince', 'Support Coordinator', 'coordinator@thep31collective.org'],
+  ['Shanay Prince', 'Support Coordinator', 'grants@thep31collective.org'],
   ['Anthony Carr', 'Marketplace Tech Support', 'vendor@p31market.com'],
 ].map(([name, jobTitle, email]) => ({ '@type': 'Person', name, jobTitle, email }));
 const collectiveOrg = {
@@ -229,7 +229,7 @@ const collectiveOrg = {
   employee: team,
   contactPoint: [
     { '@type': 'ContactPoint', contactType: 'membership', email: 'members@thep31collective.org', telephone: BUSINESS.phone, availableLanguage: 'English' },
-    { '@type': 'ContactPoint', contactType: 'customer support', email: 'coordinator@thep31collective.org', availableLanguage: 'English' },
+    { '@type': 'ContactPoint', contactType: 'customer support', email: 'coordinator@p31market.com', availableLanguage: 'English' },
   ],
   parentOrganization: { '@type': 'Organization', '@id': `${SITE_URL}/#organization`, name: SITE_NAME, url: SITE_URL },
   sameAs: BUSINESS.sameAs.filter((u) => !u.includes('maps.google')),

@@ -39,6 +39,26 @@ export async function uploadAcademyFile(slug, folder, file) {
   return { file_path: path, file_name: file.name, mime_type: file.type || null, size_bytes: file.size };
 }
 
+// Lesson videos and session recordings uploaded by mentors live in the private "academy-media"
+// bucket: <program slug>/lessons/… or <program slug>/sessions/… (v41). Students stream them
+// through short-lived links.
+export async function uploadAcademyMedia(slug, folder, file, onProgress) {
+  const path = `${slug}/${folder}/${crypto.randomUUID()}-${safeName(file.name)}`;
+  onProgress?.(0);
+  const { error } = await supabase.storage.from('academy-media').upload(path, file, { contentType: file.type || 'video/mp4', cacheControl: '3600' });
+  if (error) throw error;
+  onProgress?.(100);
+  return { path, name: file.name, size: file.size };
+}
+export async function mediaUrl(path, seconds = 6 * 3600) {
+  const { data, error } = await supabase.storage.from('academy-media').createSignedUrl(path, seconds);
+  if (error) throw error;
+  return data.signedUrl;
+}
+export const removeAcademyMedia = (path) => supabase.storage.from('academy-media').remove([path]);
+export const MEDIA_ACCEPT = 'video/mp4,video/quicktime,video/webm,video/x-m4v,audio/mpeg,audio/mp4,audio/x-m4a,.mp4,.mov,.webm,.m4v,.mp3,.m4a';
+export const MEDIA_NOTE = 'MP4, MOV, WebM or audio, up to 500 MB (your plan’s upload limit applies).';
+
 // YouTube / Vimeo / Loom links become embeds; anything else opens as a link.
 export function videoEmbed(url) {
   if (!url) return null;

@@ -2,12 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { CornerUpLeft, MessageSquareText, SmilePlus, Pencil, Trash2, Pin, PinOff, X, ImagePlus, Send, Loader2, BookOpen, Store, MessageCircle, Sparkles, Bell, Mail } from 'lucide-react';
 import { REACTIONS, timeOf, dayOf, ago, deviceNotify, setDeviceNotify } from './api';
 import { badgesFor, initials } from './badges';
+import { PHOTO_BY_NAME } from '../lib/teamPhotos';
 import mark from '../assets/academy/collective-mark.webp';
 
 // ── People ───────────────────────────────────────────────
 export const Avatar = ({ person, size = 40, onClick }) => {
-  const inner = person?.avatar_url
-    ? <img src={person.avatar_url} alt="" loading="lazy" />
+  // The team's headshots stand in until someone uploads her own picture (team and overseers only,
+  // so a member cannot borrow a team photo by using the same name).
+  const src = person?.avatar_url || ((person?.roles?.team || person?.roles?.admin) ? PHOTO_BY_NAME[person?.name] : null);
+  const inner = src
+    ? <img src={src} alt="" loading="lazy" />
     : <span>{initials(person?.name)}</span>;
   const style = { width: size, height: size, fontSize: size * 0.38 };
   return onClick

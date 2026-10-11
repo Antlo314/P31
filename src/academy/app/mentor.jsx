@@ -5,7 +5,7 @@ import {
   Upload, Download, Eye, EyeOff, ArrowUp, ArrowDown, Pencil, Megaphone, Pin, Link2, X, ClipboardCheck, Search, ArrowLeft, Video, BarChart3,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { money, BILLING, fmtDate, fmtDateTime, fileSize, openFile, uploadAcademyFile, CONTACT_EMAIL } from '../../lib/academy';
+import { money, BILLING, fmtDate, fmtDateTime, fileSize, openFile, uploadAcademyFile, uploadAcademyMedia, removeAcademyMedia, mediaUrl, MEDIA_ACCEPT, MEDIA_NOTE, CONTACT_EMAIL } from '../../lib/academy';
 import { DashHead, DashEmpty } from '../../apps/DashShell';
 import RichText from '../RichText';
 import Thread from './Thread';
@@ -331,13 +331,22 @@ export const SessionModal = ({ session, studentId, onClose, onSaved }) => {
   const [provider, setProvider] = useState('daily'); // new sessions: daily | zoom | link
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [rec, setRec] = useState({ path: session?.recording_path || null, file: null });
   const isZoom = session?.provider === 'zoom';
   const isLive = session?.provider === 'daily';
   const save = async (e) => {
     e.preventDefault();
     setBusy(true); setError('');
+    let recordingPath = rec.path;
+    if (rec.file) {
+      try {
+        const m = await uploadAcademyMedia(program.slug, 'sessions', rec.file);
+        if (session?.recording_path && session.recording_path !== m.path) removeAcademyMedia(session.recording_path).catch(() => {});
+        recordingPath = m.path;
+      } catch (err) { setBusy(false); return setError(/bucket/i.test(err.message) ? 'Run storefront_v41_team_dashboards.sql in Supabase first (it creates the video bucket).' : err.message); }
+    }
     const row = { ...form, starts_at: fromLocalInput(form.starts_at), duration_minutes: Number(form.duration_minutes), program_id: program.id,
-      student_id: session ? session.student_id : studentId || null, join_url: form.join_url || null, recording_url: form.recording_url || null };
+      student_id: session ? session.student_id : studentId || null, join_url: form.join_url || null, recording_url: form.recording_url || null, recording_path: recordingPath || null };
     if (isZoom || isLive || (!session && provider !== 'link')) delete row.join_url; // the room owns the link
     const { data, error: err } = await write(session
       ? supabase.from('academy_sessions').update(row).eq('id', session.id).select('id').single()
@@ -396,6 +405,16 @@ export const SessionModal = ({ session, studentId, onClose, onSaved }) => {
         <label className="k-field"><span>Description (optional)</span><textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></label>
         {session && <label className="k-field"><span>Session notes (visible to the student)</span><textarea rows={4} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></label>}
         {session && <label className="k-field"><span>Recording link {isZoom ? '(fills in by itself when Zoom finishes a cloud recording)' : '(optional)'}</span><input type="url" value={form.recording_url} onChange={(e) => setForm({ ...form, recording_url: e.target.value })} /></label>}
+        {session && (
+          <div className="k-field"><span>Or upload the recording</span>
+            {rec.path && !rec.file ? (
+              <div className="ds-row"><Video size={18} /><div><strong>Recording uploaded</strong><small>{rec.path.split('/').pop().replace(/^[0-9a-f-]{36}-/, '')}</small></div>
+                <button type="button" className="k-btn k-btn--sm k-btn--ghost" onClick={() => mediaUrl(rec.path).then((u) => window.open(u, '_blank', 'noopener'))}>Play</button>
+                <button type="button" className="k-btn k-btn--sm k-btn--ghost" onClick={() => { if (session.recording_path) removeAcademyMedia(session.recording_path).catch(() => {}); setRec({ path: null, file: null }); }}><Trash2 size={14} /> Remove</button></div>
+            ) : <input type="file" accept={MEDIA_ACCEPT} onChange={(e) => setRec((r) => ({ ...r, file: e.target.files[0] || null }))} />}
+            <small className="ds-muted">{MEDIA_NOTE} Students watch it from their Sessions page.</small>
+          </div>
+        )}
         {error && <p className="k-error">{error}</p>}
         <div className="k-actions">
           <button className="k-btn k-btn--gold" disabled={busy}>{busy ? 'Saving…' : session ? 'Save' : 'Schedule'}</button>
@@ -495,26 +514,48 @@ export const MentorStudent = () => {
 const LessonModal = ({ lesson, moduleId, onClose, onSaved }) => {
   const { program } = useAcademy();
   const [form, setForm] = useState({ title: lesson?.title || '', body: lesson?.body || '', video_url: lesson?.video_url || '', reflection_prompt: lesson?.reflection_prompt || '', is_published: lesson?.is_published ?? false });
+  const [video, setVideo] = useState({ path: lesson?.video_path || null, file: null, busy: false });
   const [error, setError] = useState('');
   const save = async (e) => {
     e.preventDefault();
-    const row = { ...form, video_url: form.video_url || null, reflection_prompt: form.reflection_prompt || null, updated_at: new Date().toISOString() };
+    let videoPath = video.path;
+    if (video.file) {
+      setVideo((v) => ({ ...v, busy: true })); setError('');
+      try {
+        const m = await uploadAcademyMedia(program.slug, 'lessons', video.file);
+        if (lesson?.video_path && lesson.video_path !== m.path) removeAcademyMedia(lesson.video_path).catch(() => {});
+        videoPath = m.path;
+      } catch (err) { setVideo((v) => ({ ...v, busy: false })); return setError(/row-level security|policy/i.test(err.message) ? 'You don’t have permission to upload here.' : /bucket/i.test(err.message) ? 'Run storefront_v41_team_dashboards.sql in Supabase first (it creates the video bucket).' : err.message); }
+    }
+    const row = { ...form, video_url: form.video_url || null, video_path: videoPath || null, reflection_prompt: form.reflection_prompt || null, updated_at: new Date().toISOString() };
     const { error: err } = await write(lesson
       ? supabase.from('academy_lessons').update(row).eq('id', lesson.id)
       : supabase.from('academy_lessons').insert({ ...row, program_id: program.id, module_id: moduleId, position: Date.now() % 1e9 }));
+    setVideo((v) => ({ ...v, busy: false }));
     if (err) return setError(err);
     onSaved(); onClose();
   };
+  const dropVideo = () => { if (lesson?.video_path) removeAcademyMedia(lesson.video_path).catch(() => {}); setVideo({ path: null, file: null, busy: false }); };
   return (
     <Modal title={lesson ? 'Edit lesson' : 'New lesson'} onClose={onClose}>
       <form className="ds-form" onSubmit={save}>
         <label className="k-field"><span>Title</span><input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></label>
         <label className="k-field"><span>Lesson (# heading, - bullets, **bold**, links)</span><textarea rows={10} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} /></label>
         <label className="k-field"><span>Video link (YouTube, Vimeo, Loom — optional)</span><input type="url" value={form.video_url} onChange={(e) => setForm({ ...form, video_url: e.target.value })} /></label>
+        <div className="k-field"><span>Or upload the video file</span>
+          {video.path && !video.file ? (
+            <div className="ds-row"><Video size={18} /><div><strong>Video uploaded</strong><small>{video.path.split('/').pop().replace(/^[0-9a-f-]{36}-/, '')}</small></div>
+              <button type="button" className="k-btn k-btn--sm k-btn--ghost" onClick={() => mediaUrl(video.path).then((u) => window.open(u, '_blank', 'noopener'))}>Play</button>
+              <button type="button" className="k-btn k-btn--sm k-btn--ghost" onClick={dropVideo}><Trash2 size={14} /> Remove</button></div>
+          ) : (
+            <input type="file" accept={MEDIA_ACCEPT} onChange={(e) => setVideo((v) => ({ ...v, file: e.target.files[0] || null }))} />
+          )}
+          <small className="ds-muted">{MEDIA_NOTE} Students stream it inside the lesson.</small>
+        </div>
         <label className="k-field"><span>Reflection question (optional)</span><input value={form.reflection_prompt} onChange={(e) => setForm({ ...form, reflection_prompt: e.target.value })} /></label>
         <label className="ds-row" style={{ cursor: 'pointer' }}><input type="checkbox" className="ds-check" checked={form.is_published} onChange={(e) => setForm({ ...form, is_published: e.target.checked })} /><div><strong>Published</strong><small>Students can see it</small></div></label>
         {error && <p className="k-error">{error}</p>}
-        <button className="k-btn k-btn--gold">Save lesson</button>
+        <button className="k-btn k-btn--gold" disabled={video.busy}>{video.busy ? 'Uploading the video…' : 'Save lesson'}</button>
       </form>
     </Modal>
   );
@@ -594,7 +635,7 @@ export const MentorCurriculum = () => {
                   {ls.map((l, j) => (
                     <li key={l.id} className="ds-row">
                       <BookOpen size={18} />
-                      <div><strong>{l.title}</strong><small>{l.is_published ? 'Published' : 'Draft'}{l.video_url ? ' · video' : ''}{l.reflection_prompt ? ' · reflection' : ''}</small></div>
+                      <div><strong>{l.title}</strong><small>{l.is_published ? 'Published' : 'Draft'}{l.video_url || l.video_path ? ' · video' : ''}{l.reflection_prompt ? ' · reflection' : ''}</small></div>
                       <button className="k-btn k-btn--icon k-btn--ghost" onClick={() => moveLesson(ls, j, -1)} aria-label="Move up"><ArrowUp size={14} /></button>
                       <button className="k-btn k-btn--icon k-btn--ghost" onClick={() => moveLesson(ls, j, 1)} aria-label="Move down"><ArrowDown size={14} /></button>
                       <button className="k-btn k-btn--icon k-btn--ghost" onClick={() => togglePublish(l)} aria-label={l.is_published ? 'Unpublish' : 'Publish'}>{l.is_published ? <Eye size={14} /> : <EyeOff size={14} />}</button>

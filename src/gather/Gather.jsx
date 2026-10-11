@@ -11,6 +11,8 @@ import mark from '../assets/academy/collective-mark.webp';
 import * as api from './api';
 import { GROUPS, groupOf } from './badges';
 import { Avatar, Badges, Message, DayDivider, Composer, Lightbox, PersonCard } from './parts';
+import Tour from '../components/Tour';
+import { GATHER_TOUR } from './gatherTour';
 import './gather.css';
 
 const ICONS = { sparkles: Sparkles, book: BookOpen, hash: Hash, heart: Heart, party: PartyPopper, store: Store, calendar: CalendarDays, graduation: GraduationCap, shield: ShieldCheck };
@@ -424,7 +426,8 @@ function channelName(c, people, me) {
   return people.get(c.other_user)?.name || (me ? 'Conversation' : 'Direct message');
 }
 
-const Shell = ({ children }) => <div className="gt-shell">{children}</div>;
+// The walkthrough (?tour=gather, or Systems → Walkthroughs) rides along with every screen.
+const Shell = ({ children }) => <div className="gt-shell">{children}<Tour id="gather" steps={GATHER_TOUR} autoStart={false} /></div>;
 
 const Guest = () => (
   <Shell>

@@ -127,7 +127,7 @@ const Portal = () => {
           {!recovery && status === 'signed-out' && (
             <form className="lg__form" onSubmit={signIn}>
               <h2 className="k-h2 lg__title">{creating ? <>Create an <em>account</em></> : <>Sign <em>in</em></>}</h2>
-              <p className="lg__sub">{creating ? 'For mentors and Content Studio team members — an admin connects your dashboard.' : 'Use the email you enrolled or were invited with.'}</p>
+              <p className="lg__sub">{creating ? 'For the P31 team and mentors: use the mailbox on the team directory. An admin switches your dashboards on for that email.' : 'Use the email you enrolled, were invited with, or were given on the team.'}</p>
               {creating && (
                 <label className="lg__field"><span>Full name</span>
                   <div className="lg__input"><input required autoComplete="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
@@ -148,7 +148,7 @@ const Portal = () => {
               {note && <p className="k-fine" role="status">{note}</p>}
               <button className="k-btn k-btn--plum k-btn--lg k-btn--block" disabled={busy}>{busy ? 'One moment…' : creating ? 'Create account' : <>Sign in <ArrowRight size={18} /></>}</button>
               {!creating && <button type="button" className="lg__forgot" onClick={forgot}>Forgot password?</button>}
-              <button type="button" className="lg__forgot" onClick={() => { setCreating(!creating); setError(''); setNote(''); }}>{creating ? 'I already have an account' : 'Mentor or Studio team? Create an account'}</button>
+              <button type="button" className="lg__forgot" onClick={() => { setCreating(!creating); setError(''); setNote(''); }}>{creating ? 'I already have an account' : 'On the P31 team? Create an account'}</button>
               <p className="lg__foot">New here? <a href={hrefFor(JOIN_PATH)}>Join P31 Collective</a> or <a href={hrefFor('/academy')}>book an intro call</a></p>
             </form>
           )}

@@ -90,7 +90,7 @@ export async function marketCards() {
       items: (vendors.data || []).map((v) => ({ key: v.id, title: v.business_name, sub: `${v.full_name} · ${ago(v.created_at)}` })),
     },
     !curators.error && {
-      key: 'curators', site: 'market', Icon: Store, title: 'Shops to review', count: curators.count ?? (curators.data || []).length, to: '/dashboard/governance', cta: 'Review on p31market.com', empty: 'No shops waiting for review.',
+      key: 'curators', site: 'market', Icon: Store, title: 'Shops to review', count: curators.count ?? (curators.data || []).length, to: '/systems/shops', cta: 'Open Curators & shops', empty: 'No shops waiting for review.',
       items: (curators.data || []).map((c) => ({ key: c.id, title: c.business_name || 'New shop', sub: `Applied ${ago(c.created_at)}` })),
     },
     forms,
@@ -152,6 +152,12 @@ export async function healthCards() {
 export async function systemsCards() {
   const [m, c, h] = await Promise.all([marketCards(), collectiveCards(), healthCards()]);
   return [...m, ...c.filter((x) => x.key === 'applications'), ...h];
+}
+
+/** A team member's Systems cards: only the ones her dashboards open (pages = her Systems paths). */
+export async function teamCards(pages) {
+  const [m, c] = await Promise.all([marketCards(), collectiveCards()]);
+  return [...m, ...c.filter((x) => x.key === 'applications')].filter((x) => pages.some((p) => x.to.startsWith(p)));
 }
 
 export async function studioCards() {

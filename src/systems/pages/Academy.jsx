@@ -1,23 +1,34 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { GraduationCap, Users, Clapperboard, PhoneCall, Trash2, Plus, Check, ExternalLink, DollarSign, UserPlus } from 'lucide-react';
+import { GraduationCap, Users, Clapperboard, PhoneCall, Trash2, Plus, Check, ExternalLink, DollarSign, UserPlus, BookOpen, CalendarDays } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../context/AuthContext';
 import { money, BILLING, fmtDate } from '../../lib/academy';
 import { installCallTracking } from '../../academy/app/live';
+import { AcademyContext } from '../../academy/app/data';
+import { MentorCurriculum, MentorSessions } from '../../academy/app/mentor';
+import '../../academy/app/classroom.css';
 
 const PROGRAMS = [['business', 'Business Mentorship'], ['faith', 'Faith-Based Mentorship']];
 const ORDER = ['month', 'week', 'six_months', 'one_time'];
+const TABS = [
+  { v: 'plans', l: 'Plans & prices', Icon: DollarSign }, { v: 'curriculum', l: 'Curriculum & videos', Icon: BookOpen }, { v: 'sessions', l: 'Sessions & recordings', Icon: CalendarDays },
+  { v: 'mentors', l: 'Mentors', Icon: GraduationCap }, { v: 'members', l: 'Members', Icon: Users },
+  { v: 'studio', l: 'Studio seats', Icon: Clapperboard }, { v: 'calls', l: 'Intro calls', Icon: PhoneCall },
+];
 
-// Systems → Academy: prices (private), mentors, Content Studio seats,
-// members and every intro-call request.
+// Systems → Mentorship: prices (private), each program's curriculum, videos and sessions,
+// mentors, Content Studio seats, members and every intro-call request.
 const Academy = () => {
-  const [tab, setTab] = useState('plans');
+  const { user } = useAuth();
+  const [tab, setTab] = useState(() => new URLSearchParams(window.location.search).get('tab') || 'plans');
   const [programs, setPrograms] = useState([]);
   const [plans, setPlans] = useState([]);
   const [mentors, setMentors] = useState([]);
   const [seats, setSeats] = useState([]);
   const [rosters, setRosters] = useState({});
   const [calls, setCalls] = useState([]);
+  const [progId, setProgId] = useState('');
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
 
@@ -31,6 +42,7 @@ const Academy = () => {
     ]);
     if (p.error) { setError(p.error.message.includes('does not exist') ? 'Run storefront_v20_academy_and_studio.sql in Supabase to turn on the Academy.' : p.error.message); return; }
     setPrograms(p.data || []); setPlans(pl.data || []); setMentors(m.data || []); setSeats(s.data || []); setCalls(c.data || []);
+    setProgId((id) => id || p.data?.[0]?.id || '');
     const entries = await Promise.all((p.data || []).map(async (prog) => [prog.id, (await supabase.rpc('academy_roster', { p_program: prog.id })).data || []]));
     setRosters(Object.fromEntries(entries));
   }, []);
@@ -54,13 +66,15 @@ const Academy = () => {
   };
 
   const progName = (id) => programs.find((p) => p.id === id)?.title || 'Not sure yet';
+  const prog = programs.find((p) => p.id === progId) || null;
+  const editing = tab === 'curriculum' || tab === 'sessions';
 
   return (
     <div className="sys-page">
       <header className="sys-page__head">
-        <p className="sys-eyebrow">Academy</p>
-        <h1>Mentorships & Studio</h1>
-        <p className="sys-muted">Prices stay private: they’re shown only on the personal enrollment link a mentor sends after an intro call.</p>
+        <p className="sys-eyebrow">Collective</p>
+        <h1>Mentorship</h1>
+        <p className="sys-muted">Prices stay private: they’re shown only on the personal enrollment link a mentor sends after an intro call. Curriculum, lesson videos and sessions are edited here or from each mentor console.</p>
       </header>
       <section className="sys-card" style={{ marginBottom: 14 }}>
         <h2>Live classes</h2>
@@ -70,37 +84,53 @@ const Academy = () => {
       {msg && <p className="sys-ok"><Check size={16} /> {msg}</p>}
       {error && <p className="sys-error">{error}</p>}
 
-      <div className="sys-chips" role="tablist" style={{ marginBottom: 16 }}>
-        {[{ v: 'plans', l: 'Plans & prices', Icon: DollarSign }, { v: 'mentors', l: 'Mentors', Icon: GraduationCap }, { v: 'members', l: 'Members', Icon: Users },
-          { v: 'studio', l: 'Studio seats', Icon: Clapperboard }, { v: 'calls', l: 'Intro calls', Icon: PhoneCall }].map((t) => (
-          <button key={t.v} role="tab" aria-selected={tab === t.v} className={`sys-chip ${tab === t.v ? 'is-on' : ''}`} onClick={() => setTab(t.v)}><t.Icon size={14} /> {t.l}</button>
+      <div className="sys-chips" role="tablist" style={{ marginBottom: 16 }} data-tour="academy-tabs">
+        {TABS.map((t) => (
+          <button key={t.v} role="tab" aria-selected={tab === t.v} className={`sys-chip ${tab === t.v ? 'is-on' : ''}`} onClick={() => setTab(t.v)} data-tour={`tab-${t.v}`}><t.Icon size={14} /> {t.l}</button>
         ))}
       </div>
 
-      {tab === 'plans' && programs.map((prog) => (
-        <section key={prog.id} className="sys-card sys-form" style={{ marginBottom: 14 }}>
-          <h2>{prog.title}</h2>
-          {plans.filter((pl) => pl.program_id === prog.id).sort((a, b) => ORDER.indexOf(a.billing) - ORDER.indexOf(b.billing)).map((pl) => <PlanRow key={pl.id} plan={pl} onSave={savePlan} />)}
+      {tab === 'plans' && programs.map((p) => (
+        <section key={p.id} className="sys-card sys-form" style={{ marginBottom: 14 }}>
+          <h2>{p.title}</h2>
+          {plans.filter((pl) => pl.program_id === p.id).sort((a, b) => ORDER.indexOf(a.billing) - ORDER.indexOf(b.billing)).map((pl) => <PlanRow key={pl.id} plan={pl} onSave={savePlan} />)}
           <p className="sys-muted">A plan with no price is hidden from mentors’ invite options.</p>
         </section>
       ))}
 
+      {editing && (
+        <>
+          <div className="sys-chips" role="tablist" aria-label="Program" data-tour="academy-program">
+            {programs.map((p) => <button key={p.id} role="tab" aria-selected={progId === p.id} className={`sys-chip ${progId === p.id ? 'is-on' : ''}`} onClick={() => setProgId(p.id)}>{p.title}</button>)}
+          </div>
+          {prog ? (
+            <AcademyContext.Provider value={{ program: prog, isMentor: true, isAdmin: true, preview: false, viewAs: false, user }}>
+              <div className="ds sys-embed" data-tour="academy-editor">
+                {tab === 'curriculum' ? <MentorCurriculum key={prog.id} /> : <MentorSessions key={prog.id} />}
+              </div>
+            </AcademyContext.Provider>
+          ) : <p className="sys-muted">No programs yet.</p>}
+          <p className="sys-muted" style={{ marginTop: 10 }}>Students see published modules and lessons in their classroom at once. Mentors can edit the same curriculum from their console.</p>
+        </>
+      )}
+
       {tab === 'mentors' && (
         <>
           <AddByEmail label="Add a mentor" withProgram withTitle onAdd={({ email, program, title }) => rpc('add_academy_mentor', { p_email: email, p_program: program, p_title: title || null })} />
-          {programs.map((prog) => (
-            <section key={prog.id} className="sys-card" style={{ marginTop: 14 }}>
-              <h2>{prog.title}</h2>
+          <p className="sys-muted" style={{ marginTop: 10 }}>A team member with the Classroom dashboard (Systems → Team & dashboards) is a mentor of every program without being listed here.</p>
+          {programs.map((p) => (
+            <section key={p.id} className="sys-card" style={{ marginTop: 14 }}>
+              <h2>{p.title}</h2>
               <ul className="sys-list">
-                {mentors.filter((m) => m.program_id === prog.id).map((m) => (
+                {mentors.filter((m) => m.program_id === p.id).map((m) => (
                   <li key={m.user_id} className="sys-result">
                     <div className="sys-result__main"><h3>{m.display_name}</h3><div className="sys-result__meta"><span>{m.title || 'Mentor'}</span><span>since {fmtDate(m.created_at)}</span></div></div>
-                    <button className="sys-icon-btn" onClick={() => window.confirm('Remove this mentor?') && rpc('remove_academy_mentor', { p_user: m.user_id, p_program: prog.slug })} aria-label="Remove mentor"><Trash2 size={16} /></button>
+                    <button className="sys-icon-btn" onClick={() => window.confirm('Remove this mentor?') && rpc('remove_academy_mentor', { p_user: m.user_id, p_program: p.slug })} aria-label="Remove mentor"><Trash2 size={16} /></button>
                   </li>
                 ))}
-                {!mentors.some((m) => m.program_id === prog.id) && <li className="sys-muted">No mentors yet.</li>}
+                {!mentors.some((m) => m.program_id === p.id) && <li className="sys-muted">No mentors yet.</li>}
               </ul>
-              <Link to={`/academy/${prog.slug}/teach`} className="sys-linkbtn">Open the mentor console <ExternalLink size={13} /></Link>
+              <Link to={`/academy/${p.slug}/teach`} className="sys-linkbtn">Open the mentor console <ExternalLink size={13} /></Link>
             </section>
           ))}
         </>
@@ -109,20 +139,20 @@ const Academy = () => {
       {tab === 'members' && (
         <>
           <ManualEnroll onEnroll={(f) => rpc('academy_enroll_manual', { p_email: f.email, p_program: f.program, p_days: f.days ? Number(f.days) : null, p_source: f.source })} />
-          {programs.map((prog) => (
-            <section key={prog.id} className="sys-card" style={{ marginTop: 14 }}>
-              <h2>{prog.title} <span className="sys-muted">· {(rosters[prog.id] || []).filter((r) => r.status === 'active').length} active</span></h2>
+          {programs.map((p) => (
+            <section key={p.id} className="sys-card" style={{ marginTop: 14 }}>
+              <h2>{p.title} <span className="sys-muted">· {(rosters[p.id] || []).filter((r) => r.status === 'active').length} active</span></h2>
               <ul className="sys-list">
-                {(rosters[prog.id] || []).map((r) => (
+                {(rosters[p.id] || []).map((r) => (
                   <li key={r.user_id} className="sys-result">
                     <div className="sys-result__main">
                       <h3>{r.full_name}</h3>
                       <div className="sys-result__meta"><span>{r.email}</span><span>{r.plan_label || r.source}</span><span>{r.status}</span><span>{r.access_until ? `to ${fmtDate(r.access_until)}` : 'open-ended'}</span></div>
                     </div>
-                    {r.status !== 'expired' && <EndButton userId={r.user_id} programId={prog.id} onDone={done} onFail={fail} />}
+                    {r.status !== 'expired' && <EndButton userId={r.user_id} programId={p.id} onDone={done} onFail={fail} />}
                   </li>
                 ))}
-                {!(rosters[prog.id] || []).length && <li className="sys-muted">No members yet.</li>}
+                {!(rosters[p.id] || []).length && <li className="sys-muted">No members yet.</li>}
               </ul>
             </section>
           ))}
@@ -140,7 +170,7 @@ const Academy = () => {
                   <button className="sys-icon-btn" onClick={() => window.confirm('Remove this Studio seat?') && rpc('remove_studio_member', { p_user: s.user_id })} aria-label="Remove seat"><Trash2 size={16} /></button>
                 </li>
               ))}
-              {!seats.length && <li className="sys-muted">No seats given yet. Studio members sign in at /portal.</li>}
+              {!seats.length && <li className="sys-muted">No seats given yet. Studio members sign in at /portal. The Content creator dashboard (Team & dashboards) opens the Studio too.</li>}
             </ul>
           </section>
         </>

@@ -57,7 +57,7 @@ Proverbs 31 Marketplace ("P31") is a curated, traveling marketplace and communit
 - Savannah Campbell, Executive Assistant (administrative support, outreach communications, scheduling with Melanie): secretary@thep31collective.org · secretary@p31market.com
 - Yanni Bratcher, Marketing Strategist (marketing, press, collaborations and awareness): marketing@p31market.com
 - Alexia Thomas, Member Liaison (mentorship members, community experience, event planning, market questions): members@thep31collective.org · outreach@p31market.com
-- Shanay Prince, Support Coordinator (grants, partnerships, sponsorships, operations): coordinator@thep31collective.org · grants@p31market.com
+- Shanay Prince, Support Coordinator (grants, partnerships, sponsorships, operations): grants@thep31collective.org · grants@p31market.com · coordinator@p31market.com
 - Anthony Carr, Marketplace Tech Support (curator storefronts, vendor help, website trouble): vendor@p31market.com
 Give one email, the one that fits the question. For general market questions use outreach@p31market.com.
 

@@ -1,5 +1,7 @@
-// The P31 Marketplace & Collective team directory: one source for names, roles and inboxes,
-// used by both sites, structured data and the DM assistant's routing.
+// The P31 Marketplace & Collective team directory (October 2026): one source for names, roles
+// and inboxes, used by both sites, structured data, the Team page in Systems and the DM assistant.
+// Each mailbox is its own login; the @p31market.com ones belong to the marketplace side and the
+// @thep31collective.org ones to the Collective side.
 
 export const FOUNDER = 'Melanie JC';
 
@@ -20,16 +22,21 @@ export const EMAIL = {
   marketing: 'marketing@p31market.com',
   members: 'members@thep31collective.org',
   community: 'outreach@p31market.com',
-  support: 'coordinator@thep31collective.org',
+  grantsCollective: 'grants@thep31collective.org',
   grants: 'grants@p31market.com',
+  support: 'coordinator@p31market.com',
   vendors: 'vendor@p31market.com',
 };
 
+// photo: the key of her headshot in src/lib/teamPhotos.js (none for Anthony yet).
 export const TEAM = [
-  { name: 'Melanie JC', role: 'Founder & CEO', focus: ['Vision & leadership', 'Partnerships & decisions'], emails: [EMAIL.founder, EMAIL.ceo], icon: 'crown' },
-  { name: 'Savannah Campbell', role: 'Executive Assistant', focus: ['Administrative support', 'Outreach communications'], emails: [EMAIL.assistant, EMAIL.assistantMarket], icon: 'clipboard' },
-  { name: 'Yanni Bratcher', role: 'Marketing Strategist', focus: ['Marketing strategy', 'Organization awareness'], emails: [EMAIL.marketing], icon: 'megaphone' },
-  { name: 'Alexia Thomas', role: 'Member Liaison', focus: ['Community experience', 'Event planning'], emails: [EMAIL.members, EMAIL.community], icon: 'people' },
-  { name: 'Shanay Prince', role: 'Support Coordinator', focus: ['Grants & partnerships', 'Operations support'], emails: [EMAIL.support, EMAIL.grants], icon: 'headset' },
-  { name: 'Anthony Carr', role: 'Marketplace Tech Support', focus: ['Virtual marketplace troubleshooting', 'Vendor support'], emails: [EMAIL.vendors], icon: 'laptop' },
+  { name: 'Melanie JC', role: 'Founder & CEO', focus: ['Vision & leadership', 'Partnerships & decisions'], emails: [EMAIL.founder, EMAIL.ceo], icon: 'crown', photo: 'melanie' },
+  { name: 'Savannah Campbell', role: 'Executive Assistant', focus: ['Administrative support', 'Outreach communications'], emails: [EMAIL.assistant, EMAIL.assistantMarket], icon: 'clipboard', photo: 'a' },
+  { name: 'Yanni Bratcher', role: 'Marketing Strategist', focus: ['Marketing strategy', 'Organization awareness'], emails: [EMAIL.marketing], icon: 'megaphone', photo: 'b' },
+  { name: 'Alexia Thomas', role: 'Member Liaison', focus: ['Community experience', 'Event planning'], emails: [EMAIL.members, EMAIL.community], icon: 'people', photo: 'c' },
+  { name: 'Shanay Prince', role: 'Support Coordinator', focus: ['Grants & partnerships', 'Operations support'], emails: [EMAIL.grantsCollective, EMAIL.grants, EMAIL.support], icon: 'headset', photo: 'd' },
+  { name: 'Anthony Carr', role: 'Marketplace Tech Support', focus: ['Virtual marketplace troubleshooting', 'Vendor support'], emails: [EMAIL.vendors], icon: 'laptop', photo: null },
 ];
+
+/** The team member a mailbox belongs to. */
+export const memberByEmail = (email = '') => TEAM.find((p) => p.emails.includes(email.toLowerCase()));

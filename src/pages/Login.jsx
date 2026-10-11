@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Mail, Lock, ArrowRight, Eye, EyeOff, Store, UserRound, Check } from 'lucide-react';
 import LazyVideo from '../components/LazyVideo';
+import { collectivePortal } from '../lib/site';
 import './Login.css';
 
 import curatorVid from '../assets/web/curator.mp4';
@@ -152,6 +153,9 @@ const Login = () => {
 
           <p className="lg__foot">
             Not approved yet? <Link to="/apply">Apply to become a curator</Link>
+          </p>
+          <p className="lg__foot">
+            On the P31 team? <a href={collectivePortal()}>Sign in at the member portal</a>
           </p>
         </div>
       </div>

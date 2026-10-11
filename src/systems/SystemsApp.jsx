@@ -1,16 +1,19 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes, Navigate, useLocation } from 'react-router-dom';
-import { LogOut, Menu, X, Sun, ArrowUpRight, ChevronDown, ChevronRight, Monitor } from 'lucide-react';
+import { LogOut, Menu, X, Sun, ArrowUpRight, ChevronDown, ChevronRight, Monitor, Compass, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useOperator } from './useOperator';
-import { useRoles } from '../lib/roles';
+import { useRoles, isTeam } from '../lib/roles';
+import { DASH, dashboardsOf, systemsPagesFor } from '../lib/dashboards';
 import { useIsPhone } from '../lib/device';
 import SystemsLogin from './SystemsLogin';
 import SystemsShowcase from './SystemsShowcase';
 import Overview from './pages/Overview';
-import { SITES, SYSTEMS_HOME, SYSTEMS_GROUPS, SYSTEMS_NAV, MOBILE_TABS, navFor } from './nav';
+import SystemsTour from './SystemsTour';
+import { SITES, SYSTEMS_HOME, SYSTEMS_GROUPS, SYSTEMS_NAV, MOBILE_TABS, navFor, itemAllowed } from './nav';
 import { hrefFor } from '../lib/site';
 import './Systems.css';
+import './pages/pages.css';
 
 // Heavy tools load on first visit to their tab.
 const Social = lazy(() => import('./pages/Social'));
@@ -29,9 +32,16 @@ const Health = lazy(() => import('./pages/Health'));
 const TeamAccess = lazy(() => import('./pages/TeamAccess'));
 const VendorApplications = lazy(() => import('./pages/VendorApplications'));
 const Forms = lazy(() => import('./pages/Forms'));
+const Shops = lazy(() => import('./pages/Shops'));
+const Walkthroughs = lazy(() => import('./pages/Walkthroughs'));
 
-// Team members who aren't Systems admins get only the pages for the tools they were given.
-const TEAM_PAGES = { davinci: '/systems/pro-edit' };
+// Every Systems page by its path segment. Team members see only the ones their dashboards unlock.
+const PAGES = {
+  orders: Orders, vendors: VendorApplications, forms: Forms, events: Events, shops: Shops, campaigns: Campaigns,
+  applications: Applications, academy: Academy, crm: Crm, social: Social, growth: Growth, photos: Photos, clips: Clips, 'pro-edit': ProEdit,
+  team: TeamAccess, health: Health, settings: SettingsPage, walkthroughs: Walkthroughs,
+};
+const ADMIN_PAGES = ['team', 'health', 'settings'];
 
 const readFolded = (key) => { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; } };
 
@@ -52,6 +62,46 @@ const NavItem = ({ n, className, size, onClick, tag = false }) => {
 
 const SitePill = ({ site }) => <span className={`sys-site sys-site--${site}`}>{SITES[site]?.label || site}</span>;
 
+/** The home of a team member: the dashboards she was given, each with where it opens. */
+const TeamHome = ({ name, dashboards }) => {
+  const hour = new Date().getHours();
+  const first = (name || '').trim().split(/\s+/)[0];
+  return (
+    <div className="sys-page">
+      <header className="sys-page__head">
+        <p className="sys-eyebrow">Your dashboards · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+        <h1>{hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'}{first ? `, ${first}.` : '.'}</h1>
+        <p className="sys-muted">{dashboards.length ? `${dashboards.length === 1 ? 'The dashboard this login opens' : 'The dashboards this login opens'}, and where each one leads. An admin can add more from Team & dashboards.` : 'No dashboards are switched on for this login yet. Ask an admin to assign yours in Systems → Team & dashboards.'}</p>
+      </header>
+      <div className="sys-dash-grid" data-tour="team-home">
+        {dashboards.map((id) => {
+          const d = DASH[id];
+          const links = [...d.systems.map((to) => ({ to, label: SYSTEMS_NAV.find((n) => n.to === to)?.label || to })), ...d.opens];
+          return (
+            <article key={id} className={`sys-dash ${d.paused ? 'is-paused' : ''}`}>
+              <span className="sys-dash__icon"><d.Icon size={22} /></span>
+              <h2>{d.label}{d.paused && <span className="sys-tag sys-tag--dim">Paused</span>}</h2>
+              <p>{d.blurb}</p>
+              <div className="sys-dash__links">
+                {links.map((l) => {
+                  const href = hrefFor(l.to);
+                  return href === l.to
+                    ? <Link key={l.to} to={l.to} className="sys-btn sys-btn--ghost sys-btn--sm">{l.label} <ArrowRight size={13} /></Link>
+                    : <a key={l.to} href={href} className="sys-btn sys-btn--ghost sys-btn--sm">{l.label} <ArrowUpRight size={13} /></a>;
+                })}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+      <section className="sys-card sys-card--row">
+        <div><h2><Compass size={18} /> New here?</h2><p className="sys-muted">Every dashboard has an animated walkthrough, and a test run that shows it working.</p></div>
+        <Link to="/systems/walkthroughs" className="sys-btn sys-btn--gold">Open the walkthroughs</Link>
+      </section>
+    </div>
+  );
+};
+
 const SystemsApp = () => {
   const { status: opStatus, operator: op } = useOperator();
   const { status: roleStatus, roles, user } = useRoles();
@@ -63,20 +113,24 @@ const SystemsApp = () => {
   const [folded, setFolded] = useState(() => readFolded('p31_sys_nav'));
   useEffect(() => { try { localStorage.setItem('p31_sys_nav', JSON.stringify(folded)); } catch { /* private mode */ } }, [folded]);
 
-  // Admins (Systems operators) see everything; team members see only their tools.
-  const full = opStatus === 'operator';
-  const teamPages = !full && opStatus === 'not-operator' && roleStatus === 'ready'
-    ? (roles.tools || []).map((t) => TEAM_PAGES[t]).filter(Boolean) : [];
+  // Admins (Systems operators and site admins) see everything; team members see their dashboards.
+  const rolesReady = roleStatus === 'ready';
+  const full = opStatus === 'operator' || (rolesReady && !!roles.admin);
+  const mine = rolesReady && !full ? dashboardsOf(roles) : [];
+  const pages = full ? [] : systemsPagesFor(mine);
+  const teamOnly = !full && rolesReady && (pages.length > 0 || isTeam(roles));
   const status = full ? 'operator'
-    : opStatus === 'not-operator' && roleStatus === 'loading' ? 'loading'
-      : teamPages.length ? 'team' : opStatus;
-  const operator = full ? op : { display_name: user?.user_metadata?.full_name || user?.email || 'Team', role: 'team' };
+    : opStatus === 'loading' || (opStatus !== 'signed-out' && !rolesReady) ? 'loading'
+      : teamOnly ? 'team' : opStatus;
+  const name = user?.user_metadata?.full_name || user?.email || 'Team';
+  const operator = full ? (op || { display_name: name, role: 'admin' }) : { display_name: name, role: 'team' };
   const groups = SYSTEMS_GROUPS
-    .map((g) => ({ ...g, items: full ? g.items : g.items.filter((n) => teamPages.includes(n.to)) }))
+    .map((g) => ({ ...g, items: g.items.filter((n) => itemAllowed(n, mine, full)) }))
     .filter((g) => g.items.length);
-  const tabs = full ? MOBILE_TABS.map((to) => SYSTEMS_NAV.find((n) => n.to === to)).filter(Boolean) : groups.flatMap((g) => g.items).slice(0, 4);
+  const tabs = full ? MOBILE_TABS.map((to) => SYSTEMS_NAV.find((n) => n.to === to)).filter(Boolean) : groups.flatMap((g) => g.items).filter((n) => !n.away).slice(0, 4);
   const here = navFor(pathname);
   const inMore = !tabs.some((n) => n.to === pathname.replace(/\/+$/, ''));
+  const allowed = (seg) => full || seg === 'walkthroughs' || (!ADMIN_PAGES.includes(seg) && pages.includes(`/systems/${seg}`));
 
   useEffect(() => {
     if (!moreOpen) return undefined;
@@ -88,15 +142,14 @@ const SystemsApp = () => {
   const atFront = pathname.replace(/\/+$/, '') === '/systems';
   if (status === 'loading') return <div className="sys-boot" aria-busy="true" />;
   // Visitors (and members without Systems access) at /systems see what Systems is.
-  if (atFront && status === 'team') return <Navigate to={teamPages[0]} replace />;
-  if (atFront && status !== 'operator') return <SystemsShowcase />;
+  if (atFront && status !== 'operator' && status !== 'team') return <SystemsShowcase />;
   if (status === 'signed-out') return <SystemsLogin />;
   if (status === 'not-operator') {
     return (
       <div className="sys-login">
         <div className="sys-login__card">
           <h1>Systems</h1>
-          <p className="sys-alert">This account doesn’t have Systems access.</p>
+          <p className="sys-alert">This account doesn’t have Systems access. An admin switches dashboards on in Systems → Team & dashboards for the email you sign in with.</p>
           <button className="sys-btn sys-btn--gold sys-btn--block" onClick={signOut}>Sign in as someone else</button>
         </div>
       </div>
@@ -113,7 +166,7 @@ const SystemsApp = () => {
           <span>Systems</span>
         </div>
         <nav className="sys-side__nav" aria-label="Systems">
-          {full && <NavItem n={SYSTEMS_HOME} className="sys-side__link" size={18} />}
+          <NavItem n={full ? SYSTEMS_HOME : { ...SYSTEMS_HOME, label: 'My dashboards' }} className="sys-side__link" size={18} />
           {groups.map((g) => {
             // A group folds unless the current page is inside it.
             const shut = !!folded[g.id] && !g.items.some((n) => pathname.replace(/\/+$/, '').startsWith(n.to));
@@ -149,39 +202,21 @@ const SystemsApp = () => {
               <ChevronRight size={13} className="sys-crumb__sep" /><strong>{here.item.label}</strong>
               {here.item.paused ? <span className="sys-tag sys-tag--dim">Paused</span> : here.item.desktop && <span className="sys-tag"><Monitor size={11} /> Computer</span>}
             </>
-          ) : <strong>Overview</strong>}
+          ) : <strong>{full ? 'Overview' : 'My dashboards'}</strong>}
           {site !== 'both' && <span className="sys-crumb__host">{SITES[site]?.host}</span>}
         </div>
 
         <Suspense fallback={<div className="sys-loading">Loading…</div>}>
-          {!full ? (
-            <Routes>
-              {teamPages.includes('/systems/pro-edit') && <Route path="pro-edit" element={<ProEdit />} />}
-              <Route path="*" element={<Navigate to={teamPages[0]} replace />} />
-            </Routes>
-          ) : (
           <Routes>
-            <Route index element={<Overview operator={operator} />} />
-            <Route path="crm" element={<Crm />} />
-            <Route path="applications" element={<Applications />} />
-            <Route path="health" element={<Health />} />
-            <Route path="social" element={<Social />} />
-            <Route path="growth" element={<Growth />} />
-            <Route path="events" element={<Events />} />
-            <Route path="campaigns" element={<Campaigns />} />
-            <Route path="orders" element={<Orders />} />
-            <Route path="academy" element={<Academy />} />
-            <Route path="clips" element={<Clips />} />
-            <Route path="photos" element={<Photos />} />
-            <Route path="pro-edit" element={<ProEdit />} />
-            <Route path="settings" element={<SettingsPage operator={operator} />} />
-            <Route path="team" element={<TeamAccess />} />
-            <Route path="vendors" element={<VendorApplications />} />
-            <Route path="forms" element={<Forms />} />
+            <Route index element={full ? <Overview operator={operator} /> : <TeamHome name={name} dashboards={mine} />} />
+            {Object.entries(PAGES).map((entry) => {
+              const seg = entry[0]; const Page = entry[1];
+              return <Route key={seg} path={seg} element={allowed(seg) ? <Page operator={operator} /> : <Navigate to="/systems" replace />} />;
+            })}
             <Route path="*" element={<Navigate to="/systems" replace />} />
           </Routes>
-          )}
         </Suspense>
+        <SystemsTour user={user} />
       </main>
 
       <nav className="sys-tabbar">
@@ -206,7 +241,7 @@ const SystemsApp = () => {
             </div>
             <nav className="sys-more__nav" aria-label="All Systems sections">
               <div className="sys-more__grid">
-                {full && <NavItem n={SYSTEMS_HOME} className="sys-more__link" size={22} onClick={() => setMoreOpen(false)} />}
+                <NavItem n={full ? SYSTEMS_HOME : { ...SYSTEMS_HOME, label: 'My dashboards' }} className="sys-more__link" size={22} onClick={() => setMoreOpen(false)} />
                 <Link to="/today" className="sys-more__link"><Sun size={22} /> <span>Today</span></Link>
               </div>
               {groups.map((g) => (

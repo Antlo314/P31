@@ -51,3 +51,21 @@ const classroomTour = (slug) => {
 
 // Built once, so the walkthrough keeps the same steps from render to render.
 export const CLASSROOM_TOURS = { business: classroomTour('business'), faith: classroomTour('faith') };
+
+// The mentor console walkthrough (mentors, admins and the Classroom dashboard).
+const mentorTour = (slug) => {
+  const t = `/academy/${slug}/teach`;
+  const name = slug === 'faith' ? 'Faith-Based Mentorship' : 'Business Mentorship';
+  return [
+    { title: `The ${name} console`, body: 'Everything for running the program: students, their work, the curriculum and videos, sessions, intro calls and enrollment. A two-minute tour.' },
+    { to: t, targets: at(t), title: 'Overview', body: 'Active students, new intro-call requests, unread messages and work waiting for feedback, with what is coming up. “Go live now” opens a live room at once.' },
+    { to: `${t}/students`, targets: at(`${t}/students`), title: 'Students', body: 'Each student’s page: messages, personal tasks, files, 1:1 sessions, action plans, progress, submitted work and private notes. “See their dashboard” shows her classroom exactly as she sees it.' },
+    { to: `${t}/gradebook`, targets: at(`${t}/gradebook`), title: 'Gradebook', body: 'Work handed in, graded against the rubric you set on each assignment, with written feedback she reads in her classroom.' },
+    { to: `${t}/curriculum`, targets: at(`${t}/curriculum`), title: 'Curriculum & videos', body: 'Modules and lessons, each with notes, a video link or an uploaded video, a reflection question and downloads. Publish when ready; students see it at once.' },
+    { to: `${t}/sessions`, targets: at(`${t}/sessions`), title: 'Sessions & recordings', body: 'Group sessions in the live room, on Zoom, or any link. Afterwards add notes, attendance and the recording (a link or an uploaded file).' },
+    { to: `${t}/calls`, targets: at(`${t}/calls`), title: 'Intro calls and invites', body: 'Requests from the mentorship page. After the call, send a private enrollment link with the plan and price only she sees.' },
+    { to: `${t}/announcements`, targets: at(`${t}/announcements`), title: 'Announcements', body: 'News, reminders and encouragement for everyone in the program, pinned when they matter.' },
+    { title: 'That is the console', body: 'Replay this any time from the ? button. Admins can also edit the curriculum, videos and sessions from Systems → Mentorship.' },
+  ];
+};
+export const MENTOR_TOURS = { business: mentorTour('business'), faith: mentorTour('faith') };

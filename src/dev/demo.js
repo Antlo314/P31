@@ -26,9 +26,12 @@ const PEOPLE = {
   'u-dv': { name: 'Sample DaVinci Editor', email: 'davinci@example.com' },
   'u-st': { name: 'Sample Studio Seat', email: 'studio@example.com' },
   'u-cu': { name: 'Sample Curator', email: 'curator@example.com' },
+  'u-sv': { name: 'Savannah Campbell', email: 'secretary@thep31collective.org' },
+  'u-an': { name: 'Anthony Carr', email: 'vendor@p31market.com' },
 };
+// team = a team member with a few dashboards (like Savannah); shops = the shops dashboard (like Anthony).
 const userFor = (mode) => {
-  const id = mode === 'student' ? 'u-s1' : mode === 'faith' ? 'u-s5' : mode === 'davinci' ? 'u-dv' : mode === 'studio' ? 'u-st' : mode === 'curator' ? 'u-cu' : 'u-mel';
+  const id = mode === 'student' ? 'u-s1' : mode === 'faith' ? 'u-s5' : mode === 'davinci' ? 'u-dv' : mode === 'studio' ? 'u-st' : mode === 'curator' ? 'u-cu' : mode === 'team' ? 'u-sv' : mode === 'shops' ? 'u-an' : 'u-mel';
   return { id, email: PEOPLE[id].email, user_metadata: { full_name: PEOPLE[id].name }, app_metadata: {}, aud: 'authenticated' };
 };
 
@@ -227,8 +230,16 @@ const makeDb = () => ({
     { id: 'or2', product_name: 'Sample Tote Bag', buyer_name: 'Sample Buyer', buyer_email: 'buyer@example.com', quantity: 2, amount_total: 5000, amount_subtotal: 5000, order_type: 'request', fulfillment_method: 'shipping', fulfillment_status: 'fulfilled', payment_status: 'paid', created_at: day(-3) },
   ],
   team_access: [
-    { email: 'davinci@example.com', full_name: 'Sample DaVinci Editor', tools: ['davinci'], note: 'Sample', created_at: day(-2) },
-    { email: 'studio@example.com', full_name: 'Sample Studio Seat', tools: ['studio'], note: 'Sample', created_at: day(-1) },
+    { email: 'founder@thep31collective.org', full_name: 'Melanie JC', tools: [], note: 'Site admin: every dashboard', role_title: 'Founder & CEO', photo_key: 'melanie', site: 'collective', sort_order: 10, created_at: day(-30) },
+    { email: 'ceo@p31market.com', full_name: 'Melanie JC', tools: [], note: 'Site admin: every dashboard', role_title: 'Founder & CEO', photo_key: 'melanie', site: 'market', sort_order: 11, created_at: day(-30) },
+    { email: 'secretary@thep31collective.org', full_name: 'Savannah Campbell', tools: ['people', 'emails', 'classroom'], note: 'Administrative support, outreach communications', role_title: 'Executive Assistant', photo_key: 'a', site: 'collective', sort_order: 20, created_at: day(-30) },
+    { email: 'secretary@p31market.com', full_name: 'Savannah Campbell', tools: ['vendors', 'events', 'orders', 'emails'], note: 'Administrative support, outreach communications', role_title: 'Executive Assistant', photo_key: 'a', site: 'market', sort_order: 21, created_at: day(-30) },
+    { email: 'marketing@p31market.com', full_name: 'Yanni Bratcher', tools: ['studio', 'social'], note: 'Marketing strategy, organization awareness', role_title: 'Marketing Strategist', photo_key: 'b', site: 'market', sort_order: 30, created_at: day(-30) },
+    { email: 'members@thep31collective.org', full_name: 'Alexia Thomas', tools: ['people', 'emails'], note: 'Community experience, event planning', role_title: 'Member Liaison', photo_key: 'c', site: 'collective', sort_order: 40, created_at: day(-30) },
+    { email: 'grants@p31market.com', full_name: 'Shanay Prince', tools: ['vendors', 'events'], note: 'Grants and partnerships, operations support', role_title: 'Support Coordinator', photo_key: 'd', site: 'market', sort_order: 51, created_at: day(-30) },
+    { email: 'vendor@p31market.com', full_name: 'Anthony Carr', tools: ['davinci', 'shops', 'vendors', 'orders'], note: 'Virtual marketplace troubleshooting, vendor support', role_title: 'Marketplace Tech Support', photo_key: null, site: 'market', sort_order: 60, created_at: day(-30) },
+    { email: 'davinci@example.com', full_name: 'Sample DaVinci Editor', tools: ['davinci'], note: 'Sample', role_title: 'Video editor', photo_key: null, site: 'both', sort_order: 100, created_at: day(-2) },
+    { email: 'studio@example.com', full_name: 'Sample Studio Seat', tools: ['studio'], note: 'Sample', role_title: 'Content creator', photo_key: null, site: 'both', sort_order: 101, created_at: day(-1) },
   ],
   email_threads: [
     { id: 'et-1', mailbox: 'collective', subject: 'Question about joining', contact_email: 'sample.applicant@example.com', contact_name: 'Sample Applicant', status: 'needs_reply', category: 'applicant', summary: 'Applied last week; asks when she will hear back and whether she can attend the next meetup.', needs_human: false, human_reason: null,
@@ -357,6 +368,8 @@ const GATHER_ROLES = {
   'u-s2': { admin: false, team: false, mentor: [], student: [{ program: 'business', alum: true }], vendor: null, title: null },
   'u-s5': { admin: false, team: false, mentor: [], student: [{ program: 'faith', alum: false }], vendor: null, title: null },
   'u-st': { admin: false, team: true, mentor: [], student: [], vendor: null, title: 'Marketing Strategist' },
+  'u-sv': { admin: false, team: true, mentor: ['business', 'faith'], student: [], vendor: null, title: 'Executive Assistant' },
+  'u-an': { admin: false, team: true, mentor: [], student: [], vendor: null, title: 'Marketplace Tech Support' },
 };
 const gatherAud = (mode) => {
   const id = userFor(mode).id; const r = GATHER_ROLES[id];
@@ -406,11 +419,32 @@ const rpc = {
           ? { signed_in: true, admin: false, operator: false, curator: false, studio: true, tools: ['studio'], mentor: [], student: [] }
         : mode === 'curator'
           ? { signed_in: true, admin: false, operator: false, curator: true, studio: false, tools: [], mentor: [], student: [] }
-          : { signed_in: true, admin: true, operator: true, curator: false, studio: true, tools: ['studio', 'davinci'], mentor: ['business', 'faith'], student: [] }),
+          : mode === 'team'
+            ? { signed_in: true, admin: false, operator: false, curator: false, studio: true, tools: ['people', 'emails', 'classroom', 'vendors', 'events'], mentor: ['business', 'faith'], student: [] }
+            : mode === 'shops'
+              ? { signed_in: true, admin: false, operator: false, curator: false, studio: false, tools: ['shops', 'vendors', 'orders', 'davinci'], mentor: [], student: [] }
+              : { signed_in: true, admin: true, operator: true, curator: false, studio: true, tools: ['studio', 'social', 'emails', 'classroom', 'people', 'vendors', 'events', 'orders', 'shops', 'davinci'], mentor: ['business', 'faith'], student: [] }),
   team_access_status: () => [
+    { email: 'founder@thep31collective.org', has_account: true, confirmed: true, last_sign_in: day(-1) },
+    { email: 'ceo@p31market.com', has_account: false, confirmed: false, last_sign_in: null },
+    { email: 'secretary@thep31collective.org', has_account: true, confirmed: true, last_sign_in: day(-2) },
+    { email: 'secretary@p31market.com', has_account: false, confirmed: false, last_sign_in: null },
+    { email: 'marketing@p31market.com', has_account: true, confirmed: false, last_sign_in: null },
+    { email: 'members@thep31collective.org', has_account: false, confirmed: false, last_sign_in: null },
+    { email: 'grants@p31market.com', has_account: false, confirmed: false, last_sign_in: null },
+    { email: 'vendor@p31market.com', has_account: true, confirmed: true, last_sign_in: day(-3) },
     { email: 'davinci@example.com', has_account: true, confirmed: true, last_sign_in: day(-1) },
     { email: 'studio@example.com', has_account: false, confirmed: false, last_sign_in: null },
   ],
+  // Curators & shops (v41): every shop, its products, and the admin controls.
+  shop_admin_list: () => db.curator_data.map((c) => ({
+    ...c, verification_badges: c.verification_badges || [], owner_name: c.profiles?.full_name || PEOPLE[c.id]?.name || 'Sample Owner', owner_email: PEOPLE[c.id]?.email || 'owner@example.com',
+    products: db.products.filter((p) => p.curator_id === c.id).length, products_active: db.products.filter((p) => p.curator_id === c.id && p.is_active !== false).length,
+    orders: c.id === 'u-cu' ? db.orders.length : 0, orders_30d: c.id === 'u-cu' ? 1 : 0, stripe_connected: c.id === 'u-cu', is_featured: !!c.is_featured, is_paid: !!c.is_paid, is_early_bird: !!c.is_early_bird,
+  })),
+  shop_admin_update: (a) => { const c = db.curator_data.find((x) => x.id === a.p_id); if (c) Object.assign(c, a.p_patch); return c ? { id: c.id, status: c.status, slug: c.slug } : null; },
+  shop_admin_products: (a) => db.products.filter((p) => p.curator_id === a.p_id).map((p) => ({ id: p.id, name: p.name, price: p.price, image_url: p.image_url, is_active: p.is_active !== false, is_featured: !!p.is_featured, badge: p.badge, category: p.category, created_at: p.created_at })),
+  shop_admin_set_product: (a) => { const p = db.products.find((x) => x.id === a.p_id); if (p) Object.assign(p, a.p_patch); return p; },
   academy_roster: (a) => roster(a.p_program),
   academy_inbox: (a) => roster(a.p_program).slice(0, 3).map((r, i) => ({
     student_id: r.user_id, full_name: r.full_name, email: r.email, unread: [1, 0, 2][i],

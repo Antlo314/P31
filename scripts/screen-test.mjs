@@ -66,7 +66,7 @@ const SCREENS = [
   ['studio creative tools on a phone', cl('/studio/create'), ['Clip Studio'], 'Clip Studio needs a computer', { phone: true }],
   ['curator creative studio on a phone', at('market', 'curator')('/dashboard/studio'), ['Clip Studio'], 'Clip Studio needs a computer', { phone: true }],
   ['today on a phone', cl('/today'), [], 'Join applications', { phone: true }],
-  ['team access', cl('/systems/team'), [], 'Give someone access'],
+  ['team access', cl('/systems/team'), [], 'Add a login'],
   ['vendor applications', cl('/systems/vendors'), [], 'Sample Candle Co.'],
   ['vendor decision email', cl('/systems/vendors'), ['All', 'Sample Crafts'], 'Sends the welcome from vendor@p31market.com'],
   ['event lineup', cl('/systems/events'), ['Lineup'], 'Sample Candle Co.'],
@@ -74,7 +74,7 @@ const SCREENS = [
   ['davinci paused', cl('/systems/pro-edit'), [], 'DaVinci is paused for now'],
   // Team members with one tool (like Anthony → DaVinci, Yanni → Content Studio).
   ['davinci member sees the pause note', at('collective', 'davinci')('/systems/pro-edit'), [], 'DaVinci is paused for now'],
-  ['davinci member: systems is davinci only', at('collective', 'davinci')('/systems/crm'), [], 'DaVinci is paused for now'],
+  ['davinci member: a page she lacks goes to her dashboards', at('collective', 'davinci')('/systems/crm'), [], 'this login opens'],
   ['studio member lands in studio + walkthrough', at('collective', 'studio')('/portal'), [], 'Welcome to Content Studio'],
   ['studio walkthrough steps', cl('/studio'), ['Next', 'Next'], 'Planner: months ahead'],
   ['studio planner', cl('/studio/planner'), [], 'Plan this month with AI'], ['studio planner: open a post', cl('/studio/planner'), ['Two weeks until the Luncheon'], 'Draft hook, caption & hashtags'],
@@ -144,11 +144,45 @@ const SCREENS = [
   ['about: team photo and portraits', mk('/about'), [], 'Savannah Campbell'],
   ['pop-up opens from the footer', mk('/'), ['Subscribe to our newsletter'], 'You’re subscribed'],
   ['collective: melanie and the team', cl('/'), [], 'Melanie JC'],
+  // Team dashboards (v41): the Team page, a team member's console, the shops page, curriculum and sessions editors, walkthroughs.
+  ['team & dashboards: the directory', cl('/systems/team'), [], 'Savannah Campbell'],
+  ['team & dashboards: chips per login', cl('/systems/team'), [], 'Social media manager'],
+  ['team & dashboards: add a login', cl('/systems/team'), ['Shanay Prince'], 'suggested:'],
+  ['team member: my dashboards', at('collective', 'team')('/systems'), [], 'this login opens'],
+  ['team member: only her pages in the menu', at('collective', 'team')('/systems'), [], 'Vendor applications'],
+  ['team member: a page she lacks goes home', at('collective', 'team')('/systems/orders'), [], 'this login opens'],
+  ['team member: a page she has', at('collective', 'team')('/systems/vendors'), [], 'Sample Candle Co.'],
+  ['team member: today shows her cards', at('collective', 'team')('/today'), [], 'Vendor forms'],
+  ['team member: walkthroughs for her dashboards', at('collective', 'team')('/systems/walkthroughs'), [], 'Vendor applications'],
+  ['emails dashboard opens the inbox only', at('collective', 'team')('/studio'), [], 'Sample Applicant'],
+  ['shops dashboard: the shops page', at('collective', 'shops')('/systems/shops'), [], 'Sample Bakery Co.'],
+  ['shops dashboard: no mentorship page', at('collective', 'shops')('/systems/academy'), [], 'this login opens'],
+  ['curators & shops: open a shop', cl('/systems/shops'), ['Sample Bakery Co.'], 'Featured In The Directory'],
+  ['curators & shops: products', cl('/systems/shops'), ['Sample Bakery Co.'], 'Lemon Pound Cake'],
+  ['mentorship: curriculum & videos tab', cl('/systems/academy?tab=curriculum'), [], 'Add module'],
+  ['mentorship: new lesson has a video upload', cl('/systems/academy?tab=curriculum'), ['Add lesson'], 'Or upload the video file'],
+  ['mentorship: sessions & recordings tab', cl('/systems/academy?tab=sessions'), [], 'Schedule a session'],
+  ['mentor console: curriculum video upload', cl('/academy/business/teach/curriculum'), ['Add lesson'], 'Or upload the video file'],
+  ['walkthroughs hub', cl('/systems/walkthroughs'), [], 'Systems at a glance'],
+  ['walkthroughs: play a chapter', cl('/systems/walkthroughs'), ['Play'], '1 OF 7'],
+  ['walkthroughs: step by step', cl('/systems/walkthroughs'), ['Step by step', 'Next'], '2 OF 7'],
+  ['walkthroughs: a link starts a chapter', cl('/systems/shops?tour=sys:shops'), [], 'Every shop on the marketplace'],
+  ['walkthroughs: test runs', cl('/systems/walkthroughs?tab=tests'), [], 'Assign a dashboard and sign in as that person'],
+  ['walkthroughs: test run steps', cl('/systems/walkthroughs?tab=tests'), ['Storefront agreement'], 'Agreements lists it'],
+  ['today walkthrough', cl('/today?tour=today'), [], 'Today: your home'],
+  ['mentor console walkthrough', cl('/academy/business/teach?tour=mentor-business'), [], 'The Business Mentorship console'],
+  ['gathering walkthrough', cl('/gather/the-gathering?tour=gather'), [], 'Welcome to The Gathering'],
+  ['studio email walkthrough', cl('/studio/email?tour=studio-email'), [], 'The shared inboxes'],
+  ['portal: team sign-up wording', at('collective', 'off')('/portal'), [], 'On the P31 team? Create an account'],
+  ['market sign-in: team link', mk('/login'), [], 'On the P31 team?'],
+  ['about: headshots with names', mk('/about'), [], 'Shanay Prince'],
+  ['team & dashboards on a phone', cl('/systems/team'), [], 'Savannah Campbell', { phone: true }],
+  ['curators & shops on a phone', cl('/systems/shops'), ['Sample Bakery Co.'], 'Featured In The Directory', { phone: true }],
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const clickText = (page, text) => page.evaluate((t) => {
-  const els = [...document.querySelectorAll('button, a, [role="tab"]')].filter((e) => e.offsetParent);
+  const els = [...document.querySelectorAll('button, a, [role="tab"], [role="button"], summary')].filter((e) => e.offsetParent);
   const el = els.find((e) => e.textContent.trim() === t) || els.find((e) => e.textContent.trim().startsWith(t)) || els.find((e) => e.textContent.includes(t));
   if (!el) return false;
   el.click();
@@ -167,10 +201,12 @@ const settle = async (page) => {
 };
 
 if (!CHROME) { console.error('screen-test: Chrome not found (set CHROME_PATH)'); process.exit(1); }
+// P31_ONLY="team|shops" runs just the screens whose names match (for a quick check while building).
+const only = process.env.P31_ONLY ? new RegExp(process.env.P31_ONLY, 'i') : null;
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
 const failures = [];
 let n = 0;
-for (const [name, url, clicks = [], expect, opts = {}] of SCREENS) {
+for (const [name, url, clicks = [], expect, opts = {}] of SCREENS.filter((s) => !only || only.test(s[0]))) {
   const page = await browser.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));

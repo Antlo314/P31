@@ -62,3 +62,11 @@ export const STUDIO_TOUR = [
     body: 'That’s it. Replay this walkthrough any time from the ? button at the top.',
   },
 ];
+
+// The Email inbox walkthrough: for the Emails dashboard (and anyone, from Systems → Walkthroughs).
+export const STUDIO_EMAIL_TOUR = [
+  { title: 'The shared inboxes', body: 'members@thep31collective.org and vendor@p31market.com arrive here. Carla reads each email, sorts it and drafts a reply for you to approve.' },
+  { to: '/studio/email', targets: at('/studio/email'), title: 'Threads to answer', body: 'Each thread shows who wrote, the subject, a summary and whether it needs a person. Open one to read the whole conversation.' },
+  { to: '/studio/email', targets: ['.ds-main form', '.ds-main textarea', '.ds-main'], title: 'Approve the draft', body: 'Edit the drafted reply as you like, then Send reply. Nothing goes out until you confirm. Replies come from the mailbox the email was sent to.' },
+  { to: '/studio/email', targets: at('/studio/email'), title: 'Needs a person', body: 'Refunds, complaints and anything delicate are flagged “needs a person” and never answered by themselves.' },
+];
