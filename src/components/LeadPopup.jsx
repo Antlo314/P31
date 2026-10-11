@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { X, ArrowRight, CalendarHeart, Gem, Mail, Check, Phone } from 'lucide-react';
+import { X, ArrowRight, Check, Phone } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { gsap, reducedMotion } from '../lib/motion';
@@ -9,11 +9,6 @@ import './LeadPopup.css';
 import gatherImg from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
 
 const QUIET = ['/login', '/register', '/dashboard', '/systems', '/onboarding-exclusive', '/unsubscribe', '/portal', '/enroll', '/academy', '/studio'];
-const PERKS = [
-  { Icon: CalendarHeart, text: 'First word on every market date' },
-  { Icon: Gem, text: 'Private previews & curator drops' },
-  { Icon: Mail, text: 'Stories from the collective — never spam' },
-];
 
 const LeadPopup = () => {
   const { user } = useAuth();
@@ -202,43 +197,39 @@ const LeadPopup = () => {
                   <path d="M20 33l8 8 16-17" pathLength="40" strokeDasharray="40" />
                 </svg>
               </div>
-              <p className="k-eyebrow k-eyebrow--center lp2__done-in">The Inner Circle</p>
+              <p className="k-eyebrow k-eyebrow--center lp2__done-in">Stay connected</p>
               <h2 id="lp2-title" className="k-h2 lp2__done-in">Welcome{firstName ? `, ${firstName}` : ''}.</h2>
-              <p className="k-body lp2__done-in">You’re in the collective. Market dates, invitations and curator stories will find their way to you.</p>
+              <p className="k-body lp2__done-in">You’re subscribed. The latest news, marketplace highlights, upcoming events and exclusive opportunities will find their way to you.</p>
               <button className="k-btn k-btn--gold lp2__done-in" onClick={close}>Continue exploring <ArrowRight size={18} /></button>
             </div>
           ) : (
             <>
-              <p className="k-eyebrow lp2__in">The Inner Circle</p>
-              <h2 id="lp2-title" className="k-h2 lp2__title lp2__in">Join the <em>collective</em></h2>
-              <p className="k-body lp2__in">Be first through the gates — early invitations, market dates and the best of Proverbs 31 Marketplace.</p>
-
-              <ul className="lp2__perks lp2__in">
-                {PERKS.map((p) => <li key={p.text}><span><p.Icon size={16} /></span>{p.text}</li>)}
-              </ul>
+              <p className="k-eyebrow lp2__in">Stay connected</p>
+              <h2 id="lp2-title" className="k-h2 lp2__title lp2__in">Stay in the <em>Know</em></h2>
+              <p className="k-body lp2__in">Be part of what’s happening at Proverbs 31 Marketplace! Subscribe to our newsletter for the latest news, marketplace highlights, upcoming events, and exclusive opportunities for faith-driven women in business and purpose.</p>
 
               <form className="k-form lp2__form lp2__in" onSubmit={submit}>
                 <div className="k-row">
-                  <label className="k-field"><span>First name</span>
+                  <label className="k-field"><span>First Name</span>
                     <input required autoComplete="given-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Jane" disabled={state === 'sending'} />
                   </label>
-                  <label className="k-field"><span>Email</span>
+                  <label className="k-field"><span>Email Address</span>
                     <input required type="email" inputMode="email" autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" disabled={state === 'sending'} />
                   </label>
                 </div>
                 {withPhone ? (
-                  <label className="k-field"><span>Mobile (for text reminders)</span>
+                  <label className="k-field"><span>Optional: Add your phone number</span>
                     <input type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="(555) 123-4567" disabled={state === 'sending'} />
                   </label>
                 ) : (
-                  <button type="button" className="lp2__more" onClick={() => setWithPhone(true)}><Phone size={14} /> Add a phone for text reminders</button>
+                  <button type="button" className="lp2__more" onClick={() => setWithPhone(true)}><Phone size={14} /> Optional: Add your phone number</button>
                 )}
                 <input className="k-trap" tabIndex={-1} autoComplete="off" aria-hidden="true" value={form.trap} onChange={(e) => setForm({ ...form, trap: e.target.value })} />
                 {error && <p className="k-error" role="alert">{error}</p>}
                 <button className="k-btn k-btn--gold k-btn--lg k-btn--block" disabled={state === 'sending'}>
-                  {state === 'sending' ? 'Joining…' : <>Join the collective <ArrowRight size={18} /></>}
+                  {state === 'sending' ? 'Subscribing…' : <>Subscribe to Our Newsletter <ArrowRight size={18} /></>}
                 </button>
-                <p className="k-fine lp2__fine"><Check size={13} /> One click to unsubscribe. We never share your details.</p>
+                <p className="k-fine lp2__fine"><Check size={13} /> Unsubscribe anytime. We respect your privacy and never share your information.</p>
               </form>
             </>
           )}

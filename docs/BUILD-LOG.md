@@ -8,6 +8,7 @@ A running record of what has been built for Proverbs 31 Marketplace and The P31 
 - **"December · date coming soon."** Markets can now announce their month before the day is set (a new "Announce the month" switch in Systems → Markets & events). The site reads "December · date coming soon" until "Date announced" is turned on. The hero chip reads "Up next" so it fits a luncheon as well as a market.
 - **The Luncheon on Instagram and Facebook.** The three scheduled "Winter Gala" posts (Oct 17, Oct 24, Nov 7) were removed and replaced with Luncheon posts at the same times, and three more follow on Saturdays Nov 14, 21 and 28: the announcement with date and venue, "which seat is yours", what the ticket includes, a finish-the-sentence on business advice, a four-Saturdays countdown, and a business-casual this-or-that. Every caption carries the ticket link (`marketing/social/2026-10-17-luncheon`).
 - **The Collective's Instagram.** The Instagram icon on thep31collective.org now opens @the.p31collective instead of the marketplace account.
+- **The marketplace pop-up** now reads as the newsletter sign-up Melanie JC wrote: "Stay in the Know", the invitation to subscribe for news, highlights, events and opportunities for faith-driven women in business and purpose, First Name, Email Address, an optional phone number, "Subscribe to Our Newsletter", and the privacy line.
 
 ## October 11 — JotForm retired: the vendor forms live on the site
 
