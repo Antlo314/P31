@@ -1,0 +1,53 @@
+/* Studio menu (StudioNav.jsx) and the setup list (SetupChecklist.jsx). Prefixes: sn- / sc- */
+.sn { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.sn__toggle { display: none; }
+.sn__groups { flex: 1; min-height: 0; overflow-y: auto; padding: 0 0.9rem 1rem; scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.15) transparent; }
+.sn__group { display: grid; gap: 2px; margin-top: 10px; }
+.sn__label {
+  display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 6px 1.1rem 4px; border: 0; background: none; cursor: pointer;
+  font: inherit; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--metallic-gold); opacity: 0.8;
+}
+.sn__label svg { transition: rotate 0.2s; }
+.sn__group.is-shut .sn__label svg { rotate: -90deg; }
+.sn .nav-item { font-size: 0.92rem; }
+.sn__foot { margin-top: auto; }
+
+/* Phones: brand and one menu button on a row; the groups fold out under it. */
+@media (max-width: 768px) {
+  .dashboard-sidebar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 10px 14px !important; height: auto; position: sticky; top: var(--nb-h, 64px); z-index: 30; }
+  .dashboard-sidebar .sidebar-brand { flex: 1; padding: 0; margin: 0; border: 0; }
+  .dashboard-sidebar .sidebar-brand span { font-size: 1.15rem; }
+  .sn { display: contents; }
+  .sn__toggle {
+    display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 999px; cursor: pointer;
+    border: 1px solid rgba(242, 206, 77, 0.4); background: rgba(255, 255, 255, 0.06); color: var(--gold-light); font: inherit; font-weight: 700; font-size: 0.86rem;
+  }
+  .sn__groups, .sn__foot { flex-basis: 100%; display: none; }
+  .sn.is-open .sn__groups, .sn.is-open .sn__foot.sidebar-footer { display: block !important; }
+  .sn.is-open .sn__groups { padding: 4px 0 6px; max-height: 70dvh; }
+  .sn__group { margin-top: 6px; }
+  .sn .nav-item { padding: 11px 14px !important; white-space: normal; }
+  .sn__foot.sidebar-footer { padding: 6px 0 2px; border: 0; }
+}
+
+/* Setup list */
+.sc { display: grid; gap: 10px; }
+.sc__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sc__head .card-title { margin: 0; }
+.sc__count { font-size: 0.76rem; font-weight: 800; color: var(--on-surface-muted); }
+.sc__bar { height: 6px; border-radius: 999px; background: var(--surface-container-low); overflow: hidden; }
+.sc__bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--gold-light), var(--metallic-gold)); transition: width 0.5s var(--ease-fluid, ease); }
+.sc__lead { margin: 0; font-size: 0.88rem; color: var(--on-surface-variant); }
+.sc__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.sc__list li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 12px; background: var(--surface-alt); }
+.sc__list li.is-next { background: rgba(242, 206, 77, 0.16); box-shadow: inset 0 0 0 1px rgba(217, 169, 58, 0.45); }
+.sc__list li.is-done { opacity: 0.75; }
+.sc__list li > div { display: grid; min-width: 0; }
+.sc__list strong { font-size: 0.86rem; }
+.sc__list li.is-done strong { text-decoration: line-through; text-decoration-color: rgba(0, 0, 0, 0.35); }
+.sc__list small { font-size: 0.7rem; color: var(--on-surface-muted); }
+.sc__tick { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--outline); display: grid; place-items: center; color: #fff; }
+.sc__list li.is-done .sc__tick { background: #17A673; border-color: #17A673; }
+.sc__go { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--outline-variant); background: #fff; cursor: pointer; font: inherit; font-weight: 800; font-size: 0.76rem; color: var(--dark-plum); white-space: nowrap; }
+.sc__list li.is-next .sc__go { background: var(--dark-plum); border-color: var(--dark-plum); color: #fff; }
+.sc__tour { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border-radius: 999px; border: 0; cursor: pointer; font: inherit; font-weight: 800; font-size: 0.88rem; background: linear-gradient(135deg, var(--gold-light), var(--metallic-gold)); color: #2a1a00; }

@@ -2,6 +2,13 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 10 (evening) — Studio walkthrough, menus, Pro Edit hidden
+
+- **A walkthrough inside the studio.** New vendors now get a guided tour the first time they sign in: nine steps that open each room (Identity, banner and logo, payments, products, Store Design, Marketing, Orders) and point at the actual buttons. It replays from Help & Guide or the setup list.
+- **Set up your shop list.** The Identity page opens with a checklist that ticks itself as the vendor works (name/story/link, banner and logo, payments, first product, look, promote) with a "Do this" button for each step and a progress bar.
+- **Smaller menus.** The studio menu is five short groups (Your shop, Sell, Grow, Help, Admin) that fold; on phones the whole menu sits behind one button so the page comes first. Systems sidebar groups fold too.
+- **Pro Edit hidden** from vendors and the public Systems page until it is needed; the team's DaVinci tool is unchanged.
+
 ## October 10 (later) — Vendor marketing
 
 - **Marketing tab for every vendor.** Each curator's studio now has a Marketing tab with four rooms. *Promote a product*: pick any product and get its own link (opens the item directly), a QR code, a promo image drawn on the spot in four looks (Clean, Plum, Sale, Noir) and three sizes (post, portrait, story) with a ribbon and a scan-to-shop QR, and one tap that writes three captions, hook lines, a story line, hashtags, an email and a text message for that product. *Followers & email*: the shop's own email list, with an AI-written email, a test send, one real send a day (from the market address, replies go to the vendor), and a history. *Share kit*: shop link, bio line, ready-to-post lines, and a printable 5×7 table sign with the QR for the physical market. *Insights*: opens, buy taps and shares per product over 7/30/90 days, which products are quiet, and six plain-language tips on what sells on P31.
