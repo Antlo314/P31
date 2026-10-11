@@ -1,5 +1,5 @@
 /* ============================================================
-   P31 — v38: the site runs itself a little more
+   P31 - v38: the site runs itself a little more
    Run after v37. Safe to run more than once.
 
    1. One admin list. Admins live in site_admins (Systems -> Team access
@@ -18,9 +18,9 @@
                                         drafted as pre-posts for review
    ============================================================ */
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 1. One admin list
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.site_admins (
   email TEXT PRIMARY KEY CHECK (email = lower(email) AND email ~ '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
   full_name TEXT,
@@ -64,17 +64,17 @@ $fn$;
 DROP TRIGGER IF EXISTS site_admins_keep_one ON public.site_admins;
 CREATE TRIGGER site_admins_keep_one BEFORE DELETE ON public.site_admins FOR EACH ROW EXECUTE FUNCTION public.site_admins_keep_one();
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 2. Markets: vendors or not, and vendor check-in time
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 ALTER TABLE public.market_events
   ADD COLUMN IF NOT EXISTS has_vendors BOOLEAN NOT NULL DEFAULT true,
   ADD COLUMN IF NOT EXISTS load_in TEXT;          -- e.g. 3:15 PM (vendors check in by)
 UPDATE public.market_events SET has_vendors = false WHERE title = 'Business and Leadership Luncheon';
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 3. Survey to lineup, automatically
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 ALTER TABLE public.event_vendors
   ADD COLUMN IF NOT EXISTS source TEXT,           -- application | registration | feedback | manual
   ADD COLUMN IF NOT EXISTS notified_at TIMESTAMPTZ;
@@ -108,9 +108,9 @@ DROP TRIGGER IF EXISTS market_invite_returning ON public.market_events;
 CREATE TRIGGER market_invite_returning AFTER INSERT OR UPDATE OF date_public ON public.market_events
   FOR EACH ROW EXECUTE FUNCTION public.market_invite_returning();
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 4. A vendor sees her own markets
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- Matched by her account (lineup curator) or by her email once it is confirmed.
 -- Only market details and her own status come back, never anyone else.
 CREATE OR REPLACE FUNCTION public.my_markets()
@@ -142,9 +142,9 @@ $fn$;
 REVOKE ALL ON FUNCTION public.my_markets() FROM public, anon;
 GRANT EXECUTE ON FUNCTION public.my_markets() TO authenticated;
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 5. The morning digest remembers which days it has sent
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.team_digests (
   day DATE PRIMARY KEY,                 -- the Eastern date it covers
   sent_at TIMESTAMPTZ,
@@ -155,14 +155,20 @@ ALTER TABLE public.team_digests ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Team reads digests" ON public.team_digests;
 CREATE POLICY "Team reads digests" ON public.team_digests FOR SELECT TO authenticated USING (public.is_academy_admin() OR public.is_operator());
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 6. The scheduler
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- Supabase ships both extensions; this turns them on (Database -> Extensions shows them too).
 -- pg_cron lives in pg_catalog, and the postgres role is given the cron schema, as in the Supabase install steps.
 CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
-GRANT USAGE ON SCHEMA cron TO postgres;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cron TO postgres;
+DO $grants$
+BEGIN
+  GRANT USAGE ON SCHEMA cron TO postgres;
+  GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cron TO postgres;
+EXCEPTION WHEN insufficient_privilege THEN
+  RAISE NOTICE 'cron grants left as they were: %', SQLERRM;
+END;
+$grants$;
 CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
 
 -- Replace any earlier copies of these jobs, then schedule them (times are UTC).

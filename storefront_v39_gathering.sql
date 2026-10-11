@@ -1,5 +1,5 @@
 /* ============================================================
-   P31 — v39: The Gathering (community messaging)
+   P31 - v39: The Gathering (community messaging)
    Run after v38. Safe to run more than once.
 
    One place where vendors, mentorship students and alumnae, mentors,
@@ -19,9 +19,9 @@
    Replaces the old curator community chat (its history is carried over).
    ============================================================ */
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 1. Tables
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.chat_channels (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug TEXT NOT NULL UNIQUE CHECK (slug ~ '^[a-z0-9-]{2,60}$'),
@@ -91,9 +91,9 @@ CREATE TABLE IF NOT EXISTS public.chat_scriptures (
   text TEXT NOT NULL
 );
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 2. Who someone is (drives access and badges)
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.chat_roles(p_user UUID)
 RETURNS JSONB LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, auth
 AS $fn$
@@ -158,9 +158,9 @@ END;
 $fn$;
 GRANT EXECUTE ON FUNCTION public.chat_readable_channels() TO authenticated;
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 3. Row security (reads); all writes go through the functions below
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 ALTER TABLE public.chat_channels ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Members read their channels" ON public.chat_channels;
 CREATE POLICY "Members read their channels" ON public.chat_channels FOR SELECT TO authenticated
@@ -188,9 +188,9 @@ ALTER TABLE public.chat_scriptures ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Members read scriptures" ON public.chat_scriptures;
 CREATE POLICY "Members read scriptures" ON public.chat_scriptures FOR SELECT TO authenticated USING (public.chat_is_member());
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 4. Writing
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.chat_post(p_channel UUID, p_body TEXT, p_attachments JSONB DEFAULT '[]'::jsonb,
                                             p_reply_to UUID DEFAULT NULL, p_thread UUID DEFAULT NULL)
 RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
@@ -292,7 +292,7 @@ RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $fn$
 DECLARE r JSONB; arr JSONB; me TEXT := auth.uid()::text;
 BEGIN
-  IF p_emoji NOT IN ('🙏🏾', '❤️', '🙌🏾', '🔥', '😂', '👏🏾', '✨', '💜', '😭', '💯') THEN RAISE EXCEPTION 'That reaction is not available.'; END IF;
+  IF p_emoji NOT IN (U&'\+01F64F\+01F3FE', U&'\2764\FE0F', U&'\+01F64C\+01F3FE', U&'\+01F525', U&'\+01F602', U&'\+01F44F\+01F3FE', U&'\2728', U&'\+01F49C', U&'\+01F62D', U&'\+01F4AF') THEN RAISE EXCEPTION 'That reaction is not available.'; END IF;
   SELECT reactions INTO r FROM chat_messages
    WHERE id = p_id AND deleted_at IS NULL AND channel_id IN (SELECT public.chat_readable_channels()) FOR UPDATE;
   IF NOT FOUND THEN RAISE EXCEPTION 'That message is not available.'; END IF;
@@ -316,9 +316,9 @@ $fn$;
 REVOKE ALL ON FUNCTION public.chat_mark_read(UUID) FROM public, anon;
 GRANT EXECUTE ON FUNCTION public.chat_mark_read(UUID) TO authenticated;
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 5. Reading helpers: my channels, people and their badges, direct messages
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.chat_my_channels()
 RETURNS JSONB LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
 AS $fn$
@@ -419,9 +419,9 @@ $fn$;
 REVOKE ALL ON FUNCTION public.chat_set_title(UUID, TEXT) FROM public, anon;
 GRANT EXECUTE ON FUNCTION public.chat_set_title(UUID, TEXT) TO authenticated;
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 6. Channels
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 INSERT INTO public.chat_channels (slug, name, topic, kind, audience, section, icon, sort_order) VALUES
   ('welcome', 'Welcome', 'Start here: what The Gathering is for, and how we treat one another.', 'announcements', 'everyone', 'gather', 'sparkles', 1),
   ('daily-word', 'Daily Word', 'A new verse every morning. Share what it speaks to you in the discussion beneath it.', 'scripture', 'everyone', 'gather', 'book', 2),
@@ -439,11 +439,11 @@ INSERT INTO public.chat_messages (channel_id, kind, body, pinned)
 SELECT c.id, 'system',
   'Welcome to The Gathering, the home of the P31 family online.' || chr(10) || chr(10) ||
   'Vendors, mentorship students, mentors and the P31 team all meet here. A few ways we walk together:' || chr(10) ||
-  '• Speak life. She openeth her mouth with wisdom; and in her tongue is the law of kindness (Proverbs 31:26).' || chr(10) ||
-  '• Celebrate one another. Share your wins in Wins & celebrations, and your shop and products in Market talk.' || chr(10) ||
-  '• Hold what is shared in Prayer requests with care. It stays here.' || chr(10) ||
-  '• Each morning a new verse appears in Daily Word. Reply in its discussion to share what it speaks to you.' || chr(10) ||
-  '• Need the team? Use Team room if you are on the team, or send any team member a direct message.',
+  U&'\2022 Speak life. She openeth her mouth with wisdom; and in her tongue is the law of kindness (Proverbs 31:26).' || chr(10) ||
+  U&'\2022 Celebrate one another. Share your wins in Wins & celebrations, and your shop and products in Market talk.' || chr(10) ||
+  U&'\2022 Hold what is shared in Prayer requests with care. It stays here.' || chr(10) ||
+  U&'\2022 Each morning a new verse appears in Daily Word. Reply in its discussion to share what it speaks to you.' || chr(10) ||
+  U&'\2022 Need the team? Use Team room if you are on the team, or send any team member a direct message.',
   true
   FROM public.chat_channels c
  WHERE c.slug = 'welcome' AND NOT EXISTS (SELECT 1 FROM public.chat_messages m WHERE m.channel_id = c.id AND m.kind = 'system');
@@ -457,9 +457,9 @@ SELECT u.id, t.title FROM auth.users u
                ('vendor@p31market.com', 'Marketplace Tech Support')) AS t(email, title) ON t.email = lower(u.email)
 ON CONFLICT (user_id) DO NOTHING;
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 7. The old curator chat comes along
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 DO $mig$
 DECLARE has_rcpt BOOLEAN;
 BEGIN
@@ -502,9 +502,9 @@ BEGIN
 END;
 $mig$;
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 8. Photos and videos (private: only members can see them)
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES ('chat', 'chat', false, 52428800, ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/quicktime', 'video/webm'])
 ON CONFLICT (id) DO UPDATE SET public = false, file_size_limit = EXCLUDED.file_size_limit, allowed_mime_types = EXCLUDED.allowed_mime_types;
@@ -519,9 +519,9 @@ DROP POLICY IF EXISTS "Members remove their own Gathering media" ON storage.obje
 CREATE POLICY "Members remove their own Gathering media" ON storage.objects FOR DELETE TO authenticated
   USING (bucket_id = 'chat' AND (storage.foldername(name))[1] = auth.uid()::text);
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 9. Live updates (new messages, edits, reactions, unread dots)
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 DO $rt$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
@@ -535,9 +535,9 @@ BEGIN
 END;
 $rt$;
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 10. The Daily Word
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.chat_post_daily_word()
 RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $fn$
@@ -587,21 +587,21 @@ INSERT INTO public.chat_scriptures (id, ref, text) VALUES
   (15, 'Proverbs 31:31', 'Give her of the fruit of her hands; and let her own works praise her in the gates.'),
   (16, 'Proverbs 3:5', 'Trust in the LORD with all thine heart; and lean not unto thine own understanding.'),
   (17, 'Proverbs 16:3', 'Commit thy works unto the LORD, and thy thoughts shall be established.'),
-  (18, 'Proverbs 18:16', 'A man’s gift maketh room for him, and bringeth him before great men.'),
-  (19, 'Proverbs 19:21', 'There are many devices in a man’s heart; nevertheless the counsel of the LORD, that shall stand.'),
+  (18, 'Proverbs 18:16', U&'A man\2019s gift maketh room for him, and bringeth him before great men.'),
+  (19, 'Proverbs 19:21', U&'There are many devices in a man\2019s heart; nevertheless the counsel of the LORD, that shall stand.'),
   (20, 'Proverbs 22:29', 'Seest thou a man diligent in his business? he shall stand before kings; he shall not stand before mean men.'),
   (21, 'Proverbs 27:17', 'Iron sharpeneth iron; so a man sharpeneth the countenance of his friend.'),
   (22, 'Psalm 23:1', 'The LORD is my shepherd; I shall not want.'),
   (23, 'Psalm 37:4', 'Delight thyself also in the LORD; and he shall give thee the desires of thine heart.'),
   (24, 'Psalm 46:5', 'God is in the midst of her; she shall not be moved: God shall help her, and that right early.'),
   (25, 'Psalm 90:17', 'And let the beauty of the LORD our God be upon us: and establish thou the work of our hands upon us; yea, the work of our hands establish thou it.'),
-  (26, 'Ecclesiastes 9:10', 'Whatsoever thy hand findeth to do, do it with thy might…'),
+  (26, 'Ecclesiastes 9:10', U&'Whatsoever thy hand findeth to do, do it with thy might\2026'),
   (27, 'Isaiah 40:31', 'But they that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles; they shall run, and not be weary; and they shall walk, and not faint.'),
   (28, 'Jeremiah 29:11', 'For I know the thoughts that I think toward you, saith the LORD, thoughts of peace, and not of evil, to give you an expected end.'),
   (29, 'Lamentations 3:23', 'They are new every morning: great is thy faithfulness.'),
   (30, 'Esther 4:14', 'And who knoweth whether thou art come to the kingdom for such a time as this?'),
   (31, 'Ruth 1:16', 'Whither thou goest, I will go; and where thou lodgest, I will lodge: thy people shall be my people, and thy God my God.'),
-  (32, 'Deuteronomy 8:18', 'But thou shalt remember the LORD thy God: for it is he that giveth thee power to get wealth…'),
+  (32, 'Deuteronomy 8:18', U&'But thou shalt remember the LORD thy God: for it is he that giveth thee power to get wealth\2026'),
   (33, 'Joshua 1:9', 'Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou goest.'),
   (34, 'Matthew 5:16', 'Let your light so shine before men, that they may see your good works, and glorify your Father which is in heaven.'),
   (35, 'Luke 1:45', 'And blessed is she that believed: for there shall be a performance of those things which were told her from the Lord.'),
@@ -612,28 +612,34 @@ INSERT INTO public.chat_scriptures (id, ref, text) VALUES
   (40, '2 Timothy 1:7', 'For God hath not given us the spirit of fear; but of power, and of love, and of a sound mind.'),
   (41, 'Hebrews 11:1', 'Now faith is the substance of things hoped for, the evidence of things not seen.'),
   (42, '1 Corinthians 15:58', 'Forasmuch as ye know that your labour is not in vain in the Lord.'),
-  (43, 'Proverbs 3:5–6', 'Trust in the LORD with all thine heart; and lean not unto thine own understanding. In all thy ways acknowledge him, and he shall direct thy paths.'),
-  (44, 'Lamentations 3:22–23', 'It is of the LORD’s mercies that we are not consumed, because his compassions fail not. They are new every morning: great is thy faithfulness.'),
+  (43, U&'Proverbs 3:5\20136', 'Trust in the LORD with all thine heart; and lean not unto thine own understanding. In all thy ways acknowledge him, and he shall direct thy paths.'),
+  (44, U&'Lamentations 3:22\201323', U&'It is of the LORD\2019s mercies that we are not consumed, because his compassions fail not. They are new every morning: great is thy faithfulness.'),
   (45, '2 Corinthians 12:9', 'My grace is sufficient for thee: for my strength is made perfect in weakness.'),
   (46, 'Romans 8:28', 'And we know that all things work together for good to them that love God, to them who are the called according to his purpose.'),
   (47, 'Matthew 11:28', 'Come unto me, all ye that labour and are heavy laden, and I will give you rest.'),
   (48, 'Psalm 37:5', 'Commit thy way unto the LORD; trust also in him; and he shall bring it to pass.'),
-  (49, 'Psalm 121:1–2', 'I will lift up mine eyes unto the hills, from whence cometh my help. My help cometh from the LORD, which made heaven and earth.')
+  (49, U&'Psalm 121:1\20132', 'I will lift up mine eyes unto the hills, from whence cometh my help. My help cometh from the LORD, which made heaven and earth.')
 ON CONFLICT (id) DO UPDATE SET ref = EXCLUDED.ref, text = EXCLUDED.text;
 
 -- The scheduler has to be on (v38 turns it on; repeating this is harmless).
 CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
-GRANT USAGE ON SCHEMA cron TO postgres;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cron TO postgres;
+DO $grants$
+BEGIN
+  GRANT USAGE ON SCHEMA cron TO postgres;
+  GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cron TO postgres;
+EXCEPTION WHEN insufficient_privilege THEN
+  RAISE NOTICE 'cron grants left as they were: %', SQLERRM;
+END;
+$grants$;
 
 -- 11:30 UTC every day (7:30 AM Eastern in summer, 6:30 AM in winter), and once now for today.
 SELECT cron.unschedule(jobid) FROM cron.job WHERE jobname = 'p31-daily-word';
 SELECT cron.schedule('p31-daily-word', '30 11 * * *', $job$ SELECT public.chat_post_daily_word(); $job$);
 SELECT public.chat_post_daily_word();
 
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 -- 11. The Gathering lives at /gather, so no shop can take that link
--- ──────────────────────────────────────────────────────────
+-- ----------------------------------------------------------
 ALTER TABLE public.curator_data DROP CONSTRAINT IF EXISTS slug_not_reserved;
 ALTER TABLE public.curator_data ADD CONSTRAINT slug_not_reserved CHECK (
   slug NOT IN ('about', 'directory', 'login', 'dashboard', 'visionary', 'apply', 'community', 'register', 'onboarding-exclusive',

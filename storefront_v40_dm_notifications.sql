@@ -1,5 +1,5 @@
 /* ============================================================
-   P31 — v40: direct-message notifications for The Gathering
+   P31 - v40: direct-message notifications for The Gathering
    Run after v39. Safe to run more than once.
 
    A member who misses a direct message gets one email, a few minutes
@@ -59,8 +59,14 @@ $fn$;
 
 -- The scheduler has to be on (v38 turns it on; repeating this is harmless).
 CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
-GRANT USAGE ON SCHEMA cron TO postgres;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cron TO postgres;
+DO $grants$
+BEGIN
+  GRANT USAGE ON SCHEMA cron TO postgres;
+  GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cron TO postgres;
+EXCEPTION WHEN insufficient_privilege THEN
+  RAISE NOTICE 'cron grants left as they were: %', SQLERRM;
+END;
+$grants$;
 CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
 
 -- Every 5 minutes: email anyone who missed a direct message.
