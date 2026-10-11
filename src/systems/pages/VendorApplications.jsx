@@ -158,6 +158,9 @@ const VendorApplication = ({ app, onBack }) => {
               </label>
               <button className="sys-btn sys-btn--gold" onClick={emailDecision} disabled={sending}><Mail size={15} /> {sending ? 'Sending…' : `Email ${first}: ${LABEL[decision].toLowerCase()}`}</button>
               <p className="sys-muted" style={{ margin: 0 }}>{sent || `Sends the ${decision} note from vendor@p31market.com with next steps (storefront sign-up for approved vendors), and records it here.`}</p>
+              {decision === 'approved' && (
+                <p className="sys-ok" style={{ margin: 0 }}><Check size={13} /> {a.email} is pre-approved: when she registers at p31market.com/register with this email, her studio opens straight away.</p>
+              )}
             </>
           ) : (
             <p className="sys-muted" style={{ margin: 0 }}>Set the status to Approved, Waitlist or Declined and the email button appears here.</p>

@@ -27,7 +27,7 @@ ${note ? `<p>${esc(note).replace(/\n/g, '<br>')}</p>` : ''}
 <p>Next steps:</p>
 <ol style="padding-left:20px;line-height:1.6">
 <li>Reply to this email to confirm your spot.</li>
-<li>Create your curator account at <a href="${SITE}/register" style="color:#5E2A8C">${SITE.replace('https://', '')}/register</a>: it gives you a storefront on the marketplace and your booth details as they’re set.</li>
+<li>Create your curator account at <a href="${SITE}/register" style="color:#5E2A8C">${SITE.replace('https://', '')}/register</a> using this same email (<b>${esc(a.email)}</b>). Your studio opens the moment you sign up: your own storefront on the marketplace, products, payments and marketing tools, plus your booth details as they’re set.</li>
 <li>Booth placement, load-in times and payment details follow by email once the lineup is set.</li>
 </ol>
 <p>Give her of the fruit of her hands; and let her own works praise her in the gates. (Proverbs 31:31)</p>`,
