@@ -116,7 +116,7 @@ const Home = () => {
             <Link to="/apply" className="k-btn k-btn--gold k-btn--lg">
               Become a curator <ArrowUpRight size={18} />
             </Link>
-            <button type="button" className="k-btn k-btn--light k-btn--lg" onClick={openJoin}>Join the Inner Circle</button>
+            <button type="button" className="k-btn k-btn--light k-btn--lg" onClick={openJoin}>Subscribe to our newsletter</button>
           </div>
         </div>
 
@@ -351,7 +351,7 @@ const Home = () => {
               <article className="h26-date">
                 <div className="h26-date__info">
                   <h3>New dates coming soon</h3>
-                  <p>Join the collective to hear first.</p>
+                  <p>Subscribe to our newsletter to hear first.</p>
                 </div>
                 <button type="button" onClick={openJoin} className="k-btn k-btn--sm k-btn--light">Notify me</button>
               </article>
@@ -400,11 +400,11 @@ const Home = () => {
       {/* ── NEWSLETTER ──────────────────────────────────────── */}
       <section className="k-section k-section--tight" id="newsletter">
         <div className="k-cta k-dark h26-news" data-reveal="scale">
-          <p className="k-eyebrow">The Inner Circle</p>
-          <h2 className="k-h2">Join the <em>collective</em></h2>
-          <p className="k-lede">Exclusive invitations, market dates and highlights from our community of visionary women.</p>
+          <p className="k-eyebrow">Stay connected</p>
+          <h2 className="k-h2">Stay in the <em>Know</em></h2>
+          <p className="k-lede">Subscribe to our newsletter for the latest news, marketplace highlights, upcoming events, and exclusive opportunities for faith-driven women in business and purpose.</p>
           {newsState === 'done' ? (
-            <p className="h26-news__done"><Check size={18} /> You’re on the list — welcome to the collective.</p>
+            <p className="h26-news__done"><Check size={18} /> You’re subscribed. Welcome!</p>
           ) : (
             <form className="h26-news__form" onSubmit={handleNewsletter}>
               <label className="sr-only" htmlFor="h26-name">First name</label>

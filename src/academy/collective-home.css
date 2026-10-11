@@ -66,8 +66,44 @@
 .ch-melanie__more[open] { display: grid; gap: 14px; }
 .ch-melanie__more p { margin: 0; }
 
-/* 3D arches take over from the flat arch once they're running. */
-.ch-hero { min-height: min(100svh, 980px); display: grid; align-items: center; }
-.ch-hero__arch { transition: opacity 1.2s ease; }
-.ch-hero:has(.s3d.is-live) .ch-hero__arch { opacity: 0; }
+.ch-hero { min-height: min(92svh, 900px); display: grid; align-items: center; }
 .ch-hero__inner { text-shadow: 0 2px 30px rgba(18, 8, 29, 0.85); }
+
+/* ── The Collective look: warm, refined, still ──────────────
+   Scoped to thep31collective.org (.cl-site): no orbital rings, sparkles or
+   card tilt; softer plum gradients with one warm gold glow; gold hairlines. */
+.cl-site .k-hero, .cl-site .k-section--night, .cl-site .k-dark.k-section, .cl-site .k-cta.k-dark {
+  background:
+    radial-gradient(70% 55% at 50% 112%, rgba(217, 169, 58, 0.22), transparent 70%),
+    linear-gradient(170deg, #33195a 0%, #23123b 50%, #170c27 100%);
+}
+.cl-site .k-hero::before, .cl-site .k-section--night::before { opacity: 0.35; }
+.cl-site .k-hero::after, .cl-site .ch-hero::after { background: radial-gradient(640px circle at 50% 100%, rgba(242, 206, 77, 0.1), transparent 62%); }
+.cl-site .k-hero { box-shadow: inset 0 -1px 0 rgba(242, 206, 77, 0.35); }
+.cl-site .orn__arch, .cl-site .orn__spark, .cl-site .k-hero__arch { display: none; }
+.cl-site .orn__orb--1 { background: radial-gradient(closest-side, rgba(120, 60, 170, 0.32), transparent); }
+.cl-site .orn__orb--2 { background: radial-gradient(closest-side, rgba(242, 206, 77, 0.16), transparent); }
+.cl-site .k-tilt, .cl-site .k-tilt.k-tilt:hover { transform: none; }
+.cl-site .ch-hero__mark { filter: drop-shadow(0 12px 28px rgba(242, 206, 77, 0.28)); }
+
+/* You belong here */
+.ch-belong { display: grid; gap: 14px; }
+@media (min-width: 760px) { .ch-belong { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1100px) { .ch-belong { grid-template-columns: repeat(4, 1fr); } }
+.ch-pillar {
+  display: grid; gap: 10px; align-content: start; justify-items: start;
+  padding: clamp(24px, 2.6vw, 32px); border-radius: var(--r-lg); background: #fff; border: 1px solid var(--line);
+  border-top: 3px solid var(--gold); box-shadow: var(--shadow-1);
+}
+.ch-pillar > * { margin: 0; }
+.ch-pillar .k-icon { width: 46px; height: 46px; }
+.ch-pillar small { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-text); }
+.ch-pillar h3 { font-family: var(--font-heading); font-weight: 400; font-size: 1.45rem; line-height: 1.15; color: var(--plum); }
+.ch-pillar p { color: var(--ink-2); line-height: 1.65; }
+.ch-pillar .k-link { margin-top: 4px; display: inline-flex; align-items: center; gap: 6px; }
+
+/* The team's doors, quietly, at the very end */
+.ch-team { margin: clamp(18px, 3vw, 28px) 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: 0.84rem; color: rgba(255, 255, 255, 0.55); }
+.ch-team a { display: inline-flex; align-items: center; gap: 5px; color: rgba(255, 255, 255, 0.78); font-weight: 700; text-decoration: none; }
+.ch-team a:hover { color: var(--gold-hi); }
+.k-dark .ch-market { color: rgba(255, 255, 255, 0.6); }

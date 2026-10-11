@@ -24,7 +24,7 @@ const Footer = () => (
         <p className="k-eyebrow">Proverbs 31 Marketplace</p>
         <h2 className="ft__title">Where her gifts <em>make room.</em></h2>
         <div className="k-actions">
-          <button type="button" className="k-btn k-btn--gold" onClick={openJoin}>Join the collective <ArrowRight size={18} /></button>
+          <button type="button" className="k-btn k-btn--gold" onClick={openJoin}>Subscribe to our newsletter <ArrowRight size={18} /></button>
           <Link to="/apply" className="k-btn k-btn--light">Become a curator <ArrowUpRight size={18} /></Link>
         </div>
       </section>

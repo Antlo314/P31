@@ -27,7 +27,7 @@ const fa = at('collective', 'faith');
 const SCREENS = [
   ['market home', mk('/')], ['shop', mk('/shop')], ['curators', mk('/directory')], ['market dates', mk('/calendar')],
   ['about + team', mk('/about')], ['vendor application', mk('/apply'), [], 'What best describes what you sell or offer?'], ['services', mk('/services')], ['partner', mk('/partner')], ['curator sign-in', mk('/login')],
-  ['collective home', cl('/')], ['academy', cl('/academy')], ['systems showcase', at('collective', 'student')('/systems')],
+  ['collective home', cl('/'), [], 'You belong here'], ['academy', cl('/academy')], ['systems showcase', at('collective', 'student')('/systems')],
   ['join', cl('/join')], ['mentorship', cl('/mentorship')], ['business mentorship', cl('/mentorship/business')],
   ['faith mentorship', cl('/mentorship/faith')], ['verify', cl('/verify')], ['portal', cl('/portal?choose')],
   ['today', cl('/today'), [], 'Join applications'], ['portal sends the team to today', cl('/portal'), [], 'Work to grade'], ['students skip today', st('/today')],

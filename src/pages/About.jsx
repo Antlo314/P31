@@ -34,7 +34,7 @@ const About = () => (
       media={{ src: gatherImg, alt: 'Women of the Proverbs 31 community gathered together' }}
       actions={<>
         <Link to="/apply" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></Link>
-        <button type="button" className="k-btn k-btn--light" onClick={openJoin}>Join the collective</button>
+        <button type="button" className="k-btn k-btn--light" onClick={openJoin}>Subscribe to our newsletter</button>
       </>}
     />
 
@@ -134,7 +134,7 @@ const About = () => (
         <p className="k-lede">Apply to curate, or join the collective to hear about the next market first.</p>
         <div className="k-actions">
           <Link to="/apply" className="k-btn k-btn--gold">Become a curator <ArrowUpRight size={18} /></Link>
-          <button type="button" className="k-btn k-btn--light" onClick={openJoin}>Join the collective</button>
+          <button type="button" className="k-btn k-btn--light" onClick={openJoin}>Subscribe to our newsletter</button>
         </div>
       </div>
     </section>

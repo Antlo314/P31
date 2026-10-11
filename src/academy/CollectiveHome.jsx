@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, GraduationCap, Clapperboard, ShieldCheck, ArrowUpRight, Sparkles, Instagram, CalendarDays, Handshake, Video, Lock } from 'lucide-react';
+import { ArrowRight, GraduationCap, ArrowUpRight, Sparkles, Instagram, CalendarDays, Handshake, Video, Lock, HeartHandshake, Users, Sprout, ShieldCheck, Clapperboard } from 'lucide-react';
 import { PROGRAMS } from './content';
 import { marketHome } from '../lib/site';
 import { CALENDLY, openCalendly } from '../lib/calendly';
@@ -17,36 +17,55 @@ import community from '../assets/web/p31_community_impact_editorial_177654407659
 import partner from '../assets/web/p31_partner_hero_editorial.webp';
 import jewelry from '../assets/web/vendor_jewelry.webp';
 
-// The Collective's two pillars, plus the Studio the content team signs in to.
-const DOORS = [
-  { to: '/academy', Icon: GraduationCap, title: 'Academy', who: 'Mentorship', body: 'Business and faith-based mentorship with Melanie: your classroom, live sessions and certificate.', cta: 'Explore the Academy' },
-  { to: '/systems', Icon: ShieldCheck, title: 'Systems', who: 'The P31 tools', body: 'Clip Studio, Photo Studio, the CRM and more, built to help the market and the Collective grow.', cta: 'See the tools' },
-  { to: '/studio', Icon: Clapperboard, title: 'Content Studio', who: 'P31 content team', body: 'Plan, create and schedule posts, and keep up with DMs and comments.', cta: 'Sign in' },
+// What the Collective is for: the heart of the home page.
+const PILLARS = [
+  { Icon: GraduationCap, kicker: 'Mentorship', title: 'Walk with a mentor', body: 'Private business and faith-based mentorship with Melanie JC: honest conversation, a plan for your season, and someone in your corner.', to: '/academy', cta: 'Explore mentorship' },
+  { Icon: HeartHandshake, kicker: 'Healing', title: 'Heal and be restored', body: 'Rooted in Not Easily Broken Apart Women’s Ministry: breaking cycles, rediscovering your God-given identity, and becoming whole.', to: '/mentorship/faith', cta: 'Faith-based mentorship' },
+  { Icon: Users, kicker: 'Fellowship', title: 'Belong to a sisterhood', body: 'Monthly gatherings, prayer and fasting, and a circle of Kingdom women who build alongside you and cheer you on.', to: '/join', cta: 'Join P31 Collective' },
+  { Icon: Sprout, kicker: 'Purpose & growth', title: 'Grow into your calling', body: 'Turn the gifts in your hands into purpose-filled work: leadership, stewardship, and the courage to build God’s way.', to: '/mentorship/business', cta: 'Business mentorship' },
 ];
 
-// thep31collective.org — home of the mentorships and every P31 team sign-in.
+// thep31collective.org — a warm, refined home for mentorship, healing, fellowship and growth.
 const CollectiveHome = () => (
   <div className="k-page ch">
     <header className="k-hero k-dark ch-hero">
-      {/* Kept still on purpose: no 3D arches or drifting motes here, just the brand arch and soft accents. */}
+      {/* Still and soft on purpose: plum gradient, one warm gold glow, no rings or sparkles. */}
       <Ornaments />
-      <span className="k-hero__arch ch-hero__arch" aria-hidden="true" data-reveal="fade" />
       <div className="ch-hero__inner k-center">
         <img src={mark} alt="" className="mt-mark ch-hero__mark" data-intro="0" />
         <p className="k-eyebrow k-eyebrow--center" data-intro="0.1">The Proverbs 31 Collective</p>
         <h1 className="k-display ch-hero__title" data-split="intro" data-delay="0.15">Rise, build <em>and become.</em></h1>
         <p className="k-lede" data-intro="0.4">
-          Mentorship for faith-driven women, and the home of the P31 team: the Academy for mentorship, and Systems, the tools that help the market and the Collective grow.
+          Mentorship, healing and fellowship for faith-driven women. A place to grow in purpose, build what God has placed in your hands, and know that you belong.
         </p>
         <div className="k-actions ch-hero__actions" data-intro="0.55">
           <JoinCollective className="k-btn k-btn--gold k-btn--lg" />
           <button type="button" className="k-btn k-btn--light k-btn--lg" onClick={() => openCalendly('intro', { source: 'home-hero' })}><CalendarDays size={18} /> Book an intro call</button>
-          <Link to="/academy" className="k-btn k-btn--light k-btn--lg">Explore the Academy <ArrowRight size={18} /></Link>
+          <Link to="/academy" className="k-btn k-btn--light k-btn--lg">Explore mentorship <ArrowRight size={18} /></Link>
         </div>
       </div>
     </header>
 
-    <section className="k-section ch-melanie" id="melanie">
+    <section className="k-section" id="belong">
+      <div className="k-head k-center">
+        <p className="k-eyebrow k-eyebrow--center" data-reveal="fade">Welcome</p>
+        <h2 className="k-h2" data-split>You belong <em>here</em></h2>
+        <p className="k-lede" data-reveal>The Collective is where faith-driven women heal, grow, and build together. Four doors, one family.</p>
+      </div>
+      <div className="ch-belong" data-reveal-group>
+        {PILLARS.map((p) => (
+          <article key={p.kicker} className="ch-pillar">
+            <span className="k-icon"><p.Icon size={20} /></span>
+            <small>{p.kicker}</small>
+            <h3>{p.title}</h3>
+            <p>{p.body}</p>
+            <Link to={p.to} className="k-link">{p.cta} <ArrowRight size={15} /></Link>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section className="k-section k-section--mist ch-melanie" id="melanie">
       <div className="k-split k-split--wide-right">
         <div className="ch-melanie__photo" data-reveal="clip">
           <img src={melanie} alt="Melanie JC" loading="lazy" decoding="async" />
@@ -120,7 +139,7 @@ const CollectiveHome = () => (
       </div>
       <div className="k-grid k-grid--2" data-reveal-group>
         {Object.values(PROGRAMS).map((p, i) => (
-          <Link key={p.slug} to={`/mentorship/${p.slug}`} className={`k-card k-card--link mt-program ${i === 0 ? 'k-card--night' : ''}`} data-tilt>
+          <Link key={p.slug} to={`/mentorship/${p.slug}`} className={`k-card k-card--link mt-program ${i === 0 ? 'k-card--night' : ''}`}>
             <span className="k-num">0{i + 1}</span>
             <p className="mt-program__pillars">{p.pillars.join(' · ')}</p>
             <h3>{p.title} {p.accent}</h3>
@@ -146,7 +165,7 @@ const CollectiveHome = () => (
       <p className="k-lede">From a calling to help women heal to a movement of women who build, lead and prosper, the Collective is where that journey continues.</p>
       <div className="k-actions">
         <JoinCollective className="k-btn k-btn--gold" />
-        <Link to="/academy" className="k-btn k-btn--light">Explore the Academy <ArrowRight size={17} /></Link>
+        <Link to="/academy" className="k-btn k-btn--light">Explore mentorship <ArrowRight size={17} /></Link>
       </div>
     </ParallaxStory>
 
@@ -185,33 +204,22 @@ const CollectiveHome = () => (
       <TeamDirectory eyebrow="The P31 team" lede="Reach the right person directly. We’re here Monday to Friday." />
     </section>
 
-    <section className="k-section k-section--night k-dark">
-      <div className="k-head k-center">
-        <p className="k-eyebrow k-eyebrow--center" data-reveal="fade">Academy & Systems</p>
-        <h2 className="k-h2" data-split>Where would you <em>like to go?</em></h2>
-      </div>
-      <div className="k-grid k-grid--3 ch-doors" data-reveal-group>
-        {DOORS.map((d) => (
-          <Link key={d.to} to={d.to} className="ch-door" data-tilt>
-            <span className="k-icon"><d.Icon size={22} /></span>
-            <small>{d.who}</small>
-            <h3>{d.title}</h3>
-            <p>{d.body}</p>
-            <span className="k-link">{d.cta} <ArrowRight size={16} /></span>
-          </Link>
-        ))}
-      </div>
-    </section>
-
-    <section className="k-section k-section--tight">
+    <section className="k-section k-section--night k-dark k-section--tight">
       <figure className="k-quote k-center" style={{ maxWidth: 980 }}>
         <blockquote data-scrub>“Strength and honour are her clothing; and she shall rejoice in time to come.”</blockquote>
         <figcaption data-reveal="fade">Proverbs 31:25 KJV</figcaption>
       </figure>
+      <div className="k-actions pl-center" data-reveal><JoinCollective className="k-btn k-btn--gold k-btn--lg" /></div>
       <p className="k-center ch-market" data-reveal="fade">
         Looking for the market? <a href={marketHome()} className="k-link">Visit Proverbs 31 Marketplace <ArrowUpRight size={15} /></a>
       </p>
-      <div className="k-actions pl-center" data-reveal><JoinCollective className="k-btn k-btn--gold k-btn--lg" /></div>
+      {/* The team’s own doors stay quiet here; the nav and the portal carry them. */}
+      <p className="ch-team" data-reveal="fade">
+        <span>P31 team:</span>
+        <Link to="/portal"><Lock size={13} /> Member portal</Link>
+        <Link to="/systems"><ShieldCheck size={13} /> Systems</Link>
+        <Link to="/studio"><Clapperboard size={13} /> Content Studio</Link>
+      </p>
     </section>
   </div>
 );

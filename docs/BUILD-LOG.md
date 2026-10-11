@@ -2,6 +2,12 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 11 — The Collective, warmer and quieter
+
+- **Less aerospace, more sanctuary.** Across thep31collective.org the celestial elements are gone: the 3D arches and drifting motes, the spinning gem on the Join page, the orbital gold rings, the floating sparkles and the 3D card tilt. In their place: a soft plum gradient with one warm gold glow at the base of each dark section, a gold hairline, and the brand mark. Plum, gold, the logo and the type are unchanged. The marketplace keeps its own look.
+- **The home page leads with people, not tools.** A new "You belong here" section opens the page with the four things the Collective is for: Mentorship (walk with a mentor), Healing (rooted in NEBA Women’s Ministry), Fellowship (a sisterhood), and Purpose & growth. Then Melanie JC, the two mentorship paths, her mandate, the ways to book a call, and the team. The Systems and Content Studio doors moved to one quiet line at the foot of the page; the nav and the portal still carry them for the team.
+- **Newsletter buttons match the pop-up.** Every button that opens the marketplace sign-up now says "Subscribe to our newsletter" (home hero, footer, Our Story, Market dates), and the home-page newsletter block reads "Stay in the Know" with the same text as the pop-up.
+
 ## October 11 — The December event: Business and Leadership Luncheon
 
 - **Renamed and connected.** The December event on p31market.com is now the **Business and Leadership Luncheon** (was "Winter Gala"): Saturday, December 19, 1:30 to 5 PM at The Four Event Center, 8599 Roswell Rd Suite B, Atlanta, with the Eventbrite ticket link, so the home page and Market dates show the date, the venue, directions and "Get tickets" instead of a free RSVP.

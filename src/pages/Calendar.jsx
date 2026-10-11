@@ -253,8 +253,8 @@ const Calendar = () => {
           <div className="k-empty" data-reveal>
             <span className="k-icon"><Bell size={24} /></span>
             <h2>New dates coming soon</h2>
-            <p>Join the collective to hear about the next market first.</p>
-            <button type="button" className="k-btn k-btn--gold" onClick={openJoin}>Join the collective</button>
+            <p>Subscribe to our newsletter to hear about the next market first.</p>
+            <button type="button" className="k-btn k-btn--gold" onClick={openJoin}>Subscribe to our newsletter</button>
           </div>
         )}
       </section>
