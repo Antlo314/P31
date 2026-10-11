@@ -360,7 +360,7 @@ const Home = () => {
 
           <aside className="h26-visit" data-reveal="right">
             <span className="k-icon"><MapPin size={22} /></span>
-            <p className="k-eyebrow" style={{ margin: '18px 0 8px' }}>Next market location</p>
+            <p className="k-eyebrow" style={{ margin: '18px 0 8px' }}>Where it happens</p>
             <h3>{nextEvent?.venue || 'Venue to be announced'}</h3>
             {(nextEvent?.address || nextEvent?.location) && <p className="h26-visit__addr">{nextEvent.address || nextEvent.location}</p>}
             <p className="h26-visit__date">

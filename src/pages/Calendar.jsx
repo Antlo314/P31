@@ -187,7 +187,7 @@ const Calendar = () => {
             <div className="cal-feature__media">
               <img src={next.image_url || featuredImg} alt="" data-parallax="6" />
               <div className="cal-feature__date"><DateBadge ev={next} big /></div>
-              <span className="cal-feature__flag">Next market</span>
+              <span className="cal-feature__flag">Up next</span>
             </div>
             <div className="cal-feature__body">
               <h2>{next.title}</h2>

@@ -189,7 +189,7 @@ const NextMarket = () => {
   if (ev === undefined) return null;
   return (
     <div className="jn-benefits vp-next" data-reveal>
-      <p className="k-eyebrow">Next market</p>
+      <p className="k-eyebrow">Up next</p>
       {ev ? (
         <ul>
           <li><span className="k-icon"><Store size={16} /></span><b>{ev.title}</b></li>
