@@ -158,18 +158,19 @@ CREATE POLICY "Team reads digests" ON public.team_digests FOR SELECT TO authenti
 -- ----------------------------------------------------------
 -- 6. The scheduler
 -- ----------------------------------------------------------
--- Supabase ships both extensions; this turns them on (Database -> Extensions shows them too).
--- pg_cron lives in pg_catalog, and the postgres role is given the cron schema, as in the Supabase install steps.
-CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
-DO $grants$
+-- Turn on the scheduler (pg_cron) and web calls (pg_net) only when they are not on yet.
+-- Supabase sets their permissions itself. Running CREATE EXTENSION again, or granting on
+-- the cron schema by hand, makes that setup fail with "dependent privileges exist".
+DO $ext$
 BEGIN
-  GRANT USAGE ON SCHEMA cron TO postgres;
-  GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cron TO postgres;
-EXCEPTION WHEN insufficient_privilege THEN
-  RAISE NOTICE 'cron grants left as they were: %', SQLERRM;
+  IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN
+    CREATE EXTENSION pg_cron WITH SCHEMA pg_catalog;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_net') THEN
+    CREATE EXTENSION pg_net WITH SCHEMA extensions;
+  END IF;
 END;
-$grants$;
-CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
+$ext$;
 
 -- Replace any earlier copies of these jobs, then schedule them (times are UTC).
 SELECT cron.unschedule(jobid) FROM cron.job WHERE jobname IN ('p31-join-notify', 'p31-team-digest', 'p31-studio-autocreate');

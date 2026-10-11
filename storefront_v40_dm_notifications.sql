@@ -57,17 +57,19 @@ AS $fn$
                             'dm_email', coalesce((SELECT dm_email FROM chat_prefs WHERE user_id = auth.uid()), true));
 $fn$;
 
--- The scheduler has to be on (v38 turns it on; repeating this is harmless).
-CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
-DO $grants$
+-- Turn on the scheduler (pg_cron) and web calls (pg_net) only when they are not on yet.
+-- Supabase sets their permissions itself. Running CREATE EXTENSION again, or granting on
+-- the cron schema by hand, makes that setup fail with "dependent privileges exist".
+DO $ext$
 BEGIN
-  GRANT USAGE ON SCHEMA cron TO postgres;
-  GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cron TO postgres;
-EXCEPTION WHEN insufficient_privilege THEN
-  RAISE NOTICE 'cron grants left as they were: %', SQLERRM;
+  IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN
+    CREATE EXTENSION pg_cron WITH SCHEMA pg_catalog;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_net') THEN
+    CREATE EXTENSION pg_net WITH SCHEMA extensions;
+  END IF;
 END;
-$grants$;
-CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
+$ext$;
 
 -- Every 5 minutes: email anyone who missed a direct message.
 SELECT cron.unschedule(jobid) FROM cron.job WHERE jobname = 'p31-chat-notify';
