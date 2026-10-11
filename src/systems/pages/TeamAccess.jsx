@@ -6,7 +6,7 @@ import { COLLECTIVE_URL } from '../../lib/seo';
 
 const TOOLS = [
   { id: 'studio', label: 'Content Studio', Icon: Clapperboard, note: 'Posts, calendar, messages, comments and clip editing' },
-  { id: 'davinci', label: 'DaVinci', Icon: Film, note: 'Clip finder and the DaVinci edit queue' },
+  { id: 'davinci', label: 'DaVinci', Icon: Film, note: 'Clip finder and the DaVinci edit queue (paused for now; access is kept for when it returns)' },
 ];
 const EMPTY = { full_name: '', email: '', tools: [] };
 

@@ -2,6 +2,19 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 11 — Cleaner mark, DaVinci paused
+
+- **The hands mark, cleaned.** The original art (only 381 pixels wide) had a beaded light outline along every curve, which showed as white dots on dark backgrounds, in texted links and on the app icon. The mark was rebuilt from the original: outline smoothed, the beads and a ribbed texture removed, flat colour and the finger lines kept. Every icon, favicon, share image, the brand kit and the in-app marks were regenerated, and phones are told to fetch the new icons.
+- **Profile picture for Instagram and Facebook.** A square tile with the mark (`marketing/brand/profile-1024.png`) for the @proverbs31market accounts, which currently show a blank avatar. Instagram offers no way to set it through an API, so it is a one-minute upload in the app.
+- **DaVinci paused.** The DaVinci clip finder and Iris queue are greyed out everywhere (console menu, Overview, Today, the portal) with a "paused for now" page, kept behind one switch (`src/lib/features.js`) for when the bridge is ready.
+
+## October 11 — The admin console, by site, on any screen
+
+- **Systems is now split by site.** The team console (thep31collective.org/systems) is organized as Market (p31market.com: orders, vendor applications, markets & events, curators & shops, campaigns), Collective (thep31collective.org: join applications, mentorship, people, Content Studio, email inbox), Create (social, growth, Photo Studio, Clip Studio, DaVinci) and Team (access, health, settings). Every page carries a line saying which site and room it belongs to.
+- **A new front page.** The Overview opens with "what needs you" across both sites, then a Market section (open orders, paid this month, shops live, the next market with its lineup count, plus new orders, vendor applications and shops to review) and a Collective section (new join applications, students active, emails waiting, posts scheduled, plus the applications, emails, DMs and posts going out), then the creative tools and the team pages.
+- **Phones get what works on phones.** The bottom bar holds Overview, Orders, Vendors and Join; "More" lists every room by site. The two video tools (Clip Studio, the DaVinci clip finder) need a computer, so on a phone they explain what they do, point to what you can do right there, and can email you the link; the DaVinci edit queue still works on a phone. The same applies in Content Studio and in each vendor's Creative Studio, where Photo Studio and the promo image maker stay fully usable on a phone.
+- **Today** uses the same attention cards as the console and marks each one Market or Collective.
+
 ## October 10 (night) — One-step vendor approval, share previews
 
 - **Approving an application is the whole job.** Setting a vendor application to Approved in Systems now pre-approves her email on its own: she registers at p31market.com/register with that email and her studio opens at once (and if she had already signed up while waiting, it opens the moment she is approved). The welcome email reminds her to use the same email. Declining later removes the pre-approval. No more second step in Vendor Approvals.

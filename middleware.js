@@ -83,7 +83,7 @@ async function shareHead(request, url, slug) {
     : [];
 
   const origin = `${url.protocol}//${url.host}`;
-  const defaultImage = `${origin}/og-image.jpg`;
+  const defaultImage = `${origin}/og-image.jpg?v=2`;
   const shopUrl = `${origin}/${shop.slug}`;
   const page = product
     ? {

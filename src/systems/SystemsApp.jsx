@@ -1,13 +1,14 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes, Navigate, useLocation } from 'react-router-dom';
-import { LogOut, Menu, X, Sun, ArrowUpRight, ChevronDown } from 'lucide-react';
+import { LogOut, Menu, X, Sun, ArrowUpRight, ChevronDown, ChevronRight, Monitor } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useOperator } from './useOperator';
 import { useRoles } from '../lib/roles';
+import { useIsPhone } from '../lib/device';
 import SystemsLogin from './SystemsLogin';
 import SystemsShowcase from './SystemsShowcase';
 import Overview from './pages/Overview';
-import { SYSTEMS_HOME, SYSTEMS_GROUPS, SYSTEMS_NAV } from './nav';
+import { SITES, SYSTEMS_HOME, SYSTEMS_GROUPS, SYSTEMS_NAV, MOBILE_TABS, navFor } from './nav';
 import { hrefFor } from '../lib/site';
 import './Systems.css';
 
@@ -28,29 +29,37 @@ const Health = lazy(() => import('./pages/Health'));
 const TeamAccess = lazy(() => import('./pages/TeamAccess'));
 const VendorApplications = lazy(() => import('./pages/VendorApplications'));
 
-// Phones get the four most-used tabs in the bottom bar; "More" opens a
-// sheet with every section.
-const MOBILE_TABS = ['/systems', '/systems/social', '/systems/orders', '/systems/clips'];
-
 // Team members who aren't Systems admins get only the pages for the tools they were given.
 const TEAM_PAGES = { davinci: '/systems/pro-edit' };
 
+const readFolded = (key) => { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; } };
+
 // One menu entry: a Systems page, or (marked ↗) a link out to another dashboard.
-const NavItem = ({ n, className, size, onClick }) => {
-  const body = <><n.Icon size={size} /> <span>{n.label}</span>{n.away && <ArrowUpRight size={13} className="sys-away" aria-label="(opens another dashboard)" />}</>;
+const NavItem = ({ n, className, size, onClick, tag = false }) => {
+  const body = <>
+    <n.Icon size={size} /> <span>{n.label}</span>
+    {n.away && <ArrowUpRight size={13} className="sys-away" aria-label="(opens another dashboard)" />}
+    {tag && n.desktop && !n.paused && <Monitor size={13} className="sys-away sys-desk" aria-label="(needs a computer)" />}
+    {n.paused && <span className="sys-tag sys-tag--dim">Paused</span>}
+  </>;
+  // Paused tools stay in the menu, greyed out, so nobody wonders where they went.
+  if (n.paused) return <span className={`${className} is-paused`} aria-disabled="true" title="Paused for now">{body}</span>;
   if (!n.away) return <NavLink to={n.to} end={n.end} className={className} onClick={onClick}>{body}</NavLink>;
   const href = hrefFor(n.to);
   return href === n.to ? <Link to={n.to} className={className} onClick={onClick}>{body}</Link> : <a href={href} className={className}>{body}</a>;
 };
+
+const SitePill = ({ site }) => <span className={`sys-site sys-site--${site}`}>{SITES[site]?.label || site}</span>;
 
 const SystemsApp = () => {
   const { status: opStatus, operator: op } = useOperator();
   const { status: roleStatus, roles, user } = useRoles();
   const { signOut } = useAuth();
   const { pathname } = useLocation();
+  const phone = useIsPhone();
   const [moreOpen, setMoreOpen] = useState(false);
   // Which sidebar groups the person folded away (kept on this device).
-  const [folded, setFolded] = useState(() => { try { return JSON.parse(localStorage.getItem('p31_sys_nav')) || {}; } catch { return {}; } });
+  const [folded, setFolded] = useState(() => readFolded('p31_sys_nav'));
   useEffect(() => { try { localStorage.setItem('p31_sys_nav', JSON.stringify(folded)); } catch { /* private mode */ } }, [folded]);
 
   // Admins (Systems operators) see everything; team members see only their tools.
@@ -64,7 +73,8 @@ const SystemsApp = () => {
   const groups = SYSTEMS_GROUPS
     .map((g) => ({ ...g, items: full ? g.items : g.items.filter((n) => teamPages.includes(n.to)) }))
     .filter((g) => g.items.length);
-  const tabs = full ? SYSTEMS_NAV.filter((n) => MOBILE_TABS.includes(n.to)) : groups.flatMap((g) => g.items).slice(0, 4);
+  const tabs = full ? MOBILE_TABS.map((to) => SYSTEMS_NAV.find((n) => n.to === to)).filter(Boolean) : groups.flatMap((g) => g.items).slice(0, 4);
+  const here = navFor(pathname);
   const inMore = !tabs.some((n) => n.to === pathname.replace(/\/+$/, ''));
 
   useEffect(() => {
@@ -92,6 +102,8 @@ const SystemsApp = () => {
     );
   }
 
+  const site = here?.item.site || 'both';
+
   return (
     <div className="sys">
       <aside className="sys-side">
@@ -105,11 +117,11 @@ const SystemsApp = () => {
             // A group folds unless the current page is inside it.
             const shut = !!folded[g.id] && !g.items.some((n) => pathname.replace(/\/+$/, '').startsWith(n.to));
             return (
-              <div key={g.id} className={`sys-side__group ${shut ? 'is-shut' : ''}`} role="group" aria-labelledby={`sys-g-${g.id}`}>
+              <div key={g.id} className={`sys-side__group sys-side__group--${g.site} ${shut ? 'is-shut' : ''}`} role="group" aria-labelledby={`sys-g-${g.id}`}>
                 <button type="button" id={`sys-g-${g.id}`} className="sys-side__label" onClick={() => setFolded((f) => ({ ...f, [g.id]: !f[g.id] }))} aria-expanded={!shut}>
-                  <span>{g.label}</span><ChevronDown size={13} />
+                  <span>{g.label}<small>{g.sub}</small></span><ChevronDown size={13} />
                 </button>
-                {!shut && g.items.map((n) => <NavItem key={n.to} n={n} className="sys-side__link" size={18} />)}
+                {!shut && g.items.map((n) => <NavItem key={n.to} n={n} className="sys-side__link" size={18} tag />)}
               </div>
             );
           })}
@@ -127,6 +139,19 @@ const SystemsApp = () => {
       </aside>
 
       <main className="sys-main">
+        {/* Where you are: which site, which room. */}
+        <div className="sys-crumb" aria-label="Where you are">
+          <SitePill site={site} />
+          {here ? (
+            <>
+              <ChevronRight size={13} className="sys-crumb__sep" /><span>{here.group.label}</span>
+              <ChevronRight size={13} className="sys-crumb__sep" /><strong>{here.item.label}</strong>
+              {here.item.paused ? <span className="sys-tag sys-tag--dim">Paused</span> : here.item.desktop && <span className="sys-tag"><Monitor size={11} /> Computer</span>}
+            </>
+          ) : <strong>Overview</strong>}
+          {site !== 'both' && <span className="sys-crumb__host">{SITES[site]?.host}</span>}
+        </div>
+
         <Suspense fallback={<div className="sys-loading">Loading…</div>}>
           {!full ? (
             <Routes>
@@ -161,7 +186,7 @@ const SystemsApp = () => {
         {tabs.map((n) => (
           <NavLink key={n.to} to={n.to} end={n.end} className="sys-tabbar__link">
             <n.Icon size={20} />
-            <span>{n.label}</span>
+            <span>{n.short || n.label}</span>
           </NavLink>
         ))}
         <button type="button" className={`sys-tabbar__link ${inMore ? 'active' : ''}`} onClick={() => setMoreOpen(true)} aria-haspopup="dialog">
@@ -184,12 +209,15 @@ const SystemsApp = () => {
               </div>
               {groups.map((g) => (
                 <section key={g.id} className="sys-more__group" aria-labelledby={`sys-mg-${g.id}`}>
-                  <h3 id={`sys-mg-${g.id}`}>{g.label}</h3>
+                  <h3 id={`sys-mg-${g.id}`}>{g.site !== 'both' ? <SitePill site={g.site} /> : g.label} <small>{g.sub}</small></h3>
                   <div className="sys-more__grid">
-                    {g.items.map((n) => <NavItem key={n.to} n={n} className="sys-more__link" size={22} onClick={() => setMoreOpen(false)} />)}
+                    {g.items.map((n) => <NavItem key={n.to} n={n} className={`sys-more__link ${n.desktop ? 'is-desktop' : ''}`} size={22} onClick={() => setMoreOpen(false)} tag />)}
                   </div>
                 </section>
               ))}
+              {phone && groups.some((g) => g.items.some((n) => n.desktop && !n.paused)) && (
+                <p className="sys-more__note"><Monitor size={13} /> On your computer: {groups.flatMap((g) => g.items).filter((n) => n.desktop && !n.paused).map((n) => n.label).join(' and ')} {groups.flatMap((g) => g.items).filter((n) => n.desktop && !n.paused).length === 1 ? 'edits' : 'edit'} video on the device itself. Everything else works right here.</p>
+              )}
             </nav>
             <div className="sys-more__me">
               <span>{operator.display_name || operator.username} · {operator.role === 'owner' ? 'Owner' : full ? 'Admin' : 'Team'}</span>
