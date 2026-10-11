@@ -60,6 +60,30 @@ Return ONLY a JSON object (no code fences, no commentary) with exactly these key
 ${i.events ? `Markets and dates this period: ${i.events}\n` : ''}${i.focus ? `Focus this month: ${i.focus}\n` : ''}Mix these pillars across the month: Market countdown and behind the scenes · Curator spotlight (a real woman-owned brand, described generally since names are not given) · Faith and encouragement (one scripture, KJV, used with care) · Community and testimonials · Mentorship and the P31 Collective · Shop the marketplace. Vary the format: reels most often, then photos, a carousel, a story.
 Return ONLY a JSON array (no code fences) of ${i.count || 12} objects, each: {"day": 1-31, "kind": "reel"|"photo"|"carousel"|"story", "pillar": "...", "theme": "one line: what the post is", "hook": "on-screen hook, 3–8 words", "caption": "2–4 short lines with a call to action", "hashtags": "#five #specific #tags"}. Spread the days out; markets get a post the week before, the day before, and the day after.`,
   },
+  // One product, everything a vendor needs to market it, as JSON the Marketing tab reads.
+  product_promo: {
+    maxTokens: 2200,
+    prompt: (i) => `Write a marketing kit for one product sold by a woman-owned shop on Proverbs 31 Marketplace.
+Shop: ${i.shop || '(not given)'}
+Product: ${i.name || '(not given)'}${i.price ? ` · $${i.price}` : ''}${i.compare_at ? ` (was $${i.compare_at})` : ''}
+${i.category ? `Category: ${i.category}\n` : ''}${i.description ? `Description: ${i.description}\n` : ''}${i.tags ? `Tags: ${i.tags}\n` : ''}${i.angle ? `Angle the vendor wants: ${i.angle}\n` : ''}${i.hasImage ? 'A photo of the product is attached — describe only what you can actually see.\n' : ''}What works on Instagram and Facebook right now: the first line is a short, specific hook (a feeling, a use, a question — never "introducing"); plain words people search; one clear call to action ("tap the link", "DM us", "find us at the market"); 3–5 specific hashtags, not a wall; stories are one line; emails lead with the benefit and have one button.
+Return ONLY JSON (no code fences) with:
+ "hooks": [3 on-screen hook lines, 3–8 words each],
+ "captions": [3 captions for Instagram/Facebook, each 2–5 short lines with the hook first and one call to action, no hashtags inside],
+ "story": "one line for an Instagram story sticker, max 60 characters",
+ "hashtags": [5 specific hashtags],
+ "email_subject": "max 50 characters",
+ "email_body": "90–140 words, 2–3 short paragraphs, warm and first person from the maker, ends with one call to action to shop the link",
+ "sms": "one text message under 140 characters with a call to action",
+ "best_time": "one sentence on when to post this kind of product"`,
+  },
+  // A vendor's email to the people following their shop. Subject, then body, separated by ---.
+  shop_email: {
+    maxTokens: 1400,
+    prompt: (i) => `Write an email from ${i.shop || 'a woman-owned shop'} on Proverbs 31 Marketplace to the shoppers who follow the shop.
+Purpose: ${i.goal || 'share what is new'}
+${i.product ? `Product to feature: ${i.product}\n` : ''}${i.details ? `Details: ${i.details}\n` : ''}${i.maker ? `Maker: ${i.maker}\n` : ''}First person from the maker, warm and personal, never salesy. Return exactly 2 parts separated by ---: first a subject line (max 50 characters), then the email body (90–160 words, 2–3 short paragraphs, one clear call to action, signed with the maker's name or the shop name).`,
+  },
   product_description: {
     maxTokens: 1000,
     prompt: (i) => `Write a product description for an online boutique listing.
@@ -182,7 +206,7 @@ Deno.serve(async (req) => {
 
     const parts = text.split(/\n\s*---\s*\n/).map((s) => s.trim()).filter(Boolean);
     // A campaign is one draft: subject line, then the body.
-    const options = task === 'campaign'
+    const options = task === 'campaign' || task === 'shop_email'
       ? [`${parts[0].replace(/^subject:\s*/i, '')}\n${parts.slice(1).join('\n\n')}`]
       : parts.slice(0, 3);
     return json({ options });

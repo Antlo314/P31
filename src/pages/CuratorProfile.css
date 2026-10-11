@@ -300,3 +300,29 @@
 }
 .sf-fav.is-on { color: #e5484d; border-color: rgba(229, 72, 77, 0.35); }
 .sf-fav.is-on svg { fill: #e5484d; }
+
+/* ── Badges, sale timer, share, follow ───────────────────── */
+.sf-card__tags .is-badge { background: rgba(242, 206, 77, 0.95); color: #2a1a00; }
+.sf-ends { margin: 0; font-size: 0.76rem; font-weight: 800; color: var(--sf-accent); }
+.sf-sheet__share {
+  position: absolute; top: 12px; right: 60px; z-index: 2;
+  width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer;
+  background: rgba(255, 255, 255, 0.92); color: #201431; display: grid; place-items: center;
+  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.5);
+}
+.sf-follow {
+  max-width: 1180px; margin: 8px 16px 0; padding: 22px 20px; border-radius: var(--sf-radius);
+  background: var(--sf-surface); border: 1px solid var(--sf-line);
+  display: grid; gap: 14px;
+}
+@media (min-width: 900px) { .sf-follow { margin-inline: 40px; grid-template-columns: 1.2fr 1fr; align-items: center; padding: 28px 32px; } }
+@media (min-width: 1260px) { .sf-follow { margin-inline: auto; } }
+.sf-follow h2 { margin: 0 0 6px; font-family: var(--sf-head); font-weight: var(--sf-head-weight); font-size: 1.5rem; color: var(--sf-ink); }
+.sf-follow p { margin: 0; color: var(--sf-ink-2); font-size: 0.95rem; line-height: 1.5; }
+.sf-follow__form { display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.sf-follow__form input {
+  min-height: 50px; padding: 0 16px; border-radius: var(--sf-btn-radius); border: 1px solid var(--sf-line);
+  background: var(--sf-bg); color: var(--sf-ink); font: inherit; font-size: 16px; min-width: 0;
+}
+.sf-follow__form .sf-low { grid-column: 1 / -1; }
+.sf-follow__done { display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--sf-accent); }

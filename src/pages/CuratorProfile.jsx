@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft, Share2, ShoppingBag, Sparkles, Leaf, BadgeCheck, Instagram, Facebook, Globe, Mail, Phone, MapPin,
-  CreditCard, DollarSign, Send, Check, X, ShieldAlert, Star, Images, Store, Loader2, Minus, Plus, Heart,
+  CreditCard, DollarSign, Send, Check, X, ShieldAlert, Star, Images, Store, Loader2, Minus, Plus, Heart, Bell, Link2,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { applyMeta, curatorMeta } from '../lib/seo';
@@ -25,6 +25,55 @@ const stockLabel = (p) => {
   if (p.stock_status === 'limited_edition') return 'Limited';
   if (p.stock_status === 'pre_order') return 'Pre-order';
   return null;
+};
+
+// A sale shows while the compare-at price is higher and the end time (if set) has not passed.
+const saleOn = (p) => Number(p.compare_at_price) > Number(p.price) && (!p.sale_ends_at || new Date(p.sale_ends_at) > new Date());
+const endsIn = (p) => {
+  if (!p.sale_ends_at) return null;
+  const ms = new Date(p.sale_ends_at) - Date.now();
+  if (ms <= 0) return null;
+  const h = Math.floor(ms / 3600000);
+  if (h >= 48) return `Sale ends in ${Math.floor(h / 24)} days`;
+  if (h >= 1) return `Sale ends in ${h}h`;
+  return `Sale ends in ${Math.max(1, Math.floor(ms / 60000))} min`;
+};
+
+// "Get updates from this shop": an email box at the bottom of every storefront.
+const FollowBox = ({ curator }) => {
+  const [email, setEmail] = useState('');
+  const [state, setState] = useState('idle'); // idle | busy | done | error
+  const [count, setCount] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    supabase.rpc('shop_follower_count', { p_curator: curator.id }).then(({ data }) => { if (alive && typeof data === 'number') setCount(data); });
+    return () => { alive = false; };
+  }, [curator.id]);
+  const submit = async (e) => {
+    e.preventDefault();
+    setState('busy');
+    const { error } = await supabase.rpc('shop_subscribe', { p_curator: curator.id, p_email: email.trim(), p_source: 'storefront' });
+    setState(error ? 'error' : 'done');
+    if (!error) setCount((c) => (c == null ? 1 : c + 1));
+  };
+  return (
+    <section className="sf-follow" data-reveal>
+      <div>
+        <p className="sf-eyebrow">Stay close</p>
+        <h2>Get updates from {curator.business_name}</h2>
+        <p>New pieces, market dates and the occasional sale, straight from the maker. {count > 0 && <b>{count} {count === 1 ? 'person follows' : 'people follow'} this shop.</b>}</p>
+      </div>
+      {state === 'done' ? (
+        <p className="sf-follow__done"><Check size={18} /> You’re on the list. Thank you!</p>
+      ) : (
+        <form onSubmit={submit} className="sf-follow__form">
+          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" aria-label="Your email" />
+          <button type="submit" className="sf-btn sf-btn--accent" disabled={state === 'busy'}>{state === 'busy' ? <Loader2 size={18} className="sf-spin" /> : <Bell size={18} />} Follow</button>
+          {state === 'error' && <p className="sf-low">That didn’t go through. Check the email and try again.</p>}
+        </form>
+      )}
+    </section>
+  );
 };
 
 const CuratorProfile = () => {
@@ -102,10 +151,10 @@ const CuratorProfile = () => {
 
         const { data: prodData } = await supabase
           .from('products').select('*').eq('curator_id', data.id).order('created_at', { ascending: false });
-        // Hidden items stay in the dashboard only; the curator's own order wins.
+        // Hidden items stay in the dashboard only; featured first, then the curator's own order.
         setProducts((prodData || [])
           .filter((p) => p.is_active !== false)
-          .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)));
+          .sort((a, b) => (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0) || (a.sort_order ?? 0) - (b.sort_order ?? 0)));
 
         const { data: testData } = await supabase
           .from('testimonials').select('*').eq('curator_id', data.id).eq('is_approved', true);
@@ -187,6 +236,15 @@ const CuratorProfile = () => {
       else { await navigator.clipboard.writeText(url); setShared(true); setTimeout(() => setShared(false), 1800); }
     } catch { /* closed */ }
   };
+  // One product's own link (opens the sheet for whoever taps it).
+  const shareProduct = async (p) => {
+    const url = `${window.location.origin}/${curator.slug || curator.id}?p=${p.id}`;
+    logEvent('share', p.id);
+    try {
+      if (navigator.share) await navigator.share({ title: p.name, text: `${p.name} · ${money(p.price)} at ${curator.business_name}`, url });
+      else { await navigator.clipboard.writeText(url); setShared(p.id); setTimeout(() => setShared(false), 1800); }
+    } catch { /* closed */ }
+  };
 
   const groupsOf = (p) => (Array.isArray(p.variants) ? p.variants.filter((g) => g?.name && g.options?.length) : []);
   const missingOption = (p) => groupsOf(p).find((g) => !sel[g.name]);
@@ -229,7 +287,7 @@ const CuratorProfile = () => {
       <div className="sf-grid" data-reveal-group>
         {shown.map((p) => {
           const tag = stockLabel(p);
-          const onSale = Number(p.compare_at_price) > Number(p.price);
+          const onSale = saleOn(p);
           return (
             <button className="sf-card" key={p.id} onClick={() => openProduct(p)}>
               <div className="sf-card__img">
@@ -237,6 +295,7 @@ const CuratorProfile = () => {
                 <div className="sf-card__tags">
                   {tag && <span className={tag === 'Sold out' ? 'is-dark' : ''}>{tag}</span>}
                   {onSale && !tag && <span className="is-accent">Sale</span>}
+                  {p.badge && !tag && <span className="is-badge">{p.badge}</span>}
                 </div>
                 {p.image_urls?.length > 1 && <span className="sf-card__count"><Images size={12} /> {p.image_urls.length}</span>}
               </div>
@@ -246,7 +305,8 @@ const CuratorProfile = () => {
                   <strong>{money(p.price)}</strong>
                   {onSale && <s>{money(p.compare_at_price)}</s>}
                 </p>
-                {p.inventory > 0 && p.inventory <= 5 && <p className="sf-low">Only {p.inventory} left</p>}
+                {p.inventory > 0 && p.inventory <= 5 ? <p className="sf-low">Only {p.inventory} left</p>
+                  : onSale && endsIn(p) ? <p className="sf-ends">{endsIn(p)}</p> : null}
               </div>
             </button>
           );
@@ -356,6 +416,8 @@ const CuratorProfile = () => {
         </section>
       )}
 
+      <FollowBox curator={curator} />
+
       <section className="sf-contact" data-reveal>
         <a href={`mailto:${contactEmail}`}><Mail size={17} /> {curator.public_email ? 'Email the shop' : 'Contact P31'}</a>
         {curator.phone && <a href={`tel:${curator.phone.replace(/[^\d+]/g, '')}`}><Phone size={17} /> {curator.phone}</a>}
@@ -367,6 +429,7 @@ const CuratorProfile = () => {
         <div className="sf-sheet" role="dialog" aria-modal="true" aria-label={open.name} onClick={(e) => e.target === e.currentTarget && setOpen(null)}>
           <div className="sf-sheet__panel">
             <button className="sf-sheet__close" onClick={() => setOpen(null)} aria-label="Close"><X size={18} /></button>
+            <button className="sf-sheet__share" onClick={() => shareProduct(open)} aria-label="Share this item">{shared === open.id ? <Check size={16} /> : <Link2 size={16} />}</button>
             <div className="sf-gallery">
               {(open.image_urls?.length ? open.image_urls : [open.image_url]).filter(Boolean).map((src, i) => (
                 <img key={src} src={src} alt={i === 0 ? open.name : ''} />
@@ -378,10 +441,12 @@ const CuratorProfile = () => {
               <h2>{open.name}</h2>
               <p className="sf-price sf-price--lg">
                 <strong>{money(open.price)}</strong>
-                {Number(open.compare_at_price) > Number(open.price) && <s>{money(open.compare_at_price)}</s>}
+                {saleOn(open) && <s>{money(open.compare_at_price)}</s>}
                 {stockLabel(open) && <span className="sf-pill">{stockLabel(open)}</span>}
+                {!stockLabel(open) && open.badge && <span className="sf-pill">{open.badge}</span>}
               </p>
               {open.inventory > 0 && open.inventory <= 5 && <p className="sf-low">Only {open.inventory} left</p>}
+              {saleOn(open) && endsIn(open) && <p className="sf-ends">{endsIn(open)}</p>}
               {open.description && <p className="sf-desc">{open.description}</p>}
               {open.tags?.length > 0 && <div className="sf-tags">{open.tags.map((t) => <span key={t}>#{t}</span>)}</div>}
 
