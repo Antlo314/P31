@@ -46,7 +46,7 @@ Still in **Storefront**, press the gold **Add Artifact** button:
 4. **Description**: what it is, what it is made of, why people love it. **Write description with AI** looks at your photo and drafts it.
 5. Optional: **compare-at price** (shows a Sale tag), **inventory** (shows "Only 3 left"), **SKU**, **tags**, **options** (Size: S, M, L).
 6. **Marketing box**: a **badge** on the photo (New, Bestseller, Limited, Handmade, Gift, Back in stock, Small batch, Market exclusive), **Sale ends** (shoppers see a countdown; the sale tag drops by itself when it passes), **Feature it first in my shop**.
-7. **Save Artifact.** Repeat for each product (up to 10). Drag to reorder; the gear icon edits; the eye hides without deleting.
+7. **Save Artifact.** Repeat for each product (up to 10). The gear icon on a card edits it; untick "Visible in my storefront" to hide one without deleting it; "Feature it first" pins it to the top.
 
 ### 5. Store Design — pick your look (3 minutes)
 In **Store Design**:
