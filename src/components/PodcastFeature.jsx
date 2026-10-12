@@ -1,7 +1,6 @@
 import React from 'react';
 import { ArrowUpRight, Instagram, Facebook } from 'lucide-react';
 import { PODCAST } from '../lib/podcast';
-import { isCollective } from '../lib/site';
 import emblem from '../assets/podcast/emblem.webp';
 import lotus from '../assets/podcast/lotus.webp';
 import './PodcastFeature.css';
@@ -12,8 +11,8 @@ import './PodcastFeature.css';
  * gold, sound waves from the microphone and a twinkle on the crown; beside it, the flyer's words.
  */
 const PodcastFeature = () => {
-  const listen = PODCAST.platforms.find((p) => p.url);
-  const insta = PODCAST.social.instagram[isCollective ? 'collective' : 'market'];
+  const listen = PODCAST.listen || PODCAST.platforms.find((p) => p.url)?.url;
+  const { instagram: insta, facebook } = PODCAST.social;
   return (
     <section className="k-section k-section--night k-dark pod" id="podcast" aria-labelledby="pod-title">
       <div className="pod__inner">
@@ -62,12 +61,12 @@ const PodcastFeature = () => {
           <div className="pod__social" data-reveal="fade">
             <span>Follow along</span>
             <a href={insta.url} target="_blank" rel="noreferrer" aria-label={`Instagram ${insta.handle}`}><Instagram size={18} /> {insta.handle}</a>
-            <a href={PODCAST.social.facebook.url} target="_blank" rel="noreferrer" aria-label="Facebook"><Facebook size={18} /> Facebook</a>
+            <a href={facebook.url} target="_blank" rel="noreferrer" aria-label="The podcast on Facebook"><Facebook size={18} /> {facebook.handle}</a>
           </div>
 
           {listen && (
             <div className="k-actions pod__actions" data-reveal>
-              <a href={listen.url} target="_blank" rel="noreferrer" className="k-btn k-btn--gold">Listen now <ArrowUpRight size={18} /></a>
+              <a href={listen} target="_blank" rel="noreferrer" className="k-btn k-btn--gold">Listen now <ArrowUpRight size={18} /></a>
             </div>
           )}
         </div>
