@@ -43,7 +43,8 @@ const useSessions = (program, user) => {
   return { ...res, data: res.data.filter((s) => forStudent(s, user?.id)) };
 };
 const useLessons = (program) => useRows(
-  () => supabase.from('academy_lessons').select('id, module_id, title, position, video_url, video_path, is_published').eq('program_id', program.id).eq('is_published', true).order('position'),
+  // '*' so the list works before and after the video column exists (v41).
+  () => supabase.from('academy_lessons').select('*').eq('program_id', program.id).eq('is_published', true).order('position'),
   [program.id],
 );
 const useProgress = (program, user) => useRows(

@@ -346,7 +346,8 @@ export const SessionModal = ({ session, studentId, onClose, onSaved }) => {
       } catch (err) { setBusy(false); return setError(/bucket/i.test(err.message) ? 'Run storefront_v41_team_dashboards.sql in Supabase first (it creates the video bucket).' : err.message); }
     }
     const row = { ...form, starts_at: fromLocalInput(form.starts_at), duration_minutes: Number(form.duration_minutes), program_id: program.id,
-      student_id: session ? session.student_id : studentId || null, join_url: form.join_url || null, recording_url: form.recording_url || null, recording_path: recordingPath || null };
+      student_id: session ? session.student_id : studentId || null, join_url: form.join_url || null, recording_url: form.recording_url || null,
+      ...(recordingPath || session?.recording_path ? { recording_path: recordingPath || null } : {}) };
     if (isZoom || isLive || (!session && provider !== 'link')) delete row.join_url; // the room owns the link
     const { data, error: err } = await write(session
       ? supabase.from('academy_sessions').update(row).eq('id', session.id).select('id').single()
@@ -527,7 +528,8 @@ const LessonModal = ({ lesson, moduleId, onClose, onSaved }) => {
         videoPath = m.path;
       } catch (err) { setVideo((v) => ({ ...v, busy: false })); return setError(/row-level security|policy/i.test(err.message) ? 'You don’t have permission to upload here.' : /bucket/i.test(err.message) ? 'Run storefront_v41_team_dashboards.sql in Supabase first (it creates the video bucket).' : err.message); }
     }
-    const row = { ...form, video_url: form.video_url || null, video_path: videoPath || null, reflection_prompt: form.reflection_prompt || null, updated_at: new Date().toISOString() };
+    // video_path is only sent when there is (or was) an uploaded video, so lessons save before v41 too.
+    const row = { ...form, video_url: form.video_url || null, ...(videoPath || lesson?.video_path ? { video_path: videoPath || null } : {}), reflection_prompt: form.reflection_prompt || null, updated_at: new Date().toISOString() };
     const { error: err } = await write(lesson
       ? supabase.from('academy_lessons').update(row).eq('id', lesson.id)
       : supabase.from('academy_lessons').insert({ ...row, program_id: program.id, module_id: moduleId, position: Date.now() % 1e9 }));

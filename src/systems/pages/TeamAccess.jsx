@@ -54,7 +54,7 @@ const TeamAccess = () => {
     const base = { email: row.email, full_name: row.full_name || null, tools: row.tools || [], note: row.note || null };
     const full = v41 ? { ...base, role_title: row.role_title || null, photo_key: row.photo_key || memberByEmail(row.email)?.photo || null, site: row.site || siteOfEmail(row.email), sort_order: row.sort_order ?? 100 } : base;
     const { error: err } = await supabase.from('team_access').upsert(full);
-    if (err) setError(/column .* does not exist/i.test(err.message) ? 'Run storefront_v41_team_dashboards.sql in Supabase to manage dashboards here.' : err.message);
+    if (err) setError(/column .* does not exist|tools_check|check constraint/i.test(err.message) ? 'Run storefront_v41_team_dashboards.sql in Supabase to manage dashboards here (until then only Content Studio and DaVinci can be given).' : err.message);
     load();
   };
   const toggle = (row, id) => save({ ...row, tools: row.tools.includes(id) ? row.tools.filter((t) => t !== id) : [...row.tools, id] });

@@ -22,10 +22,8 @@ import teamGroupWide from '../assets/web/team/team-group-wide.webp';
 import { TEAM } from './team';
 
 export const MELANIE = { portrait: melaniePortrait, square: melanieSquare, wide: melanieWide, head: melanieHead };
+/** The "Meet the team" event photo. It is not the team: it belongs only in the marketplace pop-up. */
 export const GROUP = { tall: teamGroup, wide: teamGroupWide };
-
-/** The four team portraits (the strip under the directory). */
-export const PORTRAITS = [teamA, teamB, teamC, teamD];
 
 /** Round headshots and full portraits by photo key (src/lib/team.js → photo). */
 export const HEADSHOTS = { melanie: melanieHead, a: teamAHead, b: teamBHead, c: teamCHead, d: teamDHead };

@@ -6,7 +6,10 @@ import { marketHome } from '../lib/site';
 import { CALENDLY, openCalendly } from '../lib/calendly';
 import TeamDirectory from '../components/TeamDirectory';
 import mark from '../assets/academy/collective-mark.webp';
-import { MELANIE, GROUP, PORTRAITS } from '../lib/teamPhotos';
+import { MELANIE } from '../lib/teamPhotos';
+import community from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
+import partner from '../assets/web/p31_partner_hero_editorial.webp';
+import jewelry from '../assets/web/vendor_jewelry.webp';
 import './mentorship.css';
 import './collective-home.css';
 import './pillars.css';
@@ -151,10 +154,10 @@ const CollectiveHome = () => (
       id="mandate"
       words={['Heal.', 'Rise.', 'Build.', 'Prosper.']}
       images={[
-        { src: GROUP.tall, alt: 'The P31 team together at an event' },
+        { src: community, alt: 'Women gathered at a P31 event' },
         { src: MELANIE.portrait, alt: 'Melanie JC' },
-        { src: PORTRAITS[0], alt: 'A member of the P31 team' },
-        { src: PORTRAITS[1], alt: 'A member of the P31 team' },
+        { src: jewelry, alt: 'Handmade jewelry from a P31 curator' },
+        { src: partner, alt: 'A P31 partner' },
       ]}
     >
       <p className="k-eyebrow k-eyebrow--center">Her mandate</p>
@@ -198,7 +201,7 @@ const CollectiveHome = () => (
     </section>
 
     <section className="k-section" id="team">
-      <TeamDirectory eyebrow="The P31 team" lede="Reach the right person directly. We’re here Monday to Friday." photo={GROUP.wide} gallery={PORTRAITS} />
+      <TeamDirectory eyebrow="The P31 team" lede="Reach the right person directly. We’re here Monday to Friday." portraits />
     </section>
 
     <section className="k-section k-section--forest k-dark k-section--tight">

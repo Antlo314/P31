@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowRight, CheckCircle2, Mail, Sparkles, CalendarHeart, BadgePercent, Mic, Store, HeartHandshake, Users, Star } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
-import { GROUP } from '../lib/teamPhotos';
 import { supabase } from '../lib/supabase';
 import { JOIN_FORM_URL } from '../lib/academy';
 import { EMAIL } from '../lib/team';
@@ -219,7 +218,6 @@ const Join = () => (
       title="Join the"
       accent="P31 Collective"
       lead="A faith-centered community for women entrepreneurs who desire to grow spiritually, purposefully, and professionally while building meaningful relationships with like-minded women."
-      media={{ src: GROUP.tall, alt: 'The P31 team together at an event' }}
       actions={<a href="#apply" className="k-btn k-btn--gold">Apply to join <ArrowRight size={18} /></a>}
     />
 
