@@ -61,6 +61,7 @@ const DbUpdates = () => {
                     <small>{s.landed ? `In the database${s.applied_at ? ` since ${fmt(s.applied_at)}` : ''}` : `Waiting${run >= 0 && waiting.length > 1 ? ` · run ${run + 1} of ${waiting.length}` : ''} · ${s.file}`}</small>
                     {!s.landed && <small>{s.what}</small>}
                     {!s.landed && s.expect && <small className="db-row__expect">When it works, the result is one row: {s.expect}</small>}
+                    {!s.landed && <small>Or, on the computer with the project (no pasting): <code>npx supabase db query --linked --project-ref xsnhxjttdizljaawpumz -f {s.file}</code></small>}
                   </div>
                   {!s.landed && SQL[s.file] && (
                     <span className="db-row__actions">
