@@ -18,4 +18,12 @@ export const PODCAST = {
     { id: 'audible', label: 'Audible', icon: audible, url: '' },
     { id: 'youtube', label: 'YouTube', icon: youtube, url: '' },
   ],
+  // Where to follow along: each site's own Instagram, and the P31 Facebook page.
+  social: {
+    instagram: {
+      market: { handle: '@proverbs31market', url: 'https://www.instagram.com/proverbs31market' },
+      collective: { handle: '@the.p31collective', url: 'https://www.instagram.com/the.p31collective' },
+    },
+    facebook: { handle: 'Proverbs 31 Marketplace', url: 'https://www.facebook.com/share/1LEtAu9AJD/?mibextid=wwXIfr' },
+  },
 };
