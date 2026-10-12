@@ -16,6 +16,7 @@ import './pillars.css';
 import JoinCollective from '../components/JoinCollective';
 import Ornaments from '../components/Ornaments';
 import ParallaxStory from '../components/ParallaxStory';
+import PodcastFeature from '../components/PodcastFeature';
 
 // What the Collective is for: the heart of the home page.
 const PILLARS = [
@@ -130,6 +131,9 @@ const CollectiveHome = () => (
         </div>
       </div>
     </section>
+
+    {/* Her podcast, right after her story. */}
+    <PodcastFeature />
 
     <section className="k-section">
       <div className="k-head k-center">

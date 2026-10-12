@@ -157,14 +157,14 @@ REVOKE ALL ON FUNCTION public.chat_member_ids() FROM public, anon, authenticated
 INSERT INTO public.team_access (email, full_name, tools, note, role_title, photo_key, site, sort_order) VALUES
   ('founder@thep31collective.org', 'Melanie JC', '{}', 'Site admin: every dashboard', 'Founder & CEO', 'melanie', 'collective', 10),
   ('ceo@p31market.com', 'Melanie JC', '{}', 'Site admin: every dashboard', 'Founder & CEO', 'melanie', 'market', 11),
-  ('secretary@thep31collective.org', 'Savannah Campbell', ARRAY['people', 'emails', 'classroom'], 'Administrative support, outreach communications', 'Executive Assistant', 'a', 'collective', 20),
-  ('secretary@p31market.com', 'Savannah Campbell', ARRAY['vendors', 'events', 'orders', 'emails'], 'Administrative support, outreach communications', 'Executive Assistant', 'a', 'market', 21),
-  ('marketing@p31market.com', 'Yanni Bratcher', ARRAY['studio', 'social'], 'Marketing strategy, organization awareness', 'Marketing Strategist', 'b', 'market', 30),
-  ('members@thep31collective.org', 'Alexia Thomas', ARRAY['people', 'emails'], 'Community experience, event planning', 'Member Liaison', 'c', 'collective', 40),
-  ('outreach@p31market.com', 'Alexia Thomas', ARRAY['events', 'vendors'], 'Community experience, event planning', 'Member Liaison', 'c', 'market', 41),
-  ('grants@thep31collective.org', 'Shanay Prince', ARRAY['people'], 'Grants and partnerships, operations support', 'Support Coordinator', 'd', 'collective', 50),
-  ('grants@p31market.com', 'Shanay Prince', ARRAY['vendors', 'events'], 'Grants and partnerships, operations support', 'Support Coordinator', 'd', 'market', 51),
-  ('coordinator@p31market.com', 'Shanay Prince', ARRAY['orders', 'vendors', 'events'], 'Grants and partnerships, operations support', 'Support Coordinator', 'd', 'market', 52),
+  ('secretary@thep31collective.org', 'Savannah Campbell', ARRAY['people', 'emails', 'classroom'], 'Administrative support, outreach communications', 'Executive Assistant', 'b', 'collective', 20),
+  ('secretary@p31market.com', 'Savannah Campbell', ARRAY['vendors', 'events', 'orders', 'emails'], 'Administrative support, outreach communications', 'Executive Assistant', 'b', 'market', 21),
+  ('marketing@p31market.com', 'Yanni Bratcher', ARRAY['studio', 'social'], 'Marketing strategy, organization awareness', 'Marketing Strategist', 'd', 'market', 30),
+  ('members@thep31collective.org', 'Alexia Thomas', ARRAY['people', 'emails'], 'Community experience, event planning', 'Member Liaison', 'a', 'collective', 40),
+  ('outreach@p31market.com', 'Alexia Thomas', ARRAY['events', 'vendors'], 'Community experience, event planning', 'Member Liaison', 'a', 'market', 41),
+  ('grants@thep31collective.org', 'Shanay Prince', ARRAY['people'], 'Grants and partnerships, operations support', 'Support Coordinator', 'c', 'collective', 50),
+  ('grants@p31market.com', 'Shanay Prince', ARRAY['vendors', 'events'], 'Grants and partnerships, operations support', 'Support Coordinator', 'c', 'market', 51),
+  ('coordinator@p31market.com', 'Shanay Prince', ARRAY['orders', 'vendors', 'events'], 'Grants and partnerships, operations support', 'Support Coordinator', 'c', 'market', 52),
   ('vendor@p31market.com', 'Anthony Carr', ARRAY['davinci', 'shops', 'vendors', 'orders'], 'Virtual marketplace troubleshooting, vendor support', 'Marketplace Tech Support', NULL, 'market', 60)
 ON CONFLICT (email) DO UPDATE SET
   full_name = EXCLUDED.full_name,

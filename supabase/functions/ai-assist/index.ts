@@ -1,11 +1,11 @@
 // Supabase Edge Function: ai-assist
-// On-brand writing help with Claude for curators and the Systems team:
-// captions, product descriptions (optionally from the product photo), shop
-// bios, outreach messages, comment replies and email campaigns.
+// On-brand writing help for curators and the P31 team: captions, product
+// descriptions (optionally from the product photo), shop bios, outreach
+// messages, comment replies and email campaigns.
 //
-// Setup:
-//   supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
-//   supabase functions deploy ai-assist
+// Model: Google Gemini when GEMINI_API_KEY is set (GEMINI_MODEL, the same key Carla
+// uses), otherwise Claude (ANTHROPIC_API_KEY).
+//   supabase functions deploy ai-assist --no-verify-jwt
 //
 // Body: { task, input: { ...fields }, imageUrl?, imageBase64?, imageType? }
 // Returns: { options: string[] }   (1–3 drafts)
@@ -21,6 +21,7 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
 
 const MODEL = 'claude-opus-5-5';
+const GEMINI_FALLBACK_MODEL = 'gemini-3.8-flash';
 const DAILY_LIMIT = { operator: 300, curator: 40 };
 
 // Stable brand voice (kept first so repeated calls share the cached prefix).
@@ -136,15 +137,26 @@ Deno.serve(async (req) => {
     const user = userData?.user;
     if (!user) return json({ error: 'Sign in to use AI writing.' }, 401);
 
-    // Who may use it, and how much per day.
-    const [{ data: op }, { data: cur }] = await Promise.all([
-      admin.from('system_operators').select('user_id').eq('user_id', user.id).maybeSingle(),
-      admin.from('curator_data').select('id').eq('id', user.id).maybeSingle(),
-    ]);
-    const role = op ? 'operator' : cur ? 'curator' : null;
+    // Who may use it, and how much per day: the team (admins, Systems operators, anyone with a
+    // team dashboard or a classroom) and curators.
+    const asUser = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false },
+    });
+    const { data: roles } = await asUser.rpc('my_roles');
+    let team = !!(roles && (roles.admin || roles.operator || roles.studio || (roles.tools || []).length || (roles.mentor || []).length));
+    let curator = !!roles?.curator;
+    if (!roles) { // before v41: the older checks
+      const [{ data: op }, { data: cur }] = await Promise.all([
+        admin.from('system_operators').select('user_id').eq('user_id', user.id).maybeSingle(),
+        admin.from('curator_data').select('id').eq('id', user.id).maybeSingle(),
+      ]);
+      team = !!op; curator = !!cur;
+    }
+    const role = team ? 'operator' : curator ? 'curator' : null;
     if (!role) return json({ error: 'AI writing is available to curators and the P31 team.' }, 403);
     // Only people allowed to use it learn whether it's switched on.
-    if (!Deno.env.get('ANTHROPIC_API_KEY')) return json({ error: 'AI writing isn’t switched on yet (add the ANTHROPIC_API_KEY secret).' });
+    const useGemini = !!Deno.env.get('GEMINI_API_KEY');
+    if (!useGemini && !Deno.env.get('ANTHROPIC_API_KEY')) return json({ error: 'AI writing isn’t switched on yet (add the GEMINI_API_KEY secret).' });
 
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { count } = await admin.from('ai_usage').select('id', { count: 'exact', head: true })
@@ -169,6 +181,23 @@ Deno.serve(async (req) => {
       clean.hasImage = '1';
     }
     content.push({ type: 'text', text: spec.prompt(clean) });
+
+    const done = (text: string) => {
+      const parts = text.split(/\n\s*---\s*\n/).map((s) => s.trim()).filter(Boolean);
+      // A campaign is one draft: subject line, then the body.
+      const options = task === 'campaign' || task === 'shop_email'
+        ? [`${parts[0].replace(/^subject:\s*/i, '')}\n${parts.slice(1).join('\n\n')}`]
+        : parts.slice(0, 3);
+      return json({ options });
+    };
+
+    if (useGemini) {
+      const out = await gemini(spec, clean, content);
+      await admin.from('ai_usage').insert({ user_id: user.id, task, input_tokens: out.inTokens, output_tokens: out.outTokens });
+      if (out.blocked) return json({ error: 'The AI couldn’t write that one — try rephrasing the details.' });
+      if (!out.text) return json({ error: 'No draft came back — please try again.' });
+      return done(out.text);
+    }
 
     const client = new Anthropic();
     // Claude Opus 5.5 always thinks; low effort keeps short copy fast and cheap.
@@ -198,18 +227,12 @@ Deno.serve(async (req) => {
     }
 
     const text = response.content
-      .filter((b) => b.type === 'text')
-      .map((b) => (b as Anthropic.Beta.BetaTextBlock).text)
+      .filter((b: { type: string }) => b.type === 'text')
+      .map((b: { type: string }) => (b as Anthropic.Beta.BetaTextBlock).text)
       .join('\n')
       .trim();
     if (!text) return json({ error: 'No draft came back — please try again.' });
-
-    const parts = text.split(/\n\s*---\s*\n/).map((s) => s.trim()).filter(Boolean);
-    // A campaign is one draft: subject line, then the body.
-    const options = task === 'campaign' || task === 'shop_email'
-      ? [`${parts[0].replace(/^subject:\s*/i, '')}\n${parts.slice(1).join('\n\n')}`]
-      : parts.slice(0, 3);
-    return json({ options });
+    return done(text);
   } catch (err) {
     if (err instanceof Anthropic.RateLimitError) return json({ error: 'AI is busy right now — try again in a minute.' }, 429);
     if (err instanceof Anthropic.AuthenticationError) return json({ error: 'The AI key isn’t valid — check ANTHROPIC_API_KEY.' }, 500);
@@ -218,6 +241,56 @@ Deno.serve(async (req) => {
       return json({ error: 'AI writing hit a problem — please try again.' }, 502);
     }
     console.error('ai-assist error:', err);
+    if (/^Gemini /.test((err as Error).message || '')) return json({ error: 'AI writing hit a problem — please try again.' }, 502);
     return json({ error: (err as Error).message || 'AI writing failed.' }, 500);
   }
 });
+
+// ── Gemini ──────────────────────────────────────────────────
+const toBase64 = (bytes: Uint8Array) => {
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+};
+
+/** The same request for Gemini: the brand voice as the system instruction, the photo inline. */
+async function gemini(spec: Task, clean: Record<string, string>, content: Anthropic.Beta.BetaContentBlockParam[]) {
+  const parts: Record<string, unknown>[] = [];
+  for (const block of content) {
+    if (block.type !== 'image') continue;
+    const src = block.source as { type: string; url?: string; data?: string; media_type?: string };
+    if (src.type === 'base64') parts.push({ inline_data: { mime_type: src.media_type, data: src.data } });
+    if (src.type === 'url' && src.url) {
+      const res = await fetch(src.url);
+      const type = (res.headers.get('content-type') || '').split(';')[0];
+      const bytes = new Uint8Array(await res.arrayBuffer());
+      if (res.ok && /^image\/(jpeg|png|webp|gif)$/.test(type) && bytes.length < 7_000_000) parts.push({ inline_data: { mime_type: type, data: toBase64(bytes) } });
+    }
+  }
+  parts.push({ text: spec.prompt(clean) });
+
+  const models = [...new Set([Deno.env.get('GEMINI_MODEL') || GEMINI_FALLBACK_MODEL, GEMINI_FALLBACK_MODEL])];
+  let last: Error | null = null;
+  for (const model of models) {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: 'POST',
+      headers: { 'x-goog-api-key': Deno.env.get('GEMINI_API_KEY')!, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: SYSTEM }] },
+        contents: [{ role: 'user', parts }],
+        generationConfig: { maxOutputTokens: spec.maxTokens + 4000, temperature: 0.9 },
+      }),
+    });
+    const j = await res.json();
+    if (!res.ok) { last = new Error(`Gemini ${model} ${res.status}: ${JSON.stringify(j.error || j).slice(0, 200)}`); console.error(last.message); continue; }
+    const cand = j.candidates?.[0];
+    const text = (cand?.content?.parts || []).map((p: { text?: string; thought?: boolean }) => (p.thought ? '' : p.text || '')).join('').trim();
+    return {
+      text,
+      blocked: !!j.promptFeedback?.blockReason || cand?.finishReason === 'SAFETY' || cand?.finishReason === 'PROHIBITED_CONTENT',
+      inTokens: j.usageMetadata?.promptTokenCount ?? null,
+      outTokens: j.usageMetadata?.candidatesTokenCount ?? null,
+    };
+  }
+  throw last ?? new Error('Gemini failed');
+}

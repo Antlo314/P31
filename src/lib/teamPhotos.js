@@ -1,18 +1,17 @@
 // The team photoshoot (olive-green studio, October 2026). Originals live in marketing/team;
 // these are the web-sized crops from scripts/team-photos.mjs.
 //
-// Who is who follows the October 2026 team directory, in the order the portraits were given:
-// Melanie JC (marble dress), Savannah Campbell (a), Yanni Bratcher (b), Alexia Thomas (c),
-// Shanay Prince (d). Each person's `photo` key lives in src/lib/team.js; change it there if two
-// are swapped and every page follows.
+// Who is who comes from the original file names (alexa.jpg, savannah.png, shnay.png, yanni.jpg):
+// a = Alexia Thomas, b = Savannah Campbell, c = Shanay Prince, d = Yanni Bratcher, plus Melanie JC
+// (marble dress). Each person's `photo` key lives in src/lib/team.js; every page follows it.
 import melaniePortrait from '../assets/web/team/melanie-portrait.webp';
 import melanieSquare from '../assets/web/team/melanie-square.webp';
 import melanieWide from '../assets/web/team/melanie-wide.webp';
 import melanieHead from '../assets/web/team/melanie-head.webp';
-import teamA from '../assets/web/team/team-a.webp'; // locs, leopard-print dress
-import teamB from '../assets/web/team/team-b.webp'; // white shirt, floral skirt, on the sofa
-import teamC from '../assets/web/team/team-c.webp'; // cream vest and jeans, on the sofa
-import teamD from '../assets/web/team/team-d.webp'; // black corset, on the stool
+import teamA from '../assets/web/team/team-a.webp'; // Alexia Thomas: locs, leopard-print dress
+import teamB from '../assets/web/team/team-b.webp'; // Savannah Campbell: white shirt, floral skirt, on the sofa
+import teamC from '../assets/web/team/team-c.webp'; // Shanay Prince: cream vest and jeans, on the sofa
+import teamD from '../assets/web/team/team-d.webp'; // Yanni Bratcher: black corset, on the stool
 import teamAHead from '../assets/web/team/team-a-head.webp';
 import teamBHead from '../assets/web/team/team-b-head.webp';
 import teamCHead from '../assets/web/team/team-c-head.webp';

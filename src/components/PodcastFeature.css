@@ -1,0 +1,106 @@
+/* The P31 Podcast band (PodcastFeature.jsx), shared by p31market.com and thep31collective.org.
+   The emblem is a cut-out (transparent background), so it sits on the section's own plum. */
+.pod { overflow: hidden; }
+.pod::after { /* a warm pool of gold behind the emblem, like the flyer's studio light */
+  content: ''; position: absolute; z-index: -1; pointer-events: none;
+  left: max(-6%, calc(50% - 680px)); top: 50%; width: min(64vw, 760px); aspect-ratio: 1; transform: translateY(-50%);
+  background: radial-gradient(closest-side, rgba(217, 169, 58, 0.16), rgba(155, 113, 178, 0.08) 55%, transparent 75%);
+}
+.pod__inner {
+  position: relative; max-width: 1180px; margin: 0 auto;
+  display: grid; grid-template-columns: minmax(260px, 450px) 1px minmax(0, 1fr); align-items: center;
+  gap: clamp(28px, 5vw, 72px);
+}
+
+/* ── The emblem and its motion ── */
+.pod__art { display: grid; place-items: center; width: 100%; }
+.pod__float { position: relative; width: 100%; max-width: 450px; aspect-ratio: 668 / 660; animation: pod-float 9s ease-in-out infinite; }
+.pod__emblem { position: relative; z-index: 1; display: block; width: 100%; height: 100%; filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.35)); }
+.pod__glow { /* breathes behind the microphone head */
+  position: absolute; z-index: 0; left: 85%; top: 37%; width: 46%; aspect-ratio: 1; transform: translate(-50%, -50%);
+  border-radius: 50%; background: radial-gradient(closest-side, rgba(242, 206, 77, 0.42), rgba(242, 206, 77, 0.1) 60%, transparent);
+  animation: pod-breathe 4.8s ease-in-out infinite;
+}
+.pod__shine { /* a light gliding across the gold (only where the emblem is) */
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  -webkit-mask-image: var(--pod-mask); mask-image: var(--pod-mask);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  background: linear-gradient(112deg, transparent 38%, rgba(255, 244, 204, 0) 41%, rgba(255, 246, 214, 0.95) 50%, rgba(255, 244, 204, 0) 59%, transparent 62%);
+  background-size: 320% 100%; background-repeat: no-repeat;
+  mix-blend-mode: screen; opacity: 0.75;
+  animation: pod-shine 7.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+.pod__waves { /* sound rising from the microphone */
+  position: absolute; z-index: 1; left: 86%; top: 38%; width: 0; height: 0;
+}
+.pod__waves i {
+  position: absolute; left: 0; top: 0; width: 46cqw; aspect-ratio: 1; border-radius: 50%;
+  border: 2px solid transparent; border-right-color: rgba(242, 206, 77, 0.85);
+  transform: translate(-50%, -50%) scale(0.55); opacity: 0;
+  animation: pod-wave 3.6s ease-out infinite;
+}
+.pod__float { container-type: inline-size; }
+.pod__waves i:nth-child(2) { animation-delay: 1.2s; }
+.pod__waves i:nth-child(3) { animation-delay: 2.4s; }
+.pod__twinkle { position: absolute; z-index: 3; width: 5.5%; aspect-ratio: 1; transform: translate(-50%, -50%) scale(0); animation: pod-twinkle 5.2s ease-in-out infinite; }
+.pod__twinkle::before, .pod__twinkle::after {
+  content: ''; position: absolute; left: 50%; top: 50%; width: 100%; height: 12%; border-radius: 999px; transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, #fffbe9, rgba(255, 236, 170, 0.7) 45%, transparent);
+}
+.pod__twinkle::after { transform: translate(-50%, -50%) rotate(90deg); }
+.pod__twinkle--crown { left: 45.5%; top: 10%; }
+.pod__twinkle--one { left: 69.5%; top: 25%; width: 4%; animation-delay: 2.6s; }
+
+@keyframes pod-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes pod-breathe { 0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(0.92); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.06); } }
+@keyframes pod-shine { 0% { background-position: 100% 0; } 38%, 100% { background-position: 0% 0; } }
+@keyframes pod-wave { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 18% { opacity: 0.9; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.25); } }
+@keyframes pod-twinkle { 0%, 70%, 100% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; } 80% { transform: translate(-50%, -50%) scale(1) rotate(45deg); opacity: 1; } 90% { transform: translate(-50%, -50%) scale(0.4) rotate(90deg); opacity: 0.6; } }
+
+/* ── The words ── */
+.pod__rule { align-self: stretch; width: 1px; background: linear-gradient(transparent, rgba(242, 206, 77, 0.6) 18%, rgba(242, 206, 77, 0.6) 82%, transparent); }
+.pod__copy { display: grid; justify-items: center; text-align: center; gap: clamp(14px, 1.6vw, 20px); }
+.pod__platforms { list-style: none; margin: 0 0 6px; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; }
+.pod__platforms li { padding: 0 clamp(10px, 1.6vw, 18px); border-left: 1px solid rgba(242, 206, 77, 0.45); }
+.pod__platforms li:first-child { border-left: 0; }
+.pod__platforms a, .pod__platform { display: grid; justify-items: center; gap: 6px; color: rgba(255, 255, 255, 0.86); text-decoration: none; font-size: 0.78rem; font-weight: 600; line-height: 1.15; }
+.pod__platforms img { height: 36px; width: auto; transition: transform 0.25s ease; }
+.pod__platforms a:hover img, .pod__platforms a:focus-visible img { transform: translateY(-3px) scale(1.06); }
+.pod__platforms a:hover span { color: var(--gold-hi, #F2CE4D); }
+.pod__series { display: grid; justify-items: center; gap: 6px; }
+.pod__eyebrow { margin: 0; font-family: var(--font-heading, 'Noto Serif', Georgia, serif); font-size: clamp(0.95rem, 1.5vw, 1.2rem); letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-hi, #F2CE4D); }
+.pod__divider { display: flex; align-items: center; gap: 12px; }
+.pod__divider::before, .pod__divider::after { content: ''; width: clamp(60px, 9vw, 110px); height: 1px; background: linear-gradient(90deg, transparent, rgba(242, 206, 77, 0.7)); }
+.pod__divider::after { background: linear-gradient(270deg, transparent, rgba(242, 206, 77, 0.7)); }
+.pod__divider img { width: 30px; height: auto; }
+.pod__themes { margin: 0; display: grid; gap: 4px; font-family: var(--font-heading, 'Noto Serif', Georgia, serif); font-size: clamp(1rem, 1.7vw, 1.3rem); letter-spacing: 0.14em; text-transform: uppercase; color: #fff; }
+.pod__family { margin: 0; padding-top: clamp(10px, 1.4vw, 16px); border-top: 1px solid rgba(242, 206, 77, 0.28); display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 12px; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold-hi, #F2CE4D); }
+.pod__family b { color: rgba(242, 206, 77, 0.7); font-weight: 400; }
+.pod__title { margin: 6px 0 0; font-family: var(--font-heading, 'Noto Serif', Georgia, serif); font-weight: 400; font-style: italic; font-size: clamp(1.9rem, 4vw, 3rem); line-height: 1.1; letter-spacing: -0.01em; color: #fff; }
+.pod__title em { color: var(--gold-hi, #F2CE4D); }
+.pod__host { margin: 0; display: grid; justify-items: center; gap: 4px; }
+.pod__host small { display: flex; align-items: center; gap: 12px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255, 255, 255, 0.78); }
+.pod__host small::before, .pod__host small::after { content: ''; width: 46px; height: 1px; background: rgba(242, 206, 77, 0.55); }
+.pod__host span { font-family: var(--font-heading, 'Noto Serif', Georgia, serif); font-size: clamp(1.5rem, 2.8vw, 2.2rem); letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold-hi, #F2CE4D); }
+.pod__actions { justify-content: center; margin-top: 4px; }
+
+@media (max-width: 860px) {
+  .pod__inner { grid-template-columns: 1fr; justify-items: center; }
+  .pod__rule { display: none; }
+  .pod__float { max-width: 320px; }
+  .pod::after { left: 50%; top: 22%; transform: translate(-50%, -50%); width: 120vw; }
+  .pod__platforms li { padding: 0 9px; }
+  .pod__platforms img { height: 30px; }
+  .pod__platforms a, .pod__platform { font-size: 0.68rem; }
+}
+@media (max-width: 520px) { /* five platforms in one even row */
+  .pod__platforms { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); width: 100%; }
+  .pod__platforms li { padding: 0 4px; }
+  .pod__platforms a, .pod__platform { font-size: 0.62rem; text-align: center; }
+  .pod__platforms img { height: 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pod__float, .pod__glow, .pod__shine, .pod__waves i, .pod__twinkle { animation: none; }
+  .pod__waves, .pod__twinkle, .pod__shine { display: none; }
+}

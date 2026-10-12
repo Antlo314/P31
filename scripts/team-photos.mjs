@@ -20,7 +20,8 @@ await make('melanie-jc.jpg', 'melanie-portrait.webp', { ratio: 4 / 5, fx: 0.5, f
 await make('melanie-jc.jpg', 'melanie-square.webp', { ratio: 1, fx: 0.53, fy: 0.3, width: 640, zoom: 1.35 });
 await make('melanie-jc.jpg', 'melanie-wide.webp', { ratio: 3 / 2, fx: 0.5, fy: 0.32, width: 1200, zoom: 1.15 });
 await make('melanie-jc.jpg', 'melanie-head.webp', { ratio: 1, fx: 0.535, fy: 0.275, width: 480, zoom: 2.6, enlarge: true });
-// The team portraits (a = locs & leopard, b = floral skirt on the sofa, c = vest & jeans, d = black corset on the stool),
+// The team portraits (a = Alexia Thomas, b = Savannah Campbell, c = Shanay Prince, d = Yanni Bratcher; from the original
+// file names alexa.jpg, savannah.png, shnay.png, yanni.jpg),
 // and a headshot of each (just the head and shoulders).
 await make('team-a.jpg', 'team-a.webp', { ratio: 4 / 5, fx: 0.52, fy: 0.45, width: 900 });
 await make('team-b.png', 'team-b.webp', { ratio: 4 / 5, fx: 0.5, fy: 0.5, width: 900 });

@@ -195,6 +195,10 @@ const SCREENS = [
   ['gathering: search mentions of me', cl('/gather/the-gathering'), ['Search messages', 'Mentions of me'], '#The Gathering ·'],
   ['walkthroughs: activity chapter', cl('/systems/activity?tour=sys:activity'), [], 'Who changed what'],
   ['walkthroughs: billing test run', cl('/systems/walkthroughs?tab=tests'), [], 'A storefront free period and subscription'],
+  // The P31 Podcast band on both home pages
+  ['market home: podcast', mk('/'), [], 'Step into the'],
+  ['collective home: podcast', cl('/'), [], 'Step into the'],
+  ['collective home: podcast on a phone', cl('/'), [], 'Step into the', { phone: true }],
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

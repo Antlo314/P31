@@ -2,6 +2,12 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 12 (evening) — The P31 Podcast, AI writing switched on, the team's photos corrected
+
+- **The P31 Podcast on both home pages.** A plum band built from Melanie JC's podcast flyer: the emblem (crown, P31 and the golden microphone) cut out of its background so it sits on the page itself, with a light that glides across the gold every few seconds, sound waves rising from the microphone, a soft glow that breathes behind it, and a twinkle on the crown. Beside it, in the site's own type: Apple Podcasts, Spotify, iHeartRadio, Audible and YouTube; "Her podcast series"; Biblical wisdom, powerful testimonies, Kingdom entrepreneurship; P31 Marketplace, P31 Collective, P31 Movement; "Step into the conversation, with Melanie JC". On p31market.com it sits before the newsletter; on thep31collective.org right after Melanie JC's story. Phones get the same, stacked. The platform badges become links as soon as the show links are added (`src/lib/podcast.js`), with a "Listen now" button.
+- **AI writing is on.** Every "Write with AI" button (vendor stories and product descriptions, captions, Content Studio, campaigns) now uses the Google Gemini key P31 already has, the same one Carla uses. Team members on the new per-mailbox logins can use it too, not only the original Systems accounts.
+- **The team's photos match their names.** On the team directory, each portrait now follows the name the photo was saved under: Alexia Thomas, Savannah Campbell, Shanay Prince and Yanni Bratcher had been shown with one another's pictures.
+
 ## October 12 — Storefront billing, reminders, welcome emails, an activity log, and search in The Gathering
 
 - **Database status, inside Systems.** Systems → Health now opens with every database update the site needs and a tick for each one that is in. A waiting update has a Copy script button, a link to the SQL editor and the result to expect, so running one takes a minute and nobody has to guess whether it landed. The Overview page shows a banner while one is waiting. From v42 on, each update also records the date it ran.

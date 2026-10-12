@@ -29,6 +29,7 @@ import bentoSkincare from '../assets/web/vendor_skincare.webp';
 import bentoCommunity from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
 import partnerImg from '../assets/web/p31_partner_hero_editorial.webp';
 import Ornaments from '../components/Ornaments';
+import PodcastFeature from '../components/PodcastFeature';
 
 const CATEGORIES = ['Art', 'Wellness', 'Clothing', 'Food', 'Literature', 'Community', 'Services'];
 const PILLARS = [
@@ -395,6 +396,9 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* ── THE P31 PODCAST ─────────────────────────────────── */}
+      <PodcastFeature />
 
       {/* ── NEWSLETTER ──────────────────────────────────────── */}
       <section className="k-section k-section--tight" id="newsletter">

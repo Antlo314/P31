@@ -31,10 +31,10 @@ export const EMAIL = {
 // photo: the key of her headshot in src/lib/teamPhotos.js (none for Anthony yet).
 export const TEAM = [
   { name: 'Melanie JC', role: 'Founder & CEO', focus: ['Vision & leadership', 'Partnerships & decisions'], emails: [EMAIL.founder, EMAIL.ceo], icon: 'crown', photo: 'melanie' },
-  { name: 'Savannah Campbell', role: 'Executive Assistant', focus: ['Administrative support', 'Outreach communications'], emails: [EMAIL.assistant, EMAIL.assistantMarket], icon: 'clipboard', photo: 'a' },
-  { name: 'Yanni Bratcher', role: 'Marketing Strategist', focus: ['Marketing strategy', 'Organization awareness'], emails: [EMAIL.marketing], icon: 'megaphone', photo: 'b' },
-  { name: 'Alexia Thomas', role: 'Member Liaison', focus: ['Community experience', 'Event planning'], emails: [EMAIL.members, EMAIL.community], icon: 'people', photo: 'c' },
-  { name: 'Shanay Prince', role: 'Support Coordinator', focus: ['Grants & partnerships', 'Operations support'], emails: [EMAIL.grantsCollective, EMAIL.grants, EMAIL.support], icon: 'headset', photo: 'd' },
+  { name: 'Savannah Campbell', role: 'Executive Assistant', focus: ['Administrative support', 'Outreach communications'], emails: [EMAIL.assistant, EMAIL.assistantMarket], icon: 'clipboard', photo: 'b' },
+  { name: 'Yanni Bratcher', role: 'Marketing Strategist', focus: ['Marketing strategy', 'Organization awareness'], emails: [EMAIL.marketing], icon: 'megaphone', photo: 'd' },
+  { name: 'Alexia Thomas', role: 'Member Liaison', focus: ['Community experience', 'Event planning'], emails: [EMAIL.members, EMAIL.community], icon: 'people', photo: 'a' },
+  { name: 'Shanay Prince', role: 'Support Coordinator', focus: ['Grants & partnerships', 'Operations support'], emails: [EMAIL.grantsCollective, EMAIL.grants, EMAIL.support], icon: 'headset', photo: 'c' },
   { name: 'Anthony Carr', role: 'Marketplace Tech Support', focus: ['Virtual marketplace troubleshooting', 'Vendor support'], emails: [EMAIL.vendors], icon: 'laptop', photo: null },
 ];
 
