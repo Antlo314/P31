@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>P31 Sites and Systems Guide</title>
+<style>
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; src: url(../../public/fonts/NotoSerif-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; font-style: italic; src: url(../../public/fonts/NotoSerif-400-italic.woff2) format('woff2'); }
+  @font-face { font-family: 'Noto Serif'; font-weight: 700; src: url(../../public/fonts/NotoSerif-700.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 400; src: url(../../public/fonts/Manrope-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 600; src: url(../../public/fonts/Manrope-600.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 800; src: url(../../public/fonts/Manrope-800.woff2) format('woff2'); }
+
+  :root {
+    --plum: #3A1C36; --plum-2: #2D1529; --plum-3: #21101E; --thistle: #E3D0EA; --thistle-2: #F3EAF6; --thistle-3: #F8F3FA;
+    --amethyst: #9B71B2; --gold: #D9A93A; --gold-2: #F2CE4D; --olive: #6C6D11; --green: #374126;
+    --ink: #2A1526; --ink-2: #4E3A4B; --dim: #74657A; --line: #E3D0EA;
+  }
+  @page { size: Letter; margin: 0.7in 0.7in 0.75in; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: Manrope, sans-serif; font-size: 10.2pt; line-height: 1.55; color: var(--ink); background: #fff; }
+  h1, h2, h3 { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; color: var(--plum); }
+  h1 { font-size: 26pt; line-height: 1.12; margin: 0 0 10px; letter-spacing: -0.01em; }
+  h2 { font-size: 15pt; margin: 22px 0 8px; }
+  h3 { font-size: 12pt; margin: 16px 0 6px; }
+  p { margin: 0 0 8px; }
+  ul, ol { margin: 4px 0 10px; padding-left: 18px; }
+  li { margin: 2px 0; }
+  a { color: var(--plum); font-weight: 600; text-decoration: none; border-bottom: 1px solid var(--thistle); }
+  code { font-family: Consolas, 'Courier New', monospace; font-size: 8.6pt; background: var(--thistle-3); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; word-break: break-all; }
+  pre { font-family: Consolas, 'Courier New', monospace; font-size: 8.4pt; background: var(--plum-3); color: #f7f1fc; border-radius: 8px; padding: 10px 12px; white-space: pre-wrap; word-break: break-all; margin: 6px 0 10px; }
+  strong { font-weight: 800; }
+  em { font-family: 'Noto Serif', Georgia, serif; font-style: italic; }
+  .eyebrow { font-size: 8pt; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+  .lead { font-size: 11.2pt; color: var(--ink-2); }
+  .muted { color: var(--dim); }
+  .small { font-size: 8.8pt; }
+
+  /* Sections start on a new page */
+  .part { break-before: page; }
+  .part.flow { break-before: auto; margin-top: 26px; }
+  .part-head { break-inside: avoid; break-after: avoid; }
+  h2 { break-after: avoid; }
+  .part-head { background: var(--plum); color: #fff; border-radius: 16px; padding: 20px 24px; margin: 0 0 16px; position: relative; overflow: hidden; }
+  .part-head::after { content: ''; position: absolute; right: -40px; bottom: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(242, 206, 77, 0.28), transparent 70%); }
+  .part-head .eyebrow { color: var(--gold-2); }
+  .part-head h1 { color: #fff; margin: 0 0 6px; font-size: 22pt; }
+  .part-head p { color: rgba(255, 255, 255, 0.82); margin: 0; max-width: 92%; }
+
+  /* Cover */
+  .cover { height: 9.4in; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(70% 50% at 100% 0%, rgba(155, 113, 178, 0.35), transparent 70%), radial-gradient(60% 45% at 0% 100%, rgba(242, 206, 77, 0.18), transparent 70%), var(--plum-3); color: #fff; border-radius: 22px; padding: 46px 44px; }
+  .cover img { width: 92px; height: 92px; }
+  .cover h1 { color: #fff; font-size: 38pt; line-height: 1.05; margin: 18px 0 12px; }
+  .cover h1 em { color: var(--gold-2); }
+  .cover .lead { color: rgba(255, 255, 255, 0.85); font-size: 12.5pt; max-width: 5.6in; }
+  .cover .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 30px; font-size: 9.5pt; color: rgba(255, 255, 255, 0.85); }
+  .cover .meta b { display: block; color: var(--gold-2); font-size: 7.6pt; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 2px; }
+
+  /* Status pills */
+  .pill { display: inline-block; font-size: 7.4pt; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; vertical-align: 2px; white-space: nowrap; }
+  .ok { background: rgba(55, 65, 38, 0.12); color: var(--green); border: 1px solid rgba(55, 65, 38, 0.35); }
+  .step { background: rgba(217, 169, 58, 0.14); color: #7a5c12; border: 1px solid rgba(217, 169, 58, 0.55); }
+  .off { background: rgba(163, 51, 51, 0.08); color: #9a2f2f; border: 1px solid rgba(163, 51, 51, 0.35); }
+  .paused { background: #eee8f0; color: #6b5d70; border: 1px solid #d8cfdc; }
+  .opt { background: var(--thistle-3); color: var(--amethyst); border: 1px solid var(--thistle); }
+
+  /* Feature cards */
+  .feat { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px 6px; margin: 0 0 10px; break-inside: avoid; background: #fff; }
+  .feat h3 { margin: 0 0 4px; font-size: 11.4pt; display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+  .feat .where { font-size: 8.6pt; color: var(--dim); margin: 0 0 6px; }
+  .feat .k { font-size: 7.6pt; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amethyst); margin: 6px 0 2px; }
+  .feat ul, .feat ol { margin: 2px 0 6px; }
+
+  /* Callouts */
+  .note { border-left: 4px solid var(--gold); background: rgba(242, 206, 77, 0.1); border-radius: 0 10px 10px 0; padding: 9px 13px; margin: 8px 0 12px; break-inside: avoid; }
+  .note.plum { border-color: var(--amethyst); background: var(--thistle-3); }
+  .note.red { border-color: #b04a4a; background: rgba(176, 74, 74, 0.07); }
+  .note p:last-child, .note ul:last-child { margin-bottom: 0; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 14px; font-size: 9pt; break-inside: auto; }
+  th { text-align: left; font-size: 7.6pt; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: var(--plum); padding: 6px 8px; }
+  td { border-bottom: 1px solid var(--line); padding: 6px 8px; vertical-align: top; }
+  tr { break-inside: avoid; }
+  tr:nth-child(even) td { background: var(--thistle-3); }
+
+  /* Numbers grid */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 8px 0 14px; }
+  .stat { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--thistle-3); break-inside: avoid; }
+  .stat b { display: block; font-family: 'Noto Serif', Georgia, serif; font-size: 18pt; font-weight: 400; color: var(--plum); line-height: 1.1; }
+  .stat span { font-size: 8.2pt; color: var(--ink-2); line-height: 1.3; display: block; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .box { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; break-inside: avoid; }
+  .box h3 { margin-top: 0; }
+  .toc { columns: 2; column-gap: 28px; font-size: 10pt; }
+  .toc div { break-inside: avoid; margin: 0 0 6px; }
+  .toc b { color: var(--gold); font-family: 'Noto Serif', Georgia, serif; font-weight: 400; margin-right: 6px; }
+  .check { list-style: none; padding-left: 0; }
+  .check li { padding-left: 22px; position: relative; margin: 4px 0; }
+  .check li::before { content: ''; position: absolute; left: 0; top: 3px; width: 12px; height: 12px; border: 1.6px solid var(--plum); border-radius: 3px; }
+  .steps { counter-reset: s; list-style: none; padding-left: 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 28px; margin: 6px 0; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 19px; height: 19px; border-radius: 50%; background: var(--plum); color: #fff; font-size: 8pt; font-weight: 800; display: grid; place-items: center; }
+  .avoid { break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<!-- ============================== COVER ============================== -->
+<section class="cover">
+  <div>
+    <img src="../../marketing/brand/mark-gold.png" alt="">
+    <p class="eyebrow" style="color: var(--gold-2); margin-top: 26px;">Prepared for Melanie JC · Founder &amp; CEO</p>
+    <h1>The P31 Sites &amp;<br><em>Systems Guide</em></h1>
+    <p class="lead">Every feature on p31market.com and thep31collective.org: what it does, how to use it, whether it is working today, what still needs to be connected (and exactly how), where the old JotForms went, and what we suggest next.</p>
+  </div>
+  <div class="meta">
+    <div><b>Sites</b>www.p31market.com<br>www.thep31collective.org</div>
+    <div><b>Status as of</b>Monday, October 12, 2026<br>Checked live against both sites and the database</div>
+    <div><b>Team console</b>thep31collective.org/systems</div>
+    <div><b>Questions</b>Reply to the person who sent this guide</div>
+  </div>
+</section>
+
+<!-- ============================== CONTENTS ============================== -->
+<section class="part">
+  <p class="eyebrow">Contents</p>
+  <h1>What is in this guide</h1>
+  <div class="toc">
+    <div><b>1</b>The short version: what works, what is waiting, today's numbers</div>
+    <div><b>2</b>How the two sites fit together</div>
+    <div><b>3</b>p31market.com, page by page</div>
+    <div><b>4</b>thep31collective.org, page by page</div>
+    <div><b>5</b>The vendor's Curator Studio</div>
+    <div><b>6</b>The Mentorship Academy (students and mentors)</div>
+    <div><b>7</b>The team's tools: Today, Systems, Content Studio</div>
+    <div><b>8</b>The Gathering (community chat)</div>
+    <div><b>9</b>What runs by itself (scheduled jobs)</div>
+    <div><b>10</b>Where the JotForms went</div>
+    <div><b>11</b>What still needs to be connected, step by step</div>
+    <div><b>12</b>How we know it works (testing)</div>
+    <div><b>13</b>Suggestions for what comes next</div>
+    <div><b>A</b>Team logins and their dashboards</div>
+    <div><b>B</b>Key links</div>
+  </div>
+
+  <h2>How to read the status labels</h2>
+  <table>
+    <tr><th style="width: 30%">Label</th><th>Meaning</th></tr>
+    <tr><td><span class="pill ok">Working</span></td><td>Live on the site and checked. Anyone can use it today.</td></tr>
+    <tr><td><span class="pill step">Working · one step</span></td><td>Built and live, but one setting or action (usually a few minutes in a dashboard) is still needed for it to be complete.</td></tr>
+    <tr><td><span class="pill off">Not connected</span></td><td>Built, but the outside service it depends on (Stripe, an AI key, the email inbox) has not been connected yet. Section 11 explains how to connect each one.</td></tr>
+    <tr><td><span class="pill paused">Paused</span></td><td>Built and switched off on purpose until it is needed.</td></tr>
+    <tr><td><span class="pill opt">Optional</span></td><td>Nice to have; nothing breaks without it.</td></tr>
+  </table>
+  <div class="note plum"><p><strong>Where the labels come from.</strong> On October 12 we checked every public page on both sites, every server function, the database, the email records (SPF, DKIM, DMARC), the SSL certificates, the Instagram and Facebook connections and the booking links. We also checked which outside services have a key saved in Supabase (names only; no key was ever displayed). The results are in section 12. Statuses change as the items in section 11 are completed; the current state is always in Systems → Health and Systems → Settings.</p></div>
+</section>
+
+<!-- ============================== 1. SHORT VERSION ============================== -->
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Section 1</p>
+    <h1>The short version</h1>
+    <p>Both sites are live, fast and secure, and almost everything on them works. What is missing is a handful of connections to outside services, and people: shops, students and team accounts.</p>
+  </div>
+
+  <h2>Today's numbers (live, October 12)</h2>
+  <div class="stats">
+    <div class="stat"><b>4</b><span>shops created, all waiting for review (none live yet)</span></div>
+    <div class="stat"><b>0</b><span>orders so far</span></div>
+    <div class="stat"><b>20</b><span>newsletter subscribers</span></div>
+    <div class="stat"><b>6</b><span>"Join P31 Collective" applications</span></div>
+    <div class="stat"><b>1</b><span>vendor application through /apply</span></div>
+    <div class="stat"><b>1</b><span>mentorship intro-call request</span></div>
+    <div class="stat"><b>0</b><span>active mentorship students; 0 lessons loaded</span></div>
+    <div class="stat"><b>37</b><span>Instagram and Facebook posts queued, through the Luncheon (plus one in January)</span></div>
+    <div class="stat"><b>0 of 11</b><span>team logins have created their account</span></div>
+    <div class="stat"><b>0</b><span>submissions on the new on-site vendor forms</span></div>
+    <div class="stat"><b>2</b><span>events on the calendar: the Luncheon (Dec 19) and Spring Renewal (Mar 28, 2027)</span></div>
+    <div class="stat"><b>8</b><span>automatic jobs running on schedule</span></div>
+  </div>
+
+  <div class="two">
+    <div class="box">
+      <h3>Working today</h3>
+      <ul>
+        <li>Both websites, every public page, on phones and computers</li>
+        <li>Shops and products, "Request this order", shop followers and emails</li>
+        <li>Vendor application, the four vendor forms that replaced JotForm, volunteer form</li>
+        <li>Newsletter pop-up and the new three-email welcome series</li>
+        <li>Join P31 Collective application, intro-call booking (Calendly)</li>
+        <li>The Mentorship Academy classrooms and live video rooms (Daily)</li>
+        <li>Systems (the team console), Today, the 8 AM morning email</li>
+        <li>Content Studio: planner, Auto-create, scheduling to Instagram and Facebook</li>
+        <li>Carla, the Instagram and Facebook direct-message assistant</li>
+        <li>The Gathering community chat, with the Daily Word</li>
+        <li>All outgoing emails (Resend), Google Sheet copies of applications</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Not connected yet</h3>
+      <ul>
+        <li><strong>Stripe</strong> (no key saved): mentorship payments by private link, storefront subscriptions, and card checkout in shops</li>
+        <li><strong>AI writing</strong> (no key saved): every "Write with AI" button</li>
+        <li><strong>The shared email inbox</strong>: members@ and vendor@ inside Content Studio, with Carla's drafted replies</li>
+        <li><strong>Google Business Profile</strong>: dropped out of Zernio, needs a reconnect</li>
+        <li><strong>The old JotForms</strong> are still open and should be closed</li>
+        <li>Optional: Eventbrite ticket counts, Growth search (Apify), Zoom, the Collective Instagram in Content Studio</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>The ten things to do first</h2>
+  <ol class="steps">
+    <li><strong>Announce the Luncheon date.</strong> Tickets are on sale on Eventbrite, but the site still says "December · date coming soon". Systems → Markets &amp; events → Business and Leadership Luncheon → turn on <em>Date public</em>. (It has no vendors, so no vendor emails go out.) 2 minutes.</li>
+    <li><strong>Review the 4 waiting shops.</strong> Systems → Curators &amp; shops → filter Pending. 10 minutes.</li>
+    <li><strong>Close the four old JotForms</strong> with a "this form has moved" note, after downloading their submissions. Section 10. 15 minutes.</li>
+    <li><strong>Connect Stripe</strong> for mentorship payments and storefront subscriptions. Section 11, item 1. 20 minutes.</li>
+    <li><strong>Switch on AI writing.</strong> Section 11, item 2. 5 minutes (or we can point it at the Google Gemini key that is already saved).</li>
+    <li><strong>Have the team create their accounts.</strong> Systems → Team &amp; dashboards → "Sign-up steps" on each card. Appendix A lists every login.</li>
+    <li><strong>Load the curriculum.</strong> Both mentorship programs exist but have no lessons yet. Systems → Mentorship → Curriculum &amp; videos.</li>
+    <li><strong>Connect the shared email inbox.</strong> Section 11, item 3. 30 minutes with whoever manages the Bluehost email.</li>
+    <li><strong>Reconnect Google Business Profile</strong> in Zernio. Section 11, item 5. 5 minutes.</li>
+    <li><strong>Turn on the Stripe customer portal</strong> so students and vendors can change their card or cancel. Section 11, item 1, step 4. 2 minutes.</li>
+  </ol>
+</section>
+
+<!-- ============================== 2. HOW IT FITS ============================== -->
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Section 2</p>
+    <h1>How the two sites fit together</h1>
+    <p>One website program serves both addresses. It reads the address you typed and shows the right site. Accounts, data and the team console are shared.</p>
+  </div>
+
+  <table>
+    <tr><th style="width: 24%">Address</th><th style="width: 38%">What lives there</th><th>Who it is for</th></tr>
+    <tr><td><strong>www.p31market.com</strong></td><td>The marketplace: Shop, Curators directory, Market dates, Our Story, Services, Partner, the vendor application and vendor forms, each vendor's shop page, the vendor sign-in and the Curator Studio</td><td>Shoppers, vendors (curators), sponsors and volunteers</td></tr>
+    <tr><td><strong>www.thep31collective.org</strong></td><td>The Collective: home, Mentorship (Business and Faith-Based), the Academy, Join, the member portal, certificate checks, and the team tools (Systems, Content Studio, Today)</td><td>Women joining the Collective, mentorship students and mentors, the P31 team</td></tr>
+    <tr><td><strong>/gather on both</strong></td><td>The Gathering, the community chat</td><td>Vendors, students, alumnae, mentors and the team (each sees only her rooms)</td></tr>
+  </table>
+  <p>If someone opens a Collective page on the marketplace address (for example p31market.com/mentorship or p31market.com/systems), they are moved to the right address automatically. We checked all of these redirects on October 12.</p>
+
+  <h2>Who signs in where</h2>
+  <table>
+    <tr><th style="width: 22%">Person</th><th style="width: 34%">Signs in at</th><th>Lands on</th></tr>
+    <tr><td>Vendor (curator)</td><td>p31market.com/login (new vendors: /register with the email the team approved)</td><td>Her Curator Studio (p31market.com/dashboard)</td></tr>
+    <tr><td>Mentorship student</td><td>thep31collective.org/portal</td><td>Her classroom (/academy/business or /academy/faith)</td></tr>
+    <tr><td>Mentor</td><td>thep31collective.org/portal</td><td>The mentor console (/academy/…/teach)</td></tr>
+    <tr><td>Team member</td><td>The sign-in page of her login's site: "On the P31 team? Create an account" on p31market.com/login or thep31collective.org/portal</td><td>Today, with only the dashboards switched on for that login</td></tr>
+    <tr><td>Admin (Melanie JC and the two original admins)</td><td>Either site</td><td>Everything: Systems, Today, Content Studio, every classroom</td></tr>
+  </table>
+  <div class="note"><p><strong>Each team mailbox is its own login.</strong> A person with two mailboxes (for example secretary@thep31collective.org and secretary@p31market.com) has two logins, each with its own set of dashboards. A new admin must confirm her email before admin access switches on; only the two original admin accounts skip that.</p></div>
+
+  <h2>The team's places, in one line each</h2>
+  <ul>
+    <li><strong>Today</strong> (thep31collective.org/today): the team's home page. Everything that needs attention across the dashboards that person runs, plus the Daily Word.</li>
+    <li><strong>Systems</strong> (thep31collective.org/systems): the console behind both sites, arranged by site: Market, Collective, Create and Team.</li>
+    <li><strong>Content Studio</strong> (thep31collective.org/studio): Instagram and Facebook planning, creation, scheduling, messages and comments, plus the shared email inbox.</li>
+    <li><strong>The Gathering</strong> (/gather): the community chat.</li>
+    <li><strong>Walkthroughs</strong> (Systems → Team → Walkthroughs): an animated walkthrough for every room, and 26 test runs.</li>
+  </ul>
+</section>
+
+<!-- ============================== 3. P31MARKET.COM ============================== -->
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Section 3</p>
+    <h1>p31market.com, page by page</h1>
+    <p>The marketplace for women creatives, artisans and visionaries: online shops, seasonal Atlanta markets, and the events in between.</p>
+  </div>
+
+  <div class="feat"><h3>Home <span class="pill ok">Working</span></h3><p class="where">p31market.com</p>
+    <p>Hero film, "Beyond a marketplace", the next event chip ("Up next"), shops and products, the "far above rubies" verse band, ways to take part, and the newsletter block.</p>
+    <p class="k">How to use it</p><ul><li>The next event card follows Systems → Markets &amp; events automatically. Right now it shows the Luncheon as "December · date coming soon" because its date is not marked public yet (see the first item on the to-do list).</li></ul></div>
+
+  <div class="feat"><h3>Newsletter pop-up ("Stay in the Know") <span class="pill ok">Working</span></h3><p class="where">Appears on the marketplace; also the "Subscribe to our newsletter" buttons</p>
+    <p>First name, email and optional phone. Every sign-up is added to the subscriber list (20 so far) and, from October 12, receives three welcome emails over about a week: a welcome with Melanie JC's story, what is coming up, and ways to be part of P31. Each has an unsubscribe link.</p>
+    <p class="k">How to use it</p><ul><li>Subscribers are in Systems → People and can receive Campaigns. Turn the welcome series off in Systems → Settings → Automatic emails.</li><li>The pop-up photo is the event photo of five women from the market.</li></ul></div>
+
+  <div class="feat"><h3>Shop <span class="pill step">Working · no shops live yet</span></h3><p class="where">p31market.com/shop</p>
+    <p>Every product from every approved shop, with search, categories, sale tags and badges. Shoppers can save favorites (heart) and see them at /favorites.</p>
+    <p class="k">How a shopper buys</p><ol><li>Opens a product, picks options, adds it to the bag.</li><li>Presses <strong>Request this order</strong>, enters name and email.</li><li>The vendor receives the request (also in Systems → Orders) and is paid through her own Cash App, Venmo or payment link.</li></ol>
+    <p class="k">Status</p><ul><li>The page works; it fills up as shops are approved (4 are waiting). Paying by card on the page is switched off on purpose until Stripe Connect is set up (section 11, item 4).</li></ul></div>
+
+  <div class="feat"><h3>Each shop's page <span class="pill ok">Working</span></h3><p class="where">p31market.com/shop-name (the vendor picks her link)</p>
+    <p>Banner, logo, story, products, testimonials, a "Get updates from this shop" box (followers), and a share button on every product. When a shop or product link is shared by text, Instagram story, WhatsApp, Facebook or X, the preview shows that shop's banner or that product's photo, name and price.</p></div>
+
+  <div class="feat"><h3>Curators (directory) <span class="pill ok">Working</span></h3><p class="where">p31market.com/directory</p>
+    <p>Every approved vendor, with featured curators first (set in Systems → Curators &amp; shops → Featured). Empty until the first shop is approved.</p></div>
+
+  <div class="feat"><h3>Market dates <span class="pill step">Working · Luncheon date not public</span></h3><p class="where">p31market.com/calendar</p>
+    <p>Upcoming markets and events with date, venue, directions, and "Get tickets" or "Save my spot". Vendor logos from confirmed registrations appear under each market's lineup when published.</p>
+    <p class="k">How to use it</p><ul><li>Everything here comes from Systems → Markets &amp; events. "Announce the month" shows "December · date coming soon"; "Date public" shows the full date.</li></ul></div>
+
+  <div class="feat"><h3>Our Story, Services, Partner <span class="pill ok">Working</span></h3><p class="where">/about · /services · /partner</p>
+    <ul><li><strong>Our Story</strong>: Melanie JC's story and the team directory with portraits and names (Anthony Carr's photo still to come).</li><li><strong>Services</strong>: vendor booths, storefronts (Bespoke brand, Bespoke, Curator) and coaching.</li><li><strong>Partner</strong>: sponsor and partner options (financial giving, in-kind giving, strategic partnership, volunteering).</li></ul></div>
+
+  <div class="feat"><h3>Vendor application <span class="pill ok">Working</span></h3><p class="where">p31market.com/apply</p>
+    <p>The vendor interest form. Each application lands in Systems → Vendor applications, emails the team and adds a row to P31's Google Sheet. One application so far.</p>
+    <p class="k">How the team uses it</p><ol><li>Systems → Vendor applications → open it.</li><li>Set it to <strong>Approved</strong> (optionally choose a market to place her in its lineup) and press <strong>Email them</strong>.</li><li>Approving pre-approves her email: when she registers at p31market.com/register with that email, her studio opens at once.</li></ol></div>
+
+  <div class="feat"><h3>Vendor forms hub and the four forms <span class="pill ok">Working</span></h3><p class="where">p31market.com/vendors · /vendors/agreement · /vendors/register · /vendors/feedback · /volunteer</p>
+    <p>The forms that replaced JotForm, word for word, signed on a phone or computer with a draw-to-sign box. Section 10 covers them in full.</p></div>
+
+  <div class="feat"><h3>Vendor sign-in and registration <span class="pill ok">Working</span></h3><p class="where">p31market.com/login · /register</p>
+    <p>Vendors sign in to their Curator Studio. Team members with a p31market.com mailbox use "On the P31 team? Create an account" here.</p></div>
+</section>
+
+<!-- ============================== 4. COLLECTIVE ============================== -->
+<section class="part flow">
+  <div class="part-head">
+    <p class="eyebrow">Section 4</p>
+    <h1>thep31collective.org, page by page</h1>
+    <p>The Proverbs 31 Collective by NEBA: mentorship, healing, fellowship and purpose, for faith-driven women entrepreneurs.</p>
+  </div>
+
+  <div class="feat"><h3>Home <span class="pill ok">Working</span></h3><p class="where">thep31collective.org</p>
+    <p>"You belong here" (Mentorship, Healing, Fellowship, Purpose &amp; growth), Melanie JC, the two mentorship paths, her mandate, the ways to book a call, the vision scripture (Proverbs 31:29) and the team. The Instagram icon opens @the.p31collective.</p></div>
+
+  <div class="feat"><h3>Mentorship <span class="pill ok">Working</span></h3><p class="where">/mentorship · /mentorship/business · /mentorship/faith</p>
+    <p>The Business Mentorship (strategy, structure, accountability) and the Faith-Based Mentorship, each with what is included and how to begin. No prices are shown publicly, by design.</p>
+    <p class="k">How someone joins</p><ol><li>She books an intro call (Calendly; all three booking links checked on October 12).</li><li>After the call, the mentor sends a private enrollment link from the mentor console (Invites).</li><li>She opens the link and pays by card. <span class="pill off">Not connected</span> Card payment needs Stripe (section 11, item 1). Until then, enroll her by hand: Systems → Mentorship → <em>Enroll someone manually</em> (choose "Paid another way" or "Complimentary" and the number of days).</li></ol></div>
+
+  <div class="feat"><h3>The Academy <span class="pill ok">Working</span></h3><p class="where">/academy</p><p>The front door to the P31 Academy: both programs and the sign-in to a classroom.</p></div>
+
+  <div class="feat"><h3>Join P31 Collective <span class="pill ok">Working</span></h3><p class="where">thep31collective.org/join</p>
+    <p>The membership application. Each one lands in Systems → Join applications, emails members@ and adds a row to the Collective Google Sheet. Six so far.</p></div>
+
+  <div class="feat"><h3>Member portal <span class="pill ok">Working</span></h3><p class="where">thep31collective.org/portal</p>
+    <p>One sign-in for students, mentors and the team; it sends each person to the right place. Team members with a @thep31collective.org mailbox create their account here.</p></div>
+
+  <div class="feat"><h3>Certificate check <span class="pill ok">Working</span></h3><p class="where">/verify · /verify/serial-number</p><p>Anyone can confirm a P31 certificate of completion by its serial number.</p></div>
+
+  <div class="feat"><h3>Unsubscribe <span class="pill ok">Working</span></h3><p class="where">/unsubscribe (from links in emails)</p><p>One click removes someone from the newsletter, campaigns and the welcome series.</p></div>
+</section>
+
+<!-- ============================== 5. CURATOR STUDIO ============================== -->
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Section 5</p>
+    <h1>The vendor's Curator Studio</h1>
+    <p>Where each vendor builds and runs her shop, on a phone or a computer. A guided tour opens the first time she signs in and replays from Help &amp; Guide.</p>
+  </div>
+
+  <h2>How a vendor opens a store, start to finish</h2>
+  <ol class="steps">
+    <li><strong>Apply</strong> at p31market.com/apply. The team approves it in Systems → Vendor applications (this pre-approves her email).</li>
+    <li><strong>Sign the Storefront Agreement</strong> at p31market.com/vendors/agreement. It attaches to her account automatically when the emails match.</li>
+    <li><strong>Create the account</strong> at p31market.com/register with the same email. Her studio opens.</li>
+    <li><strong>Identity</strong>: business name, tagline, story (Write with AI, once AI writing is on), shop link, city, Instagram, public email. Save.</li>
+    <li><strong>Storefront</strong>: banner, logo, and how she gets paid (Cash App, Venmo or a payment link today; Connect with Stripe once card checkout is on).</li>
+    <li><strong>Products</strong>: Add Artifact, start from a template, photo (Photo Studio cleans the background), price, options, badge, sale timer. Up to ten.</li>
+    <li><strong>Store Design</strong>: one of six templates, colour, fonts, layout. Publish design.</li>
+    <li><strong>Go live</strong>: if the team approved her email, the shop is live at her link immediately.</li>
+  </ol>
+
+  <h2>Every room in the studio</h2>
+  <table>
+    <tr><th style="width: 20%">Room</th><th style="width: 58%">What it does</th><th>Status</th></tr>
+    <tr><td><strong>Identity</strong></td><td>Name, tagline, story, shop link, socials. Opens with a setup checklist that ticks itself (name, banner and logo, payments, first product, look, promote), and My markets: each market she is in, with status, booth, date, venue and check-in time.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td><strong>Storefront</strong></td><td>Banner, logo, payment links, products (templates, badges, featured, sale timers, inventory, options).</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td><strong>Store Design</strong></td><td>Templates: Atelier, Boutique, Gallery, Editorial, Market, Noir Luxe; colour, headings, hero, layout; live preview.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td><strong>Plan &amp; billing</strong></td><td>Her storefront plan: a countdown of the free period, "Set up my subscription", and "Change card or cancel". A banner appears in the studio when the end is near.</td><td><span class="pill off">Needs Stripe to take payment</span></td></tr>
+    <tr><td><strong>Orders</strong></td><td>Order requests with the buyer's details; mark confirmed and fulfilled.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td><strong>Discounts</strong></td><td>Codes like WELCOME10 with a percentage and an end date.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td><strong>Testimonials</strong></td><td>Customer quotes shown on her shop.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td><strong>Marketing</strong></td><td>Promote a product (link, QR code, promo image in four looks and three sizes, captions), Followers &amp; email (her own list, one send a day), Share kit (bio line, printable 5×7 table sign), Insights.</td><td><span class="pill step">Working · AI captions need AI writing</span></td></tr>
+    <tr><td><strong>Creative Studio</strong></td><td>Photo Studio (background removal, looks) and short video tools; Photo Studio works on a phone.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td><strong>Intelligence</strong></td><td>Visits, product opens and buy taps.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td><strong>Concierge</strong></td><td>Private notes between the vendor and the P31 team.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td><strong>The Gathering</strong></td><td>Opens the community chat (Market talk, Market day and the shared rooms).</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td><strong>Help &amp; Guide</strong></td><td>Replays the studio walkthrough and answers common questions.</td><td><span class="pill ok">Working</span></td></tr>
+  </table>
+
+  <h2>Storefront billing (from the Storefront Agreement)</h2>
+  <ul>
+    <li>Complimentary for the first three months from activation, then $14.99 a month if the vendor keeps the storefront; the 5% fee per sale applies throughout.</li>
+    <li>A shop approved from now on starts its free period by itself. Shops that were approved earlier are <strong>not</strong> billed until an admin presses "Start for N approved shops" in Systems → Curators &amp; shops. Early-bird shops stay complimentary.</li>
+    <li>The vendor gets an email 14 days before the free period ends and a note when it ends. Pausing an unpaid shop automatically is <strong>off</strong> unless an admin switches it on under Terms.</li>
+    <li>Card payment for the subscription needs Stripe (section 11, item 1). Until then the button explains that card payments are not connected and points the vendor to vendor@p31market.com.</li>
+  </ul>
+</section>
+
+<!-- ============================== 6. ACADEMY ============================== -->
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Section 6</p>
+    <h1>The Mentorship Academy</h1>
+    <p>Two programs, Business Mentorship and Faith-Based Mentorship, each with its own classroom for students and console for mentors.</p>
+  </div>
+
+  <div class="note red"><p><strong>Before students arrive:</strong> both programs exist, but <strong>no lessons have been added yet</strong>, and card payment for enrollment needs Stripe. Load the curriculum in Systems → Mentorship → Curriculum &amp; videos (or the mentor console → Curriculum), and enroll students by hand until Stripe is connected.</p></div>
+
+  <h2>The student's classroom</h2>
+  <table>
+    <tr><th style="width: 22%">Room</th><th>What the student does there</th></tr>
+    <tr><td>Lessons</td><td>Modules and lessons with text, a linked video (YouTube, Vimeo, Loom) or an uploaded video file that plays in the page.</td></tr>
+    <tr><td>Assignments</td><td>Opens each assignment, writes or uploads her work, sees the grade and feedback.</td></tr>
+    <tr><td>Quizzes</td><td>Takes quizzes and sees her score.</td></tr>
+    <tr><td>Sessions</td><td>Upcoming group and one-on-one sessions with "Add to calendar", the live room (opens 30 minutes before), and "Watch the recording" afterwards. Reminder emails arrive the day before and an hour before.</td></tr>
+    <tr><td>Messages</td><td>Private messages with her mentor.</td></tr>
+    <tr><td>Discussions</td><td>Program discussion threads.</td></tr>
+    <tr><td>Goals and My work (Business) · Journal (Faith)</td><td>Personal planning space for each program.</td></tr>
+    <tr><td>Library</td><td>Resources the mentor shares.</td></tr>
+    <tr><td>Progress and certificate</td><td>Her progress through the program; a certificate of completion with a serial number anyone can verify.</td></tr>
+    <tr><td>Billing and plans</td><td>Her plan; "change card or cancel" through the Stripe customer portal (needs Stripe and the portal switched on).</td></tr>
+  </table>
+
+  <h2>The mentor console</h2>
+  <table>
+    <tr><th style="width: 22%">Room</th><th>What the mentor does there</th></tr>
+    <tr><td>Overview</td><td>What needs attention: grading, messages, intro calls, sessions coming up.</td></tr>
+    <tr><td>Students</td><td>Every student, with progress, submissions and notes; open one for the full picture.</td></tr>
+    <tr><td>Intro calls</td><td>Requests from the intro-call form, with follow-up.</td></tr>
+    <tr><td>Invites</td><td>Private enrollment links for people who had their intro call.</td></tr>
+    <tr><td>Curriculum</td><td>Modules and lessons; upload a lesson video (stored privately) or paste a link; publish or hide.</td></tr>
+    <tr><td>Sessions</td><td>Schedule group or one-on-one sessions (the live room is created automatically), switch reminder emails on or off per session, attach the recording afterwards.</td></tr>
+    <tr><td>Inbox</td><td>Messages from students.</td></tr>
+    <tr><td>Assignments, Gradebook, Quizzes</td><td>Create work, grade it, see everyone's scores.</td></tr>
+    <tr><td>Announcements, Discussions</td><td>News and encouragement for the program; discussion threads.</td></tr>
+    <tr><td>Completion</td><td>Mark a student complete and issue her certificate.</td></tr>
+  </table>
+  <p><span class="pill ok">Working</span> Live classes run on Daily (connected). <span class="pill opt">Optional</span> Zoom can be added later; it is not needed.</p>
+</section>
+
+<!-- ============================== 7. TEAM TOOLS ============================== -->
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Section 7</p>
+    <h1>The team's tools</h1>
+    <p>Today, Systems and Content Studio live on thep31collective.org and run both sites. Each team member sees only the rooms her dashboards open; admins see everything.</p>
+  </div>
+
+  <div class="feat"><h3>Today <span class="pill ok">Working</span></h3><p class="where">thep31collective.org/today</p>
+    <p>Everything that needs attention across the dashboards a person runs (grading, student messages, intro calls, classes, applications, orders, curators, site errors, DMs, posts going out), each marked Market or Collective, plus the Daily Word and ticket sales for the next event (once Eventbrite is connected).</p></div>
+
+  <div class="feat"><h3>The 8 AM morning email <span class="pill ok">Working</span></h3>
+    <p>One summary of the last day across both sites: orders, applications, agreements, registrations, survey answers, volunteers, emails waiting, site errors, posts going out today, and days until the next event, with a button into Today.</p></div>
+
+  <h2>Systems, room by room</h2>
+  <p class="muted small">thep31collective.org/systems. On a phone, the bottom bar holds Overview, Orders, Vendors and Join; "More" lists every room.</p>
+  <table>
+    <tr><th style="width: 19%">Room</th><th style="width: 61%">What it does and how to use it</th><th>Status</th></tr>
+    <tr><td><strong>Overview</strong></td><td>"What needs you" across both sites, then the Market numbers (open orders, paid this month, shops live, the next market) and the Collective numbers. A banner appears if a database update is waiting.</td><td><span class="pill ok">Working</span></td></tr>
+  </table>
+  <div class="avoid"><h3>Market · p31market.com</h3>
+  <table>
+    <tr><th style="width: 19%">Room</th><th style="width: 61%">What it does and how to use it</th><th>Status</th></tr>
+    <tr><td>Orders</td><td>Every order request from every shop, live: confirm, fulfil, cancel, export.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Vendor applications</td><td>Applications from /apply. Approve (optionally into a market), email, decline.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Vendor forms</td><td>Agreements, Registrations, Feedback, Volunteers (the former JotForms): search, CSV export, signatures and logos, pre-approve and email the account link, confirm, waitlist or decline a registration, add to a lineup.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Markets &amp; events</td><td>Dates, venue, tickets, capacity, "Has vendors", check-in time, "Announce the month", "Date public"; each market's lineup with booths, paid and day-of check-in; Eventbrite ticket sales.</td><td><span class="pill ok">Working</span> <span class="pill opt">Tickets: optional</span></td></tr>
+    <tr><td>Curators &amp; shops</td><td>Every shop: approve, pause, ask for changes; feature; badges; a note she sees in her studio; hide or feature products; open the shop; message her in The Gathering; storefront billing (start the free period, extend 30 days, complimentary, take out of billing; Terms for admins).</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Campaigns</td><td>Email newsletter subscribers, curators or everyone, with the P31 template and an unsubscribe link; send yourself a test first; AI drafts.</td><td><span class="pill step">Working · AI drafts need AI writing</span></td></tr>
+  </table></div>
+  <div class="avoid"><h3>Collective · thep31collective.org</h3>
+  <table>
+    <tr><th style="width: 19%">Room</th><th style="width: 61%">What it does and how to use it</th><th>Status</th></tr>
+    <tr><td>Join applications</td><td>"Join P31 Collective" applications: review and reply.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Mentorship</td><td>Programs, mentors, members, manual enrollment, and each program's Curriculum &amp; videos and Sessions &amp; recordings.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>People</td><td>Everyone who has reached P31, from the first form to alumni, with their history (the CRM).</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Content Studio · Email inbox</td><td>Open the Studio and the shared inbox (below).</td><td>See below</td></tr>
+  </table></div>
+  <div class="avoid"><h3>Create · both sites</h3>
+  <table>
+    <tr><th style="width: 19%">Room</th><th style="width: 61%">What it does and how to use it</th><th>Status</th></tr>
+    <tr><td>Social</td><td>Drafts, scheduled posts and history across the connected accounts.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Growth</td><td>Find groups, creators and events that fit P31, and track outreach; comment listening.</td><td><span class="pill off">Needs Apify</span></td></tr>
+    <tr><td>Photo Studio</td><td>Remove backgrounds, stage products, apply looks. Works on a phone.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Clip Studio</td><td>Raw footage in, a captioned reel out (computer only).</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>DaVinci</td><td>Long footage in, finished clips out, built by Iris in DaVinci Resolve.</td><td><span class="pill paused">Paused</span></td></tr>
+  </table></div>
+  <div class="avoid"><h3>Team</h3>
+  <table>
+    <tr><th style="width: 19%">Room</th><th style="width: 61%">What it does and how to use it</th><th>Status</th></tr>
+    <tr><td>Team &amp; dashboards</td><td>A card per person with each mailbox, whether she has made her account, and the dashboards switched on (Content creator, Social media manager, Emails, Classroom, People, Vendors, Events, Orders, Shops, DaVinci). "Sign-up steps" copies a note for her. Site admins are managed here too.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Activity</td><td>Who changed what across both sites, in plain words, with filters and search.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Walkthroughs</td><td>Animated walkthroughs of every room (press Play), and 26 test runs with a checklist.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Health</td><td>Database updates (all six recent ones are in) and errors visitors hit on either site.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Settings</td><td>Password, the team, automatic emails (welcome series, class reminders), connected services.</td><td><span class="pill ok">Working</span></td></tr>
+  </table></div>
+
+  <h2>Content Studio</h2>
+  <p class="muted small">thep31collective.org/studio. Connected to Instagram @proverbs31market (connection valid 55 more days) and the Proverbs 31 Marketplace Facebook page (45 more days) through Zernio. 37 posts are queued, through the Luncheon on December 19 (plus one in January).</p>
+  <table>
+    <tr><th style="width: 19%">Room</th><th style="width: 61%">What it does</th><th>Status</th></tr>
+    <tr><td>Overview</td><td>What is going out, what is waiting for approval, messages and comments.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Planner</td><td>A social calendar months ahead: hooks, captions and hashtags per post, approval, one-tap scheduling; a sound board of trending audio for reels.</td><td><span class="pill step">Working · AI drafts need AI writing</span></td></tr>
+    <tr><td>Auto-create</td><td>Choose the post types (Bible fill-in-the-blank, finish the sentence, this or that, quiz, Sunday word, invitations, business tips), the card style, dates and times; it drafts every card and caption from the P31 library, then save as drafts or schedule all. On the 20th it drafts next month by itself for review.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Calendar</td><td>Everything scheduled, by day.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Create post</td><td>Write a caption, add photos or video, pick the time and accounts, schedule.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Messages</td><td>Instagram and Facebook direct messages. Carla answers routine questions automatically and hands anything sensitive to a person.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Comments</td><td>Comments on P31 posts, with replies.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Creative tools</td><td>Photo Studio and Clip Studio.</td><td><span class="pill ok">Working</span></td></tr>
+    <tr><td>Email</td><td>members@thep31collective.org and vendor@p31market.com inside the Studio, with a reply Carla drafts and a person approves.</td><td><span class="pill off">Not connected</span></td></tr>
+  </table>
+</section>
+
+<!-- ============================== 8. GATHERING ============================== -->
+<section class="part flow">
+  <div class="part-head">
+    <p class="eyebrow">Section 8</p>
+    <h1>The Gathering</h1>
+    <p>P31's community chat at /gather on both sites, for vendors, mentorship students and alumnae, mentors, the team and the overseers. <span class="pill ok" style="background: rgba(255,255,255,0.9);">Working</span></p>
+  </div>
+
+  <div class="two">
+    <div class="box"><h3>Rooms by who they are for</h3><ul>
+      <li><strong>Everyone</strong>: Welcome, Daily Word, The Gathering, Prayer requests, Wins &amp; celebrations</li>
+      <li><strong>Vendors and the team</strong>: Market talk, Market day</li>
+      <li><strong>Students, alumnae and mentors</strong>: Academy lounge</li>
+      <li><strong>The team and overseers</strong>: Team room</li>
+    </ul></div>
+    <div class="box"><h3>What members can do</h3><ul>
+      <li>Post, reply in threads, react, share photos and videos (private to members)</li>
+      <li>Direct messages between any two members</li>
+      <li><strong>@mention</strong> someone: type @ and a few letters, pick her name</li>
+      <li><strong>Search</strong> every room she belongs to; "Mentions of me"</li>
+      <li>Badges: Founder &amp; CEO and other titles, Overseer, P31 Team, Mentor, Business or Faith student, Alumna, Vendor (with a link to her shop)</li>
+    </ul></div>
+  </div>
+  <h2>How to use it</h2>
+  <ul>
+    <li><strong>The Daily Word</strong> appears every morning with a question and pops up the first time someone opens The Gathering that day. "Join the discussion" opens its thread; "Amen" adds a 🙏🏾.</li>
+    <li><strong>Alerts</strong>: an unread direct message becomes one email after a few minutes; with The Gathering open, direct messages and @mentions show as a notification on that device. Both switches are on each member's own card.</li>
+    <li><strong>Titles</strong>: overseers set a member's title from her card (for example Executive Assistant).</li>
+    <li><strong>Moderation</strong>: the team can pin and remove messages.</li>
+  </ul>
+</section>
+
+<!-- ============================== 9. SCHEDULED JOBS ============================== -->
+<section class="part flow">
+  <div class="part-head">
+    <p class="eyebrow">Section 9</p>
+    <h1>What runs by itself</h1>
+    <p>Eight scheduled jobs, all running (checked October 12). Times are Eastern; jobs set on the hour shift one hour earlier on the clock when daylight saving ends on November 1, except the morning email, which is built to arrive in the 8 AM hour all year.</p>
+  </div>
+  <table>
+    <tr><th style="width: 24%">Job</th><th style="width: 22%">When</th><th>What it does</th></tr>
+    <tr><td>Morning email</td><td>8 AM daily</td><td>The summary of the last day across both sites, to the team.</td></tr>
+    <tr><td>Daily Word</td><td>7:30 AM daily (6:30 AM after Nov 1)</td><td>Posts the day's KJV verse and question in The Gathering.</td></tr>
+    <tr><td>Form emails</td><td>Every 10 minutes</td><td>Makes sure every application, agreement, registration, survey and volunteer email goes out, even if the visitor closed the page.</td></tr>
+    <tr><td>Message alerts</td><td>Every 5 minutes</td><td>Emails members about direct messages they have not read.</td></tr>
+    <tr><td>Class reminders</td><td>Every 15 minutes</td><td>Emails students the day before and an hour before each session.</td></tr>
+    <tr><td>Welcome emails</td><td>Every hour</td><td>Sends the next welcome email to new subscribers who are due one.</td></tr>
+    <tr><td>Storefront billing</td><td>11 AM daily (10 AM after Nov 1)</td><td>Free-period reminders, notes when a period ends, failed-payment notes, and the optional automatic pause.</td></tr>
+    <tr><td>Next month's posts</td><td>The 20th, 10 AM (9 AM after Nov 1)</td><td>Drafts next month's engagement posts in Content Studio and emails marketing@ and founder@ to review. Nothing posts until someone approves it.</td></tr>
+  </table>
+  <div class="note plum"><p>Every outgoing email is sent through Resend from the P31 addresses. Both domains have SPF, DKIM and DMARC set up correctly (checked October 12), which keeps P31's emails out of spam folders.</p></div>
+</section>
+
+<!-- ============================== 10. JOTFORMS ============================== -->
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Section 10</p>
+    <h1>Where the JotForms went</h1>
+    <p>On October 11 the four JotForms moved onto p31market.com, word for word, as part of the site. Submissions now go straight into Systems instead of a JotForm inbox.</p>
+  </div>
+
+  <table>
+    <tr><th style="width: 28%">The old JotForm</th><th style="width: 30%">Now on the site</th><th>Where submissions land</th></tr>
+    <tr><td>Proverbs 31 Marketplace Storefront Agreement Form</td><td><a href="https://www.p31market.com/vendors/agreement">p31market.com/vendors/agreement</a></td><td>Systems → Vendor forms → Agreements. The signer gets a copy by email; it attaches to her curator account when the emails match.</td></tr>
+    <tr><td>Vendor Registration Form (with the Vendor Rules &amp; Regulations)</td><td><a href="https://www.p31market.com/vendors/register">p31market.com/vendors/register</a></td><td>Systems → Vendor forms → Registrations. One tap adds her (and her logo) to that market's lineup; confirm, waitlist or decline with an email.</td></tr>
+    <tr><td>Proverbs 31 Marketplace Vendor Feedback Survey</td><td><a href="https://www.p31market.com/vendors/feedback">p31market.com/vendors/feedback</a></td><td>Systems → Vendor forms → Feedback, with average scores per market. "I'm in for the next market" answers are invited automatically when the next market's date is announced.</td></tr>
+    <tr><td>Proverbs 31 Marketplace Volunteer</td><td><a href="https://www.p31market.com/volunteer">p31market.com/volunteer</a></td><td>Systems → Vendor forms → Volunteers. The volunteer gets a copy from outreach@.</td></tr>
+  </table>
+  <p>All four, plus the vendor application, are listed on one page: <a href="https://www.p31market.com/vendors">p31market.com/vendors</a>. Every signer is also added to Systems → People.</p>
+
+  <div class="note red">
+    <p><strong>The old JotForms are still open.</strong> On October 12 all four still accepted submissions on jotform.com, while the new on-site forms had none yet. If any old link is still shared (Instagram bio, Linktree, emails, Eventbrite, printed QR codes), answers will go to JotForm and never reach Systems.</p>
+  </div>
+
+  <h2>What to do (about 15 minutes)</h2>
+  <ol class="steps">
+    <li><strong>Check the JotForm inbox</strong> for anything submitted since October 11, and handle it.</li>
+    <li><strong>Download the history.</strong> In JotForm, open each form's submissions table and choose Download All (Excel or CSV; PDFs if you want the signatures). If you send us the files, we can import past agreements and registrations into Systems so each vendor's history is in one place.</li>
+    <li><strong>Close each form with a forwarding note.</strong> In JotForm open the form → Settings → Form Status → Disable, and set the message, for example: <em>"This form has moved. Please sign at p31market.com/vendors/agreement."</em> Use the matching address for each form.</li>
+    <li><strong>Replace the old links</strong> anywhere they were shared with <strong>p31market.com/vendors</strong>.</li>
+  </ol>
+  <p class="muted small">Old JotForm addresses (form.jotform.com/…): proverbs31markets/p31-virtual-market-vendor-agreement · 260633974375062 (registration) · proverbs31markets/proverbs-31-marketplace-vendor-feed (feedback) · 260845531116049 (volunteer).</p>
+</section>
+
+<!-- ============================== 11. CONNECTIONS ============================== -->
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Section 11</p>
+    <h1>What still needs to be connected, step by step</h1>
+    <p>Keys go into Supabase (Project → Edge Functions → Secrets), never into the website itself, and nobody else ever needs to see them. Most take effect within a minute; where something must be redeployed, the step says so.</p>
+  </div>
+
+  <table>
+    <tr><th style="width: 5%">#</th><th style="width: 30%">Connection</th><th style="width: 41%">What it unlocks</th><th>Effort</th></tr>
+    <tr><td>1</td><td>Stripe (payments and subscriptions)</td><td>Mentorship enrollment by private link, student billing, storefront subscriptions</td><td>20 min</td></tr>
+    <tr><td>2</td><td>AI writing</td><td>Every "Write with AI" button</td><td>5 min</td></tr>
+    <tr><td>3</td><td>Shared email inbox</td><td>members@ and vendor@ in Content Studio with Carla's drafts</td><td>30 min</td></tr>
+    <tr><td>4</td><td>Card checkout in shops (Stripe Connect)</td><td>Shoppers pay by card; P31's 5% fee collected automatically</td><td>45 min</td></tr>
+    <tr><td>5</td><td>Google Business Profile</td><td>Google listing updates and photos from Zernio</td><td>5 min</td></tr>
+    <tr><td>6</td><td>Team accounts</td><td>Each team member's dashboards</td><td>5 min each</td></tr>
+    <tr><td>7</td><td>Eventbrite ticket counts</td><td>Luncheon ticket sales on Today and in Systems</td><td>5 min · optional</td></tr>
+    <tr><td>8</td><td>Collective Instagram in Content Studio</td><td>Posting to @the.p31collective from the Studio</td><td>10 min · optional</td></tr>
+    <tr><td>9</td><td>Growth search (Apify)</td><td>Systems → Growth and comment listening</td><td>10 min · optional</td></tr>
+    <tr><td>10</td><td>Zoom</td><td>Zoom as a second option for live classes (Daily already works)</td><td>20 min · optional</td></tr>
+    <tr><td>11</td><td>DaVinci bridge</td><td>The DaVinci clip finder and Iris queue</td><td>Later</td></tr>
+  </table>
+
+  <div class="feat"><h3>1. Stripe: mentorship payments and storefront subscriptions <span class="pill off">Not connected</span></h3>
+    <p>No Stripe key is saved yet, so the private enrollment link, the student billing page and the vendor "Set up my subscription" button all explain that card payments are not connected.</p>
+    <ol class="steps">
+      <li><strong>Secret key.</strong> Stripe dashboard → Developers → API keys → reveal the <em>Secret key</em> (starts sk_live_). In Supabase → Edge Functions → Secrets, add <code>STRIPE_SECRET_KEY</code> with that value.</li>
+      <li><strong>Webhook.</strong> Stripe → Developers → Webhooks → Add endpoint. URL: <code>https://xsnhxjttdizljaawpumz.supabase.co/functions/v1/academy-webhook</code>. Events: <code>checkout.session.completed</code>, <code>invoice.paid</code>, <code>invoice.payment_failed</code>, <code>customer.subscription.updated</code>, <code>customer.subscription.deleted</code>.</li>
+      <li><strong>Webhook secret.</strong> Open the new endpoint, reveal its <em>Signing secret</em> (starts whsec_) and add it in Supabase as <code>ACADEMY_STRIPE_WEBHOOK_SECRET</code>.</li>
+      <li><strong>Customer portal.</strong> Stripe → Settings → Billing → Customer portal → Activate. This is what "Change card or cancel" opens for students and vendors.</li>
+      <li><strong>Test.</strong> Create a private enrollment link for yourself in the mentor console, pay, confirm the classroom opens, then refund the payment in Stripe.</li>
+    </ol>
+    <p class="small muted">This one webhook handles mentorship and storefront subscriptions together. To try everything first without real money, use Stripe's test mode keys, then switch to the live keys.</p></div>
+
+  <div class="feat"><h3>2. AI writing <span class="pill off">Not connected</span></h3>
+    <p>Unlocks: the vendor's "Write with AI" (story, product descriptions), product captions in Marketing, Content Studio caption and hook writing and "rewrite with AI", Planner drafts, Campaign drafts, and the Social and Growth helpers. Carla (DMs) already works, because she uses the Google Gemini key that is saved.</p>
+    <p class="k">Option A (no new account)</p><p>Tell us to point AI writing at the Google Gemini key that is already saved. It is a small change on our side and a redeploy of one function.</p>
+    <p class="k">Option B (Anthropic)</p><ol class="steps"><li>console.anthropic.com → API Keys → Create key.</li><li>Supabase → Edge Functions → Secrets → add <code>ANTHROPIC_API_KEY</code>.</li></ol></div>
+
+  <div class="feat"><h3>3. The shared email inbox <span class="pill off">Not connected</span></h3>
+    <p>Unlocks: emails to members@thep31collective.org and vendor@p31market.com appear in Content Studio → Email, each with a reply Carla drafts; a person edits and sends. Refunds, complaints and press are flagged for a human. The mailboxes keep receiving mail as they do today; this adds a copy into the Studio.</p>
+    <ol class="steps">
+      <li><strong>Resend key with full access.</strong> Resend → API Keys: make sure the key saved in Supabase as <code>RESEND_API_KEY</code> has <em>Full access</em> (reading received mail needs it). If it is a sending-only key, create a Full access key and replace it.</li>
+      <li><strong>Receiving address.</strong> In Resend, turn on receiving for a private address (for example a subdomain such as inbox.thep31collective.org; Resend shows the MX record to add in Bluehost's DNS for that subdomain).</li>
+      <li><strong>Webhook.</strong> Resend → Webhooks → Add endpoint: <code>https://xsnhxjttdizljaawpumz.supabase.co/functions/v1/email-inbound</code>, event <code>email.received</code>. Copy its signing secret into Supabase as <code>RESEND_WEBHOOK_SECRET</code>.</li>
+      <li><strong>Forwarders.</strong> In Bluehost → Email → Forwarders, forward members@thep31collective.org and vendor@p31market.com to the receiving address (keep normal delivery on as well).</li>
+      <li><strong>Test.</strong> Send an email to members@ from a personal address; within a minute it appears in Content Studio → Email with a drafted reply.</li>
+    </ol></div>
+
+  <div class="feat"><h3>4. Card checkout in shops (Stripe Connect) <span class="pill off">Not connected · planned last</span></h3>
+    <p>Today shoppers send an order request and pay the vendor directly (Cash App, Venmo or the vendor's own link). With Stripe Connect, each vendor connects her own Stripe account from her studio, shoppers pay by card on her page, the money goes to her bank, and P31's 5% fee is kept automatically. Do item 1 first.</p>
+    <ol class="steps">
+      <li>Stripe → Connect → Get started → choose <em>Express</em> accounts and fill in the platform profile.</li>
+      <li>Stripe → Developers → Webhooks → Add endpoint: <code>https://xsnhxjttdizljaawpumz.supabase.co/functions/v1/stripe-webhook</code>, events <code>checkout.session.completed</code> and <code>account.updated</code>; add its signing secret in Supabase as <code>STRIPE_WEBHOOK_SECRET</code>.</li>
+      <li>Supabase secrets: <code>APP_URL</code> = https://www.p31market.com and <code>PLATFORM_FEE_PERCENT</code> = 5.</li>
+      <li>Deploy the two remaining functions (from the project folder):<pre>npx supabase functions deploy stripe-connect stripe-account-status --no-verify-jwt --use-api --project-ref xsnhxjttdizljaawpumz</pre></li>
+      <li>Vercel → the P31 project → Settings → Environment Variables → set <code>VITE_ENABLE_CARD_PAYMENTS</code> to <code>true</code> → redeploy.</li>
+      <li>Each vendor: Curator Studio → Storefront → <strong>Connect with Stripe</strong> and finish Stripe's steps.</li>
+    </ol></div>
+
+  <div class="feat"><h3>5. Google Business Profile <span class="pill off">Disconnected</span></h3>
+    <p>The Google connection in Zernio has lapsed (Zernio answers "account not found"). Instagram and Facebook are fine.</p>
+    <ol class="steps"><li>Zernio → Accounts → Google Business → Reconnect, signing in with the Google account that owns the P31 listing.</li><li>Tell us when it is back: the new logo and cover photo are ready to push.</li></ol></div>
+
+  <div class="feat"><h3>6. Team accounts <span class="pill step">0 of 11 made</span></h3>
+    <ol class="steps">
+      <li>Systems → Team &amp; dashboards → on each person's card press <strong>Sign-up steps</strong> and send her the note.</li>
+      <li>She creates the account with that mailbox: @p31market.com logins at p31market.com/login, @thep31collective.org logins at thep31collective.org/portal ("On the P31 team? Create an account").</li>
+      <li>She confirms the email. Her dashboards appear the next time she opens Systems or Today. Her card in Team &amp; dashboards changes from "No account yet" to "Account made · email not confirmed yet" and then to "Active".</li>
+    </ol>
+    <p class="small muted">Appendix A lists every login and its dashboards. Dashboards can be changed at any time from the same page.</p></div>
+
+  <div class="feat"><h3>7. Eventbrite ticket counts <span class="pill opt">Optional</span></h3>
+    <ol class="steps"><li>Eventbrite → Account settings → Developer links → API keys → copy the <em>private token</em>.</li><li>Supabase secrets → add <code>EVENTBRITE_TOKEN</code>.</li><li>The Luncheon's ticket link in Systems → Markets &amp; events must be its Eventbrite page (it is). Sold, total and days to go then show on Overview, Markets &amp; events and Today.</li></ol></div>
+
+  <div class="feat"><h3>8. The Collective Instagram in Content Studio <span class="pill opt">Optional</span></h3>
+    <p>Content Studio posts to @proverbs31market and the Proverbs 31 Marketplace Facebook page. @the.p31collective is not connected. To post to it from the Studio: Zernio → Accounts → Add → Instagram, sign in to @the.p31collective (it must be a Business or Creator account linked to a Facebook Page), then tell us and we will add it to the Studio's account choices.</p></div>
+
+  <div class="feat"><h3>9. Growth search (Apify) <span class="pill opt">Optional</span></h3>
+    <p>apify.com → Settings → Integrations → copy the API token → Supabase secrets → add <code>APIFY_TOKEN</code>. Apify bills by use; Systems → Settings shows "Connected" once it works.</p></div>
+
+  <div class="feat"><h3>10. Zoom <span class="pill opt">Optional</span></h3>
+    <p>Live classes already run on Daily. To add Zoom as well: Zoom Marketplace → Develop → Build App → Server-to-Server OAuth, with the meeting scopes; then add <code>ZOOM_ACCOUNT_ID</code>, <code>ZOOM_CLIENT_ID</code> and <code>ZOOM_CLIENT_SECRET</code> in Supabase.</p></div>
+
+  <div class="feat"><h3>11. DaVinci <span class="pill paused">Paused</span></h3>
+    <p>The DaVinci clip finder and the Iris queue are switched off everywhere until the bridge to DaVinci Resolve is ready on the editing computer. Turning it back on is one switch on our side.</p></div>
+
+  <h2>Smaller items</h2>
+  <ul class="check">
+    <li>Luncheon: turn on <em>Date public</em> (Systems → Markets &amp; events).</li>
+    <li>Review the 4 pending shops (Systems → Curators &amp; shops).</li>
+    <li>Load lessons into both mentorship programs.</li>
+    <li>When shops are live and Stripe is connected: decide when to press "Start for N approved shops" for storefront billing.</li>
+    <li>Anthony Carr's headshot for the team directory (send us a photo).</li>
+    <li>Optional: set <code>MARKET_EMAIL_FROM</code> (for example <em>Proverbs 31 Marketplace &lt;vendor@p31market.com&gt;</em>) so marketplace emails always come from the market address.</li>
+  </ul>
+</section>
+
+<!-- ============================== 12. TESTING ============================== -->
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Section 12</p>
+    <h1>How we know it works</h1>
+    <p>Three kinds of checks: automatic tests on every change, a live check of the real sites, and step-by-step test runs a person can follow.</p>
+  </div>
+
+  <h2>Live check of the real sites (October 12)</h2>
+  <p>111 checks: <strong>109 passed, 2 to look at, 0 failing.</strong> The two items to look at are the Stripe Connect functions, which are not deployed yet by design (section 11, item 4).</p>
+  <table>
+    <tr><th style="width: 26%">Area</th><th>What was checked</th></tr>
+    <tr><td>Routing</td><td>Both addresses, with and without www and https, and the Collective pages opened on the marketplace address, all land on the right page.</td></tr>
+    <tr><td>Pages</td><td>Every public page on both sites opens, shows its content within about 1.6 seconds, on a computer and on a phone, with no errors.</td></tr>
+    <tr><td>Security</td><td>HTTPS everywhere, SSL certificates valid and renewing automatically, protection against framing and file sniffing, private data hidden from visitors (99 tables checked).</td></tr>
+    <tr><td>Email</td><td>Mail servers and SPF, DKIM and DMARC for both domains.</td></tr>
+    <tr><td>Functions</td><td>Every server function answers as expected (and explains clearly when its service is not connected).</td></tr>
+    <tr><td>Services</td><td>The three Calendly booking links, the Google Form backups, the Instagram profile, and the Instagram and Facebook connections in Zernio.</td></tr>
+  </table>
+
+  <h2>Automatic tests on every change</h2>
+  <ul>
+    <li><strong>Screen test</strong>: opens 207 screens across both sites with sample data (no real accounts), clicks the key buttons, and fails if anything crashes or a button is missing. All 207 pass.</li>
+    <li><strong>Link test</strong>: follows every internal link and image on both sites (174 pages); no broken links, blank pages or broken images.</li>
+    <li><strong>Database tests</strong>: every database update is tested twice in a scratch database before it is handed over.</li>
+  </ul>
+
+  <h2>Test runs a person can follow</h2>
+  <p>Systems → Walkthroughs → Test runs lists 26 short tests (also printable). Each says what to do, what should happen, and how to clean up. They cover: the vendor application; the storefront agreement; market registration into a lineup; the feedback survey and next-market invite; the volunteer form; the marketplace pop-up; the Join application; the intro call; assigning a dashboard and signing in as that person; pausing, featuring and noting a shop; a lesson with an uploaded video; a session with its recording; an order from a shop to Systems; a reply from the shared inbox; scheduling a post; a campaign test; The Gathering (posts, threads, DMs, alerts); @mentions and search; database updates; a storefront free period and subscription; class reminders; welcome emails; the activity log; Eventbrite ticket sales; the walkthroughs themselves; and the automated checks.</p>
+  <div class="note"><p>Use <strong>TEST</strong> in names when trying a form so test rows are easy to find and remove afterwards.</p></div>
+</section>
+
+<!-- ============================== 13. SUGGESTIONS ============================== -->
+<section class="part flow">
+  <div class="part-head">
+    <p class="eyebrow">Section 13</p>
+    <h1>Suggestions for what comes next</h1>
+    <p>The sites have plenty of features now. The numbers in section 1 say the next gains come from getting vendors live, students enrolled and the Luncheon sold.</p>
+  </div>
+
+  <div class="feat"><h3>1. Vendor setup nudges <span class="pill opt">Recommended first</span></h3>
+    <p>Applicants who have not finished get a reminder to sign the agreement and create their account; approved vendors get a short email series (around days 2, 5 and 10) showing what is left on their setup checklist ("add 3 products", "connect payments"). Systems shows who is stuck and where.</p></div>
+  <div class="feat"><h3>2. A Luncheon page</h3>
+    <p>p31market.com/luncheon: date, venue, schedule, speakers and sponsors, a ticket button straight to Eventbrite, a countdown, its own share image, and a sponsor inquiry form. With ten weeks to go, it is the nearest revenue.</p></div>
+  <div class="feat"><h3>3. Card checkout in shops</h3>
+    <p>Stripe Connect (section 11, item 4) so shoppers can pay by card on any shop page and P31's 5% fee is collected automatically.</p></div>
+  <div class="feat"><h3>4. Mentorship follow-up</h3>
+    <p>A gentle email series for people who booked an intro call but have not enrolled, and a "next cohort" waitlist. Prices stay private; the enrollment link is still shared one to one.</p></div>
+  <div class="feat"><h3>5. A free download to grow the list</h3>
+    <p>For example "31 Days of Business Devotions" as a PDF offered in the pop-up. Every sign-up starts the welcome emails that went live on October 12.</p></div>
+  <div class="feat"><h3>6. A monthly report for Melanie JC</h3>
+    <p>Emailed on the 1st: shops, orders, subscribers, students, ticket sales and social growth, all from live data, so this kind of status check happens by itself every month.</p></div>
+  <div class="feat"><h3>Later</h3>
+    <ul><li>Import the JotForm history into Systems (once the files are downloaded).</li><li>Email alerts for @mentions in The Gathering, and who is online.</li><li>Posting to the Collective Instagram from Content Studio.</li><li>Switching DaVinci back on when the editing bridge is ready.</li></ul></div>
+</section>
+
+<!-- ============================== APPENDIX A ============================== -->
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Appendix A</p>
+    <h1>Team logins and their dashboards</h1>
+    <p>From the October 2026 team directory. Each mailbox is its own login. Change dashboards in Systems → Team &amp; dashboards.</p>
+  </div>
+  <table>
+    <tr><th style="width: 18%">Person</th><th style="width: 30%">Login (mailbox)</th><th style="width: 22%">Role</th><th>Dashboards</th></tr>
+    <tr><td>Melanie JC</td><td>founder@thep31collective.org</td><td>Founder &amp; CEO</td><td>Everything (site admin)</td></tr>
+    <tr><td>Melanie JC</td><td>ceo@p31market.com</td><td>Founder &amp; CEO</td><td>Everything (site admin)</td></tr>
+    <tr><td>Savannah Campbell</td><td>secretary@thep31collective.org</td><td>Executive Assistant</td><td>People, Emails, Classroom</td></tr>
+    <tr><td>Savannah Campbell</td><td>secretary@p31market.com</td><td>Executive Assistant</td><td>Vendors, Events, Orders, Emails</td></tr>
+    <tr><td>Yanni Bratcher</td><td>marketing@p31market.com</td><td>Marketing Strategist</td><td>Social media manager, Content creator</td></tr>
+    <tr><td>Alexia Thomas</td><td>members@thep31collective.org</td><td>Member Liaison</td><td>People, Emails</td></tr>
+    <tr><td>Alexia Thomas</td><td>outreach@p31market.com</td><td>Member Liaison</td><td>Events, Vendors</td></tr>
+    <tr><td>Shanay Prince</td><td>grants@thep31collective.org</td><td>Support Coordinator</td><td>People</td></tr>
+    <tr><td>Shanay Prince</td><td>grants@p31market.com</td><td>Support Coordinator</td><td>Vendors, Events</td></tr>
+    <tr><td>Shanay Prince</td><td>coordinator@p31market.com</td><td>Support Coordinator</td><td>Orders, Vendors, Events</td></tr>
+    <tr><td>Anthony Carr</td><td>vendor@p31market.com</td><td>Marketplace Tech Support</td><td>Shops, Orders, Vendors, DaVinci</td></tr>
+  </table>
+  <p><strong>Site admins (see and change everything):</strong> founder@thep31collective.org, ceo@p31market.com, and the two original admin accounts (proverbs31markets@gmail.com and info@lumenlabsatl.com).</p>
+  <h2>What each dashboard opens</h2>
+  <table>
+    <tr><th style="width: 26%">Dashboard</th><th>Opens</th></tr>
+    <tr><td>Content creator</td><td>Content Studio (planner, Auto-create, create post, calendar), Photo Studio, Clip Studio</td></tr>
+    <tr><td>Social media manager</td><td>Social, Growth, Instagram and Facebook messages and comments</td></tr>
+    <tr><td>Emails</td><td>The shared inboxes and Campaigns</td></tr>
+    <tr><td>Classroom</td><td>The mentor consoles for both programs and Systems → Mentorship</td></tr>
+    <tr><td>People &amp; applications</td><td>Join applications and People (the CRM)</td></tr>
+    <tr><td>Vendors &amp; forms</td><td>Vendor applications and Vendor forms</td></tr>
+    <tr><td>Markets &amp; events</td><td>Markets &amp; events, lineups and check-in</td></tr>
+    <tr><td>Orders</td><td>Orders</td></tr>
+    <tr><td>Curators &amp; shops</td><td>Curators &amp; shops, including storefront billing</td></tr>
+    <tr><td>DaVinci</td><td>The DaVinci tools (paused for now)</td></tr>
+  </table>
+</section>
+
+<!-- ============================== APPENDIX B ============================== -->
+<section class="part flow">
+  <div class="part-head">
+    <p class="eyebrow">Appendix B</p>
+    <h1>Key links</h1>
+    <p>Bookmark these.</p>
+  </div>
+  <table>
+    <tr><th style="width: 34%">What</th><th>Address</th></tr>
+    <tr><td>Marketplace</td><td>www.p31market.com</td></tr>
+    <tr><td>The Collective</td><td>www.thep31collective.org</td></tr>
+    <tr><td>Team home (Today)</td><td>www.thep31collective.org/today</td></tr>
+    <tr><td>Systems (team console)</td><td>www.thep31collective.org/systems</td></tr>
+    <tr><td>Content Studio</td><td>www.thep31collective.org/studio</td></tr>
+    <tr><td>The Gathering</td><td>www.p31market.com/gather or www.thep31collective.org/gather</td></tr>
+    <tr><td>Walkthroughs and test runs</td><td>www.thep31collective.org/systems/walkthroughs</td></tr>
+    <tr><td>Vendor forms hub</td><td>www.p31market.com/vendors</td></tr>
+    <tr><td>Vendor application</td><td>www.p31market.com/apply</td></tr>
+    <tr><td>Storefront Agreement</td><td>www.p31market.com/vendors/agreement</td></tr>
+    <tr><td>Vendor registration</td><td>www.p31market.com/vendors/register</td></tr>
+    <tr><td>Vendor feedback survey</td><td>www.p31market.com/vendors/feedback</td></tr>
+    <tr><td>Volunteer form</td><td>www.p31market.com/volunteer</td></tr>
+    <tr><td>Vendor sign-in and studio</td><td>www.p31market.com/login · www.p31market.com/dashboard</td></tr>
+    <tr><td>Join P31 Collective</td><td>www.thep31collective.org/join</td></tr>
+    <tr><td>Mentorship</td><td>www.thep31collective.org/mentorship</td></tr>
+    <tr><td>Member portal</td><td>www.thep31collective.org/portal</td></tr>
+    <tr><td>Certificate check</td><td>www.thep31collective.org/verify</td></tr>
+  </table>
+</section>
+
+</body>
+</html>
