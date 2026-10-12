@@ -21,8 +21,15 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 | 15 | Schedule a post | As a team member | thep31collective.org | 4 |
 | 16 | Send a campaign test | As an admin | p31market.com | 3 |
 | 17 | The Gathering: post, thread, direct message, alert | As a team member | both sites | 5 |
-| 18 | Walkthroughs play on every dashboard | As a team member | both sites | 3 |
-| 19 | Automated screen, link and form check | As an admin | both sites | 2 |
+| 18 | The Gathering: @mention and search | As a team member | both sites | 4 |
+| 19 | Database updates land | As an admin | both sites | 3 |
+| 20 | A storefront free period and subscription | As an admin | p31market.com | 6 |
+| 21 | Class reminder emails | As an admin | thep31collective.org | 3 |
+| 22 | Welcome emails for a new subscriber | As a visitor | p31market.com | 3 |
+| 23 | The activity log | As an admin | both sites | 2 |
+| 24 | Eventbrite ticket sales | As an admin | p31market.com | 3 |
+| 25 | Walkthroughs play on every dashboard | As a team member | both sites | 3 |
+| 26 | Automated screen, link and form check | As an admin | both sites | 2 |
 
 ## 1. Vendor application
 
@@ -299,7 +306,123 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Delete the test messages (the ⋯ menu on your own message).
 
-## 18. Walkthroughs play on every dashboard
+## 18. The Gathering: @mention and search
+
+*As a team member · both sites · about 4 minutes*
+
+**Do this**
+
+1. Open The Gathering on two devices (or two browsers) signed in as two team members. On the second, switch on “Notify me on this device” from her own card.
+2. On the first, in The Gathering channel type @ and the first letters of her name, pick her from the list, finish the message and send.
+3. On the second, stay in another room. Then open the magnifying glass, search a word from the message, and tap “Mentions of me”.
+
+**What should happen**
+
+- Her name is gold in the message for her (purple for everyone else) and the message has a gold edge.
+- The room shows an @ marker in her channel list and her device shows “… mentioned you”.
+- Search lists the message with the word marked; tapping it jumps to it (or opens its thread).
+
+**Afterwards:** Delete the test message.
+
+## 19. Database updates land
+
+*As an admin · both sites · about 3 minutes*
+
+**Do this**
+
+1. Open Systems → Health. Any waiting script shows Copy script.
+2. Tap Copy script, open the SQL editor, press Ctrl+A then Ctrl+V, and Run with nothing highlighted (confirm “Run this query” if asked).
+3. Back in Health, tap Check again.
+
+**What should happen**
+
+- The editor shows the one result row printed under the script (for v42: versions_ok true … jobs 8).
+- The script turns into a tick with today’s date; the Overview banner disappears once nothing is waiting.
+
+**Afterwards:** None.
+
+## 20. A storefront free period and subscription
+
+*As an admin · p31market.com · about 6 minutes*
+
+**Do this**
+
+1. In Systems → Curators & shops open a test shop whose studio you can sign in to, and tap “Start free period”.
+2. Sign in to that shop’s studio (p31market.com/dashboard) → Plan & billing.
+3. Tap “Set up my subscription”, look over the Stripe page, then go back without paying.
+4. In Systems, tap “Extend 30 days”, then “Complimentary”.
+
+**What should happen**
+
+- The shop shows “Free period · N days left”; the studio shows the same countdown and the button names the price.
+- Stripe Checkout shows “P31 Marketplace storefront” at the monthly price, with the first charge after the free period; going back lands on Plan & billing with “No changes were made”.
+- Extend 30 days moves the end date; Complimentary turns the studio card into “Your storefront is complimentary”. Systems → Activity lists each change.
+
+**Afterwards:** Tap “Take out of billing” on the test shop (or leave it complimentary).
+
+## 21. Class reminder emails
+
+*As an admin · thep31collective.org · about 3 minutes*
+
+**Do this**
+
+1. In the Mentor console → Sessions, schedule a TEST session about 50 minutes from now for a program where your own email is an enrolled student (or invite yourself), with “Email reminders” on.
+2. Wait for the next quarter hour.
+
+**What should happen**
+
+- You get “Starting at <time>: TEST…” with how to join; a session a day out gets “Coming up: TEST…” instead. Each reminder goes once.
+
+**Afterwards:** Delete the TEST session.
+
+## 22. Welcome emails for a new subscriber
+
+*As a visitor · p31market.com · about 3 minutes*
+
+**Do this**
+
+1. In a private window on p31market.com, subscribe through the pop-up or the footer with an email you can read.
+2. Wait up to an hour.
+
+**What should happen**
+
+- Email 1 (welcome and Melanie JC’s story) arrives within the hour; email 2 (what is coming up) about three days later; email 3 (ways to be part of it) about four days after that.
+- Each has an unsubscribe link; using it stops the rest. Systems → Settings → Automatic emails switches the series off for everyone.
+
+**Afterwards:** Unsubscribe the test address.
+
+## 23. The activity log
+
+*As an admin · both sites · about 2 minutes*
+
+**Do this**
+
+1. Make any change in Systems (feature a shop, switch a team dashboard, edit a market).
+2. Open Systems → Activity.
+
+**What should happen**
+
+- The change is at the top in plain words with your name, the time and the before and after; the area chips and search narrow the list.
+
+**Afterwards:** Undo the test change (that is logged too).
+
+## 24. Eventbrite ticket sales
+
+*As an admin · p31market.com · about 3 minutes*
+
+**Do this**
+
+1. Add the Supabase secret EVENTBRITE_TOKEN (Eventbrite → Account settings → Developer links → API keys → private token) and deploy eventbrite-stats.
+2. Make sure the Luncheon in Systems → Markets & events has its Eventbrite link as the ticket link.
+3. Open Systems → Overview, then Markets & events, then Today.
+
+**What should happen**
+
+- A ticket card shows tickets sold of the total, days to go and each ticket type; tapping it opens the Eventbrite page. Without the token, Markets & events explains how to add it.
+
+**Afterwards:** None.
+
+## 25. Walkthroughs play on every dashboard
 
 *As a team member · both sites · about 3 minutes*
 
@@ -314,7 +437,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** None.
 
-## 19. Automated screen, link and form check
+## 26. Automated screen, link and form check
 
 *As an admin · both sites · about 2 minutes*
 

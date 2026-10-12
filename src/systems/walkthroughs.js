@@ -55,6 +55,7 @@ export const SYSTEMS_CHAPTERS = {
     title: 'Markets & events', group: 'Market', site: 'market', minutes: 3, dash: 'events',
     steps: [
       { to: '/systems/events', targets: nav('/systems/events'), title: 'Every market and event', body: 'Dates, venues, tickets, RSVPs and vendor lineups, upcoming first.' },
+      { to: '/systems/events', targets: [...tour('tickets'), ...card(1)], title: 'Ticket sales', body: 'For events sold on Eventbrite, the ticket count shows here, on Overview and on Today, refreshed every ten minutes: sold, total, days to go and each ticket type. Tap it to open the Eventbrite page.' },
       { to: '/systems/events', targets: card(1), title: 'Add or edit a date', body: 'Title, date, venue, start time, capacity and the ticket link. “Month public” shows “December · date coming soon” on the site until the day is set; “Date public” announces it.' },
       { to: '/systems/events', targets: card(1), title: 'Has vendors, and load-in', body: 'Switch “Has vendors” off for events without booths (the luncheon). For markets, set the vendor check-in time; it goes into confirmation emails and the vendor’s studio.' },
       { to: '/systems/events', targets: card(1), title: 'Lineup, booths and check-in', body: 'Open the lineup to see every vendor, assign booths, mark paid, and check vendors in on the day. Announcing a date invites last market’s “I’m in” vendors automatically.' },
@@ -68,6 +69,9 @@ export const SYSTEMS_CHAPTERS = {
       { to: '/systems/shops', targets: tour('shops-list'), title: 'Open a shop', body: 'Tap a row to open it: status, switches, details, the agreement, payouts and every product.' },
       { to: '/systems/shops', targets: ['[data-tour="shops-detail"]', '[data-tour="shops-list"]'], title: 'Feature, badges and a note', body: 'Feature a curator at the top of the directory, give badges like Handmade or Organic, and leave her a note she sees in her studio. Products can be hidden or featured one by one.' },
       { to: '/systems/shops', targets: ['[data-tour="shops-detail"]', '[data-tour="shops-list"]'], title: 'Open the shop, or message her', body: '“Open shop” shows the live storefront; “Message” starts a private conversation in The Gathering.' },
+      { to: '/systems/shops', targets: tour('shops-billing'), title: 'Storefront billing', body: 'The Storefront Agreement terms: free for the first months, then a monthly subscription through Stripe. Terms (admins) sets the price, the free months, when the reminder goes out, and whether an unpaid shop pauses itself after a grace period (off unless you switch it on).' },
+      { to: '/systems/shops', targets: [...tour('shops-billing'), ...tour('shops-filters')], title: 'Who is in which stage', body: 'Filter by Ending soon, Free period, Ended or failed, Subscribed, Complimentary or Not in billing. Shops already live are not billed until you press “Start for N approved shops”; each one then gets a full free period and a reminder before it ends.' },
+      { to: '/systems/shops', targets: ['[data-tour="shops-billing-actions"]', '[data-tour="shops-detail"]', '[data-tour="shops-list"]'], title: 'One shop’s plan', body: 'Inside a shop: Start free period, Extend 30 days, Complimentary, or Take out of billing. Every change is written to the Activity log.' },
     ],
   },
   'sys:campaigns': {
@@ -147,9 +151,17 @@ export const SYSTEMS_CHAPTERS = {
       { to: '/systems/team', targets: tour('team-admins'), title: 'Site admins', body: 'Admins open everything and can change this page. Melanie JC is an admin on both of her mailboxes; add or remove others here. The site always keeps at least one.' },
     ],
   },
+  'sys:activity': {
+    title: 'Activity', group: 'Team', site: 'both', minutes: 1, dash: 'admin',
+    steps: [
+      { to: '/systems/activity', targets: nav('/systems/activity'), title: 'Who changed what', body: 'Every change the team makes across both sites, newest first, in plain words: “Melanie JC paused shop Sample Bakery Co.”, with the before and after underneath.' },
+      { to: '/systems/activity', targets: [...tour('activity-areas'), ...head], title: 'By area, or search', body: 'Shops, Team, Vendors, Events, Mentorship, People, Campaigns and Settings. Search finds a person, a shop or a change. Vendors editing their own shops are not listed, so the log stays about the team.' },
+    ],
+  },
   'sys:health': {
     title: 'Health', group: 'Team', site: 'both', minutes: 1, dash: 'admin',
     steps: [
+      { to: '/systems/health', targets: [...tour('db-status'), ...nav('/systems/health')], title: 'Database updates', body: 'Every database script the site needs, with a tick once it is in. A waiting script has Copy script and SQL editor buttons and the result row to expect; run them in the order shown, then tap Check again. Overview shows a banner while one is waiting.' },
       { to: '/systems/health', targets: nav('/systems/health'), title: 'Errors visitors hit', body: 'Anything that breaks on either site shows here as it happens, with the page and how often. Mark it resolved once fixed.' },
     ],
   },
@@ -157,6 +169,7 @@ export const SYSTEMS_CHAPTERS = {
     title: 'Settings', group: 'Team', site: 'both', minutes: 1, dash: 'admin',
     steps: [
       { to: '/systems/settings', targets: nav('/systems/settings'), title: 'Your password and connected services', body: 'Change your Systems password, see the team, and check the services the sites talk to.' },
+      { to: '/systems/settings', targets: [...tour('automations'), ...head], title: 'Automatic emails', body: 'Welcome emails send three notes to each new newsletter subscriber over about a week. Class reminders email mentorship students the day before and an hour before each session. Admins switch either off here; mentors can also switch reminders off for one session.' },
     ],
   },
   'sys:walkthroughs': {
@@ -176,8 +189,8 @@ export const OTHER_CHAPTERS = [
   { id: 'mentor-business', title: 'Mentor console: Business Mentorship', group: 'Other dashboards', site: 'collective', minutes: 3, dash: 'classroom', href: '/academy/business/teach?tour=mentor-business', blurb: 'Students, inbox, gradebook, assignments, quizzes, curriculum, sessions, intro calls, invites.' },
   { id: 'mentor-faith', title: 'Mentor console: Faith Mentorship', group: 'Other dashboards', site: 'collective', minutes: 3, dash: 'classroom', href: '/academy/faith/teach?tour=mentor-faith', blurb: 'The same console for the Faith-Based Mentorship.' },
   { id: 'classroom-business', title: 'A student’s classroom', group: 'Other dashboards', site: 'collective', minutes: 2, dash: 'classroom', href: '/academy/business?tour=classroom-business', blurb: 'What a student sees: lessons, assignments, sessions, the member line, progress.' },
-  { id: 'gather', title: 'The Gathering', group: 'Other dashboards', site: 'both', minutes: 2, dash: 'team', href: '/gather/the-gathering?tour=gather', blurb: 'Channels by audience, the Daily Word, threads, reactions, members and direct messages.' },
-  { id: 'curator-studio', title: 'Curator Studio: what a vendor sees', group: 'Other dashboards', site: 'market', minutes: 3, dash: 'shops', href: '/dashboard/identity?tour=curator-studio', blurb: 'The vendor’s own studio: shop setup, products, orders, marketing and the community.' },
+  { id: 'gather', title: 'The Gathering', group: 'Other dashboards', site: 'both', minutes: 2, dash: 'team', href: '/gather/the-gathering?tour=gather', blurb: 'Channels by audience, the Daily Word, threads, reactions, @mentions, search, members and direct messages.' },
+  { id: 'curator-studio', title: 'Curator Studio: what a vendor sees', group: 'Other dashboards', site: 'market', minutes: 3, dash: 'shops', href: '/dashboard/identity?tour=curator-studio', blurb: 'The vendor’s own studio: shop setup, products, orders, marketing, her storefront plan and the community.' },
 ];
 
 export const CHAPTER_GROUPS = ['Start here', 'Market', 'Collective', 'Create', 'Team', 'Other dashboards'];

@@ -49,7 +49,7 @@ const EXT = new Set(['.css', '.jsx', '.js', '.ts', '.html', '.webmanifest', '.mj
 const SKIP = /node_modules|[\\/]dist[\\/]|[\\/]assets[\\/]|demo-studio\.json|[\\/]marketing[\\/]social[\\/]/;
 const files = [];
 const walk = (dir) => { for (const f of readdirSync(dir)) { const p = join(dir, f); if (SKIP.test(p)) continue; if (statSync(p).isDirectory()) walk(p); else if (EXT.has(extname(p)) && !/palette\.mjs$/.test(p)) files.push(p); } };
-['src', 'supabase/functions', 'public', 'scripts'].forEach((d) => { try { walk(join(ROOT, d)); } catch { /* optional */ } });
+['src', 'supabase/functions', 'public', 'scripts', 'marketing/brand'].forEach((d) => { try { walk(join(ROOT, d)); } catch { /* optional */ } });
 ['index.html', 'middleware.js'].forEach((f) => files.push(join(ROOT, f)));
 
 let changed = 0; let total = 0;

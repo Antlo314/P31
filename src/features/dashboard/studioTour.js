@@ -46,6 +46,11 @@ export const CURATOR_TOUR = [
     body: 'Orders arrive here with the buyer’s details. Discounts makes codes like WELCOME10 for checkout; Testimonials puts customer quotes on your shop.',
   },
   {
+    to: '/dashboard/billing', targets: ['[data-tour="billing-status"]', '[data-tour="nav-billing"]'],
+    title: '8. Your plan',
+    body: 'Your storefront is complimentary for its first months. This page counts down the free period, and one button sets up the monthly subscription through Stripe when you are ready; the first charge waits until the free period ends. We email you before anything changes.',
+  },
+  {
     to: '/dashboard/identity', targets: ['[data-tour="checklist"]'],
     title: 'Your setup list',
     body: 'This card tracks what is done and what is next, with a button for each step. When every line is ticked, your shop is ready to share. Questions go to Concierge, where the P31 team answers.',

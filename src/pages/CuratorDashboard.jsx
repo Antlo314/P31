@@ -17,6 +17,7 @@ import MarketingPanel from '../features/marketing/MarketingPanel';
 import StudioNav from '../features/dashboard/StudioNav';
 import SetupChecklist from '../features/dashboard/SetupChecklist';
 import MyMarkets from '../features/dashboard/MyMarkets';
+import BillingPanel, { BillingBanner } from '../features/dashboard/BillingPanel';
 import Tour from '../components/Tour';
 import { CURATOR_TOUR, CURATOR_TOUR_ID } from '../features/dashboard/studioTour';
 import { PRODUCT_TEMPLATES, PRODUCT_BADGES, applyTemplate } from '../features/marketing/productTemplates';
@@ -989,6 +990,8 @@ const CuratorDashboard = () => {
               <p>Welcome back, {profile?.full_name}. Refine your sanctuary’s professional presence.</p>
             </header>
 
+            {!isAdmin && <BillingBanner curator={curatorData} />}
+
             {/* The storefront agreement (moved from JotForm) is signed once, on the site. */}
             {curatorData && !curatorData.agreement_signed_at && !isAdmin && (
               <div className="agreement-nudge glass-card" role="status">
@@ -1247,7 +1250,8 @@ const CuratorDashboard = () => {
                     <span className="status-text">{
                       curatorData?.status === 'approved' ? 'Market Approved' : 
                       curatorData?.status === 'pending' ? 'Reviewing' : 
-                      curatorData?.status === 'rejected' ? 'Fix Requested' : 'Draft Mode'
+                      curatorData?.status === 'rejected' ? 'Fix Requested' :
+                      curatorData?.status === 'paused' ? 'Paused' : 'Draft Mode'
                     }</span>
                   </div>
                   <p className="status-sub">
@@ -1257,6 +1261,8 @@ const CuratorDashboard = () => {
                       ? "Your artifacts are currently under architectural review."
                       : curatorData?.status === 'rejected'
                       ? "Adjustments required. See guidance below."
+                      : curatorData?.status === 'paused'
+                      ? "Your storefront is paused and hidden from the marketplace for now. Your products and settings are kept."
                       : "Refine your boutique to request market placement."}
                   </p>
 
@@ -1979,6 +1985,7 @@ const CuratorDashboard = () => {
           } />
 
           <Route path="community" element={<Navigate to="/gather" replace />} />
+          <Route path="billing" element={<BillingPanel curator={curatorData} />} />
 
           <Route path="governance" element={
             isAdmin ? (

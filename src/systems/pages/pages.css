@@ -104,3 +104,43 @@
   .wk-test__body { display: grid !important; }
   .wk-steps li, .wk-expect, .wk-test__sum .sys-muted, .wk-test__body h4 { color: #000 !important; }
 }
+
+/* Billing on Curators & shops */
+.sh-billing { margin-bottom: 14px; }
+.sh-billing__row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.sh-billing h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; }
+.sh-billing__actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.sh-terms { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.sh-status--rejected { background: rgba(255, 186, 120, 0.16); color: #FFC98F; }
+.sh-status--draft { background: rgba(255, 255, 255, 0.08); color: rgba(246, 241, 251, 0.7); }
+.sh-bill--trial { background: rgba(155, 113, 178, 0.22); color: #E3D0EA; }
+.sh-bill--active { background: rgba(159, 214, 180, 0.18); color: #9FD6B4; }
+.sh-bill--ended { background: rgba(255, 140, 140, 0.16); color: #FFB4B4; }
+.sh-bill--comp { background: rgba(242, 206, 77, 0.16); color: #F2CE4D; }
+
+/* Activity */
+.ac-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ac-row { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; align-items: start; padding: 10px 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.035); border: 1px solid rgba(255, 255, 255, 0.06); }
+.ac-row__icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: rgba(155, 113, 178, 0.2); color: #E3D0EA; }
+.ac-row__main { display: grid; gap: 3px; min-width: 0; }
+.ac-row__main strong { font-size: 0.92rem; font-weight: 600; }
+.ac-row__main small { font-size: 0.8rem; color: rgba(246, 241, 251, 0.7); overflow-wrap: anywhere; }
+.ac-row__meta { color: rgba(246, 241, 251, 0.5) !important; }
+
+/* Database updates (Health) and the overview banner */
+.db-card { margin-bottom: 18px; }
+.db-card__head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.db-card__head h2 { display: flex; align-items: center; gap: 8px; margin: 0; }
+.db-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.db-row { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 10px 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.035); }
+.db-row.is-waiting { border: 1px solid rgba(242, 206, 77, 0.45); background: rgba(242, 206, 77, 0.06); }
+.db-row__icon { color: #9FD6B4; padding-top: 1px; }
+.db-row.is-waiting .db-row__icon { color: #F2CE4D; }
+.db-row__main { display: grid; gap: 2px; min-width: 0; }
+.db-row__main strong { font-size: 0.93rem; }
+.db-row__main small { font-size: 0.8rem; color: rgba(246, 241, 251, 0.68); overflow-wrap: anywhere; }
+.db-row__expect { color: rgba(242, 206, 77, 0.85) !important; }
+.db-row__actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+@media (max-width: 640px) { .db-row { grid-template-columns: 26px minmax(0, 1fr); } .db-row__actions { grid-column: 1 / -1; justify-content: flex-start; } }
+.db-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 14px; padding: 12px 14px; border-radius: 14px; background: rgba(242, 206, 77, 0.1); border: 1px solid rgba(242, 206, 77, 0.45); color: #F8E7A8; text-decoration: none; font-size: 0.9rem; line-height: 1.45; }
+.db-banner strong { color: #F2CE4D; }

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   Hash, BookOpen, Heart, PartyPopper, Store, CalendarDays, GraduationCap, ShieldCheck, Sparkles, Users, Menu, X, Search,
-  MessageCircle, Pin, LogIn, ArrowLeft, Plus, Loader2,
+  MessageCircle, Pin, LogIn, ArrowLeft, Plus, Loader2, AtSign,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -10,7 +10,8 @@ import { isCollective } from '../lib/site';
 import mark from '../assets/academy/collective-mark.webp';
 import * as api from './api';
 import { GROUPS, groupOf } from './badges';
-import { Avatar, Badges, Message, DayDivider, Composer, Lightbox, PersonCard } from './parts';
+import { Avatar, Badges, Message, DayDivider, Composer, Lightbox, PersonCard, MentionProvider, Hit } from './parts';
+import { mentions } from './mentions';
 import Tour from '../components/Tour';
 import { GATHER_TOUR } from './gatherTour';
 import './gather.css';
@@ -35,7 +36,9 @@ const Gather = () => {
   const [replyTo, setReplyTo] = useState(null);
   const [threadReplyTo, setThreadReplyTo] = useState(null);
   const [urls, setUrls] = useState({});
-  const [panel, setPanel] = useState(null);     // 'members' | 'pins' | null
+  const [panel, setPanel] = useState(null);     // 'members' | 'pins' | 'search' | null
+  const [find, setFind] = useState({ q: '', shown: '', list: null, busy: false }); // the search panel
+  const [ats, setAts] = useState([]);           // rooms with a new @mention of me
   const [nav, setNav] = useState(false);        // phones: channel list open
   const [person, setPerson] = useState(null);
   const [light, setLight] = useState(null);
@@ -45,6 +48,7 @@ const Gather = () => {
   const [state, setState] = useState('loading'); // loading | ready | outside | failed
   const listRef = useRef(null);
   const atBottom = useRef(true);
+  const pendingOpen = useRef(null); // a search result in another room, opened once that room loads
 
   const channel = useMemo(() => channels.find((c) => c.slug === slug) || null, [channels, slug]);
   // What the live feed needs to know (kept in a ref so the subscription is made once).
@@ -99,7 +103,7 @@ const Gather = () => {
   useEffect(() => {
     if (!channel) return undefined;
     let on = true;
-    Promise.resolve().then(() => { if (on) { setMessages([]); setThread(null); setReplyTo(null); setNav(false); } });
+    Promise.resolve().then(() => { if (on) { setMessages([]); setThread(null); setReplyTo(null); setNav(false); setAts((a) => a.filter((id) => id !== channel.id)); } });
     api.getMessages(channel.id).then((list) => {
       if (!on) return;
       setMessages(list); setMore(list.length >= api.PAGE);
@@ -140,6 +144,17 @@ const Gather = () => {
         if (!row?.id) return;
         const { channel: here, thread: open } = live.current;
         ensurePeople([row.author_id]); signFor([row]);
+        // A direct message or an @mention for me, while I am looking elsewhere: a notification on this device.
+        if (eventType === 'INSERT' && row.author_id !== me?.id) {
+          const ch = channelsRef.current.find((c) => c.id === row.channel_id);
+          const forMe = mentions(row.body, peopleRef.current.get(me?.id)?.name);
+          if (forMe && row.channel_id !== here) setAts((a) => (a.includes(row.channel_id) ? a : [...a, row.channel_id]));
+          if ((ch?.kind === 'dm' || forMe) && (row.channel_id !== here || document.hidden)) {
+            const who = peopleRef.current.get(row.author_id)?.name || 'Someone';
+            api.showDeviceNotification(ch?.kind === 'dm' ? `${who} · The Gathering` : `${who} mentioned you · #${ch?.name || 'The Gathering'}`,
+              (row.body || 'Sent you a photo').replace(/\*\*?/g, '').slice(0, 120), () => ch && navigate(`/gather/${ch.slug}`));
+          }
+        }
         if (row.thread_root) {
           if (row.thread_root === open) setThread((t) => (t ? { ...t, replies: upsert(t.replies, row) } : t));
           return;
@@ -151,14 +166,6 @@ const Gather = () => {
         } else if (eventType === 'INSERT' && row.author_id !== me?.id) {
           setChannels((cs) => cs.map((c) => (c.id === row.channel_id ? { ...c, unread: (c.unread || 0) + 1, last_message_at: row.created_at } : c)));
           if (!channelsRef.current.some((c) => c.id === row.channel_id)) loadChannels(); // a brand-new DM
-        }
-        // A direct message for me, while I am looking elsewhere: a notification on this device.
-        if (eventType === 'INSERT' && row.author_id !== me?.id && (row.channel_id !== here || document.hidden)) {
-          const ch = channelsRef.current.find((c) => c.id === row.channel_id);
-          if (ch?.kind === 'dm') {
-            const who = peopleRef.current.get(row.author_id)?.name || 'Someone';
-            api.showDeviceNotification(`${who} · The Gathering`, (row.body || 'Sent you a photo').replace(/\*\*?/g, '').slice(0, 120), () => navigate(`/gather/${ch.slug}`));
-          }
         }
       })
       .subscribe();
@@ -202,12 +209,44 @@ const Gather = () => {
       setMessages((list) => (list.some((x) => x.id === row.id) ? list : [...list, row]));
     }
   };
-  const openThread = async (m) => {
+  const jump = (id) => { const el = document.getElementById(`m-${id}`); if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.add('is-flash'); setTimeout(() => el.classList.remove('is-flash'), 1600); } };
+  const openThread = async (m, focus) => {
     setPanel(null); setThreadReplyTo(null);
     setThread({ root: m, replies: [] });
     const replies = await api.getThread(m.id);
     ensurePeople(replies.map((r) => r.author_id)); signFor(replies);
     setThread((t) => (t && t.root.id === m.id ? { ...t, replies } : t));
+    if (focus && focus !== m.id) setTimeout(() => jump(focus), 80);
+  };
+  // ── Search ──
+  const runSearch = async (q) => {
+    setFind((f) => ({ ...f, q, busy: true }));
+    try {
+      const list = await api.search(q);
+      ensurePeople(list.map((m) => m.author_id));
+      setFind({ q, shown: q.trim(), list, busy: false });
+    } catch (e) { setFind((f) => ({ ...f, busy: false })); setError(e.message); }
+  };
+  // A message already on screen scrolls into view; anything else opens in the side panel with its thread.
+  function showHit(root, focus, list = messages) {
+    if (root.id === focus && list.some((x) => x.id === focus)) { setPanel(null); setTimeout(() => jump(focus), 120); return; }
+    openThread(root, focus);
+  }
+  // A search result from another room: open it once that room's messages are in.
+  useEffect(() => {
+    const p = pendingOpen.current;
+    if (!p || !channel || p.root.channel_id !== channel.id || messages[0]?.channel_id !== channel.id) return; // wait for this room's own list
+    pendingOpen.current = null;
+    setTimeout(() => showHit(p.root, p.focus, messages), 0);
+  }, [messages, channel]); // eslint-disable-line react-hooks/exhaustive-deps
+  const openHit = async (m) => {
+    const ch = channels.find((c) => c.id === m.channel_id);
+    if (!ch) return;
+    const root = m.thread_root ? await api.getMessage(m.thread_root) : m;
+    if (!root) return;
+    if (ch.id === channel?.id) { showHit(root, m.id); return; }
+    pendingOpen.current = { root, focus: m.id };
+    navigate(`/gather/${ch.slug}`);
   };
   const actions = {
     react: async (m, emoji) => { try { const r = await api.react(m.id, emoji); replace({ ...m, reactions: r || {} }); } catch (e) { setError(e.message); } },
@@ -218,7 +257,7 @@ const Gather = () => {
     pin: async (m) => { try { replace(await api.pin(m.id, !m.pinned)); } catch (e) { setError(e.message); } },
     person: (id) => { const p = people.get(id); if (p) setPerson(p); },
     lightbox: (items, index) => setLight({ items, index }),
-    jump: (id) => { const el = document.getElementById(`m-${id}`); if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.classList.add('is-flash'); setTimeout(() => el.classList.remove('is-flash'), 1600); } },
+    jump,
   };
   const messagePerson = async (p) => {
     setPerson(null); setPanel(null);
@@ -259,9 +298,12 @@ const Gather = () => {
     ? (channel.kind === 'scripture' ? 'Share what today’s word speaks to you in its discussion: tap “Join the discussion”.' : 'Only the team posts here. Reply in a thread to join in.') : null;
   const dms = channels.filter((c) => c.kind === 'dm');
   const members = [...people.values()].filter((p) => !query || p.name.toLowerCase().includes(query.toLowerCase()));
+  const everyone = [...people.values()];
+  const roomName = (id) => { const c = channels.find((x) => x.id === id); return !c ? '' : c.kind === 'dm' ? channelName(c, people, me) : `#${c.name}`; };
 
   return (
     <Shell>
+      <MentionProvider names={everyone.map((p) => p.name)} me={meP.name}>
       <div className={`gt ${nav ? 'nav-open' : ''} ${thread || panel ? 'side-open' : ''}`}>
         {/* Channels */}
         <aside className="gt-side" aria-label="Channels">
@@ -281,7 +323,7 @@ const Gather = () => {
                     const Icon = ICONS[c.icon] || Hash;
                     return (
                       <Link key={c.id} to={`/gather/${c.slug}`} className={`gt-ch ${c.id === channel?.id ? 'is-on' : ''} ${c.unread ? 'has-new' : ''}`}>
-                        <Icon size={16} /> <span>{c.name}</span>{c.unread > 0 && c.id !== channel?.id && <b>{c.unread > 99 ? '99+' : c.unread}</b>}
+                        <Icon size={16} /> <span>{c.name}</span>{ats.includes(c.id) && <i className="gt-ch__at" title="You were mentioned"><AtSign size={12} /></i>}{c.unread > 0 && c.id !== channel?.id && <b>{c.unread > 99 ? '99+' : c.unread}</b>}
                       </Link>
                     );
                   })}
@@ -317,6 +359,7 @@ const Gather = () => {
               {channel?.topic && channel.kind !== 'dm' && <p>{channel.topic}</p>}
               {channel?.kind === 'dm' && <Badges roles={people.get(channel.other_user)?.roles} max={3} />}
             </div>
+            <button type="button" className={`gt-icon ${panel === 'search' ? 'is-on' : ''}`} onClick={() => { setThread(null); setPanel(panel === 'search' ? null : 'search'); }} aria-label="Search messages" title="Search"><Search size={18} /></button>
             {pinned.length > 0 && <button type="button" className={`gt-icon ${panel === 'pins' ? 'is-on' : ''}`} onClick={() => { setThread(null); setPanel(panel === 'pins' ? null : 'pins'); }} aria-label="Pinned messages" title="Pinned"><Pin size={18} /></button>}
             <button type="button" className={`gt-icon ${panel === 'members' ? 'is-on' : ''}`} onClick={() => { setThread(null); setPanel(panel === 'members' ? null : 'members'); }} aria-label="Members" title="Members"><Users size={18} /><span className="gt-icon__label">Members</span></button>
           </header>
@@ -341,15 +384,16 @@ const Gather = () => {
               placeholder={channel.kind === 'dm' ? `Message ${channelName(channel, people, me)}` : `Message #${channel.name}`}
               replyTo={replyTo} replyName={replyTo && (people.get(replyTo.author_id)?.name || 'this message')} onCancelReply={() => setReplyTo(null)}
               onSend={async (text, files) => { await sendTo(channel.id, text, files, replyTo, null); setReplyTo(null); }}
+              people={everyone} meId={me.id}
             />
           )}
         </main>
 
         {/* Thread, members or pins */}
         {(thread || panel) && (
-          <aside className="gt-panel" aria-label={thread ? 'Thread' : panel === 'pins' ? 'Pinned messages' : 'Members'}>
+          <aside className="gt-panel" aria-label={thread ? 'Thread' : panel === 'pins' ? 'Pinned messages' : panel === 'search' ? 'Search messages' : 'Members'}>
             <header className="gt-panel__head">
-              <strong>{thread ? (thread.root.kind === 'scripture' ? 'Daily Word discussion' : 'Thread') : panel === 'pins' ? 'Pinned' : 'Members'}</strong>
+              <strong>{thread ? (thread.root.kind === 'scripture' ? 'Daily Word discussion' : 'Thread') : panel === 'pins' ? 'Pinned' : panel === 'search' ? 'Search' : 'Members'}</strong>
               <button type="button" className="gt-icon" onClick={() => { setThread(null); setPanel(null); }} aria-label="Close"><X size={18} /></button>
             </header>
             {thread && (
@@ -364,6 +408,7 @@ const Gather = () => {
                   placeholder={thread.root.kind === 'scripture' ? 'What is this word speaking to you?' : 'Reply in the thread'}
                   replyTo={threadReplyTo} replyName={threadReplyTo && (people.get(threadReplyTo.author_id)?.name || 'this message')} onCancelReply={() => setThreadReplyTo(null)}
                   onSend={async (text, files) => { await sendTo(thread.root.channel_id, text, files, threadReplyTo, thread.root); setThreadReplyTo(null); }}
+                  people={everyone} meId={me.id}
                   autoFocus
                 />
               </>
@@ -371,6 +416,28 @@ const Gather = () => {
             {!thread && panel === 'pins' && (
               <div className="gt-list gt-list--thread">
                 {pinned.map((m) => <Message key={m.id} m={m} people={people} me={me} urls={urls} byId={byId} actions={actions} inThread />)}
+              </div>
+            )}
+            {!thread && panel === 'search' && (
+              <div className="gt-find">
+                <form onSubmit={(e) => { e.preventDefault(); runSearch(find.q); }}>
+                  <label className="gt-search"><Search size={15} /><input value={find.q} onChange={(e) => setFind((f) => ({ ...f, q: e.target.value }))} placeholder="Search messages" aria-label="Search messages" autoFocus enterKeyHint="search" /></label>
+                </form>
+                <div className="gt-find__quick">
+                  <button type="button" className="gt-btn gt-btn--sm" onClick={() => runSearch(`@${meP.name}`)}><AtSign size={14} /> Mentions of me</button>
+                </div>
+                {find.busy && <p className="gt-find__note"><Loader2 size={14} className="gt-spin" /> Searching…</p>}
+                {!find.busy && find.list && !find.list.length && <p className="gt-find__note">Nothing found for “{find.shown}”. Try fewer words.</p>}
+                {!find.busy && !find.list && <p className="gt-find__note">Search every room and conversation you are part of. Two letters or more.</p>}
+                {find.list?.map((m) => (
+                  <button key={m.id} type="button" className="gt-hit" onClick={() => openHit(m)}>
+                    <Avatar person={people.get(m.author_id)} size={28} />
+                    <span className="gt-hit__main">
+                      <span className="gt-hit__meta"><b>{people.get(m.author_id)?.name || 'P31 member'}</b> · {roomName(m.channel_id)}{m.thread_root ? ' · thread' : ''} · {api.ago(m.created_at)}</span>
+                      <span className="gt-hit__text"><Hit text={m.body} q={find.shown} /></span>
+                    </span>
+                  </button>
+                ))}
               </div>
             )}
             {!thread && panel === 'members' && (
@@ -401,6 +468,7 @@ const Gather = () => {
         onSetPrefs={async (dmEmail) => { const r = await api.setPrefs(dmEmail); setMe((m) => ({ ...m, dm_email: r?.dm_email ?? dmEmail })); }}
         onSetTitle={async (p, title) => { await api.setTitle(p.id, title); const [fresh] = await api.getPeople([p.id]); if (fresh) { setPeople((m) => new Map(m).set(fresh.id, fresh)); setPerson(fresh); } }} />}
       {light && <Lightbox items={light.items} index={light.index} urls={urls} onClose={() => setLight(null)} />}
+      </MentionProvider>
       {word && (
         <div className="gt-sheet" role="dialog" aria-modal="true" aria-label="Today’s Daily Word" onClick={(e) => e.target === e.currentTarget && closeWord()}>
           <div className="gt-wordpop">

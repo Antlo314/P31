@@ -7,6 +7,8 @@ import { hrefFor } from '../../lib/site';
 import { useIsPhone } from '../../lib/device';
 import { marketCards, collectiveCards, healthCards } from '../../today/cards';
 import AttentionCard, { Go } from '../../today/AttentionCard';
+import { dbStatus, pending } from '../../lib/dbStatus';
+import TicketSales from '../../today/TicketSales';
 import '../../today/today.css';
 
 const money = (cents) => `$${(Math.round(cents) / 100).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -97,10 +99,12 @@ const Overview = ({ operator }) => {
   const phone = useIsPhone();
   const [n, setN] = useState(null);
   const [cards, setCards] = useState({});
+  const [waiting, setWaiting] = useState([]);
 
   useEffect(() => {
     let live = true;
     loadNumbers().then((x) => { if (live) setN(x); });
+    dbStatus().then((s) => { if (live) setWaiting(pending(s)); }).catch(() => {});
     [['market', marketCards], ['collective', collectiveCards], ['health', healthCards]].forEach(([k, load]) => load()
       .catch(() => [])
       .then((list) => { if (live) setCards((c) => ({ ...c, [k]: list })); }));
@@ -126,6 +130,12 @@ const Overview = ({ operator }) => {
         <Link to="/today" className="sys-btn sys-btn--ghost sys-btn--sm"><Sun size={15} /> Today</Link>
       </header>
 
+      {waiting.length > 0 && (
+        <Link to="/systems/health" className="db-banner" role="status">
+          <strong>Database update waiting:</strong> {waiting.map((s) => `v${s.v} ${s.title}`).join(', ')}. Parts of the site wait for {waiting.length === 1 ? 'it' : 'them'}. Open Health to copy {waiting.length === 1 ? 'the script' : 'the scripts'} <ArrowRight size={14} />
+        </Link>
+      )}
+
       {needs.length > 0 && (
         <div className="sys-needs" role="group" aria-label="Needs you">
           {needs.map((c) => (
@@ -145,6 +155,7 @@ const Overview = ({ operator }) => {
           <Stat n={n?.shops} label="Shops live" to="/dashboard/governance" />
           <Stat n={n ? (n.next ? fmtDate(n.next.event_date) : 'None') : null} label={n?.next ? n.next.title : 'Next market'} to="/systems/events" sub={n?.next && n.lineup != null ? `${n.lineup} vendor${n.lineup === 1 ? '' : 's'} in the lineup` : null} />
         </div>
+        <TicketSales />
         <Cards list={cards.market} skeleton={3} />
         <Tools group={group('market')} phone={phone} />
       </section>

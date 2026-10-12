@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { CornerUpLeft, MessageSquareText, SmilePlus, Pencil, Trash2, Pin, PinOff, X, ImagePlus, Send, Loader2, BookOpen, Store, MessageCircle, Sparkles, Bell, Mail } from 'lucide-react';
 import { REACTIONS, timeOf, dayOf, ago, deviceNotify, setDeviceNotify } from './api';
 import { badgesFor, initials } from './badges';
+import { mentionPattern, mentions, mentionAt, suggestPeople, snippet } from './mentions';
 import { PHOTO_BY_NAME } from '../lib/teamPhotos';
 import mark from '../assets/academy/collective-mark.webp';
 
@@ -31,7 +32,22 @@ export const Badges = ({ roles, max = 2, size = 'sm' }) => {
   );
 };
 
-// ── Text: links, **bold**, *italic*, line breaks (no HTML ever) ──
+// ── @mentions: every message knows the members' names and who is reading ──
+const MentionCtx = createContext({ re: null, me: '' });
+export const MentionProvider = ({ names, me, children }) => {
+  const key = names.join('\n');
+  const value = useMemo(() => ({ re: mentionPattern(key.split('\n')), me: me || '' }), [key, me]);
+  return <MentionCtx.Provider value={value}>{children}</MentionCtx.Provider>;
+};
+const Plain = ({ text }) => {
+  const { re, me } = useContext(MentionCtx);
+  if (!re) return text;
+  return text.split(re).map((p, i) => (i % 2
+    ? <span key={i} className={`gt-mention ${me && p.toLowerCase() === `@${me.toLowerCase()}` ? 'is-me' : ''}`}>{p}</span>
+    : p));
+};
+
+// ── Text: links, **bold**, *italic*, @mentions, line breaks (no HTML ever) ──
 const TOKEN = /(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"]|\*\*[^*\n]+\*\*|\*[^*\s][^*\n]*\*)/g;
 export const RichText = ({ text }) => {
   if (!text) return null;
@@ -43,10 +59,18 @@ export const RichText = ({ text }) => {
         if (/^https?:\/\//.test(p)) return <a key={i} href={p} target="_blank" rel="noopener noreferrer">{p.replace(/^https?:\/\/(www\.)?/, '').slice(0, 60)}{p.length > 70 ? '…' : ''}</a>;
         if (/^\*\*.+\*\*$/.test(p)) return <strong key={i}>{p.slice(2, -2)}</strong>;
         if (/^\*.+\*$/.test(p)) return <em key={i}>{p.slice(1, -1)}</em>;
-        return <React.Fragment key={i}>{p}</React.Fragment>;
+        return <React.Fragment key={i}><Plain text={p} /></React.Fragment>;
       })}
     </>
   );
+};
+
+/** A search result's text with the searched words marked. */
+export const Hit = ({ text, q }) => {
+  const s = snippet(text, q);
+  const at = q ? s.toLowerCase().indexOf(q.toLowerCase()) : -1;
+  if (at < 0) return s || 'a photo';
+  return <>{s.slice(0, at)}<mark>{s.slice(at, at + q.length)}</mark>{s.slice(at + q.length)}</>;
 };
 
 // ── Photos and videos ───────────────────────────────────
@@ -103,6 +127,8 @@ export const Message = ({ m, prev, people, me, urls, byId, inThread, actions }) 
   const mine = m.author_id && m.author_id === me.id;
   const grouped = sameGroup(prev, m);
   const quoted = m.reply_to ? byId(m.reply_to) : null;
+  const { me: myName } = useContext(MentionCtx);
+  const forMe = !mine && !m.deleted_at && mentions(m.body, myName);
 
   if (m.kind === 'scripture') return <WordCard m={m} people={people} me={me} actions={actions} inThread={inThread} />;
   if (m.kind === 'system') {
@@ -121,7 +147,7 @@ export const Message = ({ m, prev, people, me, urls, byId, inThread, actions }) 
   const reactionList = Object.entries(m.reactions || {}).filter(([, ids]) => ids?.length);
 
   return (
-    <article className={`gt-msg ${grouped ? 'is-grouped' : ''} ${mine ? 'is-mine' : ''} ${m.pinned ? 'is-pinned' : ''}`} id={`m-${m.id}`}>
+    <article className={`gt-msg ${grouped ? 'is-grouped' : ''} ${mine ? 'is-mine' : ''} ${m.pinned ? 'is-pinned' : ''} ${forMe ? 'is-mentioned' : ''}`} id={`m-${m.id}`}>
       {grouped ? <span className="gt-msg__time-side">{timeOf(m.created_at)}</span> : <Avatar person={author} onClick={() => actions.person(m.author_id)} />}
       <div className="gt-msg__main">
         {!grouped && (
@@ -203,13 +229,29 @@ export const WordCard = ({ m, me, actions, inThread }) => {
 };
 
 // ── Writing ─────────────────────────────────────────────
-export const Composer = ({ placeholder, onSend, replyTo, replyName, onCancelReply, locked, autoFocus }) => {
+export const Composer = ({ placeholder, onSend, replyTo, replyName, onCancelReply, locked, autoFocus, people = [], meId }) => {
   const [text, setText] = useState('');
   const [files, setFiles] = useState([]);
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
+  const [at, setAt] = useState(null); // the @name being typed: { start, q, list, i }
   const ref = useRef(null);
   const fileRef = useRef(null);
+
+  const lookForMention = (value, caret) => {
+    const m = people.length ? mentionAt(value, caret) : null;
+    const list = m ? suggestPeople(people, m.q, meId) : [];
+    setAt(m && list.length ? { ...m, list, i: 0 } : null);
+  };
+  const pickMention = (p) => {
+    const el = ref.current;
+    const caret = el?.selectionStart ?? text.length;
+    const insert = `@${p.name} `;
+    setText(text.slice(0, at.start) + insert + text.slice(caret));
+    const pos = at.start + insert.length;
+    setAt(null);
+    requestAnimationFrame(() => { el?.focus(); el?.setSelectionRange(pos, pos); });
+  };
 
   useEffect(() => { if (replyTo) ref.current?.focus(); }, [replyTo]);
   useEffect(() => () => files.forEach((f) => f.preview && URL.revokeObjectURL(f.preview)), [files]);
@@ -255,12 +297,32 @@ export const Composer = ({ placeholder, onSend, replyTo, replyName, onCancelRepl
         </div>
       )}
       {error && <p className="gt-composer__error" role="alert">{error}</p>}
+      {at && (
+        <ul className="gt-mentions" role="listbox" aria-label="Mention someone">
+          {at.list.map((p, i) => (
+            <li key={p.id} role="option" aria-selected={i === at.i}>
+              <button type="button" className={i === at.i ? 'is-on' : ''} onMouseDown={(e) => e.preventDefault()} onClick={() => pickMention(p)}>
+                <Avatar person={p} size={24} /> <strong>{p.name}</strong> <Badges roles={p.roles} max={1} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
       <div className="gt-composer__row">
         <button type="button" className="gt-composer__attach" onClick={() => fileRef.current?.click()} disabled={files.length >= 6 || !!busy} aria-label="Add photos or videos" title="Add photos or videos"><ImagePlus size={20} /></button>
         <input ref={fileRef} type="file" accept="image/*,video/mp4,video/quicktime,video/webm" multiple hidden onChange={pick} />
         <textarea ref={ref} rows={1} value={text} placeholder={placeholder} autoFocus={autoFocus} aria-label={placeholder}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && !touch) { e.preventDefault(); send(); } }}
+          onChange={(e) => { setText(e.target.value); lookForMention(e.target.value, e.target.selectionStart); }}
+          onBlur={() => setAt(null)}
+          onKeyDown={(e) => {
+            if (at) {
+              const n = at.list.length;
+              if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); setAt({ ...at, i: (at.i + (e.key === 'ArrowDown' ? 1 : n - 1)) % n }); return; }
+              if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); pickMention(at.list[at.i]); return; }
+              if (e.key === 'Escape') { e.preventDefault(); setAt(null); return; }
+            }
+            if (e.key === 'Enter' && !e.shiftKey && !touch) { e.preventDefault(); send(); }
+          }}
           onPaste={(e) => { const imgs = [...e.clipboardData.files].filter((f) => /^image\//.test(f.type)); if (imgs.length) setFiles((f) => [...f, ...imgs.slice(0, 6 - f.length).map((file) => ({ file, preview: URL.createObjectURL(file) }))]); }} />
         <button type="button" className="gt-composer__send" onClick={send} disabled={!!busy || (!text.trim() && !files.length)} aria-label="Send">{busy ? <Loader2 size={18} className="gt-spin" /> : <Send size={18} />}</button>
       </div>

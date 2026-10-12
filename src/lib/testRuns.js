@@ -170,6 +170,82 @@ export const TEST_RUNS = [
     cleanup: 'Delete the test messages (the ⋯ menu on your own message).',
   },
   {
+    id: 'gathering-search', title: 'The Gathering: @mention and search', site: 'both', who: 'team', minutes: 4, tour: 'gather',
+    steps: [
+      'Open The Gathering on two devices (or two browsers) signed in as two team members. On the second, switch on “Notify me on this device” from her own card.',
+      'On the first, in The Gathering channel type @ and the first letters of her name, pick her from the list, finish the message and send.',
+      'On the second, stay in another room. Then open the magnifying glass, search a word from the message, and tap “Mentions of me”.',
+    ],
+    expect: [
+      'Her name is gold in the message for her (purple for everyone else) and the message has a gold edge.',
+      'The room shows an @ marker in her channel list and her device shows “… mentioned you”.',
+      'Search lists the message with the word marked; tapping it jumps to it (or opens its thread).',
+    ],
+    cleanup: 'Delete the test message.',
+  },
+  {
+    id: 'db-status', title: 'Database updates land', site: 'both', who: 'admin', minutes: 3, tour: 'sys:health',
+    steps: [
+      'Open Systems → Health. Any waiting script shows Copy script.',
+      'Tap Copy script, open the SQL editor, press Ctrl+A then Ctrl+V, and Run with nothing highlighted (confirm “Run this query” if asked).',
+      'Back in Health, tap Check again.',
+    ],
+    expect: [
+      'The editor shows the one result row printed under the script (for v42: versions_ok true … jobs 8).',
+      'The script turns into a tick with today’s date; the Overview banner disappears once nothing is waiting.',
+    ],
+    cleanup: 'None.',
+  },
+  {
+    id: 'storefront-billing', title: 'A storefront free period and subscription', site: 'market', who: 'admin', minutes: 6, tour: 'sys:shops',
+    steps: [
+      'In Systems → Curators & shops open a test shop whose studio you can sign in to, and tap “Start free period”.',
+      'Sign in to that shop’s studio (p31market.com/dashboard) → Plan & billing.',
+      'Tap “Set up my subscription”, look over the Stripe page, then go back without paying.',
+      'In Systems, tap “Extend 30 days”, then “Complimentary”.',
+    ],
+    expect: [
+      'The shop shows “Free period · N days left”; the studio shows the same countdown and the button names the price.',
+      'Stripe Checkout shows “P31 Marketplace storefront” at the monthly price, with the first charge after the free period; going back lands on Plan & billing with “No changes were made”.',
+      'Extend 30 days moves the end date; Complimentary turns the studio card into “Your storefront is complimentary”. Systems → Activity lists each change.',
+    ],
+    cleanup: 'Tap “Take out of billing” on the test shop (or leave it complimentary).',
+  },
+  {
+    id: 'class-reminders', title: 'Class reminder emails', site: 'collective', who: 'admin', minutes: 3, tour: 'sys:academy',
+    steps: [
+      'In the Mentor console → Sessions, schedule a TEST session about 50 minutes from now for a program where your own email is an enrolled student (or invite yourself), with “Email reminders” on.',
+      'Wait for the next quarter hour.',
+    ],
+    expect: ['You get “Starting at <time>: TEST…” with how to join; a session a day out gets “Coming up: TEST…” instead. Each reminder goes once.'],
+    cleanup: 'Delete the TEST session.',
+  },
+  {
+    id: 'welcome-series', title: 'Welcome emails for a new subscriber', site: 'market', who: 'visitor', minutes: 3,
+    steps: ['In a private window on p31market.com, subscribe through the pop-up or the footer with an email you can read.', 'Wait up to an hour.'],
+    expect: [
+      'Email 1 (welcome and Melanie JC’s story) arrives within the hour; email 2 (what is coming up) about three days later; email 3 (ways to be part of it) about four days after that.',
+      'Each has an unsubscribe link; using it stops the rest. Systems → Settings → Automatic emails switches the series off for everyone.',
+    ],
+    cleanup: 'Unsubscribe the test address.',
+  },
+  {
+    id: 'activity-log', title: 'The activity log', site: 'both', who: 'admin', minutes: 2, tour: 'sys:activity',
+    steps: ['Make any change in Systems (feature a shop, switch a team dashboard, edit a market).', 'Open Systems → Activity.'],
+    expect: ['The change is at the top in plain words with your name, the time and the before and after; the area chips and search narrow the list.'],
+    cleanup: 'Undo the test change (that is logged too).',
+  },
+  {
+    id: 'ticket-sales', title: 'Eventbrite ticket sales', site: 'market', who: 'admin', minutes: 3, tour: 'sys:events',
+    steps: [
+      'Add the Supabase secret EVENTBRITE_TOKEN (Eventbrite → Account settings → Developer links → API keys → private token) and deploy eventbrite-stats.',
+      'Make sure the Luncheon in Systems → Markets & events has its Eventbrite link as the ticket link.',
+      'Open Systems → Overview, then Markets & events, then Today.',
+    ],
+    expect: ['A ticket card shows tickets sold of the total, days to go and each ticket type; tapping it opens the Eventbrite page. Without the token, Markets & events explains how to add it.'],
+    cleanup: 'None.',
+  },
+  {
     id: 'walkthroughs', title: 'Walkthroughs play on every dashboard', site: 'both', who: 'team', minutes: 3, tour: 'sys:walkthroughs',
     steps: ['In Systems → Walkthroughs press Play on “Systems at a glance”; let it run, then open one from Other dashboards (Content Studio).'],
     expect: ['The pointer glides to each item and taps it, the card explains it, and the progress bar advances by itself; hovering the card pauses it.', 'Content Studio opens with its own walkthrough running.'],

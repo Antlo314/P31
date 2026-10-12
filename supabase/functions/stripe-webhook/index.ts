@@ -48,6 +48,8 @@ Deno.serve(async (req) => {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         const meta = session.metadata || {};
+        // Mentorship enrollments and storefront subscriptions are handled by academy-webhook, not as orders.
+        if (meta.kind === 'academy' || meta.kind === 'storefront' || session.mode === 'subscription') break;
         const shipping =
           // deno-lint-ignore no-explicit-any
           (session as any).shipping_details ||

@@ -178,12 +178,29 @@ const SCREENS = [
   ['about: headshots with names', mk('/about'), [], 'Shanay Prince'],
   ['team & dashboards on a phone', cl('/systems/team'), [], 'Savannah Campbell', { phone: true }],
   ['curators & shops on a phone', cl('/systems/shops'), ['Sample Bakery Co.'], 'Featured In The Directory', { phone: true }],
+  // Operations (v42)
+  ['health: database updates', cl('/systems/health'), [], 'Every script the site needs is in the database'],
+  ['activity log', cl('/systems/activity'), [], 'Melanie JC changed shop'],
+  ['activity log: one area', cl('/systems/activity'), ['Events'], 'Business and Leadership Luncheon'],
+  ['settings: automatic emails', cl('/systems/settings'), [], 'Class reminders'],
+  ['curators & shops: storefront billing', cl('/systems/shops'), [], 'Storefront billing'],
+  ['curators & shops: billing terms', cl('/systems/shops'), ['Terms'], 'Save terms'],
+  ['curators & shops: one shop’s plan', cl('/systems/shops'), ['Sample Bakery Co.'], 'Extend 30 Days'],
+  ['curator: plan & billing', at('market', 'curator')('/dashboard/billing'), [], 'Set up my subscription'],
+  ['curator: free period banner', at('market', 'curator')('/dashboard/identity'), [], 'left in your free period'],
+  ['overview: ticket sales', cl('/systems'), [], 'tickets sold of 150'],
+  ['markets & events: ticket sales', cl('/systems/events'), [], 'VIP table seat'],
+  ['today: ticket sales', cl('/today'), [], 'tickets sold of 150'],
+  ['gathering: @mention highlighted', cl('/gather/the-gathering'), [], '@Sample Curator'],
+  ['gathering: search mentions of me', cl('/gather/the-gathering'), ['Search messages', 'Mentions of me'], '#The Gathering ·'],
+  ['walkthroughs: activity chapter', cl('/systems/activity?tour=sys:activity'), [], 'Who changed what'],
+  ['walkthroughs: billing test run', cl('/systems/walkthroughs?tab=tests'), [], 'A storefront free period and subscription'],
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const clickText = (page, text) => page.evaluate((t) => {
   const els = [...document.querySelectorAll('button, a, [role="tab"], [role="button"], summary')].filter((e) => e.offsetParent);
-  const el = els.find((e) => e.textContent.trim() === t) || els.find((e) => e.textContent.trim().startsWith(t)) || els.find((e) => e.textContent.includes(t));
+  const el = els.find((e) => e.textContent.trim() === t) || els.find((e) => e.getAttribute('aria-label') === t) || els.find((e) => e.textContent.trim().startsWith(t)) || els.find((e) => e.textContent.includes(t));
   if (!el) return false;
   el.click();
   return true;

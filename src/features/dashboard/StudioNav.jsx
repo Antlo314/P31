@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   User, ShoppingBag, Palette, DollarSign, Tag, Star, Megaphone, Camera, BarChart3, Bell, MessageSquare,
-  HelpCircle, ExternalLink, Crown, ShieldCheck, ChevronDown, Menu, X, LogOut,
+  HelpCircle, ExternalLink, Crown, ShieldCheck, ChevronDown, Menu, X, LogOut, CreditCard,
 } from 'lucide-react';
 import { startCuratorTour } from './studioTour';
 import './StudioNav.css';
@@ -14,6 +14,7 @@ const GROUPS = [
     { id: 'identity', label: 'Identity', Icon: User },
     { id: 'storefront', label: 'Storefront', Icon: ShoppingBag },
     { id: 'design', label: 'Store Design', Icon: Palette },
+    { id: 'billing', label: 'Plan & billing', Icon: CreditCard },
   ] },
   { id: 'sell', label: 'Sell', items: [
     { id: 'orders', label: 'Orders', Icon: DollarSign, alias: ['sales'] },

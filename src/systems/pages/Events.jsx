@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Plus, CalendarClock, Eye, EyeOff, Users, Download, Pencil, X, Check, Ticket, Store } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import EventLineup from './EventLineup';
+import TicketSales from '../../today/TicketSales';
 import { formatEventDate } from '../../lib/events';
 
 const blank = {
@@ -168,6 +169,7 @@ const Events = () => {
         </div>
         <button className="sys-btn sys-btn--gold" onClick={() => setEditing({ ...blank })}><Plus size={16} /> New market</button>
       </header>
+      <TicketSales />
 
       {msg && <p className="sys-ok" onAnimationEnd={() => setMsg('')}><Check size={16} /> {msg}</p>}
       {error && <p className="sys-error">{error}</p>}

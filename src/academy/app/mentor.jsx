@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   Users, PhoneCall, MessageCircle, FileCheck2, CalendarDays, Plus, Send, Copy, Check, Trash2, Mail, Phone, BookOpen,
@@ -332,6 +332,15 @@ export const SessionModal = ({ session, studentId, onClose, onSaved }) => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [rec, setRec] = useState({ path: session?.recording_path || null, file: null });
+  // Email reminders a day and an hour before (v42). The switch shows once the database has it.
+  const [remind, setRemind] = useState(session?.reminders ?? true);
+  const [canRemind, setCanRemind] = useState(session ? 'reminders' in session : false);
+  useEffect(() => {
+    if (session) return undefined;
+    let live = true;
+    supabase.from('academy_sessions').select('reminders').limit(1).then(({ error }) => { if (live) setCanRemind(!error); });
+    return () => { live = false; };
+  }, [session]);
   const isZoom = session?.provider === 'zoom';
   const isLive = session?.provider === 'daily';
   const save = async (e) => {
@@ -347,7 +356,8 @@ export const SessionModal = ({ session, studentId, onClose, onSaved }) => {
     }
     const row = { ...form, starts_at: fromLocalInput(form.starts_at), duration_minutes: Number(form.duration_minutes), program_id: program.id,
       student_id: session ? session.student_id : studentId || null, join_url: form.join_url || null, recording_url: form.recording_url || null,
-      ...(recordingPath || session?.recording_path ? { recording_path: recordingPath || null } : {}) };
+      ...(recordingPath || session?.recording_path ? { recording_path: recordingPath || null } : {}),
+      ...(canRemind ? { reminders: remind } : {}) };
     if (isZoom || isLive || (!session && provider !== 'link')) delete row.join_url; // the room owns the link
     const { data, error: err } = await write(session
       ? supabase.from('academy_sessions').update(row).eq('id', session.id).select('id').single()
@@ -404,6 +414,7 @@ export const SessionModal = ({ session, studentId, onClose, onSaved }) => {
           <label className="k-field"><span>Join link (Google Meet, Zoom or other)</span><input type="url" value={form.join_url} onChange={(e) => setForm({ ...form, join_url: e.target.value })} placeholder="https://" /></label>
         )}
         <label className="k-field"><span>Description (optional)</span><textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></label>
+        {canRemind && <label className="ds-row" style={{ cursor: 'pointer' }}><input type="checkbox" className="ds-check" checked={remind} onChange={(e) => setRemind(e.target.checked)} /><div><strong>Email reminders</strong><small>{studentId || session?.student_id ? 'The student gets' : 'Students get'} an email the day before and an hour before, with the time and how to join.</small></div></label>}
         {session && <label className="k-field"><span>Session notes (visible to the student)</span><textarea rows={4} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></label>}
         {session && <label className="k-field"><span>Recording link {isZoom ? '(fills in by itself when Zoom finishes a cloud recording)' : '(optional)'}</span><input type="url" value={form.recording_url} onChange={(e) => setForm({ ...form, recording_url: e.target.value })} /></label>}
         {session && (

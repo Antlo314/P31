@@ -1,6 +1,6 @@
 import {
   LayoutGrid, Megaphone, Radar, Clapperboard, ImagePlus, Film, Settings, CalendarDays, Mail, Receipt, GraduationCap, Users, UserPlus,
-  Activity, Sparkles, Store, KeyRound, ClipboardList, Inbox, FileSignature, MessagesSquare, Compass,
+  Activity, Sparkles, Store, KeyRound, ClipboardList, Inbox, FileSignature, MessagesSquare, Compass, History,
 } from 'lucide-react';
 import { DAVINCI_ON } from '../lib/features';
 
@@ -50,8 +50,9 @@ export const SYSTEMS_GROUPS = [
   {
     id: 'team', site: 'both', label: 'Team', sub: 'people, help & health', items: [
       { to: '/systems/team', label: 'Team & dashboards', short: 'Team', Icon: KeyRound, site: 'both', dash: 'admin', blurb: 'Who is on the team, which dashboards each login opens, and the site admins.' },
+      { to: '/systems/activity', label: 'Activity', Icon: History, site: 'both', dash: 'admin', blurb: 'Who changed what: shops, dashboards, admins, vendor forms, markets, enrollments, campaigns and settings.' },
       { to: '/systems/walkthroughs', label: 'Walkthroughs', short: 'Learn', Icon: Compass, site: 'both', dash: 'team', blurb: 'Animated walkthroughs of every function, and the test runs that prove each one works.' },
-      { to: '/systems/health', label: 'Health', Icon: Activity, site: 'both', dash: 'admin', blurb: 'Errors visitors hit on either site, as they happen.' },
+      { to: '/systems/health', label: 'Health', Icon: Activity, site: 'both', dash: 'admin', blurb: 'Whether the database has every update, and the errors visitors hit on either site.' },
       { to: '/systems/settings', label: 'Settings', Icon: Settings, site: 'both', dash: 'admin', blurb: 'Your password, the team, and connected services.' },
     ],
   },

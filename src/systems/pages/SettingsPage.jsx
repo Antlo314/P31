@@ -1,8 +1,59 @@
 import React, { useEffect, useState } from 'react';
-import { KeyRound, Users, PlugZap, Check } from 'lucide-react';
+import { KeyRound, Users, PlugZap, Check, Workflow } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useRoles } from '../../lib/roles';
 
 const MIN_PASSWORD = 8;
+
+// The automatic emails (v42): welcome emails for new subscribers, class reminders for students.
+const AUTOMATIONS = [
+  { key: 'welcome', field: 'enabled', label: 'Welcome emails', note: 'Three emails to each new newsletter subscriber, a few days apart: welcome and Melanie JC story, what is coming up, ways to be part of P31.' },
+  { key: 'reminders', field: 'enabled', label: 'Class reminders', note: 'Mentorship students get an email the day before and an hour before each session. Mentors can switch it off for one session.' },
+  { key: 'reminders', field: 'day_before', label: '…the day before', sub: true },
+  { key: 'reminders', field: 'hour_before', label: '…an hour before', sub: true },
+];
+const Automations = () => {
+  const { roles } = useRoles();
+  const admin = !!(roles.admin || roles.operator);
+  const [vals, setVals] = useState(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    supabase.from('app_settings').select('key, value').in('key', ['welcome', 'reminders']).then(({ data, error: err }) => {
+      if (err) { setError(/does not exist|schema cache/i.test(err.message) ? 'Run storefront_v42_operations.sql to turn these on (Systems → Health has a copy button).' : err.message); return; }
+      setVals(Object.fromEntries((data || []).map((r) => [r.key, r.value])));
+    });
+  }, []);
+  const flip = async (a) => {
+    if (!admin) return;
+    const cur = vals[a.key] || {};
+    const value = { ...cur, [a.field]: cur[a.field] === false };
+    setVals({ ...vals, [a.key]: value });
+    const { error: err } = await supabase.from('app_settings').upsert({ key: a.key, value, updated_at: new Date().toISOString() });
+    if (err) setError(err.message);
+  };
+  return (
+    <section className="sys-card" data-tour="automations">
+      <h2><Workflow size={18} /> Automatic emails</h2>
+      {error && <p className="sys-error">{error}</p>}
+      {vals && (
+        <ul className="sys-list">
+          {AUTOMATIONS.map((a) => {
+            const on = vals[a.key]?.[a.field] !== false;
+            const parentOff = a.sub && vals[a.key]?.enabled === false;
+            return (
+              <li key={a.key + a.field} style={a.sub ? { paddingLeft: 22 } : undefined}>
+                <span><strong>{a.label}</strong>{a.note && <><br /><small className="sys-muted">{a.note}</small></>}</span>
+                <button type="button" className={`sys-chip ${on && !parentOff ? 'is-on' : ''}`} aria-pressed={on} disabled={parentOff || !admin} onClick={() => flip(a)}>{on ? 'On' : 'Off'}</button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {vals && !admin && <p className="sys-muted" style={{ marginTop: 8 }}>Only an admin can switch these.</p>}
+      <p className="sys-muted" style={{ marginTop: 8 }}>Storefront billing reminders are set in Curators &amp; shops → Terms.</p>
+    </section>
+  );
+};
 
 const PasswordForm = ({ onSubmit, submitLabel }) => {
   const [pw, setPw] = useState('');
@@ -105,6 +156,8 @@ const SettingsPage = ({ operator }) => {
           </>
         )}
       </section>
+
+      <Automations />
 
       <section className="sys-card">
         <h2><PlugZap size={18} /> Connected services</h2>

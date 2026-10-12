@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Activity, CheckCircle2, RotateCcw, ChevronDown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { fmtDateTime } from '../../lib/academy';
+import DbUpdates from './DbUpdates';
 
 const VIEWS = [['open', 'Open'], ['resolved', 'Fixed'], ['all', 'All']];
 const KIND = { render: 'Page crashed', error: 'Script error', promise: 'Failed request or task', chunk: 'Old version after a deploy' };
@@ -40,9 +41,11 @@ const Health = () => {
     <div className="sys-page">
       <header className="sys-page__head">
         <p className="sys-eyebrow">Health</p>
-        <h1>Site errors</h1>
-        <p className="sys-muted">When a page breaks for anyone on p31market.com or thep31collective.org, it shows up here automatically, grouped so each problem appears once with a count. Mark it fixed once it’s handled; if it happens again, it reopens.</p>
+        <h1>Health</h1>
+        <p className="sys-muted">Whether the database has every update the site needs, and the errors visitors hit on p31market.com or thep31collective.org, grouped so each problem appears once with a count. Mark an error fixed once it’s handled; if it happens again, it reopens.</p>
       </header>
+      <DbUpdates />
+      <h2 className="sys-subhead">Site errors</h2>
       {error && <p className="sys-error">{error}</p>}
 
       <div className="sys-row sys-row--center" style={{ marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>

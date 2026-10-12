@@ -293,8 +293,23 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
     { id: 40, requested_by: 'u-mel', kind: 'edit', title: 'Sample recap', style: 'Social Clean', aspect: '9:16', source_paths: ['u-mel/pro-edit/1/01-a.mp4'], status: 'done', result_path: 'u-mel/pro-edit/results/40-recap.mp4', created_at: day(-3), updated_at: day(-2) },
   ],
   curator_data: [
-    { id: 'cu1', business_name: 'Sample Pending Shop', slug: 'sample-pending', status: 'pending', created_at: day(-1), profiles: { full_name: 'Sample Applicant' } },
-    { id: 'u-cu', business_name: 'Sample Bakery Co.', slug: 'sample-bakery', is_paid: true, plan: 'free', tagline: 'Small-batch treats, baked with love', bio: 'Sample bio: a home bakery in Gwinnett making pound cakes and cookies for markets and gifts.', status: 'approved', is_published: true, public_email: 'curator@example.com', location: 'Gwinnett, GA', instagram: 'samplebakery', store_design: { template: 'boutique' }, logo_url: null, banner_url: null, agreement_signed_at: day(-100), agreement_id: 'ag-2', created_at: day(-120), profiles: { full_name: 'Sample Curator' } },
+    { id: 'cu1', business_name: 'Sample Pending Shop', slug: 'sample-pending', status: 'pending', subscription_status: 'none', created_at: day(-1), profiles: { full_name: 'Sample Applicant' } },
+    { id: 'u-cu', business_name: 'Sample Bakery Co.', slug: 'sample-bakery', is_paid: true, plan: 'free', tagline: 'Small-batch treats, baked with love', bio: 'Sample bio: a home bakery in Gwinnett making pound cakes and cookies for markets and gifts.', status: 'approved', is_published: true, public_email: 'curator@example.com', location: 'Gwinnett, GA', instagram: 'samplebakery', store_design: { template: 'boutique' }, logo_url: null, banner_url: null, agreement_signed_at: day(-100), agreement_id: 'ag-2', activated_at: day(-80), trial_ends_at: day(12), subscription_status: 'trial', created_at: day(-120), profiles: { full_name: 'Sample Curator' } },
+  ],
+  // Operations (v42): which scripts ran, the activity log, the billing and automatic-email switches.
+  schema_versions: [{ version: 41, name: 'team dashboards', applied_at: day(-1) }, { version: 42, name: 'operations', applied_at: iso(-30) }],
+  app_settings: [
+    { key: 'billing', value: { price_cents: 1499, free_months: 3, remind_days: 14, grace_days: 7, auto_pause: false } },
+    { key: 'reminders', value: { enabled: true, day_before: true, hour_before: true } },
+    { key: 'welcome', value: { enabled: true } },
+  ],
+  admin_activity: [
+    { id: 6, actor_name: 'Melanie JC', actor_email: 'melanie@example.com', area: 'curator_data', action: 'update', target_id: 'u-cu', target_label: 'Sample Bakery Co.', changes: { is_featured: [false, true] }, created_at: iso(-25) },
+    { id: 5, actor_name: 'Anthony Carr', actor_email: 'vendor@p31market.com', area: 'curator_data', action: 'update', target_id: 'cu1', target_label: 'Sample Pending Shop', changes: { status: ['draft', 'pending'] }, created_at: iso(-140) },
+    { id: 4, actor_name: 'Melanie JC', actor_email: 'melanie@example.com', area: 'team_access', action: 'update', target_label: 'secretary@thep31collective.org', changes: { tools: [['events'], ['events', 'emails', 'people']] }, created_at: day(-1) },
+    { id: 3, actor_name: 'Melanie JC', actor_email: 'melanie@example.com', area: 'market_events', action: 'update', target_label: 'Business and Leadership Luncheon', changes: { venue: ['TBA', 'The Four Event Center'] }, created_at: day(-2) },
+    { id: 2, actor_name: 'Melanie JC', actor_email: 'melanie@example.com', area: 'curator_data', action: 'update', target_id: 'u-cu', target_label: 'Sample Bakery Co.', changes: { subscription_status: ['none', 'trial'], trial_ends_at: [null, day(12)] }, created_at: day(-3) },
+    { id: 1, actor_name: 'Melanie JC', actor_email: 'melanie@example.com', area: 'app_settings', action: 'update', target_label: 'billing', changes: { value: [{ price_cents: 1499 }, { price_cents: 1499, auto_pause: false }] }, created_at: day(-4) },
   ],
   products: [
     { id: 101, curator_id: 'u-cu', name: 'Lemon Pound Cake', description: 'Sample: a dense, buttery pound cake with a bright lemon glaze.', price: 28, compare_at_price: 34, sale_ends_at: day(4), badge: 'Bestseller', is_featured: true, category: 'Wellness', stock_status: 'in_stock', inventory: 6, image_url: null, image_urls: [], tags: ['cake', 'gift'], variants: [{ name: 'Size', options: ['Loaf', 'Bundt'] }], is_active: true, sort_order: 0, created_at: day(-40) },
@@ -337,6 +352,7 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
     { id: 'gm-1r', channel_id: 'ch-the-gathering', author_id: 'u-cu', kind: 'message', body: 'So grateful to be here!', attachments: [], reactions: {}, meta: {}, pinned: false, reply_count: 0, thread_root: 'gm-1', reply_to: null, created_at: iso(-90) },
     { id: 'gm-2', channel_id: 'ch-the-gathering', author_id: 'u-cu', kind: 'message', body: 'Hi all! Sample Bakery Co. here. Here is the table from our last market. **Lemon pound cake** sold out in an hour!', attachments: [{ type: 'image', path: 'u-cu/sample-table.jpg', name: 'table.jpg', width: 1200, height: 630 }], reactions: { '🔥': ['u-mel', 'u-s1'] }, meta: {}, pinned: false, reply_count: 0, thread_root: null, reply_to: null, created_at: iso(-200) },
     { id: 'gm-3', channel_id: 'ch-the-gathering', author_id: 'u-s1', kind: 'message', body: 'That table is gorgeous. Business Mentorship student here, launching my candle line in November.', attachments: [], reactions: {}, meta: {}, pinned: false, reply_count: 0, thread_root: null, reply_to: 'gm-2', created_at: iso(-180) },
+    { id: 'gm-7', channel_id: 'ch-the-gathering', author_id: 'u-s1', kind: 'message', body: '@Melanie JC thank you for Tuesday’s session! @Sample Curator how do you package the pound cakes for market day?', attachments: [], reactions: {}, meta: {}, pinned: false, reply_count: 0, thread_root: null, reply_to: null, created_at: iso(-40) },
     { id: 'gm-4', channel_id: 'ch-market', author_id: 'u-cu', kind: 'message', body: 'Anyone have a favorite table-cover supplier? Need floor-length for the next market.', attachments: [], reactions: {}, meta: {}, pinned: false, reply_count: 0, thread_root: null, reply_to: null, created_at: iso(-120) },
     { id: 'gm-5', channel_id: 'ch-academy', author_id: 'u-s1', kind: 'message', body: 'Accountability check: who finished this week’s action plan?', attachments: [], reactions: {}, meta: {}, pinned: false, reply_count: 0, thread_root: null, reply_to: null, created_at: iso(-110) },
     { id: 'gm-6', channel_id: 'ch-team', author_id: 'u-mel', kind: 'message', body: 'Team: luncheon run-of-show draft is in the shared folder.', attachments: [], reactions: {}, meta: {}, pinned: false, reply_count: 0, thread_root: null, reply_to: null, created_at: iso(-100) },
@@ -445,6 +461,16 @@ const rpc = {
   shop_admin_update: (a) => { const c = db.curator_data.find((x) => x.id === a.p_id); if (c) Object.assign(c, a.p_patch); return c ? { id: c.id, status: c.status, slug: c.slug } : null; },
   shop_admin_products: (a) => db.products.filter((p) => p.curator_id === a.p_id).map((p) => ({ id: p.id, name: p.name, price: p.price, image_url: p.image_url, is_active: p.is_active !== false, is_featured: !!p.is_featured, badge: p.badge, category: p.category, created_at: p.created_at })),
   shop_admin_set_product: (a) => { const p = db.products.find((x) => x.id === a.p_id); if (p) Object.assign(p, a.p_patch); return p; },
+  storefront_billing_admin: (a) => {
+    const later = (n) => new Date(Date.now() + n * 864e5).toISOString();
+    const list = a.p_action === 'start_all' ? db.curator_data.filter((c) => c.status === 'approved' && ['none', undefined].includes(c.subscription_status)) : db.curator_data.filter((c) => c.id === a.p_id);
+    list.forEach((c) => {
+      if (a.p_action === 'start' || a.p_action === 'start_all') Object.assign(c, { activated_at: c.activated_at || later(0), trial_ends_at: later(90), subscription_status: 'trial' });
+      if (a.p_action === 'extend') Object.assign(c, { trial_ends_at: new Date(Math.max(Date.now(), new Date(c.trial_ends_at || Date.now()).getTime()) + (a.p_days || 30) * 864e5).toISOString(), subscription_status: c.subscription_status === 'ended' ? 'trial' : c.subscription_status });
+      if (a.p_action === 'comp' || a.p_action === 'none') c.subscription_status = a.p_action;
+    });
+    return { changed: list.length };
+  },
   academy_roster: (a) => roster(a.p_program),
   academy_inbox: (a) => roster(a.p_program).slice(0, 3).map((r, i) => ({
     student_id: r.user_id, full_name: r.full_name, email: r.email, unread: [1, 0, 2][i],
@@ -486,6 +512,9 @@ const rpc = {
 };
 
 const fns = {
+  'eventbrite-stats': () => ({ configured: true, checked_at: iso(0), events: [{ id: 'ev1', title: 'Business and Leadership Luncheon', event_date: day(70).slice(0, 10), url: 'https://www.eventbrite.com/e/proverbs-31-business-leadership-luncheon-tickets-2002850002272', sold: 46, total: 150,
+    classes: [{ name: 'General admission', sold: 38, total: 120 }, { name: 'VIP table seat', sold: 8, total: 30 }] }] }),
+  'vendor-billing': (b) => ({ error: b.action === 'portal' ? '(Demo) The Stripe billing page opens here: change card or cancel.' : '(Demo) Stripe Checkout opens here: card details, then back to this page.' }),
   'studio-zernio': (b) => {
     if (b.action === 'overview') return studio.overview;
     if (b.action === 'posts') return studio.posts;
@@ -542,7 +571,9 @@ class Query {
   lt(c, v) { this.filters.push((r) => r[c] === undefined || r[c] < v); return this; }
   contains(c, arr) { this.filters.push((r) => Array.isArray(r[c]) && arr.every((x) => r[c].includes(x))); return this; }
   match(obj) { Object.entries(obj).forEach(([c, v]) => this.eq(c, v)); return this; }
-  filter() { return this; } or() { return this; } ilike() { return this; } like() { return this; } range() { return this; } textSearch() { return this; }
+  filter() { return this; } or() { return this; }
+  ilike(c, pat) { const needle = String(pat).replace(/^%|%$/g, '').toLowerCase(); this.filters.push((r) => String(r[c] ?? '').toLowerCase().includes(needle)); return this; }
+  like() { return this; } range() { return this; } textSearch() { return this; }
   order(c, o = {}) { this.sorts.push([c, o.ascending !== false]); return this; }
   limit(n) { this.max = n; return this; }
   single() { this.one = 1; return this; }

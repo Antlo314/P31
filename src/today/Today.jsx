@@ -11,6 +11,7 @@ import { DAVINCI_ON } from '../lib/features';
 import { mentorCards, systemsCards, teamCards, studioCards, davinciCards } from './cards';
 import AttentionCard, { Go } from './AttentionCard';
 import TodaysWord from './TodaysWord';
+import TicketSales from './TicketSales';
 import DashShell, { DashHead } from '../apps/DashShell';
 import Tour, { TourButton } from '../components/Tour';
 import mark from '../assets/academy/collective-mark.webp';
@@ -104,6 +105,8 @@ const Today = () => {
       />
 
       <TodaysWord />
+
+      {(admin || dashboardsOf(roles).some((d) => ['events', 'orders', 'vendors'].includes(d))) && <TicketSales compact />}
 
       {quick.length > 0 && (
         <div className="td2-quick" role="group" aria-label="Quick actions">

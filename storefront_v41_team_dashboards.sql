@@ -189,15 +189,11 @@ RETURNS JSONB LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public,
 AS $fn$
 BEGIN
   IF NOT public.can_run_shops() THEN RAISE EXCEPTION 'Only admins and the shops dashboard can see every shop.'; END IF;
+  -- Every shop column (so later columns such as billing appear here too), minus the payment ids.
   RETURN coalesce((
-    SELECT jsonb_agg(jsonb_build_object(
-      'id', c.id, 'business_name', c.business_name, 'slug', c.slug, 'tagline', c.tagline, 'status', c.status,
-      'logo_url', c.logo_url, 'banner_url', c.banner_url, 'is_paid', c.is_paid, 'is_featured', c.is_featured,
-      'is_early_bird', c.is_early_bird, 'is_published', c.is_published, 'plan', c.plan,
+    SELECT jsonb_agg((to_jsonb(c) - 'stripe_account_id' - 'stripe_billing_customer_id' - 'stripe_subscription_id') || jsonb_build_object(
       'verification_badges', coalesce(to_jsonb(c.verification_badges), '[]'::jsonb),
-      'admin_feedback', c.admin_feedback, 'agreement_signed_at', c.agreement_signed_at,
-      'instagram', c.instagram, 'website', c.website, 'phone', c.phone,
-      'stripe_connected', c.stripe_account_id IS NOT NULL, 'created_at', c.created_at,
+      'stripe_connected', c.stripe_account_id IS NOT NULL,
       'owner_name', p.full_name, 'owner_email', u.email,
       'products', (SELECT count(*) FROM products x WHERE x.curator_id = c.id),
       'products_active', (SELECT count(*) FROM products x WHERE x.curator_id = c.id AND coalesce(x.is_active, true)),
@@ -227,8 +223,10 @@ BEGIN
   END IF;
   IF p_patch ? 'status' THEN
     v_status := p_patch->>'status';
-    IF v_status NOT IN ('pending', 'approved', 'paused', 'declined') THEN RAISE EXCEPTION 'Status can be pending, approved, paused or declined.'; END IF;
+    IF v_status NOT IN ('draft', 'pending', 'approved', 'paused', 'rejected') THEN RAISE EXCEPTION 'Status can be draft, pending, approved, paused or rejected.'; END IF;
   END IF;
+  -- The shop guard (guard_curator_data) undoes protected changes unless the write is trusted.
+  PERFORM set_config('p31.trusted', 'on', true);
   UPDATE curator_data SET
     status = CASE WHEN p_patch ? 'status' THEN v_status ELSE status END,
     is_paid = CASE WHEN p_patch ? 'is_paid' THEN (p_patch->>'is_paid')::boolean ELSE is_paid END,
@@ -242,6 +240,7 @@ BEGIN
     slug = CASE WHEN p_patch ? 'slug' THEN v_slug ELSE slug END
   WHERE id = p_id
   RETURNING * INTO v_row;
+  PERFORM set_config('p31.trusted', '', true);
   IF v_row.id IS NULL THEN RAISE EXCEPTION 'That shop was not found.'; END IF;
   RETURN jsonb_build_object('id', v_row.id, 'status', v_row.status, 'slug', v_row.slug, 'is_featured', v_row.is_featured, 'is_paid', v_row.is_paid);
 END;

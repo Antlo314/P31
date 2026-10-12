@@ -6,6 +6,7 @@
 // Stripe → Developers → Webhooks → endpoint https://<project>.supabase.co/functions/v1/academy-webhook
 // Events: checkout.session.completed, invoice.paid, invoice.payment_failed,
 //         customer.subscription.updated, customer.subscription.deleted
+// It also keeps storefront subscriptions (vendor-billing, v42) in step on curator_data.
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
@@ -35,11 +36,33 @@ Deno.serve(async (req) => {
   }
 
   const now = new Date().toISOString();
+  // Storefront subscriptions (vendor-billing, v42) arrive on this same endpoint.
+  // deno-lint-ignore no-explicit-any
+  const storefront = async (subId: string, patch: Record<string, any>) => {
+    const { data: shops } = await db.from('curator_data').update(patch).eq('stripe_subscription_id', subId).select('id, status, billing_notice');
+    // A shop paused for an unpaid subscription opens again once it is paid.
+    for (const shop of shops || []) {
+      if (patch.subscription_status === 'active' && shop.status === 'paused' && shop.billing_notice === 'paused') {
+        await db.from('curator_data').update({ status: 'approved', billing_notice: null }).eq('id', shop.id);
+      }
+    }
+  };
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
         const s = event.data.object as Stripe.Checkout.Session;
         const m = s.metadata || {};
+        if (m.kind === 'storefront' && m.curator_id && s.mode === 'subscription' && s.subscription) {
+          const subId = typeof s.subscription === 'string' ? s.subscription : s.subscription.id;
+          const sub = await stripe.subscriptions.retrieve(subId);
+          const { data: shop } = await db.from('curator_data').update({
+            subscription_status: 'active', stripe_subscription_id: subId,
+            stripe_billing_customer_id: typeof s.customer === 'string' ? s.customer : s.customer?.id || null,
+            subscription_current_end: iso(periodEnd(sub)), billing_notice: null, billing_notice_at: null,
+          }).eq('id', m.curator_id).select('id, status').maybeSingle();
+          if (shop?.status === 'paused') await db.from('curator_data').update({ status: 'approved' }).eq('id', shop.id);
+          break;
+        }
         if (m.kind !== 'academy') break;
         let accessUntil: string | null = null;
         let subscriptionId: string | null = null;
@@ -73,6 +96,7 @@ Deno.serve(async (req) => {
         const end = inv.lines?.data?.[0]?.period?.end;
         await db.from('academy_enrollments').update({ status: 'active', access_until: iso(end, GRACE_DAYS), updated_at: now })
           .eq('stripe_subscription_id', subId);
+        await storefront(subId, { subscription_status: 'active', subscription_current_end: iso(end), billing_notice: null });
         break;
       }
 
@@ -80,7 +104,10 @@ Deno.serve(async (req) => {
         // deno-lint-ignore no-explicit-any
         const inv = event.data.object as any;
         const subId = typeof inv.subscription === 'string' ? inv.subscription : inv.subscription?.id || inv.parent?.subscription_details?.subscription;
-        if (subId) await db.from('academy_enrollments').update({ status: 'past_due', updated_at: now }).eq('stripe_subscription_id', subId);
+        if (subId) {
+          await db.from('academy_enrollments').update({ status: 'past_due', updated_at: now }).eq('stripe_subscription_id', subId);
+          await storefront(subId, { subscription_status: 'past_due' });
+        }
         break;
       }
 
@@ -90,6 +117,8 @@ Deno.serve(async (req) => {
           : ['past_due', 'unpaid', 'incomplete'].includes(sub.status) ? 'past_due' : 'active';
         await db.from('academy_enrollments').update({ status, access_until: iso(periodEnd(sub), GRACE_DAYS), updated_at: now })
           .eq('stripe_subscription_id', sub.id);
+        // A Stripe trial (the vendor's free period) still counts as subscribed.
+        await storefront(sub.id, { subscription_status: status, subscription_current_end: iso(periodEnd(sub)) });
         break;
       }
 
@@ -98,6 +127,7 @@ Deno.serve(async (req) => {
         await db.from('academy_enrollments')
           .update({ status: 'canceled', access_until: iso(sub.ended_at || Math.floor(Date.now() / 1000)), updated_at: now })
           .eq('stripe_subscription_id', sub.id);
+        await storefront(sub.id, { subscription_status: 'canceled' });
         break;
       }
     }

@@ -91,7 +91,8 @@
 .gt-msg--system { grid-template-columns: 44px minmax(0, 1fr); margin: 14px 0; padding: 14px; background: linear-gradient(135deg, rgba(242, 206, 77, 0.08), rgba(155, 113, 178, 0.08)); border: 1px solid rgba(242, 206, 77, 0.25); }
 .gt-msg__mark { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; }
 .gt-quote { display: flex; align-items: center; gap: 6px; max-width: 100%; padding: 2px 0 2px 10px; border: 0; border-left: 2px solid rgba(242, 206, 77, 0.5); background: none; cursor: pointer; text-align: left; font-size: 0.8rem; color: var(--gt-dim); }
-.gt-quote b { color: var(--gt-ink); }
+.gt-quote { min-width: 0; }
+.gt-quote b { color: var(--gt-ink); white-space: nowrap; flex-shrink: 0; }
 .gt-quote span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Avatar and badges */
@@ -241,3 +242,26 @@ video.gt-media__item { width: 100%; max-height: 420px; cursor: auto; }
 .gt-switch input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--gt-gold); flex: none; }
 .gt-switch span { display: inline-flex; align-items: center; gap: 6px; line-height: 1.35; }
 .gt-switch svg { flex: none; color: var(--gt-gold); }
+
+/* @mentions (Composer suggestions, highlighted names, rooms with a mention) */
+.gt-mention { padding: 0 3px; border-radius: 5px; background: rgba(155, 113, 178, 0.22); color: #e9dcf2; font-weight: 700; }
+.gt-mention.is-me { background: rgba(242, 206, 77, 0.2); color: var(--gt-gold); }
+.gt-msg.is-mentioned { background: rgba(242, 206, 77, 0.06); box-shadow: inset 3px 0 0 var(--gt-gold); }
+.gt-ch__at { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; background: var(--gt-gold); color: #2a1a00; font-style: normal; }
+.gt-ch__at + b { margin-left: 4px; }
+.gt-mentions { list-style: none; margin: 0; padding: 4px; display: grid; gap: 2px; border-radius: 12px; background: var(--gt-raise); border: 1px solid var(--gt-line); box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.6); max-width: 360px; }
+.gt-mentions button { width: 100%; display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 0; border-radius: 8px; background: none; color: var(--gt-ink); font: inherit; font-size: 0.86rem; cursor: pointer; text-align: left; }
+.gt-mentions button.is-on, .gt-mentions button:hover { background: rgba(242, 206, 77, 0.14); }
+
+/* Search panel */
+.gt-find { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 10px; display: grid; gap: 8px; align-content: start; }
+.gt-find__quick { display: flex; gap: 6px; flex-wrap: wrap; }
+.gt-find__quick .gt-btn { display: inline-flex; align-items: center; gap: 6px; }
+.gt-find__note { margin: 4px 6px; font-size: 0.82rem; color: var(--gt-dim); display: flex; align-items: center; gap: 6px; }
+.gt-hit { display: flex; gap: 10px; align-items: flex-start; padding: 8px; border-radius: 10px; border: 0; background: none; color: var(--gt-ink); font: inherit; cursor: pointer; text-align: left; }
+.gt-hit:hover, .gt-hit:focus-visible { background: rgba(255, 255, 255, 0.05); }
+.gt-hit__main { display: grid; gap: 3px; min-width: 0; }
+.gt-hit__meta { font-size: 0.74rem; color: var(--gt-dim); }
+.gt-hit__meta b { color: var(--gt-ink); }
+.gt-hit__text { font-size: 0.86rem; line-height: 1.45; overflow-wrap: anywhere; }
+.gt-hit mark { background: rgba(242, 206, 77, 0.28); color: var(--gt-ink); border-radius: 3px; padding: 0 1px; }

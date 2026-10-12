@@ -66,6 +66,15 @@ export async function getThread(rootId) {
   const { data } = await supabase.from('chat_messages').select('*').eq('thread_root', rootId).order('created_at', { ascending: true }).limit(500);
   return data || [];
 }
+/** Messages whose words match, newest first. Row security keeps it to the reader's own rooms and DMs. */
+export async function search(text, limit = 40) {
+  const q = text.replace(/[%_\\*,()]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (q.length < 2) return [];
+  const { data, error } = await supabase.from('chat_messages').select('*').ilike('body', `%${q}%`).is('deleted_at', null)
+    .order('created_at', { ascending: false }).limit(limit);
+  if (error) throw new Error('Search is not available right now. Please try again.');
+  return data || [];
+}
 export async function getMessage(id) {
   const { data } = await supabase.from('chat_messages').select('*').eq('id', id).maybeSingle();
   return data;

@@ -1,0 +1,17 @@
+/* Eventbrite ticket sales (TicketSales.jsx): works on the dark Systems pages and the light Today page. */
+.tk { display: grid; gap: 8px; margin: 0 0 14px; }
+.tk__event, .tk--setup {
+  display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 12px; align-items: center;
+  padding: 12px 14px; border-radius: 16px; color: inherit; text-decoration: none;
+  background: color-mix(in srgb, currentColor 6%, transparent); border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+}
+.tk--setup { grid-template-columns: 24px minmax(0, 1fr); margin: 0 0 14px; }
+.tk--setup p { margin: 0; font-size: 0.86rem; line-height: 1.45; opacity: 0.85; }
+.tk__event:hover { border-color: rgba(217, 169, 58, 0.6); }
+.tk__icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: rgba(242, 206, 77, 0.16); color: #D9A93A; }
+.tk__main { display: grid; gap: 4px; min-width: 0; }
+.tk__main strong { font-size: 0.95rem; }
+.tk__main small { font-size: 0.8rem; opacity: 0.75; }
+.tk__bar { display: block; height: 6px; border-radius: 3px; background: color-mix(in srgb, currentColor 12%, transparent); overflow: hidden; }
+.tk__bar span { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, #D9A93A, #F2CE4D); }
+.tk__go { opacity: 0.6; }
