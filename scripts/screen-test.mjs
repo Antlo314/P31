@@ -82,6 +82,14 @@ const SCREENS = [
   ['studio auto-create: preview', cl('/studio/autocreate'), ['Preview the posts'], 'Save as drafts'],
   ['studio auto-create: library', cl('/studio/autocreate'), ['Library'], 'Add your own'],
   ['studio auto-create on a phone', cl('/studio/autocreate'), ['Preview the posts'], 'Schedule all', { phone: true }],
+  ['studio design: the collection', cl('/studio/design'), [], 'Use in a post'],
+  ['studio design: templates', cl('/studio/design'), ['Templates'], 'Bold quote'],
+  ['studio design: brand styles', cl('/studio/design'), ['Styles'], 'Plum night'],
+  ['studio design: add text', cl('/studio/design'), ['Add', 'Heading'], 'Shrink long text to fit'],
+  ['studio design: music', cl('/studio/design'), ['Music'], 'Sunday Keys'],
+  ['studio design: saved designs', cl('/studio/design'), ['Saved'], 'Nothing saved yet'],
+  ['studio design: batch', cl('/studio/design'), ['Batch'], 'Make the designs'],
+  ['studio design on a phone', cl('/studio/design'), ['Styles'], 'Plum night', { phone: true }],
   ['studio email + send', cl('/studio/email'), ['Sample Applicant', 'Send reply', 'Yes, send it'], 'Sent to sample.applicant@example.com'],
   ['studio email: needs a person', cl('/studio/email'), ['Sample Vendor'], 'Needs a person: Refund request'],
   ['classroom walkthrough', st('/academy/business'), ['Next'], 'Home: what’s next'],
@@ -202,6 +210,23 @@ const SCREENS = [
   // Signed in on the Collective: the account menu with Sign out
   ['collective header: account menu and sign out', cl('/'), ['Account menu'], 'Sign out'],
   ['collective header: team links in the menu', cl('/academy'), ['Account menu'], 'Today'],
+  // Full admin control (v43): edit and delete in every room
+  ['studio calendar: edit, duplicate, post now, delete', cl('/studio/calendar'), [], 'Post now'],
+  ['studio calendar: the full post editor', cl('/studio/calendar'), ['Edit'], 'Post it now'],
+  ['studio calendar: studio history actions', cl('/studio/calendar'), ['Studio history'], 'Duplicate'],
+  ['studio email: delete a conversation', cl('/studio/email'), ['Sample Applicant'], 'Delete conversation'],
+  ['join applications: edit and delete', cl('/systems/applications'), ['Jordan Ellis'], 'Edit details'],
+  ['vendor applications: edit and delete', cl('/systems/vendors'), ['All', 'Sample Crafts'], 'Edit details'],
+  ['vendor forms: delete an agreement', cl('/systems/forms'), ['Sample Candle Co.'], 'Delete'],
+  ['vendor forms: edit a registration', cl('/systems/forms?tab=registrations'), ['Sample Candle Co.'], 'Edit details'],
+  ['vendor forms: edit a volunteer', cl('/systems/forms?tab=volunteers'), ['Sample Volunteer'], 'Edit details'],
+  ['orders: delete an order', cl('/systems/orders'), ['All'], 'Delete order'],
+  ['people: delete a contact', cl('/systems/crm'), ['Danielle Brooks'], 'Delete'],
+  ['markets & events: delete a market', cl('/systems/events'), ['Edit'], 'Delete market'],
+  ['curators & shops: edit and delete products', cl('/systems/shops'), ['Sample Bakery Co.'], 'Delete product'],
+  ['curators & shops: delete a shop (admins)', cl('/systems/shops'), ['Sample Bakery Co.'], 'Delete shop'],
+  ['campaigns: subscribers', cl('/systems/campaigns'), [], 'Everyone on the newsletter list'],
+  ['growth: delete a saved prospect', cl('/systems/growth'), ['Prospects'], 'Delete'],
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

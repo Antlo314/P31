@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Mail, Send, Plus, Users, Check, FlaskConical, Trash2 } from 'lucide-react';
+import { Mail, Send, Plus, Users, Check, FlaskConical, Trash2, Pencil, Copy } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import AiAssist from '../../components/AiAssist';
+import Subscribers from './Subscribers';
 
 const AUDIENCES = [
   ['subscribers', 'Newsletter subscribers'],
@@ -78,8 +79,9 @@ const Campaigns = () => {
   };
 
   const remove = async (c) => {
-    if (!window.confirm('Delete this draft?')) return;
-    await supabase.from('campaigns').delete().eq('id', c.id);
+    if (!window.confirm(c.status === 'sent' ? 'Delete this sent campaign from the list? The emails already went out; only the record goes.' : 'Delete this draft?')) return;
+    const { error: err, count } = await supabase.from('campaigns').delete({ count: 'exact' }).eq('id', c.id);
+    if (err || count === 0) { setError(err?.message || 'It was not deleted. This login may not have the Emails dashboard.'); return; }
     if (editingId === c.id) { setDraft(blank); setEditingId(null); }
     load();
   };
@@ -143,15 +145,16 @@ const Campaigns = () => {
                 {c.error && <span className="sys-error">{c.error}</span>}
               </div>
             </div>
-            {c.status !== 'sent' && (
-              <div className="sys-row">
-                <button className="sys-icon-btn" onClick={() => { setEditingId(c.id); setDraft({ subject: c.subject, body: c.body, audience: c.audience }); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-label="Edit"><Plus size={16} /></button>
-                <button className="sys-icon-btn" onClick={() => remove(c)} aria-label="Delete draft"><Trash2 size={16} /></button>
-              </div>
-            )}
+            <div className="sys-row">
+              {c.status !== 'sent' && <button className="sys-icon-btn" onClick={() => { setEditingId(c.id); setDraft({ subject: c.subject, body: c.body, audience: c.audience }); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-label="Edit" title="Edit"><Pencil size={16} /></button>}
+              <button className="sys-icon-btn" onClick={() => { setEditingId(null); setDraft({ subject: c.subject, body: c.body, audience: c.audience }); window.scrollTo({ top: 0, behavior: 'smooth' }); }} aria-label="Use as a new draft" title="Use as a new draft"><Copy size={16} /></button>
+              <button className="sys-icon-btn" onClick={() => remove(c)} aria-label={c.status === 'sent' ? 'Delete from the list' : 'Delete draft'} title="Delete"><Trash2 size={16} /></button>
+            </div>
           </article>
         ))}
       </section>
+
+      <Subscribers />
     </div>
   );
 };

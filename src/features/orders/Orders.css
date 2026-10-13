@@ -70,3 +70,4 @@
 
 .ord-spin { animation: ord-spin 0.9s linear infinite; }
 @keyframes ord-spin { to { transform: rotate(360deg); } }
+.ord-link--danger { display: inline-flex; align-items: center; gap: 5px; color: #b04a4a; margin-left: 12px; }

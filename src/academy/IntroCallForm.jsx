@@ -24,6 +24,8 @@ const IntroCallForm = ({ program = '' }) => {
       setState('idle');
       return;
     }
+    // The team, the CEO and the person's own PDF copy go out from here (the scheduler also catches it).
+    supabase.functions.invoke('join-notify', { body: {} }).catch(() => {});
     setState('done');
   };
 

@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { fmtDate, fmtDateTime } from '../../lib/academy';
+import { DeleteRecord } from '../AdminRecord';
 
 const STAGES = [['all', 'Everyone'], ['lead', 'Leads'], ['prospect', 'Prospects'], ['member', 'Members'], ['alumni', 'Alumni'], ['partner', 'Partners'], ['curator', 'Curators']];
 const ICON = {
@@ -108,8 +109,15 @@ const Contact = ({ contact, onBack }) => {
   useEffect(() => { Promise.resolve().then(load); }, [load]);
 
   const patch = async (p) => {
-    const { data, error } = await supabase.from('crm_contacts').update(p).eq('id', c.id).select('*').single();
-    if (!error) { setC(data); setSaved('Saved'); setTimeout(() => setSaved(''), 1400); }
+    const { data, error } = await supabase.from('crm_contacts').update(p).eq('id', c.id).select('*').maybeSingle();
+    if (!error && data) { setC(data); setSaved('Saved'); setTimeout(() => setSaved(''), 1400); }
+    else setSaved(error?.message || 'Not saved: this login may not have the People dashboard.');
+  };
+  const removeNote = async (a) => {
+    if (!window.confirm('Delete this note? This cannot be undone.')) return;
+    const { error, count } = await supabase.from('crm_activities').delete({ count: 'exact' }).eq('id', a.id);
+    if (error || count === 0) { window.alert(error?.message || 'That note was not deleted.'); return; }
+    load();
   };
   const addNote = async (e) => {
     e.preventDefault();
@@ -135,6 +143,7 @@ const Contact = ({ contact, onBack }) => {
         <section className="sys-card sys-form">
           <h2>Details {saved && <span className="sys-ok" style={{ margin: 0 }}>{saved}</span>}</h2>
           <label className="sys-field"><span>Name</span><input defaultValue={c.full_name || ''} onBlur={(e) => e.target.value !== (c.full_name || '') && patch({ full_name: e.target.value || null })} /></label>
+          <label className="sys-field"><span>Email</span><input type="email" defaultValue={c.email || ''} onBlur={(e) => e.target.value.trim().toLowerCase() !== (c.email || '') && patch({ email: e.target.value.trim().toLowerCase() || null })} /></label>
           <label className="sys-field"><span>Phone</span><input defaultValue={c.phone || ''} onBlur={(e) => e.target.value !== (c.phone || '') && patch({ phone: e.target.value || null })} /></label>
           <label className="sys-field"><span>Stage</span>
             <select value={c.stage} onChange={(e) => patch({ stage: e.target.value })}>{STAGES.filter(([v]) => v !== 'all').map(([v, l]) => <option key={v} value={v}>{l.replace(/s$/, '')}</option>)}<option value="other">Other</option></select>
@@ -148,6 +157,9 @@ const Contact = ({ contact, onBack }) => {
             </div>
           </div>
           <label className="sys-field"><span>Notes</span><textarea rows={4} defaultValue={c.notes || ''} onBlur={(e) => e.target.value !== (c.notes || '') && patch({ notes: e.target.value || null })} /></label>
+          <div className="adm-actions">
+            <DeleteRecord what={`${c.full_name || c.email} from People`} note="Their timeline goes with them. Applications and orders stay where they are." onDelete={() => supabase.from('crm_contacts').delete({ count: 'exact' }).eq('id', c.id)} onDone={onBack} />
+          </div>
         </section>
 
         <section className="sys-card">
@@ -166,6 +178,7 @@ const Contact = ({ contact, onBack }) => {
                     <strong>{a.title}</strong>
                     <small>{fmtDateTime(a.occurred_at)}{a.source ? ` · ${a.source}` : ''}</small>
                     {a.kind === 'note' && a.detail?.body && a.detail.body !== a.title && <p>{a.detail.body}</p>}
+                    {a.kind === 'note' && <button type="button" className="sys-linkbtn crm-note-del" onClick={() => removeNote(a)}><X size={12} /> Delete note</button>}
                     {a.detail?.message && <p>{a.detail.message}</p>}
                   </div>
                 </li>

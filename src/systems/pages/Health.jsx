@@ -3,6 +3,7 @@ import { Activity, CheckCircle2, RotateCcw, ChevronDown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { fmtDateTime } from '../../lib/academy';
 import DbUpdates from './DbUpdates';
+import { DeleteRecord } from '../AdminRecord';
 
 const VIEWS = [['open', 'Open'], ['resolved', 'Fixed'], ['all', 'All']];
 const KIND = { render: 'Page crashed', error: 'Script error', promise: 'Failed request or task', chunk: 'Old version after a deploy' };
@@ -85,6 +86,7 @@ const Health = () => {
                 {r.user_agent && <p className="sys-muted">Browser: {r.user_agent}</p>}
                 {r.stack && <pre>{r.stack}</pre>}
                 <p className="sys-muted">Send this to your developer if it keeps happening.</p>
+                <DeleteRecord what="this error from the list" note="If it happens again it comes back." onDelete={() => supabase.from('app_errors').delete({ count: 'exact' }).eq('id', r.id)} onDone={load} />
               </div>
             )}
           </li>

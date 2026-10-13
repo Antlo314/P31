@@ -144,3 +144,18 @@
 @media (max-width: 640px) { .db-row { grid-template-columns: 26px minmax(0, 1fr); } .db-row__actions { grid-column: 1 / -1; justify-content: flex-start; } }
 .db-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 14px; padding: 12px 14px; border-radius: 14px; background: rgba(242, 206, 77, 0.1); border: 1px solid rgba(242, 206, 77, 0.45); color: #F8E7A8; text-decoration: none; font-size: 0.9rem; line-height: 1.45; }
 .db-banner strong { color: #F2CE4D; }
+
+/* Edit and Delete in every room (src/systems/AdminRecord.jsx) */
+.adm-del { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.adm-del__btn { color: #ffb4b4; border-color: rgba(255, 140, 140, 0.35); }
+.adm-del__btn:hover { background: rgba(255, 120, 120, 0.12); }
+.adm-edit { padding: 12px; border-radius: 12px; border: 1px solid var(--sys-line); background: rgba(255, 255, 255, 0.03); }
+.adm-del .spin, .adm-edit .spin { animation: adm-spin 1s linear infinite; }
+@keyframes adm-spin { to { transform: rotate(360deg); } }
+.adm-actions { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; margin-top: 4px; }
+.sh-product-wrap { display: grid; gap: 6px; padding-bottom: 8px; border-bottom: 1px solid var(--sys-line); }
+.sh-product__more { margin: 0 0 0 4px; }
+.sub-list li.sub-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; align-items: start; }
+.sub-row__main { display: grid; gap: 2px; min-width: 0; }
+.sub-row__main small { color: var(--sys-muted, rgba(255,255,255,0.6)); overflow-wrap: anywhere; }
+@media (max-width: 700px) { .sub-list li.sub-row { grid-template-columns: 1fr; } }

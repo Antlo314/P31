@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Search, Download, ArrowLeft, Mail, Phone, MapPin, Cake, AtSign, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { fmtDate, fmtDateTime } from '../../lib/academy';
+import { DeleteRecord, EditRecord } from '../AdminRecord';
 
 const STATUSES = [['new', 'New'], ['reviewing', 'Reviewing'], ['approved', 'Approved'], ['waitlist', 'Waitlist'], ['declined', 'Declined'], ['all', 'All']];
 const LABEL = Object.fromEntries(STATUSES);
@@ -92,12 +93,15 @@ const Field = ({ label, children }) => (children ? <div className="app-field"><s
 const Application = ({ app, onBack }) => {
   const [a, setA] = useState(app);
   const [saved, setSaved] = useState('');
+  const [err, setErr] = useState('');
   const patch = async (p) => {
     const { data: who } = await supabase.auth.getUser();
     const { data, error } = await supabase.from('collective_applications')
       .update({ ...p, ...(p.status ? { reviewed_by: who?.user?.id || null, reviewed_at: new Date().toISOString() } : {}) })
-      .eq('id', a.id).select('*').single();
-    if (!error) { setA(data); setSaved('Saved'); setTimeout(() => setSaved(''), 1400); }
+      .eq('id', a.id).select('*').maybeSingle();
+    if (error || !data) { setErr(error?.message || 'That did not save. This login may not have the People dashboard.'); return { error: error || { message: 'Not saved.' } }; }
+    setErr(''); setA(data); setSaved('Saved'); setTimeout(() => setSaved(''), 1400);
+    return { data };
   };
   const first = a.full_name.split(' ')[0];
   const nextStep = `mailto:${a.email}?subject=${encodeURIComponent('Your P31 Collective membership')}&body=${encodeURIComponent(`Hi ${first},\n\nThank you for applying to join the P31 Collective. `)}`;
@@ -145,6 +149,11 @@ const Application = ({ app, onBack }) => {
           </label>
           <a className="sys-btn sys-btn--gold" href={nextStep}><Mail size={15} /> Email {first} the next step</a>
           <p className="sys-muted" style={{ margin: 0 }}>Opens your email with their address filled in. Send the membership payment link or welcome details from there.</p>
+          {err && <p className="sys-error" role="alert">{err}</p>}
+          <div className="adm-actions">
+            <EditRecord value={a} onSave={patch} fields={[['full_name', 'Name'], ['email', 'Email', 'email'], ['phone', 'Phone', 'tel'], ['city_state', 'City and state'], ['business_name', 'Business or ministry'], ['socials', 'Socials']]} />
+            <DeleteRecord what={`${a.full_name}’s application`} note="Their contact stays in People." onDelete={() => supabase.from('collective_applications').delete({ count: 'exact' }).eq('id', a.id)} onDone={onBack} />
+          </div>
         </section>
       </div>
     </div>

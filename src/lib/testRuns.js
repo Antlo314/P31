@@ -152,6 +152,67 @@ export const TEST_RUNS = [
     cleanup: 'Cancel the scheduled post before it goes out if it was only a test.',
   },
   {
+    id: 'edit-scheduled-post', title: 'Change a scheduled post completely', site: 'collective', who: 'team', minutes: 4, tour: 'studio',
+    steps: [
+      'Content Studio → Create post: schedule a TEST post for tomorrow with one photo, on Instagram and Facebook.',
+      'Calendar → the TEST post → Edit. Swap the photo for another, change the caption, tick “Different caption for Facebook” and write one, change the time, Save changes.',
+      'Back on the Calendar, press Duplicate on it, change the caption, and schedule the copy for the day after.',
+      'Delete both TEST posts.',
+    ],
+    expect: [
+      'The calendar shows the new photo, caption and time; Zernio shows the same post with the Facebook caption on Facebook only.',
+      'The copy is a separate post; deleting removes each from the calendar and from Zernio, and nothing goes out.',
+    ],
+    cleanup: 'None, once both are deleted.',
+  },
+  {
+    id: 'edit-delete-rooms', title: 'Edit and delete in every Systems room', site: 'both', who: 'admin', minutes: 6,
+    steps: [
+      'Submit a TEST vendor application and a TEST Join application (use your own email).',
+      'In Systems → Vendor applications open the TEST one → Edit details, change the phone, Save. Then Delete.',
+      'Do the same in Join applications, then in Vendor forms (an agreement, a registration, a volunteer), People (a TEST contact), and Campaigns → Subscribers (add, unsubscribe, delete a TEST address).',
+      'In Curators & shops open a shop → Edit product on one product, change its price, Save; then change it back.',
+      'Sign in as a team login that has only the Vendors dashboard and try the same in Vendor applications.',
+    ],
+    expect: [
+      'Every change shows at once and appears in Systems → Activity; each Delete asks first and the row is gone after.',
+      'The Vendors login can edit and delete in Vendor applications and Vendor forms, but rooms it does not have stay closed.',
+      'If a change is refused, the room says so (“This login may not have that permission”) instead of looking saved.',
+    ],
+    cleanup: 'Delete the TEST rows (that is the test).',
+  },
+  {
+    id: 'form-pdf-copies', title: 'Every form: CEO email and a PDF copy', site: 'both', who: 'visitor', minutes: 5,
+    steps: [
+      'Run the v43 database update and deploy join-notify (see the guide).',
+      'Submit a TEST entry on each: p31market.com/apply, /vendors/agreement, /vendors/register, /vendors/feedback (with an email), /volunteer, thep31collective.org/join, and an intro-call request on thep31collective.org/mentorship.',
+      'Check the inbox you used, and ceo@p31market.com.',
+    ],
+    expect: [
+      'Within a minute each person gets a confirmation email with a PDF of exactly what they sent (signed forms include the drawn signature).',
+      'ceo@p31market.com receives every team notification, with the same PDF attached; the usual team mailboxes still receive theirs.',
+      'Each entry is in Systems (applications, vendor forms) or the mentor console (intro calls).',
+    ],
+    cleanup: 'Delete the TEST rows in Systems.',
+  },
+  {
+    id: 'design-studio', title: 'Design a post, and a reel with music', site: 'both', who: 'team', minutes: 6, tour: 'studio',
+    steps: [
+      'Open Content Studio → Design. The Collection shows the 48 quote cards on the calendar; open one.',
+      'Click the big words on the page and change them; drag them a little; open Styles and pick another colour style.',
+      'Open Music, play two tracks, pick one, then press Play at the top to watch and hear the reel.',
+      'Download → Video with music, and Download → Image (PNG). Then Save.',
+      'Use in a post → As a reel with music. On Create post, set a time a week out and schedule it, then delete it from the Calendar.',
+    ],
+    expect: [
+      'The words, colours and position change on the page as you edit; Undo puts them back.',
+      'The MP4 plays with the words animating in and the music underneath; the PNG matches the page.',
+      'Saved lists the design (for the whole team once v44 has run; in this browser before that).',
+      'Create post opens with the reel attached and the caption filled in; the scheduled post shows on the Calendar.',
+    ],
+    cleanup: 'Delete the TEST post from the Calendar and the design from Saved.',
+  },
+  {
     id: 'campaign', title: 'Send a campaign test', site: 'market', who: 'admin', minutes: 3, tour: 'sys:campaigns',
     steps: ['In Systems → Campaigns start a campaign, write a subject and body (or draft one), and use “Send me a test”.'],
     expect: ['Your admin mailbox receives the test with the P31 template and an unsubscribe link.'],

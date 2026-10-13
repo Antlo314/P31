@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>P31 quote renderer</title></head>
+<body style="margin:0;background:#222">
+<!-- Opened by build.mjs through the dev server: draws collection posts with the Design studio engine. -->
+<script type="module">
+  import { COLLECTION } from '/src/studio/design/collection.js';
+  import { fromWords } from '/src/studio/design/templates.js';
+  import { renderStill, renderVideo, videoLength } from '/src/studio/design/export.js';
+  import { renderTrack, levels } from '/src/studio/design/music.js';
+  const toData = (blob) => new Promise((r) => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(blob); });
+  window.ids = COLLECTION.map((p) => p.id);
+  window.still = async (id) => toData(await renderStill(fromWords(COLLECTION.find((p) => p.id === id)), { type: 'image/jpeg', quality: 0.93 }));
+  window.video = async (id, track, seconds) => {
+    const doc = fromWords(COLLECTION.find((p) => p.id === id));
+    const len = seconds || videoLength(doc);
+    const audio = track ? await renderTrack(track, len, { seed: id.length + len }) : null;
+    const out = await renderVideo(doc, { seconds: len, audio });
+    return { data: await toData(out.blob), type: out.type, seconds: len };
+  };
+  window.trackLevels = async (track, seconds = 12) => { const t0 = performance.now(); const b = await renderTrack(track, seconds); return { ...levels(b), ms: Math.round(performance.now() - t0) }; };
+  window.ready = true;
+</script>
+</body>
+</html>

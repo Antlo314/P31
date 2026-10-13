@@ -7,6 +7,9 @@
 //   • Vendor feedback surveys (p31market.com/vendors/feedback) → email the market team (+ a thank-you when an email was left)
 //   • Volunteer acknowledgments (p31market.com/volunteer)   → email outreach@ + a copy to the volunteer
 //   • Survey invitations (v38): businesses that said "I'm in for the next market" get invited when a market announces its date
+//   • Mentorship intro-call requests (v43)                   → email members@ + a copy to the person
+// Every team email also goes to ceo@p31market.com, and every person who submits gets their copy
+// with a PDF of what they sent attached (the team email carries the same PDF).
 // Every page calls it right after someone submits, and the scheduler calls it every 10 minutes (v38),
 // so nothing waits on a visitor's browser. Calling it again sends nothing new.
 //
@@ -21,6 +24,7 @@
 // Deploy: supabase functions deploy join-notify --no-verify-jwt
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { sendEmail, layout, esc, emailConfigured } from '../_shared/email.ts';
+import { formPdf, toBase64, type PdfSpec } from '../_shared/form-pdf.ts';
 
 const env = (k: string) => Deno.env.get(k) || '';
 const list = (k: string, fallback: string[]) => {
@@ -47,6 +51,53 @@ const MARKET = 'https://www.p31market.com';
 const MARKET_FOOT = 'p31market.com · Where her gifts make room.';
 const VENDOR_EMAIL = 'vendor@p31market.com';
 const OUTREACH_EMAIL = 'outreach@p31market.com';
+const MEMBERS_EMAIL = 'members@thep31collective.org';
+const CEO_EMAIL = 'ceo@p31market.com';
+const COLLECTIVE_FOOT = 'thep31collective.org · The P31 Collective by NEBA';
+const withCeo = (to: string[]) => [...new Set([...to, CEO_EMAIL])];
+
+// The words people agree to, shared by their email copy and their PDF copy.
+const AGREEMENT_BENEFITS = [
+  'A direct storefront link to promote and share your business site',
+  'Ability to list and sell up to 10 products and/or services.',
+  'Increased visibility through Proverbs 31 Marketplace marketing efforts, including organic traffic and SEO optimization to help drive discovery of your storefront.',
+  'Ongoing promotional exposure through targeted campaigns on platforms such as Google, Meta (Facebook/Instagram), and social media to expand your reach and brand awareness.',
+  'Access to a community chat with other Proverbs 31 women creatives',
+  'Web technical support for your storefront',
+  'A professional, uniform storefront layout with customizable product listings',
+];
+const AGREEMENT_DUTIES = [
+  'Collect, report, and remit any applicable sales tax related to your sales through Proverbs 31 Marketplace',
+  'Manage your own shipping and handling',
+  'Create and maintain your own refund and exchange policies',
+  'Provide customers with a direct method of contact',
+  'Manage your product listings once your storefront is set up',
+];
+const AGREEMENT_TERMS = [
+  'My storefront is 100% complimentary for 3 months from date of activation',
+  'Proverbs 31 Marketplace will deduct a 5% transaction fee from each sale',
+  'After the complimentary period, I will have the option to continue my storefront for a $14.99 monthly platform fee. At that time, I will receive a subscription link to enroll if I choose to keep my storefront active. The 5% transaction fee per order will remain applicable.',
+  'I may cancel my storefront subscription at any time with a minimum 2-week notice',
+];
+const MARKET_RULES = [
+  'Arrive and check in no later than 3:15 PM. Late arrivals will not be permitted to set up.',
+  'Bring your own 6-foot table and a covering that sweeps the ground (an 8-foot table and skirt are provided for Package A only). One table per vendor space, a maximum of two chairs, and one assistant.',
+  'It is an indoor event: no tents or canopies. Keep storage hidden beneath the table and remove carts after setup.',
+  'No cooking at your booth; consumables must be sealed in closed-lid containers or fully packaged, with no open samples.',
+  'You handle your own payment processing and sales tax. Please do not break down before the official closing time.',
+  'Vendor fees are non-refundable and non-transferable, including cancellations, no-shows and late arrivals.',
+  'In an emergency on the day, call the P31 Market Team at 470-562-2852.',
+];
+const VOLUNTEER_ACKS = [
+  'I will assist with tasks as assigned by the event organizer and report any issues directly to them.',
+  'I may be photographed or recorded by official event photographers/videographers.',
+  'I will conduct myself respectfully and follow all safety guidelines while on-site.',
+  'I understand that Proverbs 31 Marketplace is not responsible for personal injury or loss of personal belongings.',
+  'I understand that any information discussed in team meetings, or otherwise made known to me, as well as any materials provided to me, belong to Proverbs 31 Marketplace Company, and its owner, and cannot be shared publicly.',
+];
+const plainAddress = (a: Row) => { const x = a.address || {}; return [x.street, x.line2, [x.city, x.state, x.zip].filter(Boolean).join(', '), x.country].filter(Boolean).join(', '); };
+const stars5 = (n: number | null) => (n ? `${n} of 5` : '');
+const join = (v: string[] | null) => (v || []).join(', ');
 
 // ── Email pieces ──────────────────────────────────────────────
 const tr = (label: string, value: string) =>
@@ -89,6 +140,10 @@ type Flow = {
   after?: (admin: Admin, a: Row) => Promise<unknown>;
   /** A copy for the person who submitted (their email is on the row). */
   confirm?: (a: Row) => { subject: string; html: string; replyTo: string } | null;
+  /** The PDF copy of what they sent (attached to their copy and to the team email). */
+  pdf?: (a: Row) => PdfSpec;
+  /** Not a team email (the invitation goes to a vendor): no CEO copy. */
+  external?: boolean;
   sheet: () => { url: string; token: string; tab?: string } | null;
   sheetRow: (a: Row) => Row;
 };
@@ -111,7 +166,22 @@ const FLOWS: Flow[] = [
       + tr('Found us through', esc(a.heard_from)) + tr('Their business', text(a.business_description))
       + tr('What inspired them', text(a.inspiration)) + tr('Hoping to grow in', lines(a.growth_areas)) + tr('Interested in', lines(a.interests)),
     ) + button(`${SYSTEMS}/applications`, 'Review in Systems → Applications'),
-    'thep31collective.org · The P31 Collective by NEBA', 'THE PROVERBS 31 COLLECTIVE'),
+    COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE'),
+    confirm: (a) => ({
+      replyTo: MEMBERS_EMAIL,
+      subject: 'We received your P31 Collective application',
+      html: layout('Thank you for applying', `<p>Hi ${esc(String(a.full_name).split(' ')[0])},</p>
+<p>Thank you for applying to join The P31 Collective. Your application is in, and a copy of everything you sent is attached as a PDF.</p>
+<p>Our team reviews every application personally and will be in touch by email with next steps.</p>
+<p>Questions? Reply to this email or write to ${mail(MEMBERS_EMAIL)}.</p>`, COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE'),
+    }),
+    pdf: (a) => ({
+      brand: 'collective', title: 'Join P31 Collective application', submittedAt: a.created_at, reference: a.id,
+      sections: [
+        { heading: 'Your details', rows: [['Name', a.full_name], ['Business or ministry', a.business_name], ['Email', a.email], ['Phone', a.phone], ['City and state', a.city_state], ['Birthday', a.birthday], ['Social media', a.socials]] },
+        { heading: 'Your answers', rows: [['How you found us', a.heard_from], ['Your business', a.business_description], ['What inspired you to join', a.inspiration], ['Hoping to grow in', join(a.growth_areas)], ['Interested in', join(a.interests)], ['Membership terms', a.agreed ? 'Agreed' : 'Not agreed']] },
+      ],
+    }),
     sheet: () => (env('JOIN_SHEET_URL') ? { url: env('JOIN_SHEET_URL'), token: env('JOIN_SHEET_TOKEN'), tab: env('JOIN_SHEET_TAB') || undefined } : null),
     // Keyed by the Join form questions, so the Apps Script can match the sheet's headings.
     sheetRow: (a) => ({
@@ -145,6 +215,21 @@ const FLOWS: Flow[] = [
       + tr('Website / social', text(a.website_social)) + tr('Sells or offers', lines(a.categories))
       + tr('Serious about joining', esc(a.serious)) + tr('Referred by', text(a.referred_by)) + tr('Anything else', text(a.notes)),
     ) + button(`${SYSTEMS}/vendors`, 'Review in Systems → Vendor applications')),
+    confirm: (a) => ({
+      replyTo: VENDOR_EMAIL,
+      subject: `We received your vendor application: ${a.business_name}`,
+      html: layout('Thank you for applying to vend', `<p>Hi ${esc(String(a.full_name).split(' ')[0])},</p>
+<p>Thank you for applying to vend with Proverbs 31 Marketplace for <b>${esc(a.business_name)}</b>. Your application is in, and a copy of everything you sent is attached as a PDF.</p>
+<p>The market team reviews every application and will email you with a decision and, if approved, your next steps.</p>
+<p>Questions? Reply to this email or write to ${mail(VENDOR_EMAIL)}.</p>`, MARKET_FOOT),
+    }),
+    pdf: (a) => ({
+      brand: 'market', title: 'Vendor application', submittedAt: a.created_at, reference: a.id,
+      sections: [
+        { heading: 'Your details', rows: [['Name', a.full_name], ['Business or brand', a.business_name], ['Email', a.email], ['Phone', a.phone], ['Website or social media', a.website_social]] },
+        { heading: 'Your answers', rows: [['Serious about joining and participating', a.serious], ['What you sell or offer', join(a.categories)], ['Referred by', a.referred_by], ['Anything else', a.notes], ['Vendor terms', a.agreed ? 'Agreed' : 'Not agreed']] },
+      ],
+    }),
     sheet: () => {
       const tab = env('VENDOR_SHEET_TAB');
       if (env('VENDOR_SHEET_URL')) return { url: env('VENDOR_SHEET_URL'), token: env('VENDOR_SHEET_TOKEN') || env('JOIN_SHEET_TOKEN'), tab: tab || undefined };
@@ -173,7 +258,7 @@ const FLOWS: Flow[] = [
   {
     name: 'agreement',
     table: 'vendor_agreements',
-    fields: 'id, business_name, first_name, last_name, email, phone, address, signed_name, signed_on, terms_version, curator_id, source, created_at',
+    fields: 'id, business_name, first_name, last_name, email, phone, address, signature, signed_name, signed_on, terms_version, curator_id, source, created_at',
     to: marketTeam,
     from: marketFrom,
     subject: (a) => `Storefront agreement signed: ${a.business_name} (${fullName(a)})`,
@@ -190,28 +275,10 @@ const FLOWS: Flow[] = [
       subject: `Your Proverbs 31 Marketplace Storefront Agreement: ${a.business_name}`,
       html: layout('Your storefront agreement', `<p>Hi ${esc(a.first_name)},</p>
 <p>Thank you for completing the Proverbs 31 Marketplace Storefront Agreement for <b>${esc(a.business_name)}</b> on ${esc(longDate(a.signed_on))}, signed as <b>${esc(a.signed_name)}</b>. This is your copy of what you agreed to.</p>
-<p style="margin:14px 0 4px"><b>P31 Storefront Benefits</b></p>${bullets([
-        'A direct storefront link to promote and share your business site',
-        'Ability to list and sell up to 10 products and/or services.',
-        'Increased visibility through Proverbs 31 Marketplace marketing efforts, including organic traffic and SEO optimization to help drive discovery of your storefront.',
-        'Ongoing promotional exposure through targeted campaigns on platforms such as Google, Meta (Facebook/Instagram), and social media to expand your reach and brand awareness.',
-        'Access to a community chat with other Proverbs 31 women creatives',
-        'Web technical support for your storefront',
-        'A professional, uniform storefront layout with customizable product listings',
-      ])}
-<p style="margin:14px 0 4px"><b>Vendor Responsibilities</b></p>${bullets([
-        'Collect, report, and remit any applicable sales tax related to your sales through Proverbs 31 Marketplace',
-        'Manage your own shipping and handling',
-        'Create and maintain your own refund and exchange policies',
-        'Provide customers with a direct method of contact',
-        'Manage your product listings once your storefront is set up',
-      ])}
-<p style="margin:14px 0 4px"><b>Terms & Subscription Agreement</b></p>${bullets([
-        'My storefront is 100% complimentary for 3 months from date of activation',
-        'Proverbs 31 Marketplace will deduct a 5% transaction fee from each sale',
-        'After the complimentary period, I will have the option to continue my storefront for a $14.99 monthly platform fee. At that time, I will receive a subscription link to enroll if I choose to keep my storefront active. The 5% transaction fee per order will remain applicable.',
-        'I may cancel my storefront subscription at any time with a minimum 2-week notice',
-      ])}
+<p style="margin:14px 0 4px"><b>P31 Storefront Benefits</b></p>${bullets(AGREEMENT_BENEFITS)}
+<p style="margin:14px 0 4px"><b>Vendor Responsibilities</b></p>${bullets(AGREEMENT_DUTIES)}
+<p style="margin:14px 0 4px"><b>Terms & Subscription Agreement</b></p>${bullets(AGREEMENT_TERMS)}
+<p>A PDF copy of your signed agreement is attached.</p>
 <p>The full agreement, including liability, termination, legal compliance and food-product terms, is at ${link(`${MARKET}/vendors/agreement`, 'p31market.com/vendors/agreement')}.</p>
 <p><b>What happens next.</b> ${a.curator_id
           ? `You already have a curator account with this email, so your storefront agreement is now on file. Sign in at ${link(`${MARKET}/login`, 'p31market.com/login')}.`
@@ -219,6 +286,17 @@ const FLOWS: Flow[] = [
             ? `You are already approved, so there is no wait: create your curator account at ${link(`${MARKET}/register`, 'p31market.com/register')} using this same email (<b>${esc(a.email)}</b>) and your studio opens straight away.`
             : `Within 7–10 days you will receive a link to create your account and set up your storefront. Use this same email (<b>${esc(a.email)}</b>) when you register.`}</p>
 <p>Questions? Reply to this email or write to ${mail(VENDOR_EMAIL)}.</p>`, MARKET_FOOT),
+    }),
+    pdf: (a) => ({
+      brand: 'market', title: 'Proverbs 31 Marketplace Storefront Agreement', submittedAt: a.created_at, reference: a.id,
+      sections: [
+        { heading: 'Business and contact', rows: [['Business', a.business_name], ['Contact', fullName(a)], ['Email', a.email], ['Phone', a.phone], ['Business address', plainAddress(a)], ['Terms version', a.terms_version]] },
+        { heading: 'P31 Storefront Benefits', bullets: AGREEMENT_BENEFITS },
+        { heading: 'Vendor Responsibilities', bullets: AGREEMENT_DUTIES },
+        { heading: 'Terms & Subscription Agreement', bullets: AGREEMENT_TERMS },
+        { paragraph: `The full agreement, including liability, termination, legal compliance and food-product terms, is at ${MARKET}/vendors/agreement.` },
+      ],
+      signature: a.signature, signedName: a.signed_name, signedOn: a.signed_on,
     }),
     // Approved through the vendor application already (v35 pre-approval)? Then the account link goes out now.
     enrich: async (admin, a) => {
@@ -239,7 +317,7 @@ const FLOWS: Flow[] = [
   {
     name: 'registration',
     table: 'vendor_registrations',
-    fields: 'id, event_id, event_label, business_name, first_name, last_name, email, phone, website, social, products, logo_url, signed_name, signed_on, source, created_at',
+    fields: 'id, event_id, event_label, business_name, first_name, last_name, email, phone, website, social, products, logo_url, signature, signed_name, signed_on, source, created_at',
     to: marketTeam,
     from: marketFrom,
     subject: (a) => `Market registration: ${a.business_name} for ${a.event_label}`,
@@ -255,18 +333,20 @@ const FLOWS: Flow[] = [
       html: layout('Your market registration is in', `<p>Hi ${esc(a.first_name)},</p>
 <p>Thank you for registering <b>${esc(a.business_name)}</b> for the P31 Marketplace, <b>${esc(a.event_label)}</b>, and for signing the Vendor Rules & Regulations on ${esc(longDate(a.signed_on))}.</p>
 <p>The market team will confirm your space and send booth placement, load-in time and payment details by email.</p>
-<p style="margin:14px 0 4px"><b>A few reminders for market day</b></p>${bullets([
-        'Arrive and check in no later than 3:15 PM. Late arrivals will not be permitted to set up.',
-        'Bring your own 6-foot table and a covering that sweeps the ground (an 8-foot table and skirt are provided for Package A only). One table per vendor space, a maximum of two chairs, and one assistant.',
-        'It is an indoor event: no tents or canopies. Keep storage hidden beneath the table and remove carts after setup.',
-        'No cooking at your booth; consumables must be sealed in closed-lid containers or fully packaged, with no open samples.',
-        'You handle your own payment processing and sales tax. Please do not break down before the official closing time.',
-        'Vendor fees are non-refundable and non-transferable, including cancellations, no-shows and late arrivals.',
-        'In an emergency on the day, call the P31 Market Team at 470-562-2852.',
-      ])}
+<p style="margin:14px 0 4px"><b>A few reminders for market day</b></p>${bullets(MARKET_RULES)}
+<p>A PDF copy of your registration is attached.</p>
 <p>The full rules are at ${link(`${MARKET}/vendors/register`, 'p31market.com/vendors/register')}. Questions? Reply to this email or write to ${mail(VENDOR_EMAIL)}.</p>`, MARKET_FOOT),
     }),
     sheet: () => null,
+    pdf: (a) => ({
+      brand: 'market', title: `Market registration: ${a.event_label}`, submittedAt: a.created_at, reference: a.id,
+      sections: [
+        { heading: 'Your registration', rows: [['Event', a.event_label], ['Business', a.business_name], ['Contact', fullName(a)], ['Email', a.email], ['Phone', a.phone], ['Website', a.website], ['Social media', a.social], ['Products or services', a.products], ['Logo', a.logo_url ? 'Uploaded' : 'Not uploaded']] },
+        { heading: 'Market-day reminders', bullets: MARKET_RULES },
+        { paragraph: `You signed the Vendor Rules & Regulations. The full rules are at ${MARKET}/vendors/register.` },
+      ],
+      signature: a.signature, signedName: a.signed_name, signedOn: a.signed_on,
+    }),
     sheetRow: (a) => ({ 'Timestamp': eastern(a.created_at), 'Event': a.event_label, 'Business Name': a.business_name, 'Contact': fullName(a), 'Email': a.email, 'Phone': a.phone }),
   },
   {
@@ -287,15 +367,23 @@ const FLOWS: Flow[] = [
       subject: `Thank you for your feedback on ${a.market_label}`,
       html: layout('Thank you for your honest feedback', `<p>Thank you for taking the time to tell us how <b>${esc(a.market_label)}</b> went for <b>${esc(a.business_name)}</b>. We read every survey and use it to shape the next market.</p>
 ${a.again === 'in' ? `<p>You said you are in for the next market. The team will reach out as the next date is set.</p>` : a.again === 'waitlist' ? `<p>You asked to stay on the waitlist for future events. We will keep you posted.</p>` : ''}
-<p>Questions or anything else to add? Reply to this email or write to ${mail(VENDOR_EMAIL)}.</p>`, MARKET_FOOT),
+<p>A PDF copy of your answers is attached. Questions or anything else to add? Reply to this email or write to ${mail(VENDOR_EMAIL)}.</p>`, MARKET_FOOT),
     } : null),
+    pdf: (a) => ({
+      brand: 'market', title: `Vendor feedback survey: ${a.market_label}`, submittedAt: a.created_at, reference: a.id,
+      sections: [
+        { heading: 'About you', rows: [['Market', a.market_label], ['Business', a.business_name], ['Email', a.email]] },
+        { heading: 'Your ratings', rows: [['Overall experience', stars5(a.overall)], ['Venue and atmosphere', stars5(a.venue)], ['DJ and sounds', stars5(a.dj)], ['Organization, host and team', stars5(a.organization)], ['Sales vs. traffic', a.sales]] },
+        { heading: 'Your answers', rows: [['Vending with P31 again', AGAIN[a.again] || a.again], ['Enjoyed most', a.enjoyed], ['Could improve', a.improve], ['Additional comments', a.comments]] },
+      ],
+    }),
     sheet: () => null,
     sheetRow: (a) => ({ 'Timestamp': eastern(a.created_at), 'Market': a.market_label, 'Business Name': a.business_name, 'Overall': a.overall }),
   },
   {
     name: 'volunteer',
     table: 'volunteer_signups',
-    fields: 'id, event_id, first_name, last_name, phone, email, emergency_contact, signed_name, signed_on, source, created_at',
+    fields: 'id, event_id, first_name, last_name, phone, email, emergency_contact, signature, signed_name, signed_on, source, created_at',
     to: () => list('VOLUNTEER_NOTIFY_TO', [OUTREACH_EMAIL, 'founder@thep31collective.org']),
     from: marketFrom,
     subject: (a) => `New volunteer: ${fullName(a)}`,
@@ -308,23 +396,58 @@ ${a.again === 'in' ? `<p>You said you are in for the next market. The team will 
       subject: 'Thank you for volunteering with Proverbs 31 Marketplace',
       html: layout('Thank you for serving with us', `<p>Hi ${esc(a.first_name)},</p>
 <p>Thank you for signing the Volunteer Day-of-Event Acknowledgment on ${esc(longDate(a.signed_on))}. The market team will reach out with your assignment and arrival time.</p>
-<p style="margin:14px 0 4px"><b>What you acknowledged</b></p>${bullets([
-        'I will assist with tasks as assigned by the event organizer and report any issues directly to them.',
-        'I may be photographed or recorded by official event photographers/videographers.',
-        'I will conduct myself respectfully and follow all safety guidelines while on-site.',
-        'I understand that Proverbs 31 Marketplace is not responsible for personal injury or loss of personal belongings.',
-        'I understand that any information discussed in team meetings, or otherwise made known to me, as well as any materials provided to me, belong to Proverbs 31 Marketplace Company, and its owner, and cannot be shared publicly.',
-      ])}
+<p style="margin:14px 0 4px"><b>What you acknowledged</b></p>${bullets(VOLUNTEER_ACKS)}
+<p>A PDF copy of your signed acknowledgment is attached.</p>
 <p>Emergency contact on file: ${esc(a.emergency_contact)}. If anything changes, reply to this email or write to ${mail(OUTREACH_EMAIL)}.</p>`, MARKET_FOOT),
     }),
     sheet: () => null,
+    pdf: (a) => ({
+      brand: 'market', title: 'Volunteer Day-of-Event Acknowledgment', submittedAt: a.created_at, reference: a.id,
+      sections: [
+        { heading: 'Your details', rows: [['Name', fullName(a)], ['Email', a.email], ['Phone', a.phone], ['Emergency contact', a.emergency_contact]] },
+        { heading: 'What you acknowledged', bullets: VOLUNTEER_ACKS },
+      ],
+      signature: a.signature, signedName: a.signed_name, signedOn: a.signed_on,
+    }),
     sheetRow: (a) => ({ 'Timestamp': eastern(a.created_at), 'Name': fullName(a), 'Email': a.email, 'Phone': a.phone }),
+  },
+  // Mentorship intro-call requests (thep31collective.org/mentorship): v43 gives the table notified_at.
+  {
+    name: 'introcall',
+    table: 'academy_inquiries',
+    fields: 'id, program_id, full_name, email, phone, message, preferred_times, created_at',
+    to: () => list('INTRO_NOTIFY_TO', [MEMBERS_EMAIL, 'founder@thep31collective.org']),
+    from: () => env('COLLECTIVE_EMAIL_FROM') || undefined,
+    enrich: async (admin, a) => {
+      const { data } = a.program_id ? await admin.from('academy_programs').select('title, slug').eq('id', a.program_id).maybeSingle() : { data: null };
+      return { ...a, program: data?.title || 'Mentorship', slug: data?.slug || 'business' };
+    },
+    subject: (a) => `Intro call request: ${a.full_name} (${a.program})`,
+    email: (a) => layout(`Intro call request: ${a.full_name}`, intro(a, `asked for an intro call about the ${a.program}`) + table(
+      tr('Name', esc(a.full_name)) + tr('Program', esc(a.program)) + tr('Email', mail(a.email)) + (a.phone ? tr('Phone', tel(a.phone)) : '')
+      + tr('Best times', text(a.preferred_times)) + tr('Message', text(a.message)),
+    ) + button(`https://www.thep31collective.org/academy/${a.slug}/teach/calls`, 'Open in the mentor console'), COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE'),
+    confirm: (a) => ({
+      replyTo: MEMBERS_EMAIL,
+      subject: `We received your intro call request: ${a.program}`,
+      html: layout('Thank you for reaching out', `<p>Hi ${esc(String(a.full_name).split(' ')[0])},</p>
+<p>Thank you for asking about the <b>${esc(a.program)}</b>. Your request is in, and a copy is attached as a PDF.</p>
+<p>A mentor will reach out to set a time for your intro call${a.preferred_times ? ', keeping your best times in mind' : ''}.</p>
+<p>Questions? Reply to this email or write to ${mail(MEMBERS_EMAIL)}.</p>`, COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE'),
+    }),
+    pdf: (a) => ({
+      brand: 'collective', title: `Intro call request: ${a.program}`, submittedAt: a.created_at, reference: a.id,
+      sections: [{ heading: 'Your request', rows: [['Name', a.full_name], ['Program', a.program], ['Email', a.email], ['Phone', a.phone], ['Best times', a.preferred_times], ['Message', a.message]] }],
+    }),
+    sheet: () => null,
+    sheetRow: (a) => ({ 'Timestamp': eastern(a.created_at), 'Name': a.full_name, 'Email': a.email }),
   },
 ];
 
 // Survey invitations: v38 adds them to a lineup when a vendor market announces its date.
 FLOWS.push({
   name: 'invite',
+  external: true,
   table: 'event_vendors',
   fields: 'id, event_id, business_name, email, created_at',
   scope: (q) => q.eq('source', 'feedback').not('email', 'is', null),
@@ -384,14 +507,24 @@ Deno.serve(async (req) => {
       try {
         for (const raw of await claim(admin, f, 'notified_at')) {
           const a = f.enrich ? await f.enrich(admin, raw).catch(() => raw) : raw;
-          const res = await sendEmail(f.to(a), f.subject(a), f.email(a), (f.replyTo ? f.replyTo(a) : a.email) || undefined, f.from());
+          // The PDF copy of what they sent: best effort (the emails still go if it cannot be made).
+          let files: { filename: string; content: string }[] | undefined;
+          if (f.pdf) {
+            try {
+              const spec = f.pdf(a);
+              const slug = spec.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+              files = [{ filename: `${slug}-${String(a.id).slice(0, 8)}.pdf`, content: toBase64(await formPdf(spec)) }];
+            } catch (e) { console.error(`join-notify ${f.name} pdf`, e); }
+          }
+          const to = f.external ? f.to(a) : withCeo(f.to(a));
+          const res = await sendEmail(to, f.subject(a), f.email(a), (f.replyTo ? f.replyTo(a) : a.email) || undefined, f.from(), files);
           if (!res.ok) { await release(admin, f, 'notified_at', a.id); continue; }
           r.emailed += 1;
           if (f.after) await f.after(admin, a).catch((e) => console.error(`join-notify ${f.name} after`, e));
-          // Their copy: best effort, never blocks the team email.
+          // Their copy, with the PDF: best effort, never blocks the team email.
           const c = f.confirm?.(a);
           if (c && a.email) {
-            try { const sent = await sendEmail(a.email, c.subject, c.html, c.replyTo, f.from()); if (sent.ok) r.confirmed += 1; } catch (e) { console.error(`join-notify ${f.name} confirm`, e); }
+            try { const sent = await sendEmail(a.email, c.subject, c.html, c.replyTo, f.from(), files); if (sent.ok) r.confirmed += 1; } catch (e) { console.error(`join-notify ${f.name} confirm`, e); }
           }
         }
       } catch (e) {

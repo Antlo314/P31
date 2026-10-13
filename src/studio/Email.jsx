@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Mail, Send, Sparkles, EyeOff, Inbox, RefreshCw, AlertTriangle, Paperclip, Undo2, Check } from 'lucide-react';
+import { Mail, Send, Sparkles, EyeOff, Inbox, RefreshCw, AlertTriangle, Paperclip, Undo2, Check, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { DashHead } from '../apps/DashShell';
 
@@ -71,7 +71,7 @@ const StudioEmail = () => {
           {!threads && !error && <li className="ds-muted">Loading…</li>}
         </ul>
         <div ref={viewRef}>
-          {open ? <Thread key={open.id} thread={open} onChanged={load} /> : (
+          {open ? <Thread key={open.id} thread={open} onChanged={load} onDeleted={() => { setOpen(null); load(); }} /> : (
             <div className="ds-card"><p className="ds-muted"><Mail size={16} /> Pick an email to read it and Carla’s draft.</p></div>
           )}
         </div>
@@ -80,7 +80,7 @@ const StudioEmail = () => {
   );
 };
 
-const Thread = ({ thread: initial, onChanged }) => {
+const Thread = ({ thread: initial, onChanged, onDeleted }) => {
   const [t, setT] = useState(initial);
   const [msgs, setMsgs] = useState(null);
   const [draft, setDraft] = useState(initial.draft || '');
@@ -188,6 +188,14 @@ const Thread = ({ thread: initial, onChanged }) => {
       )}
       {note && <p className="em-note" role="status">{note}</p>}
       {error && <p className="k-error" role="alert">{error}</p>}
+      <div className="k-actions em-delete">
+        <button className="k-btn k-btn--ghost k-btn--sm" disabled={!!busy} onClick={async () => {
+          if (!window.confirm('Delete this conversation from the inbox? The emails stay in the mailbox itself; this only removes it here. This cannot be undone.')) return;
+          const { error: err, count } = await supabase.from('email_threads').delete({ count: 'exact' }).eq('id', t.id);
+          if (err || count === 0) return setError(err?.message || 'It was not deleted. This login may not have the Emails dashboard.');
+          onDeleted?.();
+        }}><Trash2 size={15} /> Delete conversation</button>
+      </div>
     </div>
   );
 };

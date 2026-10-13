@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CalendarClock, PenSquare, MessagesSquare, MessageCircle, Clapperboard, Lock, Mail, CalendarRange, Wand2 } from 'lucide-react';
+import { LayoutDashboard, CalendarClock, PenSquare, MessagesSquare, MessageCircle, Clapperboard, Lock, Mail, CalendarRange, Wand2, Palette } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useRoles } from '../lib/roles';
 import { dashboardsOf } from '../lib/dashboards';
@@ -9,6 +9,8 @@ import { StudioOverview, StudioCalendar, StudioCompose, StudioInbox, StudioComme
 import StudioEmail from './Email';
 import StudioPlanner from './Planner';
 import StudioFactory from './Factory';
+// The Design studio carries its own fonts and music engine, so it loads only when opened.
+const StudioDesign = lazy(() => import('./design/Designer'));
 import { supabase } from '../lib/supabase';
 import logo from '../assets/web/p31-mark-192.webp';
 import Tour, { TourButton } from '../components/Tour';
@@ -20,6 +22,7 @@ const NAV = [
   { to: '/studio', label: 'Overview', Icon: LayoutDashboard, end: true },
   { to: '/studio/email', label: 'Email', Icon: Mail },
   { to: '/studio/planner', label: 'Planner', Icon: CalendarRange },
+  { to: '/studio/design', label: 'Design', Icon: Palette },
   { to: '/studio/autocreate', label: 'Auto-create', Icon: Wand2 },
   { to: '/studio/calendar', label: 'Calendar', Icon: CalendarClock },
   { to: '/studio/compose', label: 'Create post', Icon: PenSquare },
@@ -27,7 +30,7 @@ const NAV = [
   { to: '/studio/comments', label: 'Comments', Icon: MessageCircle },
   { to: '/studio/create', label: 'Creative tools', Icon: Clapperboard },
 ];
-const PAGES = { '': StudioOverview, email: StudioEmail, planner: StudioPlanner, autocreate: StudioFactory, calendar: StudioCalendar, compose: StudioCompose, inbox: StudioInbox, comments: StudioComments, create: StudioCreate };
+const PAGES = { '': StudioOverview, email: StudioEmail, planner: StudioPlanner, design: StudioDesign, autocreate: StudioFactory, calendar: StudioCalendar, compose: StudioCompose, inbox: StudioInbox, comments: StudioComments, create: StudioCreate };
 
 // Which Studio pages a person gets: the Content creator dashboard (and admins, Studio seats) open
 // everything; Social media manager opens the overview, messages and comments; Emails opens the inbox.
@@ -82,6 +85,7 @@ const StudioApp = () => {
       tools={<TourButton id={full ? 'studio' : 'studio-email'} />}
       banner={roles.preview ? <div className="ds-banner">Layout preview (development only) — Zernio calls need a real Studio sign-in.</div> : null}
     >
+      <Suspense fallback={<p className="ds-muted">Loading…</p>}>
       <Routes>
         {Object.entries(PAGES).map((entry) => {
           const seg = entry[0]; const Page = entry[1];
@@ -90,6 +94,7 @@ const StudioApp = () => {
         })}
         <Route path="*" element={<Navigate to={home} replace />} />
       </Routes>
+      </Suspense>
       {full ? <Tour id="studio" steps={STUDIO_TOUR} user={user} autoStart={!roles.preview} /> : <Tour id="studio-email" steps={STUDIO_EMAIL_TOUR} user={user} autoStart={false} />}
       {full && <Tour id="studio-email" steps={STUDIO_EMAIL_TOUR} user={user} autoStart={false} />}
     </DashShell>

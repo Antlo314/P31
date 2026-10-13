@@ -211,7 +211,10 @@ const PlanItem = ({ item, events, onClose, onChanged }) => {
     setBusy('');
   };
 
-  const remove = async () => { await supabase.from('content_plan').delete().eq('id', f.id); onChanged(null); onClose(); };
+  const remove = async () => {
+    if (!window.confirm('Delete this planned post? This cannot be undone.')) return;
+    await supabase.from('content_plan').delete().eq('id', f.id); onChanged(null); onClose();
+  };
   const KindIcon = (KIND[f.kind] || KIND.reel)[1];
 
   return (

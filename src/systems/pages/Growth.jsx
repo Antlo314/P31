@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Search, ExternalLink, Bookmark, BookmarkCheck, Download, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import AiAssist from '../../components/AiAssist';
+import { DeleteRecord } from '../AdminRecord';
 
 const SOURCES = [
   { id: 'facebook_groups', label: 'Facebook groups', hint: 'women entrepreneurs Atlanta' },
@@ -177,6 +178,10 @@ const Growth = () => {
                   </div>
                   <AiAssist compact task="outreach" label="Draft outreach message"
                     getInput={() => ({ name: p.name, platform: p.platform, about: p.description || p.source_query })} />
+                  <div className="adm-actions">
+                    <DeleteRecord what={`${p.name} from your saved list`} onDelete={() => supabase.from('social_prospects').delete({ count: 'exact' }).eq('id', p.id)}
+                      onDone={() => setSaved((rows) => rows.filter((r) => r.id !== p.id))} />
+                  </div>
                 </div>
               </article>
             ))}

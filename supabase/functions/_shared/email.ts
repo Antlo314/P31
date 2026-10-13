@@ -5,7 +5,8 @@
 
 export const emailConfigured = () => !!Deno.env.get('RESEND_API_KEY');
 
-export async function sendEmail(to: string | string[], subject: string, html: string, replyTo?: string, from?: string) {
+/** attachments: [{ filename, content (base64) }], e.g. the PDF copy of a form. */
+export async function sendEmail(to: string | string[], subject: string, html: string, replyTo?: string, from?: string, attachments?: { filename: string; content: string }[]) {
   const key = Deno.env.get('RESEND_API_KEY');
   if (!key) {
     console.log(`[email skipped — no RESEND_API_KEY] ${subject} → ${to}`);
@@ -20,6 +21,7 @@ export async function sendEmail(to: string | string[], subject: string, html: st
       subject,
       html,
       ...(replyTo ? { reply_to: replyTo } : {}),
+      ...(attachments?.length ? { attachments } : {}),
     }),
   });
   if (!res.ok) {

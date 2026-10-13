@@ -4,6 +4,12 @@ import { Store, Star, ExternalLink, MessagesSquare, Check, X, Eye, EyeOff, Packa
 import { supabase } from '../../lib/supabase';
 import { useRoles } from '../../lib/roles';
 import { SITES } from '../nav';
+import { DeleteRecord, EditRecord } from '../AdminRecord';
+
+// The vendor studio's availability choices, so an admin edit matches what she sees.
+const STOCK = [['in_stock', 'In stock'], ['out_of_stock', 'Sold out'], ['limited_edition', 'Limited edition'], ['pre_order', 'Pre-order']];
+const PRODUCT_FIELDS = [['name', 'Name'], ['price', 'Price ($)', 'number'], ['compare_at_price', 'Was price ($, shows a sale)', 'number'], ['category', 'Category'],
+  ['stock_status', 'Availability', 'select', STOCK], ['inventory', 'How many left', 'number'], ['badge', 'Badge (New, Bestseller, Handmade…)'], ['description', 'Description', 'textarea']];
 
 const STATUSES = [['draft', 'Draft'], ['pending', 'Pending'], ['approved', 'Approved'], ['paused', 'Paused'], ['rejected', 'Needs changes']];
 const STATUS_LABEL = Object.fromEntries(STATUSES);
@@ -96,9 +102,10 @@ const Shops = () => {
     patch(sel, { business_name: edit.business_name, slug: edit.slug, tagline: edit.tagline, admin_feedback: edit.admin_feedback, verification_badges: edit.verification_badges.split(',').map((b) => b.trim()).filter(Boolean) }, 'Shop details saved.');
   };
   const setProduct = async (p, change) => {
-    const { error: err } = await supabase.rpc('shop_admin_set_product', { p_id: p.id, p_patch: change });
-    if (err) return setError(err.message);
-    setProducts((list) => list.map((x) => (x.id === p.id ? { ...x, ...change } : x)));
+    const { data, error: err } = await supabase.rpc('shop_admin_set_product', { p_id: p.id, p_patch: change });
+    if (err) { setError(err.message); return { error: err }; }
+    setProducts((list) => list.map((x) => (x.id === p.id ? { ...x, ...change, ...(data && typeof data === 'object' ? data : {}) } : x)));
+    return { data };
   };
   const message = async (s) => {
     const { data, error: err } = await supabase.rpc('chat_open_dm', { p_user: s.id });
@@ -246,19 +253,34 @@ const Shops = () => {
               <span className="sys-muted"><Mail size={13} /> {sel.stripe_connected ? 'Payouts connected' : 'Payouts not connected'}</span>
               {sel.plan && <span className="sys-muted">Plan: {sel.plan}</span>}
             </div>
+            {admin && (
+              <div className="adm-actions">
+                <DeleteRecord what={`the shop ${sel.business_name || ''} and all of its products`} note="Her login stays, so she could start a new shop; orders keep their record." label="Delete shop"
+                  onDelete={() => supabase.rpc('shop_admin_delete_shop', { p_id: sel.id })}
+                  onDone={() => { setSel(null); setMsg('Shop deleted.'); load(); }} />
+              </div>
+            )}
 
             <div>
               <p className="sys-eyebrow"><Package size={13} /> Products ({products ? products.length : '…'})</p>
               {products === null ? <p className="sys-muted">Loading…</p> : products.length === 0 ? <p className="sys-muted">No products yet.</p> : (
                 <div className="sh-products">
                   {products.map((p) => (
-                    <div key={p.id} className={`sh-product ${p.is_active ? '' : 'is-off'}`}>
-                      {p.image_url ? <img src={p.image_url} alt="" /> : <span className="sh-product__ph" />}
-                      <span className="sh-product__main"><strong>{p.name}</strong><small>{money(p.price)}{p.badge ? ` · ${p.badge}` : ''}{p.is_featured ? ' · featured' : ''}{p.is_active ? '' : ' · hidden'}</small></span>
-                      <span className="sh-product__actions">
-                        <button type="button" className="sys-icon-btn" title={p.is_active ? 'Hide this product' : 'Show this product'} aria-label={p.is_active ? 'Hide' : 'Show'} onClick={() => setProduct(p, { is_active: !p.is_active })}>{p.is_active ? <EyeOff size={14} /> : <Eye size={14} />}</button>
-                        <button type="button" className="sys-icon-btn" title={p.is_featured ? 'Unfeature' : 'Feature in the shop'} aria-label="Feature" onClick={() => setProduct(p, { is_featured: !p.is_featured })}><Star size={14} fill={p.is_featured ? '#F2CE4D' : 'none'} /></button>
-                      </span>
+                    <div key={p.id} className="sh-product-wrap">
+                      <div className={`sh-product ${p.is_active ? '' : 'is-off'}`}>
+                        {p.image_url ? <img src={p.image_url} alt="" /> : <span className="sh-product__ph" />}
+                        <span className="sh-product__main"><strong>{p.name}</strong><small>{money(p.price)}{p.badge ? ` · ${p.badge}` : ''}{p.is_featured ? ' · featured' : ''}{p.is_active ? '' : ' · hidden'}</small></span>
+                        <span className="sh-product__actions">
+                          <button type="button" className="sys-icon-btn" title={p.is_active ? 'Hide this product' : 'Show this product'} aria-label={p.is_active ? 'Hide' : 'Show'} onClick={() => setProduct(p, { is_active: !p.is_active })}>{p.is_active ? <EyeOff size={14} /> : <Eye size={14} />}</button>
+                          <button type="button" className="sys-icon-btn" title={p.is_featured ? 'Unfeature' : 'Feature in the shop'} aria-label="Feature" onClick={() => setProduct(p, { is_featured: !p.is_featured })}><Star size={14} fill={p.is_featured ? '#F2CE4D' : 'none'} /></button>
+                        </span>
+                      </div>
+                      <div className="adm-actions sh-product__more">
+                        <EditRecord title="Edit product" value={{ ...p, stock_status: p.stock_status || 'in_stock' }} fields={PRODUCT_FIELDS} onSave={(patch) => setProduct(p, patch)} />
+                        <DeleteRecord what={`${p.name}`} note="It disappears from her shop." label="Delete product"
+                          onDelete={() => supabase.rpc('shop_admin_delete_product', { p_id: p.id })}
+                          onDone={() => setProducts((list) => list.filter((x) => x.id !== p.id))} />
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -3,6 +3,7 @@ import { Search, Download, ArrowLeft, Mail, Phone, AtSign, Check, Store } from '
 import { supabase } from '../../lib/supabase';
 import { fmtDate, fmtDateTime } from '../../lib/academy';
 import { formatEventDate, showDate } from '../../lib/events';
+import { DeleteRecord, EditRecord } from '../AdminRecord';
 
 const STATUSES = [['new', 'New'], ['reviewing', 'Reviewing'], ['approved', 'Approved'], ['waitlist', 'Waitlist'], ['declined', 'Declined'], ['all', 'All']];
 const LABEL = Object.fromEntries(STATUSES);
@@ -91,12 +92,15 @@ const Field = ({ label, children }) => (children ? <div className="app-field"><s
 const VendorApplication = ({ app, onBack }) => {
   const [a, setA] = useState(app);
   const [saved, setSaved] = useState('');
+  const [err, setErr] = useState('');
   const patch = async (p) => {
     const { data: who } = await supabase.auth.getUser();
     const { data, error } = await supabase.from('vendor_applications')
       .update({ ...p, ...(p.status ? { reviewed_by: who?.user?.id || null, reviewed_at: new Date().toISOString() } : {}) })
-      .eq('id', a.id).select('*').single();
-    if (!error) { setA(data); setSaved('Saved'); setTimeout(() => setSaved(''), 1400); }
+      .eq('id', a.id).select('*').maybeSingle();
+    if (error || !data) { setErr(error?.message || 'That did not save. This login may not have the Vendors dashboard.'); return { error: error || { message: 'Not saved.' } }; }
+    setErr(''); setA(data); setSaved('Saved'); setTimeout(() => setSaved(''), 1400);
+    return { data };
   };
   const first = a.full_name.split(' ')[0];
   const [note, setNote] = useState('');
@@ -190,6 +194,11 @@ const VendorApplication = ({ app, onBack }) => {
           ) : (
             <p className="sys-muted" style={{ margin: 0 }}>Set the status to Approved, Waitlist or Declined and the email button appears here.</p>
           )}
+          {err && <p className="sys-error" role="alert">{err}</p>}
+          <div className="adm-actions">
+            <EditRecord value={a} onSave={patch} fields={[['business_name', 'Business name'], ['full_name', 'Contact name'], ['email', 'Email', 'email'], ['phone', 'Phone', 'tel'], ['website_social', 'Website or social media'], ['referred_by', 'Referred by']]} />
+            <DeleteRecord what={`the application from ${a.business_name}`} note="Any market lineup spot made from it stays." onDelete={() => supabase.from('vendor_applications').delete({ count: 'exact' }).eq('id', a.id)} onDone={onBack} />
+          </div>
         </section>
       </div>
     </div>

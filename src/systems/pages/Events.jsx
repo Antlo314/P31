@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import EventLineup from './EventLineup';
 import TicketSales from '../../today/TicketSales';
 import { formatEventDate } from '../../lib/events';
+import { DeleteRecord } from '../AdminRecord';
 
 const blank = {
   title: '', event_date: '', start_time: '', venue: '', address: '', description: '',
@@ -72,10 +73,11 @@ const Events = () => {
       rsvp_url: editing.rsvp_url || null,
       is_active: !!editing.is_active,
     };
-    const { error: err } = editing.id
-      ? await supabase.from('market_events').update(row).eq('id', editing.id)
+    const { error: err, count } = editing.id
+      ? await supabase.from('market_events').update(row, { count: 'exact' }).eq('id', editing.id)
       : await supabase.from('market_events').insert(row);
     if (err) return setError(err.message);
+    if (editing.id && count === 0) return setError('That did not save. This login may not have the Events dashboard.');
     setEditing(null);
     setMsg('Saved — the site updates right away.');
     load();
@@ -231,7 +233,15 @@ const Events = () => {
               <label><input type="checkbox" checked={editing.has_vendors !== false} onChange={(e) => setEditing({ ...editing, has_vendors: e.target.checked })} /> Has vendors (lineup, registrations, survey invitations when the date is announced)</label>
               <label><input type="checkbox" checked={!!editing.is_active} onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })} /> Published</label>
             </div>
-            <button className="sys-btn sys-btn--gold">Save market</button>
+            <div className="adm-actions" style={{ justifyContent: 'space-between' }}>
+              <button className="sys-btn sys-btn--gold">Save market</button>
+              {editing.id && (
+                <DeleteRecord what={`${editing.title}`} note="Its lineup and RSVPs go with it. Registrations, feedback and volunteers stay, without the market." label="Delete market"
+                  onDelete={() => supabase.from('market_events').delete({ count: 'exact' }).eq('id', editing.id)}
+                  onDone={() => { setEditing(null); setMsg('Deleted.'); load(); }} />
+              )}
+            </div>
+            <p className="sys-muted" style={{ margin: 0 }}>To take it off the site but keep everything, untick Published instead.</p>
           </form>
         </div>
       )}

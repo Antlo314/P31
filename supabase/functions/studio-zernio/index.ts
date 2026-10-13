@@ -12,8 +12,14 @@
 //             audioId?, audioVolume?, videoVolume?, firstComment?, coverUrl?, shareToFeed?}
 //   audio    {q?, type?: music|original_sound}  → Instagram catalog audio (trending when q is empty)
 //   limit                                        → Instagram publishing quota for the rolling day
-//   update   {postId, content?, scheduledFor?, timezone?}
-//   remove   {postId}
+//   get      {postId}                     one post with everything the editor needs
+//   update   {postId, ...the create fields}  replaces the whole post (media, captions, accounts, time);
+//            {postId, content?, scheduledFor?} still works for a quick caption or time change;
+//            add publishNow: true to send it right away
+//   remove   {postId}                     deletes a post that has not gone out
+//   retry    {postId}                     tries a failed post again
+//   editPublished {postId, platform, content}  changes the caption of a published Facebook post
+//   unpublish     {postId, platform}           takes a published Facebook post down (Instagram cannot)
 //   inbox                         recent DM conversations (read-only)
 //   thread   {conversationId, accountId}
 //   comments                      posts with comments
@@ -65,14 +71,57 @@ async function ourAccounts() {
 }
 
 const slimPost = (p: any) => ({
-  id: p._id || p.id, title: p.title || '', content: p.content || '', status: p.status,
+  id: p._id || p.id, title: p.title || '', content: p.content || '', status: p.status, isDraft: !!p.isDraft,
   scheduledFor: p.scheduledFor || null, publishedAt: p.publishedAt || null, timezone: p.timezone || null,
-  media: (p.mediaItems || []).map((m: any) => ({ type: m.type, url: m.url, thumbnail: m.thumbnail || m.instagramThumbnail || null })),
+  media: (p.mediaItems || []).map((m: any) => ({ type: m.type, url: m.url, thumbnail: m.thumbnail || m.instagramThumbnail || null, altText: m.altText || '' })),
   platforms: (p.platforms || []).map((x: any) => ({
     platform: x.platform, accountId: x.accountId?._id || x.accountId, status: x.status,
     url: x.platformPostUrl || x.url || null, error: x.errorMessage || x.error || null,
+    customContent: x.customContent || '', firstComment: x.platformSpecificData?.firstComment || '',
+    audioId: x.platformSpecificData?.audioConfiguration?.audioId || null,
+    shareToFeed: x.platformSpecificData?.shareToFeed !== false,
   })),
 });
+
+/** The Zernio post body from the composer's fields (shared by create and a full update). */
+async function buildPost(b: any) {
+  const accounts = await ourAccounts();
+  const wanted: string[] = (Array.isArray(b.platforms) ? b.platforms : []).filter((p: string) => PLATFORMS.includes(p));
+  if (!wanted.length) throw new UserError('Pick Instagram, Facebook or both.');
+  const media = (Array.isArray(b.media) ? b.media : []).slice(0, 10)
+    .filter((m: any) => m && /^https:\/\//.test(m.url) && ['image', 'video'].includes(m.type))
+    .map((m: any) => ({ type: m.type, url: m.url, altText: String(m.altText || '').slice(0, 1000) || undefined,
+      ...(m.thumbnail ? { thumbnail: m.thumbnail, instagramThumbnail: m.thumbnail } : {}) }));
+  if (wanted.includes('instagram') && !media.length) throw new UserError('Instagram posts need a photo or video.');
+  const content = String(b.content || '').trim();
+  if (!content && !media.length) throw new UserError('Write a caption or add media.');
+  if (!b.publishNow) {
+    if (!b.scheduledFor) throw new UserError('Choose when it should go out.');
+    if (Number.isNaN(new Date(b.scheduledFor).getTime())) throw new UserError('That date and time doesn’t look right.');
+  }
+  const isReel = media.length === 1 && media[0].type === 'video';
+  const platforms = wanted.map((p) => {
+    const acct = accounts.find((a: any) => a.platform === p);
+    if (!acct) throw new UserError(`${p} isn’t connected in Zernio.`);
+    const custom = p === 'instagram' ? b.igContent : b.fbContent;
+    // Instagram extras: a catalog track on a reel, a cover frame, the first comment, feed sharing.
+    const extra: Record<string, unknown> = {};
+    if (p === 'instagram') {
+      if (isReel && b.audioId) {
+        extra.audioConfiguration = { audioId: String(b.audioId), audioVolume: Math.max(0, Math.min(100, Number(b.audioVolume ?? 100))), videoVolume: Math.max(0, Math.min(100, Number(b.videoVolume ?? 100))) };
+      }
+      if (isReel && /^https:\/\//.test(String(b.coverUrl || ''))) extra.instagramThumbnail = String(b.coverUrl);
+      if (isReel && b.shareToFeed === false) extra.shareToFeed = false;
+      if (!isReel && String(b.firstComment || '').trim()) extra.firstComment = String(b.firstComment).trim().slice(0, 2200);
+    }
+    return { platform: p, accountId: acct.id, ...(custom ? { customContent: String(custom).slice(0, 2200) } : {}), ...(Object.keys(extra).length ? { platformSpecificData: extra } : {}) };
+  });
+  return {
+    title: String(b.title || content.split('\n')[0] || 'Studio post').slice(0, 100),
+    content: content.slice(0, 2200), mediaItems: media, platforms,
+    ...(b.publishNow ? { publishNow: true } : { scheduledFor: b.scheduledFor, timezone: b.timezone || 'America/New_York' }),
+  };
+}
 
 async function handle(action: string, b: any) {
   switch (action) {
@@ -123,43 +172,14 @@ async function handle(action: string, b: any) {
     }
 
     case 'create': {
-      const accounts = await ourAccounts();
-      const wanted: string[] = (Array.isArray(b.platforms) ? b.platforms : []).filter((p: string) => PLATFORMS.includes(p));
-      if (!wanted.length) throw new UserError('Pick Instagram, Facebook or both.');
-      const media = (Array.isArray(b.media) ? b.media : []).slice(0, 10)
-        .filter((m: any) => m && /^https:\/\//.test(m.url) && ['image', 'video'].includes(m.type))
-        .map((m: any) => ({ type: m.type, url: m.url, altText: String(m.altText || '').slice(0, 1000) || undefined,
-          ...(m.thumbnail ? { thumbnail: m.thumbnail, instagramThumbnail: m.thumbnail } : {}) }));
-      if (wanted.includes('instagram') && !media.length) throw new UserError('Instagram posts need a photo or video.');
-      const content = String(b.content || '').trim();
-      if (!content && !media.length) throw new UserError('Write a caption or add media.');
-      if (!b.scheduledFor) throw new UserError('Choose when it should go out.');
-      const when = new Date(b.timezone ? `${b.scheduledFor}` : b.scheduledFor);
-      if (Number.isNaN(when.getTime())) throw new UserError('That date and time doesn’t look right.');
-      const isReel = media.length === 1 && media[0].type === 'video';
-      const platforms = wanted.map((p) => {
-        const acct = accounts.find((a: any) => a.platform === p);
-        if (!acct) throw new UserError(`${p} isn’t connected in Zernio.`);
-        const custom = p === 'instagram' ? b.igContent : b.fbContent;
-        // Instagram extras: a catalog track on a reel, a cover frame, the first comment, feed sharing.
-        const extra: Record<string, unknown> = {};
-        if (p === 'instagram') {
-          if (isReel && b.audioId) {
-            extra.audioConfiguration = { audioId: String(b.audioId), audioVolume: Math.max(0, Math.min(100, Number(b.audioVolume ?? 100))), videoVolume: Math.max(0, Math.min(100, Number(b.videoVolume ?? 100))) };
-          }
-          if (isReel && /^https:\/\//.test(String(b.coverUrl || ''))) extra.instagramThumbnail = String(b.coverUrl);
-          if (isReel && b.shareToFeed === false) extra.shareToFeed = false;
-          if (!isReel && String(b.firstComment || '').trim()) extra.firstComment = String(b.firstComment).trim().slice(0, 2200);
-        }
-        return { platform: p, accountId: acct.id, ...(custom ? { customContent: String(custom).slice(0, 2200) } : {}), ...(Object.keys(extra).length ? { platformSpecificData: extra } : {}) };
-      });
-      const body = {
-        title: String(b.title || content.split('\n')[0] || 'Studio post').slice(0, 100),
-        content: content.slice(0, 2200), mediaItems: media, platforms,
-        scheduledFor: b.scheduledFor, timezone: b.timezone || 'America/New_York',
-        metadata: { source: 'p31-studio', createdBy: b._user },
-      };
+      const body = { ...(await buildPost(b)), metadata: { source: 'p31-studio', createdBy: b._user } };
       const out = await zernio('/posts', { method: 'POST', body: JSON.stringify(body) });
+      return { post: slimPost(out.post || out) };
+    }
+
+    case 'get': {
+      if (!b.postId) throw new UserError('Missing post.');
+      const out = await zernio(`/posts/${encodeURIComponent(b.postId)}`);
       return { post: slimPost(out.post || out) };
     }
 
@@ -199,12 +219,40 @@ async function handle(action: string, b: any) {
 
     case 'update': {
       if (!b.postId) throw new UserError('Missing post.');
-      const patch: Record<string, unknown> = {};
-      if (typeof b.content === 'string') patch.content = b.content.slice(0, 2200);
-      if (b.scheduledFor) { patch.scheduledFor = b.scheduledFor; patch.timezone = b.timezone || 'America/New_York'; }
+      let patch: Record<string, unknown> = {};
+      if (Array.isArray(b.platforms)) {
+        // The whole post from the editor: media, captions, accounts, first comment, time (or now).
+        patch = { ...(await buildPost(b)), isDraft: false };
+      } else {
+        if (typeof b.content === 'string') patch.content = b.content.slice(0, 2200);
+        if (b.publishNow) { patch.publishNow = true; patch.isDraft = false; }
+        else if (b.scheduledFor) { patch.scheduledFor = b.scheduledFor; patch.timezone = b.timezone || 'America/New_York'; }
+      }
       if (!Object.keys(patch).length) throw new UserError('Nothing to change.');
       const out = await zernio(`/posts/${encodeURIComponent(b.postId)}`, { method: 'PUT', body: JSON.stringify(patch) });
       return { post: slimPost(out.post || out) };
+    }
+
+    case 'retry': {
+      if (!b.postId) throw new UserError('Missing post.');
+      const out = await zernio(`/posts/${encodeURIComponent(b.postId)}/retry`, { method: 'POST', body: '{}' });
+      return { post: slimPost(out.post || out) };
+    }
+
+    case 'editPublished': {
+      if (!b.postId) throw new UserError('Missing post.');
+      if (b.platform !== 'facebook') throw new UserError('Only Facebook lets a published caption be changed. Instagram does not.');
+      const content = String(b.content || '').trim();
+      if (!content) throw new UserError('Write the new caption.');
+      await zernio(`/posts/${encodeURIComponent(b.postId)}/edit`, { method: 'POST', body: JSON.stringify({ platform: 'facebook', content: content.slice(0, 2200) }) });
+      return { ok: true };
+    }
+
+    case 'unpublish': {
+      if (!b.postId) throw new UserError('Missing post.');
+      if (b.platform !== 'facebook') throw new UserError('Instagram does not allow posts to be taken down from here. Delete it in the Instagram app.');
+      await zernio(`/posts/${encodeURIComponent(b.postId)}/unpublish`, { method: 'POST', body: JSON.stringify({ platform: 'facebook' }) });
+      return { ok: true };
     }
 
     case 'remove': {

@@ -19,17 +19,21 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 | 13 | An order from a shop to Systems | As a vendor | p31market.com | 6 |
 | 14 | A reply from the shared inbox | As a team member | thep31collective.org | 3 |
 | 15 | Schedule a post | As a team member | thep31collective.org | 4 |
-| 16 | Send a campaign test | As an admin | p31market.com | 3 |
-| 17 | The Gathering: post, thread, direct message, alert | As a team member | both sites | 5 |
-| 18 | The Gathering: @mention and search | As a team member | both sites | 4 |
-| 19 | Database updates land | As an admin | both sites | 3 |
-| 20 | A storefront free period and subscription | As an admin | p31market.com | 6 |
-| 21 | Class reminder emails | As an admin | thep31collective.org | 3 |
-| 22 | Welcome emails for a new subscriber | As a visitor | p31market.com | 3 |
-| 23 | The activity log | As an admin | both sites | 2 |
-| 24 | Eventbrite ticket sales | As an admin | p31market.com | 3 |
-| 25 | Walkthroughs play on every dashboard | As a team member | both sites | 3 |
-| 26 | Automated screen, link and form check | As an admin | both sites | 2 |
+| 16 | Change a scheduled post completely | As a team member | thep31collective.org | 4 |
+| 17 | Edit and delete in every Systems room | As an admin | both sites | 6 |
+| 18 | Every form: CEO email and a PDF copy | As a visitor | both sites | 5 |
+| 19 | Design a post, and a reel with music | As a team member | both sites | 6 |
+| 20 | Send a campaign test | As an admin | p31market.com | 3 |
+| 21 | The Gathering: post, thread, direct message, alert | As a team member | both sites | 5 |
+| 22 | The Gathering: @mention and search | As a team member | both sites | 4 |
+| 23 | Database updates land | As an admin | both sites | 3 |
+| 24 | A storefront free period and subscription | As an admin | p31market.com | 6 |
+| 25 | Class reminder emails | As an admin | thep31collective.org | 3 |
+| 26 | Welcome emails for a new subscriber | As a visitor | p31market.com | 3 |
+| 27 | The activity log | As an admin | both sites | 2 |
+| 28 | Eventbrite ticket sales | As an admin | p31market.com | 3 |
+| 29 | Walkthroughs play on every dashboard | As a team member | both sites | 3 |
+| 30 | Automated screen, link and form check | As an admin | both sites | 2 |
 
 ## 1. Vendor application
 
@@ -276,7 +280,84 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Cancel the scheduled post before it goes out if it was only a test.
 
-## 16. Send a campaign test
+## 16. Change a scheduled post completely
+
+*As a team member · thep31collective.org · about 4 minutes*
+
+**Do this**
+
+1. Content Studio → Create post: schedule a TEST post for tomorrow with one photo, on Instagram and Facebook.
+2. Calendar → the TEST post → Edit. Swap the photo for another, change the caption, tick “Different caption for Facebook” and write one, change the time, Save changes.
+3. Back on the Calendar, press Duplicate on it, change the caption, and schedule the copy for the day after.
+4. Delete both TEST posts.
+
+**What should happen**
+
+- The calendar shows the new photo, caption and time; Zernio shows the same post with the Facebook caption on Facebook only.
+- The copy is a separate post; deleting removes each from the calendar and from Zernio, and nothing goes out.
+
+**Afterwards:** None, once both are deleted.
+
+## 17. Edit and delete in every Systems room
+
+*As an admin · both sites · about 6 minutes*
+
+**Do this**
+
+1. Submit a TEST vendor application and a TEST Join application (use your own email).
+2. In Systems → Vendor applications open the TEST one → Edit details, change the phone, Save. Then Delete.
+3. Do the same in Join applications, then in Vendor forms (an agreement, a registration, a volunteer), People (a TEST contact), and Campaigns → Subscribers (add, unsubscribe, delete a TEST address).
+4. In Curators & shops open a shop → Edit product on one product, change its price, Save; then change it back.
+5. Sign in as a team login that has only the Vendors dashboard and try the same in Vendor applications.
+
+**What should happen**
+
+- Every change shows at once and appears in Systems → Activity; each Delete asks first and the row is gone after.
+- The Vendors login can edit and delete in Vendor applications and Vendor forms, but rooms it does not have stay closed.
+- If a change is refused, the room says so (“This login may not have that permission”) instead of looking saved.
+
+**Afterwards:** Delete the TEST rows (that is the test).
+
+## 18. Every form: CEO email and a PDF copy
+
+*As a visitor · both sites · about 5 minutes*
+
+**Do this**
+
+1. Run the v43 database update and deploy join-notify (see the guide).
+2. Submit a TEST entry on each: p31market.com/apply, /vendors/agreement, /vendors/register, /vendors/feedback (with an email), /volunteer, thep31collective.org/join, and an intro-call request on thep31collective.org/mentorship.
+3. Check the inbox you used, and ceo@p31market.com.
+
+**What should happen**
+
+- Within a minute each person gets a confirmation email with a PDF of exactly what they sent (signed forms include the drawn signature).
+- ceo@p31market.com receives every team notification, with the same PDF attached; the usual team mailboxes still receive theirs.
+- Each entry is in Systems (applications, vendor forms) or the mentor console (intro calls).
+
+**Afterwards:** Delete the TEST rows in Systems.
+
+## 19. Design a post, and a reel with music
+
+*As a team member · both sites · about 6 minutes*
+
+**Do this**
+
+1. Open Content Studio → Design. The Collection shows the 48 quote cards on the calendar; open one.
+2. Click the big words on the page and change them; drag them a little; open Styles and pick another colour style.
+3. Open Music, play two tracks, pick one, then press Play at the top to watch and hear the reel.
+4. Download → Video with music, and Download → Image (PNG). Then Save.
+5. Use in a post → As a reel with music. On Create post, set a time a week out and schedule it, then delete it from the Calendar.
+
+**What should happen**
+
+- The words, colours and position change on the page as you edit; Undo puts them back.
+- The MP4 plays with the words animating in and the music underneath; the PNG matches the page.
+- Saved lists the design (for the whole team once v44 has run; in this browser before that).
+- Create post opens with the reel attached and the caption filled in; the scheduled post shows on the Calendar.
+
+**Afterwards:** Delete the TEST post from the Calendar and the design from Saved.
+
+## 20. Send a campaign test
 
 *As an admin · p31market.com · about 3 minutes*
 
@@ -290,7 +371,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Leave it as a draft, or delete it.
 
-## 17. The Gathering: post, thread, direct message, alert
+## 21. The Gathering: post, thread, direct message, alert
 
 *As a team member · both sites · about 5 minutes*
 
@@ -306,7 +387,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Delete the test messages (the ⋯ menu on your own message).
 
-## 18. The Gathering: @mention and search
+## 22. The Gathering: @mention and search
 
 *As a team member · both sites · about 4 minutes*
 
@@ -324,7 +405,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Delete the test message.
 
-## 19. Database updates land
+## 23. Database updates land
 
 *As an admin · both sites · about 3 minutes*
 
@@ -341,7 +422,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** None.
 
-## 20. A storefront free period and subscription
+## 24. A storefront free period and subscription
 
 *As an admin · p31market.com · about 6 minutes*
 
@@ -360,7 +441,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Tap “Take out of billing” on the test shop (or leave it complimentary).
 
-## 21. Class reminder emails
+## 25. Class reminder emails
 
 *As an admin · thep31collective.org · about 3 minutes*
 
@@ -375,7 +456,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Delete the TEST session.
 
-## 22. Welcome emails for a new subscriber
+## 26. Welcome emails for a new subscriber
 
 *As a visitor · p31market.com · about 3 minutes*
 
@@ -391,7 +472,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Unsubscribe the test address.
 
-## 23. The activity log
+## 27. The activity log
 
 *As an admin · both sites · about 2 minutes*
 
@@ -406,7 +487,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Undo the test change (that is logged too).
 
-## 24. Eventbrite ticket sales
+## 28. Eventbrite ticket sales
 
 *As an admin · p31market.com · about 3 minutes*
 
@@ -422,7 +503,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** None.
 
-## 25. Walkthroughs play on every dashboard
+## 29. Walkthroughs play on every dashboard
 
 *As a team member · both sites · about 3 minutes*
 
@@ -437,7 +518,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** None.
 
-## 26. Automated screen, link and form check
+## 30. Automated screen, link and form check
 
 *As an admin · both sites · about 2 minutes*
 

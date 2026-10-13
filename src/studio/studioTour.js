@@ -17,6 +17,11 @@ export const STUDIO_TOUR = [
     body: 'The social calendar. Tap “Plan this month with AI” for a month of ideas spread across the pillars, or add a day yourself. Each post gets a hook, caption and hashtags drafted for you; pick a trending track for reels; approve it, and “Schedule it” sends it to Instagram and Facebook for that day.',
   },
   {
+    to: '/studio/design', targets: at('/studio/design'),
+    title: 'Design: your own Canva, in the P31 look',
+    body: 'Start from Melanie JC’s quote cards (the Collection), a template, or a blank page. Click anything on the page to change it: words, fonts, colours, size; drag to move it. Styles shows the design in every brand colour. Music adds P31’s own tracks, your songs, or Instagram’s trending sounds. Play previews the reel; Use in a post sends the image or reel to Create post. Batch turns a list of lines into a week of posts.',
+  },
+  {
     to: '/studio/autocreate', targets: at('/studio/autocreate'),
     title: 'Auto-create: a month in a minute',
     body: 'Choose the kinds of posts (Bible fill-in-the-blank, finish the sentence, this or that, quizzes, a Sunday word, invitations), the look, and how many days. The Studio drafts every card and caption from the library at the hours your followers are online. Look them over, swap or rewrite any, then save them to the Planner or schedule the whole run.',
@@ -24,7 +29,7 @@ export const STUDIO_TOUR = [
   {
     to: '/studio/calendar', targets: at('/studio/calendar'),
     title: 'Calendar: what’s going out',
-    body: 'Every scheduled post in order, and how recent posts performed. Open a scheduled post to change or delete it before it goes out.',
+    body: 'Every scheduled post in order, and how recent posts performed. Edit opens the whole post: swap the photos or video, change either caption, the first comment, Instagram or Facebook, and the time. Each post can also be duplicated, sent now, or deleted. Studio history retries a failed post, and a post already on Facebook can have its caption changed or be taken down.',
   },
   {
     to: '/studio/compose', targets: at('/studio/compose'),

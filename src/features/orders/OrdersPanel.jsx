@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { RefreshCw, Download, Mail, Phone, Truck, Check, X, CreditCard, Send, MapPin, Package, StickyNote } from 'lucide-react';
+import { RefreshCw, Download, Mail, Phone, Truck, Check, X, CreditCard, Send, MapPin, Package, StickyNote, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import './Orders.css';
 
@@ -61,8 +61,16 @@ const OrdersPanel = ({ curatorId }) => {
   const update = async (o, patch) => {
     setError('');
     setOrders((list) => list.map((x) => (x.id === o.id ? { ...x, ...patch } : x)));
-    const { error: err } = await supabase.from('orders').update(patch).eq('id', o.id);
-    if (err) { setError(err.message); load(); }
+    const { error: err, count } = await supabase.from('orders').update(patch, { count: 'exact' }).eq('id', o.id);
+    if (err || count === 0) { setError(err?.message || 'That change did not save. This login may not have the Orders dashboard (or the v43 database update has not run).'); load(); }
+  };
+  // Systems only (not a vendor's own studio): remove an order entirely, e.g. a test order.
+  const remove = async (o) => {
+    if (!window.confirm(`Delete order #${ref(o)} completely? It disappears for the shop too. This cannot be undone. (To stop an order but keep its record, use Cancel.)`)) return;
+    setError('');
+    const { error: err, count } = await supabase.from('orders').delete({ count: 'exact' }).eq('id', o.id);
+    if (err || count === 0) { setError(err?.message || 'That order was not deleted. This login may not have the Orders dashboard.'); return; }
+    setOrders((list) => list.filter((x) => x.id !== o.id));
   };
 
   const stats = useMemo(() => {
@@ -175,6 +183,7 @@ const OrdersPanel = ({ curatorId }) => {
               {(st === 'fulfilled' || st === 'cancelled') && (
                 <button className="ord-link" onClick={() => update(o, { fulfillment_status: isRequest ? 'confirmed' : 'new' })}>Re-open</button>
               )}
+              {!curatorId && <button className="ord-link ord-link--danger" onClick={() => remove(o)}><Trash2 size={13} /> Delete order</button>}
             </article>
           );
         })}

@@ -2,7 +2,7 @@ import React, { Suspense, lazy, useCallback, useEffect, useMemo, useState } from
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Instagram, Facebook, Users, Eye, Heart, MessageCircle, Sparkles, CalendarClock, ImagePlus, Video, Send, Trash2, Pencil,
-  ExternalLink, AlertTriangle, RefreshCw, Clapperboard, Inbox, MessagesSquare, X, Check, Clock, Upload,
+  ExternalLink, AlertTriangle, RefreshCw, Clapperboard, Inbox, MessagesSquare, X, Check, Clock, Upload, Copy,
 } from 'lucide-react';
 import { DashHead, DashEmpty } from '../apps/DashShell';
 import SoundPicker from './SoundPicker';
@@ -115,27 +115,28 @@ export const StudioOverview = () => {
 };
 
 // ── Calendar (scheduled + published) ─────────────────────────
-const EditModal = ({ post, onClose, onSaved }) => {
-  const [content, setContent] = useState(post.content);
-  const [when, setWhen] = useState(post.scheduledFor ? toETInput(post.scheduledFor) : '');
+/** Change the caption of a post that is already on Facebook (Instagram does not allow it). */
+const FacebookCaption = ({ post, onClose, onSaved }) => {
+  const fb = post.platforms.find((x) => x.platform === 'facebook');
+  const [content, setContent] = useState(fb?.customContent || post.content);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const save = async (e) => {
     e.preventDefault();
     setBusy(true); setError('');
-    try { await studio('update', { postId: post.id, content, scheduledFor: when, timezone: 'America/New_York' }); onSaved(); onClose(); }
+    try { await studio('editPublished', { postId: post.id, platform: 'facebook', content }); onSaved(); onClose(); }
     catch (err) { setError(err.message); setBusy(false); }
   };
   return (
-    <div className="ds-modal" role="dialog" aria-modal="true" aria-label="Edit post" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="ds-modal" role="dialog" aria-modal="true" aria-label="Edit the Facebook caption" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="ds-modal__panel">
         <button className="k-close" onClick={onClose} aria-label="Close"><X size={18} /></button>
-        <h2>Edit scheduled post</h2>
+        <h2>Edit the Facebook caption</h2>
+        <p className="ds-muted">This post is already live. Facebook lets the caption change; Instagram does not.</p>
         <form className="ds-form" onSubmit={save}>
-          <label className="k-field"><span>Caption (applies where no platform-specific caption was set)</span><textarea rows={8} value={content} onChange={(e) => setContent(e.target.value)} /></label>
-          <label className="k-field"><span>Goes out (Eastern time)</span><input type="datetime-local" required value={when} onChange={(e) => setWhen(e.target.value)} /></label>
+          <label className="k-field"><span>Caption</span><textarea rows={8} value={content} onChange={(e) => setContent(e.target.value)} /></label>
           {error && <p className="k-error">{error}</p>}
-          <button className="k-btn k-btn--gold" disabled={busy}>{busy ? 'Saving…' : 'Save changes'}</button>
+          <button className="k-btn k-btn--gold" disabled={busy}>{busy ? 'Saving…' : 'Save the caption'}</button>
         </form>
       </div>
     </div>
@@ -144,8 +145,14 @@ const EditModal = ({ post, onClose, onSaved }) => {
 
 export const StudioCalendar = () => {
   const { data, loading, error, reload } = useStudio('posts');
-  const [edit, setEdit] = useState(null);
+  const navigate = useNavigate();
+  const [fbEdit, setFbEdit] = useState(null);
   const [tab, setTab] = useState('scheduled');
+  const act = async (fn, confirmText) => {
+    if (confirmText && !window.confirm(confirmText)) return;
+    try { await fn(); reload(); } catch (err) { window.alert(err.message); }
+  };
+  const duplicate = (p) => navigate('/studio/compose', { state: { copy: { ...fieldsFromPost(p), when: '' } } });
   const byDay = useMemo(() => {
     const groups = new Map();
     (data?.scheduled || []).forEach((p) => {
@@ -187,7 +194,9 @@ export const StudioCalendar = () => {
                   </div>
                   <p className="st-post__text">{p.content}</p>
                   <div className="k-actions">
-                    <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => setEdit(p)}><Pencil size={14} /> Edit</button>
+                    <Link className="k-btn k-btn--sm k-btn--ghost" to={`/studio/compose?edit=${encodeURIComponent(p.id)}`}><Pencil size={14} /> Edit</Link>
+                    <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => duplicate(p)}><Copy size={14} /> Duplicate</button>
+                    <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => act(() => studio('update', { postId: p.id, publishNow: true }), 'Send this post right now instead of at its scheduled time?')}><Send size={14} /> Post now</button>
                     <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => remove(p)}><Trash2 size={14} /> Delete</button>
                   </div>
                 </div>
@@ -217,37 +226,115 @@ export const StudioCalendar = () => {
       ) : <p className="ds-muted">No published posts found.</p>)}
 
       {tab === 'history' && data && (data.recent.length ? (
-        <ul className="ds-list">{data.recent.map((p) => (
-          <li key={p.id} className="ds-row"><Sparkles size={18} /><div><strong>{p.title || p.content.slice(0, 60)}</strong><small>{p.status} · {fmtET(p.publishedAt || p.scheduledFor)} · {p.platforms.map((x) => `${x.platform}: ${x.status}`).join(', ')}</small>{p.platforms.some((x) => x.error) && <small style={{ color: '#ff9b9b' }}>{p.platforms.map((x) => x.error).filter(Boolean).join(' · ')}</small>}</div></li>
-        ))}</ul>
+        <ul className="ds-list">{data.recent.map((p) => {
+          const fbLive = p.platforms.some((x) => x.platform === 'facebook' && x.status === 'published');
+          const failed = p.status === 'failed' || p.status === 'partial' || p.platforms.some((x) => x.status === 'failed');
+          const live = p.status === 'published' || p.platforms.some((x) => x.status === 'published');
+          return (
+            <li key={p.id} className="ds-row st-history">
+              <Sparkles size={18} />
+              <div>
+                <strong>{p.title || p.content.slice(0, 60)}</strong>
+                <small>{p.status} · {fmtET(p.publishedAt || p.scheduledFor)} · {p.platforms.map((x) => `${x.platform}: ${x.status}`).join(', ')}</small>
+                {p.platforms.some((x) => x.error) && <small style={{ color: '#ff9b9b' }}>{p.platforms.map((x) => x.error).filter(Boolean).join(' · ')}</small>}
+                <div className="k-actions st-history__actions">
+                  {failed && <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => act(() => studio('retry', { postId: p.id }))}><RefreshCw size={14} /> Try again</button>}
+                  {!live && <Link className="k-btn k-btn--sm k-btn--ghost" to={`/studio/compose?edit=${encodeURIComponent(p.id)}`}><Pencil size={14} /> Edit</Link>}
+                  <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => duplicate(p)}><Copy size={14} /> Duplicate</button>
+                  {fbLive && <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => setFbEdit(p)}><Facebook size={14} /> Edit Facebook caption</button>}
+                  {fbLive && <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => act(() => studio('unpublish', { postId: p.id, platform: 'facebook' }), 'Take this post down from Facebook? It cannot be put back.')}><Trash2 size={14} /> Remove from Facebook</button>}
+                  {!live && <button className="k-btn k-btn--sm k-btn--ghost" onClick={() => act(() => studio('remove', { postId: p.id }), 'Delete this post from the studio? This cannot be undone.')}><Trash2 size={14} /> Delete</button>}
+                  {p.platforms.filter((x) => x.url).map((x) => <a key={x.platform} className="k-link" href={x.url} target="_blank" rel="noopener noreferrer">Open on {PLATFORM[x.platform]?.label || x.platform} <ExternalLink size={13} /></a>)}
+                </div>
+                {live && p.platforms.some((x) => x.platform === 'instagram' && x.status === 'published') && <small className="ds-muted">Instagram does not let a published post be changed or removed from here; use the Instagram app.</small>}
+              </div>
+            </li>
+          );
+        })}</ul>
       ) : <p className="ds-muted">No posts have gone out through the studio yet.</p>)}
 
-      {edit && <EditModal post={edit} onClose={() => setEdit(null)} onSaved={reload} />}
+      {fbEdit && <FacebookCaption post={fbEdit} onClose={() => setFbEdit(null)} onSaved={reload} />}
     </>
   );
 };
 
-// ── Compose ──────────────────────────────────────────────────
+// ── Compose (new posts) and Edit (?edit=<post id>), one form ──
+/** The composer's fields from a Zernio post (for editing it, or for a copy). */
+const fieldsFromPost = (p) => {
+  const ig = p.platforms.find((x) => x.platform === 'instagram');
+  const fb = p.platforms.find((x) => x.platform === 'facebook');
+  return {
+    platforms: p.platforms.map((x) => x.platform).filter((x) => PLATFORM[x]),
+    content: p.content || '',
+    split: !!(fb?.customContent && fb.customContent !== p.content),
+    fbContent: fb?.customContent || '',
+    firstComment: ig?.firstComment || '',
+    media: p.media.map((m) => ({ type: m.type, url: m.url, thumbnail: m.thumbnail, altText: m.altText || '', name: m.url.split('/').pop() })),
+    audio: ig?.audioId ? { id: ig.audioId, title: 'the track already on it' } : null,
+    when: p.scheduledFor ? toETInput(p.scheduledFor) : '',
+  };
+};
+
 export const StudioCompose = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const editId = new URLSearchParams(location.search).get('edit');
+  const copy = location.state?.copy || null;
   const overview = useStudio('overview');
   const slots = bestSlotsET(overview.data?.bestTime?.slots || [], 4);
-  const [platforms, setPlatforms] = useState(['instagram', 'facebook']);
-  const [content, setContent] = useState('');
-  const [split, setSplit] = useState(false);
-  const [fbContent, setFbContent] = useState('');
-  const [media, setMedia] = useState(location.state?.media || []);
+  const [platforms, setPlatforms] = useState(copy?.platforms || ['instagram', 'facebook']);
+  const [content, setContent] = useState(copy?.content || '');
+  const [split, setSplit] = useState(!!copy?.split);
+  const [fbContent, setFbContent] = useState(copy?.fbContent || '');
+  const [media, setMedia] = useState(copy?.media || location.state?.media || []);
   const [when, setWhen] = useState(location.state?.when || '');
-  const [busy, setBusy] = useState('');
+  const [busy, setBusy] = useState(editId ? 'Loading the post…' : '');
   const [error, setError] = useState('');
   const [done, setDone] = useState(null);
   const [topic, setTopic] = useState('');
   const [pack, setPack] = useState(null);
-  const [firstComment, setFirstComment] = useState('');
-  const [audio, setAudio] = useState(null);
+  const [firstComment, setFirstComment] = useState(copy?.firstComment || '');
+  const [audio, setAudio] = useState(copy?.audio || null);
   const [showSound, setShowSound] = useState(false);
+  const [editing, setEditing] = useState(null); // the post being edited, once loaded
   const isReel = media.length === 1 && media[0].type === 'video';
+
+  // Editing: load the post and fill every field from it.
+  useEffect(() => {
+    if (!editId) return undefined;
+    let live = true;
+    studio('get', { postId: editId }).then(({ post }) => {
+      if (!live) return;
+      const f = fieldsFromPost(post);
+      setEditing(post);
+      setPlatforms(f.platforms); setContent(f.content); setSplit(f.split); setFbContent(f.fbContent);
+      setFirstComment(f.firstComment); setMedia(f.media); setAudio(f.audio); setWhen(f.when); setBusy('');
+    }, (err) => { if (live) { setError(err.message); setBusy(''); } });
+    return () => { live = false; };
+  }, [editId]);
+  const goneOut = editing && ['published', 'publishing'].includes(editing.status);
+  const fields = () => ({
+    platforms, content, fbContent: split ? fbContent : undefined, scheduledFor: when, timezone: 'America/New_York',
+    media: media.map(({ type, url, altText, thumbnail }) => ({ type, url, altText, thumbnail })),
+    audioId: isReel && audio ? audio.id : undefined, firstComment: !isReel && firstComment ? firstComment : undefined,
+  });
+  const postNow = async () => {
+    if (!window.confirm('Send this post right now instead of at its scheduled time?')) return;
+    setError(''); setBusy('Sending…');
+    try { const out = await studio('update', { postId: editId, ...fields(), publishNow: true }); setDone({ ...out.post, now: true }); }
+    catch (err) { setError(err.message); }
+    setBusy('');
+  };
+  const removePost = async () => {
+    if (!window.confirm('Delete this post? It won’t go out, and this cannot be undone.')) return;
+    setBusy('Deleting…');
+    try { await studio('remove', { postId: editId }); navigate('/studio/calendar'); }
+    catch (err) { setError(err.message); setBusy(''); }
+  };
+  const duplicate = () => {
+    setEditing(null); setWhen('');
+    navigate('/studio/compose', { state: { copy: { platforms, content, split, fbContent, firstComment, media, audio } } });
+  };
 
   // Hook, captions, hashtags and a first comment from the writing helper.
   const draft = async () => {
@@ -280,13 +367,9 @@ export const StudioCompose = () => {
     setError('');
     if (!platforms.length) return setError('Pick at least one platform.');
     if (!when) return setError('Choose when it should go out.');
-    setBusy('Scheduling…');
+    setBusy(editId ? 'Saving…' : 'Scheduling…');
     try {
-      const out = await studio('create', {
-        platforms, content, fbContent: split ? fbContent : undefined, scheduledFor: when, timezone: 'America/New_York',
-        media: media.map(({ type, url, altText }) => ({ type, url, altText })),
-        audioId: isReel && audio ? audio.id : undefined, firstComment: !isReel && firstComment ? firstComment : undefined,
-      });
+      const out = editId ? await studio('update', { postId: editId, ...fields() }) : await studio('create', fields());
       setDone(out.post);
     } catch (err) { setError(err.message); }
     setBusy('');
@@ -294,16 +377,24 @@ export const StudioCompose = () => {
 
   if (done) {
     return (
-      <DashEmpty Icon={Check} title="Scheduled" action={<div className="k-actions" style={{ justifyContent: 'center' }}>
+      <DashEmpty Icon={Check} title={done.now ? 'Sent' : editId ? 'Saved' : 'Scheduled'} action={<div className="k-actions" style={{ justifyContent: 'center' }}>
         <Link to="/studio/calendar" className="k-btn k-btn--gold">View calendar</Link>
-        <button className="k-btn k-btn--ghost" onClick={() => navigate(0)}>Write another</button>
-      </div>}>Goes out {fmtET(done.scheduledFor)} (Eastern) on {platforms.join(' and ')}.</DashEmpty>
+        <button type="button" className="k-btn k-btn--ghost" onClick={() => { window.location.href = '/studio/compose'; }}>Write another</button>
+      </div>}>{done.now ? `Going out now on ${platforms.join(' and ')}.` : `Goes out ${fmtET(done.scheduledFor)} (Eastern) on ${platforms.join(' and ')}.`}</DashEmpty>
     );
   }
 
   return (
     <>
-      <DashHead eyebrow="Content Studio" title="Create a" accent="post" lead="Write once, publish to Instagram and Facebook at the time you choose." />
+      <DashHead eyebrow="Content Studio" title={editId ? 'Edit' : copy ? 'Copy of a' : 'Create a'} accent="post"
+        lead={editId ? 'Change anything: the photos or video, either caption, the first comment, where it goes and when. Save, send it now, copy it, or delete it.' : copy ? 'A copy of a post, ready to change. Pick a new time and schedule it.' : 'Write once, publish to Instagram and Facebook at the time you choose.'}
+        actions={editId && editing && !goneOut ? (
+          <div className="k-actions">
+            <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={duplicate} disabled={!!busy}><Copy size={15} /> Duplicate</button>
+            <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={removePost} disabled={!!busy}><Trash2 size={15} /> Delete</button>
+          </div>
+        ) : null} />
+      {goneOut && <div className="ds-banner" role="status"><AlertTriangle size={18} /> This post has already gone out, so it can’t be changed here. Facebook captions can be changed, or the Facebook post removed, from Calendar → Studio history.</div>}
       <form className="ds-grid ds-grid--2" onSubmit={submit} style={{ alignItems: 'start' }}>
         <div className="ds-card ds-form">
           <div className="k-field"><span>Post to</span>
@@ -370,7 +461,8 @@ export const StudioCompose = () => {
             )}
             {error && <p className="k-error" role="alert">{error}</p>}
             {busy && <p className="ds-muted" role="status">{busy}</p>}
-            <button className="k-btn k-btn--gold k-btn--lg k-btn--block" disabled={!!busy}><CalendarClock size={18} /> Schedule post</button>
+            <button className="k-btn k-btn--gold k-btn--lg k-btn--block" disabled={!!busy || goneOut}><CalendarClock size={18} /> {editId ? 'Save changes' : 'Schedule post'}</button>
+            {editId && editing && !goneOut && <button type="button" className="k-btn k-btn--ghost k-btn--block" onClick={postNow} disabled={!!busy}><Send size={16} /> Post it now</button>}
           </div>
         </div>
       </form>

@@ -6,6 +6,12 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 44, file: 'storefront_v44_design_studio.sql', title: 'Design studio', what: 'Designs saved from Content Studio > Design are shared with the whole Studio team, and songs uploaded for reels go into a team music library.',
+    expect: 'designs_ready true · tracks_ready true · shared_file_rules 3',
+    checks: [['table', 'studio_designs'], ['table', 'studio_tracks']] },
+  { v: 43, file: 'storefront_v43_staff_powers.sql', title: 'Full admin control', what: 'Each team dashboard can read, edit and delete in its own room; admins can change and delete orders; full product editing and deleting shops.',
+    expect: 'has_tool_ready true · staff_policies 21 · shop_tools_ready true · orders_editable true · intro_emails_ready true',
+    checks: [['rpc', 'has_tool', { p_tool: 'orders' }]] },
   { v: 42, file: 'storefront_v42_operations.sql', title: 'Operations', what: 'Database status, the activity log, storefront billing, class reminders, welcome emails and the Luncheon follow-up ideas.',
     expect: 'versions_ok true · activity_ready true · billing_ready true · reminders_ready true · welcome_ready true · jobs 8',
     checks: [['table', 'schema_versions'], ['table', 'admin_activity'], ['column', 'curator_data', 'subscription_status'], ['column', 'leads', 'welcome_step'], ['table', 'academy_session_reminders']] },
@@ -25,7 +31,8 @@ async function probe([kind, a, b]) {
   // A normal read, not head: true (supabase-js reports a head request to a missing table as success).
   if (kind === 'table') { const { error } = await supabase.from(a).select('*').limit(1); return !missing(error); }
   if (kind === 'column') { const { error } = await supabase.from(a).select(b).limit(1); return !missing(error); }
-  if (kind === 'rpc') { const { error } = await supabase.rpc(a); return !missing(error); }
+  // A function with arguments is called with harmless ones; `exists` means any answer but "missing" counts.
+  if (kind === 'rpc') { const { error } = await supabase.rpc(a, b || undefined); return !missing(error); }
   return false;
 }
 

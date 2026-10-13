@@ -175,6 +175,7 @@ export const MentorCalls = () => {
                 <textarea rows={2} defaultValue={c.notes || ''} onBlur={(e) => e.target.value !== (c.notes || '') && update(c, { notes: e.target.value })} />
               </label>
               {c.status !== 'enrolled' && <button className="k-btn k-btn--gold k-btn--sm" style={{ justifySelf: 'start' }} onClick={() => setInvite({ email: c.email, full_name: c.full_name, inquiry_id: c.id })}><Send size={15} /> Send enrollment invite</button>}
+              <button className="k-btn k-btn--sm k-btn--ghost" style={{ justifySelf: 'start' }} onClick={async () => { if (window.confirm(`Delete the intro-call request from ${c.full_name}? This cannot be undone.`)) { await write(supabase.from('academy_inquiries').delete().eq('id', c.id)); calls.reload(); } }}><Trash2 size={15} /> Delete request</button>
             </article>
           ))}
         </div>
@@ -727,7 +728,7 @@ export const MentorAnnouncements = () => {
           <article key={a.id} className="ds-card">
             <div className="ds-card__head"><h3>{a.is_pinned && <Pin size={14} />} {a.title}</h3><span className="ds-muted">{fmtDate(a.created_at)}</span></div>
             {a.body && <RichText text={a.body} />}
-            <button className="k-btn k-btn--sm k-btn--ghost" style={{ justifySelf: 'start' }} onClick={async () => { await write(supabase.from('academy_announcements').delete().eq('id', a.id)); list.reload(); }}><Trash2 size={15} /> Delete</button>
+            <button className="k-btn k-btn--sm k-btn--ghost" style={{ justifySelf: 'start' }} onClick={async () => { if (window.confirm(`Delete the announcement “${a.title}”?`)) { await write(supabase.from('academy_announcements').delete().eq('id', a.id)); list.reload(); } }}><Trash2 size={15} /> Delete</button>
           </article>
         ))}</div> : <p className="ds-muted">Nothing posted yet.</p>}
       </section>

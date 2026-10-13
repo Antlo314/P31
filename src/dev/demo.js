@@ -8,6 +8,11 @@
 // without it the Studio screens just show empty states.
 const snapshot = Object.values(import.meta.glob('./demo-studio.json', { eager: true, import: 'default' }))[0];
 const studio = snapshot || { overview: { accounts: [], igInsights: null, fbInsights: null, bestTime: null }, posts: { scheduled: [], recent: [], published: [] } };
+// A scheduled post to edit when the saved snapshot has none.
+const SAMPLE_POST = { id: 'demo-scheduled-1', title: 'Sample scheduled post', content: 'Sample caption for a scheduled post. #p31market #womenowned', status: 'scheduled',
+  scheduledFor: new Date(Date.now() + 2 * 864e5).toISOString(), publishedAt: null, media: [{ type: 'image', url: '/og-image.jpg', thumbnail: null, altText: 'Sample photo' }],
+  platforms: [{ platform: 'instagram', status: 'scheduled', customContent: '', firstComment: 'Save your seat: link in bio' }, { platform: 'facebook', status: 'scheduled', customContent: '' }] };
+if (!studio.posts.scheduled?.length) studio.posts.scheduled = [SAMPLE_POST];
 
 let now = 0; // set when the demo client starts, so nothing runs at import time
 const iso = (mins) => new Date(now + mins * 60000).toISOString();
@@ -534,6 +539,12 @@ const fns = {
     ] };
     if (b.action === 'limit') return { used: 3, total: 100, windowSeconds: 86400 };
     if (b.action === 'create') return { post: { id: 'demo-post', scheduledFor: b.scheduledFor, status: 'scheduled', platforms: (b.platforms || []).map((p) => ({ platform: p, status: 'scheduled' })) } };
+    // Editing a post: load it, save it (or send it now), retry, Facebook caption and take-down.
+    const all = [...(studio.posts.scheduled || []), ...(studio.posts.recent || [])];
+    const found = all.find((p) => p.id === b.postId) || all[0] || SAMPLE_POST;
+    if (b.action === 'get') return { post: found };
+    if (b.action === 'update') return { post: { ...found, status: b.publishNow ? 'publishing' : 'scheduled', scheduledFor: b.publishNow ? iso(0) : (b.scheduledFor ? new Date(b.scheduledFor).toISOString() : found.scheduledFor) } };
+    if (['remove', 'retry', 'editPublished', 'unpublish'].includes(b.action)) return { ok: true, post: found };
     return {};
   },
   'ai-assist': (b) => {

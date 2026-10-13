@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { fmtDate, fmtDateTime } from '../../lib/academy';
 import { eventLabel } from '../../lib/forms';
 import { AGAIN_LABEL } from '../../pages/vendors/formText';
+import { DeleteRecord, EditRecord } from '../AdminRecord';
 
 const TABS = [
   ['agreements', 'Agreements', FileSignature, 'vendor_agreements'],
@@ -221,7 +222,10 @@ const useRow = (table, row) => {
     else if (error) setSaved(error.message);
   };
   const refresh = async () => { const { data } = await supabase.from(table).select('*').eq('id', r.id).single(); if (data) setR(data); };
-  return [r, patch, saved, refresh];
+  const remove = () => supabase.from(table).delete({ count: 'exact' }).eq('id', r.id);
+  // For Edit details: the same update, reporting back to EditRecord.
+  const save = async (p) => { const res = await supabase.from(table).update(p).eq('id', r.id).select('*').maybeSingle(); if (res.data) setR(res.data); return res.error ? res : res.data ? res : { error: { message: 'That did not save. This login may not have the Vendors dashboard.' } }; };
+  return [r, patch, saved, refresh, remove, save];
 };
 
 const StatusChips = ({ tab, r, patch }) => (
@@ -267,7 +271,7 @@ const invokeDecision = async (body) => {
 
 // ── Storefront agreement ──
 const Agreement = ({ row, onBack }) => {
-  const [r, patch, saved, refresh] = useRow('vendor_agreements', row);
+  const [r, patch, saved, refresh, remove] = useRow('vendor_agreements', row);
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
@@ -307,6 +311,7 @@ const Agreement = ({ row, onBack }) => {
           <StatusChips tab="agreements" r={r} patch={patch} />
           {r.reviewed_at && <p className="sys-muted" style={{ margin: 0 }}>Last updated {fmtDateTime(r.reviewed_at)}</p>}
           <Notes r={r} patch={patch} />
+          <div className="adm-actions"><DeleteRecord what={`the agreement signed by ${r.business_name}`} note="Her storefront stays; it just loses the link to this agreement." onDelete={remove} onDone={onBack} /></div>
           <label className="sys-field"><span>A personal line for the email (optional)</span>
             <textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Welcome aboard! Call me if you get stuck on the setup." />
           </label>
@@ -325,7 +330,7 @@ const Agreement = ({ row, onBack }) => {
 
 // ── Market registration ──
 const Registration = ({ row, events, onBack }) => {
-  const [r, patch, saved, refresh] = useRow('vendor_registrations', row);
+  const [r, patch, saved, refresh, remove, save] = useRow('vendor_registrations', row);
   const [eventId, setEventId] = useState(row.event_id || '');
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
@@ -384,6 +389,10 @@ const Registration = ({ row, events, onBack }) => {
             <button className="sys-btn sys-btn--ghost" onClick={toLineup} disabled={busy || !(eventId || r.event_id)}><Store size={15} /> Add to lineup</button>
           )}
           <Notes r={r} patch={patch} />
+          <div className="adm-actions">
+            <EditRecord value={r} onSave={save} fields={[['business_name', 'Business name'], ['first_name', 'First name'], ['last_name', 'Last name'], ['email', 'Email', 'email'], ['phone', 'Phone', 'tel'], ['website', 'Website'], ['social', 'Social media'], ['products', 'What she will sell', 'textarea']]} />
+            <DeleteRecord what={`the registration from ${r.business_name}`} note="A lineup spot made from it stays." onDelete={remove} onDone={onBack} />
+          </div>
           {decision ? (
             <>
               <label className="sys-field"><span>A personal line for the email (optional)</span>
@@ -401,7 +410,7 @@ const Registration = ({ row, events, onBack }) => {
 
 // ── Feedback survey answer ──
 const Feedback = ({ row, events, onBack }) => {
-  const [r, , , refresh] = useRow('vendor_feedback', row);
+  const [r, , , refresh, remove] = useRow('vendor_feedback', row);
   const [eventId, setEventId] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
@@ -446,6 +455,7 @@ const Feedback = ({ row, events, onBack }) => {
             : <p className="sys-muted" style={{ margin: 0 }}>Said P31 is not the right fit. A kind thank-you is enough.</p>}
           {msg && <p className="sys-muted" style={{ margin: 0 }}>{msg}</p>}
           {r.email && <a className="sys-linkbtn" href={`mailto:${r.email}?subject=${encodeURIComponent(`Thank you for your feedback on ${r.market_label}`)}`}><Mail size={14} /> Write back</a>}
+          <div className="adm-actions"><DeleteRecord what={`the feedback from ${r.business_name}`} onDelete={remove} onDone={onBack} /></div>
         </section>
       </div>
     </div>
@@ -454,7 +464,7 @@ const Feedback = ({ row, events, onBack }) => {
 
 // ── Volunteer ──
 const VolunteerRow = ({ row, events, onBack }) => {
-  const [r, patch, saved] = useRow('volunteer_signups', row);
+  const [r, patch, saved, , remove, save] = useRow('volunteer_signups', row);
   const ev = events.find((e) => e.id === r.event_id);
   return (
     <div className="sys-page">
@@ -477,6 +487,10 @@ const VolunteerRow = ({ row, events, onBack }) => {
           <StatusChips tab="volunteers" r={r} patch={patch} />
           <EventSelect events={events} value={r.event_id} onChange={(v) => patch({ event_id: v })} label="Market she will serve at" />
           <Notes r={r} patch={patch} />
+          <div className="adm-actions">
+            <EditRecord value={r} onSave={save} fields={[['first_name', 'First name'], ['last_name', 'Last name'], ['email', 'Email', 'email'], ['phone', 'Phone', 'tel'], ['emergency_contact', 'Emergency contact']]} />
+            <DeleteRecord what={`${name(r)} as a volunteer`} onDelete={remove} onDone={onBack} />
+          </div>
           <a className="sys-linkbtn" href={`mailto:${r.email}?subject=${encodeURIComponent('Volunteering at the Proverbs 31 Market')}`}><Mail size={14} /> Email {r.first_name} the assignment and arrival time</a>
           <a className="sys-linkbtn" href="https://www.p31market.com/volunteer" target="_blank" rel="noreferrer"><Globe size={14} /> The form as volunteers see it</a>
         </section>
