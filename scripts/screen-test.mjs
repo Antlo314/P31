@@ -199,6 +199,9 @@ const SCREENS = [
   ['market home: podcast', mk('/'), [], 'Step into the'],
   ['collective home: podcast', cl('/'), [], 'Step into the'],
   ['collective home: podcast on a phone', cl('/'), [], 'Step into the', { phone: true }],
+  // Signed in on the Collective: the account menu with Sign out
+  ['collective header: account menu and sign out', cl('/'), ['Account menu'], 'Sign out'],
+  ['collective header: team links in the menu', cl('/academy'), ['Account menu'], 'Today'],
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

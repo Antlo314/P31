@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Mail, ArrowUpRight, ArrowUp, Instagram, Facebook, KeyRound, Home, GraduationCap, ShieldCheck, Store, Phone, MapPin, Users } from 'lucide-react';
+import { Mail, ArrowUpRight, ArrowUp, Instagram, Facebook, KeyRound, Home, GraduationCap, ShieldCheck, Store, Phone, MapPin, Users, LayoutDashboard, LogOut, Sun, MessagesSquare, Crown, UserRound } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useRoles } from '../lib/roles';
 import { isFlushRoute } from '../lib/routes';
 import { marketHome } from '../lib/site';
 import { EMAIL, OFFICE } from '../lib/team';
@@ -17,7 +19,14 @@ const SYSTEMS = /^\/(systems|studio)(\/|$)/;
 // Header and footer for thep31collective.org — the mentorship side of P31.
 export const CollectiveNav = () => {
   const { pathname } = useLocation();
+  const { user, profile, isAdmin, signOut } = useAuth();
+  const { roles } = useRoles();
   const [scrolled, setScrolled] = useState(false);
+  const [menu, setMenu] = useState(false);
+  useEffect(() => { Promise.resolve().then(() => setMenu(false)); }, [pathname]);
+  const team = !!(roles.admin || roles.operator || roles.studio || (roles.tools || []).length);
+  const firstName = profile?.full_name?.split(' ')[0];
+  const initial = (firstName || user?.email || '?').charAt(0).toUpperCase();
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
@@ -44,7 +53,26 @@ export const CollectiveNav = () => {
         </nav>
         <div className="nb__actions cl-nb__actions">
           <JoinCollective className="nb__cta cl-nb__join" size={16} />
-          <Link to="/portal" className="nb__cta cl-nb__signin" aria-label="Sign in"><KeyRound size={16} /> <span>Sign in</span></Link>
+          {user ? (
+            <div className="nb__user">
+              <button type="button" className="nb__avatar" onClick={() => setMenu(!menu)} aria-expanded={menu} aria-label="Account menu">
+                {profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : <span>{initial}</span>}
+                {(isAdmin || roles.admin) && <Crown size={11} className="nb__crown" />}
+              </button>
+              {menu && (
+                <div className="nb__menu" role="menu">
+                  <p className="nb__menu-name">{firstName || user.email}</p>
+                  <Link to="/portal" role="menuitem"><LayoutDashboard size={16} /> My dashboards</Link>
+                  {team && <Link to="/today" role="menuitem"><Sun size={16} /> Today</Link>}
+                  {team && <Link to="/systems" role="menuitem"><ShieldCheck size={16} /> Systems</Link>}
+                  <Link to="/gather" role="menuitem"><MessagesSquare size={16} /> The Gathering</Link>
+                  <button type="button" role="menuitem" onClick={() => { setMenu(false); signOut(); }}><LogOut size={16} /> Sign out</button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link to="/portal" className="nb__cta cl-nb__signin" aria-label="Sign in"><KeyRound size={16} /> <span>Sign in</span></Link>
+          )}
         </div>
       </div>
     </header>
@@ -55,7 +83,7 @@ export const CollectiveNav = () => {
       <NavLink to="/academy" className={() => `tb__item ${ACADEMY.test(pathname) ? 'active' : ''}`}><GraduationCap size={20} /><span>Academy</span></NavLink>
       <NavLink to="/systems" className={() => `tb__item ${SYSTEMS.test(pathname) ? 'active' : ''}`}><ShieldCheck size={20} /><span>Systems</span></NavLink>
       <a href={marketHome()} className="tb__item"><Store size={20} /><span>Market</span></a>
-      <NavLink to="/portal" className="tb__item"><KeyRound size={20} /><span>Sign in</span></NavLink>
+      <NavLink to="/portal" className="tb__item">{user ? <><UserRound size={20} /><span>Account</span></> : <><KeyRound size={20} /><span>Sign in</span></>}</NavLink>
     </nav>
     </>
   );
