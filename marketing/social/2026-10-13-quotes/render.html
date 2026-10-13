@@ -5,20 +5,37 @@
 <!-- Opened by build.mjs through the dev server: draws collection posts with the Design studio engine. -->
 <script type="module">
   import { COLLECTION } from '/src/studio/design/collection.js';
-  import { fromWords } from '/src/studio/design/templates.js';
+  import { fromWords, applyMotion, toReel } from '/src/studio/design/templates.js';
+  import { drawDesign } from '/src/studio/design/draw.js';
+  import { prepare } from '/src/studio/design/export.js';
   import { renderStill, renderVideo, videoLength } from '/src/studio/design/export.js';
   import { renderTrack, levels } from '/src/studio/design/music.js';
   const toData = (blob) => new Promise((r) => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(blob); });
   window.ids = COLLECTION.map((p) => p.id);
   window.still = async (id) => toData(await renderStill(fromWords(COLLECTION.find((p) => p.id === id)), { type: 'image/jpeg', quality: 0.93 }));
-  window.video = async (id, track, seconds) => {
-    const doc = fromWords(COLLECTION.find((p) => p.id === id));
+  window.video = async (id, track, seconds, { reel = false } = {}) => {
+    const base = fromWords(COLLECTION.find((p) => p.id === id));
+    const doc = reel ? toReel(base) : base;
     const len = seconds || videoLength(doc);
     const audio = track ? await renderTrack(track, len, { seed: id.length + len }) : null;
     const out = await renderVideo(doc, { seconds: len, audio });
     return { data: await toData(out.blob), type: out.type, seconds: len };
   };
   window.trackLevels = async (track, seconds = 12) => { const t0 = performance.now(); const b = await renderTrack(track, seconds); return { ...levels(b), ms: Math.round(performance.now() - t0) }; };
+  // Filmstrip frames of a post's motion (checks that entrances read well): returns small JPEG data URLs.
+  window.frames = async (id, preset, times, { reel = true, text = null, emph = null, camera = null } = {}) => {
+    const p = COLLECTION.find((x) => x.id === id);
+    let doc = fromWords(p);
+    if (text || emph) doc = { ...doc, layers: doc.layers.map((l, i) => (i === 0 && l.type === 'text' ? { ...l, ...(text ? { text } : {}), ...(emph ? { emph } : {}) } : l)) };
+    if (preset) doc = applyMotion(doc, preset);
+    if (camera) doc = { ...doc, motion: { ...doc.motion, camera } };
+    if (reel) doc = toReel(doc);
+    await prepare(doc);
+    const big = document.createElement('canvas'); const sm = document.createElement('canvas');
+    const { w, h } = doc.size === 'story' ? { w: 1080, h: 1920 } : { w: 1080, h: 1350 };
+    big.width = w; big.height = h; sm.width = 270; sm.height = Math.round(270 * h / w);
+    return times.map((t) => { drawDesign(big.getContext('2d'), doc, t, { length: 10 }); sm.getContext('2d').drawImage(big, 0, 0, sm.width, sm.height); return sm.toDataURL('image/jpeg', 0.85); });
+  };
   window.ready = true;
 </script>
 </body>

@@ -344,16 +344,18 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 1. Open Content Studio → Design. The Collection shows the 48 quote cards on the calendar; open one.
 2. Click the big words on the page and change them; drag them a little; open Styles and pick another colour style.
-3. Open Music, play two tracks, pick one, then press Play at the top to watch and hear the reel.
-4. Download → Video with music, and Download → Image (PNG). Then Save.
-5. Use in a post → As a reel with music. On Create post, set a time a week out and schedule it, then delete it from the Calendar.
+3. Open Motion and try Editorial, Gentle and Word by word (each plays as you pick it). Put one word in *asterisks*, pick Marker in its settings, and play again.
+4. Open Music, play two tracks, pick one, then press Play at the top to watch and hear the reel.
+5. Download → Reel 9:16 with music, and Download → Image (PNG). Then Save.
+6. Use in a post → As a reel with music. On Create post, set a time a week out and schedule it, then delete it from the Calendar.
 
 **What should happen**
 
 - The words, colours and position change on the page as you edit; Undo puts them back.
-- The MP4 plays with the words animating in and the music underneath; the PNG matches the page.
+- The MP4 is 9:16: the topo lines draw themselves in, the words arrive the way the Motion choice says, the highlighted word gets its marker after it lands, the camera eases in, and the music sits underneath; the PNG matches the page.
 - Saved lists the design (for the whole team once v44 has run; in this browser before that).
-- Create post opens with the reel attached and the caption filled in; the scheduled post shows on the Calendar.
+- Create post opens with the reel attached, its cover (the finished card) and the caption filled in; the scheduled post shows on the Calendar with that cover.
+- Trending Instagram tracks list under Pick a trending track once the Instagram account is connected to Zernio through Facebook Login; before that the Studio says so.
 
 **Afterwards:** Delete the TEST post from the Calendar and the design from Saved.
 

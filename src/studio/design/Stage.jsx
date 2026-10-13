@@ -8,7 +8,7 @@ const SNAP = 10;
  * The page being designed: the canvas, plus an overlay for picking, dragging and resizing layers
  * (with centre guides). `time` (seconds) plays the entrances instead; the overlay hides then.
  */
-const Stage = ({ doc, selected, onSelect, onChange, onEditText, time = null, maxHeight = 720 }) => {
+const Stage = ({ doc, selected, onSelect, onChange, onEditText, time = null, length = 10, maxHeight = 720 }) => {
   const wrap = useRef(null);
   const canvas = useRef(null);
   const [scale, setScale] = useState(0.4);
@@ -32,11 +32,11 @@ const Stage = ({ doc, selected, onSelect, onChange, onEditText, time = null, max
     const c = canvas.current;
     if (!c) return undefined;
     let live = true;
-    const paint = () => { if (live) setBoxes(drawDesign(c.getContext('2d'), doc, time)); };
+    const paint = () => { if (live) setBoxes(drawDesign(c.getContext('2d'), doc, time, { length })); };
     paint();
     if (time == null) prepare(doc).then(paint);
     return () => { live = false; };
-  }, [doc, time]);
+  }, [doc, time, length]);
 
   const toDoc = (e) => {
     const r = canvas.current.getBoundingClientRect();

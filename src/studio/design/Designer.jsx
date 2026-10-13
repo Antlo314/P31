@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Undo2, Redo2, Play, Square, Save, Download, Send, LayoutTemplate, Sparkles, Palette, Plus, Music2, FolderOpen, Layers, Loader2, Check, Image as ImageIcon, Film } from 'lucide-react';
+import { Undo2, Redo2, Play, Square, Save, Download, Send, LayoutTemplate, Sparkles, Palette, Plus, Music2, FolderOpen, Layers, Loader2, Check, Image as ImageIcon, Film, Wand2, Smartphone } from 'lucide-react';
 import { DashHead } from '../../apps/DashShell';
 import Stage from './Stage';
 import Inspector from './Inspector';
 import MusicPanel from './MusicPanel';
 import { getMusicBuffer, playBuffer, stopPreview } from './audio';
-import { TemplatesPanel, CollectionPanel, StylesPanel, AddPanel, DesignsPanel } from './panels';
+import { TemplatesPanel, CollectionPanel, StylesPanel, AddPanel, DesignsPanel, MotionPanel } from './panels';
 import Batch from './Batch';
 import { SIZES } from './brand';
-import { fromWords, resize, newId } from './templates';
+import { fromWords, resize, newId, toReel } from './templates';
 import { COLLECTION, captionsFor } from './collection';
 import { renderStill, renderVideo, videoLength, download, fileName, prepare } from './export';
 import { saveDesign, listDesigns } from './store';
@@ -25,7 +25,7 @@ const readDraft = () => { try { const d = JSON.parse(localStorage.getItem(DRAFT)
 
 const TABS = [
   ['templates', 'Templates', LayoutTemplate], ['collection', 'Collection', Sparkles], ['styles', 'Styles', Palette], ['add', 'Add', Plus],
-  ['music', 'Music', Music2], ['saved', 'Saved', FolderOpen], ['batch', 'Batch', Layers],
+  ['motion', 'Motion', Wand2], ['music', 'Music', Music2], ['saved', 'Saved', FolderOpen], ['batch', 'Batch', Layers],
 ];
 
 /**
@@ -113,13 +113,14 @@ const Designer = () => {
   }, [selected, undo, redo, layerAction, change]);
 
   // ── Preview: the entrances with the music, in real time ──
-  const play = async () => {
-    if (time != null) { stop(); return; }
+  const play = async (restart = false) => {
+    if (time != null && !restart) { stop(); return; }
+    const d = docRef.current; // the latest design, even right after a preset changed it
     setBusy('mix'); setError('');
     try {
-      await prepare(doc);
-      const len = videoLength(doc);
-      const audio = await getMusicBuffer(doc.music, len);
+      await prepare(d);
+      const len = videoLength(d);
+      const audio = await getMusicBuffer(d.music, len);
       setBusy('');
       if (audio) playBuffer(audio);
       const t0 = performance.now();
@@ -135,11 +136,11 @@ const Designer = () => {
 
   // ── Files ──
   const still = async (type = 'image/png') => renderStill(doc, { type });
-  const video = async () => {
-    const len = videoLength(doc);
+  const video = async (d = doc) => {
+    const len = videoLength(d);
     setBusy('video'); setProgress(0);
-    const audio = await getMusicBuffer(doc.music, len);
-    return renderVideo(doc, { seconds: len, audio, onProgress: setProgress });
+    const audio = await getMusicBuffer(d.music, len);
+    return renderVideo(d, { seconds: len, audio, onProgress: setProgress });
   };
   const run = async (label, job) => {
     stop(); setBusy(label); setError(''); setNote('');
@@ -147,15 +148,19 @@ const Designer = () => {
     setBusy(''); setProgress(0);
   };
   const downloadStill = (type) => run('image', async () => download(await still(type), fileName(doc, type === 'image/png' ? 'png' : 'jpg')));
-  const downloadVideo = () => run('video', async () => { const out = await video(); download(out.blob, fileName(doc, out.type === 'video/mp4' ? 'mp4' : 'webm')); });
+  const downloadVideo = (reel = false) => run('video', async () => { const out = await video(reel ? toReel(doc) : doc); download(out.blob, fileName(doc, out.type === 'video/mp4' ? 'mp4' : 'webm')); });
+  // A reel goes out at 9:16 (resized with the reel's safe area), with the finished design as its
+  // cover, so the grid shows the whole card rather than the empty first frame.
   const sendToPost = (kind) => run(kind === 'video' ? 'video' : 'upload', async () => {
-    let file;
-    if (kind === 'video') { const out = await video(); file = new File([out.blob], fileName(doc, out.type === 'video/mp4' ? 'mp4' : 'webm'), { type: out.type }); }
+    let file; let coverUrl = null;
+    const reel = toReel(doc);
+    if (kind === 'video') { const out = await video(reel); file = new File([out.blob], fileName(doc, out.type === 'video/mp4' ? 'mp4' : 'webm'), { type: out.type }); }
     else file = new File([await still('image/jpeg')], fileName(doc, 'jpg'), { type: 'image/jpeg' });
     setBusy('upload');
     const url = await uploadMedia(file, file.name);
-    const alt = doc.layers.filter((l) => l.type === 'text' && !l.hidden).map((l) => l.text).join(' ').slice(0, 400);
-    navigate('/studio/compose', { state: { copy: { platforms: ['instagram', 'facebook'], content: doc.caption || '', media: [{ type: kind === 'video' ? 'video' : 'image', url, name: file.name, altText: alt }], audio: kind === 'video' ? doc.music?.ig || null : null } } });
+    if (kind === 'video') coverUrl = await uploadMedia(new File([await renderStill(reel, { type: 'image/jpeg' })], fileName(doc, 'cover.jpg'), { type: 'image/jpeg' }));
+    const alt = doc.layers.filter((l) => l.type === 'text' && !l.hidden).map((l) => l.text.replace(/[*]/g, '')).join(' ').slice(0, 400);
+    navigate('/studio/compose', { state: { copy: { platforms: ['instagram', 'facebook'], content: doc.caption || '', media: [{ type: kind === 'video' ? 'video' : 'image', url, name: file.name, altText: alt }], audio: kind === 'video' ? doc.music?.ig || null : null, coverUrl, videoVolume: 0 } } });
   });
   const save = () => run('save', async () => {
     const title = meta.title?.trim() || 'Untitled design';
@@ -182,7 +187,7 @@ const Designer = () => {
           <button type="button" className="ds-icon-btn" onClick={undo} disabled={!canUndo} aria-label="Undo" title="Undo (Ctrl+Z)"><Undo2 size={16} /></button>
           <button type="button" className="ds-icon-btn" onClick={redo} disabled={!canRedo} aria-label="Redo" title="Redo (Ctrl+Y)"><Redo2 size={16} /></button>
         </span>
-        <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={play} disabled={busy && busy !== 'mix'}>
+        <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => play()} disabled={busy && busy !== 'mix'}>
           {busy === 'mix' ? <Loader2 size={14} className="dz-spin" /> : time != null ? <Square size={14} /> : <Play size={14} />} {time != null ? 'Stop' : `Play ${len}s`}
         </button>
         <span className="dz-bar__push" />
@@ -192,7 +197,8 @@ const Designer = () => {
           <div>
             <button type="button" onClick={(e) => { e.currentTarget.closest('details').open = false; downloadStill('image/png'); }}><ImageIcon size={14} /> Image (PNG)</button>
             <button type="button" onClick={(e) => { e.currentTarget.closest('details').open = false; downloadStill('image/jpeg'); }}><ImageIcon size={14} /> Image (JPG)</button>
-            <button type="button" onClick={(e) => { e.currentTarget.closest('details').open = false; downloadVideo(); }}><Film size={14} /> Video with music (MP4)</button>
+            <button type="button" onClick={(e) => { e.currentTarget.closest('details').open = false; downloadVideo(true); }}><Smartphone size={14} /> Reel 9:16 with music (MP4)</button>
+            <button type="button" onClick={(e) => { e.currentTarget.closest('details').open = false; downloadVideo(false); }}><Film size={14} /> Video in this size (MP4)</button>
           </div>
         </details>
         <details className="dz-menu dz-menu--right">
@@ -222,13 +228,14 @@ const Designer = () => {
             {tab === 'collection' && <CollectionPanel doc={doc} onReplace={(d) => replace(d)} />}
             {tab === 'styles' && <StylesPanel doc={doc} onChange={change} />}
             {tab === 'add' && <AddPanel doc={doc} onAdd={(l) => { change((d) => ({ ...d, layers: [...d.layers, l] })); setSelected(l.id); }} />}
+            {tab === 'motion' && <MotionPanel doc={doc} onChange={change} onPlay={() => { stop(); setTimeout(() => play(true), 30); }} />}
             {tab === 'music' && <MusicPanel music={doc.music || {}} seconds={len} onChange={(m) => change((d) => ({ ...d, music: m }), { coalesce: 'music' })} />}
             {tab === 'saved' && <DesignsPanel refreshKey={savedKey} shared={shared} setShared={setShared} current={meta.id} onOpen={(r) => replace(r.doc, { id: r.id, title: r.title })} />}
             {tab === 'batch' && <Batch doc={doc} shared={shared} />}
           </div>
         </aside>
         <section className="dz-center">
-          <Stage doc={doc} selected={selected} onSelect={setSelected} onChange={change} time={time}
+          <Stage doc={doc} selected={selected} onSelect={setSelected} onChange={change} time={time} length={len}
             onEditText={(id) => setTimeout(() => document.getElementById(`dz-text-${id}`)?.focus())} />
           <p className="dz-under">
             {size.label} · {size.w}×{size.h}

@@ -97,6 +97,9 @@ function contours(w, h, { seed = 1, scale = 1, density = 1, z = 0 }) {
   return lines;
 }
 
+const ease = (v) => { const x = Math.max(0, Math.min(1, v)); return -(Math.cos(Math.PI * x) - 1) / 2; };
+const pathLength = (pts) => { let s = 0; for (let i = 1; i < pts.length; i += 1) s += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y); return s + 2; };
+
 function smoothLine(ctx, pts) {
   ctx.moveTo(pts[0].x, pts[0].y);
   for (let k = 1; k < pts.length - 1; k += 1) {
@@ -119,9 +122,21 @@ const PATTERNS = {
       ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       lines.forEach(({ level, polys }) => {
         ctx.lineWidth = (level % 3 === 0 ? 6.5 : level % 3 === 1 ? 2.6 : 4.4) * p.weight;
-        ctx.beginPath();
-        polys.forEach((pts) => smoothLine(ctx, pts));
-        ctx.stroke();
+        if (p.drawn >= 1) {
+          ctx.beginPath();
+          polys.forEach((pts) => smoothLine(ctx, pts));
+          ctx.stroke();
+          return;
+        }
+        // Drawing in: every contour traces itself, the levels a beat apart.
+        polys.forEach((pts, n) => {
+          const len = pathLength(pts);
+          const k = ease((p.drawn * 1.3 - (level / lines.length) * 0.22 - (n % 5) * 0.015) / 1.0);
+          if (k <= 0) return;
+          ctx.setLineDash([len, len]); ctx.lineDashOffset = len * (1 - k);
+          ctx.beginPath(); smoothLine(ctx, pts); ctx.stroke();
+        });
+        ctx.setLineDash([]);
       });
     },
   },
@@ -136,8 +151,10 @@ const PATTERNS = {
         const y0 = (h * (k + 0.5)) / n;
         const a = (40 + r() * 50) * p.scale; const f = (0.004 + r() * 0.003) / p.scale;
         ctx.lineWidth = (k % 3 === 0 ? 5 : 2.4) * p.weight;
+        const reach = p.drawn >= 1 ? w + 20 : -20 + (w + 40) * ease(p.drawn * 1.25 - k / n * 0.25);
+        if (reach <= -20) continue;
         ctx.beginPath();
-        for (let x = -20; x <= w + 20; x += 12) {
+        for (let x = -20; x <= reach; x += 12) {
           const y = y0 + a * Math.sin(x * f + phase + k * 0.55 + t * 0.35) + a * 0.4 * Math.sin(x * f * 2.3 + k + t * 0.2);
           if (x === -20) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
@@ -197,6 +214,7 @@ const PATTERNS = {
     draw(ctx, w, h, p, t) {
       const r = rand(p.seed);
       const n = Math.max(2, Math.round(4 * p.density));
+      const a0 = ctx.globalAlpha;
       for (let k = 0; k < n; k += 1) {
         const cx = r() * w; const cy = r() * h; const rad = (180 + r() * 260) * p.scale;
         ctx.beginPath();
@@ -207,7 +225,7 @@ const PATTERNS = {
           if (a === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
         ctx.closePath();
-        ctx.globalAlpha = 0.45 * p.opacity;
+        ctx.globalAlpha = a0 * 0.45;
         ctx.fill();
       }
     },
@@ -224,12 +242,15 @@ const PATTERNS = {
 export const PATTERN_KINDS = Object.entries(PATTERNS).map(([key, v]) => ({ key, label: v.label }));
 
 /** Draw the pattern `p` (with its defaults filled in) at time t. */
-export function drawPattern(ctx, w, h, p, t = 0) {
+// `reveal` (0..1) brings the pattern in at the start of a video: line patterns that can trace
+// themselves do (when `drawIn`); the rest fade in.
+export function drawPattern(ctx, w, h, p, t = 0, reveal = 1, drawIn = false) {
   const def = PATTERNS[p?.kind] || PATTERNS.none;
-  if (def === PATTERNS.none) return;
-  const q = { color: '#AF9EAC', opacity: 1, weight: 1, density: 1, scale: 1, seed: 7, ...p };
+  if (def === PATTERNS.none || reveal <= 0) return;
+  const traces = drawIn && (p.kind === 'topo' || p.kind === 'waves');
+  const q = { color: '#AF9EAC', opacity: 1, weight: 1, density: 1, scale: 1, seed: 7, ...p, drawn: traces ? reveal : 1 };
   ctx.save();
-  ctx.globalAlpha = q.opacity;
+  ctx.globalAlpha = q.opacity * (traces ? 1 : ease(reveal));
   ctx.strokeStyle = q.color; ctx.fillStyle = q.color;
   def.draw(ctx, w, h, q, t);
   ctx.restore();

@@ -296,6 +296,10 @@ export const StudioCompose = () => {
   const [firstComment, setFirstComment] = useState(copy?.firstComment || '');
   const [audio, setAudio] = useState(copy?.audio || null);
   const [showSound, setShowSound] = useState(false);
+  // From the Design studio: the finished card as the reel's cover, and how loud the reel's own
+  // music plays under an Instagram track (off for designs, whose music is only a background bed).
+  const [cover, setCover] = useState(copy?.coverUrl || null);
+  const [videoVolume, setVideoVolume] = useState(copy?.videoVolume ?? 100);
   const [editing, setEditing] = useState(null); // the post being edited, once loaded
   const isReel = media.length === 1 && media[0].type === 'video';
 
@@ -317,6 +321,7 @@ export const StudioCompose = () => {
     platforms, content, fbContent: split ? fbContent : undefined, scheduledFor: when, timezone: 'America/New_York',
     media: media.map(({ type, url, altText, thumbnail }) => ({ type, url, altText, thumbnail })),
     audioId: isReel && audio ? audio.id : undefined, firstComment: !isReel && firstComment ? firstComment : undefined,
+    ...(isReel && audio ? { audioVolume: 100, videoVolume } : {}), coverUrl: isReel && cover ? cover : undefined,
   });
   const postNow = async () => {
     if (!window.confirm('Send this post right now instead of at its scheduled time?')) return;
@@ -333,7 +338,7 @@ export const StudioCompose = () => {
   };
   const duplicate = () => {
     setEditing(null); setWhen('');
-    navigate('/studio/compose', { state: { copy: { platforms, content, split, fbContent, firstComment, media, audio } } });
+    navigate('/studio/compose', { state: { copy: { platforms, content, split, fbContent, firstComment, media, audio, coverUrl: cover, videoVolume } } });
   };
 
   // Hook, captions, hashtags and a first comment from the writing helper.
@@ -447,6 +452,16 @@ export const StudioCompose = () => {
             {isReel && (
               <div className="k-field"><span>Instagram audio {audio ? `· ${audio.title}` : ''}</span>
                 {showSound ? <SoundPicker compact value={audio} onChange={setAudio} /> : <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => setShowSound(true)}>{audio ? 'Change track' : 'Pick a trending track'}</button>}
+              </div>
+            )}
+            {isReel && audio && (
+              <div className="k-field"><span>The reel’s own sound on Instagram</span>
+                <div className="k-segs">{[[0, 'Off'], [25, 'Quiet'], [100, 'Full']].map(([v, l]) => <button type="button" key={v} aria-pressed={videoVolume === v} onClick={() => setVideoVolume(v)}>{l}</button>)}</div>
+              </div>
+            )}
+            {isReel && cover && (
+              <div className="k-field"><span>Cover (what the grid shows)</span>
+                <span className="st-cover"><img src={cover} alt="Reel cover" /><button type="button" className="k-link" onClick={() => setCover(null)}>Use the first frame instead</button></span>
               </div>
             )}
             <p className="ds-muted"><Link to="/studio/create" className="k-link"><Clapperboard size={14} /> Make a reel or product photo in the creative tools</Link></p>

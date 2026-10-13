@@ -109,7 +109,7 @@ const MusicPanel = ({ music = {}, onChange, seconds = 12 }) => {
       )}
 
       <h4><Instagram size={15} /> Instagram’s music on the reel</h4>
-      <p className="ds-muted dz-small">Pick a trending track from Instagram’s catalogue and the reel plays it on Instagram (instead of the track above). Facebook keeps the track above.</p>
+      <p className="ds-muted dz-small">Pick a trending track from Instagram’s catalogue and the reel plays it on Instagram (instead of the track above); Facebook keeps the track above. Instagram allows this on reels only, and only when the account is connected to Zernio through Facebook Login.</p>
       {showIg
         ? <SoundPicker compact value={music.ig || null} onChange={(a) => set({ ig: a })} />
         : <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => setShowIg(true)}>{music.ig ? `Change · ${music.ig.title}` : 'Pick a trending Instagram track'}</button>}

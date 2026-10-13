@@ -4,7 +4,7 @@ import { FONTS, FONT_NAMES, weightsOf, nearestWeight, hasItalic } from './fonts'
 import { SWATCHES } from './brand';
 import { PATTERN_KINDS } from './patterns';
 import { ANIMS } from './draw';
-import { readImage } from './util';
+import { readImage, highlightLongest } from './util';
 import { videoLength } from './export';
 
 const Field = ({ label, children, row }) => <label className={`dz-field ${row ? 'dz-field--row' : ''}`}><span>{label}</span>{children}</label>;
@@ -119,7 +119,14 @@ const Inspector = ({ doc, selected, onChange, onLayer, onSelect }) => {
           {hasItalic(l.font) && <button type="button" className="dz-toggle" aria-pressed={!!l.italic} onClick={() => set({ italic: !l.italic })} title="Italic"><Italic size={16} /></button>}
         </div>
         <Field label="Colour"><Swatches value={l.color} onChange={(c) => set({ color: c, role: null })} /></Field>
-        <Field label="Highlight behind the words"><Swatches allowNone value={l.bg} onChange={(c) => set({ bg: c, bgRole: null })} /></Field>
+        <div className="dz-field"><span>Highlighted words (put them in *asterisks*)</span>
+          <Seg label="Highlight style" value={l.emph || 'color'} onChange={(v) => set({ emph: v })} options={[['color', 'Colour'], ['marker', 'Marker'], ['underline', 'Underline']]} />
+          {(l.emph || 'color') === 'marker'
+            ? <Swatches value={l.markColor} onChange={(c) => set({ markColor: c })} label="Marker colour" />
+            : <Swatches value={l.emColor} onChange={(c) => set({ emColor: c, emRole: null })} label="Highlight colour" />}
+          {!String(l.text).includes('*') && <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => set({ text: highlightLongest(l.text) })}>Highlight the longest word</button>}
+        </div>
+        <Field label="Box behind the words"><Swatches allowNone value={l.bg} onChange={(c) => set({ bg: c, bgRole: null })} /></Field>
         <Field label="Letter spacing"><Range value={l.spacing || 0} min={-6} max={50} onChange={(v) => set({ spacing: v })} /></Field>
         <Field label="Line height"><Range value={l.lh || 1.15} min={0.75} max={2} step={0.01} onChange={(v) => set({ lh: v })} /></Field>
         <Field label="Shrink long text to fit" row>

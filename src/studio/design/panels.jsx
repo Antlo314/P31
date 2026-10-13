@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Type, Square, Circle, Minus, ImagePlus, Trash2, Copy, FolderOpen, RectangleHorizontal } from 'lucide-react';
 import Thumb from './Thumb';
-import { TEMPLATES, MARKS, newId, resize, variationsOf, fromWords, INVITES } from './templates';
+import { TEMPLATES, MARKS, newId, resize, variationsOf, fromWords, INVITES, MOTIONS, applyMotion } from './templates';
 import { COLLECTION, captionsFor } from './collection';
 import { STYLES, styleOf, HANDLES } from './brand';
-import { sizeOf } from './draw';
+import { sizeOf, CAMERAS, INTROS } from './draw';
 import { readImage } from './util';
 import { listDesigns, deleteDesign } from './store';
 
@@ -159,3 +159,31 @@ export const DesignsPanel = ({ onOpen, refreshKey, shared, setShared, current })
   );
 };
 
+
+/** How the design moves in a video: a preset for every layer, the camera and the pattern. */
+export const MotionPanel = ({ doc, onChange, onPlay }) => {
+  const m = doc.motion || {};
+  const set = (patch) => onChange((d) => ({ ...d, motion: { ...d.motion, ...patch } }), { coalesce: 'motion' });
+  return (
+    <div className="dz-motion">
+      <p className="ds-muted dz-small">How the words arrive when the design becomes a reel or video. Each choice sets every layer at once, then plays it; fine-tune any layer in its settings.</p>
+      <div className="dz-presets">
+        {MOTIONS.map((p) => (
+          <button key={p.key} type="button" className={`dz-preset ${m.preset === p.key ? 'is-on' : ''}`} aria-pressed={m.preset === p.key}
+            onClick={() => { onChange((d) => applyMotion(d, p.key)); setTimeout(() => onPlay?.(), 60); }}>
+            <strong>{p.name}</strong><small>{p.note}</small>
+          </button>
+        ))}
+      </div>
+      <h4>Camera</h4>
+      <div className="dz-seg" role="group" aria-label="Camera">
+        {CAMERAS.map(([k, l]) => <button key={k} type="button" aria-pressed={(m.camera || 'push') === k} onClick={() => set({ camera: k })}>{l}</button>)}
+      </div>
+      <h4>Background</h4>
+      <div className="dz-seg" role="group" aria-label="Background at the start">
+        {INTROS.map(([k, l]) => <button key={k} type="button" aria-pressed={(m.intro || 'draw') === k} onClick={() => set({ intro: k })}>{l}</button>)}
+      </div>
+      <p className="ds-muted dz-small">Tip: put a word in *asterisks* to highlight it (in colour, with a marker or an underline; choose in the text’s settings). The highlight sweeps in after the words land.</p>
+    </div>
+  );
+};

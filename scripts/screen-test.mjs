@@ -87,6 +87,7 @@ const SCREENS = [
   ['studio design: brand styles', cl('/studio/design'), ['Styles'], 'Plum night'],
   ['studio design: add text', cl('/studio/design'), ['Add', 'Heading'], 'Shrink long text to fit'],
   ['studio design: music', cl('/studio/design'), ['Music'], 'Sunday Keys'],
+  ['studio design: motion presets', cl('/studio/design'), ['Motion'], 'Lines rise out of the page'],
   ['studio design: saved designs', cl('/studio/design'), ['Saved'], 'Nothing saved yet'],
   ['studio design: batch', cl('/studio/design'), ['Batch'], 'Make the designs'],
   ['studio design on a phone', cl('/studio/design'), ['Styles'], 'Plum night', { phone: true }],

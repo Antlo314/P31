@@ -17,3 +17,12 @@ export function readImage(file, max = 1600) {
     img.src = url;
   });
 }
+
+/** Wraps the longest word of `text` in *asterisks* (a one-tap highlight). */
+export function highlightLongest(text) {
+  const ws = String(text || '').split(' ');
+  const bare = (w) => w.replace(/[^\p{L}\p{N}']/gu, '');
+  const i = ws.reduce((a, w, j) => (bare(w).length > bare(ws[a]).length ? j : a), 0);
+  ws[i] = ws[i].replace(/^([^\p{L}\p{N}]*)(.*?)([^\p{L}\p{N}]*)$/u, '$1*$2*$3');
+  return ws.join(' ');
+}

@@ -74,7 +74,7 @@ async function encodeFast({ doc, canvas, ctx, frames, seconds, audio, onProgress
     if (sound) await sound.add(audio);
     for (let f = 0; f < frames; f += 1) {
       if (signal?.aborted) throw new DOMException('Cancelled', 'AbortError');
-      drawDesign(ctx, doc, f / FPS);
+      drawDesign(ctx, doc, f / FPS, { length: seconds });
       await video.add(f / FPS, 1 / FPS);
       if (f % 10 === 0) onProgress?.(f / frames);
     }
@@ -110,7 +110,7 @@ async function recordRealtime({ doc, canvas, ctx, seconds, audio, onProgress, si
     const tick = () => {
       if (signal?.aborted) { reject(new DOMException('Cancelled', 'AbortError')); return; }
       const t = (performance.now() - t0) / 1000;
-      drawDesign(ctx, doc, Math.min(t, seconds));
+      drawDesign(ctx, doc, Math.min(t, seconds), { length: seconds });
       onProgress?.(Math.min(1, t / seconds));
       if (t >= seconds) resolve(); else requestAnimationFrame(tick);
     };

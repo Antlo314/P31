@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Layers, Wand2, CalendarClock, Save, Loader2, X, Sparkles } from 'lucide-react';
 import Thumb from './Thumb';
-import { fromWords, resize } from './templates';
+import { fromWords, resize, toReel } from './templates';
 import { STYLES } from './brand';
 import { PATTERN_KINDS } from './patterns';
 import { renderStill, renderVideo, videoLength } from './export';
@@ -105,12 +105,15 @@ const Batch = ({ doc, shared }) => {
     for (const [i, it] of items.entries()) {
       setProgress({ done: i, total: items.length, label: format === 'video' ? 'Making videos and scheduling' : 'Scheduling' });
       try {
-        let file; let type;
+        let file; let type; let coverUrl = null;
         if (format === 'video') {
-          const len = videoLength(it.doc);
-          const audio = await getMusicBuffer(it.doc.music, len);
-          const out = await renderVideo(it.doc, { seconds: len, audio });
+          // Reels go out at 9:16, with the finished card as the cover.
+          const reel = toReel(it.doc);
+          const len = videoLength(reel);
+          const audio = await getMusicBuffer(reel.music, len);
+          const out = await renderVideo(reel, { seconds: len, audio });
           file = new File([out.blob], `p31-batch-${i + 1}.${out.type === 'video/mp4' ? 'mp4' : 'webm'}`, { type: out.type }); type = 'video';
+          coverUrl = await uploadMedia(new File([await renderStill(reel)], `p31-batch-${i + 1}-cover.jpg`, { type: 'image/jpeg' }));
         } else {
           file = new File([await renderStill(it.doc)], `p31-batch-${i + 1}.jpg`, { type: 'image/jpeg' }); type = 'image';
         }
@@ -120,6 +123,7 @@ const Batch = ({ doc, shared }) => {
           platforms, content: it.caption, title: it.line.slice(0, 90), media: [{ type, url, altText: it.line.replace('|', ' ') }],
           scheduledFor: it.when, timezone: 'America/New_York',
           ...(type === 'video' && ig ? { audioId: ig.id, audioVolume: 100, videoVolume: 0 } : {}),
+          ...(coverUrl ? { coverUrl } : {}),
         });
       } catch (e) { failed.push(`${it.line.slice(0, 40)}: ${e.message}`); }
     }

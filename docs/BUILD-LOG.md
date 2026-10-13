@@ -2,6 +2,14 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 13 (evening) — Motion that feels finished, reels made the way Instagram wants them
+
+- **Text that arrives beautifully.** New entrances, all soft and short: Soft focus (each line comes into focus), Reveal (each line rises out of an invisible slot, like a film title), Word by word (with a slight blur), Letter cascade, and a Typewriter with a blinking caret, alongside Rise, Fade, Pop and Slide. Motion presets set a whole design at once (Editorial, Gentle, Word by word, Typewriter, Bold, Still) with timing worked out from the reading order, and play it straight away.
+- **Highlight a word.** Put any word in *asterisks* to make it the accent colour, give it a highlighter-pen marker, or underline it; the marker sweeps in just after the word lands. Every colour style has its own highlighter colour.
+- **The page moves too.** In a video the topo lines draw themselves in over the first two seconds (or the pattern fades in), and the camera eases in slowly or drifts, so even a quote card feels alive.
+- **Reels to Instagram's spec.** "Use in a post → as a reel", Batch reels and the new Download → Reel 9:16 come out at 1080×1920, 30 frames a second, H.264 with AAC sound. Resizing to 9:16 keeps the words inside the part of the screen Instagram does not cover. The finished card goes up as the reel's cover, so the grid shows the whole design rather than the empty first frame. When a trending Instagram track is chosen, the reel's own music is turned off on Instagram so the two never clash (the setting is in Create post).
+- **Trending music, checked.** Instagram's trending catalogue works through Zernio only when the Instagram account is connected through Facebook Login; P31's is connected through Instagram Login, so the list is refused until it is reconnected. Instagram allows catalogue music on reels only (not photos, carousels or stories).
+
 ## October 13 (afternoon) — The Design studio, music for reels, and 48 posts in Melanie JC's look
 
 - **48 new posts, scheduled.** Melanie JC's Canva quote card ("Push me God. I want the promises we talked about.": lilac, royal purple capitals, an olive script handle over topographic lines) is now a look the site can draw itself. From it came a collection of 48 posts for Instagram and Facebook: 28 bold faith-and-business quotes, 3 prayers, 5 scriptures (King James, word for word), 6 invitations to become a P31 curator (p31market.com/apply) and 6 to book a free mentorship intro call (thep31collective.org/join), each with its own caption and a genuine question to answer in the comments. They rotate through twelve brand colour styles and five background patterns. Two go out each day from 4 PM on October 13 through November 5, at the hours P31's followers are online and clear of the posts already booked.
