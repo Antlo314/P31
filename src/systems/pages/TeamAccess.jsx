@@ -106,7 +106,7 @@ const TeamAccess = () => {
     [...rows].sort((a, b) => order(a) - order(b)).forEach((r) => {
       const person = memberByEmail(r.email);
       const key = person?.name || r.full_name || r.email;
-      if (!byName.has(key)) byName.set(key, { name: key, person, role: r.role_title || person?.role || '', photo: r.photo_key || person?.photo, logins: [] });
+      if (!byName.has(key)) byName.set(key, { name: key, person, role: r.role_title || person?.role || '', photo: person?.photo || r.photo_key, logins: [] }); // the site's own list (src/lib/team.js) decides the photo
       byName.get(key).logins.push(r);
     });
     TEAM.forEach((p) => { if (!byName.has(p.name)) byName.set(p.name, { name: p.name, person: p, role: p.role, photo: p.photo, logins: [] }); });
