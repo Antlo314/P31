@@ -15,7 +15,7 @@ const Q = (headline, caption, extra = {}) => ({ template: 'quote', kind: 'faith'
 const P = (intro, headline, caption) => ({ template: 'prayer', kind: 'faith', words: { intro, headline }, caption });
 const S = (verse, reference, caption) => ({ template: 'scripture', kind: 'scripture', words: { verse, reference }, caption });
 const C = (eyebrow, headline, body, caption) => ({ template: 'invite', kind: 'curator', link: 'curator', words: { eyebrow, headline, body, button: 'Apply at p31market.com/apply' }, caption });
-const M = (eyebrow, headline, body, button, caption) => ({ template: 'invite', kind: 'mentorship', link: 'mentorship', words: { eyebrow, headline, body, button }, caption });
+const M = (eyebrow, headline, body, button, caption) => ({ template: 'invite', kind: 'mentorship', link: 'mentorship', words: { eyebrow, headline, body, button, brand: 'collective' }, caption });
 const B = (kind, link, eyebrow, headline, ask, caption) => ({ template: 'blank', kind, link, words: { eyebrow, headline, ask }, caption });
 
 const POSTS = [

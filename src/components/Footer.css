@@ -29,7 +29,7 @@
 /* Phones: one column, so Contact reads top to bottom instead of squeezed beside the links. */
 @media (max-width: 599px) { .ft__grid { grid-template-columns: 1fr; gap: 30px; } }
 .ft__logo { display: inline-flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; }
-.ft__logo img { width: 48px; height: 48px; border-radius: 13px; object-fit: cover; }
+.ft__logo img { width: 48px; height: 48px; border-radius: 13px; object-fit: cover; box-shadow: 0 0 0 1px rgba(217, 169, 58, 0.55); }
 .ft__logo span { display: grid; line-height: 1.05; }
 .ft__logo strong { font-family: var(--font-heading); font-weight: 400; font-size: 1.3rem; }
 .ft__logo small { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold-hi); }

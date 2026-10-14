@@ -12,7 +12,7 @@ import StudioFactory from './Factory';
 // The Design studio carries its own fonts and music engine, so it loads only when opened.
 const StudioDesign = lazy(() => import('./design/Designer'));
 import { supabase } from '../lib/supabase';
-import logo from '../assets/web/p31-mark-192.webp';
+import logo from '../assets/web/p31-market-mark-192.webp';
 import Tour, { TourButton } from '../components/Tour';
 import { STUDIO_TOUR, STUDIO_EMAIL_TOUR } from './studioTour';
 import '../pages/Login.css';

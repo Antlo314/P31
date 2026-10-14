@@ -6,9 +6,11 @@ import { animLength, layout } from './draw';
 import markPlum from '../../assets/design/mark-plum.webp';
 import markGold from '../../assets/design/mark-gold.webp';
 import markWhite from '../../assets/design/mark-white.webp';
+import markMarket from '../../assets/design/mark-market.webp';
 
-export const MARKS = { plum: markPlum, gold: markGold, white: markWhite };
-const markFor = (s) => (s.dark ? markGold : markPlum);
+// The Marketplace has its own logo (the Rise & Build panels); the Collective keeps the hands.
+export const MARKS = { market: markMarket, plum: markPlum, gold: markGold, white: markWhite };
+const markFor = (s, brand = 'collective') => (brand === 'market' ? markMarket : s.dark ? markGold : markPlum);
 
 let n = 0;
 export const newId = () => `l${Date.now().toString(36)}${(n += 1).toString(36)}`;
@@ -24,7 +26,7 @@ export function restyle(doc, style) {
     layers: doc.layers.map((l) => {
       if (l.type === 'text') return l.role ? { ...l, color: s[l.role] || l.color, emColor: s[l.emRole || (l.role === 'accent' ? 'ink' : 'accent')], markColor: s.mark, ...(l.bgRole ? { bg: s[l.bgRole] } : {}) } : l;
       if (l.type === 'shape') return { ...l, ...(l.fillRole ? { fill: s[l.fillRole] } : {}), ...(l.strokeRole ? { stroke: s[l.strokeRole] } : {}) };
-      if (l.type === 'image' && l.mark) return { ...l, src: markFor(s) };
+      if (l.type === 'image' && l.mark) return { ...l, src: markFor(s, l.mark === 'market' ? 'market' : 'collective') };
       return l;
     }),
   };
@@ -181,13 +183,15 @@ function scripture({ size = 'post', style = 'ivory', pattern = 'topo', seed = 3,
 }
 
 /** An invitation (become a curator, book a mentorship call): eyebrow, big promise, details, a button. */
-function invite({ size = 'post', style = 'plum', pattern = 'topo', seed = 5, eyebrow = 'Now accepting curators', headline = 'Your gift was never meant to stay hidden.', body = 'Your own storefront on p31market.com, a seat at our Atlanta markets, coaching and a sisterhood of women who build.', button = 'Apply at p31market.com/apply', handle = HANDLES.market }) {
+function invite({ size = 'post', style = 'plum', pattern = 'topo', seed = 5, eyebrow = 'Now accepting curators', headline = 'Your gift was never meant to stay hidden.', body = 'Your own storefront on p31market.com, a seat at our Atlanta markets, coaching and a sisterhood of women who build.', button = 'Apply at p31market.com/apply', handle = HANDLES.market, brand = 'market' }) {
   const s = styleOf(style); const { w, h } = SIZES[size];
   const doc = page(size, s, pattern, seed);
   const head = newId(); const sub = newId(); const btn = newId();
   const top = size === 'story' ? 420 : size === 'square' ? 150 : 290;
   doc.layers = [
-    { id: newId(), type: 'image', name: 'P31 mark', mark: true, src: markFor(s), x: 112, y: top - 120, w: 96, h: 96, contain: true, anim: 'pop', delay: 0.2 },
+    brand === 'market'
+      ? { id: newId(), type: 'image', name: 'P31 Market logo', mark: 'market', src: markFor(s, 'market'), x: 112, y: top - 160, w: 196, h: 136, contain: true, anim: 'pop', delay: 0.2 }
+      : { id: newId(), type: 'image', name: 'P31 Collective mark', mark: 'collective', src: markFor(s), x: 112, y: top - 120, w: 96, h: 96, contain: true, anim: 'pop', delay: 0.2 },
     { id: newId(), type: 'text', name: 'Eyebrow', role: 'accent', text: eyebrow, x: 112, y: top, w: w - 224, font: 'Montserrat', weight: 800, size: 26, spacing: 28, upper: true, align: 'left', color: s.accent, anim: 'slide', delay: 0.5 },
     { id: head, type: 'text', name: 'Headline', role: 'ink', text: headline, x: 112, y: top + 64, w: w - 224, h: size === 'square' ? 420 : size === 'story' ? 760 : 500, fit: true,
       font: 'League Spartan', weight: 800, size: 100, lh: 0.95, upper: true, align: 'left', color: s.ink, anim: 'words', delay: 0.9 },
@@ -233,7 +237,7 @@ export const templateOf = (key) => TEMPLATES.find((t) => t.key === key) || TEMPL
 /** A few ready-made invitations (the sign-up links the team points people to). */
 export const INVITES = {
   curator: { eyebrow: 'Now accepting curators', headline: 'Your gift was never meant to stay hidden.', body: 'Your own storefront on p31market.com, a seat at our Atlanta markets, coaching and a sisterhood of women who build.', button: `Apply at ${LINKS.curator.short}` },
-  mentorship: { eyebrow: 'The P31 Collective', headline: 'You don’t need another sign. You need a mentor.', body: 'Business and faith-based mentorship for women who build, with live sessions and a private classroom.', button: 'Book your free intro call', handle: HANDLES.collective },
+  mentorship: { eyebrow: 'The P31 Collective', headline: 'You don’t need another sign. You need a mentor.', body: 'Business and faith-based mentorship for women who build, with live sessions and a private classroom.', button: 'Book your free intro call', handle: HANDLES.collective, brand: 'collective' },
 };
 
 /** Twelve looks of the same design, one per colour style (Canva's "Styles", in the brand). */

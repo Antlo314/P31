@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import mark from '../../assets/web/p31-mark-192.webp';
+import mark from '../../assets/web/p31-market-mark-192.webp';
 import './card.css';
 
 export const CARD_W = 1080;

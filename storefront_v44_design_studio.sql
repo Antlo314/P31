@@ -5,7 +5,7 @@
    HOW TO RUN (no pasting): from the project folder
      npx supabase db query --linked --project-ref xsnhxjttdizljaawpumz -f storefront_v44_design_studio.sql
    The result is one row: designs_ready true, tracks_ready true,
-   shared_file_rules 3.
+   shared_file_rules 3, team_photos_ok true.
 
    1. studio_designs: designs saved from Content Studio > Design, shared
       by everyone with a Studio seat (admins, Studio seats, and the
@@ -17,6 +17,9 @@
       shared/music/.
    3. Storage rules: Studio members can read, add and delete files under
       shared/ in the studio bucket. Personal folders are unchanged.
+   4. Team photos: Savannah Campbell and Shanay Prince had each other
+      as their portrait in Systems > Team access (photo keys b and c are
+      swapped back, as the team confirmed on 2026-10-14).
    ============================================================ */
 
 -- ----------------------------------------------------------
@@ -78,7 +81,19 @@ CREATE POLICY "Studio team shared files delete" ON storage.objects
   USING (bucket_id = 'studio' AND (storage.foldername(name))[1] = 'shared' AND public.is_studio_member());
 
 -- ----------------------------------------------------------
--- 4. Record this script, then one row to prove it
+-- 4. Team photos (Savannah wears the cream top, key c; Shanay the long-sleeved white shirt, key b)
+-- ----------------------------------------------------------
+DO $photos$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'team_access' AND column_name = 'photo_key') THEN
+    UPDATE public.team_access SET photo_key = 'c' WHERE full_name = 'Savannah Campbell' AND photo_key = 'b';
+    UPDATE public.team_access SET photo_key = 'b' WHERE full_name = 'Shanay Prince' AND photo_key = 'c';
+  END IF;
+END;
+$photos$;
+
+-- ----------------------------------------------------------
+-- 5. Record this script, then one row to prove it
 -- ----------------------------------------------------------
 DO $ver$
 BEGIN
@@ -91,4 +106,5 @@ $ver$;
 SELECT
   to_regclass('public.studio_designs') IS NOT NULL AS designs_ready,
   to_regclass('public.studio_tracks') IS NOT NULL AS tracks_ready,
-  (SELECT count(*) FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname LIKE 'Studio team shared files%') AS shared_file_rules;
+  (SELECT count(*) FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname LIKE 'Studio team shared files%') AS shared_file_rules,
+  NOT EXISTS (SELECT 1 FROM public.team_access WHERE (full_name = 'Savannah Campbell' AND photo_key = 'b') OR (full_name = 'Shanay Prince' AND photo_key = 'c')) AS team_photos_ok;

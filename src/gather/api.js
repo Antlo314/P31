@@ -1,6 +1,7 @@
 // The Gathering: talking to the database (chat_* functions from storefront_v39_gathering.sql),
 // and the photo / video plumbing (private "chat" bucket, signed links, resizing before upload).
 import { supabase } from '../lib/supabase';
+import { isCollective } from '../lib/site';
 
 export const REACTIONS = ['🙏🏾', '❤️', '🙌🏾', '🔥', '😂', '👏🏾', '✨', '💜', '😭', '💯'];
 export const PAGE = 60;
@@ -48,7 +49,7 @@ export async function setDeviceNotify(on) {
 export function showDeviceNotification(title, body, onClick) {
   if (!deviceNotify()) return;
   try {
-    const n = new Notification(title, { body, icon: '/icons/icon-192.png', tag: `gather-${title}` });
+    const n = new Notification(title, { body, icon: isCollective ? '/c/icons/icon-192.png' : '/icons/icon-192.png', tag: `gather-${title}` });
     n.onclick = () => { window.focus(); onClick?.(); n.close(); };
   } catch { /* some browsers only allow notifications from a service worker */ }
 }

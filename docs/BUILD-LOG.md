@@ -2,6 +2,13 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 14 — The new Proverbs 31 Marketplace logo, and the team's photos put right
+
+- **The marketplace has its own logo.** "Rise & Build": three plum panels reading PROVERBS, 31 and MARKETS in gilded capitals, from the CEO's new artwork, redrawn as type so it is sharp at every size. (The artwork as supplied spelled the left panel "PROVEBS"; the redraw spells PROVERBS in full and otherwise matches it.) It is now in the p31market.com header and footer, the browser tab icon, the phone home-screen icon, the link preview when p31market.com is shared, the Content Studio, the PDF copies of marketplace forms, and the curator invitation cards. The Collective keeps the hands everywhere on thep31collective.org, and mentorship invitations keep them too.
+- **Ready for social media and print.** A square logo, the full lockup with PROVERBS 31 MARKETPLACE, the panels on their own, a 1080 px profile picture for Instagram, Facebook and Google, and a 1640 × 624 Facebook cover, all in marketing/brand/market. The brand kit has a new first page for the marketplace logo.
+- **Scheduled posts updated.** The four curator invitations still waiting to go out (October 18, 26, 30 and November 3) now carry the new logo; the rest of the collection was unchanged.
+- **The team's photos match.** Savannah Campbell (cream top and jeans) and Shanay Prince (long-sleeved white shirt, side ponytail) had each other's portraits on both sites; they are swapped back, in the site and (with v44) in Systems → Team access.
+
 ## October 13 (evening) — Motion that feels finished, reels made the way Instagram wants them
 
 - **Text that arrives beautifully.** New entrances, all soft and short: Soft focus (each line comes into focus), Reveal (each line rises out of an invisible slot, like a film title), Word by word (with a slight blur), Letter cascade, and a Typewriter with a blinking caret, alongside Rise, Fade, Pop and Slide. Motion presets set a whole design at once (Editorial, Gentle, Word by word, Typewriter, Bold, Still) with timing worked out from the reading order, and play it straight away.

@@ -51,7 +51,8 @@
 .dz-shapes { display: flex; flex-wrap: wrap; gap: 6px; }
 .dz-marks { display: flex; gap: 8px; }
 .dz-mark { width: 60px; height: 60px; display: grid; place-items: center; border-radius: 14px; border: 1px solid var(--ds-line); cursor: pointer; }
-.dz-mark img { width: 42px; height: 42px; }
+.dz-mark img { width: 46px; height: 46px; object-fit: contain; }
+.dz-mark--market { background: #F3EAF6; }
 .dz-mark--plum { background: #F3EAF6; }
 .dz-mark--gold { background: #3A1C36; }
 .dz-mark--white { background: #742D9B; }

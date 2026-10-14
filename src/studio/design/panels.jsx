@@ -93,7 +93,9 @@ export const AddPanel = ({ doc, onAdd }) => {
       radius: kind === 'rounded' ? 40 : kind === 'frame' ? 34 : 0, fillRole: kind === 'frame' ? null : 'accent', fill: kind === 'frame' ? null : s.accent, strokeRole: kind === 'frame' || kind === 'line' ? 'accent' : null, stroke: kind === 'frame' || kind === 'line' ? s.accent : null, strokeW: kind === 'line' ? 6 : 3,
       opacity: kind === 'frame' || kind === 'line' ? 1 : 0.9, anim: kind === 'frame' ? 'fade' : 'pop', delay: 0.2 });
   };
-  const mark = (variant) => onAdd({ id: newId(), type: 'image', name: 'P31 mark', src: MARKS[variant], x: Math.round(w / 2 - 80), y: 110, w: 160, h: 160, contain: true, anim: 'pop', delay: 0.2 });
+  const mark = (variant) => (variant === 'market'
+    ? onAdd({ id: newId(), type: 'image', name: 'P31 Market logo', src: MARKS.market, x: Math.round(w / 2 - 130), y: 110, w: 260, h: 180, contain: true, anim: 'pop', delay: 0.2 })
+    : onAdd({ id: newId(), type: 'image', name: 'P31 Collective mark', src: MARKS[variant], x: Math.round(w / 2 - 80), y: 110, w: 160, h: 160, contain: true, anim: 'pop', delay: 0.2 }));
   const picture = async (file) => {
     if (!file) return;
     const img = await readImage(file);
@@ -112,9 +114,10 @@ export const AddPanel = ({ doc, onAdd }) => {
       <div className="dz-shapes">
         {[['rect', 'Box', Square], ['rounded', 'Rounded box', Square], ['circle', 'Circle', Circle], ['pill', 'Pill', RectangleHorizontal], ['line', 'Line', Minus], ['arch', 'Arch', Square], ['frame', 'Frame', Square]].map((s) => { const Icon = s[2]; return <button key={s[0]} type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => shape(s[0])}><Icon size={14} /> {s[1]}</button>; })}
       </div>
-      <h4>P31 mark</h4>
+      <h4>Logos</h4>
+      <p className="ds-muted dz-small">The Marketplace logo first, then the Collective’s hands.</p>
       <div className="dz-marks">
-        {Object.entries(MARKS).map(([k, src]) => <button key={k} type="button" className={`dz-mark dz-mark--${k}`} onClick={() => mark(k)} aria-label={`Add the ${k} P31 mark`}><img src={src} alt="" /></button>)}
+        {Object.entries(MARKS).map(([k, src]) => <button key={k} type="button" className={`dz-mark dz-mark--${k}`} onClick={() => mark(k)} aria-label={k === 'market' ? 'Add the P31 Market logo' : `Add the ${k} Collective mark`}><img src={src} alt="" /></button>)}
       </div>
       <h4><ImagePlus size={15} /> Your pictures</h4>
       <label className="k-btn k-btn--ghost k-btn--sm"><ImagePlus size={14} /> Upload a picture

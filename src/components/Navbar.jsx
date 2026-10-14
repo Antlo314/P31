@@ -11,7 +11,7 @@ import { collectivePortal, hrefFor } from '../lib/site';
 import { useRoles } from '../lib/roles';
 import './Navbar.css';
 
-import logoPath from '../assets/web/p31-mark-192.webp';
+import logoPath from '../assets/web/p31-market-mark-192.webp';
 import { JOIN_PATH } from '../lib/academy';
 
 

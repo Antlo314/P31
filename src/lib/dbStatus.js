@@ -7,7 +7,7 @@ import { supabase } from './supabase';
 
 export const SCRIPTS = [
   { v: 44, file: 'storefront_v44_design_studio.sql', title: 'Design studio', what: 'Designs saved from Content Studio > Design are shared with the whole Studio team, and songs uploaded for reels go into a team music library.',
-    expect: 'designs_ready true · tracks_ready true · shared_file_rules 3',
+    expect: 'designs_ready true · tracks_ready true · shared_file_rules 3 · team_photos_ok true',
     checks: [['table', 'studio_designs'], ['table', 'studio_tracks']] },
   { v: 43, file: 'storefront_v43_staff_powers.sql', title: 'Full admin control', what: 'Each team dashboard can read, edit and delete in its own room; admins can change and delete orders; full product editing and deleting shops.',
     expect: 'has_tool_ready true · staff_policies 21 · shop_tools_ready true · orders_editable true · intro_emails_ready true',
