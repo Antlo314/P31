@@ -66,7 +66,10 @@ Deno.serve(async (req) => {
       if (!printfulReady()) return json({ error: 'Printful is not connected yet.' }, 503);
       const { data: have } = await db.from('merch_mockups').select('item, color');
       const done = new Set((have || []).map((r: Any) => `${r.item}|${r.color}`));
-      const todo = ITEMS.flatMap((i: Any) => i.colors.map((c: string) => ({ i, c }))).filter(({ i, c }: Any) => !done.has(`${i.id}|${c}`));
+      // redo: ["item|Color", ...] makes those again even though they have photos.
+      const redo = new Set(Array.isArray(body.redo) ? body.redo.map(String) : []);
+      const todo = ITEMS.flatMap((i: Any) => i.colors.map((c: string) => ({ i, c }))).filter(({ i, c }: Any) => redo.has(`${i.id}|${c}`) || !done.has(`${i.id}|${c}`))
+        .sort((a: Any, b: Any) => Number(redo.has(`${b.i.id}|${b.c}`)) - Number(redo.has(`${a.i.id}|${a.c}`)));
       const batch = todo.slice(0, Math.min(Number(body.limit) || 2, 4));
       const made: string[] = []; const failed: Record<string, string> = {};
       for (const { i, c } of batch) {
@@ -94,7 +97,8 @@ Deno.serve(async (req) => {
           const shots: { url: string; group: string }[] = [];
           for (const m of result.mockups || []) {
             shots.push({ url: m.mockup_url, group: m.option_group || '' });
-            for (const x of m.extra || []) shots.push({ url: x.url, group: x.option_group || '' });
+            // Back views show the blank side of a front-printed piece: leave them out.
+            for (const x of m.extra || []) if (!/back/i.test(`${x.option || ''} ${x.title || ''}`)) shots.push({ url: x.url, group: x.option_group || '' });
           }
           const rank = (g: string) => (/women/i.test(g) ? 0 : /lifestyle/i.test(g) ? 1 : 2);
           const unique = [...new Map(shots.filter((x) => x.url).map((x) => [x.url, x])).values()].sort((a, b) => rank(a.group) - rank(b.group)).slice(0, MAX_PHOTOS);
@@ -112,7 +116,7 @@ Deno.serve(async (req) => {
           made.push(`${i.id} ${c}`);
         } catch (e) { failed[`${i.id} ${c}`] = (e as Error).message; }
       }
-      return json({ made, failed, remaining: todo.length - made.length });
+      return json({ made, failed, remaining: todo.filter(({ i, c }: Any) => !done.has(`${i.id}|${c}`)).length - made.filter((m) => !redo.has(m.replace(' ', '|'))).length });
     }
 
     // The success page asks whether the payment really cleared (only the state, nothing personal).
