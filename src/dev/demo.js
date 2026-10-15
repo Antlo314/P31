@@ -68,6 +68,10 @@ const makeDb = () => ({
     { id: 'pl1', program_id: BUS, billing: 'month', label: 'Monthly', price_cents: null, is_active: true },
     { id: 'pl2', program_id: BUS, billing: 'six_months', label: 'Every 6 months', price_cents: null, is_active: true },
     { id: 'pl3', program_id: FAI, billing: 'month', label: 'Monthly', price_cents: null, is_active: true },
+    { id: 'pk1', program_id: BUS, billing: 'month', package: 'Option 1', label: 'Coaching Option 1: Business Strategy and Development (biweekly, 60 min)', price_cents: 19900, is_active: true },
+    { id: 'pk2', program_id: BUS, billing: 'month', package: 'Option 2', label: 'Coaching Option 2: Hybrid Mentorship and Business Coaching (biweekly, 90 min)', price_cents: 32500, is_active: true },
+    { id: 'pk3', program_id: BUS, billing: 'month', package: 'Option 3', label: 'Coaching Option 3: Business Strategy and Development (weekly, 60 min)', price_cents: 37500, is_active: true },
+    { id: 'pk4', program_id: BUS, billing: 'month', package: 'Option 4', label: 'Coaching Option 4: VIP Hybrid Mentorship and Business Coaching (weekly, 90 min)', price_cents: 59900, is_active: true },
   ],
   academy_mentors: [
     { user_id: 'u-mel', program_id: BUS, display_name: 'Melanie JC', title: 'Lead mentor', created_at: day(-90) },
@@ -303,6 +307,9 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
   ],
   // Operations (v42): which scripts ran, the activity log, the billing and automatic-email switches.
   schema_versions: [{ version: 41, name: 'team dashboards', applied_at: day(-1) }, { version: 42, name: 'operations', applied_at: iso(-30) }],
+  // Private coaching intake (v47): one client mid-way through her three forms.
+  coaching_intakes: [{ id: 'ci2', token: 'demo-intake-token-1111111111111111111111111111111111', email: 'grace.example@example.com', full_name: 'Grace Example', program_id: 'p-biz', inquiry_id: null, status: 'complete', created_at: iso(-4000), expires_at: day(20), notified_at: iso(-3990), completed_at: iso(-60) }, { id: 'ci1', token: 'demo-intake-token-0000000000000000000000000000000000', email: 'sample.client@example.com', full_name: 'Sample Client', program_id: 'p-biz', inquiry_id: null, status: 'in_progress', created_at: iso(-180), expires_at: day(28), notified_at: iso(-175), completed_at: null }],
+  coaching_forms: [...['coaching', 'confidentiality', 'safety'].map((k, n) => ({ id: `cg${n}`, intake_id: 'ci2', kind: k, email: 'grace.example@example.com', full_name: 'Grace Example', package: k === 'coaching' ? 'Option 4' : null, answers: k === 'safety' ? { emergency_contact: 'Sample Contact, sister, (404) 555-0100', address: '1 Sample St, Atlanta, GA', phone: '(470) 555-0100', date_of_birth: '1990-01-01' } : {}, signature: null, signed_name: 'Grace Example', signed_on: day(-1).slice(0, 10), terms_version: '2026-10', created_at: iso(-100 + n) })), { id: 'cf1', intake_id: 'ci1', kind: 'coaching', email: 'sample.client@example.com', full_name: 'Sample Client', package: 'Option 2', answers: {}, signature: null, signed_name: 'Sample Client', signed_on: day(-1).slice(0, 10), terms_version: '2026-10', created_at: iso(-170) }],
   // The content autopilot (v46): settings and one batch waiting for approval.
   autopilot_settings: [{ id: 1, enabled: true, posts_per_day: 2, days_per_batch: 14, lead_days: 7, mix: { quote: 45, prayer: 10, scripture: 15, blank: 10, curator: 10, mentorship: 10 }, approvers: ['ceo@p31market.com'], updated_at: day(-2) }],
   autopilot_batches: [{ id: 'demo-batch', status: 'awaiting', first_day: day(20).slice(0, 10), last_day: day(33).slice(0, 10), created_at: iso(-60), expires_at: day(7), scheduled_count: 0 }],
@@ -436,6 +443,16 @@ const rpc = {
   shop_subscribe: () => true,
   shop_unsubscribe: () => true,
   my_product_stats: () => [{ product_id: 101, opens: 14, buys: 5, shares: 3 }, { product_id: 102, opens: 6, buys: 1, shares: 0 }],
+  // Private coaching intake (v47): a sample client who has signed the first of her three forms.
+  // demo-new: nothing signed yet; demo-safety: on the last form; anything else: on the second.
+  coaching_intake_details: (a) => {
+    if (a.p_token === 'expired') return { expired: true };
+    if (a.p_token === 'none') return null;
+    const one = { signed_on: day(-1).slice(0, 10), signed_name: 'Sample Client', package: 'Option 2' };
+    const signed = a.p_token === 'demo-new' ? {} : a.p_token === 'demo-safety' ? { coaching: one, confidentiality: { signed_on: day(0).slice(0, 10), signed_name: 'Sample Client' } } : { coaching: one };
+    return { full_name: 'Sample Client', email: 'sample.client@example.com', status: 'in_progress', expired: false, program: 'Business Mentorship', packages: [{ key: 'Option 1', price_cents: 19900 }, { key: 'Option 2', price_cents: 32500 }, { key: 'Option 3', price_cents: 37500 }, { key: 'Option 4', price_cents: 59900 }], signed };
+  },
+  coaching_form_sign: () => 'demo-form',
   my_roles: (_a, mode) => (mode === 'student'
     ? { signed_in: true, admin: false, operator: false, curator: false, studio: false, mentor: [], student: [{ program: 'business', title: 'Business Mentorship', status: 'active', has_access: true }] }
     : mode === 'faith'

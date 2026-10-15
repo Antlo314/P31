@@ -6,6 +6,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 47, file: 'storefront_v47_coaching_forms.sql', title: 'Coaching intake forms', what: 'The Business Coaching Agreement, Confidentiality Agreement and Client Safety form on one private page (sent from the mentor console), signed in order, with PDF copies emailed.',
+    expect: 'intakes_ready true · forms_ready true · sign_ready true · details_ready true',
+    checks: [['table', 'coaching_intakes'], ['table', 'coaching_forms'], ['rpc', 'coaching_intake_details', { p_token: 'probe' }]] },
   { v: 46, file: 'storefront_v46_autopilot.sql', title: 'Content autopilot', what: 'When the posting calendar runs low, the Studio drafts the next two weeks of posts and emails the approvers a review link; nothing posts until someone approves.',
     expect: 'settings_ready true · batches_ready true · items_ready true · autopilot_scheduled true',
     checks: [['table', 'autopilot_settings'], ['table', 'autopilot_batches'], ['table', 'autopilot_items']] },

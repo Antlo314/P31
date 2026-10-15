@@ -27,7 +27,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 type Row = Record<string, any>;
 type Problem = { key: string; severity: 'warn' | 'fail'; area: string; title: string; detail?: string; fix?: string; link?: string; meta?: Row };
 
-const LATEST_DB = 46; // the newest storefront_vNN.sql in the repo
+const LATEST_DB = 47; // the newest storefront_vNN.sql in the repo
 const SYSTEMS = 'https://www.thep31collective.org/systems';
 const STUDIO = 'https://www.thep31collective.org/studio';
 const ZERNIO = 'https://zernio.com/api/v1';
@@ -119,6 +119,8 @@ const FORM_TABLES: [string, string, string][] = [
   ['vendor_feedback', 'feedback surveys', `${SYSTEMS}/forms`],
   ['volunteer_signups', 'volunteer forms', `${SYSTEMS}/forms`],
   ['academy_inquiries', 'mentorship intro-call requests', `${SYSTEMS}/academy`],
+  ['coaching_intakes', 'coaching form links', `${SYSTEMS}/academy`],
+  ['coaching_forms', 'signed coaching forms', `${SYSTEMS}/academy`],
 ];
 
 // deno-lint-ignore no-explicit-any
@@ -150,7 +152,7 @@ async function checkForms(db: any, healed: string[]): Promise<Problem[]> {
   // Requests nobody has picked up in two days.
   const old = new Date(Date.now() - 48 * HOUR).toISOString();
   for (const [t, label, link] of FORM_TABLES) {
-    if (['vendor_feedback', 'volunteer_signups'].includes(t)) continue;
+    if (['vendor_feedback', 'volunteer_signups', 'coaching_intakes', 'coaching_forms'].includes(t)) continue;
     const { count, error } = await db.from(t).select('id', { count: 'exact', head: true }).eq('status', 'new').lte('created_at', old);
     if (!error && count) out.push({ key: `forms.waiting.${t}`, severity: 'warn', area: 'forms', title: `${plural(count, label.replace(/s$/, ''), label)} waiting more than 2 days`, fix: 'Open them and approve, decline or reply; the person is waiting to hear back.', link });
   }

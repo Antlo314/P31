@@ -1,0 +1,65 @@
+/* /coaching/forms/:token — the private coaching intake forms (CoachingForms.jsx). Prefix: cf- */
+.cf { max-width: 860px; margin: 0 auto; padding: clamp(24px, 4vw, 48px) 16px 80px; display: grid; gap: 18px; }
+.cf-loading { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 60px; color: var(--ink-2); }
+.cf-head { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 16px; align-items: start; }
+.cf-head h1 { margin: 4px 0 6px; font-family: var(--font-heading); font-weight: 400; font-size: clamp(1.7rem, 4.5vw, 2.4rem); line-height: 1.1; color: var(--ink); }
+.cf-head .k-eyebrow { margin: 0; }
+.cf-lead { margin: 0; color: var(--ink-2); line-height: 1.55; }
+.cf-mark { width: 64px; height: 64px; border-radius: 50%; background: #fff; padding: 5px; object-fit: contain; box-shadow: 0 0 0 1px rgba(217, 169, 58, 0.45); }
+.cf-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.cf-step { display: grid; gap: 4px; justify-items: start; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: var(--ink-2); font-size: 0.86rem; font-weight: 700; }
+.cf-step > span:nth-child(2) { display: inline-flex; gap: 6px; align-items: center; }
+.cf-step small { font-weight: 600; color: var(--gold-text); }
+.cf-step__n { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: var(--mist); color: var(--ink); font-size: 0.8rem; }
+.cf-step.is-now { border-color: var(--gold); background: linear-gradient(150deg, #3A1C36, #21101E); color: #fff; }
+.cf-step.is-now .cf-step__n { background: var(--gold-hi); color: #2a1a00; }
+.cf-step.is-done { border-color: rgba(23, 166, 115, 0.4); }
+.cf-step.is-done .cf-step__n { background: #17a673; color: #fff; }
+.cf-card { display: grid; gap: 14px; padding: clamp(18px, 3vw, 32px); border-radius: var(--r-lg); background: #fff; border: 1px solid var(--line); box-shadow: var(--shadow-1); }
+.cf-card--center { text-align: center; justify-items: center; }
+.cf-card h1 { margin: 0; font-family: var(--font-heading); font-weight: 400; font-size: 1.8rem; color: var(--ink); }
+.cf-card h2 { margin: 0; font-family: var(--font-heading); font-weight: 400; font-size: 1.6rem; line-height: 1.15; color: var(--ink); }
+.cf-card > p { margin: 0; color: var(--ink-2); line-height: 1.55; }
+.cf-stepline { font-size: 0.74rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-text) !important; }
+.cf-sub { font-size: 0.95rem; }
+.cf-terms { display: grid; gap: 10px; max-height: 420px; overflow-y: auto; padding: 16px 18px; border-radius: 14px; background: var(--mist); border: 1px solid var(--line); font-size: 0.92rem; line-height: 1.55; color: var(--ink-2); }
+.cf-terms p { margin: 0; }
+.cf-terms section { display: grid; gap: 6px; padding-top: 6px; }
+.cf-terms h3 { margin: 4px 0 0; font-size: 0.98rem; font-weight: 800; color: var(--plum); }
+.cf-terms ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.cf-tagline { font-weight: 800; color: var(--plum); letter-spacing: 0.02em; }
+.cf-coachnote { font-style: italic; }
+.cf-coach { padding-top: 6px; border-top: 1px solid var(--line); }
+.cf-packages { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.cf-package { display: grid; gap: 2px; padding: 12px; border-radius: 12px; background: #fff; border: 1px solid var(--line); }
+.cf-package small { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-text); }
+.cf-package strong { color: var(--ink); line-height: 1.2; }
+.cf-package b { font-size: 1.15rem; color: var(--plum); }
+.cf-package span { font-size: 0.8rem; font-weight: 700; }
+.cf-package p { font-size: 0.84rem; margin-top: 4px; }
+.cf-field { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
+.cf-field legend { font-weight: 800; color: var(--ink); margin-bottom: 8px; }
+.cf-options { display: grid; gap: 8px; }
+.cf-option { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: #fff; cursor: pointer; }
+.cf-option.is-on { border-color: var(--plum); background: var(--mist); }
+.cf-option input { margin-top: 4px; accent-color: var(--plum); }
+.cf-option span { display: grid; gap: 2px; color: var(--ink); }
+.cf-option small { color: var(--ink-2); font-size: 0.82rem; }
+.cf-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.cf-wide { grid-column: 1 / -1; }
+.cf-sign { display: grid; gap: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.cf-agree { display: flex; gap: 10px; align-items: flex-start; font-weight: 700; color: var(--ink); }
+.cf-agree input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--plum); flex: none; }
+.cf-ack { margin: 0; font-size: 0.9rem; color: var(--ink-2); font-style: italic; }
+.cf-fallback { text-align: center; }
+.cf-fallback a { color: var(--plum); display: inline-flex; gap: 4px; align-items: center; }
+.cf-spin { animation: cf-spin 0.9s linear infinite; }
+@keyframes cf-spin { to { transform: rotate(360deg); } }
+@media (max-width: 600px) {
+  .cf-head { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; }
+  .cf-mark { width: 48px; height: 48px; }
+  .cf-steps { grid-template-columns: 1fr; }
+  .cf-step { grid-template-columns: auto 1fr auto; align-items: center; }
+  .cf-terms { max-height: 320px; }
+}
+@media (prefers-reduced-motion: reduce) { .cf-spin { animation: none; } }

@@ -23,8 +23,9 @@
 //   VENDOR_SHEET_TAB                      or: the vendor tab's name, when vendors live in the Collective spreadsheet
 // Deploy: supabase functions deploy join-notify --no-verify-jwt
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { FORMS as COACHING_FORMS, PACKAGES, pdfSections, packagePrice, GOOGLE_FORMS } from '../_shared/coaching-text.js';
 import { sendEmail, layout, esc, emailConfigured } from '../_shared/email.ts';
-import { formPdf, toBase64, type PdfSpec } from '../_shared/form-pdf.ts';
+import { formPdf, toBase64, type PdfSpec, type PdfSection } from '../_shared/form-pdf.ts';
 
 const env = (k: string) => Deno.env.get(k) || '';
 const list = (k: string, fallback: string[]) => {
@@ -443,6 +444,84 @@ ${a.again === 'in' ? `<p>You said you are in for the next market. The team will 
     sheetRow: (a) => ({ 'Timestamp': eastern(a.created_at), 'Name': a.full_name, 'Email': a.email }),
   },
 ];
+
+// Private coaching intake (v47): the link email, then each of the three signed forms.
+const COACHING_TEAM = () => list('INTRO_NOTIFY_TO', [MEMBERS_EMAIL, 'founder@thep31collective.org']);
+const COLLECTIVE_SITE = 'https://www.thep31collective.org';
+const COACHING_ORDER = ['coaching', 'confidentiality', 'safety'] as const;
+const COACHING_LABEL: Record<string, string> = { coaching: 'Business Coaching Agreement', confidentiality: 'Confidentiality Agreement', safety: 'Client Safety & Emergency Contact form' };
+FLOWS.push({
+  name: 'intake',
+  external: true,
+  table: 'coaching_intakes',
+  fields: 'id, token, email, full_name, created_at, expires_at',
+  scope: (q) => q.neq('status', 'revoked'),
+  to: (a) => [a.email],
+  replyTo: () => MEMBERS_EMAIL,
+  from: () => env('COLLECTIVE_EMAIL_FROM') || undefined,
+  subject: () => 'Your P31 coaching agreements: three forms to sign',
+  email: (a) => layout('Before we begin', `<p>Hi ${esc(String(a.full_name || '').split(' ')[0] || 'there')},</p>
+<p>It was a joy speaking with you. Before we begin, here is your private link to the three forms we go over with every private-coaching client, signed in order:</p>
+<ol style="margin:6px 0 14px;padding-left:20px;line-height:1.6"><li><b>Business Coaching Agreement</b> (you pick your package there)</li><li><b>Confidentiality Agreement</b></li><li><b>Client Safety &amp; Emergency Contact form</b></li></ol>
+${button(`${COLLECTIVE_SITE}/coaching/forms/${a.token}`, 'Open my forms')}
+<p style="margin-top:18px">Each takes a few minutes, and you can come back to the same link to finish later. You will receive a PDF copy of each form once you sign it. The link works until ${esc(longDate(String(a.expires_at).slice(0, 10)))}.</p>
+<p>Questions? Reply to this email or write to ${mail(MEMBERS_EMAIL)}.</p>`, COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE'),
+  sheet: () => null,
+  sheetRow: (a) => ({ 'Email': a.email }),
+});
+for (const kind of COACHING_ORDER) {
+  const doc = COACHING_FORMS[kind];
+  const next = COACHING_ORDER[COACHING_ORDER.indexOf(kind) + 1];
+  FLOWS.push({
+    name: `coaching_${kind}`,
+    table: 'coaching_forms',
+    fields: 'id, intake_id, kind, email, full_name, package, answers, signature, signed_name, signed_on, terms_version, created_at',
+    scope: (q) => q.eq('kind', kind),
+    to: COACHING_TEAM,
+    from: () => env('COLLECTIVE_EMAIL_FROM') || undefined,
+    enrich: async (admin, a) => {
+      const { data } = await admin.from('coaching_forms').select('kind').eq('intake_id', a.intake_id);
+      const { data: i } = await admin.from('coaching_intakes').select('token').eq('id', a.intake_id).maybeSingle();
+      // Package prices live only in academy_plans (v47).
+      const { data: plans } = await admin.from('academy_plans').select('package, price_cents').not('package', 'is', null);
+      const prices = Object.fromEntries((plans || []).map((p: Row) => [p.package, p.price_cents]));
+      return { ...a, signedKinds: (data || []).map((x: Row) => x.kind), token: i?.token || '', prices };
+    },
+    subject: (a) => `${COACHING_LABEL[kind]} signed: ${a.full_name}${a.package ? ` (${a.package})` : ''}`,
+    email: (a) => {
+      const pkg = PACKAGES.find((p) => p.key === a.package);
+      const left = COACHING_ORDER.filter((k) => !a.signedKinds.includes(k));
+      return layout(`${COACHING_LABEL[kind]}: ${a.full_name}`, intro(a, `signed the ${COACHING_LABEL[kind]}`) + table(
+        tr('Name', esc(a.full_name)) + tr('Email', mail(a.email)) + tr('Signed as', esc(a.signed_name)) + tr('Date signed', esc(longDate(a.signed_on)))
+        + (pkg ? tr('Package', esc(`${pkg.key} — ${pkg.name}, ${packagePrice(pkg.key, a.prices)}, ${pkg.cadence}`)) : '')
+        + (kind === 'safety' ? tr('Emergency contact', text(a.answers?.emergency_contact)) + tr('Residential address', text(a.answers?.address)) + tr('Best contact number', text(a.answers?.phone)) + tr('Date of birth', a.answers?.date_of_birth ? esc(longDate(a.answers.date_of_birth)) : '') : '')
+        + tr('Terms version', esc(a.terms_version)) + tr('Still to sign', left.length ? esc(left.map((k) => COACHING_LABEL[k]).join(', ')) : '<span style="color:#374126">Nothing: all three are signed</span>'),
+      ) + `<p style="margin:14px 0 0;font-size:13px;color:#74657A">The signed form is attached as a PDF.${left.length ? '' : ' Next: send her payment link from Agreements in the mentor console (it charges the package she chose), then book her first session.'}</p>`
+      + button(`${COLLECTIVE_SITE}/academy/business/teach/agreements`, 'Open in the mentor console'), COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE');
+    },
+    confirm: (a) => ({
+      replyTo: MEMBERS_EMAIL,
+      subject: `Your copy: ${COACHING_LABEL[kind]}`,
+      html: layout(`Your ${COACHING_LABEL[kind]}`, `<p>Hi ${esc(String(a.full_name).split(' ')[0])},</p>
+<p>Thank you. You signed the <b>${esc(COACHING_LABEL[kind])}</b> on ${esc(longDate(a.signed_on))} as <b>${esc(a.signed_name)}</b>. Your copy, with every word you agreed to, is attached as a PDF.</p>
+${a.package ? `<p>Your package: <b>${esc(a.package)}</b>.</p>` : ''}
+${next ? `<p><b>Next:</b> the ${esc(COACHING_LABEL[next])}. ${button(`${COLLECTIVE_SITE}/coaching/forms/${a.token}`, 'Continue to the next form')}</p>` : '<p><b>That is all three.</b> Your mentor will send your Payment Authorization details and your first session date.</p>'}
+<p>Questions? Reply to this email or write to ${mail(MEMBERS_EMAIL)}.</p>`, COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE'),
+    }),
+    pdf: (a) => ({
+      brand: 'collective', title: doc.title, submittedAt: a.created_at, reference: a.id,
+      intro: doc.subtitle,
+      sections: [
+        { heading: 'Client', rows: [['Name', a.full_name], ['Email', a.email], ...(kind === 'safety' ? [['Emergency contact', a.answers?.emergency_contact], ['Residential address', a.answers?.address], ['Best contact number', a.answers?.phone], ['Date of birth', a.answers?.date_of_birth ? longDate(a.answers.date_of_birth) : '']] : []), ['Terms version', a.terms_version]] as [string, string][] },
+        ...(pdfSections(doc, { package: a.package }, a.prices) as PdfSection[]),
+        { paragraph: `The same form on Google, kept as a fallback: ${GOOGLE_FORMS[kind]}` },
+      ],
+      signature: a.signature, signedName: a.signed_name, signedOn: a.signed_on,
+    }) as PdfSpec,
+    sheet: () => null,
+    sheetRow: (a) => ({ 'Timestamp': eastern(a.created_at), 'Name': a.full_name, 'Email': a.email, 'Form': COACHING_LABEL[kind] }),
+  });
+}
 
 // Survey invitations: v38 adds them to a lineup when a vendor market announces its date.
 FLOWS.push({

@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>How a new coaching client signs up</title>
+<style>
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; src: url(../../public/fonts/NotoSerif-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; font-style: italic; src: url(../../public/fonts/NotoSerif-400-italic.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 400; src: url(../../public/fonts/Manrope-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 600; src: url(../../public/fonts/Manrope-600.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 800; src: url(../../public/fonts/Manrope-800.woff2) format('woff2'); }
+  :root {
+    --plum: #3A1C36; --plum-3: #21101E; --thistle: #E3D0EA; --thistle-3: #F8F3FA;
+    --amethyst: #9B71B2; --gold: #D9A93A; --gold-2: #F2CE4D; --green: #374126;
+    --ink: #2A1526; --ink-2: #4E3A4B; --dim: #74657A; --line: #E3D0EA;
+  }
+  @page { size: Letter; margin: 0.7in 0.7in 0.75in; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: Manrope, sans-serif; font-size: 10.2pt; line-height: 1.55; color: var(--ink); background: #fff; }
+  h1, h2, h3 { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; color: var(--plum); }
+  h1 { font-size: 26pt; line-height: 1.12; margin: 0 0 10px; }
+  h2 { font-size: 14pt; margin: 18px 0 8px; break-after: avoid; }
+  h3 { font-size: 11pt; margin: 12px 0 4px; }
+  p { margin: 0 0 8px; }
+  ul, ol { margin: 4px 0 10px; padding-left: 18px; }
+  li { margin: 3px 0; }
+  code, pre { font-family: Consolas, 'Courier New', monospace; }
+  code { font-size: 7.6pt; background: var(--thistle-3); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; word-break: break-all; }
+  pre { font-size: 8.2pt; background: var(--plum-3); color: #f7f1fc; border-radius: 8px; padding: 9px 12px; white-space: pre-wrap; word-break: break-all; margin: 6px 0 10px; }
+  strong, b { font-weight: 800; }
+  em { font-family: 'Noto Serif', Georgia, serif; font-style: italic; }
+  .eyebrow { font-size: 8pt; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+  .lead { font-size: 11.2pt; color: var(--ink-2); }
+  .muted { color: var(--dim); }
+  .small { font-size: 8.6pt; }
+
+  .part { margin-top: 26px; }
+  .cover + .part, .part.page { break-before: page; margin-top: 0; }
+  .part-head { break-after: avoid; }
+  .phones img.shot { max-height: 2.85in; object-fit: cover; object-position: top; width: 100%; }
+  .fig-cap img.shot { max-height: 3.6in; object-fit: cover; object-position: top; width: 100%; }
+  .part-head { background: var(--plum); color: #fff; border-radius: 16px; padding: 18px 22px; margin: 0 0 14px; position: relative; overflow: hidden; break-inside: avoid; }
+  .part-head::after { content: ''; position: absolute; right: -40px; bottom: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(242, 206, 77, 0.28), transparent 70%); }
+  .part-head .eyebrow { color: var(--gold-2); }
+  .part-head h1 { color: #fff; margin: 0 0 6px; font-size: 20pt; }
+  .part-head p { color: rgba(255, 255, 255, 0.84); margin: 0; max-width: 92%; }
+
+  .cover { height: 9.4in; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(70% 50% at 100% 0%, rgba(155, 113, 178, 0.35), transparent 70%), radial-gradient(60% 45% at 0% 100%, rgba(242, 206, 77, 0.18), transparent 70%), var(--plum-3); color: #fff; border-radius: 22px; padding: 46px 44px; }
+  .cover img { width: 92px; height: 92px; }
+  .cover h1 { color: #fff; font-size: 36pt; line-height: 1.06; margin: 18px 0 12px; }
+  .cover h1 em { color: var(--gold-2); }
+  .cover .lead { color: rgba(255, 255, 255, 0.86); font-size: 12.5pt; max-width: 5.7in; }
+  .cover .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 30px; font-size: 9.5pt; color: rgba(255, 255, 255, 0.86); }
+  .cover .meta b { display: block; color: var(--gold-2); font-size: 7.6pt; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 3px; }
+
+  .note { font-size: 9pt; border-left: 4px solid var(--gold); background: rgba(242, 206, 77, 0.1); border-radius: 0 10px 10px 0; padding: 9px 13px; margin: 8px 0 12px; break-inside: avoid; }
+  .note.plum { border-color: var(--amethyst); background: var(--thistle-3); }
+  .note p:last-child, .note ul:last-child { margin-bottom: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 8.8pt; }
+  th { text-align: left; font-size: 7.4pt; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: var(--plum); padding: 6px 8px; }
+  td { border-bottom: 1px solid var(--line); padding: 6px 8px; vertical-align: top; }
+  tr { break-inside: avoid; }
+  tr:nth-child(even) td { background: var(--thistle-3); }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  .box { border: 1px solid var(--line); border-radius: 12px; padding: 10px 13px; break-inside: avoid; background: #fff; }
+  .flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 6px 0 10px; }
+  .flow .box { padding: 8px 11px; }
+  .flow b.n { font-size: 16pt !important; }
+  .flow b.n { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; font-size: 20pt; color: var(--gold); line-height: 1; display: block; margin-bottom: 4px; }
+  .flow h3 { font-size: 10.6pt; margin: 0 0 4px; }
+  .flow p { font-size: 8.6pt; color: var(--ink-2); margin: 0; }
+  .who { display: inline-block; font-size: 6.8pt; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 1px 7px; border-radius: 999px; margin-right: 5px; vertical-align: 1px; }
+  .who.client { background: rgba(155, 113, 178, 0.16); color: #6d4a82; }
+  .who.mentor { background: rgba(217, 169, 58, 0.2); color: #7a5c12; }
+  .who.site { background: rgba(55, 65, 38, 0.12); color: var(--green); }
+
+  .shot { display: block; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 6px 18px rgba(58, 28, 54, 0.12); max-width: 100%; }
+  figure { margin: 0; break-inside: avoid; }
+  figcaption { font-size: 8pt; color: var(--dim); margin-top: 5px; line-height: 1.35; }
+  .phones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; margin: 8px 0 12px; }
+  .check { list-style: none; padding-left: 0; }
+  .check li { padding-left: 22px; position: relative; }
+  .check li::before { content: ''; position: absolute; left: 0; top: 3px; width: 12px; height: 12px; border: 1.6px solid var(--plum); border-radius: 3px; }
+  .steps { counter-reset: s; list-style: none; padding-left: 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 28px; margin: 7px 0; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 19px; height: 19px; border-radius: 50%; background: var(--plum); color: #fff; font-size: 8pt; font-weight: 800; display: grid; place-items: center; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div>
+    <img src="../../marketing/brand/mark-gold.png" alt="">
+    <p class="eyebrow" style="color: var(--gold-2); margin-top: 26px;">The P31 Collective by NEBA · Private coaching</p>
+    <h1>How a new coaching client<br><em>signs up</em></h1>
+    <p class="lead">From “I’m interested” to her first session: the intro call, the three agreements she signs on the site in order, and the payment link for the package she chose. Who does what at each step, and what lands in whose inbox.</p>
+  </div>
+  <div class="meta">
+    <div><b>The forms, in order</b>1. Business Coaching Agreement<br>2. Confidentiality Agreement<br>3. Client Safety &amp; Emergency Contact</div>
+    <div><b>Where she signs</b>Her own private link on thep31collective.org, on her phone or computer. No account is needed to sign.</div>
+    <div><b>Copies</b>A PDF of every signed form, word for word with her signature, to her and to members@, founder@ and ceo@p31market.com.</div>
+    <div><b>Fallback</b>The original Google Forms still work (links on the last page) if the site is ever unavailable.</div>
+  </div>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">At a glance</p>
+    <h1>Six steps, one button each</h1>
+    <p>You press two buttons in the mentor console. The site sends every link, keeps the order, files the copies and tells the team.</p>
+  </div>
+  <div class="flow">
+    <div class="box"><b class="n">1</b><h3>She asks for an intro call</h3><p><span class="who client">Client</span>On the mentorship page: she picks a time on the calendar, or leaves her details.</p></div>
+    <div class="box"><b class="n">2</b><h3>You meet</h3><p><span class="who mentor">Mentor</span>The intro call. If it is the right fit, go on to step 3 the same day.</p></div>
+    <div class="box"><b class="n">3</b><h3>Send the three agreements</h3><p><span class="who mentor">Mentor</span>One button. <span class="who site">Site</span>emails her a private link.</p></div>
+    <div class="box"><b class="n">4</b><h3>She signs, in order</h3><p><span class="who client">Client</span>About ten minutes. She picks her package in the first form, and gets a PDF copy after each.</p></div>
+    <div class="box"><b class="n">5</b><h3>Send her payment link</h3><p><span class="who mentor">Mentor</span>The button appears once all three are signed, already set to her package. She pays on Stripe.</p></div>
+    <div class="box"><b class="n">6</b><h3>First session</h3><p><span class="who site">Site</span>opens her classroom when she pays. You book her first session.</p></div>
+  </div>
+
+  <div class="note">
+    <p><strong>Your client who is waiting right now</strong></p>
+    <ul>
+      <li><b>Once the setup on the last page is done</b> (a few minutes): if she left her details on the mentorship page, open <b>Mentor console → Intro calls</b>, find her card and press <b>Send the three agreements</b>. If she booked on the calendar or reached you another way, open <b>Mentor console → Agreements → Send the agreements</b> and type her email and name.</li>
+      <li><b>If she needs to sign before then</b>, send her the three Google Forms in this order: Business Coaching Agreement, Confidentiality Agreement, Client Safety &amp; Emergency Contact (links on the last page). Everyone after her uses the site.</li>
+      <li><b>Her payment</b> goes through Stripe, so the payment link in step 5 works once Stripe is connected. Until then, take her first payment the way you do now.</li>
+    </ul>
+  </div>
+
+  <h2>What each person receives</h2>
+  <table>
+    <tr><th style="width:24%">When</th><th>She gets</th><th>The team gets</th></tr>
+    <tr><td>You press <b>Send the three agreements</b></td><td>“Your P31 coaching agreements: three forms to sign”, with an <b>Open my forms</b> button</td><td>Nothing yet. Her card shows <i>Link sent</i> under Agreements</td></tr>
+    <tr><td>She signs each form</td><td>“Your copy: …” with the PDF attached and a <b>Continue to the next form</b> button</td><td>“… signed: her name (her package)” with the PDF, to members@, founder@ and ceo@p31market.com</td></tr>
+    <tr><td>She signs the third form</td><td>“That is all three”, and what happens next</td><td>The email says <i>Nothing: all three are signed</i> and points you to her payment link</td></tr>
+    <tr><td>You send her payment link</td><td>A private, single-use checkout for her package (it works for 14 days)</td><td>Her enrollment shows in the mentor console once she pays</td></tr>
+  </table>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Steps 1 to 3</p>
+    <h1>The intro call, then one button</h1>
+    <p>Every client starts with a conversation. The agreements go out after it, never before.</p>
+  </div>
+  <h2>1 · She asks for an intro call</h2>
+  <p>On <b>thep31collective.org/mentorship/business</b> she either picks a time on the calendar or chooses to leave her details. Details she leaves arrive by email to the team and as a card under <b>Mentor console → Intro calls</b>. Calendar bookings come through Calendly as before.</p>
+  <figure class="fig-cap"><img class="shot" src="coaching/1-intro-call.png" alt=""><figcaption>The intro-call section of the mentorship page.</figcaption></figure>
+
+  <h2>2 and 3 · After you meet, send the three agreements</h2>
+  <div class="two">
+    <figure><img class="shot" src="coaching/2-call-card.png" alt=""><figcaption><b>Intro calls</b>: each card now has <b>Send the three agreements</b> next to <b>Send enrollment invite</b>.</figcaption></figure>
+    <figure><img class="shot" src="coaching/3-send-modal.png" alt=""><figcaption>Check her email and name, choose how long the link works (30 days unless you change it) and press <b>Create and email the link</b>.</figcaption></figure>
+  </div>
+  <ul>
+    <li>The site emails her the link straight away. You can also <b>Copy link</b> to text it, or <b>Email it from my mailbox too</b>.</li>
+    <li>Did she come through the calendar or by word of mouth? Use <b>Mentor console → Agreements → Send the agreements</b> and type her email. It is the same window.</li>
+  </ul>
+</section>
+
+<section class="part page">
+  <div class="part-head">
+    <p class="eyebrow">Step 4 · What she sees</p>
+    <h1>Three forms, signed in order</h1>
+    <p>Made for a phone. The words are exactly those of the Google Forms, so nothing she agrees to has changed.</p>
+  </div>
+  <div class="phones">
+    <figure><img class="shot" src="coaching/4-welcome.png" alt=""><figcaption>Her private page welcomes her by name.</figcaption></figure>
+    <figure><img class="shot" src="coaching/5-steps.png" alt=""><figcaption>The three forms in order. Each turns green with the date once it is signed.</figcaption></figure>
+    <figure><img class="shot" src="coaching/6-packages.png" alt=""><figcaption>Form 1: she reads the agreement and picks her package. Prices show only on a private link.</figcaption></figure>
+  </div>
+  <div class="phones">
+    <figure><img class="shot" src="coaching/7-sign.png" alt=""><figcaption>Every form: her full name (her signature), a box confirming she agrees, and an optional drawn signature.</figcaption></figure>
+    <figure><img class="shot" src="coaching/8-safety.png" alt=""><figcaption>Form 3: emergency contact, home address, best number and date of birth (she must be 18 or older).</figcaption></figure>
+    <figure><div class="note plum" style="margin:0"><p><b>The rules the site keeps for you</b></p><ul style="font-size:8.6pt"><li>She cannot skip ahead: form 2 opens only after form 1, and form 3 after form 2.</li><li>She can stop and come back to the same link. What she signed stays signed.</li><li>Package prices are never on the public site. They come from the plans in Systems → Academy, through her link only.</li><li>An old or revoked link asks her to get a new one from her mentor.</li></ul></div></figure>
+  </div>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Step 5 · The mentor console</p>
+    <h1>Follow her progress, then send her payment link</h1>
+    <p>Mentor console → <b>Agreements</b> lists everyone who was sent the forms and what each one has signed.</p>
+  </div>
+  <figure><img class="shot" src="coaching/9-agreements.png" alt=""><figcaption>A client who signed all three, with <b>Send payment link (Option 4)</b>, and one who is on form 2.</figcaption></figure>
+  <ul>
+    <li><b>View</b> beside a signed form shows her answers and signature. The full PDF is already in the team inbox.</li>
+    <li><b>Send payment link</b> appears once all three are signed and is set to the package she chose. It creates her private checkout, which works once and for 14 days. She creates her account with the same email, enters her card on Stripe, and her classroom opens. Her plan then renews monthly.</li>
+    <li>Need a different package after all? Use <b>Invites → New invite</b> and pick any plan.</li>
+    <li><b>Renew for 30 days</b> brings back an expired link, <b>Revoke link</b> stops one, and <b>Delete</b> removes her and her signed forms.</li>
+  </ul>
+
+  <div style="break-inside: avoid">
+  <h2>The four packages</h2>
+  <p class="muted small">For you and the team only: the public site never shows these. Change a price in <b>Systems → Academy</b>, and the agreement page, the emails and the payment link all follow.</p>
+  <table>
+    <tr><th>Package</th><th>Sessions</th><th style="width:12%">Monthly</th></tr>
+    <tr><td>Option 1 — Business Strategy &amp; Development Coaching</td><td>Two a month, 60 minutes, biweekly</td><td>$199</td></tr>
+    <tr><td>Option 2 — Hybrid Private Mentorship &amp; Business Coaching</td><td>Two a month, 90 minutes, biweekly</td><td>$325</td></tr>
+    <tr><td>Option 3 — Business Strategy &amp; Development Coaching</td><td>Four a month, 60 minutes, weekly</td><td>$375</td></tr>
+    <tr><td>Option 4 — VIP Hybrid Private Mentorship &amp; Business Coaching</td><td>Four a month, 90 minutes, weekly, with priority support</td><td>$599</td></tr>
+  </table>
+  <p class="small muted">The earlier Business Mentorship “Monthly” plan ($250) is still there for anyone already on it. Turn it off in Systems → Academy if it should no longer be offered.</p>
+  </div>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">One time</p>
+    <h1>Setup, and the fallback</h1>
+    <p>A few steps switch this on. After that it runs on its own.</p>
+  </div>
+  <ol class="steps">
+    <li><b>Run the database update (v47)</b> from the project folder:<pre>npx supabase db query --linked --project-ref xsnhxjttdizljaawpumz -f storefront_v47_coaching_forms.sql</pre>It answers with one row: intakes_ready true, forms_ready true, sign_ready true, details_ready true, package_plans 4.</li>
+    <li><b>Deploy the email functions</b>, which send the links and the PDF copies:<pre>npx supabase functions deploy join-notify watchdog --no-verify-jwt --use-api --project-ref xsnhxjttdizljaawpumz</pre></li>
+    <li><b>Put the site live</b>: tell Claude “merge it”.</li>
+    <li><b>For payment links</b>, connect Stripe: the Stripe secret key and the mentorship webhook, both in Supabase. Until then, everything above works except step 5.</li>
+  </ol>
+
+  <h2>Try it once yourself</h2>
+  <ul class="check">
+    <li>Agreements → Send the agreements, to an email address you can read.</li>
+    <li>Open the email and sign all three forms on your phone, picking any package.</li>
+    <li>Check that your inbox got three “Your copy” emails with PDFs, and the team inbox three “signed” emails.</li>
+    <li>Delete the test client in Agreements.</li>
+  </ul>
+
+  <div style="break-inside: avoid">
+  <h2>The Google Forms (fallback), in order</h2>
+  <table>
+    <tr><th style="width:32%">Form</th><th>Link</th></tr>
+    <tr><td>1. Business Coaching Agreement</td><td><code>https://docs.google.com/forms/d/e/1FAIpQLScgSyPZA3d21nR2nA7CyYwPjCjCL-5kB3wxJgBZe51xKE02lg/viewform</code></td></tr>
+    <tr><td>2. Confidentiality Agreement</td><td><code>https://docs.google.com/forms/d/e/1FAIpQLSdkv5zcyFFzgiLmNcmehwRSAy6WGC0GPUKSbnepRaBW2UOUxg/viewform</code></td></tr>
+    <tr><td>3. Client Safety &amp; Emergency Contact</td><td><code>https://docs.google.com/forms/d/e/1FAIpQLSd4YflYO-GUMaNCjx1_f9i0rMybAm9iqOproUlvu41VuG01fQ/viewform</code></td></tr>
+  </table>
+  <p class="small muted">Each page of the site version also has a small “Trouble with this page?” link to the matching Google Form. Answers given on Google stay in Google Forms, so let the team know and they can be filed with hers.</p>
+  </div>
+
+  <h2>If something goes wrong</h2>
+  <table>
+    <tr><th style="width:32%">She says</th><th>Do this</th></tr>
+    <tr><td>“I never got the email.”</td><td>Ask her to check spam and promotions, or open Agreements → <b>Copy her forms link</b> and text it to her.</td></tr>
+    <tr><td>“My link has expired.”</td><td>Agreements → her card → <b>Renew for 30 days</b>. The same link works again.</td></tr>
+    <tr><td>“I picked the wrong package.”</td><td>Send her payment link from <b>Invites → New invite</b> with the right plan, and note it on her intro-call card.</td></tr>
+    <tr><td>“It will not let me sign the next form.”</td><td>The forms go in order, so she needs to finish the one shown first. If the page itself fails, she can use the Google Form link at its foot.</td></tr>
+  </table>
+</section>
+
+</body>
+</html>

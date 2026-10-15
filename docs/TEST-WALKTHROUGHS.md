@@ -23,19 +23,20 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 | 17 | Edit and delete in every Systems room | As an admin | both sites | 6 |
 | 18 | Every form: CEO email and a PDF copy | As a visitor | both sites | 5 |
 | 19 | Design a post, and a reel with music | As a team member | both sites | 6 |
-| 20 | Content autopilot: draft, review, approve | As a team member | thep31collective.org | 6 |
-| 21 | The watchdog catches a problem and clears it | As an admin | both sites | 3 |
-| 22 | Send a campaign test | As an admin | p31market.com | 3 |
-| 23 | The Gathering: post, thread, direct message, alert | As a team member | both sites | 5 |
-| 24 | The Gathering: @mention and search | As a team member | both sites | 4 |
-| 25 | Database updates land | As an admin | both sites | 3 |
-| 26 | A storefront free period and subscription | As an admin | p31market.com | 6 |
-| 27 | Class reminder emails | As an admin | thep31collective.org | 3 |
-| 28 | Welcome emails for a new subscriber | As a visitor | p31market.com | 3 |
-| 29 | The activity log | As an admin | both sites | 2 |
-| 30 | Eventbrite ticket sales | As an admin | p31market.com | 3 |
-| 31 | Walkthroughs play on every dashboard | As a team member | both sites | 3 |
-| 32 | Automated screen, link and form check | As an admin | both sites | 2 |
+| 20 | Private coaching: the three agreements | As a team member | thep31collective.org | 8 |
+| 21 | Content autopilot: draft, review, approve | As a team member | thep31collective.org | 6 |
+| 22 | The watchdog catches a problem and clears it | As an admin | both sites | 3 |
+| 23 | Send a campaign test | As an admin | p31market.com | 3 |
+| 24 | The Gathering: post, thread, direct message, alert | As a team member | both sites | 5 |
+| 25 | The Gathering: @mention and search | As a team member | both sites | 4 |
+| 26 | Database updates land | As an admin | both sites | 3 |
+| 27 | A storefront free period and subscription | As an admin | p31market.com | 6 |
+| 28 | Class reminder emails | As an admin | thep31collective.org | 3 |
+| 29 | Welcome emails for a new subscriber | As a visitor | p31market.com | 3 |
+| 30 | The activity log | As an admin | both sites | 2 |
+| 31 | Eventbrite ticket sales | As an admin | p31market.com | 3 |
+| 32 | Walkthroughs play on every dashboard | As a team member | both sites | 3 |
+| 33 | Automated screen, link and form check | As an admin | both sites | 2 |
 
 ## 1. Vendor application
 
@@ -361,7 +362,25 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Delete the TEST post from the Calendar and the design from Saved.
 
-## 20. Content autopilot: draft, review, approve
+## 20. Private coaching: the three agreements
+
+*As a team member · thep31collective.org · about 8 minutes*
+
+**Do this**
+
+1. In the mentor console → Intro calls, press “Send the three agreements” on a request (or Agreements → Send the agreements) with a TEST email you can read.
+2. Open the email that arrives and follow the link. Sign the Business Coaching Agreement (pick a package), then the Confidentiality Agreement, then the Client Safety & Emergency Contact form.
+3. Check the TEST inbox and the team inbox (members@ and ceo@p31market.com).
+
+**What should happen**
+
+- The forms must be signed in that order; the page refuses to skip ahead and remembers what is already signed if you leave and come back.
+- Each signed form arrives at the team and ceo@ with a PDF of every word agreed to and the signature; the client gets her own copy with a link to the next form.
+- Agreements in the mentor console shows three green checks and the package chosen; the intro-call request moves to Scheduled.
+
+**Afterwards:** Delete the TEST client from Agreements (that removes her signed forms too).
+
+## 21. Content autopilot: draft, review, approve
 
 *As a team member · thep31collective.org · about 6 minutes*
 
@@ -380,7 +399,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Delete the TEST posts from the Studio calendar if they were only a test.
 
-## 21. The watchdog catches a problem and clears it
+## 22. The watchdog catches a problem and clears it
 
 *As an admin · both sites · about 3 minutes*
 
@@ -398,7 +417,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Delete the TEST application.
 
-## 22. Send a campaign test
+## 23. Send a campaign test
 
 *As an admin · p31market.com · about 3 minutes*
 
@@ -412,7 +431,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Leave it as a draft, or delete it.
 
-## 23. The Gathering: post, thread, direct message, alert
+## 24. The Gathering: post, thread, direct message, alert
 
 *As a team member · both sites · about 5 minutes*
 
@@ -428,7 +447,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Delete the test messages (the ⋯ menu on your own message).
 
-## 24. The Gathering: @mention and search
+## 25. The Gathering: @mention and search
 
 *As a team member · both sites · about 4 minutes*
 
@@ -446,7 +465,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Delete the test message.
 
-## 25. Database updates land
+## 26. Database updates land
 
 *As an admin · both sites · about 3 minutes*
 
@@ -463,7 +482,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** None.
 
-## 26. A storefront free period and subscription
+## 27. A storefront free period and subscription
 
 *As an admin · p31market.com · about 6 minutes*
 
@@ -482,7 +501,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Tap “Take out of billing” on the test shop (or leave it complimentary).
 
-## 27. Class reminder emails
+## 28. Class reminder emails
 
 *As an admin · thep31collective.org · about 3 minutes*
 
@@ -497,7 +516,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Delete the TEST session.
 
-## 28. Welcome emails for a new subscriber
+## 29. Welcome emails for a new subscriber
 
 *As a visitor · p31market.com · about 3 minutes*
 
@@ -513,7 +532,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Unsubscribe the test address.
 
-## 29. The activity log
+## 30. The activity log
 
 *As an admin · both sites · about 2 minutes*
 
@@ -528,7 +547,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Undo the test change (that is logged too).
 
-## 30. Eventbrite ticket sales
+## 31. Eventbrite ticket sales
 
 *As an admin · p31market.com · about 3 minutes*
 
@@ -544,7 +563,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** None.
 
-## 31. Walkthroughs play on every dashboard
+## 32. Walkthroughs play on every dashboard
 
 *As a team member · both sites · about 3 minutes*
 
@@ -559,7 +578,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** None.
 
-## 32. Automated screen, link and form check
+## 33. Automated screen, link and form check
 
 *As an admin · both sites · about 2 minutes*
 

@@ -82,6 +82,7 @@ const SystemsApp = lazy(load.systems);
 const AcademyApp = lazy(load.classroom);
 const StudioApp = lazy(load.studio);
 const Approve = lazy(() => import('./studio/autopilot/Approve'));
+const CoachingForms = lazy(() => import('./academy/coaching/CoachingForms'));
 const Today = lazy(load.today);
 const Gather = lazy(load.gather);
 
@@ -215,6 +216,8 @@ function CollectiveRoutes() {
             <Route path="/mentorship/:program" element={<MentorshipProgram />} />
             <Route path="/portal" element={<Portal />} />
             <Route path="/enroll/:token" element={<Enroll />} />
+            <Route path="/coaching/forms/:token" element={<CoachingForms />} />
+            <Route path="/coaching/forms" element={<CoachingForms />} />
             <Route path="/verify" element={<Verify />} />
             <Route path="/verify/:serial" element={<Verify />} />
           </Routes>

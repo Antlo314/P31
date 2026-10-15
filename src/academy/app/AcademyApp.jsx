@@ -4,6 +4,7 @@ import {
   Home, BookOpen, CalendarDays, ClipboardCheck, MessageCircle, Target, Upload, Library, CreditCard, Heart,
   LayoutDashboard, Users, PhoneCall, Megaphone, Send, GraduationCap, Lock, Inbox, ClipboardList, BarChart3, HelpCircle,
   MessagesSquare, Award, TrendingUp, Sparkles,
+  FileCheck2,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
@@ -17,7 +18,7 @@ import {
   StudentLibrary, StudentMessages, StudentBilling,
 } from './student';
 import {
-  MentorOverview, MentorStudents, MentorStudent, MentorCalls, MentorInvites, MentorCurriculum, MentorAnnouncements, MentorSessions,
+  MentorOverview, MentorStudents, MentorStudent, MentorCalls, MentorInvites, MentorAgreements, MentorCurriculum, MentorAnnouncements, MentorSessions,
 } from './mentor';
 import { MentorInbox, MentorAssignments, MentorGradebook, MentorQuizzes, MentorCompletion } from './teach';
 import { StudentAssignments, StudentAssignment, StudentQuizzes, StudentQuiz, StudentProgress } from './learn';
@@ -75,6 +76,7 @@ const mentorNav = (slug, counts) => {
     { to: `${t}/completion`, label: 'Completion', Icon: Award },
     { to: `${t}/announcements`, label: 'Announcements', Icon: Megaphone },
     { to: `${t}/calls`, label: 'Intro calls', Icon: PhoneCall, badge: counts.newCalls },
+    { to: `${t}/agreements`, label: 'Agreements', Icon: FileCheck2 },
     { to: `${t}/invites`, label: 'Invites', Icon: Send },
     { to: `/academy/${slug}`, label: 'Student view', Icon: GraduationCap, end: true },
     { to: '/gather', label: 'The Gathering', Icon: Sparkles },
@@ -209,6 +211,7 @@ const AcademyApp = () => {
           <Route path="teach/students" element={<MentorStudents />} />
           <Route path="teach/students/:userId" element={<MentorStudent />} />
           <Route path="teach/calls" element={<MentorCalls />} />
+          <Route path="teach/agreements" element={<MentorAgreements />} />
           <Route path="teach/invites" element={<MentorInvites />} />
           <Route path="teach/curriculum" element={<MentorCurriculum />} />
           <Route path="teach/announcements" element={<MentorAnnouncements />} />

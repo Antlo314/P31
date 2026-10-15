@@ -2,6 +2,15 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 14 (night) — Private coaching: the three agreements on the site
+
+- **The three coaching forms now live on the site**, in the order a new client signs them: the Business Coaching Agreement (she picks her package there), the Confidentiality & Non-Disclosure Agreement, then the Client Safety & Emergency Contact form. The words are exactly those of the Google Forms (kept as a fallback, linked at the foot of each page). She signs on one private page made for a phone, `thep31collective.org/coaching/forms/<her link>`: her full name, a box to confirm she agrees, and an optional drawn signature. The site keeps the order, remembers what she signed if she comes back later, and checks she is 18 or older on the safety form.
+- **One button in the mentor console.** Intro calls → **Send the three agreements** (or Agreements → Send the agreements for someone who booked on the calendar). The site emails her the link. After each form she gets her own PDF copy, word for word with her signature, plus a button to the next form. The team (members@, founder@ and ceo@p31market.com) gets the same PDF each time.
+- **Agreements page.** Mentor console → Agreements shows everyone sent the forms, a green check for each form signed, her package, and View, Renew, Revoke and Delete. Once all three are signed, **Send payment link** creates her private Stripe checkout for the package she chose.
+- **Packages are plans.** The four coaching packages are now monthly plans on the Business Mentorship (Options 1–4), editable in Systems → Academy. The prices reach the agreement page only through a private link and are never in the public site code.
+- **Stripe webhook.** The shop webhook now accepts two signing secrets (comma-separated), since vendor-account updates come from Stripe's separate connected-accounts endpoint.
+- Database v47. A how-to guide for the team: `docs/P31-Coaching-Signup-Guide.pdf` (rebuild it with `node scripts/coaching-guide.mjs`).
+
 ## October 14 (late) — Content on autopilot, with Melanie JC approving
 
 - **The calendar fills itself.** Every morning the autopilot looks at what is booked. When the next stretch has fewer posts a day than wanted (two by default) and it starts within a week, it drafts the next two weeks: bold quotes in Melanie JC's card style, prayers, King James scripture from the verified list (on Sundays where it fits), fill-in-the-blank questions, and curator and mentorship invitations, at most one invitation a day. Each post gets its own card look, Instagram and Facebook captions (links on Facebook, "link in bio" on Instagram) and a time when followers are online, clear of the posts already booked. The lines and captions are written by the same AI the Studio uses, in her voice, never repeating the October collection or recent batches; if the AI is unavailable, a built-in library of lines takes over so a batch is never missed.

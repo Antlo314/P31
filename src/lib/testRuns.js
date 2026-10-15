@@ -215,6 +215,20 @@ export const TEST_RUNS = [
     cleanup: 'Delete the TEST post from the Calendar and the design from Saved.',
   },
   {
+    id: 'coaching-forms', title: 'Private coaching: the three agreements', site: 'collective', who: 'team', minutes: 8, tour: 'mentor',
+    steps: [
+      'In the mentor console → Intro calls, press “Send the three agreements” on a request (or Agreements → Send the agreements) with a TEST email you can read.',
+      'Open the email that arrives and follow the link. Sign the Business Coaching Agreement (pick a package), then the Confidentiality Agreement, then the Client Safety & Emergency Contact form.',
+      'Check the TEST inbox and the team inbox (members@ and ceo@p31market.com).',
+    ],
+    expect: [
+      'The forms must be signed in that order; the page refuses to skip ahead and remembers what is already signed if you leave and come back.',
+      'Each signed form arrives at the team and ceo@ with a PDF of every word agreed to and the signature; the client gets her own copy with a link to the next form.',
+      'Agreements in the mentor console shows three green checks and the package chosen; the intro-call request moves to Scheduled.',
+    ],
+    cleanup: 'Delete the TEST client from Agreements (that removes her signed forms too).',
+  },
+  {
     id: 'autopilot', title: 'Content autopilot: draft, review, approve', site: 'collective', who: 'team', minutes: 6, tour: 'studio',
     steps: [
       'In Content Studio → Auto-create → Autopilot, check the settings (posts a day, days per batch, the mix, who approves) and press Draft a batch now.',

@@ -5,6 +5,8 @@
 // (or set verify_jwt = false in supabase/config.toml / the dashboard toggle).
 // Configure the endpoint in Stripe with events:
 //   checkout.session.completed, account.updated
+// Stripe sends vendors' account.updated on a separate "connected accounts" endpoint with its own
+// signing secret, so STRIPE_WEBHOOK_SECRET may hold both, comma-separated: whsec_aaa,whsec_bbb
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { sendEmail, layout, itemsTable, money, esc } from '../_shared/email.ts';
@@ -29,18 +31,17 @@ Deno.serve(async (req) => {
   // Signature verification needs the raw body + async SubtleCrypto in Deno.
   const body = await req.text();
   const signature = req.headers.get('stripe-signature') || '';
-  let event: Stripe.Event;
-  try {
-    event = await stripe.webhooks.constructEventAsync(
-      body,
-      signature,
-      webhookSecret,
-      undefined,
-      Stripe.createSubtleCryptoProvider(),
-    );
-  } catch (err) {
-    console.error('Webhook signature verification failed:', (err as Error).message);
-    return new Response(`Webhook error: ${(err as Error).message}`, { status: 400 });
+  let event: Stripe.Event | null = null;
+  let lastError = '';
+  for (const secret of webhookSecret.split(',').map((x) => x.trim()).filter(Boolean)) {
+    try {
+      event = await stripe.webhooks.constructEventAsync(body, signature, secret, undefined, Stripe.createSubtleCryptoProvider());
+      break;
+    } catch (err) { lastError = (err as Error).message; }
+  }
+  if (!event) {
+    console.error('Webhook signature verification failed:', lastError);
+    return new Response(`Webhook error: ${lastError}`, { status: 400 });
   }
 
   try {

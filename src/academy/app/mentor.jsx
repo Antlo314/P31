@@ -14,6 +14,7 @@ import { Modal } from './ui';
 import { toLocalInput, fromLocalInput, useRoster } from './helpers';
 import { AttendanceModal, CallReportModal, GoLiveModal, MentorPulse, StudentFilesPanel, StudentNotes, StudentProgressPanel, StudentTasksPanel } from './teach';
 import { startViewAs } from './viewAs';
+import { IntakeModal, MentorAgreements } from './agreements';
 
 const daysFromNow = (d) => new Date(Date.now() + d * 86400e3).toISOString();
 const STATUS_PILL = { active: 'ds-pill--green', past_due: 'ds-pill--red', canceled: '', expired: '' };
@@ -144,13 +145,14 @@ export const MentorCalls = () => {
   const { program } = useAcademy();
   const [filter, setFilter] = useState('open');
   const [invite, setInvite] = useState(null);
+  const [intake, setIntake] = useState(null);
   const calls = useRows(() => supabase.from('academy_inquiries').select('*').eq('program_id', program.id).order('created_at', { ascending: false }).limit(300), [program.id]);
   const shown = calls.data.filter((c) => filter === 'all' || (filter === 'open' ? ['new', 'scheduled'].includes(c.status) : c.status === filter));
   const update = async (c, patch) => { await write(supabase.from('academy_inquiries').update({ ...patch, updated_at: new Date().toISOString() }).eq('id', c.id)); calls.reload(); };
 
   return (
     <>
-      <DashHead eyebrow={`${program.title} · Mentor`} title="Intro" accent="calls" lead="Requests from the mentorship page. Reach out, meet, then send a private enrollment link." />
+      <DashHead eyebrow={`${program.title} · Mentor`} title="Intro" accent="calls" lead="Requests from the mentorship page. Reach out, meet, send the three agreements to sign, then the private enrollment link." />
       <div className="ds-tabs-inline" role="tablist">
         {[['open', 'Open'], ...CALL_STATUS, ['all', 'All']].map(([v, l]) => (
           <button key={v} role="tab" aria-selected={filter === v} onClick={() => setFilter(v)}>{l}{v === 'new' ? ` (${calls.data.filter((c) => c.status === 'new').length})` : ''}</button>
@@ -174,16 +176,21 @@ export const MentorCalls = () => {
               <label className="k-field"><span>Private notes</span>
                 <textarea rows={2} defaultValue={c.notes || ''} onBlur={(e) => e.target.value !== (c.notes || '') && update(c, { notes: e.target.value })} />
               </label>
-              {c.status !== 'enrolled' && <button className="k-btn k-btn--gold k-btn--sm" style={{ justifySelf: 'start' }} onClick={() => setInvite({ email: c.email, full_name: c.full_name, inquiry_id: c.id })}><Send size={15} /> Send enrollment invite</button>}
+              <div className="k-actions">
+                {c.status !== 'enrolled' && <button className="k-btn k-btn--plum k-btn--sm" onClick={() => setIntake({ email: c.email, full_name: c.full_name, inquiry_id: c.id })}><FileCheck2 size={15} /> Send the three agreements</button>}
+                {c.status !== 'enrolled' && <button className="k-btn k-btn--gold k-btn--sm" onClick={() => setInvite({ email: c.email, full_name: c.full_name, inquiry_id: c.id })}><Send size={15} /> Send enrollment invite</button>}
+              </div>
               <button className="k-btn k-btn--sm k-btn--ghost" style={{ justifySelf: 'start' }} onClick={async () => { if (window.confirm(`Delete the intro-call request from ${c.full_name}? This cannot be undone.`)) { await write(supabase.from('academy_inquiries').delete().eq('id', c.id)); calls.reload(); } }}><Trash2 size={15} /> Delete request</button>
             </article>
           ))}
         </div>
       ) : <DashEmpty Icon={PhoneCall} title="No requests here">New intro-call requests from {window.location.host}/mentorship/{program.slug} show up here.</DashEmpty>}
       {invite && <InviteModal prefill={invite} onClose={() => setInvite(null)} onCreated={calls.reload} />}
+      {intake && <IntakeModal prefill={intake} onClose={() => setIntake(null)} onCreated={calls.reload} />}
     </>
   );
 };
+export { MentorAgreements };
 
 // ── Invites ──────────────────────────────────────────────────
 export const MentorInvites = () => {
