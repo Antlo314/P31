@@ -2,10 +2,10 @@
 # (Deploys from GitHub never see these anyway; this keeps a direct upload the same as a GitHub one.)
 .env.local
 .env*.local
-tools/.env.iris
+/tools/.env.iris
 .claude/
 .vercel
-supabase/.temp/
+/supabase/.temp/
 
 # Built or installed on Vercel, not uploaded
 node_modules
@@ -13,13 +13,13 @@ dist
 dist-ssr
 
 # Local-only media and scratch
-scratch/
-public/__lab/
+/scratch/
+/public/__lab/
 src/dev/demo-studio.json
-marketing/social/2026-10-13-quotes/reels/
-marketing/brand/market/.build/
+/marketing/social/2026-10-13-quotes/reels/
+/marketing/brand/market/.build/
 *.log
 
 # Not needed to build the site (guides, PDFs, social media files): faster upload
-docs/
-marketing/
+/docs/
+/marketing/
