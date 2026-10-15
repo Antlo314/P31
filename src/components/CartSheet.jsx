@@ -4,6 +4,8 @@ import { X, Minus, Plus, Trash2, ShoppingBag, CreditCard, Send, Tag, Check, Stor
 import { supabase } from '../lib/supabase';
 import { invokePayment, CARD_PAYMENTS_ENABLED } from '../lib/payments';
 import { useCart } from '../context/CartContext';
+import { MERCH_SHOP, isMerch } from '../pages/merch/shop';
+import { SHIPPING } from '../../supabase/functions/_shared/merch-catalog.js';
 import './CartSheet.css';
 
 const money = (n) => `$${Number(n).toFixed(2)}`;
@@ -66,6 +68,22 @@ const ShopGroup = ({ group, shop, onSent }) => {
     setDisc(err ? { ok: false, message: 'Codes aren’t available right now.' } : { ...data, code: data?.ok ? data.code : null });
   };
 
+  const merch = isMerch(group.curatorId);
+  const merchShipping = group.subtotal * 100 >= SHIPPING.freeOverCents ? 0 : SHIPPING.cents / 100;
+  const merchCheckout = async () => {
+    setBusy(true); setError('');
+    try {
+      const { url } = await invokePayment('merch', {
+        action: 'checkout',
+        items: group.items.map((l) => ({ item: String(l.productId).replace(/^merch:/, ''), color: l.options?.Color, size: l.options?.Size, quantity: l.quantity })),
+      });
+      window.location.href = url;
+    } catch (err) {
+      setError(err.message);
+      setBusy(false);
+    }
+  };
+
   const payByCard = async () => {
     setBusy(true); setError('');
     try {
@@ -125,22 +143,33 @@ const ShopGroup = ({ group, shop, onSent }) => {
         ))}
       </ul>
 
-      <form className="cs2-code" onSubmit={applyCode}>
+      {!merch && (<form className="cs2-code" onSubmit={applyCode}>
         <Tag size={15} />
         <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Discount code" aria-label="Discount code" />
         <button>Apply</button>
-      </form>
+      </form>)}
       {disc?.message && <p className={disc.ok ? 'cs2-ok' : 'cs2-err'}>{disc.ok ? `${disc.code} — ${disc.message}` : disc.message}</p>}
 
       <dl className="cs2-totals">
         <div><dt>Subtotal</dt><dd>{money(group.subtotal)}</dd></div>
         {discountCents > 0 && <div className="is-disc"><dt>Discount</dt><dd>−{money(discountCents / 100)}</dd></div>}
-        <div className="is-total"><dt>Total</dt><dd>{money(total)}</dd></div>
+        {merch && <div><dt>Shipping</dt><dd>{merchShipping ? money(merchShipping) : 'Free'}</dd></div>}
+        <div className="is-total"><dt>Total</dt><dd>{money(merch ? group.subtotal + merchShipping : total)}</dd></div>
       </dl>
 
       {error && <p className="cs2-err" role="alert">{error}</p>}
 
-      {mode === 'bag' && (
+      {merch && (
+        <div className="cs2-actions">
+          <button className="cs2-btn cs2-btn--plum" onClick={merchCheckout} disabled={busy}>
+            {busy ? <Loader2 size={16} className="cs2-spin" /> : <CreditCard size={16} />} Checkout · {money(group.subtotal + merchShipping)}
+          </button>
+          <p className="cs2-label" style={{ margin: 0 }}>Printed to order and shipped to you. Free shipping over {money(SHIPPING.freeOverCents / 100)}.</p>
+          <button className="cs2-link" onClick={() => group.items.forEach((l) => remove(l.key))}>Remove merch from bag</button>
+        </div>
+      )}
+
+      {!merch && mode === 'bag' && (
         <div className="cs2-actions">
           {cards && (
             <button className="cs2-btn cs2-btn--plum" onClick={payByCard} disabled={busy}>
@@ -183,7 +212,7 @@ const CartSheet = () => {
   const [shops, setShops] = useState({});
   const [sent, setSent] = useState([]);
   const close = () => { setSent([]); closeCart(); };
-  const ids = groups.map((g) => g.curatorId).join(',');
+  const ids = groups.map((g) => g.curatorId).filter((id) => !isMerch(id)).join(',');
 
   useEffect(() => {
     if (!open || !ids) return;
@@ -220,7 +249,7 @@ const CartSheet = () => {
             <Link to="/shop" className="cs2-btn cs2-btn--plum" onClick={close}>{sent.length ? 'Keep shopping' : 'Browse the marketplace'}</Link>
           </div>
         ) : (
-          groups.map((g) => <ShopGroup key={g.curatorId} group={g} shop={shops[g.curatorId]} onSent={(r) => setSent((x) => [...x, r])} />)
+          groups.map((g) => <ShopGroup key={g.curatorId} group={g} shop={isMerch(g.curatorId) ? MERCH_SHOP : shops[g.curatorId]} onSent={(r) => setSent((x) => [...x, r])} />)
         )}
       </div>
     </div>

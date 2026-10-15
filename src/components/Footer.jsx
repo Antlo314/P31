@@ -46,6 +46,7 @@ const Footer = () => (
         <nav className="ft__col" aria-label="Explore">
           <h4>Explore</h4>
           <Link to="/shop">Shop the marketplace</Link>
+          <Link to="/merch">P31 merch</Link>
           <Link to="/directory">Curators &amp; shops</Link>
           <Link to="/calendar">Market dates</Link>
           <a href={hrefFor('/academy')}>Mentorship</a>

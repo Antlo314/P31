@@ -28,6 +28,7 @@ const load = {
   services: () => import('./pages/Services'),
   unsubscribe: () => import('./pages/Unsubscribe'),
   shop: () => import('./pages/Shop'),
+  merch: () => import('./pages/Merch'),
   apply: () => import('./pages/VendorApply'),
   // The vendor forms that replaced JotForm: hub, storefront agreement, market registration, feedback, volunteers.
   vendorHub: () => import('./pages/vendors/VendorHub'),
@@ -64,6 +65,7 @@ const Onboarding = lazy(load.onboarding);
 const Services = lazy(load.services);
 const Unsubscribe = lazy(load.unsubscribe);
 const Shop = lazy(load.shop);
+const Merch = lazy(load.merch);
 const VendorApply = lazy(load.apply);
 const VendorHub = lazy(load.vendorHub);
 const StorefrontAgreement = lazy(load.agreement);
@@ -185,6 +187,7 @@ function SiteRoutes() {
             <Route path="/onboarding-exclusive" element={<Onboarding />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/shop" element={<Shop />} />
+            <Route path="/merch" element={<Merch />} />
             <Route path="/favorites" element={<Shop favoritesOnly />} />
             {/* Vanity URL Catch-all: /popcorn or /id */}
             <Route path="/:id" element={<CuratorProfile />} />

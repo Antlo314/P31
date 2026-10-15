@@ -106,6 +106,9 @@ const SCREENS = [
   ['curator walkthrough reaches marketing', at('market', 'curator')('/dashboard/identity'), ['Start the walkthrough', 'Next', 'Next', 'Next', 'Next', 'Next', 'Next'], 'Get seen'],
   ['curator menu groups fold', at('market', 'curator')('/dashboard/identity'), ['Sell', 'Grow', 'Help & Guide'], 'Welcome to your studio'],
   ['storefront: badges, timer, follow box', mk('/myrrh-and-mercy'), [], 'Get updates from Myrrh & Mercy Apothecary'],
+  ['merch page', mk('/merch'), [], 'Wear the'],
+  ['merch: product sheet and sizes', mk('/merch'), ['Strength & Honour'], 'Add to bag'],
+  ['merch on a phone', mk('/merch'), [], 'Pray. Plan. Build.', { phone: true }],
   ['storefront: product sheet', mk('/myrrh-and-mercy?p=101'), [], 'Sale ends in'],
   // The vendor forms that replaced JotForm (word for word), and the Systems page that receives them.
   ['vendor forms hub', mk('/vendors'), [], 'Storefront Agreement'],

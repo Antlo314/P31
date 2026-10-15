@@ -12,6 +12,7 @@ import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { stripeFor, webhookSecrets, verifyEvent } from '../_shared/stripe.ts';
 import { storefrontEvent } from '../_shared/storefront-billing.ts';
+import { placeMerchOrder } from '../_shared/merch-printful.ts';
 import { sendEmail, layout, itemsTable, money, esc } from '../_shared/email.ts';
 
 Deno.serve(async (req) => {
@@ -44,6 +45,8 @@ Deno.serve(async (req) => {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         const meta = session.metadata || {};
+        // P31 merch: record it and send it to Printful to print and ship.
+        if (meta.kind === 'merch') { await placeMerchOrder(admin, session); break; }
         // Mentorship enrollments (academy-webhook) and storefront subscriptions (above) are not orders.
         if (meta.kind === 'academy' || meta.kind === 'storefront' || session.mode === 'subscription') break;
         const shipping =

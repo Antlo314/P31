@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import {
   Home, Store, CalendarDays, Handshake, LayoutGrid, ShoppingBasket, Heart, X, ChevronRight, Sparkles, Info,
-  LayoutDashboard, LogOut, Instagram, Facebook, UserRound, Crown, ShoppingBag, GraduationCap, KeyRound, UserPlus, MessagesSquare,
+  LayoutDashboard, LogOut, Instagram, Facebook, UserRound, Crown, ShoppingBag, GraduationCap, KeyRound, UserPlus, MessagesSquare, Shirt,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -24,6 +24,7 @@ const TikTok = ({ size = 18 }) => (
 const LINKS = [
   { to: '/', label: 'Home', Icon: Home, end: true },
   { to: '/shop', label: 'Shop the Marketplace', Icon: ShoppingBasket },
+  { to: '/merch', label: 'P31 Merch', Icon: Shirt },
   { to: '/directory', label: 'Curators & Shops', Icon: Store },
   { to: '/favorites', label: 'Favorites', Icon: Heart },
   { to: '/calendar', label: 'Market Dates', Icon: CalendarDays },
@@ -99,7 +100,7 @@ const Navbar = () => {
           </Link>
 
           <nav className="nb__links" aria-label="Main">
-            {[['/shop', 'Shop'], ['/directory', 'Curators'], ['/calendar', 'Dates']].map(([to, label]) => (
+            {[['/shop', 'Shop'], ['/merch', 'Merch'], ['/directory', 'Curators'], ['/calendar', 'Dates']].map(([to, label]) => (
               <NavLink key={to} to={to} className="nb__link">{label}</NavLink>
             ))}
             <a href={hrefFor('/academy')} className="nb__link">Mentorship</a>

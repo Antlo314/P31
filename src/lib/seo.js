@@ -37,6 +37,10 @@ export const ROUTE_META = {
     title: `Shop Women-Owned Brands — ${SITE_NAME}`,
     description: 'Handmade goods, beauty, fashion, art and more from women-owned small businesses around Atlanta, hand-selected by Proverbs 31 Marketplace.',
   },
+  '/merch': {
+    title: `P31 Merch: Tees, Mugs & Totes — ${SITE_NAME}`,
+    description: 'Proverbs 31 tees, sweatshirts, mugs, totes, stickers, journals and hats, printed to order. Wear the word and support women who build.',
+  },
   '/directory': {
     title: `Women Vendors & Makers in Atlanta — ${SITE_NAME}`,
     description: 'Meet the curators of Proverbs 31 Marketplace: Atlanta-area women makers, artists, stylists and founders building with excellence.',

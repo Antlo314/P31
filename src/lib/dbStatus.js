@@ -6,6 +6,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 50, file: 'storefront_v50_merch.sql', title: 'P31 merch', what: 'p31market.com/merch: orders paid on Stripe and printed and shipped by Printful, and the product photos.',
+    expect: 'orders_ready true · mockups_ready true · bucket_ready true',
+    checks: [['table', 'merch_orders'], ['table', 'merch_mockups']] },
   { v: 49, file: 'storefront_v49_new_pricing.sql', title: 'New pricing', what: 'October 2026 prices: the four business coaching packages and three faith mentorship packages, monthly; the earlier single monthly plans retired for new clients.',
     expect: 'business_prices 27500/37500/49500/65000 · faith_prices 17500/23500/31000 · old_plans_retired true',
     checks: [['column', 'academy_plans', 'package']] },
