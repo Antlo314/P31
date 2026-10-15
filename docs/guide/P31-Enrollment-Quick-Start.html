@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Start a new enrollment</title>
+<style>
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; src: url(../../public/fonts/NotoSerif-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; font-style: italic; src: url(../../public/fonts/NotoSerif-400-italic.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 400; src: url(../../public/fonts/Manrope-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 600; src: url(../../public/fonts/Manrope-600.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 800; src: url(../../public/fonts/Manrope-800.woff2) format('woff2'); }
+  :root {
+    --plum: #3A1C36; --plum-3: #21101E; --thistle: #E3D0EA; --thistle-3: #F8F3FA;
+    --amethyst: #9B71B2; --gold: #D9A93A; --gold-2: #F2CE4D; --green: #374126;
+    --ink: #2A1526; --ink-2: #4E3A4B; --dim: #74657A; --line: #E3D0EA;
+  }
+  @page { size: Letter; margin: 0.7in 0.7in 0.75in; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: Manrope, sans-serif; font-size: 10.2pt; line-height: 1.55; color: var(--ink); background: #fff; }
+  h1, h2, h3 { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; color: var(--plum); }
+  h1 { font-size: 26pt; line-height: 1.12; margin: 0 0 10px; }
+  h2 { font-size: 14pt; margin: 18px 0 8px; break-after: avoid; }
+  h3 { font-size: 11pt; margin: 12px 0 4px; }
+  p { margin: 0 0 8px; }
+  ul, ol { margin: 4px 0 10px; padding-left: 18px; }
+  li { margin: 3px 0; }
+  code, pre { font-family: Consolas, 'Courier New', monospace; }
+  code { font-size: 7.6pt; background: var(--thistle-3); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; word-break: break-all; }
+  pre { font-size: 8.2pt; background: var(--plum-3); color: #f7f1fc; border-radius: 8px; padding: 9px 12px; white-space: pre-wrap; word-break: break-all; margin: 6px 0 10px; }
+  strong, b { font-weight: 800; }
+  em { font-family: 'Noto Serif', Georgia, serif; font-style: italic; }
+  .eyebrow { font-size: 8pt; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+  .lead { font-size: 11.2pt; color: var(--ink-2); }
+  .muted { color: var(--dim); }
+  .small { font-size: 8.6pt; }
+
+  .part { margin-top: 26px; }
+  .cover + .part, .part.page { break-before: page; margin-top: 0; }
+  .part-head { break-after: avoid; }
+  .phones img.shot { max-height: 2.85in; object-fit: cover; object-position: top; width: 100%; }
+  .fig-cap img.shot { max-height: 3.6in; object-fit: cover; object-position: top; width: 100%; }
+  .part-head { background: var(--plum); color: #fff; border-radius: 16px; padding: 18px 22px; margin: 0 0 14px; position: relative; overflow: hidden; break-inside: avoid; }
+  .part-head::after { content: ''; position: absolute; right: -40px; bottom: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(242, 206, 77, 0.28), transparent 70%); }
+  .part-head .eyebrow { color: var(--gold-2); }
+  .part-head h1 { color: #fff; margin: 0 0 6px; font-size: 20pt; }
+  .part-head p { color: rgba(255, 255, 255, 0.84); margin: 0; max-width: 92%; }
+
+  .cover { height: 9.4in; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(70% 50% at 100% 0%, rgba(155, 113, 178, 0.35), transparent 70%), radial-gradient(60% 45% at 0% 100%, rgba(242, 206, 77, 0.18), transparent 70%), var(--plum-3); color: #fff; border-radius: 22px; padding: 46px 44px; }
+  .cover img { width: 92px; height: 92px; }
+  .cover h1 { color: #fff; font-size: 36pt; line-height: 1.06; margin: 18px 0 12px; }
+  .cover h1 em { color: var(--gold-2); }
+  .cover .lead { color: rgba(255, 255, 255, 0.86); font-size: 12.5pt; max-width: 5.7in; }
+  .cover .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 30px; font-size: 9.5pt; color: rgba(255, 255, 255, 0.86); }
+  .cover .meta b { display: block; color: var(--gold-2); font-size: 7.6pt; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 3px; }
+
+  .note { font-size: 9pt; border-left: 4px solid var(--gold); background: rgba(242, 206, 77, 0.1); border-radius: 0 10px 10px 0; padding: 9px 13px; margin: 8px 0 12px; break-inside: avoid; }
+  .note.plum { border-color: var(--amethyst); background: var(--thistle-3); }
+  .note p:last-child, .note ul:last-child { margin-bottom: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 8.8pt; }
+  th { text-align: left; font-size: 7.4pt; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: var(--plum); padding: 6px 8px; }
+  td { border-bottom: 1px solid var(--line); padding: 6px 8px; vertical-align: top; }
+  tr { break-inside: avoid; }
+  tr:nth-child(even) td { background: var(--thistle-3); }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  .box { border: 1px solid var(--line); border-radius: 12px; padding: 10px 13px; break-inside: avoid; background: #fff; }
+  .flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 6px 0 10px; }
+  .flow .box { padding: 8px 11px; }
+  .flow b.n { font-size: 16pt !important; }
+  .flow b.n { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; font-size: 20pt; color: var(--gold); line-height: 1; display: block; margin-bottom: 4px; }
+  .flow h3 { font-size: 10.6pt; margin: 0 0 4px; }
+  .flow p { font-size: 8.6pt; color: var(--ink-2); margin: 0; }
+  .who { display: inline-block; font-size: 6.8pt; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 1px 7px; border-radius: 999px; margin-right: 5px; vertical-align: 1px; }
+  .who.client { background: rgba(155, 113, 178, 0.16); color: #6d4a82; }
+  .who.mentor { background: rgba(217, 169, 58, 0.2); color: #7a5c12; }
+  .who.site { background: rgba(55, 65, 38, 0.12); color: var(--green); }
+
+  .shot { display: block; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 6px 18px rgba(58, 28, 54, 0.12); max-width: 100%; }
+  figure { margin: 0; break-inside: avoid; }
+  figcaption { font-size: 8pt; color: var(--dim); margin-top: 5px; line-height: 1.35; }
+  .phones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; margin: 8px 0 12px; }
+  .check { list-style: none; padding-left: 0; }
+  .check li { padding-left: 22px; position: relative; }
+  .check li::before { content: ''; position: absolute; left: 0; top: 3px; width: 12px; height: 12px; border: 1.6px solid var(--plum); border-radius: 3px; }
+  .steps { counter-reset: s; list-style: none; padding-left: 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 28px; margin: 7px 0; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 19px; height: 19px; border-radius: 50%; background: var(--plum); color: #fff; font-size: 8pt; font-weight: 800; display: grid; place-items: center; }
+
+  .top { display: grid; grid-template-columns: 70px 1fr; gap: 16px; align-items: center; background: radial-gradient(70% 90% at 100% 0%, rgba(155, 113, 178, 0.4), transparent 70%), var(--plum-3); color: #fff; border-radius: 18px; padding: 20px 24px; margin-bottom: 14px; }
+  .top img { width: 70px; height: 70px; }
+  .top h1 { color: #fff; font-size: 24pt; margin: 2px 0 4px; }
+  .top h1 em { color: var(--gold-2); }
+  .top p { margin: 0; color: rgba(255,255,255,0.86); }
+  .top .eyebrow { color: var(--gold-2); margin: 0; }
+  .you { border: 2px solid var(--gold); border-radius: 14px; padding: 12px 16px; background: rgba(242, 206, 77, 0.08); break-inside: avoid; }
+  .you h2 { margin: 0 0 6px; }
+  .url { font-family: Consolas, monospace; font-size: 9pt; background: var(--thistle-3); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; }
+  .grid3 img.shot { width: 100%; max-height: 3.5in; object-fit: cover; object-position: top; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  .grid2 img.shot { width: 100%; max-height: 2.6in; object-fit: cover; object-position: top; }
+  .page { break-before: page; }
+  body { font-size: 9.6pt; line-height: 1.45; }
+  h2 { margin: 12px 0 6px; }
+  .top { padding: 14px 20px; margin-bottom: 10px; }
+  .top h1 { font-size: 21pt; }
+  .steps > li { margin: 4px 0; }
+  .flow .box { padding: 7px 10px; }
+  .flow h3 { margin: 0 0 2px; }
+  .flow b.n { font-size: 13pt !important; margin-bottom: 2px; }
+  td { padding: 5px 8px; }
+  .shot.modal { max-height: 2.6in; }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <img src="../../src/assets/academy/collective-mark.png" alt="">
+  <div>
+    <p class="eyebrow">The P31 Collective by NEBA · Enrollment workflow</p>
+    <h1>Start a new <em>enrollment</em></h1>
+    <p>For Faith Mentorship and Business Coaching. You press one button; the site walks her through the rest.</p>
+  </div>
+</div>
+
+<div class="you">
+  <h2>Your part: 3 clicks, right after the intro call</h2>
+  <ol class="steps">
+    <li>Sign in at <span class="url">thep31collective.org/portal</span> and open the <b>Mentor console</b>.</li>
+    <li>Go to <b>Intro calls</b>, find her card and press <b>Send the three agreements</b>.<br><span class="muted small">She booked another way (calendar, phone, DM)? Use <b>Agreements → Send the agreements</b> and type her name and email.</span></li>
+    <li>Check her name and email, leave the link at <b>7 days</b>, and press <b>Create and email the link</b>. That is it.</li>
+  </ol>
+  <p class="small muted" style="margin:0">She is asked to finish within 48 hours. The link keeps working for 7 days in case life happens.</p>
+</div>
+
+<h2>Then the site does the rest</h2>
+<div class="flow">
+  <div class="box"><b class="n">1</b><h3>Invitation email</h3><p><span class="who site">Site</span>“Your P31 Collective enrollment: please complete within 48 hours”, with her setup guide and a <b>Start my enrollment</b> button.</p></div>
+  <div class="box"><b class="n">2</b><h3>Three forms, in order</h3><p><span class="who client">Client</span>Business Coaching Agreement, Confidentiality, Client Safety &amp; Emergency. A PDF copy after each one.</p></div>
+  <div class="box"><b class="n">3</b><h3>Program and plan</h3><p><span class="who client">Client</span>Business Coaching Options 1 to 4 or Faith Mentorship 2, 3 or 4 sessions, monthly. Prices show only on her private page.</p></div>
+  <div class="box"><b class="n">4</b><h3>Secure checkout</h3><p><span class="who client">Client</span>Creates her member login with the same email, then pays on Stripe.</p></div>
+  <div class="box"><b class="n">5</b><h3>Payment decision</h3><p><span class="who site">Site</span><b>Paid:</b> enrolled. <b>Not paid:</b> her page says enrollment pending, try again. Nothing is charged.</p></div>
+  <div class="box"><b class="n">6</b><h3>Welcome + team alert</h3><p><span class="who site">Site</span>She gets her welcome (classroom, booking link, The Gathering). The team and ceo@ get “enrolled”.</p></div>
+</div>
+
+<h2>Keep an eye on her</h2>
+<table>
+  <tr><th style="width:30%">Agreements tab shows</th><th>Meaning</th><th style="width:34%">What you do</th></tr>
+  <tr><td><b>Link sent</b> / <b>Signing</b></td><td>She has the link and is working through the forms.</td><td>Nothing. Nudge her if 48 hours pass.</td></tr>
+  <tr><td><b>Choosing plan / at checkout</b></td><td>All three forms are signed; she is picking a plan or paying.</td><td>If she gets stuck, <b>Send payment link</b> on her card is a backup.</td></tr>
+  <tr><td><b>Enrolled</b></td><td>Payment confirmed by Stripe. Her classroom is open.</td><td>Book her first session.</td></tr>
+  <tr><td><b>Link expired</b></td><td>7 days passed.</td><td>Press <b>Renew</b> on her card.</td></tr>
+</table>
+
+<section class="page">
+  <h2 style="margin-top:0">What it looks like</h2>
+  <div class="grid2">
+    <figure><img class="shot" src="enrollment/1-call-card.png" alt=""><figcaption><b>You:</b> Mentor console → Intro calls → <b>Send the three agreements</b>.</figcaption></figure>
+    <figure><img class="shot" src="enrollment/2-send-modal.png" alt=""><figcaption><b>You:</b> check her name and email, then <b>Create and email the link</b>.</figcaption></figure>
+  </div>
+  <div class="grid3" style="margin-top:14px">
+    <figure><img class="shot" src="enrollment/3-forms.png" alt=""><figcaption><b>Her:</b> the welcome, with her 48-hour deadline.</figcaption></figure>
+    <figure><img class="shot" src="enrollment/4-plan.png" alt=""><figcaption><b>Her:</b> after the three forms, she picks her program and plan.</figcaption></figure>
+    <figure><img class="shot" src="enrollment/5-checkout.png" alt=""><figcaption><b>Her:</b> login, then <b>Continue to secure checkout</b> (Stripe).</figcaption></figure>
+  </div>
+
+  <div class="note" style="margin-top:14px">
+    <p><strong>Good to know</strong></p>
+    <ul>
+      <li>She must use the <b>same email</b> you typed when she creates her login, or checkout will not match her invitation.</li>
+      <li>Checkout stays locked until all three forms are signed. That is on purpose.</li>
+      <li>Payments go to the <b>P31 Collective</b> Stripe account. Receipts come from Stripe.</li>
+      <li>Questions from her go to members@thep31collective.org.</li>
+    </ul>
+  </div>
+</section>
+</body>
+</html>

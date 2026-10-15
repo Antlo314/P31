@@ -9,7 +9,8 @@ import { ORDER, PACKAGES, packagePrice } from '../../../supabase/functions/_shar
 
 const daysFromNow = (d) => new Date(Date.now() + d * 86400e3).toISOString();
 const LABEL = { coaching: 'Coaching Agreement', confidentiality: 'Confidentiality', safety: 'Safety & Emergency' };
-const STATUS = { sent: 'Link sent', in_progress: 'Signing', complete: 'All signed', revoked: 'Revoked' };
+const STATUS = { sent: 'Link sent', in_progress: 'Signing', complete: 'All signed', checkout: 'Choosing plan / at checkout', enrolled: 'Enrolled', revoked: 'Revoked' };
+const SIGNED = ['complete', 'checkout', 'enrolled'];
 
 /**
  * Send a new private-coaching client her three forms: the link is created here and emailed by
@@ -109,7 +110,7 @@ export const MentorAgreements = () => {
             const expired = new Date(i.expires_at) < new Date();
             return (
               <article key={i.id} className="ds-card">
-                <div className="ds-card__head"><h3>{i.full_name || i.email}</h3><span className={`ds-pill ${i.status === 'complete' ? 'ds-pill--green' : i.status === 'revoked' || expired ? 'ds-pill--red' : 'ds-pill--gold'}`}>{expired && i.status !== 'complete' ? 'Link expired' : STATUS[i.status] || i.status}</span></div>
+                <div className="ds-card__head"><h3>{i.full_name || i.email}</h3><span className={`ds-pill ${SIGNED.includes(i.status) ? 'ds-pill--green' : i.status === 'revoked' || expired ? 'ds-pill--red' : 'ds-pill--gold'}`}>{expired && !SIGNED.includes(i.status) ? 'Link expired' : STATUS[i.status] || i.status}</span></div>
                 <p className="ds-muted">{i.email} · sent {fmtDateTime(i.created_at)}{i.notified_at ? '' : ' · email on its way'}</p>
                 <ul className="ds-list">
                   {ORDER.map((k, n) => {
@@ -124,10 +125,10 @@ export const MentorAgreements = () => {
                   })}
                 </ul>
                 <div className="k-actions">
-                  {i.status === 'complete' && done.coaching?.package && <button type="button" className="k-btn k-btn--gold k-btn--sm" onClick={() => sendPayment(i, done.coaching.package)}><CreditCard size={14} /> Send payment link ({done.coaching.package})</button>}
+                  {['complete', 'checkout'].includes(i.status) && done.coaching?.package && <button type="button" className="k-btn k-btn--gold k-btn--sm" onClick={() => sendPayment(i, done.coaching.package)}><CreditCard size={14} /> Send payment link ({done.coaching.package})</button>}
                   <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => navigator.clipboard.writeText(`${window.location.origin}/coaching/forms/${i.token}`)}><Copy size={14} /> Copy her forms link</button>
                   {(expired || i.status === 'revoked') && <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => renew(i)}><RotateCcw size={14} /> Renew for 30 days</button>}
-                  {i.status !== 'revoked' && i.status !== 'complete' && !expired && <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => revoke(i)}>Revoke link</button>}
+                  {i.status !== 'revoked' && !SIGNED.includes(i.status) && !expired && <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => revoke(i)}>Revoke link</button>}
                   <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => remove(i)}><Trash2 size={14} /> Delete</button>
                 </div>
               </article>
