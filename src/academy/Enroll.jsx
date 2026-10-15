@@ -20,6 +20,7 @@ const Enroll = () => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [note, setNote] = useState('');
+  const [forms, setForms] = useState('');
   const [ready, setReady] = useState(false);
   const returned = params.get('status');
 
@@ -65,9 +66,11 @@ const Enroll = () => {
     setBusy(true); setError('');
     const { data, error: err } = await supabase.functions.invoke('academy-checkout', { body: { token } });
     let msg = data?.error;
-    if (err) { try { msg = (await err.context?.json?.())?.error; } catch { /* keep */ } }
+    let formsPath = data?.forms || '';
+    if (err) { try { const body = await err.context?.json?.(); msg = body?.error; formsPath = body?.forms || ''; } catch { /* keep */ } }
     if (data?.url) { window.location.href = data.url; return; }
     if (data?.already) { setReady(true); setBusy(false); return; }
+    setForms(formsPath);
     setError(msg || `Checkout isn’t available right now. Please email ${CONTACT_EMAIL}.`);
     setBusy(false);
   };
@@ -116,10 +119,10 @@ const Enroll = () => {
                 : !invite.available ? <p className="k-error">This plan isn’t ready yet — please contact your mentor.</p>
                 : user ? (
                   <div className="lg__form">
-                    {returned === 'cancelled' && <p className="k-fine">Checkout was cancelled — you can try again whenever you’re ready.</p>}
+                    {returned === 'cancelled' && <p className="k-error" role="status">Your enrollment is pending: the payment did not go through and your card was not charged. Please try again below.</p>}
                     {returned === 'success' && <p className="k-fine"><Loader2 size={14} className="k-spin" /> Payment received — opening your classroom…</p>}
                     <p className="lg__sub" style={{ margin: 0 }}>Signed in as <strong>{user.email}</strong>. This invitation is for {invite.email_hint}.</p>
-                    {error && <p className="k-error" role="alert">{error}</p>}
+                    {error && <p className="k-error" role="alert">{error}{forms && <> <Link to={forms}>Open your enrollment forms</Link></>}</p>}
                     {note && <p className="k-fine">{note}</p>}
                     <button className="k-btn k-btn--gold k-btn--lg k-btn--block" onClick={checkout} disabled={busy || returned === 'success'}>
                       {busy ? 'Opening secure checkout…' : <><ShieldCheck size={18} /> Continue to secure checkout</>}

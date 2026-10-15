@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ShoppingBag, X, Check, Minus, Plus, Truck, Sparkles, ShieldAlert } from 'lucide-react';
+import { ShoppingBag, X, Check, Minus, Plus, Truck, Sparkles, ShieldAlert, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCart } from '../context/CartContext';
 import PageHeader from '../components/PageHeader';
@@ -17,6 +17,7 @@ const Merch = () => {
   const [params, setParams] = useSearchParams();
   const [photos, setPhotos] = useState({});
   const [open, setOpen] = useState(null); // { item, color, size, qty, added }
+  const [paid, setPaid] = useState(null); // back from Stripe: null = checking, true, false, or 'slow'
   const group = params.get('c') || 'All';
   const status = params.get('status');
   const ref = params.get('order');
@@ -27,8 +28,22 @@ const Merch = () => {
     });
   }, []);
 
-  // A paid order: the bag's merch lines are done.
-  useEffect(() => { if (status === 'success') cart.clearShop(MERCH_SHOP.id); }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Back from Stripe: confirm the payment really cleared before saying thank you, then empty the bag's merch lines.
+  useEffect(() => {
+    if (status !== 'success' || !ref) return undefined;
+    let alive = true; let tries = 0;
+    setPaid(null);
+    const check = async () => {
+      tries += 1;
+      const { data } = await supabase.functions.invoke('merch', { body: { action: 'order', ref } }).catch(() => ({ data: null }));
+      if (!alive) return;
+      if (data?.paid) { setPaid(true); cart.clearShop(MERCH_SHOP.id); return; }
+      if (data?.status === 'expired') { setPaid(false); return; }
+      if (tries < 6) setTimeout(check, 2500); else setPaid('slow');
+    };
+    check();
+    return () => { alive = false; };
+  }, [status, ref]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!open) return undefined;
@@ -62,9 +77,13 @@ const Merch = () => {
         lead="Proverbs 31 on cotton, ceramic and canvas. Every piece is printed for you when you order, in designs made for women who build." />
 
       {status && (
-        <div className={`mer-toast ${status === 'success' ? 'is-ok' : ''}`} role="status">
-          {status === 'success' ? <Check size={18} /> : <ShieldAlert size={18} />}
-          <span>{status === 'success' ? `Thank you! Order #${ref || ''} is in. Your receipt is in your email, and tracking follows when it ships.` : 'Checkout was cancelled. Your card was not charged, and your bag is just as you left it.'}</span>
+        <div className={`mer-toast ${status === 'success' && paid === true ? 'is-ok' : ''}`} role="status">
+          {status === 'success' && paid === null ? <Loader2 size={18} className="k-spin" /> : status === 'success' && paid === true ? <Check size={18} /> : <ShieldAlert size={18} />}
+          <span>{status !== 'success' || paid === false
+            ? 'Your order is pending: the payment did not go through and your card was not charged. Your bag is just as you left it, so you can try again.'
+            : paid === null ? 'Confirming your payment…'
+              : paid === true ? `Thank you! Order #${ref} is confirmed. Your receipt is in your email, and tracking follows when it ships.`
+                : `Order #${ref}: your payment is still being confirmed. Your receipt arrives by email as soon as it clears.`}</span>
           <button type="button" onClick={dismiss} aria-label="Dismiss"><X size={16} /></button>
         </div>
       )}

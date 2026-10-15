@@ -51,6 +51,19 @@ Deno.serve(async (req) => {
   // deno-lint-ignore no-explicit-any
   const plan = invite.plan as any; const program = invite.program as any;
   if (!plan?.is_active || !plan?.price_cents) return json({ error: 'This plan isn’t available yet — please contact your mentor.' }, 409);
+  // Enrollment workflow step 4: Faith Mentorship and Business Coaching need all three forms signed before checkout.
+  if (['business', 'faith'].includes(program?.slug)) {
+    const { data: intakes } = await admin.from('coaching_intakes').select('id, token').ilike('email', invite.email).neq('status', 'revoked');
+    let signed = false; let formsToken = '';
+    for (const i of intakes || []) {
+      const { data: forms } = await admin.from('coaching_forms').select('kind').eq('intake_id', i.id);
+      if (new Set((forms || []).map((f: { kind: string }) => f.kind)).size >= 3) { signed = true; break; }
+      formsToken ||= i.token;
+    }
+    if (!signed) {
+      return json({ error: 'Please complete your three enrollment forms first (Business Coaching Agreement, Confidentiality Agreement, Client Safety & Emergency).', forms: formsToken ? `/coaching/forms/${formsToken}` : null }, 409);
+    }
+  }
 
   const { data: existing } = await admin.from('academy_enrollments')
     .select('id, status, access_until, stripe_customer_id').eq('user_id', user.id).eq('program_id', program.id).maybeSingle();

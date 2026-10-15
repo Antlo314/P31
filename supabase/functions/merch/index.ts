@@ -115,6 +115,25 @@ Deno.serve(async (req) => {
       return json({ made, failed, remaining: todo.length - made.length });
     }
 
+    // The success page asks whether the payment really cleared (only the state, nothing personal).
+    if (body.action === 'order') {
+      const ref = String(body.ref || '').toUpperCase();
+      if (!/^M[0-9A-F]{7}$/.test(ref)) return json({ error: 'Unknown order.' }, 404);
+      const { data: order } = await db.from('merch_orders').select('status, stripe_session_id').eq('ref', ref).maybeSingle();
+      if (!order) return json({ error: 'Unknown order.' }, 404);
+      let status = order.status;
+      // The Stripe webhook may still be on its way: ask Stripe directly.
+      if (status === 'checkout' && order.stripe_session_id && stripeKey('market')) {
+        try {
+          const session = await new Stripe(stripeKey('market')).checkout.sessions.retrieve(order.stripe_session_id);
+          if (session.payment_status === 'paid') status = 'paid';
+          else if (session.status === 'expired') status = 'expired';
+        } catch (e) { console.error('merch order lookup', e); }
+      }
+      // Every later state (paid, sent, in production, shipped, or a Printful problem the team fixes) means the card was charged.
+      return json({ status, paid: !['checkout', 'expired'].includes(status) });
+    }
+
     if (body.action === 'checkout') {
       const key = stripeKey('market');
       if (!key) return json({ error: 'Merch checkout opens soon. Please check back shortly.' }, 503);
@@ -146,7 +165,7 @@ Deno.serve(async (req) => {
         metadata: { kind: 'merch', order_id: order.id, ref: order.ref },
         payment_intent_data: { metadata: { kind: 'merch', order_id: order.id, ref: order.ref }, statement_descriptor_suffix: 'P31 MERCH' },
         success_url: `${SITE}/merch?order=${order.ref}&status=success`,
-        cancel_url: `${SITE}/merch?status=cancelled`,
+        cancel_url: `${SITE}/merch?order=${order.ref}&status=cancelled`,
       });
       await db.from('merch_orders').update({ stripe_session_id: session.id }).eq('id', order.id);
       return json({ url: session.url, ref: order.ref });

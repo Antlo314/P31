@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight, Check, CheckCircle2, Lock, ShieldCheck, FileSignature, HeartPulse, Loader2, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import SignatureField from '../../components/SignatureField';
@@ -57,6 +57,10 @@ const AgreementText = ({ doc, prices }) => (
  */
 const CoachingForms = () => {
   const { token } = useParams();
+  const navigate = useNavigate();
+  const [plan, setPlan] = useState('');
+  const [going, setGoing] = useState(false);
+  const [planError, setPlanError] = useState('');
   // undefined loading, null not found (no link at all: nothing to look up)
   const [intake, setIntake] = useState(token ? undefined : null);
   const [f, setF] = useState({ full_name: '', package: '', agreed: false, signed_name: '', emergency_contact: '', address: '', phone: '', date_of_birth: '', trap: '' });
@@ -126,6 +130,24 @@ const CoachingForms = () => {
 
   const first = (intake.full_name || f.full_name || '').split(' ')[0];
   const done = !current;
+  // Step 3 of the enrollment workflow: completion is requested within 48 hours of the invitation.
+  const dueBy = intake.created_at ? new Date(new Date(intake.created_at).getTime() + 48 * 3600e3) : null;
+  const dueText = dueBy && dueBy > new Date() ? dueBy.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : null;
+  // Step 5: choose the program and tier. Business Coaching options match the agreement's packages.
+  const plans = intake.plans || [];
+  const agreed = plans.find((p) => p.program === 'business' && p.package === signed.coaching?.package);
+  const chosenId = plan || intake.chosen_plan || agreed?.id || '';
+  const choose = async () => {
+    if (!chosenId) return setPlanError('Choose a program and plan.');
+    setGoing(true); setPlanError('');
+    const { data, error: err } = await supabase.rpc('coaching_choose_plan', { p_token: token, p_plan: chosenId });
+    if (err || !data) { setGoing(false); return setPlanError(FRIENDLY.test(err?.message || '') || /already enrolled/.test(err?.message || '') ? err.message : 'We could not open checkout just now. Please try again in a moment.'); }
+    navigate(`/enroll/${data}`);
+  };
+  const tierName = (p) => (p.program === 'business'
+    ? `${p.package} — ${PACKAGES.find((x) => x.key === p.package)?.name || 'Business Coaching'}`
+    : p.label.replace(/^Faith Mentorship:s*/, ''));
+  const tierNote = (p) => (p.program === 'business' ? PACKAGES.find((x) => x.key === p.package)?.cadence : 'Private faith mentorship');
   return (
     <div className="cf">
       <header className="cf-head">
@@ -133,13 +155,16 @@ const CoachingForms = () => {
         <div>
           <p className="k-eyebrow">The Proverbs 31 Collective by NEBA · Private coaching</p>
           <h1>{done ? `All signed, ${first || 'friend'}.` : `Welcome, ${first || 'friend'}.`}</h1>
-          <p className="cf-lead">{done
-            ? 'Your three forms are on file. A copy of each is on its way to your email as a PDF.'
-            : 'Three forms, signed in order. Each one is emailed to you as a PDF once you sign it, and you can come back to this link to finish later.'}</p>
+          <p className="cf-lead">{intake.enrolled
+            ? 'You are enrolled. Your welcome email has your classroom link and the calendar for your first session.'
+            : done
+              ? 'Your three forms are on file (a PDF copy of each is in your email). One last step: choose your program and plan, then secure checkout.'
+              : 'Three forms, signed in order, then you choose your plan and check out. Each form is emailed to you as a PDF once you sign it.'}</p>
+          {!done && dueText && <p className="cf-due">Please complete your enrollment within 48 hours, by <b>{dueText}</b>.</p>}
         </div>
       </header>
 
-      <ol className="cf-steps" aria-label="Your forms">
+      <ol className="cf-steps" aria-label="Your enrollment steps">
         {ORDER.map((k, i) => {
           const { Icon, short } = STEP[k];
           const state = signed[k] ? 'done' : k === current ? 'now' : 'next';
@@ -151,14 +176,48 @@ const CoachingForms = () => {
             </li>
           );
         })}
+        <li className={`cf-step is-${intake.enrolled ? 'done' : done ? 'now' : 'next'}`} aria-current={done && !intake.enrolled ? 'step' : undefined}>
+          <span className="cf-step__n">{intake.enrolled ? <Check size={16} /> : 4}</span>
+          <span><ShieldCheck size={14} /> Plan & checkout</span>
+          {intake.enrolled && <small>Enrolled</small>}
+        </li>
       </ol>
 
-      {done ? (
+      {done && intake.enrolled ? (
         <div className="cf-card cf-card--center">
           <span className="k-icon" style={{ margin: '0 auto' }}><CheckCircle2 size={26} /></span>
-          <h2>What happens next</h2>
-          <p>Your mentor will send your Payment Authorization details and your first session date. Your package: <b>{signed.coaching?.package || 'on file'}</b>.</p>
-          <p className="k-fine">Questions? Write to <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
+          <h2>You are enrolled</h2>
+          <p>Welcome to the P31 Collective. Sign in from the member portal for your classroom, your sessions and The Gathering.</p>
+          <Link to="/portal" className="k-btn k-btn--gold">Open the member portal <ArrowRight size={16} /></Link>
+        </div>
+      ) : done ? (
+        <div className="cf-card">
+          <p className="cf-stepline">Step 5 · Your program and plan</p>
+          <h2>Choose your program and plan</h2>
+          <p className="cf-sub">Monthly, billed securely by Stripe. Your agreement package is chosen for you; pick another if your mentor agreed one with you.</p>
+          {['business', 'faith'].map((prog) => {
+            const list = plans.filter((p) => p.program === prog);
+            if (!list.length) return null;
+            return (
+              <fieldset className="cf-field" key={prog}>
+                <legend>{prog === 'business' ? 'Business Coaching' : 'Private Faith Mentorship'}</legend>
+                <div className="cf-options">
+                  {list.map((p) => (
+                    <label key={p.id} className={`cf-option ${chosenId === p.id ? 'is-on' : ''}`}>
+                      <input type="radio" name="plan" value={p.id} checked={chosenId === p.id} onChange={() => { setPlan(p.id); setPlanError(''); }} />
+                      <span><b>{tierName(p)}</b><small>${(p.price_cents / 100).toFixed(0)}/month · {tierNote(p)}</small></span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            );
+          })}
+          {!plans.length && <p className="k-error">Plans are not ready yet. Please write to {CONTACT_EMAIL}.</p>}
+          {planError && <p className="k-error" role="alert">{planError}</p>}
+          <button type="button" className="k-btn k-btn--gold k-btn--lg k-btn--block" onClick={choose} disabled={going || !plans.length}>
+            {going ? <><Loader2 size={18} className="cf-spin" /> Opening checkout…</> : <><ShieldCheck size={18} /> Continue to secure checkout</>}
+          </button>
+          <p className="k-fine" style={{ textAlign: 'center' }}>Next you create your member login with <b>{intake.email}</b>, then pay on Stripe. Your enrollment is final once payment is confirmed.</p>
         </div>
       ) : (
         <form className="cf-card" onSubmit={submit}>

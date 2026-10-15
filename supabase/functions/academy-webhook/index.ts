@@ -12,6 +12,13 @@ import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { stripeFor, webhookSecrets, verifyEvent } from '../_shared/stripe.ts';
 import { storefrontEvent } from '../_shared/storefront-billing.ts';
+import { sendEmail, layout, esc } from '../_shared/email.ts';
+
+const SITE = 'https://www.thep31collective.org';
+const SESSIONS = 'https://calendly.com/purposefullydriven7/privatementorship';
+const MEMBERS = 'members@thep31collective.org';
+const teamTo = () => [...new Set([...(Deno.env.get('INTRO_NOTIFY_TO') || `${MEMBERS},founder@thep31collective.org`).split(',').map((s) => s.trim()).filter(Boolean), 'ceo@p31market.com'])];
+const money = (c: number) => `$${(c / 100).toFixed(c % 100 ? 2 : 0)}`;
 
 const GRACE_DAYS = 3; // renewals can land a little after the period ends
 const env = (k: string) => Deno.env.get(k) || '';
@@ -62,7 +69,39 @@ Deno.serve(async (req) => {
           const { data: inv } = await db.from('academy_invites').update({ used_at: now, used_by: m.user_id })
             .eq('id', m.invite_id).is('used_at', null).select('inquiry_id').maybeSingle();
           if (inv?.inquiry_id) await db.from('academy_inquiries').update({ status: 'enrolled', updated_at: now }).eq('id', inv.inquiry_id);
+          // Workflow steps 8 and 9: the intake is enrolled; confirmation, receipt and onboarding to her, a note to the team.
+          await db.from('coaching_intakes').update({ status: 'enrolled', enrolled_at: now }).eq('invite_id', m.invite_id);
         }
+        try {
+          const [{ data: prog }, { data: plan }, { data: profile }] = await Promise.all([
+            db.from('academy_programs').select('title, slug').eq('id', m.program_id).maybeSingle(),
+            db.from('academy_plans').select('label, price_cents, billing').eq('id', m.plan_id).maybeSingle(),
+            db.from('profiles').select('full_name').eq('id', m.user_id).maybeSingle(),
+          ]);
+          const email = s.customer_details?.email || '';
+          const name = profile?.full_name || s.customer_details?.name || '';
+          const first = String(name).split(' ')[0] || 'there';
+          const paid = money(s.amount_total ?? plan?.price_cents ?? 0);
+          const classroom = `${SITE}/academy/${prog?.slug || 'business'}`;
+          if (email) {
+            await sendEmail(email, `Welcome to the ${prog?.title || 'P31 Collective'}: you are enrolled`, layout('You are enrolled', `<p>Hi ${esc(first)},</p>
+<p>Your enrollment in the <b>${esc(prog?.title || 'program')}</b> is confirmed. Welcome.</p>
+<p style="margin:12px 0 4px"><b>Your plan</b></p>
+<p style="margin:0 0 12px">${esc(plan?.label || '')}<br>${paid} paid today${plan?.billing === 'month' ? ', then monthly on this date' : ''}. Stripe sends your card receipt separately.</p>
+<p style="margin:16px 0 4px"><b>Your first steps</b></p>
+<ol style="margin:6px 0 14px;padding-left:20px;line-height:1.6">
+<li><b>Open your classroom:</b> your sessions, lessons, notes and messages with your mentor live there.</li>
+<li><b>Book your first session</b> with Melanie JC on the calendar below.</li>
+<li><b>Join the community:</b> The Gathering, the members' chat, is in your portal, with your P31 Collective member benefits and P31 vendor savings.</li>
+</ol>
+<p><a href="${classroom}" style="display:inline-block;background:#3A1C36;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Open my classroom</a>&nbsp;
+<a href="${SESSIONS}" style="display:inline-block;background:#D9A93A;color:#21101E;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Book my first session</a></p>
+<p>Questions? Reply to this email or write to ${MEMBERS}.</p>`, 'thep31collective.org · The P31 Collective by NEBA', 'THE PROVERBS 31 COLLECTIVE'), MEMBERS);
+          }
+          await sendEmail(teamTo(), `New enrollment: ${name || email} (${prog?.title || 'program'}, ${plan?.label || ''})`, layout('New enrollment', `<p><b>${esc(name || email)}</b> (${esc(email)}) paid ${paid} and is enrolled in the <b>${esc(prog?.title || '')}</b>.</p>
+<p>Plan: ${esc(plan?.label || '')}</p><p>She has been sent her welcome email with the classroom link and the session calendar. Next: her first session.</p>
+<p><a href="${SITE}/academy/${prog?.slug || 'business'}/teach/agreements" style="color:#3A1C36">Open in the mentor console</a></p>`, 'thep31collective.org · The P31 Collective by NEBA', 'THE PROVERBS 31 COLLECTIVE'), email || undefined);
+        } catch (e) { console.error('academy-webhook enrollment emails', e); }
         break;
       }
 

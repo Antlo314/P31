@@ -456,15 +456,25 @@ const rpc = {
   shop_unsubscribe: () => true,
   my_product_stats: () => [{ product_id: 101, opens: 14, buys: 5, shares: 3 }, { product_id: 102, opens: 6, buys: 1, shares: 0 }],
   // Private coaching intake (v47): a sample client who has signed the first of her three forms.
-  // demo-new: nothing signed yet; demo-safety: on the last form; anything else: on the second.
+  // demo-new: nothing signed yet; demo-safety: on the last form; demo-signed: all three, choosing a plan;
+  // demo-enrolled: paid and enrolled; anything else: on the second.
   coaching_intake_details: (a) => {
     if (a.p_token === 'expired') return { expired: true };
     if (a.p_token === 'none') return null;
     const one = { signed_on: day(-1).slice(0, 10), signed_name: 'Sample Client', package: 'Option 2' };
-    const signed = a.p_token === 'demo-new' ? {} : a.p_token === 'demo-safety' ? { coaching: one, confidentiality: { signed_on: day(0).slice(0, 10), signed_name: 'Sample Client' } } : { coaching: one };
-    return { full_name: 'Sample Client', email: 'sample.client@example.com', status: 'in_progress', expired: false, program: 'Business Mentorship', packages: [{ key: 'Option 1', price_cents: 27500 }, { key: 'Option 2', price_cents: 37500 }, { key: 'Option 3', price_cents: 49500 }, { key: 'Option 4', price_cents: 65000 }], signed };
+    const two = { signed_on: day(0).slice(0, 10), signed_name: 'Sample Client' };
+    const all = a.p_token === 'demo-signed' || a.p_token === 'demo-enrolled';
+    const signed = a.p_token === 'demo-new' ? {} : a.p_token === 'demo-safety' ? { coaching: one, confidentiality: two } : all ? { coaching: one, confidentiality: two, safety: two } : { coaching: one };
+    const programs = { [BUS]: ['business', 'Business Mentorship'], [FAI]: ['faith', 'Faith-Based Mentorship'] };
+    const plans = db.academy_plans.filter((p) => p.package && p.is_active).map((p) => ({ id: p.id, program: programs[p.program_id][0], program_title: programs[p.program_id][1], package: p.package, label: p.label, price_cents: p.price_cents, billing: p.billing }));
+    return { full_name: 'Sample Client', email: 'sample.client@example.com', status: a.p_token === 'demo-enrolled' ? 'enrolled' : 'in_progress', created_at: iso(-60 * 20), expired: false, program: 'Business Mentorship', packages: [{ key: 'Option 1', price_cents: 27500 }, { key: 'Option 2', price_cents: 37500 }, { key: 'Option 3', price_cents: 49500 }, { key: 'Option 4', price_cents: 65000 }], plans, chosen_plan: null, checkout_token: null, enrolled: a.p_token === 'demo-enrolled', signed };
   },
   coaching_form_sign: () => 'demo-form',
+  coaching_choose_plan: () => 'demo',
+  // The private checkout link made after the plan choice (step 6).
+  academy_invite_details: (a) => (a.p_token === 'demo'
+    ? { program: 'faith', program_title: 'Faith-Based Mentorship', plan_label: 'Faith Mentorship: 3 sessions a month', price_cents: 23500, billing: 'month', full_name: 'Sample Client', email_hint: 's•••@example.com', used: false, expired: false, available: true }
+    : null),
   my_roles: (_a, mode) => (mode === 'student'
     ? { signed_in: true, admin: false, operator: false, curator: false, studio: false, mentor: [], student: [{ program: 'business', title: 'Business Mentorship', status: 'active', has_access: true }] }
     : mode === 'faith'
@@ -553,6 +563,7 @@ const rpc = {
 
 const fns = {
   // A shopper's order request (Cash App / Venmo shops): the order number and the total, as order-request returns them.
+  merch: (b) => (b.action === 'order' ? { status: b.ref === 'M0000000' ? 'expired' : 'paid', paid: b.ref !== 'M0000000' } : { error: 'Demo: merch checkout is off.' }),
   'order-request': (b) => ({ ok: true, ref: 'P31-1042', total: Math.round((b.items || []).reduce((n, i) => n + (db.products.find((p) => p.id === i.productId)?.price || 0) * (i.quantity || 1), 0) * 100) }),
   'eventbrite-stats': () => ({ configured: true, checked_at: iso(0), events: [{ id: 'ev1', title: 'Business and Leadership Luncheon', event_date: day(70).slice(0, 10), url: 'https://www.eventbrite.com/e/proverbs-31-business-leadership-luncheon-tickets-2002850002272', sold: 46, total: 150,
     classes: [{ name: 'General admission', sold: 38, total: 120 }, { name: 'VIP table seat', sold: 8, total: 30 }] }] }),

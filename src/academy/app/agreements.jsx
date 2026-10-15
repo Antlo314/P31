@@ -17,7 +17,7 @@ const STATUS = { sent: 'Link sent', in_progress: 'Signing', complete: 'All signe
  */
 export const IntakeModal = ({ prefill = {}, onClose, onCreated }) => {
   const { program } = useAcademy();
-  const [form, setForm] = useState({ email: prefill.email || '', full_name: prefill.full_name || '', days: 30 });
+  const [form, setForm] = useState({ email: prefill.email || '', full_name: prefill.full_name || '', days: 7 });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [link, setLink] = useState('');
@@ -45,7 +45,7 @@ export const IntakeModal = ({ prefill = {}, onClose, onCreated }) => {
     <Modal title="Send the three agreements" onClose={onClose}>
       {link ? (
         <div className="ds-form">
-          <p>Her private link is ready and has been emailed to <strong>{form.email}</strong>. It works for {form.days} days and she can return to it until all three are signed.</p>
+          <p>Her private link is ready and has been emailed to <strong>{form.email}</strong>. She is asked to finish within 48 hours; the link keeps working for {form.days} days. After the three forms she chooses her program and plan on the same page and checks out on Stripe, and her welcome email goes out once the payment is confirmed.</p>
           <div className="ds-row"><Link2 size={18} /><div><strong style={{ fontSize: '0.85rem', overflowWrap: 'anywhere' }}>{link}</strong></div></div>
           <div className="k-actions">
             <button className="k-btn k-btn--plum" onClick={copy}>{copied ? <><Check size={16} /> Copied</> : <><Copy size={16} /> Copy link</>}</button>
@@ -55,7 +55,7 @@ export const IntakeModal = ({ prefill = {}, onClose, onCreated }) => {
         </div>
       ) : (
         <form className="ds-form" onSubmit={create}>
-          <p className="ds-muted">In this order: the Business Coaching Agreement (she picks her package there), the Confidentiality Agreement, then the Client Safety &amp; Emergency Contact form. The page shows package prices only to the person with the link.</p>
+          <p className="ds-muted">In this order: the Business Coaching Agreement (she picks her package there), the Confidentiality Agreement, then the Client Safety &amp; Emergency Contact form. Then she chooses her program and plan (Business Coaching or Faith Mentorship) and pays by secure checkout. The page shows package prices only to the person with the link.</p>
           <div className="k-row">
             <label className="k-field"><span>Her email</span><input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></label>
             <label className="k-field"><span>Her name</span><input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></label>

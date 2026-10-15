@@ -465,12 +465,13 @@ FLOWS.push({
   to: (a) => [a.email],
   replyTo: () => MEMBERS_EMAIL,
   from: () => env('COLLECTIVE_EMAIL_FROM') || undefined,
-  subject: () => 'Your P31 coaching agreements: three forms to sign',
+  subject: () => 'Your P31 Collective enrollment: please complete within 48 hours',
   email: (a) => layout('Before we begin', `<p>Hi ${esc(String(a.full_name || '').split(' ')[0] || 'there')},</p>
-<p>It was a joy speaking with you. Before we begin, here is your private link to the three forms we go over with every private-coaching client, signed in order:</p>
-<ol style="margin:6px 0 14px;padding-left:20px;line-height:1.6"><li><b>Business Coaching Agreement</b> (you pick your package there)</li><li><b>Confidentiality Agreement</b></li><li><b>Client Safety &amp; Emergency Contact form</b></li></ol>
-${button(`${COLLECTIVE_SITE}/coaching/forms/${a.token}`, 'Open my forms')}
-<p style="margin-top:18px">Each takes a few minutes, and you can come back to the same link to finish later. You will receive a PDF copy of each form once you sign it. The link works until ${esc(longDate(String(a.expires_at).slice(0, 10)))}.</p>
+<p>It was a joy speaking with you, and you are approved to enroll. Here is your private enrollment link. <b>Please complete your enrollment within 48 hours.</b></p>
+<p style="margin:14px 0 6px"><b>Your setup guide</b></p>
+<ol style="margin:0 0 14px;padding-left:20px;line-height:1.6"><li>Sign the three required forms, in order: the <b>Business Coaching Agreement</b>, the <b>Confidentiality Agreement</b> and the <b>Client Safety &amp; Emergency Contact form</b>.</li><li>Choose your program (Business Coaching or Private Faith Mentorship) and your plan.</li><li>Create your member login and pay by secure Stripe checkout.</li><li>Watch for your welcome email: your classroom, session scheduling and community access.</li></ol>
+${button(`${COLLECTIVE_SITE}/coaching/forms/${a.token}`, 'Start my enrollment')}
+<p style="margin-top:18px">Each form takes a few minutes and you receive a PDF copy as you sign. Your enrollment is final once your payment is confirmed. The link works until ${esc(longDate(String(a.expires_at).slice(0, 10)))}.</p>
 <p>Questions? Reply to this email or write to ${mail(MEMBERS_EMAIL)}.</p>`, COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE'),
   sheet: () => null,
   sheetRow: (a) => ({ 'Email': a.email }),
@@ -502,7 +503,7 @@ for (const kind of COACHING_ORDER) {
         + (pkg ? tr('Package', esc(`${pkg.key} — ${pkg.name}, ${packagePrice(pkg.key, a.prices)}, ${pkg.cadence}`)) : '')
         + (kind === 'safety' ? tr('Emergency contact', text(a.answers?.emergency_contact)) + tr('Residential address', text(a.answers?.address)) + tr('Best contact number', text(a.answers?.phone)) + tr('Date of birth', a.answers?.date_of_birth ? esc(longDate(a.answers.date_of_birth)) : '') : '')
         + tr('Terms version', esc(a.terms_version)) + tr('Still to sign', left.length ? esc(left.map((k) => COACHING_LABEL[k]).join(', ')) : '<span style="color:#374126">Nothing: all three are signed</span>'),
-      ) + `<p style="margin:14px 0 0;font-size:13px;color:#74657A">The signed form is attached as a PDF.${left.length ? '' : ' Next: send her payment link from Agreements in the mentor console (it charges the package she chose), then book her first session.'}</p>`
+      ) + `<p style="margin:14px 0 0;font-size:13px;color:#74657A">The signed form is attached as a PDF.${left.length ? '' : ' Next: she chooses her program and plan on the same page and pays by secure checkout; you get an enrollment email when payment is confirmed. (If she needs help, Agreements in the mentor console can still send her a payment link.)'}</p>`
       + button(`${COLLECTIVE_SITE}/academy/business/teach/agreements`, 'Open in the mentor console'), COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE');
     },
     confirm: (a) => ({
@@ -511,7 +512,7 @@ for (const kind of COACHING_ORDER) {
       html: layout(`Your ${COACHING_LABEL[kind]}`, `<p>Hi ${esc(String(a.full_name).split(' ')[0])},</p>
 <p>Thank you. You signed the <b>${esc(COACHING_LABEL[kind])}</b> on ${esc(longDate(a.signed_on))} as <b>${esc(a.signed_name)}</b>. Your copy, with every word you agreed to, is attached as a PDF.</p>
 ${a.package ? `<p>Your package: <b>${esc(a.package)}</b>.</p>` : ''}
-${next ? `<p><b>Next:</b> the ${esc(COACHING_LABEL[next])}. ${button(`${COLLECTIVE_SITE}/coaching/forms/${a.token}`, 'Continue to the next form')}</p>` : '<p><b>That is all three.</b> Your mentor will send your Payment Authorization details and your first session date.</p>'}
+${next ? `<p><b>Next:</b> the ${esc(COACHING_LABEL[next])}. ${button(`${COLLECTIVE_SITE}/coaching/forms/${a.token}`, 'Continue to the next form')}</p>` : `<p><b>That is all three.</b> Last step: choose your program and plan, then secure checkout. ${button(`${COLLECTIVE_SITE}/coaching/forms/${a.token}`, 'Choose my plan')}</p>`}
 <p>Questions? Reply to this email or write to ${mail(MEMBERS_EMAIL)}.</p>`, COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE'),
     }),
     pdf: (a) => ({
