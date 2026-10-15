@@ -57,7 +57,8 @@ const AgreementText = ({ doc, prices }) => (
  */
 const CoachingForms = () => {
   const { token } = useParams();
-  const [intake, setIntake] = useState(undefined); // undefined loading, null not found
+  // undefined loading, null not found (no link at all: nothing to look up)
+  const [intake, setIntake] = useState(token ? undefined : null);
   const [f, setF] = useState({ full_name: '', package: '', agreed: false, signed_name: '', emergency_contact: '', address: '', phone: '', date_of_birth: '', trap: '' });
   const [sig, setSig] = useState(null);
   const [sigKey, setSigKey] = useState(0);
@@ -70,6 +71,7 @@ const CoachingForms = () => {
     if (data?.full_name) setF((x) => ({ ...x, full_name: x.full_name || data.full_name }));
   });
   useEffect(() => {
+    if (!token) return;
     supabase.rpc('coaching_intake_details', { p_token: token }).then(({ data }) => {
       setIntake(data || null);
       if (data?.full_name) setF((x) => ({ ...x, full_name: x.full_name || data.full_name }));
