@@ -28,7 +28,7 @@ export const CURATOR_TOUR = [
   {
     to: '/dashboard/storefront', targets: ['[data-tour="add-product"]'],
     title: '4. Your products',
-    body: 'Add Artifact opens the product form: start from a template, add a photo (the Photo Studio cleans the background in one tap), then name, price, description, options, a badge and a sale timer. Up to ten products.',
+    body: 'Add product opens the product form: start from a template, add a photo (the Photo Studio cleans the background in one tap), then name, price, description, options, a badge and a sale timer. Up to ten products.',
   },
   {
     to: '/dashboard/design', targets: ['[data-tour="templates"]', '.sd-templates'],

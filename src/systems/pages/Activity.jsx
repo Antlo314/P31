@@ -30,7 +30,7 @@ const show = (v) => {
   return String(v).length > 60 ? `${String(v).slice(0, 60)}…` : String(v);
 };
 
-/** One line in plain words: "Melanie JC paused Sample Bakery Co." */
+/** One line in plain words: "Melanie JC paused Myrrh & Mercy Apothecary." */
 const describe = (r) => {
   const who = r.actor_name || r.actor_email || 'Someone';
   const [, noun] = AREA[r.area] || ['', r.area.replace(/_/g, ' ')];

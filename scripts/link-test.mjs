@@ -17,7 +17,7 @@ const CHROME = process.env.CHROME_PATH || [
 
 // Where to start: the public pages of both sites plus every dashboard, as an admin.
 const starts = [
-  ...['/', '/about', '/calendar', '/directory', '/partner', '/apply', '/vendors', '/vendors/agreement', '/vendors/register', '/vendors/feedback', '/volunteer', '/services', '/login', '/shop', '/sample-bakery', '/dashboard/identity', '/dashboard/governance', '/gather']
+  ...['/', '/about', '/calendar', '/directory', '/partner', '/apply', '/vendors', '/vendors/agreement', '/vendors/register', '/vendors/feedback', '/volunteer', '/services', '/login', '/shop', '/myrrh-and-mercy', '/dashboard/identity', '/dashboard/governance', '/gather']
     .map((p) => ['market', p]),
   ...['/', '/academy', '/join', '/mentorship', '/mentorship/business', '/mentorship/faith', '/verify', '/portal?choose', '/today', '/systems', '/systems/shops', '/systems/team', '/systems/walkthroughs', '/systems/walkthroughs?tab=tests', '/systems/academy', '/studio', '/academy/business/teach', '/academy/business', '/gather/the-gathering']
     .map((p) => ['collective', p]),

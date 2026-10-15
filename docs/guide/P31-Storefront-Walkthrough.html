@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The virtual storefront, step by step</title>
+<style>
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; src: url(../../public/fonts/NotoSerif-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; font-style: italic; src: url(../../public/fonts/NotoSerif-400-italic.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 400; src: url(../../public/fonts/Manrope-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 600; src: url(../../public/fonts/Manrope-600.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 800; src: url(../../public/fonts/Manrope-800.woff2) format('woff2'); }
+  :root {
+    --plum: #3A1C36; --plum-3: #21101E; --thistle: #E3D0EA; --thistle-3: #F8F3FA;
+    --amethyst: #9B71B2; --gold: #D9A93A; --gold-2: #F2CE4D; --green: #374126;
+    --ink: #2A1526; --ink-2: #4E3A4B; --dim: #74657A; --line: #E3D0EA;
+  }
+  @page { size: Letter; margin: 0.7in 0.7in 0.75in; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: Manrope, sans-serif; font-size: 10pt; line-height: 1.55; color: var(--ink); background: #fff; }
+  h1, h2, h3 { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; color: var(--plum); }
+  h1 { font-size: 26pt; line-height: 1.12; margin: 0 0 10px; }
+  h2 { font-size: 13.5pt; margin: 16px 0 6px; break-after: avoid; }
+  h3 { font-size: 11pt; margin: 10px 0 4px; break-after: avoid; }
+  p { margin: 0 0 7px; }
+  ul, ol { margin: 4px 0 9px; padding-left: 18px; }
+  li { margin: 2px 0; }
+  code, pre { font-family: Consolas, 'Courier New', monospace; }
+  code { font-size: 7.8pt; background: var(--thistle-3); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; word-break: break-all; }
+  pre { font-size: 8pt; background: var(--plum-3); color: #f7f1fc; border-radius: 8px; padding: 9px 12px; white-space: pre-wrap; word-break: break-all; margin: 5px 0 9px; }
+  strong, b { font-weight: 800; }
+  em { font-family: 'Noto Serif', Georgia, serif; font-style: italic; }
+  .eyebrow { font-size: 8pt; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+  .lead { font-size: 11pt; color: var(--ink-2); }
+  .muted { color: var(--dim); }
+  .small { font-size: 8.4pt; }
+
+  .part { margin-top: 22px; }
+  .part-head + * { break-before: avoid; }
+  .cover + .part, .part.page { break-before: page; margin-top: 0; }
+  .part-head { background: var(--plum); color: #fff; border-radius: 16px; padding: 16px 22px; margin: 0 0 12px; position: relative; overflow: hidden; break-inside: avoid; break-after: avoid; }
+  .part-head::after { content: ''; position: absolute; right: -40px; bottom: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(242, 206, 77, 0.28), transparent 70%); }
+  .part-head .eyebrow { color: var(--gold-2); }
+  .part-head h1 { color: #fff; margin: 0 0 4px; font-size: 19pt; }
+  .part-head p { color: rgba(255, 255, 255, 0.84); margin: 0; max-width: 92%; }
+
+  .cover { height: 9.4in; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(70% 50% at 100% 0%, rgba(155, 113, 178, 0.35), transparent 70%), radial-gradient(60% 45% at 0% 100%, rgba(242, 206, 77, 0.18), transparent 70%), var(--plum-3); color: #fff; border-radius: 22px; padding: 46px 44px; position: relative; overflow: hidden; }
+  .cover img.mark { width: 92px; height: 92px; }
+  .cover h1 { color: #fff; font-size: 31pt; line-height: 1.08; margin: 18px 0 12px; max-width: 3.9in; }
+  .cover h1 em { color: var(--gold-2); }
+  .cover .lead { color: rgba(255, 255, 255, 0.86); font-size: 12pt; max-width: 5.8in; }
+  .cover .shot-hero { position: absolute; right: 40px; top: 46px; width: 2.05in; border-radius: 14px; border: 2px solid rgba(242, 206, 77, 0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  .cover .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 30px; font-size: 9.3pt; color: rgba(255, 255, 255, 0.86); }
+  .cover .meta b { display: block; color: var(--gold-2); font-size: 7.6pt; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 3px; }
+  .cover .meta code { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); color: #fff; }
+
+  .note { border-left: 4px solid var(--gold); background: rgba(242, 206, 77, 0.1); border-radius: 0 10px 10px 0; padding: 9px 13px; margin: 8px 0 12px; break-inside: avoid; font-size: 9.2pt; }
+  .note.plum { border-color: var(--amethyst); background: var(--thistle-3); }
+  .note.red { border-color: #b04a4a; background: rgba(176, 74, 74, 0.07); }
+  .note p:last-child, .note ul:last-child { margin-bottom: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 8.6pt; }
+  th { text-align: left; font-size: 7.2pt; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: var(--plum); padding: 6px 8px; }
+  td { border-bottom: 1px solid var(--line); padding: 5px 8px; vertical-align: top; }
+  tr { break-inside: avoid; }
+  tr:nth-child(even) td { background: var(--thistle-3); }
+  .pill { display: inline-block; font-size: 6.8pt; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+  .ok { background: rgba(55, 65, 38, 0.12); color: var(--green); border: 1px solid rgba(55, 65, 38, 0.35); }
+  .new { background: rgba(155, 113, 178, 0.14); color: #6d4a82; border: 1px solid rgba(155, 113, 178, 0.4); }
+  .wait { background: rgba(217, 169, 58, 0.14); color: #7a5c12; border: 1px solid rgba(217, 169, 58, 0.55); }
+  .you { background: rgba(176, 74, 74, 0.08); color: #9a2f2f; border: 1px solid rgba(176, 74, 74, 0.35); }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; }
+  .four { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-items: start; }
+  .shot { display: block; width: 100%; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 5px 16px rgba(58, 28, 54, 0.12); }
+  .phone img.shot { max-height: 3.4in; object-fit: cover; object-position: top; }
+  figure { margin: 0 0 6px; break-inside: avoid; }
+  figcaption { font-size: 7.9pt; color: var(--dim); margin-top: 4px; line-height: 1.35; }
+  .step { display: grid; grid-template-columns: 26px 1fr; gap: 10px; break-inside: avoid; margin: 10px 0 4px; }
+  .step > b { width: 24px; height: 24px; border-radius: 50%; background: var(--plum); color: #fff; font-size: 9pt; display: grid; place-items: center; }
+  .step h3 { margin: 2px 0 2px; }
+  .step p { margin: 0; color: var(--ink-2); }
+  .steps { counter-reset: s; list-style: none; padding-left: 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 28px; margin: 7px 0; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 19px; height: 19px; border-radius: 50%; background: var(--plum); color: #fff; font-size: 8pt; font-weight: 800; display: grid; place-items: center; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <img class="shot-hero" src="storefront/s6-product.png" alt="">
+  <div>
+    <img class="mark" src="../../marketing/brand/market/p31-market-mark-transparent.png" alt="" style="width:auto;height:92px">
+    <p class="eyebrow" style="color: var(--gold-2); margin-top: 26px;">Proverbs 31 Marketplace · Virtual storefronts</p>
+    <h1>The virtual storefront, <em>step by step</em></h1>
+    <p class="lead" style="max-width: 3.9in">Every step a vendor takes from “I’d like a shop” to her first order, and every step a shopper takes from the directory to paying her. Shown on a finished sample shop, with a ready check of what works today and what waits for Stripe.</p>
+  </div>
+  <div class="meta">
+    <div><b>The sample shop</b>Myrrh &amp; Mercy Apothecary: made up for this walkthrough, dressed with photos from the P31 library. Seven products, three reviews, every label a shop can show.</div>
+    <div><b>See it yourself</b>While the preview runs on this computer:<br><code>localhost:5180/myrrh-and-mercy?site=market&amp;demo=admin</code></div>
+    <div><b>Ready today</b>Agreement, approval, the vendor’s studio, the directory, the bag, order requests, Cash App and Venmo.</div>
+    <div><b>Waits for Stripe</b>Card checkout on the site, and the $14.99 a month after the free months.</div>
+  </div>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Ready check · October 15, 2026</p>
+    <h1>What works, what changed today, what waits</h1>
+    <p>I walked both paths on the sample shop and fixed what got in the way. Items marked <i>Fixed today</i> go live when you run v48, deploy and merge (last page).</p>
+  </div>
+  <table>
+    <tr><th style="width:30%">Piece</th><th style="width:13%">Status</th><th>Notes</th></tr>
+    <tr><td>Storefront page and agreement<br><span class="muted small">p31market.com/storefront</span></td><td><span class="pill ok">Ready</span></td><td>She reads the terms, signs, and gets a PDF copy. The team and ceo@ get the same PDF.</td></tr>
+    <tr><td>Approval and account link<br><span class="muted small">Systems → Vendor forms</span></td><td><span class="pill ok">Ready</span></td><td>One button pre-approves her email and sends the link to create her account. Pre-approved vendors open straight away.</td></tr>
+    <tr><td>The vendor’s studio</td><td><span class="pill ok">Ready</span><br><span class="pill new">Fixed today</span></td><td>Set-up checklist, shop details, up to 10 products with photos and options, six looks, marketing kit, orders, discounts. <b>Fixed:</b> cramped text boxes, a status card that still said “June Marketplace”, a dead placeholder image, and dated words (“sanctuary”, “artifact”).</td></tr>
+    <tr><td>Email to the team when a shop signs up</td><td><span class="pill new">Fixed today</span></td><td>Before today nobody was told; new shops only showed on the Today page. Now the market team and ceo@ get an email with a link to Systems → Shops.</td></tr>
+    <tr><td>“Your shop is live” email to the vendor</td><td><span class="pill new">Fixed today</span></td><td>Sent the moment a shop is approved, with her link and three tips. It never existed before.</td></tr>
+    <tr><td>Directory shows only shops with products</td><td><span class="pill new">Fixed today</span></td><td>An approved shop with nothing to buy no longer appears as an empty card. Her own link still works.</td></tr>
+    <tr><td>Watchdog: shops waiting for review</td><td><span class="pill new">Fixed today</span></td><td>A shop with products that has waited more than two days for a yes now shows on the watchdog.</td></tr>
+    <tr><td>Shoppers: browse, bag, order request</td><td><span class="pill ok">Ready</span><br><span class="pill new">Fixed today</span></td><td>The shop and the shopper are both emailed and the order lands in her studio. <b>Fixed:</b> after sending, the bag went blank, so the shopper never saw her order number or the Cash App and Venmo buttons. Now they stay on screen.</td></tr>
+    <tr><td>Paying by Cash App, Venmo or her own link</td><td><span class="pill ok">Ready</span></td><td>Shown on her shop and on the order confirmation, with the order number to include.</td></tr>
+    <tr><td>Card checkout on the site</td><td><span class="pill wait">Needs Stripe</span></td><td>Stripe keys and webhooks, then two more functions deployed and card payments switched on for the site.</td></tr>
+    <tr><td>$14.99 a month after 3 free months</td><td><span class="pill wait">Needs Stripe</span></td><td>No shop is billed until you start it in Systems → Shops, so nothing can charge early.</td></tr>
+    <tr><td>The 5% fee on each sale</td><td><span class="pill you">Your call</span></td><td>The agreement says P31 keeps 5% of each sale. The site can only take it on card checkout. Cash App and Venmo payments go straight to her, so for now the 5% would be invoiced by hand.</td></tr>
+  </table>
+
+  <div class="note red">
+    <p><b>On the live site right now</b></p>
+    <ul>
+      <li><b>Four shops are waiting, and none has a product:</b> <i>TEST</i> and <i>Lumen</i> (they look like test accounts, so delete them in Systems → Shops), <i>Incandescent Lily Collection</i> (signed up May 4) and <i>Discounts Buddy</i> (October 11). It is worth a personal note to the last two.</li>
+      <li><b>Four pre-approved emails never created an account</b> (approved May 4 and June 21). Resend their link from Systems → Vendor forms, or reach out.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">The vendor’s path · 1 to 4</p>
+    <h1>From “I’d like a shop” to her studio</h1>
+    <p>About ten minutes for her, and one button for the team.</p>
+  </div>
+  <div class="two">
+    <figure><img class="shot" src="storefront/v1-storefront-page.png" alt=""><figcaption><b>1 · The storefront page</b> (p31market.com/storefront): what she gets, the terms, and two doors: vend at a market or open a virtual storefront.</figcaption></figure>
+    <figure><img class="shot" src="storefront/v2-sign.png" alt=""><figcaption><b>2 · The agreement</b>: she reads it, gives her business details and signs with her finger or mouse. She is emailed a PDF copy.</figcaption></figure>
+  </div>
+  <div class="two">
+    <figure><img class="shot" src="storefront/v3-systems-agreement.png" alt=""><figcaption><b>3 · The team approves</b> in Systems → Vendor forms: <b>Pre-approve &amp; email the account link</b>. The counts show who is waiting for a link, who has one, and who is live.</figcaption></figure>
+    <figure><img class="shot" src="storefront/v4-checklist.png" alt=""><figcaption><b>4 · Her studio</b> (p31market.com/dashboard): she creates her account with the same email, and the set-up checklist ticks itself as she goes. A two-minute walkthrough is one tap away.</figcaption></figure>
+  </div>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">The vendor’s path · 5 to 8</p>
+    <h1>Building the shop</h1>
+    <p>Everything a shopper sees comes from these four screens.</p>
+  </div>
+  <div class="two">
+    <figure><img class="shot" src="storefront/v5-identity.png" alt=""><figcaption><b>5 · Shop details</b>: name, shop link, tagline and story (the AI can draft both), location, phone, email and social links.</figcaption></figure>
+    <figure><img class="shot" src="storefront/v6-products.png" alt=""><figcaption><b>6 · Products</b>: up to 10, each with up to 10 photos. Hide, feature, reorder or mark sold out.</figcaption></figure>
+  </div>
+  <div class="three">
+    <figure><img class="shot" src="storefront/v7-add-product.png" alt=""><figcaption><b>Add product</b>: start from a template, then price, sale price and end date, stock, category, options (size, scent, chain) and tags.</figcaption></figure>
+    <figure><img class="shot" src="storefront/v8-paid.png" alt=""><figcaption><b>7 · Getting paid</b>: Cash App, Venmo, a Stripe payment link or any other link. These show on her shop and on every order confirmation.</figcaption></figure>
+    <figure><img class="shot" src="storefront/v9-design.png" alt=""><figcaption><b>8 · The look</b>: six templates (Atelier, Boutique, Gallery, Editorial, Market, Noir Luxe), then colours, fonts, layout and sections, with a live preview.</figcaption></figure>
+  </div>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">The vendor’s path · 9 and after</p>
+    <h1>Going live, and running the shop</h1>
+    <p>One yes from the team, then her studio does the day-to-day.</p>
+  </div>
+  <div class="step"><b>9</b><div><h3>The team says yes</h3><p>Systems → <b>Curators &amp; shops</b>: open her shop, look it over, press <b>Approved</b> (or <b>Needs changes</b> with a note). From today she is emailed “Your shop is live” at that moment. Feature her in the directory, give badges, extend her free period, or pause the shop from the same panel.</p></div></div>
+  <figure style="margin-top:6px"><img class="shot" src="storefront/v13-systems-shop.png" alt=""><figcaption>Systems → Curators &amp; shops with the sample shop open: status, billing, badges and switches.</figcaption></figure>
+  <div class="three" style="margin-top:8px">
+    <figure><img class="shot" src="storefront/v10-marketing.png" alt=""><figcaption><b>Marketing</b>: pick a product and get its link, a promo image, captions, a table sign and an email to her followers.</figcaption></figure>
+    <figure><img class="shot" src="storefront/v11-orders.png" alt=""><figcaption><b>Orders</b>: every request in one place: confirm, mark paid and fulfilled, or cancel. The shopper is emailed at each step.</figcaption></figure>
+    <figure><img class="shot" src="storefront/v12-billing.png" alt=""><figcaption><b>Plan &amp; billing</b>: her free period, the terms she signed and (once Stripe is on) her $14.99 subscription.</figcaption></figure>
+  </div>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">The shopper’s path</p>
+    <h1>From the directory to paying her</h1>
+    <p>Every shop is reachable three ways: the Curators &amp; shops directory, the Shop marketplace, and her own link.</p>
+  </div>
+  <div class="two">
+    <figure><img class="shot" src="storefront/s1-directory.png" alt=""><figcaption><b>Curators &amp; shops</b>: featured and founding shops first; searchable by name, maker or city.</figcaption></figure>
+    <figure><img class="shot" src="storefront/s2-marketplace.png" alt=""><figcaption><b>Shop</b>: every product from every live shop, by category, with favourites and an in-stock filter.</figcaption></figure>
+  </div>
+  <figure><img class="shot" src="storefront/s3-store.png" alt=""><figcaption><b>Her shop</b>: banner, logo, tagline, badges (Featured, Founding Artisan, Handmade, Woman-owned, city), the share button and her announcement bar.</figcaption></figure>
+  <div class="two">
+    <figure><img class="shot" src="storefront/s4-store-products.png" alt=""><figcaption>Her story and how to pay, then her products by category, each with its label: Sale with a countdown, New, Pre-order, Limited, Only a few left, Sold out.</figcaption></figure>
+    <figure><img class="shot" src="storefront/s5-reviews.png" alt=""><figcaption>Reviews, a follow box (shoppers get her new pieces and sales by email), and her contact links.</figcaption></figure>
+  </div>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">The shopper’s path · on a phone</p>
+    <h1>Choose, bag, request, pay</h1>
+    <p>Most shoppers will do this on a phone. One bag holds items from several shops; each shop gets its own request.</p>
+  </div>
+  <div class="four phone">
+    <figure><img class="shot" src="storefront/s6-product.png" alt=""><figcaption><b>The product</b>: photos, price and sale, options, quantity, favourite, share, and Add to bag.</figcaption></figure>
+    <figure><img class="shot" src="storefront/s7-bag.png" alt=""><figcaption><b>The bag</b>: her choices, a discount code box and the total.</figcaption></figure>
+    <figure><img class="shot" src="storefront/s8-request.png" alt=""><figcaption><b>The request</b>: name, email, phone, and pick-up at the next market, local pick-up or shipping.</figcaption></figure>
+    <figure><img class="shot" src="storefront/s9-sent.png" alt=""><figcaption><b>Sent</b>: her order number and the shop’s Cash App and Venmo buttons, with the amount. (Fixed today: this used to vanish.)</figcaption></figure>
+  </div>
+  <div class="note plum">
+    <p><b>What happens behind the request</b></p>
+    <ul>
+      <li>The order is saved in the vendor’s studio under <b>Orders</b>, and in Systems → Orders for the team.</li>
+      <li>The shopper is emailed “Your order request with … (#P31-…)” with how to pay. The vendor is emailed the order with the shopper’s details.</li>
+      <li>The vendor confirms, marks it paid and fulfilled, and the shopper is emailed at each step.</li>
+      <li>Once Stripe is on, shops that connect it also get <b>Pay by card</b> in the bag, and the request stays as the other way to pay.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Your turn</p>
+    <h1>Switch on today’s fixes, then decide</h1>
+    <p>The same three steps as always, then a few calls that are yours.</p>
+  </div>
+  <ol class="steps">
+    <li><b>Run the database update (v48)</b> from the project folder:<pre>npx supabase db query --linked --project-ref xsnhxjttdizljaawpumz -f storefront_v48_shop_emails.sql</pre>It answers with one row: signup_column true, live_column true.</li>
+    <li><b>Deploy the two functions</b> that send the shop emails and run the watchdog:<pre>npx supabase functions deploy join-notify watchdog --no-verify-jwt --use-api --project-ref xsnhxjttdizljaawpumz</pre></li>
+    <li><b>Put the site live</b>: tell Claude “merge it”. This also takes the coaching forms and the content autopilot live, which are waiting on the same branch.</li>
+  </ol>
+
+  <h2>Calls that are yours</h2>
+  <table>
+    <tr><th style="width:34%">Decision</th><th>Why it matters</th></tr>
+    <tr><td>The 5% fee on Cash App and Venmo sales</td><td>The agreement promises it, but the site can only take it on card checkout. Invoice it monthly by hand, waive it until Stripe is on, or ask shops to connect Stripe.</td></tr>
+    <tr><td>The four shops waiting on the live site</td><td>Delete <i>TEST</i> and <i>Lumen</i> if they are yours. Reach out to <i>Incandescent Lily Collection</i> and <i>Discounts Buddy</i> to finish setting up.</td></tr>
+    <tr><td>The four pre-approved emails with no account</td><td>Resend their links from Systems → Vendor forms. Their free months start only once they are live.</td></tr>
+    <tr><td>The sample shop</td><td>It lives only on this computer’s preview and never on the live site. Tell me a different name, products, photos or look, and I will update it.</td></tr>
+  </table>
+
+  <p class="small muted" style="margin-top:10px"><b>Optional next:</b> a short “How to set up your shop” PDF for vendors from these screenshots, to attach to the account-link email; proper product photos for the sample shop if you want it as a social showcase; a last wording pass in the studio’s older admin corners.</p>
+</section>
+
+</body>
+</html>

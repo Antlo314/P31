@@ -27,7 +27,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 type Row = Record<string, any>;
 type Problem = { key: string; severity: 'warn' | 'fail'; area: string; title: string; detail?: string; fix?: string; link?: string; meta?: Row };
 
-const LATEST_DB = 47; // the newest storefront_vNN.sql in the repo
+const LATEST_DB = 48; // the newest storefront_vNN.sql in the repo
 const SYSTEMS = 'https://www.thep31collective.org/systems';
 const STUDIO = 'https://www.thep31collective.org/studio';
 const ZERNIO = 'https://zernio.com/api/v1';
@@ -155,6 +155,13 @@ async function checkForms(db: any, healed: string[]): Promise<Problem[]> {
     if (['vendor_feedback', 'volunteer_signups', 'coaching_intakes', 'coaching_forms'].includes(t)) continue;
     const { count, error } = await db.from(t).select('id', { count: 'exact', head: true }).eq('status', 'new').lte('created_at', old);
     if (!error && count) out.push({ key: `forms.waiting.${t}`, severity: 'warn', area: 'forms', title: `${plural(count, label.replace(/s$/, ''), label)} waiting more than 2 days`, fix: 'Open them and approve, decline or reply; the person is waiting to hear back.', link });
+  }
+  // Shops that have products and have waited more than two days for a yes (empty sign-ups are left alone).
+  const { data: inReview } = await db.from('curator_data').select('id, business_name').eq('status', 'pending').lte('created_at', old).limit(100);
+  if (inReview?.length) {
+    const { data: stocked } = await db.from('products').select('curator_id').in('curator_id', inReview.map((s: { id: string }) => s.id));
+    const ready = inReview.filter((s: { id: string }) => (stocked || []).some((p: { curator_id: string }) => p.curator_id === s.id));
+    if (ready.length) out.push({ key: 'shops.waiting', severity: 'warn', area: 'forms', title: `${plural(ready.length, 'shop')} waiting for review`, detail: `${ready.slice(0, 3).map((s: { business_name: string }) => s.business_name).join(', ')}${ready.length > 3 ? ' and more' : ''} added products and are waiting to go live.`, fix: 'Systems > Shops: open each one and approve it, or choose Needs changes with a note.', link: `${SYSTEMS}/shops` });
   }
   return out;
 }

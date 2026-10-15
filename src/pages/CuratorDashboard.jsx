@@ -706,7 +706,7 @@ const CuratorDashboard = () => {
     // 1. Client-side Validation (Supabase Free Tier Optimization)
     const MAX_SIZE = 5 * 1024 * 1024; // 5MB
     if (file.size > MAX_SIZE) {
-      alert('Artifact portraits must be under 5MB to maintain sanctuary performance.');
+      alert('Photos must be under 5 MB. Try a smaller one, or tidy it up in the Photo Studio first.');
       return;
     }
 
@@ -805,7 +805,7 @@ const CuratorDashboard = () => {
     try {
       await supabase.from('curator_data').update({ status: 'pending' }).eq('id', user.id);
       await fetchUserData(user.id);
-      alert('Sanctuary submitted for architectural review.');
+      alert('Thank you! Your shop is with the P31 team for review. You will get an email as soon as it is live.');
     } catch (err) {
       alert('Error: ' + err.message);
     }
@@ -987,7 +987,7 @@ const CuratorDashboard = () => {
             <div className="dashboard-view">
             <header className="dashboard-header">
               <h1 className="font-headline text-primary">Curator <span className="text-gold">Studio</span></h1>
-              <p>Welcome back, {profile?.full_name}. Refine your sanctuary’s professional presence.</p>
+              <p>Welcome back, {profile?.full_name}. Everything for your shop, in one place.</p>
             </header>
 
             {!isAdmin && <BillingBanner curator={curatorData} />}
@@ -1023,16 +1023,16 @@ const CuratorDashboard = () => {
             <div className="dashboard-grid">
               <section className="dashboard-card glass-card">
                 <h2 className="card-title text-gold">
-                  <User size={20} /> Professional Identity
+                  <User size={20} /> Your shop details
                   <HelpTip title="Setting Up Your Identity">
                     <p>This page is your shop's "front door." Here's what each part means:</p>
                     <ol>
                       <li><strong>Business Name</strong> — the name customers see at the top of your shop.</li>
-                      <li><strong>Vanity URL</strong> — your shop's web address. If you type <strong>luxe-candles</strong>, your shop lives at <strong>p31market.com/luxe-candles</strong>. Share this link anywhere!</li>
+                      <li><strong>Shop link</strong> — your shop's web address. If you type <strong>luxe-candles</strong>, your shop lives at <strong>p31market.com/luxe-candles</strong>. Share this link anywhere!</li>
                       <li><strong>Tagline & Story</strong> — one catchy sentence, then a short paragraph about you. Write like you're talking to a customer at your booth.</li>
                       <li><strong>Photo</strong> — click the round photo circle to upload a picture of yourself or your logo.</li>
                     </ol>
-                    <p className="helptip-note">Don't overthink it — you can change everything later. Click <strong>Save Sanctuary Settings</strong> when you're done.</p>
+                    <p className="helptip-note">Don't overthink it — you can change everything later. Click <strong>Save shop details</strong> when you're done.</p>
                   </HelpTip>
                 </h2>
 
@@ -1047,7 +1047,7 @@ const CuratorDashboard = () => {
                   <input type="file" id="avatar-input" hidden accept="image/*" onChange={handleImageUpload} />
                   <div className="avatar-meta">
                     <h4 className="text-primary font-bold">{profile?.full_name}</h4>
-                    <p className="text-xs opacity-60">Architect of {editData.businessName || 'New Sanctuary'}</p>
+                    <p className="text-xs opacity-60">Owner of {editData.businessName || 'your new shop'}</p>
                   </div>
                 </div>
                 
@@ -1063,7 +1063,7 @@ const CuratorDashboard = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Vanity URL (p31market.com/your-slug)</label>
+                    <label>Shop link (p31market.com/your-shop)</label>
                      <div className="input-with-prefix">
                        <span className="url-prefix text-olive">p31market.com/</span>
                        <input 
@@ -1086,7 +1086,7 @@ const CuratorDashboard = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Professional Custom Title</label>
+                    <label>Your title (optional)</label>
                     <input 
                       type="text" 
                       placeholder="e.g. Master Artisan, Lead Curator" 
@@ -1097,7 +1097,7 @@ const CuratorDashboard = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Sanctuary Tagline</label>
+                    <label>Tagline</label>
                     <input 
                       type="text" 
                       value={editData.tagline}
@@ -1109,7 +1109,7 @@ const CuratorDashboard = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>The Story (Bio)</label>
+                    <label>Your story</label>
                     <textarea 
                       rows="4" 
                       value={editData.bio}
@@ -1122,7 +1122,7 @@ const CuratorDashboard = () => {
 
                   <div className="form-row-grid">
                     <div className="form-group">
-                      <label><MapPin size={14} /> Studio Location</label>
+                      <label><MapPin size={14} /> Location</label>
                       <input 
                         type="text" 
                         placeholder="City, State"
@@ -1131,7 +1131,7 @@ const CuratorDashboard = () => {
                       />
                     </div>
                     <div className="form-group">
-                      <label><Phone size={14} /> Concierge Phone</label>
+                      <label><Phone size={14} /> Phone (shown on your shop)</label>
                       <input 
                         type="text" 
                         placeholder="(000) 000-0000"
@@ -1142,7 +1142,7 @@ const CuratorDashboard = () => {
                   </div>
 
                   <div className="form-group">
-                    <label><Mail size={14} /> Business Concierge Email</label>
+                    <label><Mail size={14} /> Email for customers</label>
                     <input 
                       type="email" 
                       placeholder="concierge@yourbrand.com"
@@ -1151,7 +1151,7 @@ const CuratorDashboard = () => {
                     />
                   </div>
 
-                  <div className="form-divider-label">Connectivity (Icons)</div>
+                  <div className="form-divider-label">Social links</div>
 
                   <div className="form-row-grid">
                     <div className="form-group">
@@ -1188,11 +1188,11 @@ const CuratorDashboard = () => {
                   </div>
 
                 <div className="form-divider-label">
-                  <Sparkles size={16} /> Sanctuary Atmosphere & Themes
+                  <Sparkles size={16} /> Theme and announcement
                 </div>
 
                 <div className="form-group">
-                  <label>Shop Theme Aesthetic</label>
+                  <label>Theme</label>
                   <select 
                     value={editData.themePreference}
                     onChange={(e) => setEditData({...editData, themePreference: e.target.value})}
@@ -1205,7 +1205,7 @@ const CuratorDashboard = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Global Shop Announcement</label>
+                  <label>Shop announcement</label>
                   <input 
                     type="text" 
                     placeholder="e.g. Free shipping on orders over $100!" 
@@ -1216,7 +1216,7 @@ const CuratorDashboard = () => {
                 </div>
 
                 <button type="submit" className="btn-solid-gold mt-8" disabled={formLoading}>
-                  {formLoading ? 'Synchronizing...' : 'Save Sanctuary Settings'}
+                  {formLoading ? 'Saving…' : 'Save shop details'}
                 </button>
                   
                   {editData.slug && (
@@ -1248,28 +1248,28 @@ const CuratorDashboard = () => {
                   <div className="status-indicator">
                     <span className={`status-dot ${curatorData?.status === 'approved' ? 'active' : ''}`}></span>
                     <span className="status-text">{
-                      curatorData?.status === 'approved' ? 'Market Approved' : 
-                      curatorData?.status === 'pending' ? 'Reviewing' : 
-                      curatorData?.status === 'rejected' ? 'Fix Requested' :
-                      curatorData?.status === 'paused' ? 'Paused' : 'Draft Mode'
+                      curatorData?.status === 'approved' ? 'Live' : 
+                      curatorData?.status === 'pending' ? 'In review' : 
+                      curatorData?.status === 'rejected' ? 'Changes requested' :
+                      curatorData?.status === 'paused' ? 'Paused' : 'Draft'
                     }</span>
                   </div>
                   <p className="status-sub">
                     {curatorData?.status === 'approved' 
-                      ? "Your sanctuary is approved for the June Marketplace." 
+                      ? `Your shop is live at p31market.com/${curatorData?.slug || 'your-shop'}.${products.length ? '' : ' It shows in the directory once you list your first product.'}` 
                       : curatorData?.status === 'pending'
-                      ? "Your artifacts are currently under architectural review."
+                      ? "The P31 team is reviewing your shop. You will get an email as soon as it is live."
                       : curatorData?.status === 'rejected'
-                      ? "Adjustments required. See guidance below."
+                      ? "The team asked for a few changes. See their note below, then resubmit."
                       : curatorData?.status === 'paused'
                       ? "Your storefront is paused and hidden from the marketplace for now. Your products and settings are kept."
-                      : "Refine your boutique to request market placement."}
+                      : "Finish the checklist, then submit your shop for review."}
                   </p>
 
                   {curatorData?.status === 'rejected' && curatorData?.admin_feedback && (
                     <div className="admin-feedback-box glass-border mt-4 p-4" style={{borderColor: 'rgba(255, 75, 75, 0.3)', background: 'rgba(255, 75, 75, 0.03)'}}>
                        <div className="flex items-center gap-2 text-red-500 font-bold text-xs uppercase mb-2">
-                         <ShieldAlert size={14} /> Architect's Guidance
+                         <ShieldAlert size={14} /> Note from the P31 team
                        </div>
                        <p className="text-sm italic opacity-80" style={{color: 'var(--on-surface)'}}>
                          "{curatorData.admin_feedback}"
@@ -1292,13 +1292,13 @@ const CuratorDashboard = () => {
                       className={`btn-solid-gold w-full mt-2 ${(products.length < 1 || !editData.businessName) ? 'opacity-40 cursor-not-allowed' : ''}`}
                       disabled={products.length < 1 || !editData.businessName}
                     >
-                      {curatorData?.status === 'rejected' ? 'Resubmit Sanctuary' : 'Submit for Review'}
+                      {curatorData?.status === 'rejected' ? 'Resubmit my shop' : 'Submit my shop for review'}
                     </button>
                   )}
                   <div className="divider-thistle mt-4"></div>
                   {(curatorData?.is_early_bird || isAdmin) && (
                     <div className="early-bird-badge botanical-badge">
-                      <Leaf size={12} /> {isAdmin ? 'Foundation Founder' : 'June Early Bird • Free Store'}
+                      <Leaf size={12} /> {isAdmin ? 'Foundation Founder' : 'Founding Artisan · free storefront'}
                     </div>
                   )}
                 </section>
@@ -1392,7 +1392,7 @@ const CuratorDashboard = () => {
                           includeMargin={true}
                         />
                       ) : (
-                        <div className="flex-center h-48 w-48 text-gray-400 italic">Establish a Vanity URL first</div>
+                        <div className="flex-center h-48 w-48 text-gray-400 italic">Add your shop link first</div>
                       )}
                     </div>
                     <div className="text-center">
@@ -1438,15 +1438,15 @@ const CuratorDashboard = () => {
                   Marketplace <span className="text-gold">Studio</span>
                   <HelpTip title="Adding Your Products">
                     <ol>
-                      <li>Click the gold <strong>Add Artifact</strong> button (top right).</li>
+                      <li>Click the gold <strong>Add product</strong> button (top right).</li>
                       <li>Tap the photo circle to upload a picture. <strong>Photo tip:</strong> natural daylight near a window, plain background, product in the middle. Phone photos are perfectly fine!</li>
                       <li>Fill in the name, price, and a short description — mention what it is, what it's made of, and why customers love it.</li>
-                      <li>Pick a category and availability, then press <strong>Save Artifact</strong>.</li>
+                      <li>Pick a category and availability, then press <strong>Save product</strong>.</li>
                     </ol>
                     <p className="helptip-note">You can add up to 10 products. To edit one later, click the small gear icon on its card. Use <strong>View Store</strong> to see exactly what customers see.</p>
                   </HelpTip>
                 </h1>
-                <p>Curate your botanical collection and shop aesthetics.</p>
+                <p>Your products, your banner and logo, and how you get paid.</p>
               </div>
               <div className="flex-center gap-4">
                 {editData.slug && (
@@ -1463,7 +1463,7 @@ const CuratorDashboard = () => {
                   className="btn-solid-gold flex-center gap-2"
                   data-tour="add-product"
                 >
-                  <Plus size={18} /> Add Artifact
+                  <Plus size={18} /> Add product
                 </button>
               </div>
             </header>
@@ -1491,7 +1491,7 @@ const CuratorDashboard = () => {
             <section className="storefront-aesthetics glass-card mb-8" data-tour="aesthetics">
               <div className="flex-between mb-6">
                 <h2 className="card-title text-gold m-0">
-                  <Sparkles size={20} /> Shop Aesthetics & Payments
+                  <Sparkles size={20} /> Banner, logo and payments
                   <HelpTip title="Making Your Shop Look Professional">
                     <ol>
                       <li><strong>Shop Banner</strong> — the wide picture across the top of your shop. Use a photo of your products, workspace, or anything that shows your vibe. Wide/landscape photos work best.</li>
@@ -1628,9 +1628,9 @@ const CuratorDashboard = () => {
               </div>
               {!CARD_PAYMENTS_ENABLED && (
                 <p className="text-xs opacity-60 mb-4">
-                  Customers pay you directly through your own accounts — nothing to configure and no
-                  fees to the marketplace. Paste any links you already use: a Stripe Payment Link,
-                  CashApp tag, Venmo handle, or anything else.
+                  Customers pay you directly through your own accounts. Paste any links you already use:
+                  a Stripe Payment Link, Cash App tag, Venmo handle, or anything else. They show on your
+                  shop and on every order confirmation.
                 </p>
               )}
 
@@ -1700,7 +1700,7 @@ const CuratorDashboard = () => {
               {products.map(p => (
                 <div key={p.id} className="product-card glass-card">
                   <div className="product-img-frame">
-                    <img src={p.image_url || 'https://via.placeholder.com/400x500?text=Artifact'} alt={p.name} />
+                    {p.image_url ? <img src={p.image_url} alt={p.name} /> : <div className="product-img-none" aria-label="No photo yet"><ShoppingBag size={30} /><span>Add a photo</span></div>}
                     {p.stock_status === 'limited_edition' && <div className="product-prestige-ribbon">Limited Edition</div>}
                                         {p.stock_status === 'out_of_stock' && <div className="product-prestige-ribbon sold-out">Sold Out</div>}
                     {p.is_active === false && <div className="product-prestige-ribbon hidden-ribbon">Hidden</div>}
@@ -1742,7 +1742,7 @@ const CuratorDashboard = () => {
             {isProductModalOpen && (
               <div className="modal-overlay flex-center">
                 <div className="modal-content glass-card shadow-2xl p-8 max-w-lg w-full">
-                  <h2 className="font-headline text-primary mb-6">{editingProduct ? 'Refine Artifact' : 'New Artisan Item'}</h2>
+                  <h2 className="font-headline text-primary mb-6">{editingProduct ? 'Edit product' : 'New product'}</h2>
                   <form onSubmit={saveProduct} className="premium-form">
                     {!editingProduct && (
                       <div className="form-group product-templates">
@@ -1772,7 +1772,7 @@ const CuratorDashboard = () => {
 
                     {productForm.image_urls?.length > 0 && (
                       <div className="form-group">
-                        <label>Artifact Gallery ({productForm.image_urls.length}/10)</label>
+                        <label>Photos ({productForm.image_urls.length}/10)</label>
                         <div className="flex gap-2 flex-wrap mt-2">
                           {productForm.image_urls.map((url, i) => (
                             <div key={i} className="relative w-16 h-16 rounded border border-thistle overflow-hidden group">
@@ -1800,7 +1800,7 @@ const CuratorDashboard = () => {
                     )}
 
                     <div className="form-group">
-                      <label>Artifact Name</label>
+                      <label>Product name</label>
                       <input type="text" value={productForm.name} onChange={e => setProductForm({...productForm, name: e.target.value})} required />
                     </div>
                     <div className="form-row-grid">
@@ -1927,7 +1927,7 @@ const CuratorDashboard = () => {
                     </label>
                     <div className="flex-center gap-4 mt-8">
                       <button type="button" onClick={() => setIsProductModalOpen(false)} className="btn-outline-primary flex-1">Cancel</button>
-                      <button type="submit" className="btn-solid-gold flex-1">Save Artifact</button>
+                      <button type="submit" className="btn-solid-gold flex-1">Save product</button>
                     </div>
                   </form>
                 </div>

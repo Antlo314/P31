@@ -14,16 +14,35 @@ const METHODS = [
   ['ship', 'Ship to me'],
 ];
 
+// What a shopper sees once her order request is in: the order number and the shop's ways to pay.
+const SentNote = ({ receipt: r }) => (
+  <section className="cs2-group">
+    <div className="cs2-done">
+      <span><Check size={24} /></span>
+      <h3>Order request sent</h3>
+      <p>{r.shopName} has your order <strong>#{r.ref}</strong> and will confirm it by email.</p>
+      {(r.shop?.cashapp_tag || r.shop?.venmo_handle || r.shop?.stripe_link || r.shop?.other_payment_link) && (
+        <div className="cs2-pay">
+          <p className="cs2-label">Pay {money(r.total)} — include #{r.ref}</p>
+          {r.shop.cashapp_tag && <a href={`https://cash.app/$${r.shop.cashapp_tag.replace('$', '')}`} target="_blank" rel="noreferrer"><DollarSign size={16} /> Cash App ${r.shop.cashapp_tag.replace('$', '')}</a>}
+          {r.shop.venmo_handle && <a href={`https://venmo.com/${r.shop.venmo_handle.replace('@', '')}`} target="_blank" rel="noreferrer"><Send size={16} /> Venmo @{r.shop.venmo_handle.replace('@', '')}</a>}
+          {r.shop.stripe_link && <a href={r.shop.stripe_link} target="_blank" rel="noreferrer"><CreditCard size={16} /> Pay by card</a>}
+          {r.shop.other_payment_link && <a href={r.shop.other_payment_link.startsWith('http') ? r.shop.other_payment_link : `mailto:${r.shop.other_payment_link}`} target="_blank" rel="noreferrer"><ShoppingBag size={16} /> {r.shop.other_payment_label || 'Direct payment'}</a>}
+        </div>
+      )}
+    </div>
+  </section>
+);
+
 // One shop's part of the bag: lines, discount, and checkout.
-const ShopGroup = ({ group, shop }) => {
+const ShopGroup = ({ group, shop, onSent }) => {
   const { setQty, remove, clearShop } = useCart();
   const [code, setCode] = useState('');
   const [disc, setDisc] = useState(null); // { ok, amount_cents, message, code }
-  const [mode, setMode] = useState('bag'); // bag | request | done
+  const [mode, setMode] = useState('bag'); // bag | request
   const [form, setForm] = useState({ name: '', email: '', phone: '', method: 'market', note: '', trap: '' });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [done, setDone] = useState(null);
 
   const subtotalCents = Math.round(group.subtotal * 100);
   const discountCents = disc?.ok ? disc.amount_cents : 0;
@@ -71,35 +90,15 @@ const ShopGroup = ({ group, shop }) => {
         discountCode: disc?.ok ? disc.code : undefined,
         trap: form.trap,
       });
-      setDone(data);
-      setMode('done');
+      // The note goes up to the bag first: clearing the shop removes this group.
+      onSent({ curatorId: group.curatorId, shopName: group.shopName, shop, ref: data?.ref, total: data?.total ? data.total / 100 : total });
       clearShop(group.curatorId);
+      return;
     } catch (err) {
       setError(err.message);
     }
     setBusy(false);
   };
-
-  if (mode === 'done') {
-    return (
-      <section className="cs2-group">
-        <div className="cs2-done">
-          <span><Check size={24} /></span>
-          <h3>Order request sent</h3>
-          <p>{group.shopName} has your order <strong>#{done?.ref}</strong> and will confirm it by email.</p>
-          {(shop?.cashapp_tag || shop?.venmo_handle || shop?.stripe_link || shop?.other_payment_link) && (
-            <div className="cs2-pay">
-              <p className="cs2-label">Pay {money(done?.total / 100 || total)} — include #{done?.ref}</p>
-              {shop.cashapp_tag && <a href={`https://cash.app/$${shop.cashapp_tag.replace('$', '')}`} target="_blank" rel="noreferrer"><DollarSign size={16} /> Cash App ${shop.cashapp_tag.replace('$', '')}</a>}
-              {shop.venmo_handle && <a href={`https://venmo.com/${shop.venmo_handle.replace('@', '')}`} target="_blank" rel="noreferrer"><Send size={16} /> Venmo @{shop.venmo_handle.replace('@', '')}</a>}
-              {shop.stripe_link && <a href={shop.stripe_link} target="_blank" rel="noreferrer"><CreditCard size={16} /> Pay by card</a>}
-              {shop.other_payment_link && <a href={shop.other_payment_link.startsWith('http') ? shop.other_payment_link : `mailto:${shop.other_payment_link}`} target="_blank" rel="noreferrer"><ShoppingBag size={16} /> {shop.other_payment_label || 'Direct payment'}</a>}
-            </div>
-          )}
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="cs2-group">
@@ -182,6 +181,8 @@ const ShopGroup = ({ group, shop }) => {
 const CartSheet = () => {
   const { open, closeCart, groups, count } = useCart();
   const [shops, setShops] = useState({});
+  const [sent, setSent] = useState([]);
+  const close = () => { setSent([]); closeCart(); };
   const ids = groups.map((g) => g.curatorId).join(',');
 
   useEffect(() => {
@@ -196,30 +197,30 @@ const CartSheet = () => {
     if (!open) return undefined;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    const onKey = (e) => e.key === 'Escape' && closeCart();
+    const onKey = (e) => e.key === 'Escape' && close();
     window.addEventListener('keydown', onKey);
     return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', onKey); };
-  }, [open, closeCart]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!open) return null;
 
   return (
-    <div className="cs2" role="dialog" aria-modal="true" aria-label="Your bag" onClick={(e) => e.target === e.currentTarget && closeCart()}>
+    <div className="cs2" role="dialog" aria-modal="true" aria-label="Your bag" onClick={(e) => e.target === e.currentTarget && close()}>
       <div className="cs2__panel">
         <div className="cs2__grip" aria-hidden="true" />
         <header className="cs2__head">
           <h2><ShoppingBag size={20} /> Your bag {count > 0 && <span>{count}</span>}</h2>
-          <button className="cs2__close" onClick={closeCart} aria-label="Close bag"><X size={18} /></button>
+          <button className="cs2__close" onClick={close} aria-label="Close bag"><X size={18} /></button>
         </header>
 
+        {sent.map((r) => <SentNote key={`${r.curatorId}-${r.ref}`} receipt={r} />)}
         {groups.length === 0 ? (
           <div className="cs2-empty">
-            <ShoppingBag size={30} />
-            <p>Your bag is empty.</p>
-            <Link to="/shop" className="cs2-btn cs2-btn--plum" onClick={closeCart}>Browse the marketplace</Link>
+            {!sent.length && <><ShoppingBag size={30} /><p>Your bag is empty.</p></>}
+            <Link to="/shop" className="cs2-btn cs2-btn--plum" onClick={close}>{sent.length ? 'Keep shopping' : 'Browse the marketplace'}</Link>
           </div>
         ) : (
-          groups.map((g) => <ShopGroup key={g.curatorId} group={g} shop={shops[g.curatorId]} />)
+          groups.map((g) => <ShopGroup key={g.curatorId} group={g} shop={shops[g.curatorId]} onSent={(r) => setSent((x) => [...x, r])} />)
         )}
       </div>
     </div>

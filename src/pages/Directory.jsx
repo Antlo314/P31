@@ -21,8 +21,15 @@ const Directory = () => {
       .eq('status', 'approved')
       .order('is_featured', { ascending: false })
       .order('is_early_bird', { ascending: false })
-      .then(({ data }) => {
-        setVendors((data || []).filter((d) => d.business_name).map((d) => ({
+      .then(async ({ data }) => {
+        // A shop is listed once it has something to buy: an approved shop with no products yet
+        // is still reachable by its own link, but stays out of the directory.
+        const ids = (data || []).map((d) => d.id);
+        const { data: items } = ids.length
+          ? await supabase.from('products').select('curator_id, is_active').in('curator_id', ids)
+          : { data: [] };
+        const stocked = new Set((items || []).filter((p) => p.is_active !== false).map((p) => p.curator_id));
+        setVendors((data || []).filter((d) => d.business_name && stocked.has(d.id)).map((d) => ({
           id: d.id,
           to: `/${d.slug || d.id}`,
           owner: d.profiles?.full_name,

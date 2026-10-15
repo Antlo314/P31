@@ -145,6 +145,10 @@ type Flow = {
   pdf?: (a: Row) => PdfSpec;
   /** Not a team email (the invitation goes to a vendor): no CEO copy. */
   external?: boolean;
+  /** The column that marks the email as sent (default notified_at). */
+  column?: string;
+  /** Rows of any age (default: only rows created in the last two days). */
+  anyAge?: boolean;
   sheet: () => { url: string; token: string; tab?: string } | null;
   sheetRow: (a: Row) => Row;
 };
@@ -523,6 +527,67 @@ ${next ? `<p><b>Next:</b> the ${esc(COACHING_LABEL[next])}. ${button(`${COLLECTI
   });
 }
 
+// Storefronts (v48): the team hears about every new shop; the vendor hears the moment hers is approved.
+const shopOwner = async (admin: Admin, a: Row) => {
+  const [{ data: u }, { data: p }, { count }] = await Promise.all([
+    admin.auth.admin.getUserById(a.id),
+    admin.from('profiles').select('full_name').eq('id', a.id).maybeSingle(),
+    admin.from('products').select('id', { count: 'exact', head: true }).eq('curator_id', a.id),
+  ]);
+  return { ...a, email: u?.user?.email || '', full_name: p?.full_name || u?.user?.user_metadata?.full_name || '', products: count || 0 };
+};
+const shopLink = (a: Row) => `${MARKET}/${a.slug || a.id}`;
+FLOWS.push({
+  name: 'shop_signup',
+  table: 'curator_data',
+  fields: 'id, business_name, slug, status, created_at',
+  to: marketTeam,
+  from: marketFrom,
+  enrich: shopOwner,
+  subject: (a) => `New shop: ${a.business_name} (${a.status === 'approved' ? 'pre-approved, open now' : 'waiting for review'})`,
+  email: (a) => layout(`New shop: ${a.business_name}`, intro(a, `created a storefront account for <b>${esc(a.business_name)}</b>`) + table(
+    tr('Shop', esc(a.business_name)) + tr('Owner', esc(a.full_name || '')) + tr('Email', a.email ? mail(a.email) : '')
+    + tr('Status', a.status === 'approved'
+      ? '<span style="color:#374126">Pre-approved: her shop opened straight away</span>'
+      : 'Waiting for review')
+    + tr('Shop link', link(shopLink(a), shopLink(a).replace('https://www.', ''))),
+  ) + `<p style="margin:14px 0 0;font-size:13px;color:#74657A">${a.status === 'approved'
+    ? 'She joins the directory as soon as she lists her first product. Nothing to do unless something looks wrong.'
+    : 'When she has added her products, open her shop in Systems and approve it (or choose Needs changes with a note). She is emailed the moment it is approved.'}</p>`
+    + button(`${SYSTEMS}/shops`, 'Open Systems → Shops')),
+  sheet: () => null,
+  sheetRow: (a) => ({ 'Shop': a.business_name }),
+});
+FLOWS.push({
+  name: 'shop_live',
+  external: true,
+  table: 'curator_data',
+  column: 'live_notified_at',
+  anyAge: true,
+  fields: 'id, business_name, slug, created_at',
+  scope: (q) => q.eq('status', 'approved'),
+  to: (a) => (a.email ? [a.email] : []),
+  replyTo: () => VENDOR_EMAIL,
+  from: marketFrom,
+  enrich: shopOwner,
+  subject: (a) => `Your shop is live: ${a.business_name}`,
+  email: (a) => layout('Your shop is open', `<p>Hi ${esc(String(a.full_name || '').split(' ')[0] || 'there')},</p>
+<p>Good news: <b>${esc(a.business_name)}</b> is approved and open on the Proverbs 31 Marketplace.</p>
+${button(shopLink(a), 'See my shop')}
+<p style="margin-top:18px">Your shop link is <b>${esc(shopLink(a).replace('https://www.', ''))}</b>. Put it in your Instagram bio, your email signature and on your market table.</p>
+<p style="margin:14px 0 4px"><b>A few things that help it sell</b></p>
+<ul style="margin:6px 0 14px;padding-left:20px;line-height:1.55">
+${a.products ? '' : '<li><b>List your first product.</b> Your shop joins the Curators &amp; shops directory and the marketplace as soon as it has one.</li>'}
+<li>Add a clear photo to every product, and a second or third photo where you can.</li>
+<li>Check <b>How you get paid</b> in your studio: Cash App, Venmo or your own payment link, so shoppers can pay you straight away.</li>
+<li>Share one product a week from <b>Marketing</b> in your studio; it makes the image and caption for you.</li>
+</ul>
+${button(`${MARKET}/dashboard`, 'Open my studio')}
+<p style="margin-top:18px">Questions? Reply to this email or write to ${mail(VENDOR_EMAIL)}.</p>`, MARKET_FOOT),
+  sheet: () => null,
+  sheetRow: (a) => ({ 'Shop': a.business_name }),
+});
+
 // Survey invitations: v38 adds them to a lineup when a vendor market announces its date.
 FLOWS.push({
   name: 'invite',
@@ -560,18 +625,21 @@ async function addToSheet(target: { url: string; token: string; tab?: string }, 
 
 // Take the recent rows not yet handled. The update only matches rows still unhandled,
 // so two calls at once can't both take (and send) the same one.
-async function claim(admin: Admin, f: Flow, column: 'notified_at' | 'sheet_synced_at') {
+const sentColumn = (f: Flow, column: string) => (column === 'notified_at' && f.column ? f.column : column);
+async function claim(admin: Admin, f: Flow, which: 'notified_at' | 'sheet_synced_at') {
+  const column = sentColumn(f, which);
   const since = new Date(Date.now() - 2 * 864e5).toISOString();
   let q = admin.from(f.table)
     .update({ [column]: new Date().toISOString() })
-    .is(column, null).gte('created_at', since);
+    .is(column, null);
+  if (!f.anyAge) q = q.gte('created_at', since);
   if (f.scope) q = f.scope(q);
   const { data, error } = await q.select(f.fields);
   if (error) throw new Error(error.message);
   return (data || []) as Row[];
 }
 const release = (admin: Admin, f: Flow, column: string, id: string) =>
-  admin.from(f.table).update({ [column]: null }).eq('id', id);
+  admin.from(f.table).update({ [sentColumn(f, column)]: null }).eq('id', id);
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });

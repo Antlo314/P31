@@ -154,7 +154,7 @@ export const SYSTEMS_CHAPTERS = {
   'sys:activity': {
     title: 'Activity', group: 'Team', site: 'both', minutes: 1, dash: 'admin',
     steps: [
-      { to: '/systems/activity', targets: nav('/systems/activity'), title: 'Who changed what', body: 'Every change the team makes across both sites, newest first, in plain words: “Melanie JC paused shop Sample Bakery Co.”, with the before and after underneath.' },
+      { to: '/systems/activity', targets: nav('/systems/activity'), title: 'Who changed what', body: 'Every change the team makes across both sites, newest first, in plain words: “Melanie JC paused shop Myrrh & Mercy Apothecary”, with the before and after underneath.' },
       { to: '/systems/activity', targets: [...tour('activity-areas'), ...head], title: 'By area, or search', body: 'Shops, Team, Vendors, Events, Mentorship, People, Campaigns and Settings. Search finds a person, a shop or a change. Vendors editing their own shops are not listed, so the log stays about the team.' },
     ],
   },

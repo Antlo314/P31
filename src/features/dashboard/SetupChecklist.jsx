@@ -14,7 +14,7 @@ const SetupChecklist = ({ curator, editData, products = [], onGo }) => {
     { id: 'agreement', href: '/vendors/agreement', label: 'Sign the Storefront Agreement', done: !!curator?.agreement_signed_at, hint: 'Benefits, fees and your responsibilities' },
     { id: 'look', tab: 'storefront', label: 'Banner and logo', done: !!(editData.bannerUrl && editData.logoUrl), hint: 'Storefront' },
     { id: 'pay', tab: 'storefront', label: 'How you get paid', done: paid, hint: 'Storefront · payments' },
-    { id: 'product', tab: 'storefront', label: products.length ? `${products.length} product${products.length === 1 ? '' : 's'} listed` : 'Your first product', done: products.length > 0, hint: 'Storefront · Add Artifact' },
+    { id: 'product', tab: 'storefront', label: products.length ? `${products.length} product${products.length === 1 ? '' : 's'} listed` : 'Your first product', done: products.length > 0, hint: 'Storefront · Add product' },
     { id: 'design', tab: 'design', label: 'Pick your look', done: !!curator?.store_design?.template, hint: 'Store Design' },
     { id: 'market', tab: 'marketing', label: 'Share a product link or promo image', done: false, hint: 'Marketing', optional: true },
   ];

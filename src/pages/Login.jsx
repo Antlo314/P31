@@ -62,7 +62,7 @@ const Login = () => {
             id: userId, 
             // Approval, payment and publishing are decided by the database
             // (pre-approved vendors are unlocked automatically). See v16.
-            business_name: formData.bizName || 'My Sanctuary'
+            business_name: formData.bizName || 'My shop'
           }]);
         }
         navigate('/dashboard');

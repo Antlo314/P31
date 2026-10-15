@@ -6,6 +6,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 48, file: 'storefront_v48_shop_emails.sql', title: 'Shop emails', what: 'The team is emailed when a new shop signs up, and the vendor is emailed the moment her shop is approved.',
+    expect: 'signup_column true · live_column true',
+    checks: [['column', 'curator_data', 'live_notified_at']] },
   { v: 47, file: 'storefront_v47_coaching_forms.sql', title: 'Coaching intake forms', what: 'The Business Coaching Agreement, Confidentiality Agreement and Client Safety form on one private page (sent from the mentor console), signed in order, with PDF copies emailed.',
     expect: 'intakes_ready true · forms_ready true · sign_ready true · details_ready true',
     checks: [['table', 'coaching_intakes'], ['table', 'coaching_forms'], ['rpc', 'coaching_intake_details', { p_token: 'probe' }]] },
