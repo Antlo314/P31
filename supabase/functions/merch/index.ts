@@ -36,7 +36,9 @@ Deno.serve(async (req) => {
   try {
     if (body.action === 'status') {
       if (!printfulReady()) return json({ connected: false, reason: 'PRINTFUL_API_KEY is not set' });
-      const store = await pf('/store');
+      // The store's name needs the stores_list scope; a token without it still proves itself on orders.
+      let store: Any = null;
+      try { store = await pf('/store'); } catch { await pf('/orders?limit=1'); }
       // Shipping updates: register this function with Printful once.
       let webhook = 'already set';
       try {
