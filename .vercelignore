@@ -1,0 +1,21 @@
+# What `vercel --prod` from this computer must never upload: local secrets and local-only files.
+# (Deploys from GitHub never see these anyway; this keeps a direct upload the same as a GitHub one.)
+.env.local
+.env*.local
+tools/.env.iris
+.claude/
+.vercel
+supabase/.temp/
+
+# Built or installed on Vercel, not uploaded
+node_modules
+dist
+dist-ssr
+
+# Local-only media and scratch
+scratch/
+public/__lab/
+src/dev/demo-studio.json
+marketing/social/2026-10-13-quotes/reels/
+marketing/brand/market/.build/
+*.log
