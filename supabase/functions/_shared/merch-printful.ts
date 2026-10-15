@@ -25,9 +25,16 @@ export async function pf(path: string, init: RequestInit = {}): Promise<Any> {
 
 // Print areas, per Printful product: placement -> { width, height } in the printfile's pixels.
 const areaCache = new Map<number, Record<string, { width: number; height: number }>>();
+const groupCache = new Map<number, string[]>();
+/** The photo styles Printful offers for a product ("Women's", "Lifestyle", "Flat" and so on). */
+export async function photoGroups(productId: number) {
+  if (!groupCache.has(productId)) await printAreas(productId);
+  return groupCache.get(productId) || [];
+}
 export async function printAreas(productId: number) {
   if (areaCache.has(productId)) return areaCache.get(productId)!;
   const r = await pf(`/mockup-generator/printfiles/${productId}`);
+  groupCache.set(productId, Array.isArray(r.option_groups) ? r.option_groups : []);
   const byId = Object.fromEntries((r.printfiles || []).map((p: Any) => [p.printfile_id, { width: p.width, height: p.height }]));
   const areas: Record<string, { width: number; height: number }> = {};
   for (const v of r.variant_printfiles || []) for (const [placement, id] of Object.entries(v.placements || {})) areas[placement] ||= byId[id as number];

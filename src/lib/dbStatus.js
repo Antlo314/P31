@@ -6,6 +6,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 51, file: 'storefront_v51_merch_photos.sql', title: 'Merch photo galleries', what: 'Several Printful photos for each merch product (model, lifestyle, flat).',
+    expect: 'gallery_ready true',
+    checks: [['column', 'merch_mockups', 'gallery']] },
   { v: 50, file: 'storefront_v50_merch.sql', title: 'P31 merch', what: 'p31market.com/merch: orders paid on Stripe and printed and shipped by Printful, and the product photos.',
     expect: 'orders_ready true · mockups_ready true · bucket_ready true',
     checks: [['table', 'merch_orders'], ['table', 'merch_mockups']] },

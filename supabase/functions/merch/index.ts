@@ -1,7 +1,8 @@
 // Supabase Edge Function: merch (p31market.com/merch, printed and shipped by Printful)
 //   POST { action: 'status' }    is Printful connected? the store name; registers the shipping webhook once
 //   POST { action: 'photos' }    makes the next missing product photos with Printful's mockup generator
-//                                (a few per call), saves them in the public merch bucket and merch_mockups
+//                                (a few per call; up to five per item and colour: model, lifestyle, flat),
+//                                saves them in the public merch bucket and merch_mockups.gallery (v51)
 //   POST { action: 'checkout', items: [{ item, color, size, quantity }] }
 //                                a Stripe Checkout link on the Market account (address collected there);
 //                                stripe-webhook places the paid order with Printful (_shared/merch-printful.ts)
@@ -11,7 +12,15 @@
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { stripeKey } from '../_shared/stripe.ts';
-import { pf, printfulReady, printAreas, position, printfulEvent, MERCH_WEBHOOK_URL } from '../_shared/merch-printful.ts';
+import { pf, printfulReady, printAreas, photoGroups, position, printfulEvent, MERCH_WEBHOOK_URL } from '../_shared/merch-printful.ts';
+
+// The photo styles to ask Printful for, in order of preference (only those the product offers are used).
+const STYLES: Record<string, string[]> = {
+  apparel: ["Women's", 'Lifestyle', 'Flat', 'Folded', 'Front'],
+  mug: ['Lifestyle', 'Front view', 'Handle on right', 'Handle on left', 'Front'],
+  other: ['Lifestyle', 'Flat', 'Front', 'Product details'],
+};
+const MAX_PHOTOS = 5;
 import { ITEMS, TYPES, SHIPPING, SITE, itemById, itemName, priceFor, printFile, variantFor } from '../_shared/merch-catalog.js';
 
 const env = (k: string) => Deno.env.get(k) || '';
@@ -69,7 +78,10 @@ Deno.serve(async (req) => {
           const variant = variantFor(i, c, t.sizes[Math.min(1, t.sizes.length - 1)])!;
           const file: Any = { placement: t.placement, image_url: f.url };
           if (area) file.position = position(i.type, area, f);
-          const task = await pf(`/mockup-generator/create-task/${t.printful}`, { method: 'POST', body: JSON.stringify({ variant_ids: [variant], format: 'jpg', files: [file], ...(f.threads ? { options: { thread_colors: f.threads } } : {}) }) });
+          const offered = await photoGroups(t.printful);
+          const wanted = STYLES[['tee', 'crew', 'hoodie'].includes(i.type) ? 'apparel' : i.type === 'mug' ? 'mug' : 'other'];
+          const groups = wanted.filter((g) => offered.includes(g)).slice(0, 3);
+          const task = await pf(`/mockup-generator/create-task/${t.printful}`, { method: 'POST', body: JSON.stringify({ variant_ids: [variant], format: 'jpg', files: [file], ...(groups.length ? { option_groups: groups } : {}) }) });
           let result: Any = null;
           for (let n = 0; n < 20 && !result; n++) {
             await wait(2500);
@@ -78,14 +90,25 @@ Deno.serve(async (req) => {
             else if (r.status === 'failed') throw new Error(r.error || 'mockup failed');
           }
           if (!result) throw new Error('Printful took too long; it will be tried again.');
-          const mock = (result.mockups || [])[0];
-          const img = await fetch(mock.mockup_url);
-          const bytes = new Uint8Array(await img.arrayBuffer());
-          const path = `mockups/${i.id}-${c.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.jpg`;
-          const up = await db.storage.from('merch').upload(path, bytes, { contentType: 'image/jpeg', upsert: true });
-          if (up.error) throw new Error(up.error.message);
-          const publicUrl = db.storage.from('merch').getPublicUrl(path).data.publicUrl;
-          await db.from('merch_mockups').upsert({ item: i.id, color: c, url: publicUrl, updated_at: new Date().toISOString() });
+          // Every photo Printful made (main shots and extras), model and lifestyle shots first.
+          const shots: { url: string; group: string }[] = [];
+          for (const m of result.mockups || []) {
+            shots.push({ url: m.mockup_url, group: m.option_group || '' });
+            for (const x of m.extra || []) shots.push({ url: x.url, group: x.option_group || '' });
+          }
+          const rank = (g: string) => (/women/i.test(g) ? 0 : /lifestyle/i.test(g) ? 1 : 2);
+          const unique = [...new Map(shots.filter((x) => x.url).map((x) => [x.url, x])).values()].sort((a, b) => rank(a.group) - rank(b.group)).slice(0, MAX_PHOTOS);
+          if (!unique.length) throw new Error('Printful returned no photos.');
+          const gallery: string[] = [];
+          const base = `mockups/${i.id}-${c.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+          for (const [n, shot] of unique.entries()) {
+            const bytes = new Uint8Array(await (await fetch(shot.url)).arrayBuffer());
+            const path = `${base}-${n + 1}.jpg`;
+            const up = await db.storage.from('merch').upload(path, bytes, { contentType: 'image/jpeg', upsert: true });
+            if (up.error) throw new Error(up.error.message);
+            gallery.push(db.storage.from('merch').getPublicUrl(path).data.publicUrl);
+          }
+          await db.from('merch_mockups').upsert({ item: i.id, color: c, url: gallery[0], gallery, updated_at: new Date().toISOString() });
           made.push(`${i.id} ${c}`);
         } catch (e) { failed[`${i.id} ${c}`] = (e as Error).message; }
       }

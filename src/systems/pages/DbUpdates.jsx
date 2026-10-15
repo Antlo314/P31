@@ -4,6 +4,7 @@ import { dbStatus, pending } from '../../lib/dbStatus';
 
 // The scripts themselves, loaded only when one is waiting (so the copy is exact and instant).
 const SQL = {
+  'storefront_v51_merch_photos.sql': () => import('../../../storefront_v51_merch_photos.sql?raw'),
   'storefront_v50_merch.sql': () => import('../../../storefront_v50_merch.sql?raw'),
   'storefront_v49_new_pricing.sql': () => import('../../../storefront_v49_new_pricing.sql?raw'),
   'storefront_v48_shop_emails.sql': () => import('../../../storefront_v48_shop_emails.sql?raw'),

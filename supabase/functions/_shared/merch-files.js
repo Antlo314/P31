@@ -2,11 +2,11 @@
 export const PRINT_FILES = {
  "candle-dark": [
   2226,
-  1931
+  2234
  ],
  "candle-light": [
   2226,
-  1931
+  2234
  ],
  "collective-dark": [
   2479,
@@ -16,6 +16,22 @@ export const PRINT_FILES = {
   2479,
   2742
  ],
+ "crest-dark": [
+  2841,
+  3229
+ ],
+ "crest-light": [
+  2841,
+  3229
+ ],
+ "girded-dark": [
+  3470,
+  2242
+ ],
+ "girded-light": [
+  3469,
+  2242
+ ],
  "hands-dark": [
   2397,
   2623
@@ -24,6 +40,14 @@ export const PRINT_FILES = {
   2397,
   2623
  ],
+ "hat-crest-dark": [
+  1200,
+  525
+ ],
+ "hat-crest-light": [
+  1200,
+  525
+ ],
  "hat-pray-dark": [
   1200,
   525
@@ -31,6 +55,10 @@ export const PRINT_FILES = {
  "hat-pray-light": [
   1200,
   525
+ ],
+ "journal-crest": [
+  1725,
+  2400
  ],
  "journal-pray": [
   1725,
@@ -44,19 +72,31 @@ export const PRINT_FILES = {
   1725,
   2400
  ],
+ "journal-vineyard": [
+  1725,
+  2400
+ ],
  "merchandise-dark": [
   3648,
-  2005
+  2015
  ],
  "merchandise-light": [
   3648,
-  2005
+  2015
  ],
  "mug-candle": [
   2700,
   1050
  ],
+ "mug-crest": [
+  2700,
+  1050
+ ],
  "mug-merchandise": [
+  2700,
+  1050
+ ],
+ "mug-notafraid": [
   2700,
   1050
  ],
@@ -72,13 +112,33 @@ export const PRINT_FILES = {
   2700,
   1050
  ],
+ "mug-rubies": [
+  2700,
+  1050
+ ],
+ "mug-spindle": [
+  2700,
+  1050
+ ],
+ "mug-vineyard": [
+  2700,
+  1050
+ ],
+ "notafraid-dark": [
+  3101,
+  2468
+ ],
+ "notafraid-light": [
+  3101,
+  2468
+ ],
  "praised-dark": [
   2995,
-  2298
+  2927
  ],
  "praised-light": [
   2995,
-  2298
+  2927
  ],
  "pray-dark": [
   2677,
@@ -97,14 +157,34 @@ export const PRINT_FILES = {
   3140
  ],
  "room-dark": [
-  2622,
-  1625
+  3060,
+  2456
  ],
  "room-light": [
-  2622,
-  1625
+  3060,
+  2456
+ ],
+ "rubies-dark": [
+  3128,
+  2852
+ ],
+ "rubies-light": [
+  3128,
+  2852
+ ],
+ "spindle-dark": [
+  2220,
+  3484
+ ],
+ "spindle-light": [
+  2220,
+  3484
  ],
  "sticker-candle": [
+  1000,
+  1000
+ ],
+ "sticker-crest": [
   1000,
   1000
  ],
@@ -120,21 +200,37 @@ export const PRINT_FILES = {
   1000,
   1000
  ],
+ "sticker-rubies": [
+  1000,
+  1000
+ ],
+ "sticker-spindle": [
+  1000,
+  1000
+ ],
  "strength-dark": [
   2901,
-  2056
+  2890
  ],
  "strength-light": [
   2900,
-  2056
+  2890
+ ],
+ "vineyard-dark": [
+  2616,
+  3152
+ ],
+ "vineyard-light": [
+  2616,
+  3152
  ],
  "virtuous-dark": [
   2849,
-  2178
+  2727
  ],
  "virtuous-light": [
   2849,
-  2178
+  2727
  ]
 };
-export const THREADS = {"hat-pray-dark":["#FFFFFF","#FFCC00"],"hat-pray-light":["#6B5294","#A67843"]};
+export const THREADS = {"hat-pray-dark":["#FFFFFF","#FFCC00"],"hat-pray-light":["#6B5294","#A67843"],"hat-crest-dark":["#FFFFFF","#FFCC00"],"hat-crest-light":["#6B5294","#A67843"]};

@@ -22,8 +22,8 @@ const Merch = () => {
   const ref = params.get('order');
 
   useEffect(() => {
-    supabase.from('merch_mockups').select('item, color, url').then(({ data }) => {
-      setPhotos(Object.fromEntries((data || []).map((r) => [`${r.item}|${r.color}`, r.url])));
+    supabase.from('merch_mockups').select('item, color, url, gallery').then(({ data }) => {
+      setPhotos(Object.fromEntries((data || []).map((r) => [`${r.item}|${r.color}`, Array.isArray(r.gallery) && r.gallery.length ? r.gallery : [r.url]])));
     });
   }, []);
 
@@ -40,12 +40,13 @@ const Merch = () => {
   }, [open]);
 
   const shown = useMemo(() => (group === 'All' ? ITEMS : ITEMS.filter((i) => TYPES[i.type].group === group)), [group]);
-  const photo = (item, color) => photos[`${item.id}|${color}`];
-  const picture = (item, color, cls) => (photo(item, color)
-    ? <img className={cls} src={photo(item, color)} alt={`${itemName(item)} in ${color}`} loading="lazy" decoding="async" />
+  const gallery = (item, color) => photos[`${item.id}|${color}`] || [];
+  const photo = (item, color) => gallery(item, color)[0];
+  const picture = (item, color, cls, n = 0) => (gallery(item, color)[n]
+    ? <img className={cls} src={gallery(item, color)[n]} alt={`${itemName(item)} in ${color}`} loading="lazy" decoding="async" />
     : <MerchMock className={cls} item={item} color={color} />);
 
-  const openItem = (item, color = item.colors[0]) => setOpen({ item, color, size: TYPES[item.type].sizes.length === 1 ? TYPES[item.type].sizes[0] : '', qty: 1, added: false, error: '' });
+  const openItem = (item, color = item.colors[0]) => setOpen({ shot: 0, item, color, size: TYPES[item.type].sizes.length === 1 ? TYPES[item.type].sizes[0] : '', qty: 1, added: false, error: '' });
   const addToBag = () => {
     const { item, color, size, qty } = open;
     if (!size) return setOpen({ ...open, error: 'Choose a size.' });
@@ -81,6 +82,7 @@ const Merch = () => {
             <article className="mer-card" key={item.id}>
               <button type="button" className="mer-card__img" onClick={() => openItem(item)} aria-label={`${itemName(item)}, from ${money(fromPrice(item))}`}>
                 {picture(item, item.colors[0], 'mer-pic')}
+                {gallery(item, item.colors[0])[1] && <img className="mer-pic mer-pic--alt" src={gallery(item, item.colors[0])[1]} alt="" loading="lazy" decoding="async" />}
               </button>
               <div className="mer-card__info">
                 <p className="mer-card__type">{TYPES[item.type].label}</p>
@@ -106,7 +108,8 @@ const Merch = () => {
       </section>
 
       {open && (() => {
-        const { item, color, size, qty, added, error } = open;
+        const { item, color, size, qty, added, error, shot = 0 } = open;
+        const shots = gallery(item, color);
         const t = TYPES[item.type];
         const d = DESIGNS[item.design];
         const price = priceFor(item, size || t.sizes[0]);
@@ -114,7 +117,14 @@ const Merch = () => {
           <div className="mer-sheet" role="dialog" aria-modal="true" aria-label={itemName(item)} onClick={(e) => e.target === e.currentTarget && setOpen(null)}>
             <div className="mer-sheet__panel">
               <button type="button" className="mer-sheet__close" onClick={() => setOpen(null)} aria-label="Close"><X size={18} /></button>
-              <div className="mer-sheet__pic">{picture(item, color, 'mer-pic')}</div>
+              <div className="mer-sheet__pic">
+                {picture(item, color, 'mer-pic', Math.min(shot, Math.max(0, shots.length - 1)))}
+                {shots.length > 1 && (
+                  <div className="mer-thumbs" role="tablist" aria-label="Photos">
+                    {shots.map((src, n) => <button type="button" key={src} role="tab" aria-selected={n === shot} onClick={() => setOpen({ ...open, shot: n })}><img src={src} alt={`Photo ${n + 1}`} loading="lazy" /></button>)}
+                  </div>
+                )}
+              </div>
               <div className="mer-sheet__body">
                 <p className="mer-card__type">{t.name}</p>
                 <h2>{d.name}</h2>
@@ -125,7 +135,7 @@ const Merch = () => {
                   <div className="mer-opt">
                     <p className="mer-opt__label">Color: {color}</p>
                     <div className="mer-opt__swatches" role="radiogroup" aria-label="Color">
-                      {item.colors.map((c) => <button type="button" key={c} role="radio" aria-checked={c === color} title={c} style={{ background: colorHex(c) }} onClick={() => setOpen({ ...open, color: c, added: false })} />)}
+                      {item.colors.map((c) => <button type="button" key={c} role="radio" aria-checked={c === color} title={c} style={{ background: colorHex(c) }} onClick={() => setOpen({ ...open, color: c, added: false, shot: 0 })} />)}
                     </div>
                   </div>
                 )}
