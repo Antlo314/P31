@@ -19,3 +19,7 @@ src/dev/demo-studio.json
 marketing/social/2026-10-13-quotes/reels/
 marketing/brand/market/.build/
 *.log
+
+# Not needed to build the site (guides, PDFs, social media files): faster upload
+docs/
+marketing/
