@@ -93,7 +93,7 @@ const Academy = () => {
       {tab === 'plans' && programs.map((p) => (
         <section key={p.id} className="sys-card sys-form" style={{ marginBottom: 14 }}>
           <h2>{p.title}</h2>
-          {plans.filter((pl) => pl.program_id === p.id).sort((a, b) => ORDER.indexOf(a.billing) - ORDER.indexOf(b.billing)).map((pl) => <PlanRow key={pl.id} plan={pl} onSave={savePlan} />)}
+          {plans.filter((pl) => pl.program_id === p.id).sort((a, b) => ORDER.indexOf(a.billing) - ORDER.indexOf(b.billing) || (a.price_cents ?? 0) - (b.price_cents ?? 0)).map((pl) => <PlanRow key={pl.id} plan={pl} onSave={savePlan} />)}
           <p className="sys-muted">A plan with no price is hidden from mentors’ invite options.</p>
         </section>
       ))}

@@ -1,14 +1,17 @@
 // Supabase Edge Function: academy-webhook
-// Keeps mentorship enrollments in step with Stripe. Its own Stripe endpoint and
-// signing secret, separate from the curator-orders webhook.
-//   supabase secrets set ACADEMY_STRIPE_WEBHOOK_SECRET=whsec_...
+// Keeps mentorship enrollments in step with the Collective's Stripe account (see _shared/stripe.ts).
+//   supabase secrets set COLLECTIVE_STRIPE_SECRET_KEY=sk_...  COLLECTIVE_STRIPE_WEBHOOK_SECRET=whsec_...
+//   (the older STRIPE_SECRET_KEY / ACADEMY_STRIPE_WEBHOOK_SECRET still work)
 //   supabase functions deploy academy-webhook          (verify_jwt = false in config.toml)
 // Stripe → Developers → Webhooks → endpoint https://<project>.supabase.co/functions/v1/academy-webhook
 // Events: checkout.session.completed, invoice.paid, invoice.payment_failed,
 //         customer.subscription.updated, customer.subscription.deleted
-// It also keeps storefront subscriptions (vendor-billing, v42) in step on curator_data.
+// Storefront subscriptions are the Market's (stripe-webhook); they are handled here too only when one
+// Stripe account serves both sites.
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { stripeFor, webhookSecrets, verifyEvent } from '../_shared/stripe.ts';
+import { storefrontEvent } from '../_shared/storefront-billing.ts';
 
 const GRACE_DAYS = 3; // renewals can land a little after the period ends
 const env = (k: string) => Deno.env.get(k) || '';
@@ -19,50 +22,25 @@ const periodEnd = (sub: any) => sub?.current_period_end ?? sub?.items?.data?.[0]
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
-  if (!env('STRIPE_SECRET_KEY') || !env('ACADEMY_STRIPE_WEBHOOK_SECRET')) {
-    console.error('academy-webhook: missing STRIPE_SECRET_KEY or ACADEMY_STRIPE_WEBHOOK_SECRET');
+  const stripe = stripeFor('collective');
+  if (!stripe || !webhookSecrets('collective').length) {
+    console.error('academy-webhook: missing COLLECTIVE_STRIPE_SECRET_KEY or COLLECTIVE_STRIPE_WEBHOOK_SECRET');
     return new Response('Not configured', { status: 500 });
   }
-  const stripe = new Stripe(env('STRIPE_SECRET_KEY'));
   const db = createClient(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'), { auth: { persistSession: false } });
 
   const raw = await req.text();
-  let event: Stripe.Event;
-  try {
-    event = await stripe.webhooks.constructEventAsync(raw, req.headers.get('stripe-signature') || '',
-      env('ACADEMY_STRIPE_WEBHOOK_SECRET'), undefined, Stripe.createSubtleCryptoProvider());
-  } catch (err) {
-    return new Response(`Signature error: ${(err as Error).message}`, { status: 400 });
-  }
+  const { event, error: sigError } = await verifyEvent(stripe, 'collective', raw, req.headers.get('stripe-signature') || '');
+  if (!event) return new Response(`Signature error: ${sigError}`, { status: 400 });
 
   const now = new Date().toISOString();
-  // Storefront subscriptions (vendor-billing, v42) arrive on this same endpoint.
-  // deno-lint-ignore no-explicit-any
-  const storefront = async (subId: string, patch: Record<string, any>) => {
-    const { data: shops } = await db.from('curator_data').update(patch).eq('stripe_subscription_id', subId).select('id, status, billing_notice');
-    // A shop paused for an unpaid subscription opens again once it is paid.
-    for (const shop of shops || []) {
-      if (patch.subscription_status === 'active' && shop.status === 'paused' && shop.billing_notice === 'paused') {
-        await db.from('curator_data').update({ status: 'approved', billing_notice: null }).eq('id', shop.id);
-      }
-    }
-  };
   try {
+    // When one Stripe account serves both sites, storefront subscriptions arrive here too.
+    if (!Deno.env.get('MARKET_STRIPE_SECRET_KEY')) await storefrontEvent(stripe, db, event);
     switch (event.type) {
       case 'checkout.session.completed': {
         const s = event.data.object as Stripe.Checkout.Session;
         const m = s.metadata || {};
-        if (m.kind === 'storefront' && m.curator_id && s.mode === 'subscription' && s.subscription) {
-          const subId = typeof s.subscription === 'string' ? s.subscription : s.subscription.id;
-          const sub = await stripe.subscriptions.retrieve(subId);
-          const { data: shop } = await db.from('curator_data').update({
-            subscription_status: 'active', stripe_subscription_id: subId,
-            stripe_billing_customer_id: typeof s.customer === 'string' ? s.customer : s.customer?.id || null,
-            subscription_current_end: iso(periodEnd(sub)), billing_notice: null, billing_notice_at: null,
-          }).eq('id', m.curator_id).select('id, status').maybeSingle();
-          if (shop?.status === 'paused') await db.from('curator_data').update({ status: 'approved' }).eq('id', shop.id);
-          break;
-        }
         if (m.kind !== 'academy') break;
         let accessUntil: string | null = null;
         let subscriptionId: string | null = null;
@@ -96,7 +74,6 @@ Deno.serve(async (req) => {
         const end = inv.lines?.data?.[0]?.period?.end;
         await db.from('academy_enrollments').update({ status: 'active', access_until: iso(end, GRACE_DAYS), updated_at: now })
           .eq('stripe_subscription_id', subId);
-        await storefront(subId, { subscription_status: 'active', subscription_current_end: iso(end), billing_notice: null });
         break;
       }
 
@@ -106,7 +83,6 @@ Deno.serve(async (req) => {
         const subId = typeof inv.subscription === 'string' ? inv.subscription : inv.subscription?.id || inv.parent?.subscription_details?.subscription;
         if (subId) {
           await db.from('academy_enrollments').update({ status: 'past_due', updated_at: now }).eq('stripe_subscription_id', subId);
-          await storefront(subId, { subscription_status: 'past_due' });
         }
         break;
       }
@@ -117,8 +93,6 @@ Deno.serve(async (req) => {
           : ['past_due', 'unpaid', 'incomplete'].includes(sub.status) ? 'past_due' : 'active';
         await db.from('academy_enrollments').update({ status, access_until: iso(periodEnd(sub), GRACE_DAYS), updated_at: now })
           .eq('stripe_subscription_id', sub.id);
-        // A Stripe trial (the vendor's free period) still counts as subscribed.
-        await storefront(sub.id, { subscription_status: status, subscription_current_end: iso(periodEnd(sub)) });
         break;
       }
 
@@ -127,7 +101,6 @@ Deno.serve(async (req) => {
         await db.from('academy_enrollments')
           .update({ status: 'canceled', access_until: iso(sub.ended_at || Math.floor(Date.now() / 1000)), updated_at: now })
           .eq('stripe_subscription_id', sub.id);
-        await storefront(sub.id, { subscription_status: 'canceled' });
         break;
       }
     }

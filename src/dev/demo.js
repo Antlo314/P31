@@ -68,10 +68,13 @@ const makeDb = () => ({
     { id: 'pl1', program_id: BUS, billing: 'month', label: 'Monthly', price_cents: null, is_active: true },
     { id: 'pl2', program_id: BUS, billing: 'six_months', label: 'Every 6 months', price_cents: null, is_active: true },
     { id: 'pl3', program_id: FAI, billing: 'month', label: 'Monthly', price_cents: null, is_active: true },
-    { id: 'pk1', program_id: BUS, billing: 'month', package: 'Option 1', label: 'Coaching Option 1: Business Strategy and Development (biweekly, 60 min)', price_cents: 19900, is_active: true },
-    { id: 'pk2', program_id: BUS, billing: 'month', package: 'Option 2', label: 'Coaching Option 2: Hybrid Mentorship and Business Coaching (biweekly, 90 min)', price_cents: 32500, is_active: true },
-    { id: 'pk3', program_id: BUS, billing: 'month', package: 'Option 3', label: 'Coaching Option 3: Business Strategy and Development (weekly, 60 min)', price_cents: 37500, is_active: true },
-    { id: 'pk4', program_id: BUS, billing: 'month', package: 'Option 4', label: 'Coaching Option 4: VIP Hybrid Mentorship and Business Coaching (weekly, 90 min)', price_cents: 59900, is_active: true },
+    { id: 'pk1', program_id: BUS, billing: 'month', package: 'Option 1', label: 'Coaching Option 1: Business, 2 sessions a month (60 min)', price_cents: 27500, is_active: true },
+    { id: 'pk2', program_id: BUS, billing: 'month', package: 'Option 2', label: 'Coaching Option 2: Hybrid Mentorship and Business, 2 sessions a month (90 min)', price_cents: 37500, is_active: true },
+    { id: 'pk3', program_id: BUS, billing: 'month', package: 'Option 3', label: 'Coaching Option 3: Business, 4 sessions a month (60 min)', price_cents: 49500, is_active: true },
+    { id: 'pk4', program_id: BUS, billing: 'month', package: 'Option 4', label: 'Coaching Option 4: VIP Hybrid, 4 sessions a month (90 min)', price_cents: 65000, is_active: true },
+    { id: 'pf2', program_id: FAI, billing: 'month', package: 'Faith 2', label: 'Faith Mentorship: 2 sessions a month', price_cents: 17500, is_active: true },
+    { id: 'pf3', program_id: FAI, billing: 'month', package: 'Faith 3', label: 'Faith Mentorship: 3 sessions a month', price_cents: 23500, is_active: true },
+    { id: 'pf4', program_id: FAI, billing: 'month', package: 'Faith 4', label: 'Faith Mentorship: 4 sessions a month', price_cents: 31000, is_active: true },
   ],
   academy_mentors: [
     { user_id: 'u-mel', program_id: BUS, display_name: 'Melanie JC', title: 'Lead mentor', created_at: day(-90) },
@@ -459,7 +462,7 @@ const rpc = {
     if (a.p_token === 'none') return null;
     const one = { signed_on: day(-1).slice(0, 10), signed_name: 'Sample Client', package: 'Option 2' };
     const signed = a.p_token === 'demo-new' ? {} : a.p_token === 'demo-safety' ? { coaching: one, confidentiality: { signed_on: day(0).slice(0, 10), signed_name: 'Sample Client' } } : { coaching: one };
-    return { full_name: 'Sample Client', email: 'sample.client@example.com', status: 'in_progress', expired: false, program: 'Business Mentorship', packages: [{ key: 'Option 1', price_cents: 19900 }, { key: 'Option 2', price_cents: 32500 }, { key: 'Option 3', price_cents: 37500 }, { key: 'Option 4', price_cents: 59900 }], signed };
+    return { full_name: 'Sample Client', email: 'sample.client@example.com', status: 'in_progress', expired: false, program: 'Business Mentorship', packages: [{ key: 'Option 1', price_cents: 27500 }, { key: 'Option 2', price_cents: 37500 }, { key: 'Option 3', price_cents: 49500 }, { key: 'Option 4', price_cents: 65000 }], signed };
   },
   coaching_form_sign: () => 'demo-form',
   my_roles: (_a, mode) => (mode === 'student'

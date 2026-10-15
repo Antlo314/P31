@@ -198,12 +198,12 @@
   <p class="muted small">For you and the team only: the public site never shows these. Change a price in <b>Systems → Academy</b>, and the agreement page, the emails and the payment link all follow.</p>
   <table>
     <tr><th>Package</th><th>Sessions</th><th style="width:12%">Monthly</th></tr>
-    <tr><td>Option 1 — Business Strategy &amp; Development Coaching</td><td>Two a month, 60 minutes, biweekly</td><td>$199</td></tr>
-    <tr><td>Option 2 — Hybrid Private Mentorship &amp; Business Coaching</td><td>Two a month, 90 minutes, biweekly</td><td>$325</td></tr>
-    <tr><td>Option 3 — Business Strategy &amp; Development Coaching</td><td>Four a month, 60 minutes, weekly</td><td>$375</td></tr>
-    <tr><td>Option 4 — VIP Hybrid Private Mentorship &amp; Business Coaching</td><td>Four a month, 90 minutes, weekly, with priority support</td><td>$599</td></tr>
+    <tr><td>Option 1 — Business Strategy &amp; Development Coaching</td><td>Two a month, 60 minutes, biweekly</td><td>$275</td></tr>
+    <tr><td>Option 2 — Hybrid Private Mentorship &amp; Business Coaching</td><td>Two a month, 90 minutes, biweekly</td><td>$375</td></tr>
+    <tr><td>Option 3 — Business Strategy &amp; Development Coaching</td><td>Four a month, 60 minutes, weekly</td><td>$495</td></tr>
+    <tr><td>Option 4 — VIP Hybrid Private Mentorship &amp; Business Coaching</td><td>Four a month, 90 minutes, weekly, with priority support</td><td>$650</td></tr>
   </table>
-  <p class="small muted">The earlier Business Mentorship “Monthly” plan ($250) is still there for anyone already on it. Turn it off in Systems → Academy if it should no longer be offered.</p>
+  <p class="small muted">New prices from October 2026. Faith Mentorship is $175, $235 or $310 a month for 2, 3 or 4 sessions. The earlier single monthly plans are retired for new clients; anyone already paying keeps her price.</p>
   </div>
 </section>
 
@@ -217,7 +217,7 @@
     <li><b>Run the database update (v47)</b> from the project folder:<pre>npx supabase db query --linked --project-ref xsnhxjttdizljaawpumz -f storefront_v47_coaching_forms.sql</pre>It answers with one row: intakes_ready true, forms_ready true, sign_ready true, details_ready true, package_plans 4.</li>
     <li><b>Deploy the email functions</b>, which send the links and the PDF copies:<pre>npx supabase functions deploy join-notify watchdog --no-verify-jwt --use-api --project-ref xsnhxjttdizljaawpumz</pre></li>
     <li><b>Put the site live</b>: tell Claude “merge it”.</li>
-    <li><b>For payment links</b>, connect Stripe: the Stripe secret key and the mentorship webhook, both in Supabase. Until then, everything above works except step 5.</li>
+    <li><b>For payment links</b>, connect the Collective’s own Stripe account: its secret key and the mentorship webhook, both in Supabase. Until then, everything above works except step 5.</li>
   </ol>
 
   <h2>Try it once yourself</h2>

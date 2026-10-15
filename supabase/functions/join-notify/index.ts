@@ -53,6 +53,8 @@ const MARKET_FOOT = 'p31market.com · Where her gifts make room.';
 const VENDOR_EMAIL = 'vendor@p31market.com';
 const OUTREACH_EMAIL = 'outreach@p31market.com';
 const MEMBERS_EMAIL = 'members@thep31collective.org';
+/** Inboxes that get the team emails without the PDF copy (override with NO_PDF_TO). */
+const NO_PDF = () => list('NO_PDF_TO', [MEMBERS_EMAIL]).map((e) => e.toLowerCase());
 const CEO_EMAIL = 'ceo@p31market.com';
 const COLLECTIVE_FOOT = 'thep31collective.org · The P31 Collective by NEBA';
 const withCeo = (to: string[]) => [...new Set([...to, CEO_EMAIL])];
@@ -664,8 +666,17 @@ Deno.serve(async (req) => {
             } catch (e) { console.error(`join-notify ${f.name} pdf`, e); }
           }
           const to = f.external ? f.to(a) : withCeo(f.to(a));
-          const res = await sendEmail(to, f.subject(a), f.email(a), (f.replyTo ? f.replyTo(a) : a.email) || undefined, f.from(), files);
+          // Shared inboxes (members@) get the email but never the PDF copy.
+          const plain = files ? to.filter((e) => NO_PDF().includes(e.toLowerCase())) : [];
+          const withPdf = to.filter((e) => !plain.includes(e));
+          const replyTo = (f.replyTo ? f.replyTo(a) : a.email) || undefined;
+          const res = withPdf.length
+            ? await sendEmail(withPdf, f.subject(a), f.email(a), replyTo, f.from(), files)
+            : await sendEmail(plain, f.subject(a), f.email(a), replyTo, f.from());
           if (!res.ok) { await release(admin, f, 'notified_at', a.id); continue; }
+          if (withPdf.length && plain.length) {
+            try { await sendEmail(plain, f.subject(a), f.email(a), replyTo, f.from()); } catch (e) { console.error(`join-notify ${f.name} plain copy`, e); }
+          }
           r.emailed += 1;
           if (f.after) await f.after(admin, a).catch((e) => console.error(`join-notify ${f.name} after`, e));
           // Their copy, with the PDF: best effort, never blocks the team email.

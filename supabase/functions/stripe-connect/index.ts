@@ -4,6 +4,7 @@
 // Deploy: supabase functions deploy stripe-connect
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { stripeKey as stripeKeyFor } from '../_shared/stripe.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -17,8 +18,8 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
-  const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
-  if (!stripeKey) return json({ error: 'Payments not configured (missing STRIPE_SECRET_KEY).' }, 500);
+  const stripeKey = stripeKeyFor('market');
+  if (!stripeKey) return json({ error: 'Payments not configured (missing MARKET_STRIPE_SECRET_KEY).' }, 500);
 
   try {
     const stripe = new Stripe(stripeKey);

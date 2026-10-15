@@ -8,10 +8,11 @@
 //                           ends, an optional pause after the grace days, and a note when a payment fails.
 // Stripe events (checkout completed, invoices, subscription changes) arrive at academy-webhook, which
 // already listens for them on this Stripe account.
-// Secrets: STRIPE_SECRET_KEY, RESEND_API_KEY, MARKET_EMAIL_FROM or EMAIL_FROM
+// Secrets: MARKET_STRIPE_SECRET_KEY (or STRIPE_SECRET_KEY), RESEND_API_KEY, MARKET_EMAIL_FROM or EMAIL_FROM
 // Deploy: supabase functions deploy vendor-billing --no-verify-jwt
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { stripeKey } from '../_shared/stripe.ts';
 import { sendEmail, layout, esc, emailConfigured } from '../_shared/email.ts';
 
 const env = (k: string) => Deno.env.get(k) || '';
@@ -67,8 +68,8 @@ Deno.serve(async (req) => {
     if (!user) return json({ error: 'Please sign in to your curator studio first.' }, 401);
     const { data: shop } = await db.from('curator_data').select('*').eq('id', user.id).maybeSingle();
     if (!shop) return json({ error: 'This account does not have a storefront yet.' }, 404);
-    if (!env('STRIPE_SECRET_KEY')) return json({ error: `Card payments are not connected yet. Write to ${VENDOR_EMAIL} and we will help.` }, 503);
-    const stripe = new Stripe(env('STRIPE_SECRET_KEY'));
+    if (!stripeKey('market')) return json({ error: `Card payments are not connected yet. Write to ${VENDOR_EMAIL} and we will help.` }, 503);
+    const stripe = new Stripe(stripeKey('market'));
 
     if (b.action === 'portal') {
       if (!shop.stripe_billing_customer_id) return json({ error: 'There is no subscription to manage yet.' }, 409);

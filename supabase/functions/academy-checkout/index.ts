@@ -3,11 +3,12 @@
 // Checkout session. The signed-in person's email must match the invite.
 // Prices live only in academy_plans (never public) and reach the browser only
 // through the invite link.
-//   supabase secrets set STRIPE_SECRET_KEY=sk_live_...   ACADEMY_URL=https://www.thep31collective.org (optional; that's the default)
+//   supabase secrets set COLLECTIVE_STRIPE_SECRET_KEY=sk_live_...   (the Collective's own Stripe account; STRIPE_SECRET_KEY also works)   ACADEMY_URL=https://www.thep31collective.org (optional; that's the default)
 //   supabase functions deploy academy-checkout
 // Body: { token }  →  { url } | { already: true } | { error }
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { stripeKey } from '../_shared/stripe.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -57,10 +58,10 @@ Deno.serve(async (req) => {
     (existing.access_until && new Date(existing.access_until) > new Date() && existing.status === 'active'));
   if (stillActive) return json({ already: true, program: program.slug });
 
-  if (!env('STRIPE_SECRET_KEY')) {
+  if (!stripeKey('collective')) {
     return json({ error: 'Card payments aren’t connected yet. Please email members@thep31collective.org and we’ll help you enroll.' }, 503);
   }
-  const stripe = new Stripe(env('STRIPE_SECRET_KEY'));
+  const stripe = new Stripe(stripeKey('collective'));
   const appUrl = (env('ACADEMY_URL') || 'https://www.thep31collective.org').replace(/\/$/, '');
 
   let customer = existing?.stripe_customer_id || undefined;

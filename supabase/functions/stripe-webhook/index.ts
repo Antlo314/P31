@@ -3,25 +3,25 @@
 // directly (no Supabase JWT), so it MUST be deployed with JWT verification off:
 //   supabase functions deploy stripe-webhook --no-verify-jwt
 // (or set verify_jwt = false in supabase/config.toml / the dashboard toggle).
-// Configure the endpoint in Stripe with events:
-//   checkout.session.completed, account.updated
-// Stripe sends vendors' account.updated on a separate "connected accounts" endpoint with its own
-// signing secret, so STRIPE_WEBHOOK_SECRET may hold both, comma-separated: whsec_aaa,whsec_bbb
+// The Market's Stripe account (MARKET_STRIPE_SECRET_KEY; see _shared/stripe.ts). Configure the endpoint with events:
+//   checkout.session.completed, invoice.paid, invoice.payment_failed,
+//   customer.subscription.updated, customer.subscription.deleted   (orders and storefront subscriptions)
+// and a second, "connected accounts" endpoint at the same address with account.updated (vendor payouts).
+// Each has its own signing secret: MARKET_STRIPE_WEBHOOK_SECRET holds both, comma-separated: whsec_aaa,whsec_bbb
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { stripeFor, webhookSecrets, verifyEvent } from '../_shared/stripe.ts';
+import { storefrontEvent } from '../_shared/storefront-billing.ts';
 import { sendEmail, layout, itemsTable, money, esc } from '../_shared/email.ts';
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
-  const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
-  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
-  if (!stripeKey || !webhookSecret) {
-    console.error('Webhook missing STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET');
+  const stripe = stripeFor('market');
+  if (!stripe || !webhookSecrets('market').length) {
+    console.error('stripe-webhook: missing MARKET_STRIPE_SECRET_KEY or MARKET_STRIPE_WEBHOOK_SECRET');
     return new Response('Webhook not configured', { status: 500 });
   }
-
-  const stripe = new Stripe(stripeKey);
   const admin = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
@@ -31,25 +31,20 @@ Deno.serve(async (req) => {
   // Signature verification needs the raw body + async SubtleCrypto in Deno.
   const body = await req.text();
   const signature = req.headers.get('stripe-signature') || '';
-  let event: Stripe.Event | null = null;
-  let lastError = '';
-  for (const secret of webhookSecret.split(',').map((x) => x.trim()).filter(Boolean)) {
-    try {
-      event = await stripe.webhooks.constructEventAsync(body, signature, secret, undefined, Stripe.createSubtleCryptoProvider());
-      break;
-    } catch (err) { lastError = (err as Error).message; }
-  }
+  const { event, error: lastError } = await verifyEvent(stripe, 'market', body, signature);
   if (!event) {
     console.error('Webhook signature verification failed:', lastError);
     return new Response(`Webhook error: ${lastError}`, { status: 400 });
   }
 
   try {
+    // Storefront subscriptions ($14.99 a month after the free period) live on the Market's account.
+    await storefrontEvent(stripe, admin, event);
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         const meta = session.metadata || {};
-        // Mentorship enrollments and storefront subscriptions are handled by academy-webhook, not as orders.
+        // Mentorship enrollments (academy-webhook) and storefront subscriptions (above) are not orders.
         if (meta.kind === 'academy' || meta.kind === 'storefront' || session.mode === 'subscription') break;
         const shipping =
           // deno-lint-ignore no-explicit-any

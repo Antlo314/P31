@@ -6,6 +6,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 49, file: 'storefront_v49_new_pricing.sql', title: 'New pricing', what: 'October 2026 prices: the four business coaching packages and three faith mentorship packages, monthly; the earlier single monthly plans retired for new clients.',
+    expect: 'business_prices 27500/37500/49500/65000 · faith_prices 17500/23500/31000 · old_plans_retired true',
+    checks: [['column', 'academy_plans', 'package']] },
   { v: 48, file: 'storefront_v48_shop_emails.sql', title: 'Shop emails', what: 'The team is emailed when a new shop signs up, and the vendor is emailed the moment her shop is approved.',
     expect: 'signup_column true · live_column true',
     checks: [['column', 'curator_data', 'live_notified_at']] },

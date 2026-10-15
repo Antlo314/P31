@@ -2,6 +2,12 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 15 (later) — Two Stripe accounts, new prices, and no PDFs to members@
+
+- **A Stripe account for each site.** The Market (shop checkout, vendor payouts, the $14.99 storefront subscription) and the Collective (mentorship and coaching) now connect to separate Stripe accounts: `MARKET_STRIPE_SECRET_KEY` / `MARKET_STRIPE_WEBHOOK_SECRET` (endpoint `stripe-webhook`) and `COLLECTIVE_STRIPE_SECRET_KEY` / `COLLECTIVE_STRIPE_WEBHOOK_SECRET` (endpoint `academy-webhook`). Storefront subscription events are now handled on the Market's own webhook. The older single-account names still work, so nothing breaks while one side is connected and the other is not. Shared code: `supabase/functions/_shared/stripe.ts` and `_shared/storefront-billing.ts`.
+- **New prices (v49), monthly for everyone.** Business coaching: Option 1 (Business, 2 sessions) $275, Option 2 (Hybrid, 2 sessions) $375, Option 3 (Business, 4 sessions) $495, Option 4 (VIP Hybrid, 4 sessions) $650. Faith Mentorship: $175, $235 or $310 for 2, 3 or 4 sessions a month. The earlier single monthly plans ($250 business, $160 faith) are retired for new clients; anyone already paying keeps her price. Prices still live only in the database and reach the page only through a private link.
+- **members@ gets the team emails without the PDF copies** (intro calls, the three coaching forms and any form sent there). Everyone else on the email still gets the PDF. Other inboxes can be added with the `NO_PDF_TO` secret.
+
 ## October 15 — Virtual storefronts: a walkthrough, a sample shop, and the gaps closed
 
 - **A finished sample shop.** The demo data's bakery is now *Myrrh & Mercy Apothecary*: a made-up candle, body care and keepsakes shop with a logo, banner, story, badges, an announcement, Cash App and Venmo, three reviews and seven products that between them show every label a shop can carry (sale with a countdown, new, only a few left, pre-order, limited, sold out, options, several photos). Its photos are crops of the P31 maker photos and live in `src/dev/sample-shop`, served only by the preview on this computer and never part of the live site.

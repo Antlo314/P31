@@ -5,6 +5,7 @@
 // Body: { program }  →  { url } | { error }
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { stripeKey } from '../_shared/stripe.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -18,7 +19,7 @@ const env = (k: string) => Deno.env.get(k) || '';
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
-  if (!env('STRIPE_SECRET_KEY')) return json({ error: 'Billing isn’t connected yet — email members@thep31collective.org.' }, 503);
+  if (!stripeKey('collective')) return json({ error: 'Billing isn’t connected yet — email members@thep31collective.org.' }, 503);
 
   const db = createClient(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'), { auth: { persistSession: false } });
   const { data: userData } = await db.auth.getUser((req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, ''));
@@ -32,7 +33,7 @@ Deno.serve(async (req) => {
     .eq('user_id', user.id).eq('program.slug', program).maybeSingle();
   if (!row?.stripe_customer_id) return json({ error: 'There’s no card on file for this mentorship.' }, 404);
 
-  const stripe = new Stripe(env('STRIPE_SECRET_KEY'));
+  const stripe = new Stripe(stripeKey('collective'));
   const appUrl = (env('ACADEMY_URL') || 'https://www.thep31collective.org').replace(/\/$/, '');
   const portal = await stripe.billingPortal.sessions.create({
     customer: row.stripe_customer_id, return_url: `${appUrl}/academy/${program}/billing`,
