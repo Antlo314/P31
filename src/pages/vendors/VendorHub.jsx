@@ -6,9 +6,9 @@ import { EMAIL, OFFICE } from '../../lib/team';
 import './forms.css';
 
 const FORMS = [
-  { to: '/apply', Icon: ClipboardList, kicker: 'Start here', title: 'Apply to vend', body: 'The vendor interest form for the Proverbs 31 Market. Official acceptance and event details are emailed to you.', cta: 'Apply', tone: 'night' },
+  { to: '/apply', Icon: ClipboardList, kicker: 'Market events', title: 'Vend at a P31 Market', body: 'Apply for a booth at our seasonal markets. Official acceptance and event details are emailed to you.', cta: 'Apply to vend', tone: 'night' },
   { to: '/vendors/register', Icon: CalendarCheck, kicker: 'Approved vendors', title: 'Market registration', body: 'Reserve your space at a market: your details, the Vendor Rules & Regulations, your signature and your logo.', cta: 'Register for a market' },
-  { to: '/vendors/agreement', Icon: FileSignature, kicker: 'Virtual storefront', title: 'Storefront Agreement', body: 'Finalize your business storefront on P31 Virtual Marketplace: benefits, responsibilities and terms, signed online.', cta: 'Read and sign' },
+  { to: '/storefront', Icon: FileSignature, kicker: 'Virtual storefront', title: 'Open a virtual storefront', body: 'Your own storefront on p31market.com: the benefits, responsibilities and terms, then the Storefront Agreement, signed online.', cta: 'Start your storefront', tone: 'night' },
   { to: '/vendors/feedback', Icon: Star, kicker: 'After a market', title: 'Vendor Feedback Survey', body: 'Tell us honestly how the market went. Every answer shapes the next one.', cta: 'Give feedback' },
   { to: '/volunteer', Icon: HandHeart, kicker: 'Serve with us', title: 'Volunteer', body: 'Help on market day. The Day-of-Event Acknowledgment takes two minutes.', cta: 'Volunteer' },
 ];
@@ -20,7 +20,7 @@ const VendorHub = () => (
       eyebrow="Proverbs 31 Market"
       title="Vendor"
       accent="forms"
-      lead="Everything a vendor signs or sends us, in one place: apply, register for a market, sign the storefront agreement, share feedback, or volunteer."
+      lead="Everything a vendor signs or sends us, in one place: apply to vend at a market, open a virtual storefront, register for a market, share feedback, or volunteer."
     />
     <section className="k-section">
       <div className="vf-cards" data-reveal-group>

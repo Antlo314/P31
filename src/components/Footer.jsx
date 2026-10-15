@@ -53,7 +53,8 @@ const Footer = () => (
         </nav>
         <nav className="ft__col" aria-label="Join">
           <h4>Join</h4>
-          <Link to="/apply">Become a curator</Link>
+          <Link to="/apply">Vend at a market</Link>
+          <Link to="/storefront">Open a virtual storefront</Link>
           <Link to="/vendors">Vendor forms</Link>
           <Link to="/volunteer">Volunteer</Link>
           <Link to="/partner">Partner with us</Link>

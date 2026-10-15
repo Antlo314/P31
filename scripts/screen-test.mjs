@@ -189,6 +189,9 @@ const SCREENS = [
   ['curators & shops on a phone', cl('/systems/shops'), ['Sample Bakery Co.'], 'Featured In The Directory', { phone: true }],
   // Operations (v42)
   ['health: database updates', cl('/systems/health'), [], 'Every script the site needs is in the database'],
+  ['health: the watchdog', cl('/systems/health'), [], 'Run checks now'],
+  ['vendor pages: vend at a market', mk('/apply'), [], 'Open a virtual storefront'],
+  ['vendor pages: virtual storefront', mk('/storefront'), [], 'Vend at a P31 Market'],
   ['activity log', cl('/systems/activity'), [], 'Melanie JC changed shop'],
   ['activity log: one area', cl('/systems/activity'), ['Events'], 'Business and Leadership Luncheon'],
   ['settings: automatic emails', cl('/systems/settings'), [], 'Class reminders'],

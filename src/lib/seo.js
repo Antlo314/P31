@@ -54,8 +54,12 @@ export const ROUTE_META = {
     description: 'Become a curator: an online storefront, a booth at our Atlanta-area markets, brand curation and one-on-one coaching for women-owned brands.',
   },
   '/apply': {
-    title: `Become a Vendor — ${SITE_NAME}`,
-    description: 'Apply to vend at the Proverbs 31 Market: a faith-centered marketplace that uplifts, supports and showcases women-led brands and artisans in Atlanta.',
+    title: `Vend at a P31 Market — ${SITE_NAME}`,
+    description: 'Apply for a booth at the Proverbs 31 Market: a faith-centered Atlanta marketplace that uplifts, supports and showcases women-led brands and artisans.',
+  },
+  '/storefront': {
+    title: `Open a Virtual Storefront — ${SITE_NAME}`,
+    description: 'Sell online all year with your own storefront on p31market.com: up to 10 products or services, P31 marketing and support, free for your first 3 months.',
   },
   '/partner': {
     title: `Sponsor & Partner With Us — ${SITE_NAME}`,

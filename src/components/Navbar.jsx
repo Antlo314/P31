@@ -204,7 +204,14 @@ const Navbar = () => {
             <li>
               <Link to="/apply">
                 <span className="sheet__icon sheet__icon--gold"><Sparkles size={18} /></span>
-                Become a Curator
+                Vend at a market
+                <ChevronRight size={18} className="sheet__chev" />
+              </Link>
+            </li>
+            <li>
+              <Link to="/storefront">
+                <span className="sheet__icon sheet__icon--gold"><Store size={18} /></span>
+                Open a virtual storefront
                 <ChevronRight size={18} className="sheet__chev" />
               </Link>
             </li>

@@ -6,6 +6,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 45, file: 'storefront_v45_watchdog.sql', title: 'Watchdog', what: 'An hourly check of the whole system (social accounts, posts, forms, emails, scheduled jobs, site errors) that fixes what it safely can and alerts on the rest.',
+    expect: 'alerts_ready true · runs_ready true · cron_health_ready true · watchdog_scheduled true',
+    checks: [['table', 'ops_alerts'], ['table', 'ops_runs']] },
   { v: 44, file: 'storefront_v44_design_studio.sql', title: 'Design studio', what: 'Designs saved from Content Studio > Design are shared with the whole Studio team, and songs uploaded for reels go into a team music library.',
     expect: 'designs_ready true · tracks_ready true · shared_file_rules 3 · team_photos_ok true',
     checks: [['table', 'studio_designs'], ['table', 'studio_tracks']] },

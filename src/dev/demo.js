@@ -303,6 +303,9 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
   ],
   // Operations (v42): which scripts ran, the activity log, the billing and automatic-email switches.
   schema_versions: [{ version: 41, name: 'team dashboards', applied_at: day(-1) }, { version: 42, name: 'operations', applied_at: iso(-30) }],
+  // The watchdog (v45): one open heads-up and the last run.
+  ops_alerts: [{ id: 'al1', key: 'social.token.facebook', severity: 'warn', area: 'social', title: 'Facebook login expires in 12 days', detail: 'Zernio access to Facebook ends November 26; posts stop going out after that.', fix: 'Reconnect Facebook in Zernio before then (Accounts > Facebook > Reconnect).', link: 'https://zernio.com', first_seen: day(-1), last_seen: iso(-20), resolved_at: null }],
+  ops_runs: [{ id: 1, ran_at: iso(-20), source: 'cron', ok: false, open_alerts: 1, checks: [], healed: ['Retried the failed post "Sample post"'], emailed: null }],
   app_settings: [
     { key: 'billing', value: { price_cents: 1499, free_months: 3, remind_days: 14, grace_days: 7, auto_pause: false } },
     { key: 'reminders', value: { enabled: true, day_before: true, hour_before: true } },

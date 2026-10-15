@@ -108,7 +108,7 @@ const Directory = () => {
             <p>{query ? 'Try a different word, or clear the search.' : 'Approved curators appear here as they open their storefronts.'}</p>
             {query
               ? <button className="k-btn k-btn--ghost" onClick={() => setQuery('')}>Clear search</button>
-              : <Link className="k-btn k-btn--gold" to="/apply">Become a curator <ArrowUpRight size={16} /></Link>}
+              : <Link className="k-btn k-btn--gold" to="/storefront">Open a storefront <ArrowUpRight size={16} /></Link>}
           </div>
         )}
       </section>

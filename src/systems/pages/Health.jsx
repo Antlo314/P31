@@ -3,6 +3,7 @@ import { Activity, CheckCircle2, RotateCcw, ChevronDown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { fmtDateTime } from '../../lib/academy';
 import DbUpdates from './DbUpdates';
+import Watchdog from './Watchdog';
 import { DeleteRecord } from '../AdminRecord';
 
 const VIEWS = [['open', 'Open'], ['resolved', 'Fixed'], ['all', 'All']];
@@ -43,8 +44,9 @@ const Health = () => {
       <header className="sys-page__head">
         <p className="sys-eyebrow">Health</p>
         <h1>Health</h1>
-        <p className="sys-muted">Whether the database has every update the site needs, and the errors visitors hit on p31market.com or thep31collective.org, grouped so each problem appears once with a count. Mark an error fixed once it’s handled; if it happens again, it reopens.</p>
+        <p className="sys-muted">The hourly watchdog (what it found and fixed), whether the database has every update the site needs, and the errors visitors hit on p31market.com or thep31collective.org, grouped so each problem appears once with a count. Mark an error fixed once it’s handled; if it happens again, it reopens.</p>
       </header>
+      <Watchdog />
       <DbUpdates />
       <h2 className="sys-subhead">Site errors</h2>
       {error && <p className="sys-error">{error}</p>}

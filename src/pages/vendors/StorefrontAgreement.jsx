@@ -7,6 +7,7 @@ import { EMAIL } from '../../lib/team';
 import { submitForm, readSent, markSent, clearSent, todayLong, todayISO, signedInContact } from '../../lib/forms';
 import { AGREEMENT, AGREEMENT_CONFIRM, AGREEMENT_VERSION } from './formText';
 import { Chips, NameRow, ContactRow, Prefilled, Done, HelpLine, Trap } from './FormBits';
+import CuratorPaths from './CuratorPaths';
 
 const SENT_KEY = 'p31_agreement_sent';
 const BLANK = {
@@ -140,19 +141,21 @@ const BENEFITS = [
   [LayoutTemplate, 'A professional storefront layout, your listings'],
 ];
 
-// /vendors/agreement — the Proverbs 31 Marketplace Storefront Agreement Form.
+// /storefront (and /vendors/agreement) — virtual storefront inquiries: the Proverbs 31 Marketplace
+// Storefront Agreement Form, which replaced the JotForm of the same name.
 const StorefrontAgreement = () => (
   <div className="k-page">
     <PageHeader
-      eyebrow="P31 Virtual Marketplace"
-      title="Storefront"
-      accent="Agreement"
-      lead="Complete this form to finalize your business storefront on P31 Virtual Marketplace."
+      eyebrow="Become a curator · P31 Virtual Marketplace"
+      title="Open your virtual"
+      accent="storefront"
+      lead="Sell online all year with your own storefront on p31market.com. Read the terms, then send your details and sign the Storefront Agreement; within 7–10 days you will receive a link to set up your storefront."
       actions={<>
-        <a href="#sign" className="k-btn k-btn--gold">Sign the agreement <ArrowDown size={18} /></a>
+        <a href="#sign" className="k-btn k-btn--gold">Start your storefront <ArrowDown size={18} /></a>
         <a href="#terms" className="k-btn k-btn--light">Read the terms</a>
       </>}
     />
+    <CuratorPaths current="storefront" />
 
     <section className="k-section" id="terms">
       <div className="k-split jn-split" style={{ alignItems: 'start' }}>

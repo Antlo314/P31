@@ -23,17 +23,18 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 | 17 | Edit and delete in every Systems room | As an admin | both sites | 6 |
 | 18 | Every form: CEO email and a PDF copy | As a visitor | both sites | 5 |
 | 19 | Design a post, and a reel with music | As a team member | both sites | 6 |
-| 20 | Send a campaign test | As an admin | p31market.com | 3 |
-| 21 | The Gathering: post, thread, direct message, alert | As a team member | both sites | 5 |
-| 22 | The Gathering: @mention and search | As a team member | both sites | 4 |
-| 23 | Database updates land | As an admin | both sites | 3 |
-| 24 | A storefront free period and subscription | As an admin | p31market.com | 6 |
-| 25 | Class reminder emails | As an admin | thep31collective.org | 3 |
-| 26 | Welcome emails for a new subscriber | As a visitor | p31market.com | 3 |
-| 27 | The activity log | As an admin | both sites | 2 |
-| 28 | Eventbrite ticket sales | As an admin | p31market.com | 3 |
-| 29 | Walkthroughs play on every dashboard | As a team member | both sites | 3 |
-| 30 | Automated screen, link and form check | As an admin | both sites | 2 |
+| 20 | The watchdog catches a problem and clears it | As an admin | both sites | 3 |
+| 21 | Send a campaign test | As an admin | p31market.com | 3 |
+| 22 | The Gathering: post, thread, direct message, alert | As a team member | both sites | 5 |
+| 23 | The Gathering: @mention and search | As a team member | both sites | 4 |
+| 24 | Database updates land | As an admin | both sites | 3 |
+| 25 | A storefront free period and subscription | As an admin | p31market.com | 6 |
+| 26 | Class reminder emails | As an admin | thep31collective.org | 3 |
+| 27 | Welcome emails for a new subscriber | As a visitor | p31market.com | 3 |
+| 28 | The activity log | As an admin | both sites | 2 |
+| 29 | Eventbrite ticket sales | As an admin | p31market.com | 3 |
+| 30 | Walkthroughs play on every dashboard | As a team member | both sites | 3 |
+| 31 | Automated screen, link and form check | As an admin | both sites | 2 |
 
 ## 1. Vendor application
 
@@ -59,7 +60,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Do this**
 
-1. Open p31market.com/vendors/agreement.
+1. Open p31market.com/storefront (the virtual storefront page; /vendors/agreement opens the same page).
 2. Fill in the business and contact (TEST in the name), tick “I agree”, sign with your mouse or finger, and submit.
 
 **What should happen**
@@ -359,7 +360,25 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Delete the TEST post from the Calendar and the design from Saved.
 
-## 20. Send a campaign test
+## 20. The watchdog catches a problem and clears it
+
+*As an admin · both sites · about 3 minutes*
+
+**Do this**
+
+1. Open Systems → Health. The Watchdog panel at the top says when it last checked; press Run checks now.
+2. If something is listed, read its Fix line and open it. Try Snooze a day on one alert.
+3. Submit a TEST vendor application and, after a few minutes, run the checks again.
+
+**What should happen**
+
+- The panel answers “Everything is running” or lists each problem with how to fix it, and Today shows the same in its System check card.
+- A snoozed alert is greyed out and no longer emailed; it still clears itself once the check passes.
+- A brand-new failure (for example a post that keeps failing) is emailed to the alert list within the hour; anything still open is summarized at 8 AM.
+
+**Afterwards:** Delete the TEST application.
+
+## 21. Send a campaign test
 
 *As an admin · p31market.com · about 3 minutes*
 
@@ -373,7 +392,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Leave it as a draft, or delete it.
 
-## 21. The Gathering: post, thread, direct message, alert
+## 22. The Gathering: post, thread, direct message, alert
 
 *As a team member · both sites · about 5 minutes*
 
@@ -389,7 +408,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Delete the test messages (the ⋯ menu on your own message).
 
-## 22. The Gathering: @mention and search
+## 23. The Gathering: @mention and search
 
 *As a team member · both sites · about 4 minutes*
 
@@ -407,7 +426,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Delete the test message.
 
-## 23. Database updates land
+## 24. Database updates land
 
 *As an admin · both sites · about 3 minutes*
 
@@ -424,7 +443,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** None.
 
-## 24. A storefront free period and subscription
+## 25. A storefront free period and subscription
 
 *As an admin · p31market.com · about 6 minutes*
 
@@ -443,7 +462,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Tap “Take out of billing” on the test shop (or leave it complimentary).
 
-## 25. Class reminder emails
+## 26. Class reminder emails
 
 *As an admin · thep31collective.org · about 3 minutes*
 
@@ -458,7 +477,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Delete the TEST session.
 
-## 26. Welcome emails for a new subscriber
+## 27. Welcome emails for a new subscriber
 
 *As a visitor · p31market.com · about 3 minutes*
 
@@ -474,7 +493,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Unsubscribe the test address.
 
-## 27. The activity log
+## 28. The activity log
 
 *As an admin · both sites · about 2 minutes*
 
@@ -489,7 +508,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** Undo the test change (that is logged too).
 
-## 28. Eventbrite ticket sales
+## 29. Eventbrite ticket sales
 
 *As an admin · p31market.com · about 3 minutes*
 
@@ -505,7 +524,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** None.
 
-## 29. Walkthroughs play on every dashboard
+## 30. Walkthroughs play on every dashboard
 
 *As a team member · both sites · about 3 minutes*
 
@@ -520,7 +539,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 **Afterwards:** None.
 
-## 30. Automated screen, link and form check
+## 31. Automated screen, link and form check
 
 *As an admin · both sites · about 2 minutes*
 

@@ -90,7 +90,7 @@ const INTENT = [
   [/^\/about$/, load.about], [/^\/calendar$/, load.calendar], [/^\/directory$/, load.directory], [/^\/partner$/, load.partner],
   [/^\/(login|register)$/, load.login], [/^\/dashboard(\/|$)/, load.dashboard], [/^\/services$/, load.services],
   [/^\/(shop|favorites)$/, load.shop], [/^\/apply$/, load.apply], [/^\/vendors$/, load.vendorHub],
-  [/^\/vendors\/agreement$/, load.agreement], [/^\/vendors\/register$/, load.registration], [/^\/vendors\/feedback$/, load.feedback],
+  [/^\/(vendors\/agreement|storefront)$/, load.agreement], [/^\/vendors\/register$/, load.registration], [/^\/vendors\/feedback$/, load.feedback],
   [/^\/volunteer$/, load.volunteer], [/^\/mentorship(\/|$)/, load.mentorship], [/^\/portal$/, load.portal],
   [/^\/verify(\/|$)/, load.verify], [/^\/academy$/, load.academy], [/^\/academy\/[^/]+/, load.classroom], [/^\/join$/, load.join],
   [/^\/systems(\/|$)/, load.systems], [/^\/studio(\/|$)/, load.studio], [/^\/today$/, load.today], [/^\/gather(\/|$)/, load.gather],
@@ -171,6 +171,7 @@ function SiteRoutes() {
             <Route path="/partner" element={<Partner />} />
             <Route path="/apply" element={<VendorApply />} />
             <Route path="/vendors" element={<VendorHub />} />
+            <Route path="/storefront" element={<StorefrontAgreement />} />
             <Route path="/vendors/agreement" element={<StorefrontAgreement />} />
             <Route path="/vendors/register" element={<VendorRegistration />} />
             <Route path="/vendors/feedback" element={<VendorFeedback />} />

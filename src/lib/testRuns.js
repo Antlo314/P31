@@ -23,7 +23,7 @@ export const TEST_RUNS = [
   {
     id: 'storefront-agreement', title: 'Storefront agreement', site: 'market', who: 'visitor', minutes: 4, tour: 'sys:forms',
     steps: [
-      'Open p31market.com/vendors/agreement.',
+      'Open p31market.com/storefront (the virtual storefront page; /vendors/agreement opens the same page).',
       'Fill in the business and contact (TEST in the name), tick “I agree”, sign with your mouse or finger, and submit.',
     ],
     expect: [
@@ -213,6 +213,20 @@ export const TEST_RUNS = [
       'Trending Instagram tracks list under Pick a trending track once the Instagram account is connected to Zernio through Facebook Login; before that the Studio says so.',
     ],
     cleanup: 'Delete the TEST post from the Calendar and the design from Saved.',
+  },
+  {
+    id: 'watchdog', title: 'The watchdog catches a problem and clears it', site: 'both', who: 'admin', minutes: 3,
+    steps: [
+      'Open Systems → Health. The Watchdog panel at the top says when it last checked; press Run checks now.',
+      'If something is listed, read its Fix line and open it. Try Snooze a day on one alert.',
+      'Submit a TEST vendor application and, after a few minutes, run the checks again.',
+    ],
+    expect: [
+      'The panel answers “Everything is running” or lists each problem with how to fix it, and Today shows the same in its System check card.',
+      'A snoozed alert is greyed out and no longer emailed; it still clears itself once the check passes.',
+      'A brand-new failure (for example a post that keeps failing) is emailed to the alert list within the hour; anything still open is summarized at 8 AM.',
+    ],
+    cleanup: 'Delete the TEST application.',
   },
   {
     id: 'campaign', title: 'Send a campaign test', site: 'market', who: 'admin', minutes: 3, tour: 'sys:campaigns',

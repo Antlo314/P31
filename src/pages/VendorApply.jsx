@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Mail, CalendarDays, MapPin, Store, HeartHandshake, Sparkles } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import CuratorPaths from './vendors/CuratorPaths';
 import { supabase } from '../lib/supabase';
 import { EMAIL } from '../lib/team';
 import { fetchUpcomingEvents, formatEventDate, showDate, showMonth, monthLabel } from '../lib/events';
@@ -205,12 +206,13 @@ const NextMarket = () => {
 const VendorApply = () => (
   <div className="k-page">
     <PageHeader
-      eyebrow="Proverbs 31 Market"
-      title="Become a"
-      accent="vendor"
-      lead="A faith-centered marketplace created to uplift, support, and showcase women-led brands and artisans."
+      eyebrow="Become a curator · Market events"
+      title="Vend at a"
+      accent="P31 Market"
+      lead="Apply for a booth at our seasonal Atlanta markets: a faith-centered marketplace created to uplift, support, and showcase women-led brands and artisans."
       actions={<a href="#apply" className="k-btn k-btn--gold">Apply to vend <ArrowRight size={18} /></a>}
     />
+    <CuratorPaths current="market" />
 
     <section className="k-section">
       <div className="k-split jn-split" style={{ alignItems: 'start' }}>

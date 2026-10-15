@@ -2,6 +2,11 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 14 (night) — The watchdog, and two clear doors for curators
+
+- **A watchdog that checks everything, every hour.** It confirms Instagram and Facebook are connected in Zernio and warns two weeks before a login expires; retries any post that failed (once, by itself) and alerts if it keeps failing; warns when the next week has days with no post; re-sends form emails that did not go out and alerts if they still do not; flags applications and requests that have waited more than two days; and watches for bursts of site errors, scheduled jobs that fail or stop, database updates waiting, and email or Zernio not being set up. Each problem is one alert with a plain "how to fix it", in a new Watchdog panel at the top of Systems → Health and on Today. A new failure is emailed within the hour; anything still open is summarized at 8 AM. Alerts close themselves once the check passes; they can be snoozed or marked fixed. Database v45 and a new `watchdog` function.
+- **Two separate pages for curators**, as Melanie asked. p31market.com/apply is now "Vend at a P31 Market" (a booth at our seasonal markets), and the new p31market.com/storefront is "Open your virtual storefront": what you get, the terms (three months complimentary, then $14.99 a month plus the 5% transaction fee), and the Storefront Agreement form that replaced the JotForm of the same name. Both open with the same two doors, so anyone who arrives on the wrong one can switch, and the footer, the phone menu, the vendor forms page, the shop directory and the About page each point to the right one. The old /vendors/agreement address still works.
+
 ## October 14 (evening) — The Collective's new hands
 
 - **The hands, redrawn.** The Proverbs 31 Collective's mark is now the new artwork: crisp deep purple and gold hands inside the open ring. It is in the thep31collective.org header and footer, the browser tab icon, the phone home-screen icon, the link preview when the site is shared, the mentorship, join and portal pages, every Collective dashboard, The Gathering, the PDF copies of Collective forms, the Design studio and the brand kit.

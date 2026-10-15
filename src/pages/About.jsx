@@ -93,7 +93,7 @@ const About = () => (
           <p className="k-eyebrow" style={{ margin: 0 }} data-reveal="fade">For curators</p>
           <h2 className="k-h2" data-split>From gift to <em>storefront</em></h2>
         </div>
-        <Link to="/apply" className="k-btn k-btn--plum" data-reveal>Start your application <ArrowUpRight size={18} /></Link>
+        <Link to="/storefront" className="k-btn k-btn--plum" data-reveal>Open your storefront <ArrowUpRight size={18} /></Link>
       </div>
       <ol className="k-steps" style={{ '--steps': 4 }} data-reveal-group>
         {STEPS.map(([t, b]) => <li key={t}><h3>{t}</h3><p>{b}</p></li>)}

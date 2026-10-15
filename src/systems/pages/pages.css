@@ -159,3 +159,32 @@
 .sub-row__main { display: grid; gap: 2px; min-width: 0; }
 .sub-row__main small { color: var(--sys-muted, rgba(255,255,255,0.6)); overflow-wrap: anywhere; }
 @media (max-width: 700px) { .sub-list li.sub-row { grid-template-columns: 1fr; } }
+
+/* Systems → Health → Watchdog (Watchdog.jsx) */
+.wd { display: grid; gap: 12px; margin-bottom: 22px; }
+.wd--ok { border-color: rgba(123, 224, 184, 0.35); }
+.wd--alert { border-color: rgba(255, 138, 138, 0.45); }
+.wd-head { display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; }
+.wd-head > div { flex: 1 1 260px; min-width: 0; }
+.wd-head h2 { margin: 0 0 4px; font-size: 1.15rem; }
+.wd-head p { margin: 0; font-size: 0.86rem; }
+.wd-badge { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 14px; }
+.wd--ok .wd-badge { background: rgba(123, 224, 184, 0.14); color: #7be0b8; }
+.wd--alert .wd-badge { background: rgba(255, 138, 138, 0.14); color: #ff8a8a; }
+.wd-head .spin { animation: adm-spin 1s linear infinite; }
+.wd-healed { display: flex; gap: 8px; align-items: flex-start; margin: 0; padding: 10px 12px; border-radius: 12px; background: rgba(123, 224, 184, 0.08); color: #a6ecd0; font-size: 0.86rem; }
+.wd-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.wd-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 14px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.03); }
+.wd-item--fail { border-left: 3px solid #ff8a8a; }
+.wd-item--warn { border-left: 3px solid #F2CE4D; }
+.wd-item.is-snoozed { opacity: 0.6; }
+.wd-item__main { display: grid; gap: 4px; min-width: 0; }
+.wd-item__main small { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.75; }
+.wd-item__main strong { font-size: 0.98rem; }
+.wd-item__main p { margin: 0; font-size: 0.86rem; opacity: 0.85; overflow-wrap: anywhere; }
+.wd-fix { color: #F2CE4D; opacity: 1 !important; }
+.wd-item__tools { display: flex; flex-wrap: wrap; gap: 6px; align-content: start; justify-content: flex-end; max-width: 280px; }
+.wd-closed summary { cursor: pointer; font-size: 0.86rem; opacity: 0.8; }
+.wd-closed ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; font-size: 0.84rem; opacity: 0.8; }
+.wd-closed li { display: flex; gap: 6px; align-items: center; }
+@media (max-width: 700px) { .wd-item { grid-template-columns: 1fr; } .wd-item__tools { justify-content: flex-start; max-width: none; } }

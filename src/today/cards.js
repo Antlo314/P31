@@ -2,7 +2,7 @@
 // AttentionCard; a card whose data this person can't read is left out. Shared by
 // Today (the team's home) and the Systems overview.
 import {
-  ClipboardCheck, MessageCircle, PhoneCall, Video, UserPlus, Store, Receipt, Activity, Inbox, CalendarClock, Mail, Film, CheckCircle2, FileSignature,
+  ClipboardCheck, MessageCircle, PhoneCall, Video, UserPlus, Store, Receipt, Activity, Inbox, CalendarClock, Mail, Film, CheckCircle2, FileSignature, ShieldAlert,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { studio } from '../studio/api';
@@ -140,9 +140,17 @@ export async function collectiveCards() {
 
 /** Both sites: errors visitors hit. */
 export async function healthCards() {
-  const errors = await supabase.from('app_errors').select('*', { count: 'exact' }).is('resolved_at', null).order('last_seen', { ascending: false }).limit(4);
-  if (errors.error) return [];
-  return [{
+  const [errors, alerts] = await Promise.all([
+    supabase.from('app_errors').select('*', { count: 'exact' }).is('resolved_at', null).order('last_seen', { ascending: false }).limit(4),
+    supabase.from('ops_alerts').select('*', { count: 'exact' }).is('resolved_at', null).order('severity').order('first_seen').limit(4),
+  ]);
+  // The watchdog's open alerts (v45): what needs a person, each with how to fix it.
+  const watch = alerts.error ? [] : [{
+    key: 'watchdog', site: 'both', Icon: ShieldAlert, title: 'System check', count: alerts.count ?? (alerts.data || []).length, to: '/systems/health', cta: 'Open the watchdog', empty: 'The hourly check found nothing wrong.', tone: 'alert',
+    items: (alerts.data || []).map((a) => ({ key: a.id, title: a.title, sub: `${a.severity === 'fail' ? 'Needs attention' : 'Heads up'} · since ${ago(a.first_seen)}` })),
+  }];
+  if (errors.error) return watch;
+  return [...watch, {
     key: 'errors', site: 'both', Icon: Activity, title: 'Site errors', count: errors.count ?? (errors.data || []).length, to: '/systems/health', cta: 'Open Health', empty: 'Both sites are running clean.', tone: 'alert',
     items: (errors.data || []).map((e) => ({ key: e.id, title: e.message, sub: `${e.path || 'unknown page'} · ${e.count}× · ${ago(e.last_seen)}` })),
   }];
