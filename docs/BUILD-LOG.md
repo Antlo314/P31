@@ -2,6 +2,12 @@
 
 A running record of what has been built for Proverbs 31 Marketplace and The P31 Collective, written for the CEO's report. Newest first. Dates are 2026.
 
+## October 14 (evening) — The Collective's new hands
+
+- **The hands, redrawn.** The Proverbs 31 Collective's mark is now the new artwork: crisp deep purple and gold hands inside the open ring. It is in the thep31collective.org header and footer, the browser tab icon, the phone home-screen icon, the link preview when the site is shared, the mentorship, join and portal pages, every Collective dashboard, The Gathering, the PDF copies of Collective forms, the Design studio and the brand kit.
+- **Made to read everywhere.** The deep purple needs a light ground, so the hands sit on white for app icons and profile pictures, and on a white disc in browser tabs and on the Collective's dark pages. On dark designs the Studio uses the gold version; there are also white and plum one-colour versions for print.
+- **Scheduled posts updated.** The five mentorship invitations still waiting to go out (October 16, 20, 24, November 1 and 5) now carry the new hands. A 1080 px profile picture for the Collective's Instagram is in marketing/brand/collective/social.
+
 ## October 14 — The new Proverbs 31 Marketplace logo, and the team's photos put right
 
 - **The marketplace has its own logo.** "Rise & Build": three plum panels reading PROVERBS, 31 and MARKETS in gilded capitals, from the CEO's new artwork, redrawn as type so it is sharp at every size. (The artwork as supplied spelled the left panel "PROVEBS"; the redraw spells PROVERBS in full and otherwise matches it.) It is now in the p31market.com header and footer, the browser tab icon, the phone home-screen icon, the link preview when p31market.com is shared, the Content Studio, the PDF copies of marketplace forms, and the curator invitation cards. The Collective keeps the hands everywhere on thep31collective.org, and mentorship invitations keep them too.

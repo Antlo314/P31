@@ -265,3 +265,9 @@ video.gt-media__item { width: 100%; max-height: 420px; cursor: auto; }
 .gt-hit__meta b { color: var(--gt-ink); }
 .gt-hit__text { font-size: 0.86rem; line-height: 1.45; overflow-wrap: anywhere; }
 .gt-hit mark { background: rgba(242, 206, 77, 0.28); color: var(--gt-ink); border-radius: 3px; padding: 0 1px; }
+
+/* The Collective's hands (2026 artwork) are deep purple and gold, so on these dark rooms they sit
+   on a white disc, as in the site header. */
+.gt-side__brand img, .gt-gate > img, .gt-wordpop > img, .gt-msg__mark {
+  background: #fff; border-radius: 50%; object-fit: contain; padding: 3px; box-shadow: 0 0 0 1px rgba(242, 206, 77, 0.45);
+}

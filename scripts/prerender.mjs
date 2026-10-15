@@ -179,11 +179,11 @@ const C = COLLECTIVE_URL;
 const collectiveTemplate = template
   .replace(/\s*<link rel="shortcut icon"[^>]*>/, '')
   .replace(/<link rel="icon"[^>]*>/, [
-    '<link rel="icon" type="image/png" sizes="32x32" href="/c/icons/favicon-32.png" />',
-    '<link rel="icon" type="image/png" sizes="96x96" href="/c/icons/favicon-96.png" />',
-    '<link rel="shortcut icon" href="/c/favicon.ico" />',
+    '<link rel="icon" type="image/png" sizes="32x32" href="/c/icons/favicon-32.png?v=2" />',
+    '<link rel="icon" type="image/png" sizes="96x96" href="/c/icons/favicon-96.png?v=2" />',
+    '<link rel="shortcut icon" href="/c/favicon.ico?v=2" />',
   ].join('\n    '))
-  .replace(/<link rel="apple-touch-icon"[^>]*>/, '<link rel="apple-touch-icon" href="/c/icons/apple-touch-icon.png" />')
+  .replace(/<link rel="apple-touch-icon"[^>]*>/, '<link rel="apple-touch-icon" href="/c/icons/apple-touch-icon.png?v=2" />')
   .replace(/<link rel="manifest"[^>]*>/, '<link rel="manifest" href="/c/manifest.webmanifest" />')
   .replace(/(<meta name="apple-mobile-web-app-title" content=")[^"]*(")/, '$1P31 Collective$2')
   .replace(/(<meta property="og:site_name" content=")[^"]*(")/, `$1${COLLECTIVE_NAME}$2`);

@@ -7,10 +7,12 @@ import markPlum from '../../assets/design/mark-plum.webp';
 import markGold from '../../assets/design/mark-gold.webp';
 import markWhite from '../../assets/design/mark-white.webp';
 import markMarket from '../../assets/design/mark-market.webp';
+import markColor from '../../assets/design/mark-color.webp';
 
 // The Marketplace has its own logo (the Rise & Build panels); the Collective keeps the hands.
-export const MARKS = { market: markMarket, plum: markPlum, gold: markGold, white: markWhite };
-const markFor = (s, brand = 'collective') => (brand === 'market' ? markMarket : s.dark ? markGold : markPlum);
+// The Collective's hands are full colour on light designs and gold on dark ones.
+export const MARKS = { market: markMarket, color: markColor, gold: markGold, white: markWhite, plum: markPlum };
+const markFor = (s, brand = 'collective') => (brand === 'market' ? markMarket : s.dark ? markGold : markColor);
 
 let n = 0;
 export const newId = () => `l${Date.now().toString(36)}${(n += 1).toString(36)}`;

@@ -15,6 +15,9 @@
   .arch { position: absolute; left: 50%; bottom: -120px; width: 1100px; height: 700px; transform: translateX(-50%); border: 1px solid rgba(242, 206, 77, 0.22); border-bottom: 0; border-radius: 550px 550px 0 0; }
   .inner { position: absolute; inset: 0; display: grid; grid-template-columns: 300px 1fr; gap: 56px; align-items: center; padding: 0 90px; }
   .mark { width: 300px; height: 300px; filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.35)); }
+  /* The Collective hands sit on a white badge (their deep purple needs a light ground). */
+  .badge { width: 300px; height: 300px; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 0 0 4px rgba(242, 206, 77, 0.55), 0 20px 40px rgba(0, 0, 0, 0.35); }
+  .badge img { width: 262px; height: 262px; }
   .eyebrow { margin: 0 0 14px; font-size: 20px; font-weight: 800; letter-spacing: 0.3em; text-transform: uppercase; color: #F2CE4D; }
   h1 { margin: 0; font-family: 'Noto Serif', Georgia, serif; font-weight: 400; font-size: 84px; line-height: 1.02; letter-spacing: -0.02em; }
   h1 em { font-style: italic; color: #F2CE4D; }
@@ -38,7 +41,7 @@
   <div class="og" id="collective">
     <span class="arch"></span>
     <div class="inner">
-      <img class="mark" src="mark.png" alt="" />
+      <div class="badge"><img src="mark.png" alt="" /></div>
       <div>
         <p class="eyebrow">The Proverbs 31 Collective by NEBA</p>
         <h1>Heal. Rise. Build.<br /><em>Prosper God’s way.</em></h1>
