@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Connecting Stripe</title>
+<style>
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; src: url(../../public/fonts/NotoSerif-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; font-style: italic; src: url(../../public/fonts/NotoSerif-400-italic.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 400; src: url(../../public/fonts/Manrope-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 600; src: url(../../public/fonts/Manrope-600.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 800; src: url(../../public/fonts/Manrope-800.woff2) format('woff2'); }
+  :root {
+    --plum: #3A1C36; --plum-3: #21101E; --thistle: #E3D0EA; --thistle-3: #F8F3FA;
+    --amethyst: #9B71B2; --gold: #D9A93A; --gold-2: #F2CE4D; --green: #374126;
+    --ink: #2A1526; --ink-2: #4E3A4B; --dim: #74657A; --line: #E3D0EA;
+  }
+  @page { size: Letter; margin: 0.7in 0.7in 0.75in; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: Manrope, sans-serif; font-size: 9.9pt; line-height: 1.55; color: var(--ink); background: #fff; }
+  h1, h2, h3 { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; color: var(--plum); }
+  h1 { font-size: 26pt; line-height: 1.12; margin: 0 0 10px; }
+  h2 { font-size: 13pt; margin: 16px 0 6px; break-after: avoid; }
+  h3 { font-size: 10.8pt; margin: 12px 0 4px; break-after: avoid; font-family: Manrope, sans-serif; font-weight: 800; }
+  p { margin: 0 0 7px; }
+  ul, ol { margin: 4px 0 9px; padding-left: 18px; }
+  li { margin: 3px 0; }
+  code, pre { font-family: Consolas, 'Courier New', monospace; }
+  code { font-size: 8pt; background: var(--thistle-3); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; word-break: break-all; }
+  pre { font-size: 8pt; background: var(--plum-3); color: #f7f1fc; border-radius: 8px; padding: 9px 12px; white-space: pre-wrap; word-break: break-all; margin: 5px 0 9px; }
+  strong, b { font-weight: 800; }
+  em { font-family: 'Noto Serif', Georgia, serif; font-style: italic; }
+  .eyebrow { font-size: 8pt; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+  .muted { color: var(--dim); }
+  .small { font-size: 8.4pt; }
+  .ui { font-weight: 800; color: var(--plum); background: var(--thistle-3); border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; white-space: nowrap; }
+
+  .part { margin-top: 22px; }
+  .cover + .part, .part.page { break-before: page; margin-top: 0; }
+  .part-head { background: var(--plum); color: #fff; border-radius: 16px; padding: 16px 22px; margin: 0 0 12px; position: relative; overflow: hidden; break-inside: avoid; break-after: avoid; }
+  .part-head::after { content: ''; position: absolute; right: -40px; bottom: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(242, 206, 77, 0.28), transparent 70%); }
+  .part-head .eyebrow { color: var(--gold-2); }
+  .part-head h1 { color: #fff; margin: 0 0 4px; font-size: 19pt; }
+  .part-head p { color: rgba(255, 255, 255, 0.84); margin: 0; max-width: 92%; }
+
+  .cover { height: 9.4in; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(70% 50% at 100% 0%, rgba(155, 113, 178, 0.35), transparent 70%), radial-gradient(60% 45% at 0% 100%, rgba(242, 206, 77, 0.18), transparent 70%), var(--plum-3); color: #fff; border-radius: 22px; padding: 46px 44px; }
+  .cover .marks { display: flex; gap: 14px; align-items: center; }
+  .cover .marks img { height: 84px; width: auto; }
+  .cover h1 { color: #fff; font-size: 34pt; line-height: 1.06; margin: 18px 0 12px; }
+  .cover h1 em { color: var(--gold-2); }
+  .cover .lead { color: rgba(255, 255, 255, 0.86); font-size: 12pt; max-width: 5.9in; }
+  .cover .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 30px; font-size: 9.3pt; color: rgba(255, 255, 255, 0.86); }
+  .cover .meta b { display: block; color: var(--gold-2); font-size: 7.6pt; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 3px; }
+
+  .note { border-left: 4px solid var(--gold); background: rgba(242, 206, 77, 0.1); border-radius: 0 10px 10px 0; padding: 9px 13px; margin: 8px 0 12px; break-inside: avoid; font-size: 9.2pt; }
+  .note.plum { border-color: var(--amethyst); background: var(--thistle-3); }
+  .note.red { border-color: #b04a4a; background: rgba(176, 74, 74, 0.07); }
+  .note p:last-child, .note ul:last-child { margin-bottom: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 8.6pt; }
+  th { text-align: left; font-size: 7.2pt; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: var(--plum); padding: 6px 8px; }
+  td { border-bottom: 1px solid var(--line); padding: 6px 8px; vertical-align: top; }
+  tr { break-inside: avoid; }
+  tr:nth-child(even) td { background: var(--thistle-3); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .box { border: 1px solid var(--line); border-radius: 12px; padding: 10px 13px; break-inside: avoid; background: #fff; }
+  .box h3 { margin-top: 0; }
+
+  .steps { counter-reset: s; list-style: none; padding-left: 0; margin: 6px 0 10px; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 30px; margin: 6px 0; break-inside: avoid; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--plum); color: #fff; font-size: 8pt; font-weight: 800; display: grid; place-items: center; }
+  .steps.gold > li::before { background: var(--gold); color: #2a1a00; }
+  .check { list-style: none; padding-left: 0; }
+  .check li { padding-left: 22px; position: relative; }
+  .check li::before { content: ''; position: absolute; left: 0; top: 3px; width: 12px; height: 12px; border: 1.6px solid var(--plum); border-radius: 3px; }
+  .events { columns: 2; column-gap: 18px; margin: 4px 0 6px; padding-left: 16px; font-family: Consolas, 'Courier New', monospace; font-size: 8.2pt; }
+  .events li { margin: 1px 0; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div>
+    <div class="marks">
+      <img src="../../marketing/brand/market/p31-market-mark-transparent.png" alt="">
+      <img src="../../marketing/brand/mark-gold.png" alt="">
+    </div>
+    <p class="eyebrow" style="color: var(--gold-2); margin-top: 26px;">Proverbs 31 Marketplace · The P31 Collective by NEBA</p>
+    <h1>Connecting Stripe:<br><em>one account for each site</em></h1>
+    <p class="lead">Exactly where to click in Stripe, what to copy, and where to paste it in Supabase, so that p31market.com and thep31collective.org each take payments into their own Stripe account. About 45 minutes the first time.</p>
+  </div>
+  <div class="meta">
+    <div><b>You will need</b>Your Stripe login, your Supabase login (as an Owner or Administrator), and your Vercel login for the last switch.</div>
+    <div><b>Where keys go</b>Only into Supabase → Edge Function Secrets. Never into the website, Vercel, a document, an email or a chat.</div>
+    <div><b>Order</b>Collective first (simpler), then the Market. Each works on its own; nothing breaks while one is waiting.</div>
+    <div><b>Try it first</b>Each Stripe account has a sandbox with test keys and a test card. Part 4 shows how to test, then go live.</div>
+  </div>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">The map</p>
+    <h1>What goes where</h1>
+    <p>Two Stripe accounts, five values in Supabase, one switch in Vercel. Keep this page open while you work.</p>
+  </div>
+  <table>
+    <tr><th style="width:22%"></th><th style="width:39%">Collective account</th><th>Market account</th></tr>
+    <tr><td><b>Takes payment for</b></td><td>Mentorship and coaching (the private payment links)</td><td>Shop purchases by card, vendor payouts, and the $14.99 storefront subscription</td></tr>
+    <tr><td><b>Secret key goes in</b></td><td><code>COLLECTIVE_STRIPE_SECRET_KEY</code></td><td><code>MARKET_STRIPE_SECRET_KEY</code></td></tr>
+    <tr><td><b>Webhook address</b></td><td><code>https://xsnhxjttdizljaawpumz.supabase.co/functions/v1/academy-webhook</code></td><td><code>https://xsnhxjttdizljaawpumz.supabase.co/functions/v1/stripe-webhook</code> (two destinations, same address)</td></tr>
+    <tr><td><b>Webhook secret goes in</b></td><td><code>COLLECTIVE_STRIPE_WEBHOOK_SECRET</code></td><td><code>MARKET_STRIPE_WEBHOOK_SECRET</code> (both signing secrets, separated by a comma)</td></tr>
+    <tr><td><b>Also</b></td><td>Customer portal on</td><td>Connect platform profile, Customer portal on, <code>PLATFORM_FEE_PERCENT</code> = 5</td></tr>
+    <tr><td><b>Then</b></td><td>Nothing else; payment links work as soon as the key and webhook are in</td><td>In Vercel, <code>VITE_ENABLE_CARD_PAYMENTS</code> = <code>true</code>, when you want shops to take cards</td></tr>
+  </table>
+
+  <h2>Before you start</h2>
+  <ul class="check">
+    <li><b>Two Stripe accounts.</b> If you only have one, make the second now: in Stripe, click your account name in the top-left corner and choose <span class="ui">New account</span>. Name one <i>Proverbs 31 Marketplace</i> and the other <i>P31 Collective</i>. Switch between them the same way.</li>
+    <li><b>Each account activated.</b> Stripe asks each one for its business details, a bank account for payouts and a statement descriptor (what shows on a card statement, for example <i>P31 MARKET</i> and <i>P31 COLLECTIVE</i>). Use the legal business that runs each site.</li>
+    <li><b>The Supabase secrets page open in another tab:</b><br><code>https://supabase.com/dashboard/project/xsnhxjttdizljaawpumz/functions/secrets</code><br>Each value goes in as a <span class="ui">Key</span> (the name, exactly as written here) and a <span class="ui">Value</span> (what you copied), then <span class="ui">Save</span>. Functions read new secrets straight away; nothing needs redeploying.</li>
+  </ul>
+  <div class="note red">
+    <p><b>Keep keys secret.</b> Copy from Stripe and paste straight into Supabase. Do not paste them into a document, an email, a text or this chat. If a key is ever exposed, open <span class="ui">API keys</span> in Stripe, use the <span class="ui">⋯</span> menu on that key, choose <span class="ui">Rotate key</span>, and paste the new one into Supabase.</p>
+  </div>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Part 1 · The Collective account</p>
+    <h1>Mentorship and coaching payments</h1>
+    <p>Switch to the Collective account first (account name, top-left). About 15 minutes.</p>
+  </div>
+
+  <h3>1 · The secret key</h3>
+  <ol class="steps">
+    <li>Open <span class="ui">API keys</span>: <code>https://dashboard.stripe.com/apikeys</code> (also under <span class="ui">Developers</span> or <span class="ui">Workbench</span>).</li>
+    <li>Under <span class="ui">Standard keys</span>, find <span class="ui">Secret key</span> and click <span class="ui">Reveal live key</span>. Click the key to copy it. It starts with <code>sk_live_</code>.</li>
+    <li>In Supabase, add Key <code>COLLECTIVE_STRIPE_SECRET_KEY</code>, paste the Value, and <span class="ui">Save</span>.</li>
+  </ol>
+
+  <h3>2 · The webhook (so the site knows when someone has paid)</h3>
+  <ol class="steps">
+    <li>Open <span class="ui">Webhooks</span> in Workbench: <code>https://dashboard.stripe.com/webhooks</code>, and click <span class="ui">Create an event destination</span>.</li>
+    <li>Choose <span class="ui">Your account</span>.</li>
+    <li>For the payload format choose <span class="ui">Snapshot</span>, <b>not Thin</b>. Leave the API version as it is.</li>
+    <li>Select these five events (type each name in the search box):
+      <ul class="events"><li>checkout.session.completed</li><li>invoice.paid</li><li>invoice.payment_failed</li><li>customer.subscription.updated</li><li>customer.subscription.deleted</li></ul></li>
+    <li>Click <span class="ui">Continue</span>, choose <span class="ui">Webhook endpoint</span>, and click <span class="ui">Continue</span>.</li>
+    <li>Endpoint URL: <code>https://xsnhxjttdizljaawpumz.supabase.co/functions/v1/academy-webhook</code><br>Description: <i>P31 Collective · mentorship</i>. Create it.</li>
+    <li>On the destination’s page, find the <span class="ui">Signing secret</span> (starts with <code>whsec_</code>), click <span class="ui">Reveal secret</span> and copy it.</li>
+    <li>In Supabase, add Key <code>COLLECTIVE_STRIPE_WEBHOOK_SECRET</code>, paste, <span class="ui">Save</span>.</li>
+  </ol>
+
+  <h3>3 · The customer portal (clients update their card or cancel)</h3>
+  <ol class="steps">
+    <li>Open <code>https://dashboard.stripe.com/settings/billing/portal</code> (<span class="ui">Settings</span> → <span class="ui">Billing</span> → <span class="ui">Customer portal</span>).</li>
+    <li>Click <span class="ui">Activate link</span>. Allow customers to update payment methods and view invoices. For cancelling, choose <i>at the end of the billing period</i>, which matches the agreement’s notice terms. Save.</li>
+  </ol>
+
+  <h3>4 · How it looks to clients (5 minutes, optional but worth it)</h3>
+  <ul>
+    <li><span class="ui">Settings</span> → <span class="ui">Branding</span>: upload the Collective hands logo, brand colour plum <code>#3A1C36</code>, accent gold <code>#D9A93A</code>.</li>
+    <li><span class="ui">Settings</span> → <span class="ui">Public details</span>: business name <i>The P31 Collective by NEBA</i>, support email <code>members@thep31collective.org</code>, the website <code>thep31collective.org</code>.</li>
+  </ul>
+  <div class="note plum"><p><b>That is the Collective done.</b> No products or prices to create in Stripe: the site sends each client’s price (from Systems → Academy) with her payment link.</p></div>
+</section>
+
+<section class="part page">
+  <div class="part-head">
+    <p class="eyebrow">Part 2 · The Market account</p>
+    <h1>Shop card payments, vendor payouts, storefront subscriptions</h1>
+    <p>Switch to the Market account. About 25 minutes, most of it Stripe’s Connect questions.</p>
+  </div>
+
+  <h3>1 · Connect (lets vendors get paid into their own bank accounts)</h3>
+  <ol class="steps">
+    <li>Open <code>https://dashboard.stripe.com/connect/registration</code> (or <span class="ui">Connect</span> in the menu, then <span class="ui">Get started</span>) and complete the platform profile. When asked how it works: a <b>marketplace</b>, where vendors sell to shoppers, shoppers pay the platform, and the platform pays the vendor and keeps a fee.</li>
+    <li>Open the Connect settings, <code>https://dashboard.stripe.com/account/applications/settings</code>, and set the branding vendors see when they connect: name <i>Proverbs 31 Marketplace</i>, colour <code>#3A1C36</code>, the Market icon. Stripe requires this before the first vendor can connect.</li>
+  </ol>
+
+  <h3>2 · The secret key</h3>
+  <ol class="steps">
+    <li><code>https://dashboard.stripe.com/apikeys</code> → <span class="ui">Standard keys</span> → <span class="ui">Secret key</span> → <span class="ui">Reveal live key</span>, then copy it.</li>
+    <li>In Supabase, add Key <code>MARKET_STRIPE_SECRET_KEY</code>, paste, <span class="ui">Save</span>.</li>
+  </ol>
+
+  <h3>3 · Webhook A: the Market’s own payments</h3>
+  <ol class="steps">
+    <li><code>https://dashboard.stripe.com/webhooks</code> → <span class="ui">Create an event destination</span> → <span class="ui">Your account</span> → <span class="ui">Snapshot</span> (<b>not Thin</b>).</li>
+    <li>The same five events as the Collective:
+      <ul class="events"><li>checkout.session.completed</li><li>invoice.paid</li><li>invoice.payment_failed</li><li>customer.subscription.updated</li><li>customer.subscription.deleted</li></ul></li>
+    <li><span class="ui">Continue</span> → <span class="ui">Webhook endpoint</span> → <span class="ui">Continue</span>. Endpoint URL:<br><code>https://xsnhxjttdizljaawpumz.supabase.co/functions/v1/stripe-webhook</code><br>Description: <i>P31 Market · orders and storefronts</i>.</li>
+    <li>Reveal and copy its signing secret, and keep the tab open for a minute. This is secret <b>A</b>.</li>
+  </ol>
+
+  <h3>4 · Webhook B: vendors’ payout accounts</h3>
+  <ol class="steps">
+    <li><span class="ui">Create an event destination</span> again, but this time choose <span class="ui">Connected accounts</span>, then <span class="ui">Snapshot</span>.</li>
+    <li>One event: <code>account.updated</code>.</li>
+    <li>Same endpoint URL as A: <code>https://xsnhxjttdizljaawpumz.supabase.co/functions/v1/stripe-webhook</code><br>Description: <i>P31 Market · vendor payout accounts</i>.</li>
+    <li>Reveal and copy its signing secret. This is secret <b>B</b>.</li>
+    <li>In Supabase, add Key <code>MARKET_STRIPE_WEBHOOK_SECRET</code> with the Value <b>A, a comma, then B</b>, with no spaces:<br><code>whsec_AAAAAAAA,whsec_BBBBBBBB</code></li>
+  </ol>
+
+  <h3>5 · The fee, the portal, the look</h3>
+  <ul>
+    <li>In Supabase, add Key <code>PLATFORM_FEE_PERCENT</code> with Value <code>5</code>: the 5% the Storefront Agreement keeps from each card sale.</li>
+    <li><code>https://dashboard.stripe.com/settings/billing/portal</code> → <span class="ui">Activate link</span>, so vendors can change the card on their $14.99 subscription or cancel.</li>
+    <li><span class="ui">Settings</span> → <span class="ui">Branding</span> (Market logo, plum and gold) and <span class="ui">Public details</span> (<i>Proverbs 31 Marketplace</i>, <code>vendor@p31market.com</code>, <code>p31market.com</code>).</li>
+  </ul>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Part 3 · Switch it on</p>
+    <h1>Deploy, then the one switch in Vercel</h1>
+    <p>The secrets are read straight away. The functions just need the latest code once.</p>
+  </div>
+
+  <h3>1 · Deploy the payment functions (once)</h3>
+  <p>From the project folder:</p>
+  <pre>npx supabase functions deploy stripe-webhook academy-webhook academy-checkout academy-billing vendor-billing stripe-checkout stripe-connect stripe-account-status join-notify watchdog --no-verify-jwt --use-api --project-ref xsnhxjttdizljaawpumz</pre>
+
+  <h3>2 · Turn on card checkout in the shops (when you are ready)</h3>
+  <p>This switch shows <b>Pay by card</b> in the bag and the <b>Connect Stripe</b> button in each vendor’s studio. Coaching payment links and the vendors’ $14.99 subscription work without it.</p>
+  <ol class="steps">
+    <li>In Vercel, open the P31 project → <span class="ui">Settings</span> → <span class="ui">Environment Variables</span>.</li>
+    <li>Add Key <code>VITE_ENABLE_CARD_PAYMENTS</code>, Value <code>true</code>, for <span class="ui">Production</span> (and Preview if you like). <span class="ui">Save</span>. This is a switch, not a secret: never put a Stripe key in Vercel.</li>
+    <li>Open <span class="ui">Deployments</span>, open the <span class="ui">⋯</span> menu on the newest one, and choose <span class="ui">Redeploy</span>. The switch takes effect when that finishes.</li>
+  </ol>
+
+  <h2>Every value, in one place</h2>
+  <table>
+    <tr><th style="width:36%">Supabase secret (Key)</th><th>Value: where to copy it from</th></tr>
+    <tr><td><code>COLLECTIVE_STRIPE_SECRET_KEY</code></td><td>Collective account → API keys → Standard keys → Secret key (<code>sk_live_…</code>)</td></tr>
+    <tr><td><code>COLLECTIVE_STRIPE_WEBHOOK_SECRET</code></td><td>Collective account → Webhooks → the <i>academy-webhook</i> destination → Signing secret (<code>whsec_…</code>)</td></tr>
+    <tr><td><code>MARKET_STRIPE_SECRET_KEY</code></td><td>Market account → API keys → Standard keys → Secret key (<code>sk_live_…</code>)</td></tr>
+    <tr><td><code>MARKET_STRIPE_WEBHOOK_SECRET</code></td><td>Market account → Webhooks → both <i>stripe-webhook</i> destinations’ signing secrets, joined by a comma: <code>whsec_A,whsec_B</code></td></tr>
+    <tr><td><code>PLATFORM_FEE_PERCENT</code></td><td><code>5</code></td></tr>
+    <tr><td colspan="2" class="small muted">In Vercel (not Supabase): <code>VITE_ENABLE_CARD_PAYMENTS</code> = <code>true</code>, then redeploy. If you added <code>STRIPE_SECRET_KEY</code>, <code>STRIPE_WEBHOOK_SECRET</code> or <code>ACADEMY_STRIPE_WEBHOOK_SECRET</code> earlier, they are only used when the new names are missing; delete them once both sites work.</td></tr>
+  </table>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Part 4 · Test, then go live</p>
+    <h1>Prove it with a test card first</h1>
+    <p>Recommended: do Parts 1 and 2 in each account’s sandbox first, test, then repeat the key and webhook steps in live mode.</p>
+  </div>
+
+  <h3>How the sandbox works</h3>
+  <ul>
+    <li>In each Stripe account, switch from live mode to its <span class="ui">Sandbox</span> (the mode switch at the top of the Dashboard). Sandbox keys start with <code>sk_test_</code>, and sandbox webhooks have their own <code>whsec_</code> secrets.</li>
+    <li>Put the sandbox values into Supabase under the <b>same names</b>. When the tests pass, create the live key and live webhooks in live mode and <b>replace</b> each value in Supabase (open the secret, edit, save).</li>
+    <li>Test card: <code>4242 4242 4242 4242</code>, any future date, any 3-digit CVC, any ZIP. Nothing is charged in a sandbox.</li>
+  </ul>
+
+  <div class="two">
+    <div class="box">
+      <h3>Test the Collective</h3>
+      <ol class="steps gold">
+        <li>Mentor console → <b>Invites</b> → <b>New invite</b>, with your own email and any plan (or Agreements → <b>Send payment link</b> for a test client).</li>
+        <li>Open the link, create the account with that email, and pay with the test card.</li>
+        <li>The classroom opens. In Stripe → Webhooks → the academy destination → <b>Event deliveries</b>, each event says <i>Delivered</i> (200).</li>
+      </ol>
+    </div>
+    <div class="box">
+      <h3>Test the Market</h3>
+      <ol class="steps gold">
+        <li><b>Subscription:</b> sign in as a test vendor → Studio → <b>Plan &amp; billing</b> → <b>Set up my subscription</b> → test card. Her plan shows as set up.</li>
+        <li><b>Card sale</b> (after the Vercel switch): the vendor clicks <b>Connect Stripe</b> in her studio and fills the test onboarding. Then buy one of her products by card. The order lands in her Orders, with emails to both.</li>
+        <li>Both <i>stripe-webhook</i> destinations show <i>Delivered</i> (200).</li>
+      </ol>
+    </div>
+  </div>
+
+  <h2>If something is not right</h2>
+  <table>
+    <tr><th style="width:36%">You see</th><th>Fix</th></tr>
+    <tr><td>Event deliveries show <b>400</b> and “Signature error”</td><td>The webhook secret in Supabase does not match that destination: a sandbox secret with live keys (or the reverse), or B missing from the Market’s <code>A,B</code>. Copy it again.</td></tr>
+    <tr><td>Event deliveries show <b>500</b> “Not configured”</td><td>A key name is misspelled in Supabase. Compare with the table in Part 3, letter for letter.</td></tr>
+    <tr><td>Deliveries say <i>Delivered</i>, but the classroom or order never updates</td><td>The destination was made with the <b>Thin</b> payload. Delete it and make it again with <b>Snapshot</b>, then paste the new signing secret.</td></tr>
+    <tr><td>“Card payments aren’t connected yet” on a payment link or subscription</td><td>That site’s secret key is missing, or the functions were not deployed (Part 3, step 1).</td></tr>
+    <tr><td>A vendor’s <b>Connect Stripe</b> button gives an error</td><td>Finish the Market’s Connect platform profile and the Connect branding (Part 2, step 1).</td></tr>
+    <tr><td>No <b>Pay by card</b> in the bag</td><td>Either <code>VITE_ENABLE_CARD_PAYMENTS</code> is not <code>true</code> in Vercel (and redeployed), or that vendor has not finished connecting Stripe. Order requests keep working either way.</td></tr>
+  </table>
+  <p class="small muted">When both sites pass in live mode, tell Claude and it will run a quick check of the deployed functions and the database to confirm everything is talking to the right account.</p>
+</section>
+
+</body>
+</html>
