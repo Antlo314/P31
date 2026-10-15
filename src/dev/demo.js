@@ -303,6 +303,9 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
   ],
   // Operations (v42): which scripts ran, the activity log, the billing and automatic-email switches.
   schema_versions: [{ version: 41, name: 'team dashboards', applied_at: day(-1) }, { version: 42, name: 'operations', applied_at: iso(-30) }],
+  // The content autopilot (v46): settings and one batch waiting for approval.
+  autopilot_settings: [{ id: 1, enabled: true, posts_per_day: 2, days_per_batch: 14, lead_days: 7, mix: { quote: 45, prayer: 10, scripture: 15, blank: 10, curator: 10, mentorship: 10 }, approvers: ['ceo@p31market.com'], updated_at: day(-2) }],
+  autopilot_batches: [{ id: 'demo-batch', status: 'awaiting', first_day: day(20).slice(0, 10), last_day: day(33).slice(0, 10), created_at: iso(-60), expires_at: day(7), scheduled_count: 0 }],
   // The watchdog (v45): one open heads-up and the last run.
   ops_alerts: [{ id: 'al1', key: 'social.token.facebook', severity: 'warn', area: 'social', title: 'Facebook login expires in 12 days', detail: 'Zernio access to Facebook ends November 26; posts stop going out after that.', fix: 'Reconnect Facebook in Zernio before then (Accounts > Facebook > Reconnect).', link: 'https://zernio.com', first_seen: day(-1), last_seen: iso(-20), resolved_at: null }],
   ops_runs: [{ id: 1, ran_at: iso(-20), source: 'cron', ok: false, open_alerts: 1, checks: [], healed: ['Retried the failed post "Sample post"'], emailed: null }],
@@ -559,6 +562,19 @@ const fns = {
   },
   'daily-room': () => ({ error: 'Demo mode — live rooms open on the real site.' }),
   'shop-broadcast': (b) => ({ ok: true, sent: b.test ? 1 : 3, test: !!b.test }),
+  'content-autopilot': (b) => {
+    const items = [
+      { id: 'ai1', position: 0, post_at: day(20), kind: 'quote', template: 'quote', words: { headline: 'Faithful in small things. Ready for big rooms.' }, line: 'Faithful in small things. Ready for big rooms.', style: 'lilac', pattern: 'topo', seed: 111, status: 'pending', caption_ig: 'Sample caption: the small things are training for the big rooms.\n\nWhat small thing is God asking you to be faithful in?\n\n#P31Marketplace', caption_fb: 'Sample caption' },
+      { id: 'ai2', position: 1, post_at: day(21), kind: 'scripture', template: 'scripture', words: { verse: 'Commit thy works unto the LORD, and thy thoughts shall be established.', reference: 'Proverbs 16:3' }, line: 'Proverbs 16:3', style: 'ivory', pattern: 'topo', seed: 148, status: 'pending', caption_ig: 'Sample scripture caption.\n\nWhat work are you committing to Him this week?', caption_fb: 'Sample' },
+      { id: 'ai3', position: 2, post_at: day(22), kind: 'curator', template: 'invite', words: { eyebrow: 'Open a virtual storefront', headline: 'Your shop deserves a beautiful home.', body: 'A storefront on p31market.com with up to 10 products or services, P31 marketing and support. Free for your first 3 months.', button: 'Start at p31market.com/storefront', brand: 'market' }, line: 'Your shop deserves a beautiful home.', style: 'plum', pattern: 'topo', seed: 185, status: 'pending', caption_ig: 'Sample invitation caption. Start your storefront: link in bio', caption_fb: 'Sample' },
+      { id: 'ai4', position: 3, post_at: day(23), kind: 'prayer', template: 'prayer', words: { intro: 'Dear God,', headline: 'Teach my hands to build what pleases You.' }, line: 'Teach my hands to build what pleases You.', style: 'dusk', pattern: 'waves', seed: 222, status: 'pending', caption_ig: 'Sample prayer caption. If this is your prayer today, comment Amen.', caption_fb: 'Sample' },
+    ];
+    if (b.action === 'get') return { batch: { id: 'demo-batch', status: 'awaiting', open: true, first_day: day(20).slice(0, 10), last_day: day(33).slice(0, 10), expires_at: day(7), scheduled_count: 0 }, items, who: 'Studio team' };
+    if (b.action === 'draft') return { batch: 'demo-batch', posts: 22, first: day(20).slice(0, 10), last: day(33).slice(0, 10), writer: 'gemini' };
+    if (b.action === 'update') return { item: { ...items.find((i) => i.id === b.item), ...(b.remove != null ? { status: b.remove ? 'removed' : 'pending' } : {}), ...(b.caption_ig ? { caption_ig: b.caption_ig } : {}) } };
+    if (b.action === 'finish') return { scheduled: 0 };
+    return { error: '(Demo) Approving uploads and schedules the posts on the real site.' };
+  },
   'studio-autocreate': (b) => ({ ok: true, drafted: 18, month: b.month, start: `${b.month}-12` }),
   'email-send': (b) => (b.action === 'redraft'
     ? { ok: true, draft: { reply: `Hi there,

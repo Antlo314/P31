@@ -81,6 +81,7 @@ const Enroll = lazy(load.enroll);
 const SystemsApp = lazy(load.systems);
 const AcademyApp = lazy(load.classroom);
 const StudioApp = lazy(load.studio);
+const Approve = lazy(() => import('./studio/autopilot/Approve'));
 const Today = lazy(load.today);
 const Gather = lazy(load.gather);
 
@@ -246,6 +247,10 @@ function App() {
           <Route
             path="/studio/*"
             element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#21101E' }} />}><StudioApp /></Suspense>}
+          />
+          <Route
+            path="/approve/:batchId"
+            element={<Suspense fallback={<div aria-busy="true" style={{ minHeight: '100dvh', background: '#1E0F1C' }} />}><Approve /></Suspense>}
           />
           <Route
             path="/today"

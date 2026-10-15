@@ -178,3 +178,16 @@
 /* Create post: a reel's cover from the Design studio */
 .st-cover { display: flex; align-items: center; gap: 12px; }
 .st-cover img { width: 72px; aspect-ratio: 9 / 16; object-fit: cover; border-radius: 10px; }
+
+/* Auto-create → Autopilot (autopilot/AutopilotPanel.jsx) */
+.ap-panel .fc-check span { display: grid; }
+.ap-panel .fc-check small { color: var(--ds-ink-3); font-size: 0.8rem; }
+.fc-row3 { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.ap-mix { display: grid; gap: 6px; }
+.ap-mix label { display: grid; grid-template-columns: 170px minmax(0, 1fr) 44px; align-items: center; gap: 10px; font-size: 0.88rem; }
+.ap-mix input { accent-color: var(--gold-hi); }
+.ap-mix output { text-align: right; font-variant-numeric: tabular-nums; color: var(--ds-ink-3); }
+.ap-panel .fc-actions { gap: 8px; flex-wrap: wrap; justify-content: flex-start; }
+.ap-panel .fc-spin { animation: ap-panel-spin 0.9s linear infinite; }
+@keyframes ap-panel-spin { to { transform: rotate(360deg); } }
+@media (max-width: 520px) { .ap-mix label { grid-template-columns: 1fr 44px; } .ap-mix label span { grid-column: 1 / -1; } }

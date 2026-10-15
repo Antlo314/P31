@@ -6,6 +6,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 46, file: 'storefront_v46_autopilot.sql', title: 'Content autopilot', what: 'When the posting calendar runs low, the Studio drafts the next two weeks of posts and emails the approvers a review link; nothing posts until someone approves.',
+    expect: 'settings_ready true · batches_ready true · items_ready true · autopilot_scheduled true',
+    checks: [['table', 'autopilot_settings'], ['table', 'autopilot_batches'], ['table', 'autopilot_items']] },
   { v: 45, file: 'storefront_v45_watchdog.sql', title: 'Watchdog', what: 'An hourly check of the whole system (social accounts, posts, forms, emails, scheduled jobs, site errors) that fixes what it safely can and alerts on the rest.',
     expect: 'alerts_ready true · runs_ready true · cron_health_ready true · watchdog_scheduled true',
     checks: [['table', 'ops_alerts'], ['table', 'ops_runs']] },

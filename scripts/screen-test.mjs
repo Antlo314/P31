@@ -190,6 +190,9 @@ const SCREENS = [
   // Operations (v42)
   ['health: database updates', cl('/systems/health'), [], 'Every script the site needs is in the database'],
   ['health: the watchdog', cl('/systems/health'), [], 'Run checks now'],
+  ['studio auto-create: autopilot', cl('/studio/autocreate'), ['Autopilot'], 'Draft a batch now'],
+  ['autopilot review page', cl('/approve/demo-batch'), [], 'Approve 4 posts'],
+  ['autopilot review on a phone', cl('/approve/demo-batch'), [], 'Nothing posts until you approve', { phone: true }],
   ['vendor pages: vend at a market', mk('/apply'), [], 'Open a virtual storefront'],
   ['vendor pages: virtual storefront', mk('/storefront'), [], 'Vend at a P31 Market'],
   ['activity log', cl('/systems/activity'), [], 'Melanie JC changed shop'],

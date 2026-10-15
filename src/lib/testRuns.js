@@ -215,6 +215,21 @@ export const TEST_RUNS = [
     cleanup: 'Delete the TEST post from the Calendar and the design from Saved.',
   },
   {
+    id: 'autopilot', title: 'Content autopilot: draft, review, approve', site: 'collective', who: 'team', minutes: 6, tour: 'studio',
+    steps: [
+      'In Content Studio → Auto-create → Autopilot, check the settings (posts a day, days per batch, the mix, who approves) and press Draft a batch now.',
+      'Open the email that arrives (or press Review on the batch). On the review page, remove one post and edit one caption.',
+      'Press Approve and wait for it to finish.',
+    ],
+    expect: [
+      'The batch covers the days that had room, in the quote-card look, with captions and times; nothing repeats the October collection.',
+      'Removed posts stay out; the edited caption is the one that posts.',
+      'Each approved post appears on the Studio calendar at its time, with its card; the batch shows Approved and scheduled.',
+      'If nobody approves within a day, a reminder email goes out and the watchdog lists it on Health.',
+    ],
+    cleanup: 'Delete the TEST posts from the Studio calendar if they were only a test.',
+  },
+  {
     id: 'watchdog', title: 'The watchdog catches a problem and clears it', site: 'both', who: 'admin', minutes: 3,
     steps: [
       'Open Systems → Health. The Watchdog panel at the top says when it last checked; press Run checks now.',

@@ -27,7 +27,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 type Row = Record<string, any>;
 type Problem = { key: string; severity: 'warn' | 'fail'; area: string; title: string; detail?: string; fix?: string; link?: string; meta?: Row };
 
-const LATEST_DB = 45; // the newest storefront_vNN.sql in the repo
+const LATEST_DB = 46; // the newest storefront_vNN.sql in the repo
 const SYSTEMS = 'https://www.thep31collective.org/systems';
 const STUDIO = 'https://www.thep31collective.org/studio';
 const ZERNIO = 'https://zernio.com/api/v1';
@@ -90,6 +90,9 @@ async function checkPosts(db: any, healed: string[]): Promise<Problem[]> {
       out.push({ key, severity: 'fail', area: 'posts', title: `A post keeps failing: ${title}`, detail: `${when ? `${when} ET. ` : ''}${err || 'It failed again after an automatic retry.'}`.trim(), fix: 'Open it in Content Studio > Calendar > Studio history: try again, or edit the media or caption (a reconnect in Zernio fixes most).', link: `${STUDIO}/calendar`, meta: { retried: true, postId: id } });
     }
   }
+  // Autopilot batches waiting more than a day for someone's yes.
+  const { data: waiting } = await db.from('autopilot_batches').select('id, first_day').eq('status', 'awaiting').lt('created_at', new Date(Date.now() - 24 * HOUR).toISOString()).limit(1);
+  if (waiting?.[0]) out.push({ key: `autopilot.waiting.${waiting[0].id}`, severity: 'warn', area: 'posts', title: 'Drafted posts are waiting for approval', detail: `The autopilot's batch starting ${new Date(`${waiting[0].first_day}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} needs a yes before any of it can go out.`, fix: 'Open the review link in the email, or Content Studio > Auto-create > Autopilot > Review.', link: `${STUDIO}/autocreate?tab=autopilot` });
   // Days ahead with nothing booked (every page; Zernio does not sort, so sort here).
   const scheduled: Row[] = [];
   for (let page = 1; page <= 10; page += 1) {

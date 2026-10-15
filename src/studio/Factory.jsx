@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Wand2, Sparkles, Check, Send, Trash2, RefreshCw, Loader2, CalendarDays, Clock, Palette, ListChecks, BookOpen, Plus, ChevronDown, ChevronUp, AlertCircle, Eye } from 'lucide-react';
+import { Wand2, Sparkles, Check, Send, Trash2, RefreshCw, Loader2, CalendarDays, Clock, Palette, ListChecks, BookOpen, Plus, ChevronDown, ChevronUp, AlertCircle, Eye, Plane } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { DashHead } from '../apps/DashShell';
 import { studio, uploadMedia, bestSlotsET } from './api';
@@ -9,6 +9,7 @@ import { TYPES, STYLES, DEFAULT_SLOTS, mergeLibrary } from './factory/library';
 import { buildPlan, isoDate, facebookText } from './factory/generate';
 import { FitCard } from './factory/Card';
 import { renderCard } from './factory/render';
+import AutopilotPanel from './autopilot/AutopilotPanel';
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const tomorrow = () => { const d = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })); d.setDate(d.getDate() + 1); return isoDate(d); };
@@ -24,7 +25,7 @@ const missingTable = (msg = '') => /does not exist|schema cache|column/i.test(ms
  */
 const StudioFactory = () => {
   // ?tab=queue opens the pre-posts (the monthly review email links there).
-  const [tab, setTab] = useState(() => { const t = new URLSearchParams(window.location.search).get('tab'); return ['make', 'queue', 'library'].includes(t) ? t : 'make'; });
+  const [tab, setTab] = useState(() => { const t = new URLSearchParams(window.location.search).get('tab'); return ['make', 'queue', 'library', 'autopilot'].includes(t) ? t : 'make'; });
   const [settings, setSettings] = useState(() => ({ start: tomorrow(), days: 30, cadence: 'daily', mix: defaultMix(), style: 'night', platforms: ['instagram', 'facebook'], timing: 'best', slots: DEFAULT_SLOTS, skipTaken: true }));
   const [library, setLibrary] = useState(() => mergeLibrary([]));
   const [libOk, setLibOk] = useState(null); // null unknown, true table present, false run v36
@@ -179,7 +180,7 @@ const StudioFactory = () => {
       <DashHead eyebrow="Content Studio" title="Auto-create" accent="a month of posts" lead="Pick the kinds of posts, the look and how many days. The Studio drafts every card and caption from your library at the times your followers are online; you look them over, then schedule the lot."
         actions={<Link to="/studio/planner" className="k-btn k-btn--ghost k-btn--sm"><CalendarDays size={15} /> Planner</Link>} />
       <div className="ds-tabs-inline fc-tabs" role="tablist">
-        {[['make', 'Choose the mix', Wand2], ['preview', `Preview${plan ? ` (${plan.length})` : ''}`, Eye], ['queue', `Pre-posts${queue.length ? ` (${queue.length})` : ''}`, ListChecks], ['library', 'Library', BookOpen]].map((t) => {
+        {[['make', 'Choose the mix', Wand2], ['preview', `Preview${plan ? ` (${plan.length})` : ''}`, Eye], ['queue', `Pre-posts${queue.length ? ` (${queue.length})` : ''}`, ListChecks], ['library', 'Library', BookOpen], ['autopilot', 'Autopilot', Plane]].map((t) => {
           const Icon = t[2];
           return <button key={t[0]} role="tab" aria-selected={tab === t[0]} onClick={() => setTab(t[0])} disabled={t[0] === 'preview' && !plan}><Icon size={14} style={{ verticalAlign: '-2px' }} /> {t[1]}</button>;
         })}
@@ -188,6 +189,7 @@ const StudioFactory = () => {
       {error && <p className="k-error" role="alert">{error}</p>}
       {done && <p className="fc-done"><Check size={14} /> {done}</p>}
 
+      {tab === 'autopilot' && <AutopilotPanel />}
       {tab === 'make' && (
         <div className="fc-grid">
           <section className="ds-card fc-card">

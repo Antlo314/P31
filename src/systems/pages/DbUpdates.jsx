@@ -4,6 +4,7 @@ import { dbStatus, pending } from '../../lib/dbStatus';
 
 // The scripts themselves, loaded only when one is waiting (so the copy is exact and instant).
 const SQL = {
+  'storefront_v46_autopilot.sql': () => import('../../../storefront_v46_autopilot.sql?raw'),
   'storefront_v45_watchdog.sql': () => import('../../../storefront_v45_watchdog.sql?raw'),
   'storefront_v44_design_studio.sql': () => import('../../../storefront_v44_design_studio.sql?raw'),
   'storefront_v43_staff_powers.sql': () => import('../../../storefront_v43_staff_powers.sql?raw'),
