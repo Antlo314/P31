@@ -45,6 +45,7 @@ const Home = () => {
   const [events, setEvents] = useState([]);
   const [eventsLoaded, setEventsLoaded] = useState(false);
   const [curators, setCurators] = useState([]);
+  const [featured, setFeatured] = useState([]);
   const [news, setNews] = useState({ name: '', email: '', trap: '' });
   const [newsState, setNewsState] = useState('idle'); // idle | sending | done | error
   const heroRef = useRef(null);
@@ -64,6 +65,8 @@ const Home = () => {
       .order('is_featured', { ascending: false })
       .limit(8)
       .then(({ data }) => setCurators(data || []));
+    // Featured this month (v53): the CEO pick and the shops on a Featured plan.
+    supabase?.rpc('featured_shops').then(({ data }) => setFeatured(Array.isArray(data) ? data : []));
   }, []);
 
   // Hero: the film slowly pushes in and the copy lifts away as you scroll.
@@ -274,6 +277,37 @@ const Home = () => {
           </article>
         </div>
       </section>
+
+      {/* ── FEATURED THIS MONTH (CEO pick + Featured plans; hidden when empty) ── */}
+      {featured.length > 0 && (
+        <section className="k-section">
+          <div className="k-head k-head--row">
+            <div style={{ display: 'grid', gap: 16 }}>
+              <p className="k-eyebrow" style={{ margin: 0 }} data-reveal="fade">Featured this month</p>
+              <h2 className="k-h2" data-split>Shops we <em>love</em></h2>
+            </div>
+            <Link to="/directory" className="k-link" data-reveal>All curators <ArrowRight size={16} /></Link>
+          </div>
+          <div className="h26-rail" data-reveal-group>
+            {featured.map((c) => (
+              <Link to={`/${c.slug || c.id}`} className="h26-curator h26-curator--featured" key={c.id}>
+                <div className="h26-curator__banner">
+                  {c.banner_url && <img src={c.banner_url} alt="" loading="lazy" decoding="async" />}
+                  <span className="h26-curator__badge">{c.kind === 'ceo' ? 'CEO Selected' : 'Featured'}</span>
+                </div>
+                <div className="h26-curator__body">
+                  {c.logo_url
+                    ? <img className="h26-curator__logo" src={c.logo_url} alt="" loading="lazy" decoding="async" />
+                    : <span className="h26-curator__logo h26-curator__logo--blank">{(c.business_name || '?').charAt(0)}</span>}
+                  <h3>{c.business_name}</h3>
+                  {c.tagline && <p>{c.tagline}</p>}
+                  {c.location && <span className="h26-curator__loc"><MapPin size={12} /> {c.location}</span>}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── CURATOR SPOTLIGHT (live; hidden until curators are approved) ── */}
       {curators.length > 0 && (

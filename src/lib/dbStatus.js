@@ -6,6 +6,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 53, file: 'storefront_v53_shop_addons.sql', title: 'Storefront add-ons', what: 'Product slot packs, Featured vendors (CEO pick and paid social posts), Google reviews on storefronts, and Stripe-only shop payments.',
+    expect: 'addons_ready true · limit_ready true · featured_ready true · google_ready true · links_retired true · google_job_ready true',
+    checks: [['rpc', 'featured_capacity']] },
   { v: 52, file: 'storefront_v52_enrollment_flow.sql', title: 'Enrollment workflow', what: 'After the three forms, the client chooses her program and plan and checks out on Stripe; payment marks her enrolled.',
     expect: 'choose_ready true · details_ready true · enrolled_status_ready true',
     checks: [['rpc', 'coaching_choose_plan', { p_token: 'probe', p_plan: '00000000-0000-0000-0000-000000000000' }]] },

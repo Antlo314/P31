@@ -22,6 +22,9 @@ const Directory = () => {
       .order('is_featured', { ascending: false })
       .order('is_early_bird', { ascending: false })
       .then(async ({ data }) => {
+        // Featured this month (v53): the CEO pick and Featured plans go first, with their badge.
+        const { data: shelf } = await supabase.rpc('featured_shops');
+        const picked = new Map((Array.isArray(shelf) ? shelf : []).map((x) => [x.id, x.kind]));
         // A shop is listed once it has something to buy: an approved shop with no products yet
         // is still reachable by its own link, but stays out of the directory.
         const ids = (data || []).map((d) => d.id);
@@ -29,7 +32,7 @@ const Directory = () => {
           ? await supabase.from('products').select('curator_id, is_active').in('curator_id', ids)
           : { data: [] };
         const stocked = new Set((items || []).filter((p) => p.is_active !== false).map((p) => p.curator_id));
-        setVendors((data || []).filter((d) => d.business_name && stocked.has(d.id)).map((d) => ({
+        setVendors((data || []).filter((d) => d.business_name && stocked.has(d.id)).sort((a, b) => Number(picked.has(b.id)) - Number(picked.has(a.id))).map((d) => ({
           id: d.id,
           to: `/${d.slug || d.id}`,
           owner: d.profiles?.full_name,
@@ -39,7 +42,8 @@ const Directory = () => {
           location: d.location,
           logo: d.logo_url || d.profiles?.avatar_url || defaultLogo,
           banner: d.banner_url,
-          featured: d.is_featured,
+          featured: d.is_featured || picked.has(d.id),
+          ceo: picked.get(d.id) === 'ceo',
           founder: d.is_early_bird,
           admin: false,
         })));
@@ -87,7 +91,7 @@ const Directory = () => {
               <div className="dir-card__banner">
                 {v.banner && <img src={v.banner} alt="" loading="lazy" decoding="async" />}
                 <div className="dir-card__badges">
-                  {v.featured && <span><Sparkles size={12} /> Featured</span>}
+                  {v.featured && <span><Sparkles size={12} /> {v.ceo ? 'CEO Selected' : 'Featured'}</span>}
                   {v.founder && <span><Leaf size={12} /> Founder</span>}
                   {v.admin && <span><Crown size={12} /> P31</span>}
                 </div>

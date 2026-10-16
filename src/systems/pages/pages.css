@@ -188,3 +188,10 @@
 .wd-closed ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; font-size: 0.84rem; opacity: 0.8; }
 .wd-closed li { display: flex; gap: 6px; align-items: center; }
 @media (max-width: 700px) { .wd-item { grid-template-columns: 1fr; } .wd-item__tools { justify-content: flex-start; max-width: none; } }
+
+/* Featured & add-ons on the shops page (ShopAddons.jsx, v53) */
+.sh-addons { display: grid; gap: 12px; }
+.sh-addons h3 { display: flex; gap: 6px; align-items: center; margin: 0 0 4px; font-size: 0.92rem; font-weight: 800; }
+.sh-addons__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.sh-addons__list { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 0.88rem; }
+.sh-addons select { max-width: 100%; }

@@ -18,6 +18,7 @@ import StudioNav from '../features/dashboard/StudioNav';
 import SetupChecklist from '../features/dashboard/SetupChecklist';
 import MyMarkets from '../features/dashboard/MyMarkets';
 import BillingPanel, { BillingBanner } from '../features/dashboard/BillingPanel';
+import GrowPanel from '../features/dashboard/GrowPanel';
 import Tour from '../components/Tour';
 import { CURATOR_TOUR, CURATOR_TOUR_ID } from '../features/dashboard/studioTour';
 import { PRODUCT_TEMPLATES, PRODUCT_BADGES, applyTemplate } from '../features/marketing/productTemplates';
@@ -1871,6 +1872,7 @@ const CuratorDashboard = () => {
 
           <Route path="community" element={<Navigate to="/gather" replace />} />
           <Route path="billing" element={<BillingPanel curator={curatorData} />} />
+          <Route path="grow" element={<GrowPanel curator={curatorData} userId={user.id} />} />
 
           <Route path="governance" element={
             isAdmin ? (

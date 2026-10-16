@@ -1,0 +1,37 @@
+/* Grow your shop: add-ons in the curator studio (GrowPanel.jsx). Prefix: gr- (cards reuse bl- from BillingPanel.css) */
+.gr-meter { height: 8px; margin: 12px 0 4px; border-radius: 999px; background: #EFE4F3; overflow: hidden; }
+.gr-meter span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #9B71B2, #3A1C36); }
+.gr-plans { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.gr-plan { display: grid; gap: 2px; justify-items: start; min-width: 140px; padding: 12px 16px; border-radius: 16px; border: 1px solid var(--line, #E3D0EA); background: #fff; color: #3A1C36; cursor: pointer; text-align: left; position: relative; transition: border-color 0.2s, transform 0.2s; }
+.gr-plan strong { font-size: 1rem; }
+.gr-plan span { font-size: 0.86rem; color: #74657A; font-weight: 700; }
+.gr-plan:hover:not(:disabled) { border-color: #D9A93A; transform: translateY(-1px); }
+.gr-plan:disabled { opacity: 0.55; cursor: not-allowed; }
+.gr-plan svg { position: absolute; top: 10px; right: 10px; }
+.gr-link { background: none; border: 0; padding: 0; color: #3A1C36; font-weight: 800; text-decoration: underline; cursor: pointer; display: inline-flex; gap: 4px; align-items: center; font-size: inherit; }
+.gr-pick { display: flex; gap: 8px; align-items: center; margin: 12px 0 0 !important; padding: 10px 14px; border-radius: 14px; background: rgba(242, 206, 77, 0.18); color: #6b5212 !important; }
+.gr-posts { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; }
+.gr-post { border: 1px solid var(--line, #E3D0EA); border-radius: 16px; padding: 12px 14px; background: #fff; }
+.gr-post__head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-weight: 700; color: #3A1C36; }
+.gr-post__head > span:first-child { display: inline-flex; gap: 6px; align-items: center; flex: 1; min-width: 160px; }
+.gr-pill { font-size: 0.74rem; font-weight: 800; padding: 3px 10px; border-radius: 999px; background: #EFE4F3; color: #3A1C36; }
+.gr-post--waiting .gr-pill { background: rgba(242, 206, 77, 0.28); color: #6b5212; }
+.gr-post--scheduled .gr-pill { background: rgba(55, 65, 38, 0.12); color: #374126; }
+.gr-post__form { display: grid; gap: 12px; margin-top: 12px; }
+.gr-media { display: flex; flex-wrap: wrap; gap: 8px; }
+.gr-media figure { position: relative; margin: 0; width: 76px; height: 76px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line, #E3D0EA); }
+.gr-media img { width: 100%; height: 100%; object-fit: cover; }
+.gr-media figure button { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, 0.92); display: grid; place-items: center; cursor: pointer; }
+.gr-media__add { width: 76px; height: 76px; border-radius: 12px; border: 1.5px dashed #9B71B2; display: grid; place-content: center; justify-items: center; gap: 2px; color: #3A1C36; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+.gr-field { display: grid; gap: 4px; min-width: 0; }
+.gr-field span { font-size: 0.8rem; font-weight: 800; color: #3A1C36; }
+.gr-field textarea, .gr-field input, .gr-field select, .gr-google input { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line, #E3D0EA); font: inherit; background: #fff; color: #2A1526; }
+.gr-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.gr-google { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.gr-google input { flex: 1; min-width: 220px; }
+.gr-place { display: grid; gap: 4px; margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: #F8F3FA; color: #4E3A4B; }
+.gr-place strong { color: #3A1C36; }
+.gr-stars { display: inline-flex; gap: 4px; align-items: center; font-weight: 800; color: #6b5212; }
+.gr-stars svg { fill: #D9A93A; color: #D9A93A; }
+.gr-place__acts { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 4px; }
+.gr .spin { animation: bl-spin 1s linear infinite; }

@@ -307,7 +307,8 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
   curator_data: [
     { id: 'cu1', business_name: 'Sample Pending Shop', slug: 'sample-pending', status: 'pending', subscription_status: 'none', created_at: day(-1), profiles: { full_name: 'Sample Applicant' } },
     // The sample shop (images in src/dev/sample-shop, served by the dev server only; never in a production build).
-    { id: 'u-cu', business_name: 'Myrrh & Mercy Apothecary', slug: 'myrrh-and-mercy', is_paid: true, plan: 'free', tagline: 'Candles, body care and keepsakes, poured and made by hand in Decatur', bio: 'Myrrh & Mercy began at a kitchen table in 2021 with one candle and a prayer for peace in a hard season. Every jar is hand-poured in small batches with soy wax, cotton wicks and oils we blend ourselves, and every order leaves with a handwritten scripture card. Proverbs 31:24 is our reminder: she makes fine things, and she sells them with joy.', status: 'approved', is_published: true, is_featured: true, is_early_bird: true, verification_badges: ['Handmade', 'Woman-owned'], public_email: 'curator@example.com', phone: '(404) 555-0144', location: 'Decatur, GA', instagram: 'myrrhandmercy.sample', facebook: null, website: null, cashapp_tag: '$MyrrhMercySample', venmo_handle: '@MyrrhMercy-Sample', stripe_link: null, other_payment_link: null, shop_announcement: 'Fall candles are here. Order by Friday for pickup at Saturday’s market, or we ship anywhere in the US.', store_design: { template: 'atelier' }, logo_url: '/src/dev/sample-shop/logo.webp', banner_url: '/src/dev/sample-shop/banner.webp', agreement_signed_at: day(-100), agreement_id: 'ag-2', activated_at: day(-80), trial_ends_at: day(12), subscription_status: 'trial', created_at: day(-120), profiles: { full_name: 'Sample Curator' } },
+    { id: 'u-cu', business_name: 'Myrrh & Mercy Apothecary', slug: 'myrrh-and-mercy', is_paid: true, plan: 'free', tagline: 'Candles, body care and keepsakes, poured and made by hand in Decatur', bio: 'Myrrh & Mercy began at a kitchen table in 2021 with one candle and a prayer for peace in a hard season. Every jar is hand-poured in small batches with soy wax, cotton wicks and oils we blend ourselves, and every order leaves with a handwritten scripture card. Proverbs 31:24 is our reminder: she makes fine things, and she sells them with joy.', status: 'approved', is_published: true, is_featured: true, is_early_bird: true, verification_badges: ['Handmade', 'Woman-owned'], public_email: 'curator@example.com', phone: '(404) 555-0144', location: 'Decatur, GA', instagram: 'myrrhandmercy.sample', facebook: null, website: null, cashapp_tag: null, venmo_handle: null, stripe_link: null, other_payment_link: null, stripe_account_id: 'acct_sample', stripe_charges_enabled: true, stripe_payouts_enabled: true, bonus_products: 0,
+      google_place_id: 'ChIJsample', google_maps_url: 'https://maps.app.goo.gl/sample', google_synced_at: iso(-300), google_place: { id: 'ChIJsample', name: 'Myrrh & Mercy Apothecary', address: '120 Sample St, Decatur, GA 30030', rating: 4.9, count: 38, maps_url: 'https://maps.google.com', review_url: 'https://search.google.com/local/writereview?placeid=ChIJsample', open_now: true, hours: ['Monday: Closed', 'Tuesday: 10:00 AM – 6:00 PM', 'Wednesday: 10:00 AM – 6:00 PM', 'Thursday: 10:00 AM – 6:00 PM', 'Friday: 10:00 AM – 7:00 PM', 'Saturday: 9:00 AM – 5:00 PM', 'Sunday: 12:00 – 4:00 PM'], reviews: [{ author: 'Sample Reviewer', rating: 5, when: '2 weeks ago', text: 'The lavender candle fills my whole living room, and the scripture card in the bag made my day. Sample review.' }, { author: 'Another Sample', rating: 5, when: 'a month ago', text: 'Lovely shop and so kind. The body butter is the only one my skin likes. Sample review.' }] }, shop_announcement: 'Fall candles are here. Order by Friday for pickup at Saturday’s market, or we ship anywhere in the US.', store_design: { template: 'atelier' }, logo_url: '/src/dev/sample-shop/logo.webp', banner_url: '/src/dev/sample-shop/banner.webp', agreement_signed_at: day(-100), agreement_id: 'ag-2', activated_at: day(-80), trial_ends_at: day(12), subscription_status: 'trial', created_at: day(-120), profiles: { full_name: 'Sample Curator' } },
   ],
   // Operations (v42): which scripts ran, the activity log, the billing and automatic-email switches.
   schema_versions: [{ version: 41, name: 'team dashboards', applied_at: day(-1) }, { version: 42, name: 'operations', applied_at: iso(-30) }],
@@ -324,6 +325,15 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
     { key: 'billing', value: { price_cents: 1499, free_months: 3, remind_days: 14, grace_days: 7, auto_pause: false } },
     { key: 'reminders', value: { enabled: true, day_before: true, hour_before: true } },
     { key: 'welcome', value: { enabled: true } },
+    { key: 'addons', value: { included_products: 10, product_packs: [{ key: 'p1', slots: 1, cents: 200 }, { key: 'p7', slots: 7, cents: 1000 }, { key: 'p20', slots: 20, cents: 2000 }], featured_plans: [{ key: 'f2', posts: 2, cents: 2500 }, { key: 'f5', posts: 5, cents: 5000 }], featured_cap: 10, ceo_posts: 1, google_refresh_days: 3 } },
+  ],
+  // Add-ons (v53): the sample shop has a Featured plan and is this month's CEO pick.
+  shop_addons: [{ id: 'ad1', curator_id: 'u-cu', kind: 'featured', plan_key: 'f2', slots: 0, posts: 2, price_cents: 2500, status: 'active', cancel_at_period_end: false, created_at: day(-9) }],
+  featured_picks: [{ month: new Date().toLocaleDateString('en-CA').slice(0, 7) + '-01', curator_id: 'u-cu', note: 'Fall candles' }],
+  featured_posts: [
+    { id: 'fp1', curator_id: 'u-cu', month: new Date().toLocaleDateString('en-CA').slice(0, 7) + '-01', source: 'ceo', status: 'scheduled', media: [], caption: 'Fall candles are here.', created_at: day(-8) },
+    { id: 'fp2', curator_id: 'u-cu', month: new Date().toLocaleDateString('en-CA').slice(0, 7) + '-01', source: 'paid', addon_id: 'ad1', status: 'submitted', media: [{ type: 'image', url: '/src/dev/sample-shop/banner.webp' }], caption: 'Hand-poured in Decatur with a scripture card in every bag.', created_at: day(-8) },
+    { id: 'fp3', curator_id: 'u-cu', month: new Date().toLocaleDateString('en-CA').slice(0, 7) + '-01', source: 'paid', addon_id: 'ad1', status: 'waiting', media: [], created_at: day(-8) },
   ],
   admin_activity: [
     { id: 6, actor_name: 'Melanie JC', actor_email: 'melanie@example.com', area: 'curator_data', action: 'update', target_id: 'u-cu', target_label: 'Myrrh & Mercy Apothecary', changes: { is_featured: [false, true] }, created_at: iso(-25) },
@@ -454,6 +464,10 @@ const rpc = {
   shop_follower_count: () => 3,
   shop_subscribe: () => true,
   shop_unsubscribe: () => true,
+  shop_product_limit: () => 10,
+  featured_capacity: () => ({ cap: 10, taken: 4 }),
+  featured_shops: () => db.curator_data.filter((c) => c.id === 'u-cu').map((c) => ({ id: c.id, slug: c.slug, business_name: c.business_name, tagline: c.tagline, logo_url: c.logo_url, banner_url: c.banner_url, location: c.location, kind: 'ceo' })),
+  featured_submit: (a) => { const p = db.featured_posts.find((x) => x.id === a.p_id); if (p) Object.assign(p, { status: 'submitted', caption: a.p_caption, media: a.p_media }); return a.p_id; },
   my_product_stats: () => [{ product_id: 101, opens: 14, buys: 5, shares: 3 }, { product_id: 102, opens: 6, buys: 1, shares: 0 }],
   // Private coaching intake (v47): a sample client who has signed the first of her three forms.
   // demo-new: nothing signed yet; demo-safety: on the last form; demo-signed: all three, choosing a plan;
@@ -568,6 +582,7 @@ const fns = {
   'eventbrite-stats': () => ({ configured: true, checked_at: iso(0), events: [{ id: 'ev1', title: 'Business and Leadership Luncheon', event_date: day(70).slice(0, 10), url: 'https://www.eventbrite.com/e/proverbs-31-business-leadership-luncheon-tickets-2002850002272', sold: 46, total: 150,
     classes: [{ name: 'General admission', sold: 38, total: 120 }, { name: 'VIP table seat', sold: 8, total: 30 }] }] }),
   'vendor-billing': (b) => ({ error: b.action === 'portal' ? '(Demo) The Stripe billing page opens here: change card or cancel.' : '(Demo) Stripe Checkout opens here: card details, then back to this page.' }),
+  'google-place': (b) => (b.action === 'connect' ? { place: db.curator_data.find((c) => c.id === 'u-cu')?.google_place } : { ok: true }),
   'studio-zernio': (b) => {
     if (b.action === 'overview') return studio.overview;
     if (b.action === 'posts') return studio.posts;

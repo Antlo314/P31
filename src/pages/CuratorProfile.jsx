@@ -414,6 +414,51 @@ const CuratorProfile = () => {
         </section>
       )}
 
+      {/* Google Business (v53): rating, recent reviews, hours, as Google sends them */}
+      {curator.google_place?.id && (() => {
+        const g = curator.google_place;
+        return (
+          <section className="sf-reviews sf-google" data-reveal>
+            <p className="sf-eyebrow">Reviews from Google</p>
+            <div className="sf-google__head">
+              {g.rating != null && (
+                <div className="sf-google__score">
+                  <strong>{Number(g.rating).toFixed(1)}</strong>
+                  <div className="sf-stars" aria-label={`${g.rating} out of 5 on Google`}>
+                    {Array.from({ length: 5 }, (_, i) => <Star key={i} size={15} className={i < Math.round(g.rating) ? 'is-on' : ''} />)}
+                  </div>
+                  <span>{g.count} Google review{g.count === 1 ? '' : 's'}</span>
+                </div>
+              )}
+              <div className="sf-google__info">
+                {g.address && <span><MapPin size={15} /> {g.address}</span>}
+                {g.open_now != null && <span className={g.open_now ? 'is-open' : ''}>{g.open_now ? 'Open now' : 'Closed now'}</span>}
+                <span className="sf-google__links">
+                  <a href={g.maps_url} target="_blank" rel="noreferrer">See on Google Maps</a>
+                  <a href={g.review_url} target="_blank" rel="noreferrer">Write a review</a>
+                </span>
+              </div>
+            </div>
+            {g.reviews?.length > 0 && (
+              <div className="sf-reviews__rail">
+                {g.reviews.filter((r) => r.text).map((r) => (
+                  <figure className="sf-review" key={`${r.author}-${r.when}`}>
+                    <div className="sf-stars" aria-label={`${r.rating} out of 5`}>
+                      {Array.from({ length: 5 }, (_, i) => <Star key={i} size={14} className={i < r.rating ? 'is-on' : ''} />)}
+                    </div>
+                    <blockquote>“{r.text.length > 320 ? `${r.text.slice(0, 320).trim()}…` : r.text}”</blockquote>
+                    <figcaption>{r.author_url ? <a href={r.author_url} target="_blank" rel="noreferrer">{r.author}</a> : r.author} · {r.when}</figcaption>
+                  </figure>
+                ))}
+              </div>
+            )}
+            {g.hours?.length > 0 && (
+              <details className="sf-google__hours"><summary>Hours</summary><ul>{g.hours.map((h) => <li key={h}>{h}</li>)}</ul></details>
+            )}
+          </section>
+        );
+      })()}
+
       <FollowBox curator={curator} />
 
       <section className="sf-contact" data-reveal>

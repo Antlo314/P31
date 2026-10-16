@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   User, ShoppingBag, Palette, DollarSign, Tag, Star, Megaphone, Camera, BarChart3, Bell, MessageSquare,
-  HelpCircle, ExternalLink, Crown, ShieldCheck, ChevronDown, Menu, X, LogOut, CreditCard,
+  HelpCircle, ExternalLink, Crown, ShieldCheck, ChevronDown, Menu, X, LogOut, CreditCard, Rocket,
 } from 'lucide-react';
 import { startCuratorTour } from './studioTour';
 import './StudioNav.css';
@@ -22,6 +22,7 @@ const GROUPS = [
     { id: 'testimonials', label: 'Testimonials', Icon: Star },
   ] },
   { id: 'grow', label: 'Grow', items: [
+    { id: 'grow', label: 'Add-ons & Featured', Icon: Rocket },
     { id: 'marketing', label: 'Marketing', Icon: Megaphone, alias: ['toolkit'] },
     { id: 'studio', label: 'Creative Studio', Icon: Camera },
     { id: 'analytics', label: 'Intelligence', Icon: BarChart3 },

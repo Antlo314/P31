@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { useRoles } from '../../lib/roles';
 import { SITES } from '../nav';
 import { DeleteRecord, EditRecord } from '../AdminRecord';
+import ShopAddons from './ShopAddons';
 
 // The vendor studio's availability choices, so an admin edit matches what she sees.
 const STOCK = [['in_stock', 'In stock'], ['out_of_stock', 'Sold out'], ['limited_edition', 'Limited edition'], ['pre_order', 'Pre-order']];
@@ -157,6 +158,8 @@ const Shops = () => {
           )}
         </section>
       )}
+
+      {shops?.length > 0 && <ShopAddons shops={shops} admin={admin} />}
 
       <div className="sh-layout">
         <section className="sys-card" data-tour="shops-list">

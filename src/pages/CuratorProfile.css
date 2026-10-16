@@ -326,3 +326,17 @@
 }
 .sf-follow__form .sf-low { grid-column: 1 / -1; }
 .sf-follow__done { display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--sf-accent); }
+
+/* ── Google Business (v53) ───────────────────────────── */
+.sf-google__head { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; margin-bottom: 12px; }
+.sf-google__score { display: grid; grid-template-columns: auto auto; gap: 2px 10px; align-items: center; }
+.sf-google__score strong { grid-row: span 2; font-size: 2.2rem; line-height: 1; color: var(--sf-ink); font-family: var(--sf-heading, inherit); }
+.sf-google__score span { font-size: 0.82rem; color: var(--sf-ink-2); font-weight: 700; }
+.sf-google__info { display: grid; gap: 4px; color: var(--sf-ink-2); font-size: 0.9rem; }
+.sf-google__info > span { display: inline-flex; gap: 6px; align-items: center; }
+.sf-google__info .is-open { color: #17A673; font-weight: 800; }
+.sf-google__links { gap: 14px !important; flex-wrap: wrap; }
+.sf-google__links a, .sf-google .sf-review figcaption a { color: var(--sf-ink); font-weight: 800; }
+.sf-google__hours { margin-top: 10px; color: var(--sf-ink-2); font-size: 0.9rem; }
+.sf-google__hours summary { cursor: pointer; font-weight: 800; color: var(--sf-ink); }
+.sf-google__hours ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 2px; }

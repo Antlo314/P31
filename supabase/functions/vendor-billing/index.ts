@@ -4,6 +4,9 @@
 //   { action: 'checkout' }  a signed-in vendor: a Stripe Checkout link for her subscription. During the
 //                           free period her card is saved now and the first charge waits for its end.
 //   { action: 'portal' }    a signed-in vendor: a Stripe billing-portal link to change card or cancel.
+//   { action: 'addon', kind: 'products' | 'featured', plan }  a signed-in vendor: a Stripe Checkout link for
+//                           an add-on (v53): a product slot pack or a Featured plan, monthly (prices in
+//                           app_settings 'addons'). Each add-on is its own subscription on her customer.
 //   { action: 'sweep' }     the scheduler (daily): a reminder before the free period ends, a note when it
 //                           ends, an optional pause after the grace days, and a note when a payment fails.
 // Stripe events (checkout completed, invoices, subscription changes) arrive at academy-webhook, which
@@ -61,7 +64,7 @@ Deno.serve(async (req) => {
   const s = await settings(db);
 
   // ── The vendor's own links ──
-  if (b.action === 'checkout' || b.action === 'portal') {
+  if (b.action === 'checkout' || b.action === 'portal' || b.action === 'addon') {
     const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
     const { data: who } = await db.auth.getUser(token);
     const user = who?.user;
@@ -81,15 +84,55 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (['active', 'past_due'].includes(shop.subscription_status) && shop.stripe_subscription_id) return json({ already: true });
-    if (shop.subscription_status === 'comp') return json({ error: 'Your storefront is complimentary; there is nothing to pay.' }, 409);
-
     let customer = shop.stripe_billing_customer_id || undefined;
-    if (!customer) {
+    const ensureCustomer = async () => {
+      if (customer) return customer;
       const c = await stripe.customers.create({ email: user.email, name: shop.business_name || undefined, metadata: { curator_id: shop.id, source: 'p31-storefront' } });
       customer = c.id;
       await db.from('curator_data').update({ stripe_billing_customer_id: customer }).eq('id', shop.id);
+      return customer;
+    };
+
+    if (b.action === 'addon') {
+      const { data: row } = await db.from('app_settings').select('value').eq('key', 'addons').maybeSingle();
+      const a: Row = row?.value || {};
+      const kind = b.kind === 'featured' ? 'featured' : b.kind === 'products' ? 'products' : '';
+      const plans: Row[] = (kind === 'featured' ? a.featured_plans : a.product_packs) || [];
+      const plan = plans.find((p) => p.key === b.plan);
+      if (!kind || !plan) return json({ error: 'Please choose one of the add-ons shown.' }, 400);
+      if (kind === 'featured') {
+        const { data: mine } = await db.from('shop_addons').select('id').eq('curator_id', shop.id).eq('kind', 'featured').in('status', ['active', 'past_due']).limit(1);
+        if (mine?.length) return json({ error: 'You already have a Featured plan. Change or cancel it from Manage billing.' }, 409);
+        const { count } = await db.from('shop_addons').select('id', { count: 'exact', head: true }).eq('kind', 'featured').in('status', ['active', 'past_due']);
+        if ((count || 0) >= (Number(a.featured_cap) || 10)) return json({ error: 'Featured is full this month. Write to ' + VENDOR_EMAIL + ' and we will save you the next spot.' }, 409);
+      }
+      const name = kind === 'featured'
+        ? 'P31 Featured: ' + plan.posts + ' social posts a month'
+        : 'P31 storefront: ' + plan.slots + ' extra product slot' + (Number(plan.slots) === 1 ? '' : 's');
+      const { data: addon, error: addErr } = await db.from('shop_addons').insert({
+        curator_id: shop.id, kind, plan_key: plan.key, slots: kind === 'products' ? Number(plan.slots) || 0 : 0,
+        posts: kind === 'featured' ? Number(plan.posts) || 0 : 0, price_cents: Number(plan.cents) || 0,
+      }).select('id').single();
+      if (addErr) return json({ error: addErr.message }, 500);
+      const meta = { kind: 'shop_addon', addon_id: addon.id, curator_id: shop.id, addon: kind, plan: plan.key };
+      const session = await stripe.checkout.sessions.create({
+        mode: 'subscription',
+        customer: await ensureCustomer(),
+        client_reference_id: shop.id,
+        line_items: [{ quantity: 1, price_data: { currency: 'usd', unit_amount: Number(plan.cents), recurring: { interval: 'month', interval_count: 1 }, product_data: { name } } }],
+        metadata: meta,
+        subscription_data: { metadata: meta },
+        success_url: SITE + '/dashboard/grow?status=success',
+        cancel_url: SITE + '/dashboard/grow?status=cancelled',
+      });
+      await db.from('shop_addons').update({ stripe_session_id: session.id }).eq('id', addon.id);
+      return json({ url: session.url });
     }
+
+    if (['active', 'past_due'].includes(shop.subscription_status) && shop.stripe_subscription_id) return json({ already: true });
+    if (shop.subscription_status === 'comp') return json({ error: 'Your storefront is complimentary; there is nothing to pay.' }, 409);
+
+    await ensureCustomer();
     const meta = { kind: 'storefront', curator_id: shop.id };
     // Still in the free period (at least two days left): save the card now, first charge when it ends.
     const trialEnd = shop.trial_ends_at ? Math.floor(new Date(shop.trial_ends_at).getTime() / 1000) : 0;
@@ -110,6 +153,7 @@ Deno.serve(async (req) => {
 
   // ── The daily sweep ──
   if (b.action !== 'sweep') return json({ error: 'Unknown action' }, 400);
+  await db.rpc('featured_allocate');
   if (!emailConfigured()) return json({ ok: false, waiting: 'email' });
   const from = env('MARKET_EMAIL_FROM') || env('EMAIL_FROM') || undefined;
   const now = Date.now();
