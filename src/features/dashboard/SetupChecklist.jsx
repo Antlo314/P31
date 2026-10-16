@@ -8,7 +8,7 @@ import { startCuratorTour } from './studioTour';
  * Reads the same data the tabs edit, so it ticks itself as the vendor works.
  */
 const SetupChecklist = ({ curator, editData, products = [], onGo }) => {
-  const paid = !!(curator?.stripe_charges_enabled || editData.stripeLink || editData.cashappTag || editData.venmoHandle || editData.otherPaymentLink);
+  const paid = !!curator?.stripe_charges_enabled;
   const steps = [
     { id: 'identity', tab: 'identity', label: 'Name, story and shop link', done: !!(editData.businessName && editData.slug && editData.bio), hint: 'Identity' },
     { id: 'agreement', href: '/vendors/agreement', label: 'Sign the Storefront Agreement', done: !!curator?.agreement_signed_at, hint: 'Benefits, fees and your responsibilities' },

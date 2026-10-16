@@ -454,6 +454,8 @@ ${a.again === 'in' ? `<p>You said you are in for the next market. The team will 
 // Private coaching intake (v47): the link email, then each of the three signed forms.
 const COACHING_TEAM = () => list('INTRO_NOTIFY_TO', [MEMBERS_EMAIL, 'founder@thep31collective.org']);
 const COLLECTIVE_SITE = 'https://www.thep31collective.org';
+// Coaching clients write back to the founder.
+const COACHING_REPLY = 'founder@thep31collective.org';
 const COACHING_ORDER = ['coaching', 'confidentiality', 'safety'] as const;
 const COACHING_LABEL: Record<string, string> = { coaching: 'Business Coaching Agreement', confidentiality: 'Confidentiality Agreement', safety: 'Client Safety & Emergency Contact form' };
 FLOWS.push({
@@ -463,16 +465,16 @@ FLOWS.push({
   fields: 'id, token, email, full_name, created_at, expires_at',
   scope: (q) => q.neq('status', 'revoked'),
   to: (a) => [a.email],
-  replyTo: () => MEMBERS_EMAIL,
+  replyTo: () => COACHING_REPLY,
   from: () => env('COLLECTIVE_EMAIL_FROM') || undefined,
-  subject: () => 'Your P31 Collective enrollment: please complete within 48 hours',
+  subject: () => 'P31 Private Mentorship and Business Coaching Enrollment',
   email: (a) => layout('Before we begin', `<p>Hi ${esc(String(a.full_name || '').split(' ')[0] || 'there')},</p>
 <p>It was a joy speaking with you, and you are approved to enroll. Here is your private enrollment link. <b>Please complete your enrollment within 48 hours.</b></p>
 <p style="margin:14px 0 6px"><b>Your setup guide</b></p>
 <ol style="margin:0 0 14px;padding-left:20px;line-height:1.6"><li>Sign the three required forms, in order: the <b>Business Coaching Agreement</b>, the <b>Confidentiality Agreement</b> and the <b>Client Safety &amp; Emergency Contact form</b>.</li><li>Choose your program (Business Coaching or Private Faith Mentorship) and your plan.</li><li>Create your member login and pay by secure Stripe checkout.</li><li>Watch for your welcome email: your classroom, session scheduling and community access.</li></ol>
 ${button(`${COLLECTIVE_SITE}/coaching/forms/${a.token}`, 'Start my enrollment')}
 <p style="margin-top:18px">Each form takes a few minutes and you receive a PDF copy as you sign. Your enrollment is final once your payment is confirmed. The link works until ${esc(longDate(String(a.expires_at).slice(0, 10)))}.</p>
-<p>Questions? Reply to this email or write to ${mail(MEMBERS_EMAIL)}.</p>`, COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE'),
+<p>Questions? Reply to this email or write to ${mail(COACHING_REPLY)}.</p>`, COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE'),
   sheet: () => null,
   sheetRow: (a) => ({ 'Email': a.email }),
 });
@@ -507,13 +509,13 @@ for (const kind of COACHING_ORDER) {
       + button(`${COLLECTIVE_SITE}/academy/business/teach/agreements`, 'Open in the mentor console'), COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE');
     },
     confirm: (a) => ({
-      replyTo: MEMBERS_EMAIL,
+      replyTo: COACHING_REPLY,
       subject: `Your copy: ${COACHING_LABEL[kind]}`,
       html: layout(`Your ${COACHING_LABEL[kind]}`, `<p>Hi ${esc(String(a.full_name).split(' ')[0])},</p>
 <p>Thank you. You signed the <b>${esc(COACHING_LABEL[kind])}</b> on ${esc(longDate(a.signed_on))} as <b>${esc(a.signed_name)}</b>. Your copy, with every word you agreed to, is attached as a PDF.</p>
 ${a.package ? `<p>Your package: <b>${esc(a.package)}</b>.</p>` : ''}
 ${next ? `<p><b>Next:</b> the ${esc(COACHING_LABEL[next])}. ${button(`${COLLECTIVE_SITE}/coaching/forms/${a.token}`, 'Continue to the next form')}</p>` : `<p><b>That is all three.</b> Last step: choose your program and plan, then secure checkout. ${button(`${COLLECTIVE_SITE}/coaching/forms/${a.token}`, 'Choose my plan')}</p>`}
-<p>Questions? Reply to this email or write to ${mail(MEMBERS_EMAIL)}.</p>`, COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE'),
+<p>Questions? Reply to this email or write to ${mail(COACHING_REPLY)}.</p>`, COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE'),
     }),
     pdf: (a) => ({
       brand: 'collective', title: doc.title, submittedAt: a.created_at, reference: a.id,
@@ -582,7 +584,7 @@ ${button(shopLink(a), 'See my shop')}
 <ul style="margin:6px 0 14px;padding-left:20px;line-height:1.55">
 ${a.products ? '' : '<li><b>List your first product.</b> Your shop joins the Curators &amp; shops directory and the marketplace as soon as it has one.</li>'}
 <li>Add a clear photo to every product, and a second or third photo where you can.</li>
-<li>Check <b>How you get paid</b> in your studio: Cash App, Venmo or your own payment link, so shoppers can pay you straight away.</li>
+<li><b>Connect Stripe</b> in your studio (about 10 minutes) so shoppers can check out by card, Apple Pay or Klarna, with your earnings going straight to your bank.</li>
 <li>Share one product a week from <b>Marketing</b> in your studio; it makes the image and caption for you.</li>
 </ul>
 ${button(`${MARKET}/dashboard`, 'Open my studio')}

@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { applyMeta, curatorMeta } from '../lib/seo';
-import { invokePayment, CARD_PAYMENTS_ENABLED } from '../lib/payments';
+import { invokePayment } from '../lib/payments';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useFavorites } from '../lib/favorites';
@@ -107,7 +107,6 @@ const CuratorProfile = () => {
   // Native checkout when the vendor finished Stripe onboarding and the item
   // is a real catalog product with a valid price.
   const canCheckout = (p) =>
-    CARD_PAYMENTS_ENABLED &&
     !!curator?.stripe_charges_enabled &&
     typeof p.id === 'number' &&
     parseFloat(p.price) >= 0.5 &&
@@ -227,7 +226,8 @@ const CuratorProfile = () => {
   const design = resolveDesign(curator.store_design);
   const store = designAttrs(design);
   const contactEmail = curator.public_email || P31_EMAIL;
-  const hasPayments = curator.stripe_charges_enabled || curator.stripe_link || curator.cashapp_tag || curator.venmo_handle || curator.other_payment_link;
+  // Shoppers pay only through Stripe (cards, Apple Pay, Klarna and the rest), once the shop has finished Stripe sign-up.
+  const hasPayments = true;
 
   const share = async () => {
     const url = window.location.href.split('?')[0];
@@ -386,11 +386,9 @@ const CuratorProfile = () => {
             <article className="sf-panel">
               <p className="sf-eyebrow">How to pay</p>
               <div className="sf-pay">
-                {curator.stripe_charges_enabled && <div className="sf-pay__item is-native"><CreditCard size={18} /> Cards accepted — tap any item to buy</div>}
-                {curator.stripe_link && <a className="sf-pay__item" href={curator.stripe_link} target="_blank" rel="noreferrer" onClick={() => logEvent('payment_click')}><CreditCard size={18} /> Pay with card</a>}
-                {curator.cashapp_tag && <a className="sf-pay__item" href={`https://cash.app/$${curator.cashapp_tag.replace('$', '')}`} target="_blank" rel="noreferrer" onClick={() => logEvent('payment_click')}><DollarSign size={18} /> Cash App ${curator.cashapp_tag.replace('$', '')}</a>}
-                {curator.venmo_handle && <a className="sf-pay__item" href={`https://venmo.com/${curator.venmo_handle.replace('@', '')}`} target="_blank" rel="noreferrer" onClick={() => logEvent('payment_click')}><Send size={18} /> Venmo @{curator.venmo_handle.replace('@', '')}</a>}
-                {curator.other_payment_link && <a className="sf-pay__item" href={curator.other_payment_link.startsWith('http') ? curator.other_payment_link : `mailto:${curator.other_payment_link}`} target="_blank" rel="noreferrer" onClick={() => logEvent('payment_click')}><ShoppingBag size={18} /> {curator.other_payment_label || 'Direct payment'}</a>}
+                {curator.stripe_charges_enabled
+                  ? <div className="sf-pay__item is-native"><CreditCard size={18} /> Secure checkout by Stripe: cards, Apple Pay, Google Pay, Klarna and Afterpay</div>
+                  : <div className="sf-pay__item"><CreditCard size={18} /> Checkout opens soon. Questions? <a href={`mailto:${contactEmail}`}>Email the shop</a></div>}
               </div>
             </article>
           )}

@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
 </ol>
 <p><a href="${classroom}" style="display:inline-block;background:#3A1C36;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Open my classroom</a>&nbsp;
 <a href="${SESSIONS}" style="display:inline-block;background:#D9A93A;color:#21101E;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Book my first session</a></p>
-<p>Questions? Reply to this email or write to ${MEMBERS}.</p>`, 'thep31collective.org · The P31 Collective by NEBA', 'THE PROVERBS 31 COLLECTIVE'), MEMBERS);
+<p>Questions? Reply to this email or write to founder@thep31collective.org.</p>`, 'thep31collective.org · The P31 Collective by NEBA', 'THE PROVERBS 31 COLLECTIVE'), 'founder@thep31collective.org');
           }
           await sendEmail(teamTo(), `New enrollment: ${name || email} (${prog?.title || 'program'}, ${plan?.label || ''})`, layout('New enrollment', `<p><b>${esc(name || email)}</b> (${esc(email)}) paid ${paid} and is enrolled in the <b>${esc(prog?.title || '')}</b>.</p>
 <p>Plan: ${esc(plan?.label || '')}</p><p>She has been sent her welcome email with the classroom link and the session calendar. Next: her first session.</p>

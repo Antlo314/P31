@@ -23,7 +23,7 @@ export const CURATOR_TOUR = [
   {
     to: '/dashboard/storefront', targets: ['[data-tour="payments"]', '#payment-links-section'],
     title: '3. How you get paid',
-    body: 'Connect with Stripe and shoppers pay by card right on your page, with the money going to your bank. Cash App, Venmo or a payment link work as backups.',
+    body: 'Connect with Stripe and shoppers pay by card, Apple Pay, Klarna and more right on your page, with the money going to your bank. Checkout opens once Stripe is connected.',
   },
   {
     to: '/dashboard/storefront', targets: ['[data-tour="add-product"]'],

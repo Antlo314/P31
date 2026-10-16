@@ -119,6 +119,34 @@ Deno.serve(async (req) => {
       return json({ made, failed, remaining: todo.filter(({ i, c }: Any) => !done.has(`${i.id}|${c}`)).length - made.filter((m) => !redo.has(m.replace(' ', '|'))).length });
     }
 
+    // What Printful charges P31 for each product type, colour and size, and standard US shipping for one
+    // piece: the numbers behind the merch revenue sheet. Read only; nothing is ordered.
+    if (body.action === 'costs') {
+      if (!printfulReady()) return json({ error: 'Printful is not connected yet.' }, 503);
+      const types: Record<string, Any> = {};
+      for (const [key, t] of Object.entries(TYPES) as [string, Any][]) {
+        const product = await pf(`/products/${t.printful}`);
+        const price = new Map((product?.variants || []).map((v: Any) => [v.id, Math.round(Number(v.price) * 100)]));
+        const costs: Record<string, Record<string, number | null>> = {};
+        let sample = 0;
+        for (const [color, sizes] of Object.entries(t.variants || {}) as [string, Any][]) {
+          costs[color] = {};
+          for (const [size, id] of Object.entries(sizes) as [string, number][]) {
+            costs[color][size] = (price.get(id) as number) ?? null;
+            sample ||= id;
+          }
+        }
+        let shipping: number | null = null;
+        try {
+          const rates = await pf('/shipping/rates', { method: 'POST', body: JSON.stringify({ recipient: { country_code: 'US', state_code: 'GA', zip: '30303' }, items: [{ variant_id: sample, quantity: 1 }] }) });
+          const std = (rates || []).find((r: Any) => r.id === 'STANDARD') || (rates || [])[0];
+          shipping = std ? Math.round(Number(std.rate) * 100) : null;
+        } catch (e) { console.error('merch costs shipping', key, e); }
+        types[key] = { printful: t.printful, costs, shipping_cents: shipping };
+      }
+      return json({ types, checked_at: new Date().toISOString() });
+    }
+
     // The success page asks whether the payment really cleared (only the state, nothing personal).
     if (body.action === 'order') {
       const ref = String(body.ref || '').toUpperCase();

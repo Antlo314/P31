@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { fetchUpcomingEvents, formatEventDate } from '../lib/events';
 import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, ShieldCheck, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Calendar, Users, Search, DollarSign, RefreshCw, Megaphone } from 'lucide-react';
-import { invokePayment, CARD_PAYMENTS_ENABLED } from '../lib/payments';
+import { invokePayment } from '../lib/payments';
 import HelpTip from '../components/HelpTip';
 import { withEmails } from '../lib/people';
 import AiAssist from '../components/AiAssist';
@@ -133,10 +133,6 @@ const CuratorDashboard = () => {
     publicEmail: '',
     bannerUrl: '',
     logoUrl: '',
-    stripeLink: '',
-    cashappTag: '',
-    venmoHandle: '',
-    otherPaymentLabel: '',
     themePreference: 'classic_gold',
     shopAnnouncement: '',
     customTitle: ''
@@ -156,11 +152,6 @@ const CuratorDashboard = () => {
         publicEmail: curatorData.public_email || '',
         bannerUrl: curatorData.banner_url || '',
         logoUrl: curatorData.logo_url || '',
-        stripeLink: curatorData.stripe_link || '',
-        cashappTag: curatorData.cashapp_tag || '',
-        venmoHandle: curatorData.venmo_handle || '',
-        otherPaymentLink: curatorData.other_payment_link || '',
-        otherPaymentLabel: curatorData.other_payment_label || '',
         themePreference: curatorData.theme_preference || 'classic_gold',
         shopAnnouncement: curatorData.shop_announcement || '',
         customTitle: curatorData.custom_title || ''
@@ -282,7 +273,7 @@ const CuratorDashboard = () => {
 
   // Sync Stripe status when the vendor returns from Stripe onboarding
   useEffect(() => {
-    if (!user || !CARD_PAYMENTS_ENABLED) return;
+    if (!user) return;
     const params = new URLSearchParams(location.search);
     const stripeParam = params.get('stripe');
     if (stripeParam === 'return' || stripeParam === 'refresh') {
@@ -381,7 +372,7 @@ const CuratorDashboard = () => {
       fetchProducts();
       fetchMyStats();
       fetchAnalyticsData();
-      if (CARD_PAYMENTS_ENABLED) fetchOrders();
+      fetchOrders();
     }
   }, [user]);
   useEffect(() => {
@@ -395,7 +386,7 @@ const CuratorDashboard = () => {
             fetchPartnershipInquiries(),
             fetchAllCurators(),
             fetchVendorApprovals(),
-            ...(CARD_PAYMENTS_ENABLED ? [fetchAllOrders()] : [])
+            fetchAllOrders()
           ]);
         }
         if (user) {
@@ -544,11 +535,6 @@ const CuratorDashboard = () => {
           public_email: editData.publicEmail,
           banner_url: editData.bannerUrl,
           logo_url: editData.logoUrl,
-          stripe_link: editData.stripeLink,
-          cashapp_tag: editData.cashappTag,
-          venmo_handle: editData.venmoHandle,
-          other_payment_link: editData.otherPaymentLink,
-          other_payment_label: editData.otherPaymentLabel,
           theme_preference: editData.themePreference,
           shop_announcement: editData.shopAnnouncement,
           custom_title: editData.customTitle,
@@ -772,7 +758,7 @@ const CuratorDashboard = () => {
       alert('Please set a valid price greater than $0.');
       return;
     }
-    if (CARD_PAYMENTS_ENABLED && priceNum < 0.5 && !productForm.external_url) {
+    if (priceNum < 0.5 && !productForm.external_url) {
       alert('Card checkout requires a minimum price of $0.50. Set a higher price or add an external purchase link.');
       return;
     }
@@ -1468,21 +1454,20 @@ const CuratorDashboard = () => {
               </div>
             </header>
 
-            {/* Nudge: prompt curators to add a payment method until they have one */}
-            {!CARD_PAYMENTS_ENABLED &&
-             !editData.stripeLink && !editData.cashappTag && !editData.venmoHandle && !editData.otherPaymentLink && (
+            {/* Nudge: shoppers can only pay once Stripe card payments are live */}
+            {!curatorData?.stripe_charges_enabled && (
               <div className="payment-nudge-banner">
-                <div className="payment-nudge-icon"><DollarSign size={24} /></div>
+                <div className="payment-nudge-icon"><CreditCard size={24} /></div>
                 <div className="payment-nudge-text">
-                  <strong>Add how you get paid</strong>
-                  <span>Customers can't pay you until you add a payment method. Drop in your CashApp, Venmo, or a payment link — it takes about 30 seconds.</span>
+                  <strong>Connect Stripe to start selling</strong>
+                  <span>Shoppers pay by card, Apple Pay, Klarna and more, and your earnings go straight to your bank. Until Stripe is connected your shop shows “checkout opens soon”.</span>
                 </div>
                 <button
                   type="button"
                   className="btn-solid-gold btn-sm payment-nudge-btn"
-                  onClick={() => document.getElementById('payment-links-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                  onClick={() => document.getElementById('stripe-connect-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
                 >
-                  Set Up Payments →
+                  Connect Stripe →
                 </button>
               </div>
             )}
@@ -1528,9 +1513,8 @@ const CuratorDashboard = () => {
 
               <div className="divider-thistle mb-6"></div>
 
-              {/* Stripe Connect — native card payments with direct payouts */}
-              {CARD_PAYMENTS_ENABLED && (
-              <div className="stripe-connect-panel" data-tour="payments">
+              {/* Stripe Connect — the only way shoppers pay: card checkout with direct payouts */}
+              <div className="stripe-connect-panel" id="stripe-connect-section" data-tour="payments">
                 <div className="flex-between mb-4">
                   <h3 className="card-title text-gold m-0" style={{fontSize: '1rem'}}>
                     <CreditCard size={18} /> Card Payments (Stripe)
@@ -1596,103 +1580,6 @@ const CuratorDashboard = () => {
                     </div>
                   </>
                 )}
-              </div>
-              )}
-
-              <div className="form-divider-label" id="payment-links-section">
-                {CARD_PAYMENTS_ENABLED ? 'Manual Payment Links (Fallback)' : 'Get Paid — Your Payment Links'}
-                <HelpTip title="How Customers Pay You" label="How do I get these?">
-                  <p>Customers pay you <strong>directly</strong> through apps you may already have. You only need ONE of these — fill in whichever you use:</p>
-                  <p><strong>💵 Cash App (easiest)</strong></p>
-                  <ol>
-                    <li>Open Cash App on your phone.</li>
-                    <li>Tap your profile picture (top right).</li>
-                    <li>Your <strong>$Cashtag</strong> is right under your name (like $JanesCandles).</li>
-                    <li>Type it in the CashApp box below — the $ is already added for you.</li>
-                  </ol>
-                  <p><strong>💙 Venmo</strong></p>
-                  <ol>
-                    <li>Open Venmo and tap the ☰ menu or your profile.</li>
-                    <li>Your <strong>@username</strong> is at the top (like @Jane-Smith-12).</li>
-                    <li>Type it in the Venmo box below — the @ is already added.</li>
-                  </ol>
-                  <p><strong>💳 Stripe Payment Link (lets customers pay by card)</strong></p>
-                  <ol>
-                    <li>Go to <strong>stripe.com</strong> and create a free account (they'll ask for your bank info so they can deposit your money — that stays between you and Stripe).</li>
-                    <li>Once signed in, click <strong>+ Create</strong> → <strong>Payment Link</strong>.</li>
-                    <li>Type a name and price, then click <strong>Create Link</strong>.</li>
-                    <li>Copy the link (it starts with buy.stripe.com) and paste it in the Stripe box below.</li>
-                  </ol>
-                  <p className="helptip-note">After adding your info, press <strong>Save Settings</strong> at the top. Your shop will show payment buttons automatically — nothing else to do!</p>
-                </HelpTip>
-              </div>
-              {!CARD_PAYMENTS_ENABLED && (
-                <p className="text-xs opacity-60 mb-4">
-                  Customers pay you directly through your own accounts. Paste any links you already use:
-                  a Stripe Payment Link, Cash App tag, Venmo handle, or anything else. They show on your
-                  shop and on every order confirmation.
-                </p>
-              )}
-
-              <div className="payment-config-grid">
-                <div className="form-group">
-                  <label><CreditCard size={14} /> Stripe Payment Link</label>
-                  <input 
-                    type="url" 
-                    placeholder="https://buy.stripe.com/..." 
-                    value={editData.stripeLink}
-                    onChange={(e) => setEditData({...editData, stripeLink: e.target.value})}
-                  />
-                  <p className="help-text">Direct Stripe Checkout or Payment Link.</p>
-                </div>
-
-                <div className="form-row-grid">
-                  <div className="form-group">
-                    <label>CashApp Tag</label>
-                    <div className="input-with-prefix">
-                      <span className="url-prefix">$</span>
-                      <input 
-                        type="text" 
-                        placeholder="YourTag" 
-                        value={editData.cashappTag}
-                        onChange={(e) => setEditData({...editData, cashappTag: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label>Venmo Handle</label>
-                    <div className="input-with-prefix">
-                      <span className="url-prefix">@</span>
-                      <input 
-                        type="text" 
-                        placeholder="YourUsername" 
-                        value={editData.venmoHandle}
-                        onChange={(e) => setEditData({...editData, venmoHandle: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-row-grid">
-                  <div className="form-group">
-                    <label>Other Payment Label</label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. Zelle, PayPal" 
-                      value={editData.otherPaymentLabel}
-                      onChange={(e) => setEditData({...editData, otherPaymentLabel: e.target.value})}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Other Payment Link/ID</label>
-                    <input 
-                      type="text" 
-                      placeholder="Email or URL" 
-                      value={editData.otherPaymentLink}
-                      onChange={(e) => setEditData({...editData, otherPaymentLink: e.target.value})}
-                    />
-                  </div>
-                </div>
               </div>
             </section>
 
@@ -1846,11 +1733,9 @@ const CuratorDashboard = () => {
                         onChange={e => setProductForm({...productForm, external_url: e.target.value})}
                       />
                       <p className="help-text">
-                        {CARD_PAYMENTS_ENABLED && curatorData?.stripe_charges_enabled
+                        {curatorData?.stripe_charges_enabled
                           ? 'Leave blank to sell with your built-in card checkout. Add a link only if this item is sold on another website.'
-                          : CARD_PAYMENTS_ENABLED
-                          ? 'Link where customers buy this item — or connect Stripe above to sell with built-in card checkout instead.'
-                          : 'Link where customers buy this item (your website, Stripe Payment Link, Etsy, etc.). Without a link, the item shows as Inquiry Only.'}
+                          : 'Leave blank to sell with built-in card checkout once Stripe is connected. Add a link only if this item is sold on another website.'}
                       </p>
                     </div>
                     <div className="form-group">
@@ -2085,11 +1970,9 @@ const CuratorDashboard = () => {
                           </div>
                           <div className="vendor-quick-stats font-label text-gold text-xs flex items-center gap-3">
                             <span>Artifacts: {p.products?.length || '0'}</span>
-                            {CARD_PAYMENTS_ENABLED && (
-                              <span className={`stripe-status-pill ${p.stripe_charges_enabled ? 'live' : p.stripe_account_id ? 'pending' : 'off'}`}>
-                                {p.stripe_charges_enabled ? 'Payments Live' : p.stripe_account_id ? 'Stripe Onboarding' : 'Links Only'}
-                              </span>
-                            )}
+                            <span className={`stripe-status-pill ${p.stripe_charges_enabled ? 'live' : p.stripe_account_id ? 'pending' : 'off'}`}>
+                              {p.stripe_charges_enabled ? 'Payments Live' : p.stripe_account_id ? 'Stripe Onboarding' : 'No Stripe yet'}
+                            </span>
                           </div>
                         </div>
 
@@ -2192,7 +2075,6 @@ const CuratorDashboard = () => {
               </div>
 
               {/* Marketplace Commerce Overview */}
-              {CARD_PAYMENTS_ENABLED && (
               <div className="mb-12">
                 <section className="dashboard-card glass-card">
                   <div className="flex-between mb-6">
@@ -2250,7 +2132,6 @@ const CuratorDashboard = () => {
                   </div>
                 </section>
               </div>
-              )}
 
               {/* Lead Management Section */}
               <div className="leads-management-section">

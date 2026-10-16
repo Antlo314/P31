@@ -1,11 +1,8 @@
 import { supabase } from './supabase';
 
-// Master switch for built-in card payments (Stripe Connect). OFF by default:
-// all card-payment UI is hidden and curators get paid through their own
-// pasted links (Stripe payment link, CashApp, Venmo) instead. To activate,
-// set VITE_ENABLE_CARD_PAYMENTS=true in .env, complete STRIPE_SETUP.md,
-// and redeploy.
-export const CARD_PAYMENTS_ENABLED = import.meta.env.VITE_ENABLE_CARD_PAYMENTS === 'true';
+// Shops are paid only through Stripe Connect (since 2026-10-15): built-in checkout on the Market's Stripe
+// account, the platform fee (PLATFORM_FEE_PERCENT) kept automatically, the rest paid to the shop's bank.
+// Cash App, Venmo and pasted payment links were retired.
 
 // Calls a Supabase Edge Function (in supabase/functions/). The current auth
 // token — or the anon key when signed out — is attached automatically, so both
