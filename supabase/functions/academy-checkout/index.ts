@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
     }],
     metadata: meta,
     ...(recurring ? { subscription_data: { metadata: meta } } : { payment_intent_data: { metadata: meta } }),
-    allow_promotion_codes: false,
+    allow_promotion_codes: true,
     success_url: `${appUrl}/enroll/${body.token}?status=success`,
     cancel_url: `${appUrl}/enroll/${body.token}?status=cancelled`,
   });
