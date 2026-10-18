@@ -765,14 +765,18 @@ const CuratorDashboard = () => {
     }
     setFormLoading(true);
     try {
-            const row = formToProduct(productForm);
+      const row = formToProduct(productForm);
+      const targetCuratorId = (reviewingCurator && isAdmin) ? reviewingCurator.id : user.id;
       const { error } = editingProduct
         ? await supabase.from('products').update(row).eq('id', editingProduct.id)
-        : await supabase.from('products').insert([{ ...row, curator_id: user.id, sort_order: products.length }]);
+        : await supabase.from('products').insert([{ ...row, curator_id: targetCuratorId, sort_order: products.length }]);
       if (error) throw error;
       setIsProductModalOpen(false);
       setEditingProduct(null);
       setProductForm(BLANK_PRODUCT);
+      if (reviewingCurator && isAdmin) {
+        openReviewer(reviewingCurator);
+      }
       fetchProducts();
     } catch (err) {
       alert('Error saving product: ' + err.message);
@@ -2290,15 +2294,56 @@ const CuratorDashboard = () => {
 
                       {/* Right: Artifact Audit */}
                       <div className="audit-artifacts">
-                         <h4 className="font-label text-gold mb-4">Artisan Collection ({reviewingCuratorProducts.length})</h4>
-                         <div className="review-product-list" style={{display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '10px'}}>
+                         <div className="flex-between mb-4">
+                           <h4 className="font-label text-gold m-0">Artisan Collection ({reviewingCuratorProducts.length})</h4>
+                           <button
+                             type="button"
+                             onClick={() => {
+                               setEditingProduct(null);
+                               setProductForm(BLANK_PRODUCT);
+                               setIsProductModalOpen(true);
+                             }}
+                             className="btn-solid-gold btn-sm flex-center gap-1 text-xs"
+                             style={{ padding: '4px 10px' }}
+                           >
+                             <Plus size={14} /> Add Product
+                           </button>
+                         </div>
+                         <div className="review-product-list" style={{display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '10px'}}>
                             {reviewingCuratorProducts.map(prod => (
-                              <div key={prod.id} className="review-prod-item flex gap-4 p-3 glass-card" style={{padding: '0.75rem', transform: 'none'}}>
+                              <div key={prod.id} className="review-prod-item flex gap-4 p-3 glass-card" style={{padding: '0.75rem', transform: 'none', alignItems: 'center'}}>
                                  <img src={prod.image_url} alt="" style={{width: '60px', height: '60px', borderRadius: '8px', objectFit: 'cover'}} />
                                  <div style={{flex: 1}}>
-                                    <p className="font-bold text-sm">{prod.name}</p>
-                                    <p className="text-xs text-gold">${prod.price}</p>
-                                    <p className="text-[10px] opacity-60 line-clamp-2">{prod.description}</p>
+                                    <p className="font-bold text-sm m-0">{prod.name}</p>
+                                    <p className="text-xs text-gold m-0" style={{ fontWeight: 700 }}>${prod.price}</p>
+                                    <p className="text-[10px] opacity-60 line-clamp-1 m-0">{prod.description || prod.category || 'Collection'}</p>
+                                 </div>
+                                 <div className="flex items-center gap-2">
+                                   <button
+                                     type="button"
+                                     className="icon-btn text-xs"
+                                     title="Edit product details & price"
+                                     onClick={() => {
+                                       setEditingProduct(prod);
+                                       setProductForm(productToForm(prod));
+                                       setIsProductModalOpen(true);
+                                     }}
+                                   >
+                                     <Settings size={14} />
+                                   </button>
+                                   <button
+                                     type="button"
+                                     className="icon-btn text-red text-xs"
+                                     title="Delete product"
+                                     onClick={async () => {
+                                       if (window.confirm(`Delete ${prod.name}?`)) {
+                                         await supabase.from('products').delete().eq('id', prod.id);
+                                         if (reviewingCurator) openReviewer(reviewingCurator);
+                                       }
+                                     }}
+                                   >
+                                     <Trash2 size={14} />
+                                   </button>
                                  </div>
                               </div>
                             ))}

@@ -6,6 +6,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 54, file: 'storefront_v54_admin_products.sql', title: 'Admin product & pricing controls', what: 'Create products for any shop, live marketplace pricing editor, bulk product adjustments, and staff product management.',
+    expect: 'create_product_ready true · set_product_ready true · all_products_ready true · staff_policy_ready true',
+    checks: [['rpc', 'shop_admin_all_products']] },
   { v: 53, file: 'storefront_v53_shop_addons.sql', title: 'Storefront add-ons', what: 'Product slot packs, Featured vendors (CEO pick and paid social posts), Google reviews on storefronts, and Stripe-only shop payments.',
     expect: 'addons_ready true · limit_ready true · featured_ready true · google_ready true · links_retired true · google_job_ready true',
     checks: [['rpc', 'featured_capacity']] },

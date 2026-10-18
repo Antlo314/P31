@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>P31 Collective — Mentee Enrollment Coupon & Promo Code Guide</title>
+<style>
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; src: url(../../public/fonts/NotoSerif-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; font-style: italic; src: url(../../public/fonts/NotoSerif-400-italic.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 400; src: url(../../public/fonts/Manrope-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 600; src: url(../../public/fonts/Manrope-600.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 800; src: url(../../public/fonts/Manrope-800.woff2) format('woff2'); }
+  :root {
+    --plum: #3A1C36; --plum-3: #21101E; --thistle: #E3D0EA; --thistle-3: #F8F3FA;
+    --amethyst: #9B71B2; --gold: #D9A93A; --gold-2: #F2CE4D; --green: #374126;
+    --ink: #2A1526; --ink-2: #4E3A4B; --dim: #74657A; --line: #E3D0EA;
+  }
+  @page { size: Letter; margin: 0.65in 0.7in 0.7in; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: Manrope, sans-serif; font-size: 10pt; line-height: 1.5; color: var(--ink); background: #fff; }
+  h1, h2, h3 { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; color: var(--plum); }
+  h1 { font-size: 24pt; line-height: 1.15; margin: 0 0 10px; }
+  h2 { font-size: 13.5pt; margin: 18px 0 8px; break-after: avoid; }
+  h3 { font-size: 10.5pt; margin: 10px 0 4px; }
+  p { margin: 0 0 8px; }
+  ul, ol { margin: 4px 0 10px; padding-left: 20px; }
+  li { margin: 3px 0; }
+  code { font-family: Consolas, 'Courier New', monospace; font-size: 8.5pt; background: var(--thistle-3); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; color: var(--plum); font-weight: 700; }
+  strong, b { font-weight: 800; }
+  em { font-family: 'Noto Serif', Georgia, serif; font-style: italic; }
+  
+  .eyebrow { font-size: 7.8pt; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin: 0 0 4px; }
+  .lead { font-size: 10.8pt; color: var(--ink-2); line-height: 1.5; }
+  .dim { color: var(--dim); }
+  
+  .top-banner { background: radial-gradient(70% 90% at 100% 0%, rgba(155, 113, 178, 0.4), transparent 70%), var(--plum-3); color: #fff; border-radius: 16px; padding: 22px 26px; margin-bottom: 16px; }
+  .top-banner .eyebrow { color: var(--gold-2); }
+  .top-banner h1 { color: #fff; margin: 2px 0 6px; }
+  .top-banner h1 em { color: var(--gold-2); }
+  .top-banner p { margin: 0; color: rgba(255,255,255,0.88); font-size: 10.2pt; }
+  
+  .pill { display: inline-block; font-size: 7.2pt; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; }
+  .pill.live { background: rgba(55, 65, 38, 0.15); color: #2d4f1e; border: 1px solid #7cb342; }
+  .pill.gold { background: rgba(217, 169, 58, 0.2); color: #7a5c12; }
+  .pill.code { background: #21101E; color: #F2CE4D; font-family: Consolas, monospace; letter-spacing: 0.05em; padding: 3px 8px; font-size: 8.5pt; font-weight: 700; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 8.8pt; }
+  th { text-align: left; font-size: 7.4pt; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: var(--plum); padding: 7px 9px; }
+  td { border-bottom: 1px solid var(--line); padding: 7px 9px; vertical-align: middle; }
+  tr:nth-child(even) td { background: var(--thistle-3); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+  .box { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: #fff; break-inside: avoid; }
+  .box.plum { background: var(--thistle-3); border-color: var(--amethyst); }
+  .box.gold { border-color: var(--gold); background: rgba(242, 206, 77, 0.08); }
+
+  .checkout-mock { border: 1.5px solid var(--line); border-radius: 14px; padding: 16px; background: #faf8fb; margin: 12px 0; box-shadow: 0 4px 14px rgba(58, 28, 54, 0.06); }
+  .mock-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 12px; }
+  .mock-title { font-weight: 800; font-size: 11pt; color: var(--plum); }
+  .mock-price { font-size: 13pt; font-weight: 800; color: var(--ink); }
+  .mock-promo-row { display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1px dashed var(--amethyst); border-radius: 8px; padding: 10px 14px; margin: 10px 0; }
+  .mock-applied { display: flex; align-items: center; gap: 8px; }
+  .badge-check { width: 18px; height: 18px; border-radius: 50%; background: #2e7d32; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
+
+  .steps { counter-reset: s; list-style: none; padding-left: 0; margin: 8px 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 30px; margin: 10px 0; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--plum); color: #fff; font-size: 8pt; font-weight: 800; display: grid; place-items: center; }
+
+  .page-break { break-before: page; }
+</style>
+</head>
+<body>
+
+  <div class="top-banner">
+    <p class="eyebrow">The P31 Collective · Systems & Finance</p>
+    <h1>Mentee Enrollment <em>Coupons & Promotion Codes</em></h1>
+    <p>Official client briefing on the newly activated Stripe coupon codes, automatic billing rules, and step-by-step verification instructions.</p>
+  </div>
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+    <div><strong>Prepared For:</strong> Owner & Leadership, The Proverbs 31 Collective</div>
+    <div><strong>Status:</strong> <span class="pill live">● LIVE & ACTIVE IN STRIPE</span></div>
+  </div>
+
+  <h2>1. Executive Summary</h2>
+  <p class="lead">
+    Promotion codes are now fully integrated and live on your Stripe checkout flow for mentee enrollment. When prospective mentees receive their private invitation link (<code>/enroll/:token</code>) after their intro consultation, they will now see an <strong>"Add promotion code"</strong> option directly on Stripe's secure checkout page.
+  </p>
+  <p>
+    Stripe automatically verifies each coupon in real-time, calculates the discount, applies the duration limitation (e.g., 3 months, 6 months, or ongoing), and charges the adjusted amount. When the promotional window ends, Stripe will automatically bill at the standard recurring program rate without requiring any manual adjustments.
+  </p>
+
+  <h2>2. Master Coupon Code Directory</h2>
+  <p>All eight coupon codes requested have been configured with exact rules in your connected Stripe accounts:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Program / Target Audience</th>
+        <th>Discount</th>
+        <th>Duration Rule</th>
+        <th>Tiers Covered</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="pill code">GRANTU100</span></td>
+        <td><strong>Crisis Start-up</strong></td>
+        <td>100% off</td>
+        <td>3 months (repeating)</td>
+        <td>All Tiers</td>
+      </tr>
+      <tr>
+        <td><span class="pill code">STUDENT10</span></td>
+        <td><strong>Students</strong></td>
+        <td>10% off / month</td>
+        <td>Forever (Every monthly renewal)</td>
+        <td>All Tiers</td>
+      </tr>
+      <tr>
+        <td><span class="pill code">GRANTU50</span></td>
+        <td><strong>Special Grant</strong></td>
+        <td>$50.00 off / month</td>
+        <td>6 months (repeating)</td>
+        <td>All Tiers</td>
+      </tr>
+      <tr>
+        <td><span class="pill code">GRANTU20</span></td>
+        <td><strong>Member Hardship</strong></td>
+        <td>20% off</td>
+        <td>60 days (2 monthly cycles)</td>
+        <td>All Tiers</td>
+      </tr>
+      <tr>
+        <td><span class="pill code">GRANTU30</span></td>
+        <td><strong>Mom Hardship</strong></td>
+        <td>30% off</td>
+        <td>90 days (3 monthly cycles)</td>
+        <td>All Tiers</td>
+      </tr>
+      <tr>
+        <td><span class="pill code">GRANTU1</span></td>
+        <td><strong>New Mentees (Fast Start)</strong></td>
+        <td>50% off</td>
+        <td>First 1 month</td>
+        <td>All Tiers</td>
+      </tr>
+      <tr>
+        <td><span class="pill code">GRANTU3</span></td>
+        <td><strong>New Mentees (Quarterly)</strong></td>
+        <td>20% off</td>
+        <td>3 months (repeating)</td>
+        <td>All Tiers</td>
+      </tr>
+      <tr>
+        <td><span class="pill code">GRANTU40S</span></td>
+        <td><strong>Relative Mentees</strong></td>
+        <td>40% off</td>
+        <td>6 months (repeating)</td>
+        <td>All Tiers</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="checkout-mock">
+    <div class="mock-header">
+      <div>
+        <div class="mock-title">Stripe Checkout — Mentee Enrollment</div>
+        <small class="dim">thep31collective.org · Secure Subscription Checkout</small>
+      </div>
+      <div class="mock-price">$150.00 <span style="font-size:8pt;font-weight:normal;color:#74657A;">/ month</span></div>
+    </div>
+    <div class="mock-promo-row">
+      <div class="mock-applied">
+        <span class="badge-check">✓</span>
+        <div>
+          <strong style="color:#2e7d32;">Coupon Code Applied: STUDENT10</strong>
+          <div style="font-size:7.8pt;color:#74657A;">Students (10% off each month — All Tiers)</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <span style="text-decoration:line-through;color:#9e9e9e;font-size:9pt;">$150.00</span>
+        <strong style="color:#2e7d32;font-size:11.5pt;margin-left:6px;">$135.00 / month</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <h2>3. How It Works (The Complete Mentee Journey)</h2>
+
+  <div class="two-col">
+    <div class="box gold">
+      <p class="eyebrow">Step 1 · Invitation & Forms</p>
+      <p>Mentor sends the applicant their unique invitation link (<code>/enroll/:token</code>). The mentee signs the three required legal agreements (Business Coaching, Confidentiality, Emergency Safety).</p>
+    </div>
+    <div class="box gold">
+      <p class="eyebrow">Step 2 · Checkout with Code</p>
+      <p>Mentee clicks <strong>"Continue to secure checkout"</strong>. On Stripe's checkout page, they click <strong>"Add promotion code"</strong>, type their assigned code (e.g. <code>STUDENT10</code>), and click <strong>Apply</strong>.</p>
+    </div>
+    <div class="box plum">
+      <p class="eyebrow">Step 3 · Instant Discount & Card Processing</p>
+      <p>Stripe deducts the discount in real time. If 100% off (<code>GRANTU100</code>), no charge is drafted; Stripe securely registers the card on file for future renewals after 3 months.</p>
+    </div>
+    <div class="box plum">
+      <p class="eyebrow">Step 4 · Classroom Opens Automatically</p>
+      <p>The webhook triggers immediately upon completion: mentee status becomes <code>active</code>, their Collective Academy classroom unlocks, and they receive their welcome email with Calendly session links.</p>
+    </div>
+  </div>
+
+  <h2>4. How the Owner / Team Can Test It</h2>
+  <ol class="steps">
+    <li>
+      <strong>Inspect in Stripe Dashboard:</strong>
+      Log in to your <strong>Stripe Dashboard</strong> (dashboard.stripe.com) &rarr; Go to <strong>Product Catalog &rarr; Coupons</strong>. You will see all eight coupons active with their exact percentages and expiration schedules.
+    </li>
+    <li>
+      <strong>Check Promotion Codes:</strong>
+      Under the <strong>Promotion codes</strong> tab, verify that each customer-facing code (e.g., <code>GRANTU100</code>, <code>STUDENT10</code>, <code>GRANTU50</code>) is listed as <strong>Active</strong>.
+    </li>
+    <li>
+      <strong>Test Live on an Enrollment Link:</strong>
+      Open any mentee invitation URL (or generate a test invitation from <strong>Systems &rarr; Mentorship</strong>). Click <em>"Continue to secure checkout"</em>. On the Stripe screen:
+      <ul>
+        <li>Click <strong>"Add promotion code"</strong> on the left summary column.</li>
+        <li>Enter <code>STUDENT10</code> or <code>GRANTU20</code> and click <strong>Apply</strong>.</li>
+        <li>Watch the price adjust downward automatically before submitting!</li>
+      </ul>
+    </li>
+    <li>
+      <strong>Reviewing Orders:</strong>
+      Any enrollment completed with a promo code will show the original price, the coupon code used, and the discounted total in <strong>Systems &rarr; Orders</strong> and your Stripe Payments ledger.
+    </li>
+  </ol>
+
+  <div class="box plum" style="margin-top:20px;">
+    <h3 style="margin-top:0;">Need to add future coupons?</h3>
+    <p style="margin-bottom:0;">
+      A dedicated coupon automation tool has been added to your codebase (<code>scripts/create-stripe-coupons.mjs</code>). Any time leadership creates a new seasonal scholarship or corporate partner discount, simply add the code and percentage to that script or enter it directly into the Stripe Dashboard under <em>Coupons</em>.
+    </p>
+  </div>
+
+</body>
+</html>

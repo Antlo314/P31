@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, Star, ExternalLink, MessagesSquare, Check, X, Eye, EyeOff, Package, FileSignature, Mail, Save, CreditCard, CalendarPlus, Gift, Ban, PlayCircle, Settings2 } from 'lucide-react';
+import {
+  Store, Star, ExternalLink, MessagesSquare, Check, X, Eye, EyeOff, Package,
+  FileSignature, Mail, Save, CreditCard, CalendarPlus, Gift, Ban, PlayCircle,
+  Settings2, Plus, Pencil, ImagePlus, Loader2, Search, DollarSign, Tag, RefreshCw,
+} from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useRoles } from '../../lib/roles';
 import { SITES } from '../nav';
@@ -9,8 +13,18 @@ import ShopAddons from './ShopAddons';
 
 // The vendor studio's availability choices, so an admin edit matches what she sees.
 const STOCK = [['in_stock', 'In stock'], ['out_of_stock', 'Sold out'], ['limited_edition', 'Limited edition'], ['pre_order', 'Pre-order']];
-const PRODUCT_FIELDS = [['name', 'Name'], ['price', 'Price ($)', 'number'], ['compare_at_price', 'Was price ($, shows a sale)', 'number'], ['category', 'Category'],
-  ['stock_status', 'Availability', 'select', STOCK], ['inventory', 'How many left', 'number'], ['badge', 'Badge (New, Bestseller, Handmade…)'], ['description', 'Description', 'textarea']];
+const PRODUCT_FIELDS = [
+  ['name', 'Name'],
+  ['price', 'Price ($)', 'number'],
+  ['compare_at_price', 'Was price ($, shows a sale)', 'number'],
+  ['category', 'Category'],
+  ['stock_status', 'Availability', 'select', STOCK],
+  ['inventory', 'How many left', 'number'],
+  ['image_url', 'Photo URL (https://...)'],
+  ['badge', 'Badge (New, Bestseller, Handmade…)'],
+  ['sku', 'SKU (optional)'],
+  ['description', 'Description', 'textarea'],
+];
 
 const STATUSES = [['draft', 'Draft'], ['pending', 'Pending'], ['approved', 'Approved'], ['paused', 'Paused'], ['rejected', 'Needs changes']];
 const STATUS_LABEL = Object.fromEntries(STATUSES);
@@ -38,11 +52,303 @@ const matchesBilling = (s, f) => {
   return st === f;
 };
 
+/**
+ * Inline 1-click price editor for products.
+ * Clicking the price tag lets the admin adjust the amount directly and press Enter or Check.
+ */
+const QuickPriceEdit = ({ price, onSave, disabled }) => {
+  const [editing, setEditing] = useState(false);
+  const [val, setVal] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const start = (e) => {
+    e?.stopPropagation();
+    setVal(price != null ? String(price) : '');
+    setEditing(true);
+  };
+
+  const submit = async (e) => {
+    e?.preventDefault();
+    const num = parseFloat(val);
+    if (!Number.isFinite(num) || num < 0) return;
+    setBusy(true);
+    await onSave(num);
+    setBusy(false);
+    setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <form className="sh-quick-price__form" onSubmit={submit} onClick={(e) => e.stopPropagation()}>
+        <input
+          type="number"
+          step="0.01"
+          min="0"
+          className="sh-quick-price__input"
+          value={val}
+          onChange={(e) => setVal(e.target.value)}
+          autoFocus
+          disabled={busy || disabled}
+          placeholder="0.00"
+        />
+        <button type="submit" className="sh-quick-price__ok" disabled={busy || disabled} title="Save price">
+          {busy ? <Loader2 size={12} className="spin" /> : <Check size={12} />}
+        </button>
+        <button type="button" className="sh-quick-price__cancel" disabled={busy} onClick={() => { setVal(String(price ?? '')); setEditing(false); }} title="Cancel">
+          <X size={12} />
+        </button>
+      </form>
+    );
+  }
+
+  return (
+    <span className="sh-quick-price">
+      <button
+        type="button"
+        className="sh-quick-price__btn"
+        onClick={start}
+        title="Click to change price"
+        disabled={disabled}
+      >
+        {money(price) || '$0.00'} <Pencil size={11} style={{ opacity: 0.7 }} />
+      </button>
+    </span>
+  );
+};
+
+/**
+ * Modal dialog for an admin to create a new product for any shop.
+ */
+const AdminAddProductModal = ({ shops, targetShop, onClose, onCreated }) => {
+  const [curatorId, setCuratorId] = useState(targetShop?.id || shops?.[0]?.id || '');
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState('');
+  const [comparePrice, setComparePrice] = useState('');
+  const [category, setCategory] = useState('Collection');
+  const [stockStatus, setStockStatus] = useState('in_stock');
+  const [inventory, setInventory] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [badge, setBadge] = useState('');
+  const [sku, setSku] = useState('');
+  const [description, setDescription] = useState('');
+  const [isActive, setIsActive] = useState(true);
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file (PNG, JPG, WebP).');
+      return;
+    }
+    setUploading(true);
+    setError('');
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `admin-${curatorId || 'prod'}-${Date.now()}-${Math.floor(Math.random() * 1000)}.${ext}`;
+      const { error: upErr } = await supabase.storage.from('products').upload(path, file, { cacheControl: '3600', upsert: false });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from('products').getPublicUrl(path);
+      setImageUrl(pub.publicUrl);
+    } catch (err) {
+      setError(err.message || 'Image upload failed.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const save = async (e) => {
+    e.preventDefault();
+    if (!curatorId) return setError('Please choose a shop for this product.');
+    if (!name.trim()) return setError('Product name is required.');
+    const priceNum = parseFloat(price);
+    if (!Number.isFinite(priceNum) || priceNum < 0) return setError('Please enter a valid price (greater than or equal to $0).');
+
+    setBusy(true);
+    setError('');
+
+    const payload = {
+      name: name.trim(),
+      price: priceNum,
+      compare_at_price: comparePrice ? parseFloat(comparePrice) : null,
+      category: category.trim() || 'Collection',
+      stock_status: stockStatus,
+      inventory: inventory ? parseInt(inventory, 10) : null,
+      image_url: imageUrl.trim() || null,
+      badge: badge.trim() || null,
+      sku: sku.trim() || null,
+      description: description.trim() || null,
+      is_active: isActive,
+      is_featured: isFeatured,
+    };
+
+    try {
+      const { data, error: err } = await supabase.rpc('shop_admin_create_product', {
+        p_curator_id: curatorId,
+        p_product: payload,
+      });
+
+      if (err) {
+        if (/does not exist|Could not find/i.test(err.message)) {
+          const { data: insData, error: insErr } = await supabase.from('products').insert([{
+            curator_id: curatorId,
+            ...payload,
+          }]).select().single();
+          if (insErr) throw insErr;
+          onCreated(insData || payload, curatorId);
+          onClose();
+          return;
+        }
+        throw err;
+      }
+
+      onCreated(data || payload, curatorId);
+      onClose();
+    } catch (err) {
+      setError(err.message || 'Could not save product.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="sys-modal" role="dialog" aria-modal="true" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <form className="sys-modal__panel sys-form" onSubmit={save} style={{ maxWidth: 580 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <h2><Package size={18} /> Create product</h2>
+          <button type="button" className="sys-icon-btn" onClick={onClose} aria-label="Close"><X size={16} /></button>
+        </div>
+
+        {error && <p className="sys-alert" role="alert">{error}</p>}
+
+        {targetShop ? (
+          <p className="sys-muted" style={{ margin: '0 0 10px', fontSize: '0.88rem' }}>
+            Adding to <strong>{targetShop.business_name || 'Selected shop'}</strong>
+          </p>
+        ) : (
+          <label className="sys-field">
+            <span>Shop / Curator *</span>
+            <select value={curatorId} onChange={(e) => setCuratorId(e.target.value)} required>
+              <option value="">Select a shop…</option>
+              {(shops || []).map((s) => (
+                <option key={s.id} value={s.id}>{s.business_name || s.owner_name || s.slug}</option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        <div className="sys-row" style={{ flexWrap: 'wrap', gap: 10 }}>
+          <label className="sys-field sys-grow">
+            <span>Product Name *</span>
+            <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Lavender Botanical Body Butter" />
+          </label>
+          <label className="sys-field" style={{ width: 130 }}>
+            <span>Price ($) *</span>
+            <input required type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="28.00" />
+          </label>
+          <label className="sys-field" style={{ width: 140 }}>
+            <span>Compare price ($)</span>
+            <input type="number" step="0.01" min="0" value={comparePrice} onChange={(e) => setComparePrice(e.target.value)} placeholder="Original price" />
+          </label>
+        </div>
+
+        <div className="sys-row" style={{ flexWrap: 'wrap', gap: 10 }}>
+          <label className="sys-field sys-grow">
+            <span>Category</span>
+            <input value={category} onChange={(e) => setCategory(e.target.value)} list="p31-cat-list" placeholder="Collection, Skin, Wellness, Home…" />
+            <datalist id="p31-cat-list">
+              <option value="Collection" />
+              <option value="Skin" />
+              <option value="Wellness" />
+              <option value="Home" />
+              <option value="Art" />
+              <option value="Apparel" />
+              <option value="Jewelry" />
+              <option value="Gourmet" />
+              <option value="Literature" />
+            </datalist>
+          </label>
+          <label className="sys-field" style={{ width: 150 }}>
+            <span>Availability</span>
+            <select value={stockStatus} onChange={(e) => setStockStatus(e.target.value)}>
+              <option value="in_stock">In stock</option>
+              <option value="out_of_stock">Sold out</option>
+              <option value="limited_edition">Limited edition</option>
+              <option value="pre_order">Pre-order</option>
+            </select>
+          </label>
+          <label className="sys-field" style={{ width: 120 }}>
+            <span>Inventory</span>
+            <input type="number" min="0" value={inventory} onChange={(e) => setInventory(e.target.value)} placeholder="Qty left" />
+          </label>
+        </div>
+
+        <div>
+          <label className="sys-field">
+            <span>Photo URL</span>
+            <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://… or upload from computer below" />
+          </label>
+          <div className="sh-img-preview-box">
+            {imageUrl ? <img src={imageUrl} alt="Preview" className="sh-img-preview" /> : <div className="sh-img-preview" style={{ display: 'grid', placeItems: 'center', opacity: 0.5 }}><Package size={22} /></div>}
+            <div className="sh-upload-zone">
+              <label className="sys-btn sys-btn--ghost sys-btn--sm" style={{ cursor: 'pointer', justifySelf: 'start' }}>
+                {uploading ? <Loader2 size={14} className="spin" /> : <ImagePlus size={14} />} {uploading ? 'Uploading photo…' : 'Upload photo from device'}
+                <input type="file" accept="image/*" hidden onChange={handleUpload} disabled={uploading} />
+              </label>
+              <small className="sys-muted">Saves directly to Supabase products storage.</small>
+            </div>
+          </div>
+        </div>
+
+        <div className="sys-row" style={{ flexWrap: 'wrap', gap: 10 }}>
+          <label className="sys-field sys-grow">
+            <span>Badge (optional)</span>
+            <input value={badge} onChange={(e) => setBadge(e.target.value)} placeholder="e.g. Bestseller, New, Handmade" />
+          </label>
+          <label className="sys-field" style={{ width: 160 }}>
+            <span>SKU (optional)</span>
+            <input value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. P31-LAV-01" />
+          </label>
+        </div>
+
+        <label className="sys-field">
+          <span>Description</span>
+          <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Materials, scent notes, ingredients, story or specifications…" />
+        </label>
+
+        <div className="sys-row" style={{ gap: 16, marginTop: 4 }}>
+          <label className="sys-chip" style={{ cursor: 'pointer' }}>
+            <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
+            Active (visible in shop)
+          </label>
+          <label className="sys-chip" style={{ cursor: 'pointer' }}>
+            <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} />
+            Featured item
+          </label>
+        </div>
+
+        <div className="sys-chips" style={{ marginTop: 14 }}>
+          <button className="sys-btn sys-btn--gold sys-btn--sm" disabled={busy || uploading}>
+            {busy ? <Loader2 size={14} className="spin" /> : <Save size={14} />} Create product
+          </button>
+          <button type="button" className="sys-btn sys-btn--ghost sys-btn--sm" onClick={onClose} disabled={busy}>
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
 // Systems → Curators & shops: every shop on p31market.com, with its status, billing, products and controls.
 const Shops = () => {
   const navigate = useNavigate();
   const { roles } = useRoles();
   const admin = !!(roles.admin || roles.operator);
+  const [mainTab, setMainTab] = useState('shops'); // 'shops' | 'pricing'
   const [shops, setShops] = useState(null);
   const [filter, setFilter] = useState('all');
   const [billing, setBilling] = useState('any');
@@ -56,12 +362,57 @@ const Shops = () => {
   const [terms, setTerms] = useState(null);
   const [showTerms, setShowTerms] = useState(false);
 
+  // Global All Products & Pricing state
+  const [allProducts, setAllProducts] = useState(null);
+  const [allLoading, setAllLoading] = useState(false);
+  const [prodQuery, setProdQuery] = useState('');
+  const [prodFilter, setProdFilter] = useState('all'); // 'all' | 'active' | 'hidden' | 'sale' | 'sold_out'
+  const [prodShopFilter, setProdShopFilter] = useState('all');
+
+  // Add Product modal state
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [targetShopForAdd, setTargetShopForAdd] = useState(null);
+
   const load = async () => {
     const { data, error: err } = await supabase.rpc('shop_admin_list');
-    if (err) { setError(/does not exist|schema cache|Could not find/i.test(err.message) ? 'Run storefront_v41_team_dashboards.sql in Supabase to manage shops here (Systems → Health has a copy button).' : err.message); setShops([]); return; }
+    if (err) {
+      setError(/does not exist|schema cache|Could not find/i.test(err.message)
+        ? 'Run storefront_v41_team_dashboards.sql in Supabase to manage shops here (Systems → Health has a copy button).'
+        : err.message);
+      setShops([]);
+      return;
+    }
     setShops(data || []);
     setSel((cur) => (cur ? (data || []).find((s) => s.id === cur.id) || null : cur));
   };
+
+  const loadAllProducts = async () => {
+    setAllLoading(true);
+    const { data, error: err } = await supabase.rpc('shop_admin_all_products');
+    if (err) {
+      const { data: directData, error: dirErr } = await supabase
+        .from('products')
+        .select('*, curator_data(business_name, slug), profiles(full_name, email)')
+        .order('created_at', { ascending: false });
+      if (dirErr) {
+        setError(dirErr.message);
+        setAllProducts([]);
+      } else {
+        const mapped = (directData || []).map((x) => ({
+          ...x,
+          shop_name: x.curator_data?.business_name,
+          shop_slug: x.curator_data?.slug,
+          owner_name: x.profiles?.full_name,
+          owner_email: x.profiles?.email,
+        }));
+        setAllProducts(mapped);
+      }
+    } else {
+      setAllProducts(data || []);
+    }
+    setAllLoading(false);
+  };
+
   useEffect(() => {
     Promise.resolve().then(load);
     supabase.from('app_settings').select('value').eq('key', 'billing').maybeSingle().then(({ data }) => setTerms(data?.value || null));
@@ -69,10 +420,17 @@ const Shops = () => {
 
   const open = async (s) => {
     setSel(s); setProducts(null); setMsg(''); setError('');
-    setEdit({ business_name: s.business_name || '', slug: s.slug || '', tagline: s.tagline || '', admin_feedback: s.admin_feedback || '', verification_badges: (s.verification_badges || []).join(', ') });
+    setEdit({
+      business_name: s.business_name || '',
+      slug: s.slug || '',
+      tagline: s.tagline || '',
+      admin_feedback: s.admin_feedback || '',
+      verification_badges: (s.verification_badges || []).join(', '),
+    });
     const { data } = await supabase.rpc('shop_admin_products', { p_id: s.id });
     setProducts(data || []);
   };
+
   const patch = async (s, p, note) => {
     setBusy(true); setError(''); setMsg('');
     const { error: err } = await supabase.rpc('shop_admin_update', { p_id: s.id, p_patch: p });
@@ -81,6 +439,7 @@ const Shops = () => {
     setMsg(note || 'Saved.');
     load();
   };
+
   const bill = async (s, action, days, note) => {
     if (action === 'start_all' && !window.confirm(`Start the free period today for every approved shop that is not in billing yet (early-bird shops stay complimentary)? Each one gets a reminder ${terms?.remind_days || 14} days before it ends.`)) return;
     setBusy(true); setError(''); setMsg('');
@@ -90,6 +449,7 @@ const Shops = () => {
     setMsg(action === 'start_all' ? `Free period started for ${data?.changed ?? 0} shop${data?.changed === 1 ? '' : 's'}.` : note);
     load();
   };
+
   const saveTerms = async (e) => {
     e.preventDefault();
     const f = new FormData(e.target);
@@ -98,16 +458,51 @@ const Shops = () => {
     if (err) return setError(err.message);
     setTerms(value); setMsg('Billing terms saved.'); setShowTerms(false);
   };
+
   const saveDetails = (e) => {
     e.preventDefault();
     patch(sel, { business_name: edit.business_name, slug: edit.slug, tagline: edit.tagline, admin_feedback: edit.admin_feedback, verification_badges: edit.verification_badges.split(',').map((b) => b.trim()).filter(Boolean) }, 'Shop details saved.');
   };
+
   const setProduct = async (p, change) => {
+    let resData = null;
     const { data, error: err } = await supabase.rpc('shop_admin_set_product', { p_id: p.id, p_patch: change });
-    if (err) { setError(err.message); return { error: err }; }
-    setProducts((list) => list.map((x) => (x.id === p.id ? { ...x, ...change, ...(data && typeof data === 'object' ? data : {}) } : x)));
-    return { data };
+    if (err) {
+      const { data: upData, error: upErr } = await supabase.from('products').update(change).eq('id', p.id).select().maybeSingle();
+      if (upErr) { setError(err.message || upErr.message); return { error: err || upErr }; }
+      resData = upData;
+    } else {
+      resData = data;
+    }
+    const updated = { ...p, ...change, ...(resData && typeof resData === 'object' ? resData : {}) };
+    setProducts((list) => (list ? list.map((x) => (x.id === p.id ? updated : x)) : list));
+    setAllProducts((list) => (list ? list.map((x) => (x.id === p.id ? { ...x, ...updated } : x)) : list));
+    setMsg(`Saved ${updated.name || 'product'}.`);
+    return { data: resData };
   };
+
+  const deleteProduct = async (pId, pName) => {
+    const { error: err } = await supabase.rpc('shop_admin_delete_product', { p_id: pId });
+    if (err) {
+      const { error: delErr } = await supabase.from('products').delete().eq('id', pId);
+      if (delErr) { setError(err.message || delErr.message); return { error: err || delErr }; }
+    }
+    setProducts((list) => (list ? list.filter((x) => x.id !== pId) : list));
+    setAllProducts((list) => (list ? list.filter((x) => x.id !== pId) : list));
+    setMsg(`Deleted ${pName || 'product'}.`);
+    load();
+    return { success: true };
+  };
+
+  const handleProductCreated = (newProd, forShopId) => {
+    if (sel && sel.id === forShopId) {
+      setProducts((list) => [newProd, ...(list || [])]);
+    }
+    setAllProducts((list) => [newProd, ...(list || [])]);
+    setMsg(`Product “${newProd.name}” created successfully.`);
+    load();
+  };
+
   const message = async (s) => {
     const { data, error: err } = await supabase.rpc('chat_open_dm', { p_user: s.id });
     if (err) return setError(err.message);
@@ -121,177 +516,418 @@ const Shops = () => {
   const storefront = (s) => `${SITES.market.url}/${s.slug}`;
   const notInBilling = (shops || []).filter((s) => s.status === 'approved' && s.subscription_status === 'none' && !s.is_early_bird).length;
 
+  // Filtered list of all products for the All Products & Pricing tab
+  const filteredAllProducts = useMemo(() => {
+    if (!allProducts) return [];
+    return allProducts.filter((p) => {
+      if (prodShopFilter !== 'all' && p.curator_id !== prodShopFilter) return false;
+      if (prodFilter === 'active' && p.is_active === false) return false;
+      if (prodFilter === 'hidden' && p.is_active !== false) return false;
+      if (prodFilter === 'sale' && !p.compare_at_price) return false;
+      if (prodFilter === 'sold_out' && p.stock_status !== 'out_of_stock') return false;
+      if (prodQuery) {
+        const text = `${p.name} ${p.category || ''} ${p.badge || ''} ${p.shop_name || ''} ${p.shop_slug || ''} ${p.owner_name || ''}`.toLowerCase();
+        if (!text.includes(prodQuery.toLowerCase())) return false;
+      }
+      return true;
+    });
+  }, [allProducts, prodFilter, prodShopFilter, prodQuery]);
+
   return (
     <div className="sys-page">
       <header className="sys-page__head">
         <p className="sys-eyebrow">Market</p>
         <h1>Curators &amp; shops</h1>
-        <p className="sys-muted">Every shop on p31market.com. Approve or pause a shop, feature it at the top of the directory, give badges, leave the vendor a note, switch products on or off, and look after her storefront subscription.</p>
+        <p className="sys-muted">Every shop on p31market.com. Create and edit products, adjust prices, approve or pause a shop, feature it at the top of the directory, give badges, leave the vendor a note, and look after storefront subscriptions.</p>
       </header>
+
       {error && <p className="sys-alert" role="alert">{error}</p>}
       {msg && <p className="sys-ok"><Check size={16} /> {msg}</p>}
 
-      {hasBilling && (
-        <section className="sys-card sh-billing" data-tour="shops-billing">
-          <div className="sh-billing__row">
+      {/* Primary view tabs */}
+      <div className="sys-chips" role="tablist" style={{ marginBottom: 14 }}>
+        <button
+          role="tab"
+          aria-selected={mainTab === 'shops'}
+          className={`sys-chip ${mainTab === 'shops' ? 'is-on' : ''}`}
+          onClick={() => setMainTab('shops')}
+        >
+          <Store size={14} /> Curators &amp; shops ({shops ? shops.length : '…'})
+        </button>
+        <button
+          role="tab"
+          aria-selected={mainTab === 'pricing'}
+          className={`sys-chip ${mainTab === 'pricing' ? 'is-on' : ''}`}
+          onClick={() => { setMainTab('pricing'); if (!allProducts) loadAllProducts(); }}
+        >
+          <Package size={14} /> All Products &amp; Pricing {allProducts ? `(${allProducts.length})` : ''}
+        </button>
+      </div>
+
+      {mainTab === 'pricing' ? (
+        /* ========================================================
+           ALL PRODUCTS & PRICING MANAGER
+           ======================================================== */
+        <section className="sys-card" data-tour="all-products-pricing">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <div>
-              <h2><CreditCard size={18} /> Storefront billing</h2>
-              <p className="sys-muted" style={{ margin: 0 }}>{terms ? `${money((terms.price_cents || 1499) / 100)} a month after a ${terms.free_months || 3}-month free period · reminder ${terms.remind_days || 14} days before it ends · ${terms.auto_pause ? `shops pause ${terms.grace_days || 7} days after an unpaid free period` : 'shops are never paused automatically'}.` : 'Loading the terms…'} New shops start their free period when approved.</p>
+              <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <DollarSign size={18} /> Marketplace Products &amp; Live Pricing
+              </h2>
+              <p className="sys-muted" style={{ margin: '4px 0 0', fontSize: '0.84rem' }}>
+                Change prices instantly, create products for any shop, toggle visibility, and audit stock levels across the entire marketplace.
+              </p>
             </div>
-            <span className="sh-billing__actions">
-              {notInBilling > 0 && <button type="button" className="sys-btn sys-btn--ghost sys-btn--sm" disabled={busy} onClick={() => bill(null, 'start_all')}><PlayCircle size={14} /> Start for {notInBilling} approved shop{notInBilling === 1 ? '' : 's'}</button>}
-              {admin && <button type="button" className="sys-btn sys-btn--ghost sys-btn--sm" onClick={() => setShowTerms(!showTerms)}><Settings2 size={14} /> Terms</button>}
-            </span>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button
+                type="button"
+                className="sys-btn sys-btn--ghost sys-btn--sm"
+                onClick={loadAllProducts}
+                disabled={allLoading}
+                title="Refresh product list"
+              >
+                <RefreshCw size={14} className={allLoading ? 'spin' : ''} /> Refresh
+              </button>
+              <button
+                type="button"
+                className="sys-btn sys-btn--gold sys-btn--sm"
+                onClick={() => { setTargetShopForAdd(null); setShowAddModal(true); }}
+              >
+                <Plus size={14} /> Create product
+              </button>
+            </div>
           </div>
-          {showTerms && admin && terms && (
-            <form className="sys-form sh-terms" onSubmit={saveTerms}>
-              <div className="sys-row" style={{ flexWrap: 'wrap', gap: 10 }}>
-                <label className="sys-field"><span>Monthly price ($)</span><input name="price" inputMode="decimal" defaultValue={((terms.price_cents || 1499) / 100).toFixed(2)} /></label>
-                <label className="sys-field"><span>Free months</span><input name="months" type="number" min="0" max="24" defaultValue={terms.free_months || 3} /></label>
-                <label className="sys-field"><span>Reminder (days before)</span><input name="remind" type="number" min="1" max="60" defaultValue={terms.remind_days || 14} /></label>
-                <label className="sys-field"><span>Grace days</span><input name="grace" type="number" min="0" max="60" defaultValue={terms.grace_days || 7} /></label>
-              </div>
-              <label className="sys-chip" style={{ cursor: 'pointer', justifySelf: 'start' }}><input type="checkbox" name="auto" defaultChecked={!!terms.auto_pause} /> Pause a shop automatically when the grace days pass without a subscription</label>
-              <p className="sys-muted" style={{ margin: 0, fontSize: '0.82rem' }}>The Storefront Agreement says the storefront is free for 3 months, then {money((terms.price_cents || 1499) / 100)} a month, with a 5% fee per sale. Change these only alongside the agreement.</p>
-              <button className="sys-btn sys-btn--gold sys-btn--sm" style={{ justifySelf: 'start' }}><Save size={14} /> Save terms</button>
-            </form>
-          )}
-        </section>
-      )}
 
-      {shops?.length > 0 && <ShopAddons shops={shops} admin={admin} />}
-
-      <div className="sh-layout">
-        <section className="sys-card" data-tour="shops-list">
-          <div className="sh-head">
-            <label className="sys-field sh-search"><span className="sr-only">Search shops</span><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by shop, owner or email" aria-label="Search shops" /></label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginBottom: 12 }}>
+            <label className="sys-field sh-search" style={{ flex: '1 1 260px' }}>
+              <span className="sr-only">Search products</span>
+              <input
+                value={prodQuery}
+                onChange={(e) => setProdQuery(e.target.value)}
+                placeholder="Search products by name, shop, or category…"
+              />
+            </label>
+            <select
+              value={prodShopFilter}
+              onChange={(e) => setProdShopFilter(e.target.value)}
+              className="sys-field input"
+              style={{ maxWidth: 220, padding: '6px 10px', borderRadius: 10 }}
+            >
+              <option value="all">All shops</option>
+              {(shops || []).map((s) => (
+                <option key={s.id} value={s.id}>{s.business_name || s.owner_name}</option>
+              ))}
+            </select>
           </div>
-          <div className="sys-chips sh-counts" role="tablist" data-tour="shops-filters">
-            {[['all', 'All', shops?.length], ...STATUSES.filter(([v]) => v !== 'draft' || counts.draft).map(([v, l]) => [v, l, counts[v] || 0])].map(([v, l, n]) => (
-              <button key={v} role="tab" aria-selected={filter === v} className={`sys-chip ${filter === v ? 'is-on' : ''}`} onClick={() => setFilter(v)}>{l}{n != null ? ` · ${n}` : ''}</button>
+
+          <div className="sys-chips" role="tablist" style={{ marginBottom: 14 }}>
+            {[
+              ['all', 'All products', allProducts?.length],
+              ['active', 'Active'],
+              ['hidden', 'Hidden'],
+              ['sale', 'On sale'],
+              ['sold_out', 'Sold out'],
+            ].map(([v, l, n]) => (
+              <button
+                key={v}
+                role="tab"
+                aria-selected={prodFilter === v}
+                className={`sys-chip ${prodFilter === v ? 'is-on' : ''}`}
+                onClick={() => setProdFilter(v)}
+              >
+                {l}{n != null ? ` · ${n}` : ''}
+              </button>
             ))}
           </div>
-          {hasBilling && (
-            <div className="sys-chips sh-counts" role="tablist" aria-label="Billing">
-              {BILLING_FILTERS.map(([v, l]) => <button key={v} role="tab" aria-selected={billing === v} className={`sys-chip ${billing === v ? 'is-on' : ''}`} onClick={() => setBilling(v)}>{l}</button>)}
-            </div>
-          )}
-          {shops === null ? <p className="sys-muted">Loading shops…</p> : shown.length === 0 ? <p className="sys-muted">{shops.length ? 'No shops match.' : 'No shops yet.'}</p> : (
-            <div className="sh-list">
-              {shown.map((s) => (
-                <button key={s.id} type="button" className={`sh-row ${sel?.id === s.id ? 'is-on' : ''}`} onClick={() => open(s)}>
-                  {s.logo_url ? <img className="sh-logo" src={s.logo_url} alt="" /> : <span className="sh-logo"><Store size={18} /></span>}
-                  <span className="sh-row__main">
-                    <strong>{s.business_name || 'New shop'}{s.is_featured && <Star size={13} style={{ marginLeft: 6, verticalAlign: '-2px', color: '#F2CE4D' }} />}</strong>
-                    <small>{s.owner_name || s.owner_email || 'Owner'} · {s.products_active}/{s.products} products · {s.orders} order{s.orders === 1 ? '' : 's'}{s.orders_30d ? ` (${s.orders_30d} this month)` : ''} · since {fmt(s.created_at)}</small>
-                    {billingNote(s) && <small>{billingNote(s)}</small>}
-                  </span>
-                  <span className="sh-row__meta">
-                    <span className={`sh-status sh-status--${s.status}`}>{STATUS_LABEL[s.status] || s.status}</span>
-                    {s.subscription_status && s.subscription_status !== 'none' && <span className={`sh-status sh-bill--${BILLING[s.subscription_status]?.[1] || ''}`}>{BILLING[s.subscription_status]?.[0]}</span>}
-                  </span>
-                </button>
+
+          {allLoading && !allProducts ? (
+            <p className="sys-muted">Loading marketplace products…</p>
+          ) : filteredAllProducts.length === 0 ? (
+            <p className="sys-muted">{allProducts?.length ? 'No products match your search.' : 'No products found in the marketplace.'}</p>
+          ) : (
+            <div className="sh-all-prods">
+              {filteredAllProducts.map((p) => (
+                <div key={p.id} className={`sh-all-prod-row ${p.is_active === false ? 'is-off' : ''}`}>
+                  {p.image_url ? (
+                    <img src={p.image_url} alt="" />
+                  ) : (
+                    <span className="sh-all-prod__ph"><Package size={20} /></span>
+                  )}
+
+                  <div className="sh-row__main">
+                    <strong>
+                      {p.name}
+                      {p.is_featured && <Star size={12} style={{ marginLeft: 6, color: '#F2CE4D', verticalAlign: '-1px' }} />}
+                    </strong>
+                    <small>
+                      {p.category || 'Collection'}
+                      {p.badge && ` · ${p.badge}`}
+                      {p.inventory != null && ` · ${p.inventory} left`}
+                      {p.stock_status && p.stock_status !== 'in_stock' && ` · ${p.stock_status.replace(/_/g, ' ')}`}
+                    </small>
+                  </div>
+
+                  <div className="sh-row__main">
+                    <span style={{ fontSize: '0.88rem', fontWeight: 600 }}>{p.shop_name || 'Independent Shop'}</span>
+                    <small className="sys-muted">{p.owner_name || p.owner_email || ''}</small>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <QuickPriceEdit
+                        price={p.price}
+                        onSave={(newPrice) => setProduct(p, { price: newPrice })}
+                      />
+                      {p.compare_at_price && (
+                        <span style={{ fontSize: '0.75rem', textDecoration: 'line-through', opacity: 0.6 }}>
+                          {money(p.compare_at_price)}
+                        </span>
+                      )}
+                    </div>
+                    {p.is_active === false && <span className="sh-status sh-status--paused" style={{ fontSize: '0.62rem' }}>Hidden</span>}
+                  </div>
+
+                  <div className="sh-row__meta">
+                    <button
+                      type="button"
+                      className="sys-icon-btn"
+                      title={p.is_active ? 'Hide this product' : 'Show this product'}
+                      aria-label={p.is_active ? 'Hide' : 'Show'}
+                      onClick={() => setProduct(p, { is_active: !p.is_active })}
+                    >
+                      {p.is_active ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                    <button
+                      type="button"
+                      className="sys-icon-btn"
+                      title={p.is_featured ? 'Unfeature' : 'Feature item'}
+                      aria-label="Feature"
+                      onClick={() => setProduct(p, { is_featured: !p.is_featured })}
+                    >
+                      <Star size={14} fill={p.is_featured ? '#F2CE4D' : 'none'} />
+                    </button>
+                    <EditRecord
+                      title="Edit"
+                      value={{ ...p, stock_status: p.stock_status || 'in_stock' }}
+                      fields={PRODUCT_FIELDS}
+                      onSave={(patchData) => setProduct(p, patchData)}
+                    />
+                    <DeleteRecord
+                      what={`product “${p.name}”`}
+                      note="It will be removed from the shop."
+                      label="Delete"
+                      onDelete={() => deleteProduct(p.id, p.name)}
+                    />
+                  </div>
+                </div>
               ))}
             </div>
           )}
         </section>
-
-        {sel && (
-          <section className="sys-card sh-detail" data-tour="shops-detail">
-            <div className="sh-detail__head">
-              {sel.logo_url ? <img className="sh-logo" src={sel.logo_url} alt="" /> : <span className="sh-logo"><Store size={18} /></span>}
-              <div><h2>{sel.business_name || 'New shop'}</h2><p className="sys-muted" style={{ margin: 0 }}>{sel.owner_name || 'Owner'}{sel.owner_email && <> · <a href={`mailto:${sel.owner_email}`}>{sel.owner_email}</a></>}</p></div>
-              <span className="sh-row__meta" style={{ marginLeft: 'auto' }}>
-                <a className="sys-btn sys-btn--ghost sys-btn--sm" href={storefront(sel)} target="_blank" rel="noreferrer"><ExternalLink size={14} /> Open shop</a>
-                <button type="button" className="sys-btn sys-btn--ghost sys-btn--sm" onClick={() => message(sel)}><MessagesSquare size={14} /> Message</button>
-                <button type="button" className="sys-icon-btn" onClick={() => setSel(null)} aria-label="Close"><X size={16} /></button>
-              </span>
-            </div>
-
-            <div>
-              <p className="sys-eyebrow">Status</p>
-              <div className="sys-chips">
-                {STATUSES.filter(([v]) => v !== 'draft').map(([v, l]) => <button key={v} type="button" className={`sys-chip ${sel.status === v ? 'is-on' : ''}`} disabled={busy} onClick={() => patch(sel, { status: v }, `${sel.business_name} is now ${l.toLowerCase()}.`)}>{l}</button>)}
-              </div>
-              <p className="sys-muted" style={{ margin: '6px 0 0', fontSize: '0.82rem' }}>Approved shops are live on the site. Paused shops are hidden until approved again; the vendor keeps her studio. Needs changes sends her back to edit, with your note.</p>
-            </div>
-
-            {'subscription_status' in sel && (
-              <div data-tour="shops-billing-actions">
-                <p className="sys-eyebrow">Billing</p>
-                <p style={{ margin: '0 0 8px' }}><strong>{billingNote(sel) || BILLING[sel.subscription_status]?.[0] || sel.subscription_status}</strong></p>
-                <div className="sys-chips">
-                  {['none', 'ended', 'canceled'].includes(sel.subscription_status) && <button type="button" className="sys-chip" disabled={busy} onClick={() => bill(sel, 'start', null, `Free period started for ${sel.business_name}.`)}><PlayCircle size={13} /> Start free period</button>}
-                  {['trial', 'ended'].includes(sel.subscription_status) && <button type="button" className="sys-chip" disabled={busy} onClick={() => bill(sel, 'extend', 30, `Free period extended by 30 days for ${sel.business_name}.`)}><CalendarPlus size={13} /> Extend 30 days</button>}
-                  {sel.subscription_status !== 'comp' && sel.subscription_status !== 'active' && <button type="button" className="sys-chip" disabled={busy} onClick={() => bill(sel, 'comp', null, `${sel.business_name} is complimentary.`)}><Gift size={13} /> Complimentary</button>}
-                  {sel.subscription_status !== 'none' && sel.subscription_status !== 'active' && <button type="button" className="sys-chip" disabled={busy} onClick={() => bill(sel, 'none', null, `${sel.business_name} is out of billing.`)}><Ban size={13} /> Take out of billing</button>}
+      ) : (
+        /* ========================================================
+           CURATORS & SHOPS VIEW (PER-SHOP DETAILS)
+           ======================================================== */
+        <>
+          {hasBilling && (
+            <section className="sys-card sh-billing" data-tour="shops-billing">
+              <div className="sh-billing__row">
+                <div>
+                  <h2><CreditCard size={18} /> Storefront billing</h2>
+                  <p className="sys-muted" style={{ margin: 0 }}>{terms ? `${money((terms.price_cents || 1499) / 100)} a month after a ${terms.free_months || 3}-month free period · reminder ${terms.remind_days || 14} days before it ends · ${terms.auto_pause ? `shops pause ${terms.grace_days || 7} days after an unpaid free period` : 'shops are never paused automatically'}.` : 'Loading the terms…'} New shops start their free period when approved.</p>
                 </div>
-                <p className="sys-muted" style={{ margin: '6px 0 0', fontSize: '0.82rem' }}>The vendor subscribes from her studio (Plan &amp; billing). A subscription is changed or canceled by the vendor herself, or in Stripe.</p>
+                <span className="sh-billing__actions">
+                  {notInBilling > 0 && <button type="button" className="sys-btn sys-btn--ghost sys-btn--sm" disabled={busy} onClick={() => bill(null, 'start_all')}><PlayCircle size={14} /> Start for {notInBilling} approved shop{notInBilling === 1 ? '' : 's'}</button>}
+                  {admin && <button type="button" className="sys-btn sys-btn--ghost sys-btn--sm" onClick={() => setShowTerms(!showTerms)}><Settings2 size={14} /> Terms</button>}
+                </span>
               </div>
-            )}
+              {showTerms && admin && terms && (
+                <form className="sys-form sh-terms" onSubmit={saveTerms}>
+                  <div className="sys-row" style={{ flexWrap: 'wrap', gap: 10 }}>
+                    <label className="sys-field"><span>Monthly price ($)</span><input name="price" inputMode="decimal" defaultValue={((terms.price_cents || 1499) / 100).toFixed(2)} /></label>
+                    <label className="sys-field"><span>Free months</span><input name="months" type="number" min="0" max="24" defaultValue={terms.free_months || 3} /></label>
+                    <label className="sys-field"><span>Reminder (days before)</span><input name="remind" type="number" min="1" max="60" defaultValue={terms.remind_days || 14} /></label>
+                    <label className="sys-field"><span>Grace days</span><input name="grace" type="number" min="0" max="60" defaultValue={terms.grace_days || 7} /></label>
+                  </div>
+                  <label className="sys-chip" style={{ cursor: 'pointer', justifySelf: 'start' }}><input type="checkbox" name="auto" defaultChecked={!!terms.auto_pause} /> Pause a shop automatically when the grace days pass without a subscription</label>
+                  <p className="sys-muted" style={{ margin: 0, fontSize: '0.82rem' }}>The Storefront Agreement says the storefront is free for 3 months, then {money((terms.price_cents || 1499) / 100)} a month, with a 5% fee per sale. Change these only alongside the agreement.</p>
+                  <button className="sys-btn sys-btn--gold sys-btn--sm" style={{ justifySelf: 'start' }}><Save size={14} /> Save terms</button>
+                </form>
+              )}
+            </section>
+          )}
 
-            <div>
-              <p className="sys-eyebrow">Switches</p>
-              <div className="sh-toggles">
-                {[['is_featured', 'Featured in the directory', Star], ['is_paid', 'Paid storefront', Check], ['is_early_bird', 'Early bird (free store)', Star], ['is_published', 'Published', Eye]].map((sw) => {
-                  const k = sw[0]; const l = sw[1]; const Icon = sw[2];
-                  return <button key={k} type="button" className={`sys-chip ${sel[k] ? 'is-on' : ''}`} aria-pressed={!!sel[k]} disabled={busy} onClick={() => patch(sel, { [k]: !sel[k] }, `${l}: ${sel[k] ? 'off' : 'on'}.`)}><Icon size={13} /> {l}</button>;
-                })}
+          {shops?.length > 0 && <ShopAddons shops={shops} admin={admin} />}
+
+          <div className="sh-layout">
+            <section className="sys-card" data-tour="shops-list">
+              <div className="sh-head">
+                <label className="sys-field sh-search"><span className="sr-only">Search shops</span><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by shop, owner or email" aria-label="Search shops" /></label>
               </div>
-            </div>
-
-            <form className="sys-form" onSubmit={saveDetails}>
-              <div className="sys-row">
-                <label className="sys-field sys-grow"><span>Shop name</span><input value={edit.business_name} onChange={(e) => setEdit({ ...edit, business_name: e.target.value })} /></label>
-                <label className="sys-field sys-grow"><span>Link (p31market.com/…)</span><input value={edit.slug} onChange={(e) => setEdit({ ...edit, slug: e.target.value })} /></label>
+              <div className="sys-chips sh-counts" role="tablist" data-tour="shops-filters">
+                {[['all', 'All', shops?.length], ...STATUSES.filter(([v]) => v !== 'draft' || counts.draft).map(([v, l]) => [v, l, counts[v] || 0])].map(([v, l, n]) => (
+                  <button key={v} role="tab" aria-selected={filter === v} className={`sys-chip ${filter === v ? 'is-on' : ''}`} onClick={() => setFilter(v)}>{l}{n != null ? ` · ${n}` : ''}</button>
+                ))}
               </div>
-              <label className="sys-field"><span>Tagline</span><input value={edit.tagline} onChange={(e) => setEdit({ ...edit, tagline: e.target.value })} /></label>
-              <label className="sys-field"><span>Badges (comma-separated, e.g. Handmade, Organic, Verified)</span><input value={edit.verification_badges} onChange={(e) => setEdit({ ...edit, verification_badges: e.target.value })} /></label>
-              <label className="sys-field"><span>Note to the vendor (she sees it in her studio)</span><textarea rows={3} value={edit.admin_feedback} onChange={(e) => setEdit({ ...edit, admin_feedback: e.target.value })} /></label>
-              <button className="sys-btn sys-btn--gold sys-btn--sm" disabled={busy}><Save size={14} /> Save details</button>
-            </form>
-
-            <div className="sys-row" style={{ flexWrap: 'wrap', gap: 10 }}>
-              <span className="sys-muted"><FileSignature size={13} /> {sel.agreement_signed_at ? `Storefront agreement signed ${fmt(sel.agreement_signed_at)}` : 'Storefront agreement not signed yet'}</span>
-              <span className="sys-muted"><Mail size={13} /> {sel.stripe_connected ? 'Payouts connected' : 'Payouts not connected'}</span>
-              {sel.plan && <span className="sys-muted">Plan: {sel.plan}</span>}
-            </div>
-            {admin && (
-              <div className="adm-actions">
-                <DeleteRecord what={`the shop ${sel.business_name || ''} and all of its products`} note="Her login stays, so she could start a new shop; orders keep their record." label="Delete shop"
-                  onDelete={() => supabase.rpc('shop_admin_delete_shop', { p_id: sel.id })}
-                  onDone={() => { setSel(null); setMsg('Shop deleted.'); load(); }} />
-              </div>
-            )}
-
-            <div>
-              <p className="sys-eyebrow"><Package size={13} /> Products ({products ? products.length : '…'})</p>
-              {products === null ? <p className="sys-muted">Loading…</p> : products.length === 0 ? <p className="sys-muted">No products yet.</p> : (
-                <div className="sh-products">
-                  {products.map((p) => (
-                    <div key={p.id} className="sh-product-wrap">
-                      <div className={`sh-product ${p.is_active ? '' : 'is-off'}`}>
-                        {p.image_url ? <img src={p.image_url} alt="" /> : <span className="sh-product__ph" />}
-                        <span className="sh-product__main"><strong>{p.name}</strong><small>{money(p.price)}{p.badge ? ` · ${p.badge}` : ''}{p.is_featured ? ' · featured' : ''}{p.is_active ? '' : ' · hidden'}</small></span>
-                        <span className="sh-product__actions">
-                          <button type="button" className="sys-icon-btn" title={p.is_active ? 'Hide this product' : 'Show this product'} aria-label={p.is_active ? 'Hide' : 'Show'} onClick={() => setProduct(p, { is_active: !p.is_active })}>{p.is_active ? <EyeOff size={14} /> : <Eye size={14} />}</button>
-                          <button type="button" className="sys-icon-btn" title={p.is_featured ? 'Unfeature' : 'Feature in the shop'} aria-label="Feature" onClick={() => setProduct(p, { is_featured: !p.is_featured })}><Star size={14} fill={p.is_featured ? '#F2CE4D' : 'none'} /></button>
-                        </span>
-                      </div>
-                      <div className="adm-actions sh-product__more">
-                        <EditRecord title="Edit product" value={{ ...p, stock_status: p.stock_status || 'in_stock' }} fields={PRODUCT_FIELDS} onSave={(patch) => setProduct(p, patch)} />
-                        <DeleteRecord what={`${p.name}`} note="It disappears from her shop." label="Delete product"
-                          onDelete={() => supabase.rpc('shop_admin_delete_product', { p_id: p.id })}
-                          onDone={() => setProducts((list) => list.filter((x) => x.id !== p.id))} />
-                      </div>
-                    </div>
+              {hasBilling && (
+                <div className="sys-chips sh-counts" role="tablist" aria-label="Billing">
+                  {BILLING_FILTERS.map(([v, l]) => <button key={v} role="tab" aria-selected={billing === v} className={`sys-chip ${billing === v ? 'is-on' : ''}`} onClick={() => setBilling(v)}>{l}</button>)}
+                </div>
+              )}
+              {shops === null ? <p className="sys-muted">Loading shops…</p> : shown.length === 0 ? <p className="sys-muted">{shops.length ? 'No shops match.' : 'No shops yet.'}</p> : (
+                <div className="sh-list">
+                  {shown.map((s) => (
+                    <button key={s.id} type="button" className={`sh-row ${sel?.id === s.id ? 'is-on' : ''}`} onClick={() => open(s)}>
+                      {s.logo_url ? <img className="sh-logo" src={s.logo_url} alt="" /> : <span className="sh-logo"><Store size={18} /></span>}
+                      <span className="sh-row__main">
+                        <strong>{s.business_name || 'New shop'}{s.is_featured && <Star size={13} style={{ marginLeft: 6, verticalAlign: '-2px', color: '#F2CE4D' }} />}</strong>
+                        <small>{s.owner_name || s.owner_email || 'Owner'} · {s.products_active}/{s.products} products · {s.orders} order{s.orders === 1 ? '' : 's'}{s.orders_30d ? ` (${s.orders_30d} this month)` : ''} · since {fmt(s.created_at)}</small>
+                        {billingNote(s) && <small>{billingNote(s)}</small>}
+                      </span>
+                      <span className="sh-row__meta">
+                        <span className={`sh-status sh-status--${s.status}`}>{STATUS_LABEL[s.status] || s.status}</span>
+                        {s.subscription_status && s.subscription_status !== 'none' && <span className={`sh-status sh-bill--${BILLING[s.subscription_status]?.[1] || ''}`}>{BILLING[s.subscription_status]?.[0]}</span>}
+                      </span>
+                    </button>
                   ))}
                 </div>
               )}
-            </div>
-          </section>
-        )}
-      </div>
+            </section>
+
+            {sel && (
+              <section className="sys-card sh-detail" data-tour="shops-detail">
+                <div className="sh-detail__head">
+                  {sel.logo_url ? <img className="sh-logo" src={sel.logo_url} alt="" /> : <span className="sh-logo"><Store size={18} /></span>}
+                  <div><h2>{sel.business_name || 'New shop'}</h2><p className="sys-muted" style={{ margin: 0 }}>{sel.owner_name || 'Owner'}{sel.owner_email && <> · <a href={`mailto:${sel.owner_email}`}>{sel.owner_email}</a></>}</p></div>
+                  <span className="sh-row__meta" style={{ marginLeft: 'auto' }}>
+                    <a className="sys-btn sys-btn--ghost sys-btn--sm" href={storefront(sel)} target="_blank" rel="noreferrer"><ExternalLink size={14} /> Open shop</a>
+                    <button type="button" className="sys-btn sys-btn--ghost sys-btn--sm" onClick={() => message(sel)}><MessagesSquare size={14} /> Message</button>
+                    <button type="button" className="sys-icon-btn" onClick={() => setSel(null)} aria-label="Close"><X size={16} /></button>
+                  </span>
+                </div>
+
+                <div>
+                  <p className="sys-eyebrow">Status</p>
+                  <div className="sys-chips">
+                    {STATUSES.filter(([v]) => v !== 'draft').map(([v, l]) => <button key={v} type="button" className={`sys-chip ${sel.status === v ? 'is-on' : ''}`} disabled={busy} onClick={() => patch(sel, { status: v }, `${sel.business_name} is now ${l.toLowerCase()}.`)}>{l}</button>)}
+                  </div>
+                  <p className="sys-muted" style={{ margin: '6px 0 0', fontSize: '0.82rem' }}>Approved shops are live on the site. Paused shops are hidden until approved again; the vendor keeps her studio. Needs changes sends her back to edit, with your note.</p>
+                </div>
+
+                {'subscription_status' in sel && (
+                  <div data-tour="shops-billing-actions">
+                    <p className="sys-eyebrow">Billing</p>
+                    <p style={{ margin: '0 0 8px' }}><strong>{billingNote(sel) || BILLING[sel.subscription_status]?.[0] || sel.subscription_status}</strong></p>
+                    <div className="sys-chips">
+                      {['none', 'ended', 'canceled'].includes(sel.subscription_status) && <button type="button" className="sys-chip" disabled={busy} onClick={() => bill(sel, 'start', null, `Free period started for ${sel.business_name}.`)}><PlayCircle size={13} /> Start free period</button>}
+                      {['trial', 'ended'].includes(sel.subscription_status) && <button type="button" className="sys-chip" disabled={busy} onClick={() => bill(sel, 'extend', 30, `Free period extended by 30 days for ${sel.business_name}.`)}><CalendarPlus size={13} /> Extend 30 days</button>}
+                      {sel.subscription_status !== 'comp' && sel.subscription_status !== 'active' && <button type="button" className="sys-chip" disabled={busy} onClick={() => bill(sel, 'comp', null, `${sel.business_name} is complimentary.`)}><Gift size={13} /> Complimentary</button>}
+                      {sel.subscription_status !== 'none' && sel.subscription_status !== 'active' && <button type="button" className="sys-chip" disabled={busy} onClick={() => bill(sel, 'none', null, `${sel.business_name} is out of billing.`)}><Ban size={13} /> Take out of billing</button>}
+                    </div>
+                    <p className="sys-muted" style={{ margin: '6px 0 0', fontSize: '0.82rem' }}>The vendor subscribes from her studio (Plan &amp; billing). A subscription is changed or canceled by the vendor herself, or in Stripe.</p>
+                  </div>
+                )}
+
+                <div>
+                  <p className="sys-eyebrow">Switches</p>
+                  <div className="sh-toggles">
+                    {[['is_featured', 'Featured in the directory', Star], ['is_paid', 'Paid storefront', Check], ['is_early_bird', 'Early bird (free store)', Star], ['is_published', 'Published', Eye]].map((sw) => {
+                      const k = sw[0]; const l = sw[1]; const Icon = sw[2];
+                      return <button key={k} type="button" className={`sys-chip ${sel[k] ? 'is-on' : ''}`} aria-pressed={!!sel[k]} disabled={busy} onClick={() => patch(sel, { [k]: !sel[k] }, `${l}: ${sel[k] ? 'off' : 'on'}.`)}><Icon size={13} /> {l}</button>;
+                    })}
+                  </div>
+                </div>
+
+                <form className="sys-form" onSubmit={saveDetails}>
+                  <div className="sys-row">
+                    <label className="sys-field sys-grow"><span>Shop name</span><input value={edit.business_name} onChange={(e) => setEdit({ ...edit, business_name: e.target.value })} /></label>
+                    <label className="sys-field sys-grow"><span>Link (p31market.com/…)</span><input value={edit.slug} onChange={(e) => setEdit({ ...edit, slug: e.target.value })} /></label>
+                  </div>
+                  <label className="sys-field"><span>Tagline</span><input value={edit.tagline} onChange={(e) => setEdit({ ...edit, tagline: e.target.value })} /></label>
+                  <label className="sys-field"><span>Badges (comma-separated, e.g. Handmade, Organic, Verified)</span><input value={edit.verification_badges} onChange={(e) => setEdit({ ...edit, verification_badges: e.target.value })} /></label>
+                  <label className="sys-field"><span>Note to the vendor (she sees it in her studio)</span><textarea rows={3} value={edit.admin_feedback} onChange={(e) => setEdit({ ...edit, admin_feedback: e.target.value })} /></label>
+                  <button className="sys-btn sys-btn--gold sys-btn--sm" disabled={busy}><Save size={14} /> Save details</button>
+                </form>
+
+                <div className="sys-row" style={{ flexWrap: 'wrap', gap: 10 }}>
+                  <span className="sys-muted"><FileSignature size={13} /> {sel.agreement_signed_at ? `Storefront agreement signed ${fmt(sel.agreement_signed_at)}` : 'Storefront agreement not signed yet'}</span>
+                  <span className="sys-muted"><Mail size={13} /> {sel.stripe_connected ? 'Payouts connected' : 'Payouts not connected'}</span>
+                  {sel.plan && <span className="sys-muted">Plan: {sel.plan}</span>}
+                </div>
+                {admin && (
+                  <div className="adm-actions">
+                    <DeleteRecord what={`the shop ${sel.business_name || ''} and all of its products`} note="Her login stays, so she could start a new shop; orders keep their record." label="Delete shop"
+                      onDelete={() => supabase.rpc('shop_admin_delete_shop', { p_id: sel.id })}
+                      onDone={() => { setSel(null); setMsg('Shop deleted.'); load(); }} />
+                  </div>
+                )}
+
+                {/* Products section for selected shop */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <p className="sys-eyebrow" style={{ margin: 0 }}>
+                      <Package size={13} /> Products ({products ? products.length : '…'})
+                    </p>
+                    <button
+                      type="button"
+                      className="sys-btn sys-btn--gold sys-btn--sm"
+                      onClick={() => { setTargetShopForAdd(sel); setShowAddModal(true); }}
+                    >
+                      <Plus size={14} /> Add product
+                    </button>
+                  </div>
+
+                  {products === null ? <p className="sys-muted">Loading…</p> : products.length === 0 ? <p className="sys-muted">No products yet.</p> : (
+                    <div className="sh-products">
+                      {products.map((p) => (
+                        <div key={p.id} className="sh-product-wrap">
+                          <div className={`sh-product ${p.is_active ? '' : 'is-off'}`}>
+                            {p.image_url ? <img src={p.image_url} alt="" /> : <span className="sh-product__ph" />}
+                            <span className="sh-product__main">
+                              <strong>{p.name}</strong>
+                              <small>
+                                <QuickPriceEdit
+                                  price={p.price}
+                                  onSave={(newPrice) => setProduct(p, { price: newPrice })}
+                                />
+                                {p.compare_at_price && <span style={{ textDecoration: 'line-through', opacity: 0.6, marginLeft: 6 }}>{money(p.compare_at_price)}</span>}
+                                {p.badge ? ` · ${p.badge}` : ''}
+                                {p.category ? ` · ${p.category}` : ''}
+                                {p.is_featured ? ' · featured' : ''}
+                                {p.is_active ? '' : ' · hidden'}
+                              </small>
+                            </span>
+                            <span className="sh-product__actions">
+                              <button type="button" className="sys-icon-btn" title={p.is_active ? 'Hide this product' : 'Show this product'} aria-label={p.is_active ? 'Hide' : 'Show'} onClick={() => setProduct(p, { is_active: !p.is_active })}>{p.is_active ? <EyeOff size={14} /> : <Eye size={14} />}</button>
+                              <button type="button" className="sys-icon-btn" title={p.is_featured ? 'Unfeature' : 'Feature in the shop'} aria-label="Feature" onClick={() => setProduct(p, { is_featured: !p.is_featured })}><Star size={14} fill={p.is_featured ? '#F2CE4D' : 'none'} /></button>
+                            </span>
+                          </div>
+                          <div className="adm-actions sh-product__more">
+                            <EditRecord title="Edit product" value={{ ...p, stock_status: p.stock_status || 'in_stock' }} fields={PRODUCT_FIELDS} onSave={(patchData) => setProduct(p, patchData)} />
+                            <DeleteRecord what={`${p.name}`} note="It disappears from her shop." label="Delete product"
+                              onDelete={() => deleteProduct(p.id, p.name)}
+                              onDone={() => setProducts((list) => list.filter((x) => x.id !== p.id))} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Add Product Modal */}
+      {showAddModal && (
+        <AdminAddProductModal
+          shops={shops || []}
+          targetShop={targetShopForAdd}
+          onClose={() => { setShowAddModal(false); setTargetShopForAdd(null); }}
+          onCreated={handleProductCreated}
+        />
+      )}
     </div>
   );
 };

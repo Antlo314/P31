@@ -1,38 +1,8 @@
 // Supabase Edge Function: dm-agent
-// Carla: answers Instagram and Facebook DMs for P31 in the persona from
+// Carla: answers Instagram, Facebook, and TikTok DMs and comments for P31 in the persona from
 // persona.ts, with Gemini (GEMINI_API_KEY, model GEMINI_MODEL) or, when no
-// Gemini key is set, Claude (ANTHROPIC_API_KEY). Zernio calls this function for every inbox event; it verifies
-// the signature, answers 200 right away (Zernio's limit is 5 seconds), then
-// writes and sends the reply in the background.
-//
-// Setup:
-//   supabase secrets set ZERNIO_API_KEY=sk_... ZERNIO_WEBHOOK_SECRET=<random string>
-//   supabase secrets set GEMINI_API_KEY=...   (or ANTHROPIC_API_KEY=sk-ant-...)
-//   supabase secrets set DM_AGENT_ENABLED=true   (anything else = off; the kill switch)
-//   optional: DM_AGENT_DRY_RUN=true          write replies to the logs, send nothing
-//   optional: DM_AGENT_ACCOUNT_IDS=id1,id2   only answer for these Zernio accounts
-//   optional: DM_AGENT_NOTIFY_EMAIL=...      email the team on handoffs (needs RESEND_API_KEY)
-//   supabase functions deploy dm-agent
-// Then point a Zernio webhook (events message.received + message.sent) at
-// https://<project>.supabase.co/functions/v1/dm-agent with the same secret.
-//
-// Story replies and story mentions arrive as DMs and are answered like any DM.
-// Comments and Google reviews have their own switches (both default off), and
-// need those events added to the same Zernio webhook:
-//   COMMENT_AGENT_ENABLED=true   + event comment.received  → public replies under IG/FB posts
-//   REVIEW_AGENT_ENABLED=true    + event review.new        → thank-you replies to 4–5★ Google reviews
-// Under 4 stars, or anything Carla flags, emails DM_AGENT_NOTIFY_EMAIL instead.
-// DM_AGENT_DRY_RUN and DM_AGENT_ACCOUNT_IDS apply to all three (include the
-// Google Business account id there if the list is set).
-//
-// Preview: a correctly signed request with header `X-DM-Preview: 1` and a
-// message.received-shaped body is answered synchronously with the reply the
-// agent would write — nothing is sent and nothing is recorded.
-//
-// When a person on the team answers a conversation themselves (message.sent
-// with sentVia "human"), the agent stays out of that conversation for 24 hours.
-// Pauses, handoffs and replies are recorded in ai_usage (task dm_*), so no new
-// tables are needed.
+// Gemini key is set, Claude (ANTHROPIC_API_KEY). Supports both P31 Marketplace and
+// P31 Collective Zernio accounts, automated owner trigger templates, and anti-troll filtering.
 import Anthropic from 'npm:@anthropic-ai/sdk';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { PERSONA } from './persona.ts';
@@ -42,7 +12,7 @@ declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
 
 const MODEL = 'claude-opus-5-5';
 const ZERNIO = 'https://zernio.com/api/v1';
-const PLATFORMS = new Set(['instagram', 'facebook']);
+const PLATFORMS = new Set(['instagram', 'facebook', 'tiktok']);
 const PAUSE_HOURS = 24;
 const DAILY_REPLY_CAP = 400;    // a runaway-loop guard, far above normal volume
 const SETTLE_MS = 6000;         // wait for people who send several messages in a row
@@ -64,14 +34,32 @@ function safeEqual(a: string, b: string) {
   return diff === 0;
 }
 
+// Multi-key Zernio fetcher: attempts primary ZERNIO_API_KEY, then ZERNIO_COLLECTIVE_API_KEY
 async function zernio(path: string, init: RequestInit = {}) {
-  const res = await fetch(`${ZERNIO}${path}`, {
-    ...init,
-    headers: { Authorization: `Bearer ${env('ZERNIO_API_KEY')}`, 'Content-Type': 'application/json', ...(init.headers || {}) },
-  });
-  const text = await res.text();
-  if (!res.ok) throw new Error(`Zernio ${res.status} ${path}: ${text.slice(0, 300)}`);
-  return text ? JSON.parse(text) : {};
+  const keys = [env('ZERNIO_API_KEY'), env('ZERNIO_COLLECTIVE_API_KEY')].filter(Boolean);
+  let lastErr: Error | null = null;
+  for (const key of keys) {
+    try {
+      const res = await fetch(`${ZERNIO}${path}`, {
+        ...init,
+        headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', ...(init.headers || {}) },
+      });
+      const text = await res.text();
+      if (!res.ok) {
+        if (keys.length > 1 && (res.status === 401 || res.status === 404 || res.status === 403)) {
+          lastErr = new Error(`Zernio ${res.status} ${path}: ${text.slice(0, 300)}`);
+          continue;
+        }
+        throw new Error(`Zernio ${res.status} ${path}: ${text.slice(0, 300)}`);
+      }
+      return text ? JSON.parse(text) : {};
+    } catch (e) {
+      lastErr = e as Error;
+      if (keys.length > 1) continue;
+      throw e;
+    }
+  }
+  throw lastErr || new Error('No Zernio API key configured');
 }
 
 type ZMessage = {
@@ -152,8 +140,59 @@ function parseDecision(raw: string, inputTokens: number | null, outputTokens: nu
   }
 }
 
+// Fast-path baseline trigger check and anti-troll filter
+function matchTrigger(text: string, isCollective: boolean) {
+  const t = text.toUpperCase();
+
+  // Strict anti-troll filter: ignore offensive, profane or trolling comments completely
+  if (/\b(scam|scammer|scammers|fake|fraud|bitch|hoe|slut|clown|stupid|idiot|ugly|trash|dumbass|bullshit|stfu|f+u+c+k|sh+i+t|asshole)\b/i.test(text)) {
+    return { isTroll: true };
+  }
+
+  if (isCollective) {
+    if (/\b(COMMUNITY|JOIN|SISTERHOOD)\b/.test(t)) {
+      return {
+        comment: 'We would love to welcome you! Check your DMs for details on joining our community!',
+        dm: 'Thank you for your interest in P31 Collective! We’re building a community rooted in faith, fellowship, purpose, and business. Click below to learn more and become a member!\n\nhttps://www.thep31collective.org/join',
+      };
+    }
+    if (/\b(EVENT|RSVP|PRAYER WALK|GATHERING)\b/.test(t)) {
+      return {
+        comment: 'Check your DMs for details on our upcoming event details!',
+        dm: 'We’re excited that you’re interested in joining us! P31 Collective offers opportunities to connect, grow in faith, and build meaningful relationships. Explore our upcoming gatherings and reserve your spot!\n\nhttps://linktr.ee/p31marketplaceandcollective',
+      };
+    }
+    if (/\b(MENTORSHIP|MENTOR|BUSINESS COACHING|COACHING)\b/.test(t)) {
+      return {
+        comment: 'Your next level begins with intentional guidance! Check your DMs for the next step.',
+        dm: 'Thank you for your interest in private mentorship or business coaching with Melanie JC through P31 Collective by NEBA! Whether you’re seeking spiritual guidance, clarity in your purpose, or strategic business development, your first step is scheduling an introductory call.\n\nhttps://calendly.com/nebamentorship/intro-call',
+      };
+    }
+  } else {
+    // Marketplace (TikTok, @proverbs31market, Facebook)
+    if (/\b(VENDOR|CURATOR|SELL|EXHIBIT)\b/.test(t)) {
+      return {
+        comment: 'Your gifts deserve room to grow! Check your DMs for more information!',
+        dm: 'Thank you for your interest in P31 Marketplace! We’re creating opportunities for entrepreneurs, creatives, and business owners to showcase their gifts, connect, and grow. Visit our website to explore upcoming vendor and curator opportunities!\n\nhttps://www.p31market.com/',
+      };
+    }
+    if (/\b(EVENT|MARKETPLACE|TICKETS|ATTEND)\b/.test(t)) {
+      return {
+        comment: 'We’d love to see you there! Check your DMs for event details and registration!',
+        dm: 'You’re invited to experience P31 Marketplace! Join us for an atmosphere of entrepreneurship, faith, fellowship, and meaningful connections. Explore our upcoming events and secure your spot!\n\nhttps://linktr.ee/p31marketplaceandcollective',
+      };
+    }
+    if (/\b(STOREFRONT|VIRTUAL|ONLINE STORE|SHOP OWNER)\b/.test(t)) {
+      return {
+        comment: 'Your business deserves a place in the marketplace! Check your DMs to learn how to open your virtual storefront!',
+        dm: 'Thank you for your interest in becoming a P31 Marketplace virtual storefront owner! We’re creating a space where entrepreneurs and business owners can showcase their products, expand their visibility, and connect with a growing community of shoppers. Ready to bring your business into the marketplace? Visit our website to learn more and register your storefront!\n\nhttps://www.p31market.com/storefront',
+      };
+    }
+  }
+  return null;
+}
+
 // Carla's brain: Gemini when GEMINI_API_KEY is set, otherwise Claude.
-// `system` is the live context; the persona always comes first.
 async function think(system: string, turns: Turn[]): Promise<Decision | null> {
   if (!env('GEMINI_API_KEY')) return thinkClaude(system, turns);
   try {
@@ -168,7 +207,6 @@ async function think(system: string, turns: Turn[]): Promise<Decision | null> {
 const GEMINI_FALLBACK_MODEL = 'gemini-3.8-flash';
 const RETRYABLE = new Set([429, 500, 502, 503, 504]);
 
-// Busy or rate-limited Gemini calls are retried once, then the fallback model is tried.
 async function thinkGemini(system: string, turns: Turn[]): Promise<Decision | null> {
   const models = [...new Set([env('GEMINI_MODEL') || GEMINI_FALLBACK_MODEL, GEMINI_FALLBACK_MODEL])];
   let lastErr: Error | null = null;
@@ -236,7 +274,6 @@ async function thinkClaude(system: string, turns: Turn[]): Promise<Decision | nu
         },
       },
     },
-    // Persona first and cached; the live facts change, so they come after it.
     system: [
       { type: 'text', text: PERSONA, cache_control: { type: 'ephemeral' } },
       { type: 'text', text: system },
@@ -269,8 +306,6 @@ async function handleIncoming(evt: any, { preview = false } = {}): Promise<Outco
     .eq('task', 'dm_reply').gte('created_at', since);
   if (!preview && (today || 0) >= DAILY_REPLY_CAP) return skip('daily reply cap reached');
 
-  // Let a burst of messages land, then answer them together. Only the newest
-  // incoming message's event replies; the others step aside.
   if (!preview) await sleep(SETTLE_MS);
   const page = await zernio(`/inbox/conversations/${encodeURIComponent(conversationId)}/messages?accountId=${encodeURIComponent(accountId)}&limit=${HISTORY}&sortOrder=desc`);
   const recent: ZMessage[] = (page.messages || []).slice().reverse();
@@ -278,7 +313,6 @@ async function handleIncoming(evt: any, { preview = false } = {}): Promise<Outco
   if (!last || last.direction !== 'incoming') return skip('already answered');
   if (!preview && last.id !== msg.platformMessageId && last.id !== msg.id) return skip('a newer message will answer');
 
-  // Both brains want user/assistant turns that start with the person and alternate.
   const turns: Turn[] = [];
   for (const m of recent) {
     const role = m.direction === 'incoming' ? 'user' : 'assistant';
@@ -293,8 +327,48 @@ async function handleIncoming(evt: any, { preview = false } = {}): Promise<Outco
   const firstReply = !recent.some((m) => m.direction === 'outgoing');
 
   const sender = msg.sender || {};
-  const who = `This conversation is on ${msg.platform === 'instagram' ? 'Instagram' : 'Facebook'} with ${sender.name || sender.username || 'someone'}${sender.username ? ` (@${sender.username})` : ''}.${
-    firstReply ? ' This is the first reply in the conversation: greet them, and introduce yourself as Carla, P31\'s virtual assistant, in one short natural line, and mention the team reads every message.' : ''}`;
+  const platformName = msg.platform === 'instagram' ? 'Instagram' : msg.platform === 'tiktok' ? 'TikTok' : 'Facebook';
+  const isTikTok = msg.platform === 'tiktok' || (evt.account?.platform || '').toLowerCase() === 'tiktok';
+  const acctName = (evt.account?.username || evt.account?.displayName || '').toLowerCase();
+  const isCollective = !isTikTok && (acctName.includes('collective') || (msg.platform === 'instagram' && acctName.includes('collective')));
+
+  const lastText = describe(last);
+  const matched = matchTrigger(lastText, isCollective);
+  if (matched?.isTroll) {
+    return skip('rude/troll message ignored');
+  }
+
+  // If initial trigger matched directly
+  if (matched?.dm && turns.length <= 2) {
+    const reply = matched.dm;
+    if (preview) return { reply, handoff: false, handoff_reason: 'Automated trigger matched' };
+    const dryRun = env('DM_AGENT_DRY_RUN') === 'true';
+    if (!dryRun) {
+      await zernio(`/inbox/conversations/${encodeURIComponent(conversationId)}/messages`, {
+        method: 'POST',
+        headers: { 'Idempotency-Key': `dm-agent-${evt.id}` },
+        body: JSON.stringify({ accountId, message: reply }),
+      });
+    }
+    console.log(`dm-agent [trigger match]${dryRun ? ' [dry run]' : ''}: ${conversationId} ← ${JSON.stringify(reply)}`);
+    await db.from('ai_usage').insert({
+      user_id: null,
+      task: 'dm_reply_trigger',
+      input_tokens: 0,
+      output_tokens: 0,
+    });
+    return { reply, handoff: false };
+  }
+
+  const brandContext = isTikTok
+    ? 'ACCOUNT CONTEXT: TikTok (represents P31 MARKETPLACE). Focus on vendors, storefronts, and upcoming pop-up markets.'
+    : isCollective
+      ? 'ACCOUNT CONTEXT: Instagram @the.p31collective (represents THE P31 COLLECTIVE). Focus on community membership ($27/mo), gatherings, and mentorship with Melanie JC.'
+      : `ACCOUNT CONTEXT: ${platformName} (represents P31 MARKETPLACE). Focus on market shopping, vendors, and events.`;
+
+  const who = `This conversation is on ${platformName} with ${sender.name || sender.username || 'someone'}${sender.username ? ` (@${sender.username})` : ''}.
+${brandContext}${
+    firstReply ? '\nThis is the first reply in the conversation: greet them, and introduce yourself as Carla, P31\'s virtual assistant, in one short natural line, and mention the team reads every message.' : ''}`;
 
   const system = `${await liveContext(db)}
 
@@ -323,7 +397,6 @@ ${who}`;
   });
 
   if (out.handoff) {
-    // The team takes it from here: pause the agent and let them know.
     await db.from('ai_usage').insert({ user_id: null, task: `dm_pause:${conversationId}` });
     await notifyTeam(`DM needs you: ${sender.name || sender.username || 'a follower'} on ${msg.platform}`, 'A conversation needs you',
       `<p><strong>${esc(sender.name || sender.username || 'Someone')}</strong> on ${msg.platform}: “${esc(describe(last))}”</p>
@@ -334,9 +407,6 @@ ${who}`;
 }
 
 // ── Comments on our posts ───────────────────────────────────────────────────
-// Carla answers new comments publicly, in the comment thread. She never joins a
-// thread where followers are talking to each other, and answers one person at
-// most a few times per post per day.
 const COMMENT_DAILY_CAP = 300;
 const COMMENT_PER_PERSON = 3;
 
@@ -354,17 +424,44 @@ async function handleComment(evt: any, { preview = false } = {}): Promise<Outcom
   if (!text) return skip('empty comment');
   if (c.isLive) return skip('comment on a live broadcast');
 
+  const isTikTok = c.platform === 'tiktok' || (evt.account?.platform || '').toLowerCase() === 'tiktok';
+  const acctName = (evt.account?.username || evt.account?.displayName || '').toLowerCase();
+  const isCollective = !isTikTok && (acctName.includes('collective') || (c.platform === 'instagram' && acctName.includes('collective')));
+
+  const matched = matchTrigger(text, isCollective);
+  if (matched?.isTroll) {
+    return skip('rude/troll comment ignored');
+  }
+
+  let replyTo = c.id;
   if (!preview) {
     if (await countSince(db, 'comment_reply', 24) >= COMMENT_DAILY_CAP) return skip('daily comment cap reached');
     if (await countSince(db, `comment_seen:${c.platformPostId}:${author.id}`, 24) >= COMMENT_PER_PERSON) return skip('already answered this person on this post today');
   }
 
-  // A reply inside a thread: answer only when the thread is a conversation with
-  // us (we wrote the parent, or this person started it and we've answered there).
+  // If keyword trigger matches directly
+  if (matched?.comment) {
+    const reply = matched.comment;
+    if (preview) return { reply, handoff: false, handoff_reason: 'Automated comment trigger matched' };
+    const dryRun = env('DM_AGENT_DRY_RUN') === 'true';
+    if (!dryRun) {
+      await zernio(`/inbox/comments/${enc(c.platformPostId)}`, {
+        method: 'POST',
+        headers: { 'Idempotency-Key': `comment-agent-${c.id}` },
+        body: JSON.stringify({ accountId, message: reply, commentId: replyTo }),
+      });
+    }
+    console.log(`comment-agent [trigger match]${dryRun ? ' [dry run]' : ''}: ${c.platform} ${c.id} ← ${JSON.stringify(reply)}`);
+    await db.from('ai_usage').insert([
+      { user_id: null, task: 'comment_reply_trigger', input_tokens: 0, output_tokens: 0 },
+      { user_id: null, task: `comment_seen:${c.platformPostId}:${author.id}` },
+    ]);
+    return { reply, handoff: false };
+  }
+
   const turns: Turn[] = [];
-  let replyTo = c.id;
   if (c.isReply && c.parentCommentId) {
-    replyTo = c.parentCommentId; // Instagram and Facebook thread replies under the top comment
+    replyTo = c.parentCommentId;
     const page = await zernio(`/inbox/comments/${enc(c.platformPostId)}?accountId=${enc(accountId)}&commentId=${enc(c.parentCommentId)}&limit=20`);
     const parent: ZComment | undefined = page.comment;
     const replies: ZComment[] = page.comments || [];
@@ -385,11 +482,19 @@ async function handleComment(evt: any, { preview = false } = {}): Promise<Outcom
   if (prev && prev.role === 'user') prev.content = `${prev.content}\n${text}`;
   else turns.push({ role: 'user', content: text });
 
-  const where = c.platform === 'instagram' ? 'Instagram' : 'Facebook';
+  const platformName = c.platform === 'instagram' ? 'Instagram' : c.platform === 'tiktok' ? 'TikTok' : 'Facebook';
+  const brandContext = isTikTok
+    ? 'ACCOUNT CONTEXT: TikTok (represents P31 MARKETPLACE). Focus on vendors, storefronts, and upcoming pop-up markets.'
+    : isCollective
+      ? 'ACCOUNT CONTEXT: Instagram @the.p31collective (represents THE P31 COLLECTIVE). Focus on community membership ($27/mo), gatherings, and mentorship with Melanie JC.'
+      : `ACCOUNT CONTEXT: ${platformName} (represents P31 MARKETPLACE).`;
+
+  const where = platformName;
   const caption = (evt.post?.content || '').trim().slice(0, 800);
   const system = `${await liveContext(db)}
 
-MODE: PUBLIC COMMENT. You are replying in the comments of one of our ${where} posts, to ${author.name || author.username || 'someone'}${author.username ? ` (@${author.username})` : ''}. Everyone can read this reply. Follow the "Public comments" rules.
+MODE: PUBLIC COMMENT. You are replying in the comments of one of our ${where} posts, to ${author.name || author.username || 'someone'}${author.username ? ` (@${author.username})` : ''}. Everyone can read this reply. Follow the "Public comments" rules and the anti-troll guidelines.
+${brandContext}
 ${caption ? `The post's caption: """${caption}"""` : 'The post caption is not available.'}${c.ad ? '\nThis post is a paid ad.' : ''}`;
 
   const out = await think(system, turns);
@@ -422,8 +527,6 @@ ${evt.post?.permalink ? `<p><a href="${esc(evt.post.permalink)}">Open the post</
 }
 
 // ── Google reviews ──────────────────────────────────────────────────────────
-// 4–5 stars: Carla writes a gracious thank-you. 1–3 stars: no automatic reply;
-// the team is emailed so a person can answer it personally.
 async function handleReview(evt: any, { preview = false } = {}): Promise<Outcome> {
   const r = evt.review;
   const accountId: string = evt.account?.accountId || evt.account?.id;
@@ -470,9 +573,17 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
   const body = await req.text();
 
-  const secret = env('ZERNIO_WEBHOOK_SECRET');
+  // Validate webhook signature against either primary or collective webhook secret
+  const secrets = [env('ZERNIO_WEBHOOK_SECRET'), env('ZERNIO_COLLECTIVE_WEBHOOK_SECRET')].filter(Boolean);
   const sig = (req.headers.get('X-Zernio-Signature') || '').toLowerCase();
-  if (!secret || !safeEqual(sig, await hmacHex(secret, body))) return new Response('Bad signature', { status: 401 });
+  let verified = false;
+  for (const s of secrets) {
+    if (safeEqual(sig, await hmacHex(s, body))) {
+      verified = true;
+      break;
+    }
+  }
+  if (!verified) return new Response('Bad signature', { status: 401 });
 
   let evt: any;
   try { evt = JSON.parse(body); } catch { return new Response('Bad JSON', { status: 400 }); }

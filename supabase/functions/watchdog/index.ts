@@ -39,8 +39,9 @@ const etHour = (d = new Date()) => Number(etParts(d).hour) % 24;
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 const recipients = () => (env('OPS_ALERT_TO') || env('DIGEST_TO') || 'ceo@p31market.com').split(',').map((s) => s.trim()).filter(Boolean);
 
-async function zernio(path: string, init: RequestInit = {}) {
-  const res = await fetch(`${ZERNIO}${path}`, { ...init, headers: { Authorization: `Bearer ${env('ZERNIO_API_KEY')}`, 'Content-Type': 'application/json', ...(init.headers || {}) } });
+async function zernio(path: string, init: RequestInit = {}, specificKey?: string) {
+  const key = specificKey || env('ZERNIO_API_KEY') || env('ZERNIO_COLLECTIVE_API_KEY');
+  const res = await fetch(`${ZERNIO}${path}`, { ...init, headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', ...(init.headers || {}) } });
   const text = await res.text();
   if (!res.ok) throw new Error(`Zernio ${res.status}: ${text.slice(0, 200)}`);
   return text ? JSON.parse(text) : {};
@@ -50,19 +51,35 @@ async function zernio(path: string, init: RequestInit = {}) {
 // Each returns the problems it found; healing actions are pushed to `healed`.
 
 async function checkSocial(): Promise<Problem[]> {
-  if (!env('ZERNIO_API_KEY')) return [{ key: 'config.zernio', severity: 'fail', area: 'social', title: 'Zernio is not connected to the site', fix: 'Add the ZERNIO_API_KEY secret in Supabase (Edge Functions > Secrets).' }];
+  const keys = [
+    { key: env('ZERNIO_API_KEY'), label: 'Marketplace' },
+    { key: env('ZERNIO_COLLECTIVE_API_KEY'), label: 'Collective' },
+  ].filter((k) => !!k.key);
+
+  if (!keys.length) return [{ key: 'config.zernio', severity: 'fail', area: 'social', title: 'Zernio is not connected to the site', fix: 'Add the ZERNIO_API_KEY or ZERNIO_COLLECTIVE_API_KEY secret in Supabase (Edge Functions > Secrets).' }];
+
   const out: Problem[] = [];
-  const { accounts = [] } = await zernio('/accounts');
-  for (const platform of ['instagram', 'facebook']) {
-    const a = accounts.find((x: Row) => x.platform === platform);
-    const name = platform === 'instagram' ? 'Instagram' : 'Facebook';
-    if (!a) { out.push({ key: `social.missing.${platform}`, severity: 'fail', area: 'social', title: `${name} is not connected in Zernio`, fix: `Connect the P31 ${name} account in Zernio (Accounts > Connect).`, link: 'https://zernio.com' }); continue; }
-    if (a.needsReconnection || a.isActive === false || a.enabled === false) {
-      out.push({ key: `social.reconnect.${platform}`, severity: 'fail', area: 'social', title: `${name} needs reconnecting in Zernio`, detail: 'Scheduled posts to it will not go out until it is reconnected.', fix: `Zernio > Accounts > ${name} > Reconnect${platform === 'instagram' ? ' (choose Facebook Login, which also unlocks trending music for reels)' : ''}.`, link: 'https://zernio.com' });
-    }
-    if (a.tokenExpiresAt) {
-      const days = Math.floor((new Date(a.tokenExpiresAt).getTime() - Date.now()) / (24 * HOUR));
-      if (days <= 14) out.push({ key: `social.token.${platform}`, severity: days <= 3 ? 'fail' : 'warn', area: 'social', title: days < 0 ? `${name} login has expired` : `${name} login expires in ${plural(Math.max(0, days), 'day')}`, detail: `Zernio's access to ${name} ends ${new Date(a.tokenExpiresAt).toLocaleDateString('en-US', { timeZone: TZ, month: 'long', day: 'numeric' })}; posts stop going out after that.`, fix: `Reconnect ${name} in Zernio before then (Accounts > ${name} > Reconnect).`, link: 'https://zernio.com' });
+  const seen = new Set<string>();
+
+  for (const { key, label } of keys) {
+    try {
+      const { accounts = [] } = await zernio('/accounts', {}, key);
+      for (const a of accounts as Row[]) {
+        if (!['instagram', 'facebook', 'tiktok'].includes(a.platform)) continue;
+        if (seen.has(a._id)) continue;
+        seen.add(a._id);
+
+        const name = a.platform === 'instagram' ? `@${a.username || 'Instagram'}` : a.platform === 'tiktok' ? `@${a.username || 'TikTok'}` : (a.displayName || 'Facebook');
+        if (a.needsReconnection || a.isActive === false || a.enabled === false) {
+          out.push({ key: `social.reconnect.${a._id}`, severity: 'fail', area: 'social', title: `${name} (${label}) needs reconnecting in Zernio`, detail: 'Scheduled posts to it will not go out until it is reconnected.', fix: `Zernio > Accounts > ${name} > Reconnect.`, link: 'https://zernio.com' });
+        }
+        if (a.tokenExpiresAt) {
+          const days = Math.floor((new Date(a.tokenExpiresAt).getTime() - Date.now()) / (24 * HOUR));
+          if (days <= 14) out.push({ key: `social.token.${a._id}`, severity: days <= 3 ? 'fail' : 'warn', area: 'social', title: days < 0 ? `${name} login has expired` : `${name} login expires in ${plural(Math.max(0, days), 'day')}`, detail: `Zernio's access to ${name} ends ${new Date(a.tokenExpiresAt).toLocaleDateString('en-US', { timeZone: TZ, month: 'long', day: 'numeric' })}; posts stop going out after that.`, fix: `Reconnect ${name} in Zernio before then.`, link: 'https://zernio.com' });
+        }
+      }
+    } catch (e) {
+      console.warn(`Watchdog could not check social for ${label}:`, e);
     }
   }
   return out;

@@ -27,7 +27,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const ZERNIO = 'https://zernio.com/api/v1';
-const PLATFORMS = ['instagram', 'facebook'];
+const PLATFORMS = ['instagram', 'facebook', 'tiktok'];
 const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -39,35 +39,71 @@ const env = (k: string) => Deno.env.get(k) || '';
 
 class UserError extends Error {}
 
-async function zernio(path: string, init: RequestInit = {}) {
-  const res = await fetch(`${ZERNIO}${path}`, {
-    ...init,
-    headers: { Authorization: `Bearer ${env('ZERNIO_API_KEY')}`, 'Content-Type': 'application/json', ...(init.headers || {}) },
-  });
-  const text = await res.text();
-  let body: any = {};
-  try { body = text ? JSON.parse(text) : {}; } catch { body = { raw: text.slice(0, 200) }; }
-  if (!res.ok) {
-    console.error(`Zernio ${res.status} ${path}: ${text.slice(0, 300)}`);
-    throw new UserError(body?.error || `Zernio couldn't complete that (${res.status}).`);
+async function zernio(path: string, init: RequestInit = {}, specificKey?: string) {
+  const keys = [specificKey, env('ZERNIO_API_KEY'), env('ZERNIO_COLLECTIVE_API_KEY')].filter(Boolean) as string[];
+  let lastErr: Error | null = null;
+  for (const key of keys) {
+    try {
+      const res = await fetch(`${ZERNIO}${path}`, {
+        ...init,
+        headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', ...(init.headers || {}) },
+      });
+      const text = await res.text();
+      let body: any = {};
+      try { body = text ? JSON.parse(text) : {}; } catch { body = { raw: text.slice(0, 200) }; }
+      if (!res.ok) {
+        if (keys.length > 1 && (res.status === 401 || res.status === 404 || res.status === 403)) {
+          lastErr = new UserError(body?.error || `Zernio couldn't complete that (${res.status}).`);
+          continue;
+        }
+        throw new UserError(body?.error || `Zernio couldn't complete that (${res.status}).`);
+      }
+      return body;
+    } catch (e) {
+      lastErr = e as Error;
+      if (keys.length > 1) continue;
+      throw e;
+    }
   }
-  return body;
+  throw lastErr || new UserError('No Zernio API key configured.');
 }
 const quiet = (p: Promise<any>) => p.catch((e) => ({ error: (e as Error).message }));
 
 const day = (d: Date) => d.toISOString().slice(0, 10);
 
-// Only P31's own Instagram and Facebook accounts, looked up server-side.
+// P31's accounts across both Marketplace and Collective Zernio workspaces
 async function ourAccounts() {
-  const { accounts = [] } = await zernio('/accounts');
-  return accounts
-    .filter((a: any) => PLATFORMS.includes(a.platform))
-    .map((a: any) => ({
-      id: a._id, platform: a.platform, username: a.username, displayName: a.displayName,
-      picture: a.profilePicture, followers: a.followersCount ?? null, active: !!a.isActive && a.enabled !== false,
-      status: a.platformStatus, needsReconnection: !!a.needsReconnection, tokenExpiresAt: a.tokenExpiresAt || null,
-      profileUrl: a.profileUrl || null,
-    }));
+  const keys = [
+    { key: env('ZERNIO_API_KEY'), workspace: 'marketplace' },
+    { key: env('ZERNIO_COLLECTIVE_API_KEY'), workspace: 'collective' },
+  ].filter((x) => !!x.key);
+
+  const seen = new Set();
+  const accounts: any[] = [];
+  for (const { key, workspace } of keys) {
+    try {
+      const res = await fetch(`${ZERNIO}/accounts`, {
+        headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      for (const a of data.accounts || []) {
+        if (PLATFORMS.includes(a.platform) && !seen.has(a._id)) {
+          seen.add(a._id);
+          accounts.push({
+            id: a._id, platform: a.platform, username: a.username, displayName: a.displayName,
+            picture: a.profilePicture, followers: a.followersCount ?? null, active: !!a.isActive && a.enabled !== false,
+            status: a.platformStatus, needsReconnection: !!a.needsReconnection, tokenExpiresAt: a.tokenExpiresAt || null,
+            profileUrl: a.profileUrl || null,
+            workspace,
+          });
+        }
+      }
+    } catch (e) {
+      console.warn(`Error fetching accounts for ${workspace}:`, e);
+    }
+  }
+  return accounts;
 }
 
 const slimPost = (p: any) => ({
@@ -316,7 +352,7 @@ async function handle(action: string, b: any) {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
-  if (!env('ZERNIO_API_KEY')) return json({ error: 'Zernio isn’t connected yet — add the ZERNIO_API_KEY secret.' }, 503);
+  if (!env('ZERNIO_API_KEY') && !env('ZERNIO_COLLECTIVE_API_KEY')) return json({ error: 'Zernio isn’t connected yet — add the ZERNIO_API_KEY or ZERNIO_COLLECTIVE_API_KEY secret.' }, 503);
 
   // Who is calling? Use their own session so the database decides.
   const authHeader = req.headers.get('Authorization') || '';

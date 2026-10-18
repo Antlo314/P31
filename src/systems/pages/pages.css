@@ -195,3 +195,28 @@
 .sh-addons__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
 .sh-addons__list { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 0.88rem; }
 .sh-addons select { max-width: 100%; }
+
+/* ── Admin Product & Pricing Controls ───────────────────────── */
+.sh-quick-price { display: inline-flex; align-items: center; gap: 4px; }
+.sh-quick-price__btn { display: inline-flex; align-items: center; gap: 4px; background: none; border: 1px dashed rgba(242, 206, 77, 0.45); border-radius: 6px; padding: 2px 7px; color: #F2CE4D; font-weight: 700; cursor: pointer; transition: all 0.15s; font-size: 0.84rem; }
+.sh-quick-price__btn:hover { border-color: #F2CE4D; background: rgba(242, 206, 77, 0.15); transform: translateY(-1px); }
+.sh-quick-price__form { display: inline-flex; align-items: center; gap: 4px; }
+.sh-quick-price__input { width: 80px !important; padding: 3px 6px !important; font-size: 0.85rem !important; border-radius: 6px !important; height: auto !important; }
+.sh-quick-price__ok { background: #9FD6B4; color: #1e1022; border: none; border-radius: 6px; padding: 4px; cursor: pointer; display: grid; place-items: center; }
+.sh-quick-price__cancel { background: none; border: none; color: rgba(246, 241, 251, 0.6); padding: 4px; cursor: pointer; display: grid; place-items: center; }
+
+.sh-all-prods { display: grid; gap: 8px; margin-top: 12px; }
+.sh-all-prod-row { display: grid; grid-template-columns: 48px minmax(180px, 1.2fr) minmax(130px, 1fr) auto auto; gap: 12px; align-items: center; padding: 10px 14px; border-radius: 14px; background: rgba(255, 255, 255, 0.035); border: 1px solid rgba(255, 255, 255, 0.06); transition: all 0.15s; }
+.sh-all-prod-row:hover { background: rgba(255, 255, 255, 0.06); border-color: rgba(242, 206, 77, 0.35); }
+.sh-all-prod-row.is-off { opacity: 0.55; }
+.sh-all-prod-row img, .sh-all-prod__ph { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; background: #3A1C36; display: grid; place-items: center; color: #C3A9CE; }
+
+.sh-img-preview-box { display: flex; align-items: center; gap: 14px; margin-top: 8px; }
+.sh-img-preview { width: 68px; height: 68px; border-radius: 12px; object-fit: cover; background: #3A1C36; border: 1px solid rgba(255, 255, 255, 0.15); flex: none; }
+.sh-upload-zone { display: flex; flex-direction: column; gap: 6px; }
+
+@media (max-width: 860px) {
+  .sh-all-prod-row { grid-template-columns: 44px 1fr; gap: 8px; }
+  .sh-all-prod-row .sh-row__meta { grid-column: 1 / -1; justify-content: flex-start; }
+}
+
