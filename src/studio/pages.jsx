@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { DashHead, DashEmpty } from '../apps/DashShell';
 import SoundPicker from './SoundPicker';
+import Handoffs from './Handoffs';
 import { postPack } from './ai';
 import { studio, uploadMedia, bestSlotsET, nextOccurrence, fmtET } from './api';
 import DesktopOnly, { DesktopTag } from '../components/DesktopOnly';
@@ -494,6 +495,7 @@ export const StudioInbox = () => {
   return (
     <>
       <DashHead eyebrow="Content Studio" title="Messages" lead="Instagram and Facebook DMs, including Carla’s replies. Read-only here — reply from the Instagram or Facebook app or Zernio." />
+      <Handoffs />
       <div className="ds-tabs-inline" role="tablist">
         {[['', 'All'], ['instagram', 'Instagram'], ['facebook', 'Facebook']].map(([v, l]) => <button key={l} role="tab" aria-selected={platform === v} onClick={() => { setPlatform(v); setOpen(null); }}>{l}</button>)}
       </div>

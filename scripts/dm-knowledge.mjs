@@ -1,0 +1,82 @@
+// Carla's knowledge: every public page of both live sites, read the way a visitor sees it, saved as
+// supabase/functions/dm-agent/knowledge.ts. Re-run after the sites change, then redeploy dm-agent.
+//   node scripts/dm-knowledge.mjs
+// Live facts that change daily (markets, shops, prices from Stripe) are added per message in dm-agent.
+import puppeteer from 'puppeteer-core';
+import { existsSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const MARKET = 'https://www.p31market.com';
+const COLLECTIVE = 'https://www.thep31collective.org';
+const PAGES = [
+  [MARKET, ['/', '/about', '/shop', '/directory', '/calendar', '/merch', '/vendors', '/apply', '/storefront', '/vendors/register', '/vendors/agreement', '/services', '/partner', '/volunteer']],
+  [COLLECTIVE, ['/', '/join', '/mentorship', '/mentorship/business', '/mentorship/faith', '/academy', '/verify']],
+];
+const CHROME = process.env.CHROME_PATH || ['C:/Program Files/Google/Chrome/Application/chrome.exe', '/usr/bin/google-chrome'].find((p) => existsSync(p));
+const PER_PAGE = 7000;
+
+const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, timeout: 180000, protocolTimeout: 240000 });
+const page = await browser.newPage();
+await page.setViewport({ width: 1280, height: 900 });
+const pages = [];
+for (const [origin, paths] of PAGES) {
+  for (const path of paths) {
+    const url = origin + path;
+    try {
+      await page.goto(url, { waitUntil: 'load', timeout: 120000 });
+      await new Promise((r) => setTimeout(r, 3000));
+      // Scroll so lazy sections render, then read the page without its header, menus and footer.
+      await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 700) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 120)); } });
+      const text = await page.evaluate(() => {
+        const root = document.querySelector('main') || document.body;
+        const clone = root.cloneNode(true);
+        clone.querySelectorAll('nav, header, footer, script, style, noscript, svg, [aria-hidden="true"], .sr-only').forEach((n) => n.remove());
+        // Block elements on their own lines, so headings and prices do not run together.
+        clone.querySelectorAll('h1, h2, h3, h4, p, li, dt, dd, button, a, label, figcaption, td, th, section, article, div').forEach((n) => n.insertAdjacentText('beforeend', '\n'));
+        const seenLinks = new Set();
+        const linkLines = [...root.querySelectorAll('a[href]')].map((a) => {
+          const label = (a.innerText || a.getAttribute('aria-label') || '').replace(/\s+/g, ' ').trim();
+          const href = a.href;
+          if (!label || !/^https?:|^mailto:|^tel:/.test(href) || seenLinks.has(href)) return '';
+          seenLinks.add(href);
+          return `- ${label.slice(0, 80)}: ${href}`;
+        }).filter(Boolean).slice(0, 40);
+        return `${clone.innerText}${linkLines.length ? `\nLINKS ON THIS PAGE:\n${linkLines.join('\n')}` : ''}`;
+      });
+      const finalUrl = page.url();
+      pages.push({ url, finalUrl, title: await page.title(), text });
+      console.log('read', url, text.length);
+    } catch (e) { console.log('skip', url, e.message); }
+  }
+}
+await browser.close();
+
+// Lines that repeat on most pages of a site are menus and banners, not answers.
+const clean = (s) => s.replace(/\u00a0/g, ' ').split('\n').map((l) => l.replace(/\s+/g, ' ').trim()).filter((l) => l.length > 1);
+const bySite = {};
+for (const p of pages) (bySite[new URL(p.url).host] ||= []).push(p);
+const chrome = new Set();
+for (const list of Object.values(bySite)) {
+  const counts = new Map();
+  for (const p of list) for (const l of new Set(clean(p.text))) counts.set(l, (counts.get(l) || 0) + 1);
+  for (const [l, n] of counts) if (l !== 'LINKS ON THIS PAGE:' && list.length > 3 && n >= Math.ceil(list.length * 0.6) && l.length < 160) chrome.add(l);
+}
+const seen = new Set();
+const sections = [];
+for (const p of pages) {
+  if (new URL(p.finalUrl).pathname !== new URL(p.url).pathname && seen.has(p.finalUrl)) continue;
+  seen.add(p.finalUrl);
+  let body = clean(p.text).filter((l) => !chrome.has(l));
+  body = body.filter((l, i) => l !== body[i - 1]).join('\n');
+  if (body.length < 80) continue;
+  if (body.length > PER_PAGE) body = `${body.slice(0, PER_PAGE)}\n[…page continues]`;
+  sections.push(`## ${p.url.replace(/^https:\/\/www\./, '')}${p.finalUrl !== p.url ? ` (opens ${p.finalUrl.replace(/^https:\/\/www\./, '')})` : ''}\n${body}`);
+}
+
+const today = new Date().toISOString().slice(0, 10);
+const knowledge = `Everything published on the two P31 websites, page by page, read on ${today}. Use it to answer questions. Quote links exactly as they appear here.\n\n${sections.join('\n\n')}`;
+writeFileSync(join(ROOT, 'supabase/functions/dm-agent/knowledge.ts'),
+  `// GENERATED by scripts/dm-knowledge.mjs on ${today}: the text of every public page on p31market.com and\n// thep31collective.org, for Carla. Do not edit by hand; re-run the script and redeploy dm-agent.\nexport const KNOWLEDGE_DATE = '${today}';\nexport const KNOWLEDGE = ${JSON.stringify(knowledge)};\n`);
+console.log(`knowledge: ${sections.length} pages, ${knowledge.length} characters`);

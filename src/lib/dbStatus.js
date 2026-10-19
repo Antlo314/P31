@@ -6,6 +6,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 56, file: 'storefront_v56_dm_agent.sql', title: 'Smarter DM assistant', what: 'Carla answers each message once, never repeats herself, and lists every question she passes to the team under Studio > Messages.',
+    expect: 'claims_ready true · handoffs_ready true',
+    checks: [['table', 'dm_handoffs']] },
   { v: 55, file: 'storefront_v55_stripe_payment_links.sql', title: 'Mentorship plans from Stripe', what: 'Each mentorship and coaching plan uses Melanie’s own Stripe Payment Link: checkout charges her product and price, and the site copies her prices daily. Adds the two 6-month Business Coaching plans.',
     expect: 'linked_plans 9 · six_month_plans 2 · packages_month_only true · sync_job_ready true',
     checks: [['column', 'academy_plans', 'stripe_payment_link']] },
