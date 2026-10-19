@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>P31 Marketplace & Collective — How to Change Pricing Guide</title>
+<style>
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; src: url(../../public/fonts/NotoSerif-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; font-style: italic; src: url(../../public/fonts/NotoSerif-400-italic.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 400; src: url(../../public/fonts/Manrope-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 600; src: url(../../public/fonts/Manrope-600.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 800; src: url(../../public/fonts/Manrope-800.woff2) format('woff2'); }
+  :root {
+    --plum: #3A1C36; --plum-3: #21101E; --thistle: #E3D0EA; --thistle-3: #F8F3FA;
+    --amethyst: #9B71B2; --gold: #D9A93A; --gold-2: #F2CE4D; --green: #2E7D32;
+    --ink: #2A1526; --ink-2: #4E3A4B; --dim: #74657A; --line: #E3D0EA;
+  }
+  @page { size: Letter; margin: 0.6in 0.7in 0.65in; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: Manrope, sans-serif; font-size: 9.5pt; line-height: 1.5; color: var(--ink); background: #fff; }
+  h1, h2, h3 { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; color: var(--plum); }
+  h1 { font-size: 22pt; line-height: 1.15; margin: 0 0 8px; }
+  h2 { font-size: 13pt; margin: 16px 0 6px; break-after: avoid; }
+  h3 { font-size: 10.2pt; margin: 10px 0 4px; }
+  p { margin: 0 0 7px; }
+  ul, ol { margin: 4px 0 8px; padding-left: 20px; }
+  li { margin: 2px 0; }
+  code { font-family: Consolas, 'Courier New', monospace; font-size: 8.5pt; background: var(--thistle-3); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; color: var(--plum); font-weight: 700; }
+  strong, b { font-weight: 800; }
+  em { font-family: 'Noto Serif', Georgia, serif; font-style: italic; }
+  
+  .eyebrow { font-size: 7.5pt; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin: 0 0 4px; }
+  .lead { font-size: 10.2pt; color: var(--ink-2); line-height: 1.48; }
+  .dim { color: var(--dim); }
+  
+  .top-banner { background: radial-gradient(70% 90% at 100% 0%, rgba(155, 113, 178, 0.4), transparent 70%), var(--plum-3); color: #fff; border-radius: 14px; padding: 20px 24px; margin-bottom: 14px; }
+  .top-banner .eyebrow { color: var(--gold-2); }
+  .top-banner h1 { color: #fff; margin: 2px 0 6px; }
+  .top-banner h1 em { color: var(--gold-2); }
+  .top-banner p { margin: 0; color: rgba(255,255,255,0.88); font-size: 9.8pt; }
+  
+  .pill { display: inline-block; font-size: 7pt; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; }
+  .pill.live { background: rgba(46, 125, 50, 0.15); color: #2E7D32; border: 1px solid #81C784; }
+  .pill.gold { background: rgba(217, 169, 58, 0.2); color: #7a5c12; }
+  .pill.code { background: #21101E; color: #F2CE4D; font-family: Consolas, monospace; letter-spacing: 0.05em; padding: 2px 7px; font-size: 8pt; font-weight: 700; }
+
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 8.6pt; }
+  th { text-align: left; font-size: 7.2pt; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: var(--plum); padding: 6px 8px; }
+  td { border-bottom: 1px solid var(--line); padding: 6px 8px; vertical-align: middle; }
+  tr:nth-child(even) td { background: var(--thistle-3); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
+  .box { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: #fff; break-inside: avoid; }
+  .box.plum { background: var(--thistle-3); border-color: var(--amethyst); }
+  .box.gold { border-color: var(--gold); background: rgba(242, 206, 77, 0.08); }
+
+  .steps { counter-reset: s; list-style: none; padding-left: 0; margin: 8px 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 28px; margin: 8px 0; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 1px; width: 18px; height: 18px; border-radius: 50%; background: var(--plum); color: #fff; font-size: 7.5pt; font-weight: 800; display: grid; place-items: center; }
+
+  .mock-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: #FAF8FB; margin: 10px 0; }
+  .price-pill-mock { display: inline-flex; align-items: center; gap: 4px; background: rgba(242, 206, 77, 0.18); border: 1px dashed #D9A93A; border-radius: 6px; padding: 2px 8px; color: #8A6400; font-weight: 800; font-size: 8.5pt; }
+  .price-input-mock { display: inline-flex; align-items: center; gap: 4px; background: #fff; border: 1.5px solid var(--gold); border-radius: 6px; padding: 2px 6px; font-weight: 800; font-size: 8.5pt; }
+
+  .page-break { break-before: page; }
+</style>
+</head>
+<body>
+
+  <div class="top-banner">
+    <p class="eyebrow">Proverbs 31 Marketplace & Collective · Systems Administration</p>
+    <h1>Administrator Guide: <em>How to Change Pricing</em></h1>
+    <p>Comprehensive operating guide for updating product prices, managing sale/compare-at rates, adjusting storefront subscriptions, and creating new products in the dashboard.</p>
+  </div>
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:8.5pt;">
+    <div><strong>Prepared For:</strong> Admin & Management Team, P31 Marketplace</div>
+    <div><strong>Dashboard Feature Version:</strong> <span class="pill live">v54 Live</span></div>
+  </div>
+
+  <h2>1. Overview of Pricing Controls</h2>
+  <p class="lead">
+    As a P31 administrator, you now have complete control over all pricing across the platform directly from your Systems Dashboard (<code>/systems/shops</code>) and Curator Studio. Pricing changes update instantly in the Supabase database and reflect immediately on live shop pages.
+  </p>
+
+  <div class="two-col">
+    <div class="box gold">
+      <h3 style="margin-top:0; color:#8A6400;">1. Marketplace Products & Artisans</h3>
+      <p style="font-size:8.8pt; margin:0;">
+        Adjust the selling price of any product across any vendor's storefront, set promotional compare-at ("Was") prices to trigger sale tags, or create brand-new items directly.
+      </p>
+    </div>
+    <div class="box plum">
+      <h3 style="margin-top:0; color:var(--plum);">2. Storefront Plans & Billing Terms</h3>
+      <p style="font-size:8.8pt; margin:0;">
+        Configure monthly vendor storefront subscription rates (standard $14.99/mo), free period durations (3 months), grace periods, and auto-pause rules in one central panel.
+      </p>
+    </div>
+  </div>
+
+  <h2>2. Method 1: The 1-Click Quick Price Editor (Fastest)</h2>
+  <p>The fastest way to change a price without opening forms or modal windows is using the new <strong>Quick Price Editor</strong>.</p>
+
+  <div class="mock-card">
+    <p style="font-size:8.5pt; font-weight:800; margin-bottom:6px; color:var(--dim);">HOW THE QUICK PRICE PILL LOOKS IN YOUR DASHBOARD:</p>
+    <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+      <div>
+        <span style="font-size:8pt; display:block; margin-bottom:2px;">Viewing Mode:</span>
+        <span class="price-pill-mock">$28.00 ✎</span>
+      </div>
+      <div style="font-size:12pt; color:var(--dim);">➔</div>
+      <div>
+        <span style="font-size:8pt; display:block; margin-bottom:2px;">Editing Mode (after clicking):</span>
+        <span class="price-input-mock">$ [ 32.50 ] <span style="background:#2E7D32; color:#fff; border-radius:4px; padding:1px 5px; font-size:7pt;">✓</span> <span style="color:#888; font-size:8pt;">✕</span></span>
+      </div>
+    </div>
+  </div>
+
+  <ol class="steps">
+    <li><strong>Open Systems:</strong> Navigate to <code>/systems/shops</code> (Curators & shops).</li>
+    <li><strong>Open the Catalog:</strong> Click either the <strong>All Products & Pricing</strong> tab at the top, or select any specific shop from the left list.</li>
+    <li><strong>Click the Gold Price Pill:</strong> Click directly on the price (e.g. <code>$28.00</code>). It transforms into an active input field.</li>
+    <li><strong>Type New Price:</strong> Enter the new numeric price (e.g. <code>32.50</code>).</li>
+    <li><strong>Save:</strong> Press <kbd>Enter</kbd> on your keyboard or click the green checkmark <strong>(✓)</strong>.</li>
+  </ol>
+  <p style="font-size:8.5pt; color:var(--dim); margin-left:28px;">
+    <em>✓ Result:</em> The database is updated immediately, the UI confirms with "Saved [Product Name]", and visitors on <code>p31market.com</code> immediately see the new price.
+  </p>
+
+  <h2>3. Method 2: Full Product Edit & Sale/Compare-at Prices</h2>
+  <p>When you want to put an item on sale or change name, category, stock status, or description alongside the price:</p>
+
+  <ol class="steps">
+    <li>In <strong>Curators & shops</strong>, locate the product and click the <strong>Edit</strong> button.</li>
+    <li><strong>Price ($):</strong> Enter the active selling price (what the customer will actually pay, e.g. <code>$25.00</code>).</li>
+    <li><strong>Compare-at price ($):</strong> Enter the original price (e.g. <code>$35.00</code>). When this field is higher than the selling price, the marketplace automatically displays a <strong>Sale</strong> tag with the original price struck through (<s>$35.00</s> $25.00).</li>
+    <li>Click <strong>Save</strong>.</li>
+  </ol>
+
+  <div class="page-break"></div>
+
+  <h2>4. Method 3: Creating a Brand New Product</h2>
+  <p class="lead">Admins can upload and publish new products on behalf of any vendor or for the marketplace:</p>
+
+  <ol class="steps">
+    <li>Click the gold <strong>`+ Add product`</strong> button (found in the top right of the shop detail view, or in the All Products tab).</li>
+    <li><strong>Select Shop:</strong> If using the All Products tab, choose which shop/curator will own the product.</li>
+    <li><strong>Fill in Details:</strong>
+      <ul>
+        <li><strong>Product Name:</strong> Title of the item (e.g., <em>"Myrrh & Gold Botanical Oil"</em>).</li>
+        <li><strong>Price ($):</strong> Required selling price.</li>
+        <li><strong>Compare Price ($):</strong> Optional original price for discounted goods.</li>
+        <li><strong>Category:</strong> Choose from presets (<em>Collection, Skin, Wellness, Home, Art, Apparel, Jewelry, Gourmet</em>) or type a custom category.</li>
+        <li><strong>Availability:</strong> Select <em>In stock, Sold out, Limited edition,</em> or <em>Pre-order</em>.</li>
+        <li><strong>Inventory:</strong> Optional remaining item quantity.</li>
+        <li><strong>Photo:</strong> Click <strong>Upload photo from device</strong> to select any picture from your phone/computer (automatically uploaded to secure product storage), or paste an external URL.</li>
+        <li><strong>Badge:</strong> Enter custom tags like <em>"Bestseller"</em>, <em>"Handmade"</em>, or <em>"Staff Pick"</em>.</li>
+        <li><strong>Description:</strong> Artisan notes, ingredients, dimensions, and craft details.</li>
+      </ul>
+    </li>
+    <li><strong>Visibility:</strong> Leave "Active" checked so it displays in the shop immediately.</li>
+    <li>Click <strong>Create product</strong>.</li>
+  </ol>
+
+  <h2>5. Method 4: Changing Storefront Subscription Terms</h2>
+  <p>To modify what curators pay to host their storefronts on P31 Marketplace:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Setting</th>
+        <th>Default Value</th>
+        <th>Description / Impact</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Monthly Price ($)</strong></td>
+        <td><code>$14.99</code></td>
+        <td>The monthly storefront hosting rate billed to vendors after their free period.</td>
+      </tr>
+      <tr>
+        <td><strong>Free Months</strong></td>
+        <td><code>3 Months</code></td>
+        <td>The duration of the complimentary hosting period given upon vendor approval.</td>
+      </tr>
+      <tr>
+        <td><strong>Reminder Days</strong></td>
+        <td><code>14 Days</code></td>
+        <td>Days before the free period expires when automated renewal reminders are sent.</td>
+      </tr>
+      <tr>
+        <td><strong>Grace Days</strong></td>
+        <td><code>7 Days</code></td>
+        <td>Extra days permitted after expiration before a shop is paused.</td>
+      </tr>
+      <tr>
+        <td><strong>Auto-Pause Switch</strong></td>
+        <td><code>Disabled (Off)</code></td>
+        <td>When enabled, unpaid storefronts pause automatically when grace days pass.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><strong>To update terms:</strong> Go to <strong>Systems → Curators & shops → Storefront billing</strong>, click the <strong>Terms</strong> button, adjust the values, and click <strong>Save terms</strong>.</p>
+
+  <h2>6. Administrator Best Practices & Checklist</h2>
+  <div class="box plum">
+    <ul style="margin:0; padding-left:18px;">
+      <li><strong>Minimum Price for Card Checkout:</strong> Any product selling through Stripe card checkout must have a minimum price of <strong>$0.50</strong>.</li>
+      <li><strong>Sale Badges:</strong> Always ensure <code>compare_at_price</code> is higher than <code>price</code> for the discount badge to calculate correctly.</li>
+      <li><strong>Hiding Without Deleting:</strong> To temporarily take an item off the site without deleting its photos or description, tap the <strong>Eye (👁)</strong> icon to hide it. Tap it again anytime to unhide.</li>
+      <li><strong>Featured Items:</strong> Click the <strong>Star (★)</strong> icon to pin high-priority products to the top of the artisan's boutique.</li>
+    </ul>
+  </div>
+
+</body>
+</html>
