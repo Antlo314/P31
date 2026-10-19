@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Your Stripe and the website</title>
+<style>
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; src: url(../../public/fonts/NotoSerif-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; font-style: italic; src: url(../../public/fonts/NotoSerif-400-italic.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 400; src: url(../../public/fonts/Manrope-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 600; src: url(../../public/fonts/Manrope-600.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 800; src: url(../../public/fonts/Manrope-800.woff2) format('woff2'); }
+  :root {
+    --plum: #3A1C36; --plum-3: #21101E; --thistle: #E3D0EA; --thistle-3: #F8F3FA;
+    --amethyst: #9B71B2; --gold: #D9A93A; --gold-2: #F2CE4D; --green: #374126;
+    --ink: #2A1526; --ink-2: #4E3A4B; --dim: #74657A; --line: #E3D0EA;
+  }
+  @page { size: Letter; margin: 0.7in 0.7in 0.75in; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: Manrope, sans-serif; font-size: 10.2pt; line-height: 1.55; color: var(--ink); background: #fff; }
+  h1, h2, h3 { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; color: var(--plum); }
+  h1 { font-size: 26pt; line-height: 1.12; margin: 0 0 10px; }
+  h2 { font-size: 14pt; margin: 18px 0 8px; break-after: avoid; }
+  h3 { font-size: 11pt; margin: 12px 0 4px; }
+  p { margin: 0 0 8px; }
+  ul, ol { margin: 4px 0 10px; padding-left: 18px; }
+  li { margin: 3px 0; }
+  code, pre { font-family: Consolas, 'Courier New', monospace; }
+  code { font-size: 7.6pt; background: var(--thistle-3); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; word-break: break-all; }
+  pre { font-size: 8.2pt; background: var(--plum-3); color: #f7f1fc; border-radius: 8px; padding: 9px 12px; white-space: pre-wrap; word-break: break-all; margin: 6px 0 10px; }
+  strong, b { font-weight: 800; }
+  em { font-family: 'Noto Serif', Georgia, serif; font-style: italic; }
+  .eyebrow { font-size: 8pt; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+  .lead { font-size: 11.2pt; color: var(--ink-2); }
+  .muted { color: var(--dim); }
+  .small { font-size: 8.6pt; }
+
+  .part { margin-top: 26px; }
+  .cover + .part, .part.page { break-before: page; margin-top: 0; }
+  .part-head { break-after: avoid; }
+  .phones img.shot { max-height: 2.85in; object-fit: cover; object-position: top; width: 100%; }
+  .fig-cap img.shot { max-height: 3.6in; object-fit: cover; object-position: top; width: 100%; }
+  .part-head { background: var(--plum); color: #fff; border-radius: 16px; padding: 18px 22px; margin: 0 0 14px; position: relative; overflow: hidden; break-inside: avoid; }
+  .part-head::after { content: ''; position: absolute; right: -40px; bottom: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(242, 206, 77, 0.28), transparent 70%); }
+  .part-head .eyebrow { color: var(--gold-2); }
+  .part-head h1 { color: #fff; margin: 0 0 6px; font-size: 20pt; }
+  .part-head p { color: rgba(255, 255, 255, 0.84); margin: 0; max-width: 92%; }
+
+  .cover { height: 9.4in; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(70% 50% at 100% 0%, rgba(155, 113, 178, 0.35), transparent 70%), radial-gradient(60% 45% at 0% 100%, rgba(242, 206, 77, 0.18), transparent 70%), var(--plum-3); color: #fff; border-radius: 22px; padding: 46px 44px; }
+  .cover img { width: 92px; height: 92px; }
+  .cover h1 { color: #fff; font-size: 36pt; line-height: 1.06; margin: 18px 0 12px; }
+  .cover h1 em { color: var(--gold-2); }
+  .cover .lead { color: rgba(255, 255, 255, 0.86); font-size: 12.5pt; max-width: 5.7in; }
+  .cover .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 30px; font-size: 9.5pt; color: rgba(255, 255, 255, 0.86); }
+  .cover .meta b { display: block; color: var(--gold-2); font-size: 7.6pt; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 3px; }
+
+  .note { font-size: 9pt; border-left: 4px solid var(--gold); background: rgba(242, 206, 77, 0.1); border-radius: 0 10px 10px 0; padding: 9px 13px; margin: 8px 0 12px; break-inside: avoid; }
+  .note.plum { border-color: var(--amethyst); background: var(--thistle-3); }
+  .note p:last-child, .note ul:last-child { margin-bottom: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 8.8pt; }
+  th { text-align: left; font-size: 7.4pt; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: var(--plum); padding: 6px 8px; }
+  td { border-bottom: 1px solid var(--line); padding: 6px 8px; vertical-align: top; }
+  tr { break-inside: avoid; }
+  tr:nth-child(even) td { background: var(--thistle-3); }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  .box { border: 1px solid var(--line); border-radius: 12px; padding: 10px 13px; break-inside: avoid; background: #fff; }
+  .flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 6px 0 10px; }
+  .flow .box { padding: 8px 11px; }
+  .flow b.n { font-size: 16pt !important; }
+  .flow b.n { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; font-size: 20pt; color: var(--gold); line-height: 1; display: block; margin-bottom: 4px; }
+  .flow h3 { font-size: 10.6pt; margin: 0 0 4px; }
+  .flow p { font-size: 8.6pt; color: var(--ink-2); margin: 0; }
+  .who { display: inline-block; font-size: 6.8pt; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 1px 7px; border-radius: 999px; margin-right: 5px; vertical-align: 1px; }
+  .who.client { background: rgba(155, 113, 178, 0.16); color: #6d4a82; }
+  .who.mentor { background: rgba(217, 169, 58, 0.2); color: #7a5c12; }
+  .who.site { background: rgba(55, 65, 38, 0.12); color: var(--green); }
+
+  .shot { display: block; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 6px 18px rgba(58, 28, 54, 0.12); max-width: 100%; }
+  figure { margin: 0; break-inside: avoid; }
+  figcaption { font-size: 8pt; color: var(--dim); margin-top: 5px; line-height: 1.35; }
+  .phones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; margin: 8px 0 12px; }
+  .check { list-style: none; padding-left: 0; }
+  .check li { padding-left: 22px; position: relative; }
+  .check li::before { content: ''; position: absolute; left: 0; top: 3px; width: 12px; height: 12px; border: 1.6px solid var(--plum); border-radius: 3px; }
+  .steps { counter-reset: s; list-style: none; padding-left: 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 28px; margin: 7px 0; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 19px; height: 19px; border-radius: 50%; background: var(--plum); color: #fff; font-size: 8pt; font-weight: 800; display: grid; place-items: center; }
+
+  .top { background: radial-gradient(70% 90% at 100% 0%, rgba(155, 113, 178, 0.4), transparent 70%), var(--plum-3); color: #fff; border-radius: 18px; padding: 18px 24px; margin-bottom: 12px; }
+  .top h1 { color: #fff; font-size: 22pt; margin: 2px 0 6px; } .top h1 em { color: var(--gold-2); }
+  .top p { margin: 0; color: rgba(255,255,255,0.88); } .top .eyebrow { color: var(--gold-2); margin: 0; }
+  .flow { grid-template-columns: repeat(4, 1fr); }
+  td b { color: var(--plum); }
+  .path { font-weight: 800; color: var(--plum); }
+  body { font-size: 9.6pt; line-height: 1.45; } h2 { margin: 12px 0 6px; } td { padding: 5px 8px; }
+  .flow .box { padding: 7px 10px; } .flow b.n { font-size: 13pt !important; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div class="top">
+  <p class="eyebrow">The P31 Collective by NEBA · For Melanie</p>
+  <h1>Your Stripe and the website, <em>explained</em></h1>
+  <p>What the website does with your Stripe account, and exactly where to see every payment, client and price in your own dashboard.</p>
+</div>
+
+<h2>What “connected with an API” means</h2>
+<p>An API is a private, secure line between two systems. The website holds a secret key to <b>your</b> Stripe account, the P31 Collective account, so it can ask Stripe to do a few jobs for you. It is like giving your assistant a key to the office: she works inside your space, and everything she does is recorded there. <b>Nothing happens outside your Stripe account, and nothing is hidden from you.</b> Card numbers never touch the website; Stripe keeps them.</p>
+
+<h2>The four jobs the website does in your Stripe</h2>
+<div class="flow">
+  <div class="box"><b class="n">1</b><h3>Opens checkout</h3><p>When a client chooses her plan, the site opens Stripe’s secure checkout using <b>your product and price</b>, the one behind your Payment Link.</p></div>
+  <div class="box"><b class="n">2</b><h3>Starts the plan</h3><p>Her monthly subscription (or 6-month payment) is created in your account, under her name and email.</p></div>
+  <div class="box"><b class="n">3</b><h3>Hears “paid”</h3><p>Stripe sends the site a message the moment she pays. The site then enrolls her, opens her classroom and emails you and the team.</p></div>
+  <div class="box"><b class="n">4</b><h3>Copies your prices</h3><p>Once a day and at every checkout, the site reads your prices from Stripe, so the private forms page always shows what you set.</p></div>
+</div>
+<div class="note plum"><p><b>The change we just made:</b> before, checkout made a one-off price for each sale, which is why the sales did not appear under your products. Now every enrollment is charged with <b>your own product</b>, so each sale shows under that product in Stripe, and you control the price from Stripe.</p></div>
+
+<h2>Where to find everything in Stripe</h2>
+<p class="small muted">Sign in at dashboard.stripe.com and make sure the account name at the top left is <b>P31 Collective</b>. If a menu has moved, type the name into the Stripe search bar at the top; it finds every page below.</p>
+<table>
+  <tr><th style="width:34%">You want to see…</th><th>Where it is in Stripe</th></tr>
+  <tr><td><b>A client’s payment</b></td><td><span class="path">Transactions</span> (left menu). Search her email. Each payment says which plan she chose.</td></tr>
+  <tr><td><b>Your clients</b></td><td><span class="path">Customers</span>. Each client, her payments, her subscription and her receipts.</td></tr>
+  <tr><td><b>Monthly plans that are running</b></td><td><span class="path">Billing → Subscriptions</span>. Who is active, the next charge date, and anyone whose card failed.</td></tr>
+  <tr><td><b>Sales for one plan</b></td><td><span class="path">Product catalog</span> → click the product (for example Weekly Sessions). Its payments and subscriptions are listed there.</td></tr>
+  <tr><td><b>Your Payment Links</b></td><td><span class="path">Payment Links</span> (search “Payment Links”). These are the nine links the website now uses.</td></tr>
+  <tr><td><b>Money sent to your bank</b></td><td><span class="path">Balances → Payouts</span>.</td></tr>
+  <tr><td><b>Coupons and promo codes</b></td><td><span class="path">Product catalog → Coupons</span>. Clients can enter a promo code at checkout.</td></tr>
+  <tr><td><b>Klarna, Afterpay, Apple Pay</b></td><td><span class="path">Settings → Payment methods</span>.</td></tr>
+  <tr><td><b>The website’s key</b> (the API)</td><td><span class="path">Developers → API keys</span>. This is the secret key the site uses. Please do not delete or “roll” it without telling the team first, or checkout stops working.</td></tr>
+  <tr><td><b>The “paid” messages to the site</b></td><td><span class="path">Developers → Webhooks</span> → the endpoint ending in <b>academy-webhook</b>. It lists every message and whether the site received it.</td></tr>
+</table>
+
+<section>
+<h2>Changing a price</h2>
+<ol class="steps">
+  <li>In Stripe, open <span class="path">Payment Links</span> and click the plan’s link (or open the product in <span class="path">Product catalog</span>).</li>
+  <li>Change the price there. Stripe may ask you to add a new price to the product; that is normal.</li>
+  <li>That’s it. The very next checkout charges the new price, and the website shows it on the private forms page by the next morning.</li>
+</ol>
+<div class="note">
+  <p><strong>Good to know</strong></p>
+  <ul>
+    <li><b>Clients already subscribed keep their current price.</b> To change theirs, open <span class="path">Billing → Subscriptions</span>, choose the client, and update the subscription.</li>
+    <li><b>Keep the same links.</b> If you make a brand-new Payment Link instead of editing one, send the new link to the team so the website points to it.</li>
+    <li><b>Turning a link off</b> stops it working in Stripe; tell the team so that plan can be hidden on the forms page too.</li>
+    <li>Prices stay private: they show only on each client’s personal enrollment page, never on the public website.</li>
+  </ul>
+</div>
+
+<h2>Your two Stripe accounts</h2>
+<table>
+  <tr><th style="width:30%">Account</th><th>What it handles</th></tr>
+  <tr><td><b>P31 Collective</b></td><td>Private Faith Mentorship and Business Coaching enrollments (this guide), with its own key and its own “paid” messages (academy-webhook).</td></tr>
+  <tr><td><b>Proverbs 31 Marketplace</b></td><td>Vendor shops and their sales, merch, storefront subscriptions and add-ons, with its own key and its own “paid” messages (stripe-webhook).</td></tr>
+</table>
+
+<h2>A client’s journey, seen from Stripe</h2>
+<ol class="steps">
+  <li>She signs her three forms and chooses her plan on her private page.</li>
+  <li>She pays on Stripe’s checkout: a new <b>Customer</b> and a <b>payment</b> appear in Transactions, and a <b>subscription</b> in Billing.</li>
+  <li>Stripe sends the “paid” message (you can see it under <span class="path">Developers → Webhooks</span>).</li>
+  <li>The website enrolls her and emails her welcome; you and the team get an enrollment email.</li>
+</ol>
+<p class="small muted">Questions about any of this: write to the team at vendor@p31market.com.</p>
+</section>
+</body>
+</html>

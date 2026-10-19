@@ -60,7 +60,8 @@ const Academy = () => {
     const cents = form.price === '' ? null : Math.round(Number(form.price) * 100);
     if (cents !== null && (Number.isNaN(cents) || cents < 50)) return fail('Enter a price of at least $0.50, or leave it blank to hide the plan.');
     const { error: err } = await supabase.from('academy_plans').update({
-      price_cents: cents, is_active: form.active, access_days: plan.billing === 'one_time' ? Number(form.days) || 30 : null, updated_at: new Date().toISOString(),
+      // A plan with a Stripe Payment Link takes its price from Stripe (v55); only availability changes here.
+      ...(plan.stripe_payment_link ? {} : { price_cents: cents }), is_active: form.active, access_days: plan.billing === 'one_time' ? Number(form.days) || 30 : null, updated_at: new Date().toISOString(),
     }).eq('id', plan.id);
     if (err) fail(err); else done(`${plan.label} saved.`);
   };
@@ -201,8 +202,9 @@ const PlanRow = ({ plan, onSave }) => {
   return (
     <div className="sys-row" style={{ flexWrap: 'wrap', alignItems: 'flex-end', gap: 10 }}>
       <label className="sys-field" style={{ minWidth: 150 }}><span>{plan.label}{BILLING[plan.billing]?.per ? ` (per ${BILLING[plan.billing].per})` : ''}</span>
-        <input inputMode="decimal" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value.replace(/[^\d.]/g, '') })} placeholder="Not offered" />
+        <input inputMode="decimal" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value.replace(/[^\d.]/g, '') })} placeholder="Not offered" disabled={!!plan.stripe_payment_link} />
       </label>
+      {plan.stripe_payment_link && <span className="sys-muted" style={{ fontSize: '0.8rem' }}>Price set in Stripe{plan.price_synced_at ? `, copied ${new Date(plan.price_synced_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''} · <a href={plan.stripe_payment_link} target="_blank" rel="noreferrer">her payment link</a></span>}
       {plan.billing === 'one_time' && (
         <label className="sys-field" style={{ width: 130 }}><span>Days of access</span><input type="number" min="1" value={form.days} onChange={(e) => setForm({ ...form, days: e.target.value })} /></label>
       )}

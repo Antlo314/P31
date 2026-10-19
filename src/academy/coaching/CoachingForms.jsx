@@ -145,9 +145,12 @@ const CoachingForms = () => {
     navigate(`/enroll/${data}`);
   };
   const tierName = (p) => (p.program === 'business'
-    ? `${p.package} — ${PACKAGES.find((x) => x.key === p.package)?.name || 'Business Coaching'}`
+    ? (PACKAGES.find((x) => x.key === p.package) ? `${p.package} — ${PACKAGES.find((x) => x.key === p.package).name}` : p.label)
     : p.label.replace(/^Faith Mentorship:s*/, ''));
-  const tierNote = (p) => (p.program === 'business' ? PACKAGES.find((x) => x.key === p.package)?.cadence : 'Private faith mentorship');
+  const tierNote = (p) => (p.program !== 'business' ? 'Private faith mentorship'
+    : PACKAGES.find((x) => x.key === p.package)?.cadence || (p.billing === 'six_months' ? '6-month commitment, paid up front' : 'Business Coaching'));
+  const PER = { week: '/week', month: '/month', six_months: ' for 6 months', one_time: '' };
+  const priceText = (p) => `$${(p.price_cents / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}${PER[p.billing] ?? ''}`;
   return (
     <div className="cf">
       <header className="cf-head">
@@ -205,7 +208,7 @@ const CoachingForms = () => {
                   {list.map((p) => (
                     <label key={p.id} className={`cf-option ${chosenId === p.id ? 'is-on' : ''}`}>
                       <input type="radio" name="plan" value={p.id} checked={chosenId === p.id} onChange={() => { setPlan(p.id); setPlanError(''); }} />
-                      <span><b>{tierName(p)}</b><small>${(p.price_cents / 100).toFixed(0)}/month · {tierNote(p)}</small></span>
+                      <span><b>{tierName(p)}</b><small>{priceText(p)} · {tierNote(p)}</small></span>
                     </label>
                   ))}
                 </div>

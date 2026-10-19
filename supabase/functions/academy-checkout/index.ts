@@ -6,6 +6,10 @@
 //   supabase secrets set COLLECTIVE_STRIPE_SECRET_KEY=sk_live_...   (the Collective's own Stripe account; STRIPE_SECRET_KEY also works)   ACADEMY_URL=https://www.thep31collective.org (optional; that's the default)
 //   supabase functions deploy academy-checkout
 // Body: { token }  →  { url } | { already: true } | { error }
+//       { action: 'sync' }  →  copies each plan's price and billing from its Stripe Payment Link (v54);
+//                              no sign-in needed, it only reads Stripe. Run daily by job p31-plan-sync.
+// Plans with a Stripe Payment Link (Melanie's own links, v54) are charged with the product and price
+// behind that link, so every sale shows under her products in Stripe and she sets the price there.
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { stripeKey } from '../_shared/stripe.ts';
@@ -25,11 +29,61 @@ const RECURRING: Record<string, { interval: 'week' | 'month'; interval_count: nu
   six_months: { interval: 'month', interval_count: 6 },
 };
 
+// deno-lint-ignore no-explicit-any
+type Any = any;
+const BILLING_OF = (p: Stripe.Price) => {
+  if (p.type !== 'recurring') return 'one_time';
+  const { interval, interval_count: n } = p.recurring || { interval: '', interval_count: 0 };
+  if (interval === 'week' && n === 1) return 'week';
+  if (interval === 'month' && n === 1) return 'month';
+  if (interval === 'month' && n === 6) return 'six_months';
+  return null; // a cadence the site does not label; the plan keeps its billing, Stripe still charges correctly
+};
+const linkKey = (u: string) => String(u || '').trim().replace(/[?#].*$/, '').replace(/\/+$/, '').toLowerCase();
+
+/** Every active Payment Link on the account, by its public URL. */
+async function paymentLinks(stripe: Stripe) {
+  const map = new Map<string, Stripe.PaymentLink>();
+  for await (const l of stripe.paymentLinks.list({ limit: 100, active: true })) map.set(linkKey(l.url), l);
+  return map;
+}
+
+/** The price behind one plan's Payment Link, copied onto the plan. Null when the link is not on this account. */
+async function syncPlan(stripe: Stripe, db: Any, plan: Any, links?: Map<string, Stripe.PaymentLink>) {
+  const link = (links || await paymentLinks(stripe)).get(linkKey(plan.stripe_payment_link));
+  if (!link) return null;
+  const items = await stripe.paymentLinks.listLineItems(link.id, { limit: 1, expand: ['data.price'] });
+  const price = items.data[0]?.price as Stripe.Price | undefined;
+  if (!price?.unit_amount) return null;
+  const billing = BILLING_OF(price);
+  await db.from('academy_plans').update({
+    price_cents: price.unit_amount, stripe_price_id: price.id, price_synced_at: new Date().toISOString(),
+    ...(billing ? { billing } : {}), updated_at: new Date().toISOString(),
+  }).eq('id', plan.id);
+  return price;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   const admin = createClient(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'), { auth: { persistSession: false } });
+  const raw = await req.clone().json().catch(() => ({}));
+  if (raw?.action === 'sync') {
+    if (!stripeKey('collective')) return json({ error: 'The Collective Stripe key is not set.' }, 503);
+    const stripe = new Stripe(stripeKey('collective'));
+    const { data: plans } = await admin.from('academy_plans').select('id, label, package, price_cents, billing, stripe_payment_link').not('stripe_payment_link', 'is', null);
+    const links = await paymentLinks(stripe);
+    const synced: Any[] = []; const missing: string[] = [];
+    for (const p of plans || []) {
+      try {
+        const price = await syncPlan(stripe, admin, p, links);
+        if (price) synced.push({ plan: p.label, cents: price.unit_amount, billing: BILLING_OF(price) || p.billing, changed: price.unit_amount !== p.price_cents });
+        else missing.push(p.label);
+      } catch (e) { missing.push(`${p.label}: ${(e as Error).message}`); }
+    }
+    return json({ synced, missing, links_on_account: links.size });
+  }
   const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
   const { data: userData } = await admin.auth.getUser(token);
   const user = userData?.user;
@@ -40,7 +94,7 @@ Deno.serve(async (req) => {
   if (!body.token) return json({ error: 'This enrollment link is incomplete.' }, 400);
 
   const { data: invite } = await admin.from('academy_invites')
-    .select('id, email, full_name, expires_at, used_at, inquiry_id, program:academy_programs(id, slug, title), plan:academy_plans(id, billing, label, price_cents, access_days, is_active)')
+    .select('id, email, full_name, expires_at, used_at, inquiry_id, program:academy_programs(id, slug, title), plan:academy_plans(id, billing, label, price_cents, access_days, is_active, stripe_payment_link)')
     .eq('token', body.token).maybeSingle();
   if (!invite) return json({ error: 'This enrollment link isn’t valid. Please contact members@thep31collective.org.' }, 404);
   if (invite.used_at) return json({ error: 'This enrollment link has already been used.' }, 409);
@@ -87,18 +141,24 @@ Deno.serve(async (req) => {
   }
 
   const meta = { kind: 'academy', invite_id: invite.id, program_id: program.id, plan_id: plan.id, user_id: user.id };
-  const recurring = RECURRING[plan.billing];
+  // Her own product and price when the plan has her Payment Link; otherwise the price on file.
+  let price: Stripe.Price | null = null;
+  if (plan.stripe_payment_link) {
+    try { price = await syncPlan(stripe, admin, plan); } catch (e) { console.error('academy-checkout payment link', plan.id, e); }
+    if (!price) console.error('academy-checkout: payment link not found on the Collective Stripe account', plan.stripe_payment_link);
+  }
+  const recurring = price ? price.type === 'recurring' : !!RECURRING[plan.billing];
   const session = await stripe.checkout.sessions.create({
     mode: recurring ? 'subscription' : 'payment',
     customer,
     client_reference_id: user.id,
-    line_items: [{
+    line_items: [price ? { quantity: 1, price: price.id } : {
       quantity: 1,
       price_data: {
         currency: 'usd',
         unit_amount: plan.price_cents,
         product_data: { name: `${program.title} — ${plan.label}` },
-        ...(recurring ? { recurring } : {}),
+        ...(RECURRING[plan.billing] ? { recurring: RECURRING[plan.billing] } : {}),
       },
     }],
     metadata: meta,

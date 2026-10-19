@@ -6,6 +6,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 55, file: 'storefront_v55_stripe_payment_links.sql', title: 'Mentorship plans from Stripe', what: 'Each mentorship and coaching plan uses Melanie’s own Stripe Payment Link: checkout charges her product and price, and the site copies her prices daily. Adds the two 6-month Business Coaching plans.',
+    expect: 'linked_plans 9 · six_month_plans 2 · packages_month_only true · sync_job_ready true',
+    checks: [['column', 'academy_plans', 'stripe_payment_link']] },
   { v: 54, file: 'storefront_v54_admin_products.sql', title: 'Admin product & pricing controls', what: 'Create products for any shop, live marketplace pricing editor, bulk product adjustments, and staff product management.',
     expect: 'create_product_ready true · set_product_ready true · all_products_ready true · staff_policy_ready true',
     checks: [['rpc', 'shop_admin_all_products']] },
