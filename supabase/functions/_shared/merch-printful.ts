@@ -42,10 +42,18 @@ export async function printAreas(productId: number) {
   return areas;
 }
 
-/** Where the art sits: chest prints near the top and 80% wide; mugs, stickers, journals and hats fill and centre. */
+/** Where the art sits: chest prints near the top and 80% wide; journals on the front cover of the wrap; mugs, stickers and hats fill and centre. */
 export function position(type: string, area: { width: number; height: number }, art: { width: number; height: number }) {
   const ratio = art.height / art.width;
   let width: number; let height: number; let top: number;
+  // Journals print on a full wrap (back, spine, front): the art belongs on the right half, the front cover,
+  // inside a small margin so the trim and the hinge never cut it.
+  if (type === 'journal' && area.width > area.height) {
+    const half = area.width / 2; const pad = Math.round(area.height * 0.06);
+    width = half - pad * 2; height = width * ratio;
+    if (height > area.height - pad * 2) { height = area.height - pad * 2; width = height / ratio; }
+    return { area_width: area.width, area_height: area.height, width: Math.round(width), height: Math.round(height), top: Math.round((area.height - height) / 2), left: Math.round(half + (half - width) / 2) };
+  }
   if (['tee', 'crew', 'hoodie', 'tote'].includes(type)) {
     width = area.width * (type === 'hoodie' ? 0.7 : 0.8);
     height = width * ratio;
