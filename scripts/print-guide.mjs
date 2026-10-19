@@ -14,9 +14,9 @@ const CHROME = process.env.CHROME_PATH || [
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
 ].find((p) => existsSync(p));
 
-const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox', '--allow-file-access-from-files'] });
+const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, timeout: 180000, protocolTimeout: 240000, args: ['--no-sandbox', '--allow-file-access-from-files'] });
 const page = await browser.newPage();
-await page.goto(pathToFileURL(resolve(ROOT, html)).href, { waitUntil: 'networkidle0' });
+await page.goto(pathToFileURL(resolve(ROOT, html)).href, { waitUntil: 'load', timeout: 150000 });
 await page.evaluate(() => document.fonts.ready);
 const month = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 await page.pdf({

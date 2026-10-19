@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>P31 merch revenue</title>
+<style>
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; src: url(../../public/fonts/NotoSerif-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; font-style: italic; src: url(../../public/fonts/NotoSerif-400-italic.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 400; src: url(../../public/fonts/Manrope-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 600; src: url(../../public/fonts/Manrope-600.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 800; src: url(../../public/fonts/Manrope-800.woff2) format('woff2'); }
+  :root {
+    --plum: #3A1C36; --plum-3: #21101E; --thistle: #E3D0EA; --thistle-3: #F8F3FA;
+    --amethyst: #9B71B2; --gold: #D9A93A; --gold-2: #F2CE4D; --green: #374126;
+    --ink: #2A1526; --ink-2: #4E3A4B; --dim: #74657A; --line: #E3D0EA;
+  }
+  @page { size: Letter; margin: 0.7in 0.7in 0.75in; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: Manrope, sans-serif; font-size: 10.2pt; line-height: 1.55; color: var(--ink); background: #fff; }
+  h1, h2, h3 { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; color: var(--plum); }
+  h1 { font-size: 26pt; line-height: 1.12; margin: 0 0 10px; }
+  h2 { font-size: 14pt; margin: 18px 0 8px; break-after: avoid; }
+  h3 { font-size: 11pt; margin: 12px 0 4px; }
+  p { margin: 0 0 8px; }
+  ul, ol { margin: 4px 0 10px; padding-left: 18px; }
+  li { margin: 3px 0; }
+  code, pre { font-family: Consolas, 'Courier New', monospace; }
+  code { font-size: 7.6pt; background: var(--thistle-3); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; word-break: break-all; }
+  pre { font-size: 8.2pt; background: var(--plum-3); color: #f7f1fc; border-radius: 8px; padding: 9px 12px; white-space: pre-wrap; word-break: break-all; margin: 6px 0 10px; }
+  strong, b { font-weight: 800; }
+  em { font-family: 'Noto Serif', Georgia, serif; font-style: italic; }
+  .eyebrow { font-size: 8pt; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+  .lead { font-size: 11.2pt; color: var(--ink-2); }
+  .muted { color: var(--dim); }
+  .small { font-size: 8.6pt; }
+
+  .part { margin-top: 26px; }
+  .cover + .part, .part.page { break-before: page; margin-top: 0; }
+  .part-head { break-after: avoid; }
+  .phones img.shot { max-height: 2.85in; object-fit: cover; object-position: top; width: 100%; }
+  .fig-cap img.shot { max-height: 3.6in; object-fit: cover; object-position: top; width: 100%; }
+  .part-head { background: var(--plum); color: #fff; border-radius: 16px; padding: 18px 22px; margin: 0 0 14px; position: relative; overflow: hidden; break-inside: avoid; }
+  .part-head::after { content: ''; position: absolute; right: -40px; bottom: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(242, 206, 77, 0.28), transparent 70%); }
+  .part-head .eyebrow { color: var(--gold-2); }
+  .part-head h1 { color: #fff; margin: 0 0 6px; font-size: 20pt; }
+  .part-head p { color: rgba(255, 255, 255, 0.84); margin: 0; max-width: 92%; }
+
+  .cover { height: 9.4in; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(70% 50% at 100% 0%, rgba(155, 113, 178, 0.35), transparent 70%), radial-gradient(60% 45% at 0% 100%, rgba(242, 206, 77, 0.18), transparent 70%), var(--plum-3); color: #fff; border-radius: 22px; padding: 46px 44px; }
+  .cover img { width: 92px; height: 92px; }
+  .cover h1 { color: #fff; font-size: 36pt; line-height: 1.06; margin: 18px 0 12px; }
+  .cover h1 em { color: var(--gold-2); }
+  .cover .lead { color: rgba(255, 255, 255, 0.86); font-size: 12.5pt; max-width: 5.7in; }
+  .cover .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 30px; font-size: 9.5pt; color: rgba(255, 255, 255, 0.86); }
+  .cover .meta b { display: block; color: var(--gold-2); font-size: 7.6pt; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 3px; }
+
+  .note { font-size: 9pt; border-left: 4px solid var(--gold); background: rgba(242, 206, 77, 0.1); border-radius: 0 10px 10px 0; padding: 9px 13px; margin: 8px 0 12px; break-inside: avoid; }
+  .note.plum { border-color: var(--amethyst); background: var(--thistle-3); }
+  .note p:last-child, .note ul:last-child { margin-bottom: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 8.8pt; }
+  th { text-align: left; font-size: 7.4pt; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: var(--plum); padding: 6px 8px; }
+  td { border-bottom: 1px solid var(--line); padding: 6px 8px; vertical-align: top; }
+  tr { break-inside: avoid; }
+  tr:nth-child(even) td { background: var(--thistle-3); }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  .box { border: 1px solid var(--line); border-radius: 12px; padding: 10px 13px; break-inside: avoid; background: #fff; }
+  .flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 6px 0 10px; }
+  .flow .box { padding: 8px 11px; }
+  .flow b.n { font-size: 16pt !important; }
+  .flow b.n { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; font-size: 20pt; color: var(--gold); line-height: 1; display: block; margin-bottom: 4px; }
+  .flow h3 { font-size: 10.6pt; margin: 0 0 4px; }
+  .flow p { font-size: 8.6pt; color: var(--ink-2); margin: 0; }
+  .who { display: inline-block; font-size: 6.8pt; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 1px 7px; border-radius: 999px; margin-right: 5px; vertical-align: 1px; }
+  .who.client { background: rgba(155, 113, 178, 0.16); color: #6d4a82; }
+  .who.mentor { background: rgba(217, 169, 58, 0.2); color: #7a5c12; }
+  .who.site { background: rgba(55, 65, 38, 0.12); color: var(--green); }
+
+  .shot { display: block; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 6px 18px rgba(58, 28, 54, 0.12); max-width: 100%; }
+  figure { margin: 0; break-inside: avoid; }
+  figcaption { font-size: 8pt; color: var(--dim); margin-top: 5px; line-height: 1.35; }
+  .phones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; margin: 8px 0 12px; }
+  .check { list-style: none; padding-left: 0; }
+  .check li { padding-left: 22px; position: relative; }
+  .check li::before { content: ''; position: absolute; left: 0; top: 3px; width: 12px; height: 12px; border: 1.6px solid var(--plum); border-radius: 3px; }
+  .steps { counter-reset: s; list-style: none; padding-left: 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 28px; margin: 7px 0; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 19px; height: 19px; border-radius: 50%; background: var(--plum); color: #fff; font-size: 8pt; font-weight: 800; display: grid; place-items: center; }
+
+  .top { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: end; background: radial-gradient(70% 90% at 100% 0%, rgba(155, 113, 178, 0.4), transparent 70%), var(--plum-3); color: #fff; border-radius: 18px; padding: 18px 24px; margin-bottom: 12px; }
+  .top h1 { color: #fff; font-size: 22pt; margin: 2px 0 4px; } .top h1 em { color: var(--gold-2); }
+  .top p { margin: 0; color: rgba(255,255,255,0.86); } .top .eyebrow { color: var(--gold-2); margin: 0; }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 0 12px; }
+  .kpi { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; } .kpi b { display: block; font-family: 'Noto Serif', serif; font-weight: 400; font-size: 18pt; color: var(--plum); }
+  .kpi span { font-size: 8.4pt; color: var(--dim); }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  td.good { color: var(--green); font-weight: 800; } td.bad { color: #9a2f2f; font-weight: 800; }
+  table { font-size: 8.4pt; } td { padding: 4px 7px; }
+  .page { break-before: page; }
+</style>
+</head>
+<body>
+<div class="top">
+  <div>
+    <p class="eyebrow">p31market.com/merch · Printed and shipped by Printful</p>
+    <h1>What each piece <em>brings in</em></h1>
+    <p>Our price, Printful's charge to us, Stripe's fee, and what P31 keeps. Printful prices checked October 19, 2026.</p>
+  </div>
+</div>
+
+<div class="kpis">
+  <div class="kpi"><b>55%</b><span>average kept per piece, after Printful and Stripe</span></div>
+  <div class="kpi"><b>$2.21–$30.47</b><span>kept per piece, smallest to largest</span></div>
+  <div class="kpi"><b>51</b><span>products in 8 types, 85 colour options</span></div>
+</div>
+
+<h2>By product type</h2>
+<table>
+  <tr><th>Product</th><th>Size</th><th class="num">Our price</th><th class="num">Printful charges us</th><th class="num">Stripe fee</th><th class="num">P31 keeps</th><th class="num">Margin</th></tr>
+  <tr><td>Unisex Tee</td><td>S to XL</td><td class="num">$32.00</td><td class="num">$11.92</td><td class="num">$1.23</td><td class="num good">$18.85</td><td class="num">59%</td></tr>
+  <tr><td>Unisex Tee</td><td>2XL</td><td class="num">$35.00</td><td class="num">$13.92</td><td class="num">$1.32</td><td class="num good">$19.76</td><td class="num">56%</td></tr>
+  <tr><td>Unisex Tee</td><td>3XL</td><td class="num">$37.00</td><td class="num">$15.92</td><td class="num">$1.37</td><td class="num good">$19.71</td><td class="num">53%</td></tr>
+  <tr><td>Crewneck Sweatshirt</td><td>S to XL</td><td class="num">$45.00</td><td class="num">$19.17</td><td class="num">$1.61</td><td class="num good">$24.22</td><td class="num">54%</td></tr>
+  <tr><td>Crewneck Sweatshirt</td><td>2XL</td><td class="num">$48.00</td><td class="num">$21.17</td><td class="num">$1.69</td><td class="num good">$25.14</td><td class="num">52%</td></tr>
+  <tr><td>Crewneck Sweatshirt</td><td>3XL</td><td class="num">$50.00</td><td class="num">$23.17</td><td class="num">$1.75</td><td class="num good">$25.08</td><td class="num">50%</td></tr>
+  <tr><td>Hoodie</td><td>S to XL</td><td class="num">$55.00</td><td class="num">$22.63</td><td class="num">$1.90</td><td class="num good">$30.47</td><td class="num">55%</td></tr>
+  <tr><td>Hoodie</td><td>2XL</td><td class="num">$58.00</td><td class="num">$24.63</td><td class="num">$1.98</td><td class="num good">$31.39</td><td class="num">54%</td></tr>
+  <tr><td>Hoodie</td><td>3XL</td><td class="num">$60.00</td><td class="num">$26.63</td><td class="num">$2.04</td><td class="num good">$31.33</td><td class="num">52%</td></tr>
+  <tr><td>Mug</td><td>11 oz</td><td class="num">$20.00</td><td class="num">$6.07</td><td class="num">$0.88</td><td class="num good">$13.05</td><td class="num">65%</td></tr>
+  <tr><td>Mug</td><td>15 oz</td><td class="num">$24.00</td><td class="num">$8.11</td><td class="num">$1.00</td><td class="num good">$14.89</td><td class="num">62%</td></tr>
+  <tr><td>Organic Tote</td><td></td><td class="num">$28.00</td><td class="num">$15.87</td><td class="num">$1.11</td><td class="num good">$11.02</td><td class="num">39%</td></tr>
+  <tr><td>Sticker</td><td></td><td class="num">$5.00</td><td class="num">$2.34</td><td class="num">$0.45</td><td class="num good">$2.21</td><td class="num">44%</td></tr>
+  <tr><td>Hardcover Journal</td><td></td><td class="num">$24.00</td><td class="num">$9.77</td><td class="num">$1.00</td><td class="num good">$13.23</td><td class="num">55%</td></tr>
+  <tr><td>Embroidered Dad Hat</td><td></td><td class="num">$30.00</td><td class="num">$14.94</td><td class="num">$1.17</td><td class="num good">$13.89</td><td class="num">46%</td></tr>
+</table>
+
+<h2>A one-piece order, with shipping</h2>
+<table>
+  <tr><th>Product</th><th class="num">Price</th><th class="num">Shipping she pays</th><th class="num">She pays</th><th class="num">Printful item</th><th class="num">Printful shipping</th><th class="num">Stripe fee</th><th class="num">P31 keeps</th></tr>
+  <tr><td>Unisex Tee</td><td class="num">$32.00</td><td class="num">$6.95</td><td class="num">$38.95</td><td class="num">$11.92</td><td class="num">$4.95</td><td class="num">$1.43</td><td class="num good">$20.65</td></tr>
+  <tr><td>Crewneck Sweatshirt</td><td class="num">$45.00</td><td class="num">$6.95</td><td class="num">$51.95</td><td class="num">$19.17</td><td class="num">$8.79</td><td class="num">$1.81</td><td class="num good">$22.18</td></tr>
+  <tr><td>Hoodie</td><td class="num">$55.00</td><td class="num">$6.95</td><td class="num">$61.95</td><td class="num">$22.63</td><td class="num">$8.79</td><td class="num">$2.10</td><td class="num good">$28.43</td></tr>
+  <tr><td>Mug</td><td class="num">$20.00</td><td class="num">$6.95</td><td class="num">$26.95</td><td class="num">$6.07</td><td class="num">$6.69</td><td class="num">$1.08</td><td class="num good">$13.11</td></tr>
+  <tr><td>Organic Tote</td><td class="num">$28.00</td><td class="num">$6.95</td><td class="num">$34.95</td><td class="num">$15.87</td><td class="num">$4.69</td><td class="num">$1.31</td><td class="num good">$13.08</td></tr>
+  <tr><td>Sticker</td><td class="num">$5.00</td><td class="num">$6.95</td><td class="num">$11.95</td><td class="num">$2.34</td><td class="num">$4.49</td><td class="num">$0.65</td><td class="num good">$4.47</td></tr>
+  <tr><td>Hardcover Journal</td><td class="num">$24.00</td><td class="num">$6.95</td><td class="num">$30.95</td><td class="num">$9.77</td><td class="num">$5.69</td><td class="num">$1.20</td><td class="num good">$14.29</td></tr>
+  <tr><td>Embroidered Dad Hat</td><td class="num">$30.00</td><td class="num">$6.95</td><td class="num">$36.95</td><td class="num">$14.94</td><td class="num">$4.69</td><td class="num">$1.37</td><td class="num good">$15.95</td></tr>
+</table>
+<div class="note">
+  <p><strong>How to read this</strong></p>
+  <ul>
+    <li><b>Printful charges us</b> is Printful's price for the blank item with our print, before shipping. Where colours cost different amounts, the sheet uses the dearest one, so real profit is the same or a little higher.</li>
+    <li><b>Stripe fee</b> is the standard card rate, 2.9% + 30¢ per payment. Klarna and Afterpay cost more (about 6% + 30¢), and one payment covers the whole bag, so a bag of several pieces pays the 30¢ once.</li>
+    <li><b>Shipping:</b> shoppers pay $6.95 per order, free over $75.00. Printful's shipping above is its standard rate for one piece to Georgia; extra pieces in the same box add only a little.</li>
+    <li><b>Not included:</b> sales tax (Printful may add it in some states unless a resale certificate is on file with them) and any returns or reprints.</li>
+  </ul>
+</div>
+
+<section class="page">
+<h2 style="margin-top:0">Every product</h2>
+<table>
+  <tr><th>Product</th><th class="num">Colours</th><th class="num">Price</th><th class="num">Printful</th><th class="num">Stripe</th><th class="num">P31 keeps</th><th class="num">Margin</th></tr>
+  <tr><td>Strength & Honour Tee</td><td class="num">3</td><td class="num">$32.00</td><td class="num">$11.92</td><td class="num">$1.23</td><td class="num good">$18.85</td><td class="num">59%</td></tr>
+  <tr><td>Her Merchandise Is Good Tee</td><td class="num">2</td><td class="num">$32.00</td><td class="num">$11.92</td><td class="num">$1.23</td><td class="num good">$18.85</td><td class="num">59%</td></tr>
+  <tr><td>Pray. Plan. Build. Tee</td><td class="num">3</td><td class="num">$32.00</td><td class="num">$11.92</td><td class="num">$1.23</td><td class="num good">$18.85</td><td class="num">59%</td></tr>
+  <tr><td>Rise & Build Tee</td><td class="num">2</td><td class="num">$32.00</td><td class="num">$11.92</td><td class="num">$1.23</td><td class="num good">$18.85</td><td class="num">59%</td></tr>
+  <tr><td>Her Candle Tee</td><td class="num">2</td><td class="num">$32.00</td><td class="num">$11.92</td><td class="num">$1.23</td><td class="num good">$18.85</td><td class="num">59%</td></tr>
+  <tr><td>She Shall Be Praised Tee</td><td class="num">3</td><td class="num">$32.00</td><td class="num">$11.92</td><td class="num">$1.23</td><td class="num good">$18.85</td><td class="num">59%</td></tr>
+  <tr><td>Built by Her Hands Tee</td><td class="num">2</td><td class="num">$32.00</td><td class="num">$11.92</td><td class="num">$1.23</td><td class="num good">$18.85</td><td class="num">59%</td></tr>
+  <tr><td>Virtuous Woman Tee</td><td class="num">3</td><td class="num">$32.00</td><td class="num">$11.92</td><td class="num">$1.23</td><td class="num good">$18.85</td><td class="num">59%</td></tr>
+  <tr><td>Far Above Rubies Tee</td><td class="num">3</td><td class="num">$32.00</td><td class="num">$11.92</td><td class="num">$1.23</td><td class="num good">$18.85</td><td class="num">59%</td></tr>
+  <tr><td>Girded With Strength Tee</td><td class="num">2</td><td class="num">$32.00</td><td class="num">$11.92</td><td class="num">$1.23</td><td class="num good">$18.85</td><td class="num">59%</td></tr>
+  <tr><td>A Woman of Valor Tee</td><td class="num">2</td><td class="num">$32.00</td><td class="num">$11.92</td><td class="num">$1.23</td><td class="num good">$18.85</td><td class="num">59%</td></tr>
+  <tr><td>She Is Not Afraid Tee</td><td class="num">2</td><td class="num">$32.00</td><td class="num">$11.92</td><td class="num">$1.23</td><td class="num good">$18.85</td><td class="num">59%</td></tr>
+  <tr><td>Strength & Honour Crewneck</td><td class="num">2</td><td class="num">$45.00</td><td class="num">$19.17</td><td class="num">$1.61</td><td class="num good">$24.22</td><td class="num">54%</td></tr>
+  <tr><td>Where Her Gifts Make Room Crewneck</td><td class="num">2</td><td class="num">$45.00</td><td class="num">$19.17</td><td class="num">$1.61</td><td class="num good">$24.22</td><td class="num">54%</td></tr>
+  <tr><td>The P31 Collective Crewneck</td><td class="num">2</td><td class="num">$45.00</td><td class="num">$19.17</td><td class="num">$1.61</td><td class="num good">$24.22</td><td class="num">54%</td></tr>
+  <tr><td>A Woman of Valor Crewneck</td><td class="num">2</td><td class="num">$45.00</td><td class="num">$19.17</td><td class="num">$1.61</td><td class="num good">$24.22</td><td class="num">54%</td></tr>
+  <tr><td>She Planteth a Vineyard Crewneck</td><td class="num">2</td><td class="num">$45.00</td><td class="num">$19.17</td><td class="num">$1.61</td><td class="num good">$24.22</td><td class="num">54%</td></tr>
+  <tr><td>Rise & Build Hoodie</td><td class="num">2</td><td class="num">$55.00</td><td class="num">$22.63</td><td class="num">$1.90</td><td class="num good">$30.47</td><td class="num">55%</td></tr>
+  <tr><td>Pray. Plan. Build. Hoodie</td><td class="num">2</td><td class="num">$55.00</td><td class="num">$22.63</td><td class="num">$1.90</td><td class="num good">$30.47</td><td class="num">55%</td></tr>
+  <tr><td>The P31 Collective Hoodie</td><td class="num">2</td><td class="num">$55.00</td><td class="num">$22.63</td><td class="num">$1.90</td><td class="num good">$30.47</td><td class="num">55%</td></tr>
+  <tr><td>Girded With Strength Hoodie</td><td class="num">2</td><td class="num">$55.00</td><td class="num">$22.63</td><td class="num">$1.90</td><td class="num good">$30.47</td><td class="num">55%</td></tr>
+  <tr><td>A Woman of Valor Hoodie</td><td class="num">2</td><td class="num">$55.00</td><td class="num">$22.63</td><td class="num">$1.90</td><td class="num good">$30.47</td><td class="num">55%</td></tr>
+  <tr><td>Her Candle Mug</td><td class="num">1</td><td class="num">$20.00</td><td class="num">$6.07</td><td class="num">$0.88</td><td class="num good">$13.05</td><td class="num">65%</td></tr>
+  <tr><td>Her Merchandise Is Good Mug</td><td class="num">1</td><td class="num">$20.00</td><td class="num">$6.07</td><td class="num">$0.88</td><td class="num good">$13.05</td><td class="num">65%</td></tr>
+  <tr><td>Pray. Plan. Build. Mug</td><td class="num">1</td><td class="num">$20.00</td><td class="num">$6.07</td><td class="num">$0.88</td><td class="num good">$13.05</td><td class="num">65%</td></tr>
+  <tr><td>Where Her Gifts Make Room Mug</td><td class="num">1</td><td class="num">$20.00</td><td class="num">$6.07</td><td class="num">$0.88</td><td class="num good">$13.05</td><td class="num">65%</td></tr>
+  <tr><td>Rise & Build Mug</td><td class="num">1</td><td class="num">$20.00</td><td class="num">$6.07</td><td class="num">$0.88</td><td class="num good">$13.05</td><td class="num">65%</td></tr>
+  <tr><td>Far Above Rubies Mug</td><td class="num">1</td><td class="num">$20.00</td><td class="num">$6.07</td><td class="num">$0.88</td><td class="num good">$13.05</td><td class="num">65%</td></tr>
+  <tr><td>The Spindle Mug</td><td class="num">1</td><td class="num">$20.00</td><td class="num">$6.07</td><td class="num">$0.88</td><td class="num good">$13.05</td><td class="num">65%</td></tr>
+  <tr><td>She Planteth a Vineyard Mug</td><td class="num">1</td><td class="num">$20.00</td><td class="num">$6.07</td><td class="num">$0.88</td><td class="num good">$13.05</td><td class="num">65%</td></tr>
+  <tr><td>She Is Not Afraid Mug</td><td class="num">1</td><td class="num">$20.00</td><td class="num">$6.07</td><td class="num">$0.88</td><td class="num good">$13.05</td><td class="num">65%</td></tr>
+  <tr><td>A Woman of Valor Mug</td><td class="num">1</td><td class="num">$20.00</td><td class="num">$6.07</td><td class="num">$0.88</td><td class="num good">$13.05</td><td class="num">65%</td></tr>
+  <tr><td>Where Her Gifts Make Room Tote</td><td class="num">2</td><td class="num">$28.00</td><td class="num">$15.87</td><td class="num">$1.11</td><td class="num good">$11.02</td><td class="num">39%</td></tr>
+  <tr><td>Built by Her Hands Tote</td><td class="num">2</td><td class="num">$28.00</td><td class="num">$15.87</td><td class="num">$1.11</td><td class="num good">$11.02</td><td class="num">39%</td></tr>
+  <tr><td>Strength & Honour Tote</td><td class="num">2</td><td class="num">$28.00</td><td class="num">$15.87</td><td class="num">$1.11</td><td class="num good">$11.02</td><td class="num">39%</td></tr>
+  <tr><td>She Planteth a Vineyard Tote</td><td class="num">2</td><td class="num">$28.00</td><td class="num">$15.87</td><td class="num">$1.11</td><td class="num good">$11.02</td><td class="num">39%</td></tr>
+  <tr><td>The Spindle Tote</td><td class="num">2</td><td class="num">$28.00</td><td class="num">$15.87</td><td class="num">$1.11</td><td class="num good">$11.02</td><td class="num">39%</td></tr>
+  <tr><td>Rise & Build Sticker</td><td class="num">1</td><td class="num">$5.00</td><td class="num">$2.34</td><td class="num">$0.45</td><td class="num good">$2.21</td><td class="num">44%</td></tr>
+  <tr><td>Built by Her Hands Sticker</td><td class="num">1</td><td class="num">$5.00</td><td class="num">$2.34</td><td class="num">$0.45</td><td class="num good">$2.21</td><td class="num">44%</td></tr>
+  <tr><td>Pray. Plan. Build. Sticker</td><td class="num">1</td><td class="num">$5.00</td><td class="num">$2.34</td><td class="num">$0.45</td><td class="num good">$2.21</td><td class="num">44%</td></tr>
+  <tr><td>Her Candle Sticker</td><td class="num">1</td><td class="num">$5.00</td><td class="num">$2.34</td><td class="num">$0.45</td><td class="num good">$2.21</td><td class="num">44%</td></tr>
+  <tr><td>Far Above Rubies Sticker</td><td class="num">1</td><td class="num">$5.00</td><td class="num">$2.34</td><td class="num">$0.45</td><td class="num good">$2.21</td><td class="num">44%</td></tr>
+  <tr><td>A Woman of Valor Sticker</td><td class="num">1</td><td class="num">$5.00</td><td class="num">$2.34</td><td class="num">$0.45</td><td class="num good">$2.21</td><td class="num">44%</td></tr>
+  <tr><td>The Spindle Sticker</td><td class="num">1</td><td class="num">$5.00</td><td class="num">$2.34</td><td class="num">$0.45</td><td class="num good">$2.21</td><td class="num">44%</td></tr>
+  <tr><td>Pray. Plan. Build. Journal</td><td class="num">1</td><td class="num">$24.00</td><td class="num">$9.77</td><td class="num">$1.00</td><td class="num good">$13.23</td><td class="num">55%</td></tr>
+  <tr><td>Where Her Gifts Make Room Journal</td><td class="num">1</td><td class="num">$24.00</td><td class="num">$9.77</td><td class="num">$1.00</td><td class="num good">$13.23</td><td class="num">55%</td></tr>
+  <tr><td>Strength & Honour Journal</td><td class="num">1</td><td class="num">$24.00</td><td class="num">$9.77</td><td class="num">$1.00</td><td class="num good">$13.23</td><td class="num">55%</td></tr>
+  <tr><td>A Woman of Valor Journal</td><td class="num">1</td><td class="num">$24.00</td><td class="num">$9.77</td><td class="num">$1.00</td><td class="num good">$13.23</td><td class="num">55%</td></tr>
+  <tr><td>She Planteth a Vineyard Journal</td><td class="num">1</td><td class="num">$24.00</td><td class="num">$9.77</td><td class="num">$1.00</td><td class="num good">$13.23</td><td class="num">55%</td></tr>
+  <tr><td>Pray. Plan. Build. Dad hat</td><td class="num">2</td><td class="num">$30.00</td><td class="num">$14.94</td><td class="num">$1.17</td><td class="num good">$13.89</td><td class="num">46%</td></tr>
+  <tr><td>A Woman of Valor Dad hat</td><td class="num">2</td><td class="num">$30.00</td><td class="num">$14.94</td><td class="num">$1.17</td><td class="num good">$13.89</td><td class="num">46%</td></tr>
+</table>
+<p class="small muted">Apparel is shown in sizes S to XL; 2XL and 3XL cost more and are priced higher (see the first table). Mugs are shown at 11 oz.</p>
+</section>
+</body>
+</html>
