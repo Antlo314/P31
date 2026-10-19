@@ -5,6 +5,7 @@ const FLUSH = new Set([
   '/vendors', '/vendors/agreement', '/storefront', '/vendors/register', '/vendors/feedback', '/volunteer',
   '/login', '/register', '/unsubscribe', '/onboarding-exclusive',
   '/mentorship', '/mentorship/business', '/mentorship/faith', '/portal', '/academy', '/systems', '/join',
+  '/preview/home',
 ]);
 
 export const isFlushRoute = (pathname) => {

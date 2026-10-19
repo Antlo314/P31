@@ -25,7 +25,8 @@ export const isCollective = SITE === 'collective';
 
 // Which side owns a path. Each side has its own home page at "/".
 const COLLECTIVE_PATH = /^\/(mentorship|enroll|academy|portal|studio|systems|verify|join|today|approve|coaching)(\/|$)/;
-const SHARED_PATH = /^\/((__lab)?\/?|gather(\/.*)?)$/;
+// /preview/home: the home page design previews, on both sides (dev server only).
+const SHARED_PATH = /^\/((__lab)?\/?|gather(\/.*)?|preview\/home)$/;
 const ownerOf = (pathname) => {
   if (COLLECTIVE_PATH.test(pathname)) return 'collective';
   if (SHARED_PATH.test(pathname)) return null;

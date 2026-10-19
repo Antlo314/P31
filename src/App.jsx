@@ -76,6 +76,9 @@ const MentorshipLanding = lazy(() => load.mentorship().then((m) => ({ default: m
 const MentorshipProgram = lazy(() => load.mentorship().then((m) => ({ default: m.MentorshipProgram })));
 const Portal = lazy(load.portal);
 const CollectiveHome = lazy(load.collective);
+// Design previews of the two home pages: dev server only (/preview/home). Production builds leave them out.
+const MarketHomePreview = import.meta.env.DEV ? lazy(() => import('./preview/MarketHomePreview')) : null;
+const CollectiveHomePreview = import.meta.env.DEV ? lazy(() => import('./preview/CollectiveHomePreview')) : null;
 const Verify = lazy(load.verify);
 const AcademyHome = lazy(load.academy);
 const Join = lazy(load.join);
@@ -169,6 +172,7 @@ function SiteRoutes() {
         <Suspense fallback={<div aria-busy="true" style={{ minHeight: '70vh' }} />}>
           <Routes>
             <Route path="/" element={<Home />} />
+            {MarketHomePreview && <Route path="/preview/home" element={<MarketHomePreview />} />}
             <Route path="/about" element={<About />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/directory" element={<Directory />} />
@@ -213,6 +217,7 @@ function CollectiveRoutes() {
         <Suspense fallback={<div aria-busy="true" style={{ minHeight: '70vh' }} />}>
           <Routes>
             <Route path="/" element={<CollectiveHome />} />
+            {CollectiveHomePreview && <Route path="/preview/home" element={<CollectiveHomePreview />} />}
             <Route path="/academy" element={<AcademyHome />} />
             <Route path="/join" element={<Join />} />
             <Route path="/mentorship" element={<MentorshipLanding />} />
