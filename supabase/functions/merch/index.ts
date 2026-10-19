@@ -77,10 +77,12 @@ Deno.serve(async (req) => {
           const t = TYPES[i.type as keyof typeof TYPES];
           const f = printFile(i, c)!;
           const areas = await printAreas(t.printful);
-          const area = areas[t.placement];
+          // Hats: Printful may list the area under a longer name (embroidery_front_large) or not at all, and the
+          // photo generator refuses a file without a position, so fall back to the artwork's own size.
+          const area = areas[t.placement] || Object.entries(areas).find(([k]) => k.startsWith(t.placement))?.[1] || { width: f.width, height: f.height };
           const variant = variantFor(i, c, t.sizes[Math.min(1, t.sizes.length - 1)])!;
           const file: Any = { placement: t.placement, image_url: f.url };
-          if (area) file.position = position(i.type, area, f);
+          file.position = position(i.type, area, f);
           const offered = await photoGroups(t.printful);
           const wanted = STYLES[['tee', 'crew', 'hoodie'].includes(i.type) ? 'apparel' : i.type === 'mug' ? 'mug' : 'other'];
           const groups = wanted.filter((g) => offered.includes(g)).slice(0, 3);
