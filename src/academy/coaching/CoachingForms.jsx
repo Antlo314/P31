@@ -158,11 +158,11 @@ const CoachingForms = () => {
     const pkg = PACKAGES.find((x) => x.key === p.package);
     if (p.program === 'business') return pkg ? `${p.package} — ${pkg.name}` : p.label;
     if (p.program === 'couples') return p.label.replace(/^Couples Private Mentorship:?\s*/, '');
-    return p.label.replace(/^Faith Mentorship:\s*/, '');
+    return p.label.replace(/^Faith Mentorship:?\s*/, '');
   };
   const tierNote = (p) => {
-    if (p.program === 'faith') return 'Private faith mentorship';
     if (p.billing === 'six_months') return `6-month commitment, paid up front${saving(p) > 0 ? ` · you save ${dollars(saving(p))}` : ''}`;
+    if (p.program === 'faith') return 'Private faith mentorship';
     return packagesFor(p.program).find((x) => x.key === p.package)?.cadence || (p.program === 'couples' ? 'Couples Private Mentorship' : 'Business Coaching');
   };
   const PER = { week: '/week', month: '/month', six_months: ' for 6 months', one_time: '' };
