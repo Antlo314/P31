@@ -188,7 +188,7 @@ const MarketHomePreview = () => {
                     <small>{[showDate(e) && e.start_time, e.venue || e.location].filter(Boolean).join(' · ') || 'Details coming soon'}</small>
                     {e.address && showDate(e) && <small><MapPin size={12} /> {e.address}</small>}
                   </div>
-                  {e.ticket_url && <a href={e.ticket_url} target="_blank" rel="noreferrer" className="mp-link">{ticketLabel(e.ticket_url)} <ArrowUpRight size={14} /></a>}
+                  {e.rsvp_url && <a href={e.rsvp_url} target="_blank" rel="noreferrer" className="mp-link">{ticketLabel(e.rsvp_url)} <ArrowUpRight size={14} /></a>}
                 </li>
               );
             })}

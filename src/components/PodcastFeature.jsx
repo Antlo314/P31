@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowUpRight, Instagram, Facebook } from 'lucide-react';
 import { PODCAST } from '../lib/podcast';
 import emblem from '../assets/podcast/emblem.webp';
@@ -11,16 +11,18 @@ import './PodcastFeature.css';
  * gold, sound waves from the microphone and a twinkle on the crown; beside it, the flyer's words.
  */
 const PodcastFeature = () => {
+  // The shine's mask names the emblem URL; setting it only after the lazy <img> loads keeps the file out of the first screen.
+  const [lit, setLit] = useState(false);
   const listen = PODCAST.listen || PODCAST.platforms.find((p) => p.url)?.url;
   const { instagram: insta, facebook } = PODCAST.social;
   return (
     <section className="k-section k-section--night k-dark pod" id="podcast" aria-labelledby="pod-title">
       <div className="pod__inner">
         <div className="pod__art" data-reveal="fade">
-          <div className="pod__float" style={{ '--pod-mask': `url(${emblem})` }}>
+          <div className="pod__float" style={lit ? { '--pod-mask': `url(${emblem})` } : undefined}>
             <span className="pod__glow" aria-hidden="true" />
-            <img src={emblem} alt="P31 Podcast, the Proverbs 31 Podcast" className="pod__emblem" width="668" height="660" loading="lazy" decoding="async" />
-            <span className="pod__shine" aria-hidden="true" />
+            <img src={emblem} alt="P31 Podcast, the Proverbs 31 Podcast" className="pod__emblem" width="668" height="660" loading="lazy" decoding="async" onLoad={() => setLit(true)} />
+            {lit && <span className="pod__shine" aria-hidden="true" />}
             <span className="pod__waves" aria-hidden="true"><i /><i /><i /></span>
             <span className="pod__twinkle pod__twinkle--crown" aria-hidden="true" />
             <span className="pod__twinkle pod__twinkle--one" aria-hidden="true" />

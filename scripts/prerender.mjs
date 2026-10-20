@@ -3,7 +3,7 @@
 // so Google and link previews (iMessage, Facebook, X) see real content.
 // Also writes sitemap.xml. Storefronts and announced market dates come from
 // Supabase with the public anon key; if it's unreachable, static pages still build.
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { loadEnv } from 'vite';
 import {
@@ -281,10 +281,18 @@ const collectivePages = [
   // Every other Collective route (portal, classrooms, Studio, Systems): the app shell, not indexed.
   { file: 'app', path: '/portal', title: COLLECTIVE_NAME, description: COLLECTIVE_META['/'].description, noindex: true },
 ];
+// The Collective home's first-screen photo (its LCP) starts with the HTML, not after
+// index.js and the lazy CollectiveHome chunk have run. The <img> has no srcset, so the preload href matches its src.
+const heroFile = readdirSync(join(dist, 'assets')).find((f) => /^p31_community_impact_editorial_1776544076592-[\w-]+\.webp$/.test(f));
+if (!heroFile) console.warn('prerender: Collective hero photo not found in dist/assets; the home ships without its preload');
+const homePreloads = [
+  heroFile && `<link rel="preload" as="image" href="/assets/${heroFile}" fetchpriority="high" />`,
+].filter(Boolean).join('\n    ');
 for (const page of collectivePages) {
   const out = join(dist, 'c', `${page.file}.html`);
   mkdirSync(dirname(out), { recursive: true });
-  writeFileSync(out, render({ ...page, origin: C, image: COLLECTIVE_IMAGE, base: collectiveTemplate }));
+  const base = page.file === 'home' ? collectiveTemplate.replace('</head>', `  ${homePreloads}\n  </head>`) : collectiveTemplate;
+  writeFileSync(out, render({ ...page, origin: C, image: COLLECTIVE_IMAGE, base }));
 }
 const cUrls = ['/', '/join', '/academy', '/mentorship', '/mentorship/business', '/mentorship/faith', '/systems'];
 writeFileSync(join(dist, 'c', 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>

@@ -1,0 +1,199 @@
+/* thep31collective.org home (CollectiveHome.jsx). Prefix: cp-
+   After MotionSites "Church Community": dark ground rgb(29,25,26) here in plum-black, cream #F1E5C6, Manrope light display.
+   Phones: the site's fixed tab bar (Navbar.css .tb, --tb-h) covers the bottom of the screen below 1024px; the hero is
+   sized to end above it so both buttons show on the first screen (checked 320x568 to 932x430, portrait and landscape). */
+.cp { --cp-dark: #1E1119; --cp-plum: #3A1C36; --cp-cream: #F1E5C6; --cp-off: #F5F0E8; font-family: var(--font-body); background: var(--cp-dark); color: #fff; overflow-x: hidden; }
+.cp h1, .cp h2, .cp h3 { font-family: var(--font-body); }
+.cp-eyebrow { margin: 0; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--cp-cream); opacity: 0.8; }
+.cp-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+/* Hero */
+.cp-hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); min-height: 100svh; }
+.cp-hero__photo { position: relative; overflow: hidden; }
+.cp-hero__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: cp-in 1.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.cp-hero__photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(160deg, rgba(217, 169, 58, 0.18), rgba(30, 17, 25, 0.15) 50%, rgba(30, 17, 25, 0.45)); }
+.cp-hero__copy { padding: clamp(32px, 6vw, 88px) clamp(22px, 5vw, 72px); display: grid; align-content: end; gap: 22px; animation: cp-rise 0.6s ease both; }
+.cp-mark { width: 56px; height: 56px; border-radius: 50%; background: #fff; padding: 4px; }
+.cp-faces { display: flex; align-items: center; }
+.cp-faces img, .cp-plus { width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--cp-dark); object-fit: cover; margin-left: -10px; }
+.cp-faces img:first-child { margin-left: 0; }
+.cp-plus { display: inline-grid; place-items: center; background: var(--cp-cream); color: var(--cp-dark); text-decoration: none; }
+.cp-plus svg { width: 20px; height: 20px; }
+.cp-hero h1 { margin: 0; font-weight: 300; font-size: clamp(3rem, 6.4vw, 5.6rem); line-height: 0.98; letter-spacing: -0.05em; color: var(--cp-cream); }
+.cp-ghost { opacity: 0; }
+.cp-lede { margin: 0; font-size: clamp(1.05rem, 1.6vw, 1.3rem); line-height: 1.35; color: rgba(255, 255, 255, 0.65); max-width: 32rem; }
+.cp-hero__copy .cp-eyebrow { margin-bottom: -8px; }
+.cp-acts { display: flex; flex-wrap: wrap; gap: 12px; }
+.cp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 26px; background: var(--cp-cream); color: var(--cp-dark); font: 500 1.05rem var(--font-body); text-align: center; border: 0; text-decoration: none; cursor: pointer; transition: background 0.3s; }
+.cp-btn:hover { background: #fff; }
+.cp-btn--line { background: transparent; color: var(--cp-cream); box-shadow: inset 0 0 0 1px rgba(241, 229, 198, 0.5); }
+.cp-btn--line:hover { background: rgba(241, 229, 198, 0.1); }
+/* Wherever the tab bar shows, the hero ends just above it. */
+@media (max-width: 1023px) {
+  .cp-hero { min-height: calc(100svh - var(--tb-h, 64px) - 20px - env(safe-area-inset-bottom)); }
+}
+/* Phones and portrait tablets: photo on top, absorbing the spare height; avatars overlap its edge. */
+@media (max-width: 860px) {
+  .cp-hero { grid-template-columns: 1fr; grid-template-rows: minmax(120px, 1fr) auto; }
+  .cp-hero__photo { min-height: 0; }
+  .cp-hero__copy { padding-top: 28px; padding-bottom: 24px; gap: 16px; }
+  .cp-hero__copy .cp-eyebrow { margin-bottom: -4px; }
+  .cp-hero h1 { font-size: clamp(2.5rem, 11.5vw, 3rem); }
+  .cp-faces { margin-top: -62px; position: relative; }
+  .cp-mark { display: none; }
+  .cp-acts .cp-btn { flex: 1 1 100%; }
+}
+/* Short phones (320x568, 360x640): tighten so both buttons still clear the tab bar. */
+@media (max-width: 860px) and (max-height: 660px) and (orientation: portrait) {
+  .cp-hero__copy { gap: 12px; }
+  .cp-hero .cp-eyebrow { display: none; }
+  .cp-hero h1 { font-size: 2.25rem; }
+  .cp-lede { font-size: 1rem; }
+  .cp-acts { gap: 8px; }
+  .cp-acts .cp-btn { min-height: 48px; }
+}
+/* Landscape phones: photo and copy side by side so headline, lede and buttons fit between the bars. */
+@media (max-width: 1023px) and (orientation: landscape) and (max-height: 520px) {
+  .cp-hero { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); grid-template-rows: none; min-height: 0; }
+  .cp-hero__photo { min-height: 0; }
+  .cp-hero__copy { padding: calc(var(--nb-h, 64px) + 12px) max(28px, env(safe-area-inset-right)) calc(var(--tb-h, 64px) + 24px) 28px; gap: 12px; align-content: start; }
+  .cp-mark, .cp-faces, .cp-hero__copy .cp-eyebrow { display: none; }
+  .cp-hero h1 { font-size: clamp(2rem, 4.6vw, 2.6rem); }
+  .cp-lede { font-size: 1rem; }
+  .cp-acts .cp-btn { flex: 1 1 auto; min-height: 46px; padding: 0 18px; }
+}
+/* Narrow landscape phones (568x320 to 780x360): the buttons cannot share a row, so the lede steps aside. */
+@media (max-width: 799px) and (orientation: landscape) and (max-height: 420px) {
+  .cp-hero .cp-lede { display: none; }
+  .cp-hero h1 { font-size: clamp(1.75rem, 4.6vw, 2.6rem); }
+  .cp-hero .cp-acts { gap: 8px; }
+  .cp-hero .cp-acts .cp-btn { min-height: 44px; }
+}
+
+/* Founder panel */
+.cp-voice { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); background: var(--cp-dark); }
+.cp-voice__dark { position: relative; display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 40px; padding: 80px 56px 80px 96px; align-items: end; }
+.cp-voice__side { position: absolute; left: 30px; top: 90px; margin: 0; writing-mode: vertical-rl; transform: rotate(180deg); font-size: 0.9rem; font-weight: 400; line-height: 1.75; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.5); }
+.cp-voice__side b { font-weight: 500; color: rgba(255, 255, 255, 0.7); margin-inline-end: 10px; }
+.cp-voice__portrait { aspect-ratio: 4 / 5; overflow: hidden; }
+.cp-voice__portrait img { width: 100%; height: 100%; object-fit: cover; }
+.cp-quote-mark { display: block; font-family: var(--font-heading); font-size: 4rem; line-height: 0.6; color: var(--cp-cream); margin-bottom: 10px; }
+.cp-voice__quote blockquote { margin: 0 0 16px; font-size: clamp(1.6rem, 2.6vw, 2.2rem); font-weight: 300; line-height: 1.15; letter-spacing: -0.02em; color: rgba(255, 255, 255, 0.85); text-wrap: balance; }
+.cp-voice__quote p { margin: 0; color: rgba(255, 255, 255, 0.55); line-height: 1.55; max-width: 34rem; }
+.cp-card { position: relative; background: var(--cp-off); color: #1a1a1a; text-decoration: none; padding: 56px 48px; display: grid; align-content: space-between; gap: 28px; min-height: 380px; }
+.cp-card small { font-size: 1rem; color: #6f6470; }
+.cp-card h2 { margin: 0; font-weight: 500; font-size: clamp(1.8rem, 3vw, 2.4rem); line-height: 1.1; letter-spacing: -0.02em; color: #1a1a1a; text-wrap: balance; }
+.cp-more { display: inline-flex; align-items: center; gap: 6px; font-size: 1.05rem; color: inherit; }
+.cp-star { position: absolute; right: 40px; bottom: 34px; font-size: 3rem; line-height: 1; color: #1a1a1a; }
+.cp-card:focus-visible { outline-offset: -6px; }
+/* Up to small laptops the membership card goes under the panel, so the quote keeps a readable width. */
+@media (max-width: 1279px) {
+  .cp-voice { grid-template-columns: 1fr; }
+  .cp-card { min-height: 260px; }
+}
+@media (max-width: 960px) {
+  .cp-voice__dark { grid-template-columns: 1fr; padding: 56px 22px 40px 64px; }
+  .cp-voice__side { left: 8px; top: 64px; }
+  .cp-voice__portrait { width: 100%; max-width: 300px; margin-left: auto; }
+  .cp-card { padding: 36px 22px; }
+}
+
+/* Melanie: full story and links */
+.cp-story { margin-top: 18px; color: rgba(255, 255, 255, 0.6); }
+.cp-story summary { cursor: pointer; color: var(--cp-cream); font-weight: 500; list-style: none; display: inline-flex; gap: 8px; align-items: center; min-height: 44px; }
+.cp-story summary::-webkit-details-marker { display: none; }
+.cp-story summary::after { content: '+'; content: '+' / ''; font-size: 1.2rem; line-height: 1; }
+.cp-story[open] summary::after { content: '−'; content: '−' / ''; }
+.cp-story p { margin: 0 0 12px; line-height: 1.6; max-width: 36rem; }
+.cp-voice__links { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-top: 8px; }
+.cp-textlink { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0; background: none; border: 0; color: var(--cp-cream); font: 500 0.98rem var(--font-body); text-decoration: none; cursor: pointer; border-bottom: 1px solid rgba(241, 229, 198, 0.35); }
+.cp-textlink svg { flex-shrink: 0; }
+
+/* Upcoming */
+.cp-up { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); background: #fff; color: #1a1a1a; }
+.cp-up__media { position: relative; min-height: 520px; overflow: hidden; }
+.cp-up__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cp-up__media::after { content: ''; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.3); }
+.cp-play { position: absolute; z-index: 1; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 72px; height: 72px; border-radius: 50%; background: var(--cp-cream); color: var(--cp-dark); display: grid; place-items: center; }
+.cp-up__body { position: relative; }
+.cp-up__band { background: var(--cp-dark); padding: 56px 48px 120px; }
+.cp-up__band h2 { margin: 0; font-weight: 400; font-size: clamp(2.4rem, 4vw, 3rem); letter-spacing: -0.03em; color: #fff; }
+.cp-up ul { list-style: none; margin: -84px 0 0; padding: 0 48px 56px; display: grid; gap: 22px; position: relative; }
+.cp-up li { display: grid; grid-template-columns: 68px minmax(0, 1fr) auto; gap: 20px; align-items: center; }
+.cp-up li.is-faded .cp-date { opacity: 0.7; }
+.cp-up li > div strong { display: block; font-weight: 400; font-size: 1.3rem; line-height: 1.25; }
+.cp-up li > div small { color: #6b6b6b; font-size: 1rem; }
+.cp-up li:first-child > div strong, .cp-up li:first-child > div small { color: #fff; }
+/* The first row carries its own dark ground, so its white text and cream ticket link stay readable however they wrap. */
+.cp-up li:first-child { background: var(--cp-dark); margin-inline: -48px; padding: 0 48px 22px; }
+.cp-date { width: 68px; height: 90px; display: grid; place-content: center; text-align: center; background: var(--cp-cream); color: #1a1a1a; }
+.cp-date.is-white { background: #fff; }
+.cp-date b { font-size: 2.1rem; font-weight: 500; line-height: 1; }
+.cp-date small { font-size: 1.1rem; }
+.cp-link { display: inline-flex; align-items: center; gap: 4px; color: var(--cp-plum); font-weight: 700; text-decoration: none; white-space: nowrap; }
+.cp-up li:first-child .cp-link { color: var(--cp-cream); }
+@media (max-width: 860px) {
+  .cp-up { grid-template-columns: 1fr; }
+  .cp-up__media { min-height: 300px; }
+  .cp-up__band { padding: 40px 22px 110px; }
+  .cp-up ul { padding: 0 22px 44px; }
+  .cp-up li { grid-template-columns: 68px minmax(0, 1fr); gap: 16px; }
+  .cp-up li .cp-link { grid-column: 2; }
+  .cp-up li:first-child { margin-inline: -22px; padding: 0 22px 20px; }
+  /* Two rows of room while market_events loads (the measured 2-event list at 390px), so nothing below jumps. */
+  .cp-up[aria-busy="true"] ul { min-height: 308px; }
+}
+/* Narrow phones wrap the first event's detail line (and below 335px its title), so the list is taller there. */
+@media (max-width: 386px) { .cp-up[aria-busy="true"] ul { min-height: 321px; } }
+@media (max-width: 334px) { .cp-up[aria-busy="true"] ul { min-height: 347px; } }
+
+/* Two paths */
+.cp-paths { background: var(--cp-off); color: #1a1a1a; padding: 96px clamp(22px, 5vw, 72px); display: grid; gap: 18px; justify-items: start; }
+.cp-paths .cp-eyebrow { color: var(--cp-plum); }
+.cp-paths > h2 { margin: 0 0 18px; font-weight: 300; font-size: clamp(2.6rem, 5vw, 4.2rem); letter-spacing: -0.04em; line-height: 1; text-wrap: balance; }
+.cp-paths__lede { margin: -6px 0 18px; color: #6f6470; max-width: 36rem; line-height: 1.55; }
+.cp-paths__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; width: 100%; margin-bottom: 14px; }
+.cp-path { display: grid; gap: 12px; align-content: start; padding: 40px; background: #fff; color: #1a1a1a; text-decoration: none; min-height: 340px; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.cp-path:hover { transform: translateY(-4px); }
+.cp-path.is-dark { background: var(--cp-dark); color: #fff; }
+.cp-path__n { font-size: 3rem; font-weight: 300; line-height: 1; letter-spacing: -0.04em; color: #b9a98a; }
+.cp-path:not(.is-dark) .cp-path__n { color: #8a7547; }
+.cp-path small { font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6f6470; }
+.cp-path.is-dark small { color: var(--cp-cream); opacity: 0.8; }
+.cp-path h3 { margin: 0; font-weight: 500; font-size: 1.8rem; line-height: 1.1; letter-spacing: -0.02em; color: inherit; }
+.cp-path.is-dark h3 { color: #fff; }
+.cp-path p { margin: 0; color: inherit; opacity: 0.7; line-height: 1.55; }
+@media (max-width: 760px) { .cp-paths__grid { grid-template-columns: 1fr; } .cp-path { padding: 28px 22px; min-height: 0; } .cp-paths { padding: 64px 22px; } }
+
+/* Book a call */
+.cp-book { background: var(--cp-dark); color: #fff; padding: 96px clamp(22px, 5vw, 72px); display: grid; gap: 18px; justify-items: start; }
+.cp-book > h2 { margin: 0; font-weight: 300; font-size: clamp(2.6rem, 5vw, 4.2rem); letter-spacing: -0.04em; line-height: 1; color: var(--cp-cream); }
+.cp-book .cp-paths__lede { color: rgba(255, 255, 255, 0.6); }
+.cp-book__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; width: 100%; }
+.cp-call { display: grid; gap: 12px; align-content: start; padding: 32px; background: rgba(255, 255, 255, 0.04); box-shadow: inset 0 0 0 1px rgba(241, 229, 198, 0.18); color: #fff; }
+.cp-call.is-cream { background: var(--cp-cream); color: #1a1a1a; box-shadow: none; }
+.cp-call small { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+.cp-call h3 { margin: 0; font-weight: 500; font-size: 1.45rem; line-height: 1.15; letter-spacing: -0.02em; color: inherit; }
+.cp-call p { margin: 0 0 8px; line-height: 1.55; opacity: 0.75; color: inherit; }
+.cp-call .cp-btn { justify-self: start; }
+.cp-call.is-cream .cp-btn { background: var(--cp-dark); color: var(--cp-cream); }
+@media (max-width: 900px) { .cp-book__grid { grid-template-columns: 1fr; } .cp-book { padding: 64px 22px; } .cp-call { padding: 26px 22px; } .cp-call .cp-btn { justify-self: stretch; } }
+
+/* Team directory on the light ground */
+.cp-team-section { background: var(--cp-off); color: #1a1a1a; padding: 88px clamp(22px, 5vw, 72px); }
+@media (max-width: 760px) { .cp-team-section { padding: 56px 22px; } }
+.cp-team-section .td-portrait span { color: #7d6315; }
+
+/* Close */
+.cp-close { text-align: center; padding: 110px 22px; display: grid; gap: 18px; justify-items: center; background: radial-gradient(60% 70% at 50% 0%, rgba(217, 169, 58, 0.16), transparent 70%), var(--cp-dark); }
+.cp-close blockquote { margin: 0; font-weight: 300; font-size: clamp(2rem, 4.6vw, 3.6rem); line-height: 1.08; letter-spacing: -0.03em; color: var(--cp-cream); max-width: 60rem; text-wrap: pretty; }
+.cp-cite { margin: 0 0 12px; color: rgba(255, 255, 255, 0.5); }
+.cp-market { margin: 6px 0 0; color: rgba(255, 255, 255, 0.6); }
+.cp-market a { color: var(--cp-cream); display: inline-flex; gap: 4px; align-items: center; }
+.cp-team { margin: 18px 0 0; font-size: 0.85rem; }
+.cp-team a { color: rgba(255, 255, 255, 0.5); text-decoration: none; display: inline-flex; gap: 6px; align-items: center; }
+
+/* Transform only: an entrance that starts at opacity 0 hides the first paint from the browser's LCP measure. */
+@keyframes cp-in { from { transform: scale(1.06); } to { transform: none; } }
+@keyframes cp-rise { from { transform: translateY(12px); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .cp-hero__photo img, .cp-hero__copy { animation: none; } .cp-path { transition: none; } .cp-path:hover { transform: none; } }

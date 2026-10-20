@@ -487,6 +487,8 @@ img, video { -webkit-touch-callout: none; }
      so there's no pale strip under it. */
   .app-container:has(> .ft) { padding-bottom: 0; }
   .app-container > .ft { padding-bottom: calc(28px + var(--tb-h, 64px) + 20px + env(safe-area-inset-bottom)); }
+  /* Focused links and buttons scroll clear of the tab bar. Longhand, so it does not reset scroll-padding-top below. */
+  html { scroll-padding-bottom: calc(var(--tb-h, 64px) + 20px + env(safe-area-inset-bottom)); }
 }
 
 /* Inputs never trigger iOS zoom. */

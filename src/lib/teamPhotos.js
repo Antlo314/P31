@@ -17,6 +17,9 @@ import teamAHead from '../assets/web/team/team-a-head.webp';
 import teamBHead from '../assets/web/team/team-b-head.webp';
 import teamCHead from '../assets/web/team/team-c-head.webp';
 import teamDHead from '../assets/web/team/team-d-head.webp';
+import melanieAvatar from '../assets/web/team/melanie-avatar.webp';
+import teamAAvatar from '../assets/web/team/team-a-avatar.webp';
+import teamCAvatar from '../assets/web/team/team-c-avatar.webp';
 import teamGroup from '../assets/web/team/team-group.webp';
 import teamGroupWide from '../assets/web/team/team-group-wide.webp';
 import { TEAM } from './team';
@@ -24,6 +27,8 @@ import { TEAM } from './team';
 export const MELANIE = { portrait: melaniePortrait, square: melanieSquare, wide: melanieWide, head: melanieHead };
 /** The "Meet the team" event photo. It is not the team: it belongs only in the marketplace pop-up. */
 export const GROUP = { tall: teamGroup, wide: teamGroupWide };
+// 160px headshots for small round avatars (the Collective home hero row), so phones skip the 480px files.
+export const AVATARS = { melanie: melanieAvatar, a: teamAAvatar, c: teamCAvatar };
 
 /** Round headshots and full portraits by photo key (src/lib/team.js → photo). */
 export const HEADSHOTS = { melanie: melanieHead, a: teamAHead, b: teamBHead, c: teamCHead, d: teamDHead };

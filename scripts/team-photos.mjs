@@ -31,6 +31,10 @@ await make('team-a.jpg', 'team-a-head.webp', { ratio: 1, fx: 0.5, fy: 0.31, widt
 await make('team-b.png', 'team-b-head.webp', { ratio: 1, fx: 0.47, fy: 0.43, width: 480, zoom: 2.4, enlarge: true });
 await make('team-c.png', 'team-c-head.webp', { ratio: 1, fx: 0.355, fy: 0.3, width: 480, zoom: 2.3, enlarge: true });
 await make('team-d.jpg', 'team-d-head.webp', { ratio: 1, fx: 0.47, fy: 0.155, width: 480, zoom: 2.9, enlarge: true });
+// Small avatars (160px) for the Collective home's hero row: the same crops as the headshots.
+await make('melanie-jc.jpg', 'melanie-avatar.webp', { ratio: 1, fx: 0.535, fy: 0.275, width: 160, zoom: 2.6, enlarge: true });
+await make('team-a.jpg', 'team-a-avatar.webp', { ratio: 1, fx: 0.5, fy: 0.31, width: 160, zoom: 2.15, enlarge: true });
+await make('team-c.png', 'team-c-avatar.webp', { ratio: 1, fx: 0.355, fy: 0.3, width: 160, zoom: 2.3, enlarge: true });
 // The group (the P31 team at an event): tall for the pop-up and arches, wide-ish for banners.
 await make('team-group.webp', 'team-group.webp', { ratio: 4 / 5, fx: 0.5, fy: 0.58, width: 1000 });
 await make('team-group.webp', 'team-group-wide.webp', { ratio: 16 / 10, fx: 0.5, fy: 0.5, width: 1400, zoom: 1.0 });
