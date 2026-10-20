@@ -9,7 +9,6 @@ import { AcademyContext } from '../../academy/app/data';
 import { MentorCurriculum, MentorSessions } from '../../academy/app/mentor';
 import '../../academy/app/classroom.css';
 
-const PROGRAMS = [['business', 'Business Mentorship'], ['faith', 'Faith-Based Mentorship']];
 const ORDER = ['month', 'week', 'six_months', 'one_time'];
 const TABS = [
   { v: 'plans', l: 'Plans & prices', Icon: DollarSign }, { v: 'curriculum', l: 'Curriculum & videos', Icon: BookOpen }, { v: 'sessions', l: 'Sessions & recordings', Icon: CalendarDays },
@@ -117,7 +116,7 @@ const Academy = () => {
 
       {tab === 'mentors' && (
         <>
-          <AddByEmail label="Add a mentor" withProgram withTitle onAdd={({ email, program, title }) => rpc('add_academy_mentor', { p_email: email, p_program: program, p_title: title || null })} />
+          <AddByEmail label="Add a mentor" programs={programs} withProgram withTitle onAdd={({ email, program, title }) => rpc('add_academy_mentor', { p_email: email, p_program: program, p_title: title || null })} />
           <p className="sys-muted" style={{ marginTop: 10 }}>A team member with the Classroom dashboard (Systems → Team & dashboards) is a mentor of every program without being listed here.</p>
           {programs.map((p) => (
             <section key={p.id} className="sys-card" style={{ marginTop: 14 }}>
@@ -139,7 +138,7 @@ const Academy = () => {
 
       {tab === 'members' && (
         <>
-          <ManualEnroll onEnroll={(f) => rpc('academy_enroll_manual', { p_email: f.email, p_program: f.program, p_days: f.days ? Number(f.days) : null, p_source: f.source })} />
+          <ManualEnroll programs={programs} onEnroll={(f) => rpc('academy_enroll_manual', { p_email: f.email, p_program: f.program, p_days: f.days ? Number(f.days) : null, p_source: f.source })} />
           {programs.map((p) => (
             <section key={p.id} className="sys-card" style={{ marginTop: 14 }}>
               <h2>{p.title} <span className="sys-muted">· {(rosters[p.id] || []).filter((r) => r.status === 'active').length} active</span></h2>
@@ -215,15 +214,25 @@ const PlanRow = ({ plan, onSave }) => {
   );
 };
 
-const AddByEmail = ({ label, withProgram, withTitle, withName, disabled, onAdd }) => {
-  const [f, setF] = useState({ email: '', program: 'business', title: '', name: '' });
+// The Program menu: every program in the database (academy_programs), so a new one appears without a code change.
+const ProgramSelect = ({ programs, value, onChange }) => (
+  <label className="sys-field"><span>Program</span>
+    <select required value={value} onChange={(e) => onChange(e.target.value)}>
+      {programs.map((p) => <option key={p.id} value={p.slug}>{p.title}{p.is_active === false ? ' (hidden)' : ''}</option>)}
+    </select>
+  </label>
+);
+
+const AddByEmail = ({ label, programs = [], withProgram, withTitle, withName, disabled, onAdd }) => {
+  const [f, setF] = useState({ email: '', program: '', title: '', name: '' });
+  const program = f.program || programs[0]?.slug || '';
   return (
-    <form className="sys-card sys-form" onSubmit={(e) => { e.preventDefault(); onAdd(f); setF({ ...f, email: '', title: '', name: '' }); }}>
+    <form className="sys-card sys-form" onSubmit={(e) => { e.preventDefault(); onAdd({ ...f, program }); setF({ ...f, email: '', title: '', name: '' }); }}>
       <h2><UserPlus size={18} /> {label}</h2>
       <p className="sys-muted">They need an account first — mentors and Studio members create one at thep31collective.org/portal, and students from their enrollment link.</p>
       <div className="sys-row" style={{ flexWrap: 'wrap', gap: 10, alignItems: 'flex-end' }}>
         <label className="sys-field" style={{ flex: '1 1 220px' }}><span>Their account email</span><input type="email" required value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></label>
-        {withProgram && <label className="sys-field"><span>Program</span><select value={f.program} onChange={(e) => setF({ ...f, program: e.target.value })}>{PROGRAMS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>}
+        {withProgram && <ProgramSelect programs={programs} value={program} onChange={(v) => setF({ ...f, program: v })} />}
         {withTitle && <label className="sys-field"><span>Title (optional)</span><input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Lead mentor" /></label>}
         {withName && <label className="sys-field"><span>Display name (optional)</span><input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></label>}
         <button className="sys-btn sys-btn--gold" disabled={disabled}><Plus size={16} /> Add</button>
@@ -232,15 +241,16 @@ const AddByEmail = ({ label, withProgram, withTitle, withName, disabled, onAdd }
   );
 };
 
-const ManualEnroll = ({ onEnroll }) => {
-  const [f, setF] = useState({ email: '', program: 'business', days: '30', source: 'manual' });
+const ManualEnroll = ({ programs = [], onEnroll }) => {
+  const [f, setF] = useState({ email: '', program: '', days: '30', source: 'manual' });
+  const program = f.program || programs[0]?.slug || '';
   return (
-    <form className="sys-card sys-form" onSubmit={(e) => { e.preventDefault(); onEnroll(f); setF({ ...f, email: '' }); }}>
+    <form className="sys-card sys-form" onSubmit={(e) => { e.preventDefault(); onEnroll({ ...f, program }); setF({ ...f, email: '' }); }}>
       <h2><UserPlus size={18} /> Enroll someone manually</h2>
-      <p className="sys-muted">For someone who paid another way, or a complimentary seat. Card payments enroll people automatically.</p>
+      <p className="sys-muted">For someone who paid another way, or a complimentary seat. Card payments enroll the person who paid automatically; a couples client’s partner is added here as Complimentary, with their own account email.</p>
       <div className="sys-row" style={{ flexWrap: 'wrap', gap: 10, alignItems: 'flex-end' }}>
         <label className="sys-field" style={{ flex: '1 1 220px' }}><span>Their account email</span><input type="email" required value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></label>
-        <label className="sys-field"><span>Program</span><select value={f.program} onChange={(e) => setF({ ...f, program: e.target.value })}>{PROGRAMS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></label>
+        <ProgramSelect programs={programs} value={program} onChange={(v) => setF({ ...f, program: v })} />
         <label className="sys-field" style={{ width: 130 }}><span>Days (blank = open)</span><input type="number" min="1" value={f.days} onChange={(e) => setF({ ...f, days: e.target.value })} /></label>
         <label className="sys-field"><span>Type</span><select value={f.source} onChange={(e) => setF({ ...f, source: e.target.value })}><option value="manual">Paid another way</option><option value="comp">Complimentary</option></select></label>
         <button className="sys-btn sys-btn--gold"><Plus size={16} /> Enroll</button>

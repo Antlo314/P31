@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>P31 TikTok renderer</title></head>
+<body style="margin:0;background:#222">
+<!-- Opened by build.mjs through the dev server: draws each TikTok post of plan.mjs with the Design studio
+     engine, as a native 9:16 story layout kept inside TikTok's safe area, with its music. -->
+<script type="module">
+  import { styleOf } from '/src/studio/design/brand.js';
+  import { fromWords, applyMotion } from '/src/studio/design/templates.js';
+  import { drawDesign, layout, animLength } from '/src/studio/design/draw.js';
+  import { prepare, renderVideo, videoLength } from '/src/studio/design/export.js';
+  import { renderTrack, levels } from '/src/studio/design/music.js';
+
+  const W = 1080; const H = 1920;
+  // TikTok lays its tabs over the top, the username, caption and sound over the bottom ~420 px and its
+  // buttons down the right ~150 px. Nothing we draw may sit there.
+  const SAFE = { top: 230, bottom: H - 420, right: W - 150, left: 80 };
+  // The camera slowly pushes in to 103.5% over the video (draw.js), so a layout has to sit inside a
+  // slightly smaller box for its last frame to still be inside SAFE.
+  const ZOOM = 1.035;
+  const INNER = {
+    top: H / 2 - (H / 2 - SAFE.top) / ZOOM, bottom: H / 2 + (SAFE.bottom - H / 2) / ZOOM,
+    left: W / 2 - (W / 2 - SAFE.left) / ZOOM, right: Math.floor(W / 2 + (SAFE.right - W / 2) / ZOOM),
+  };
+  const FOOTER_H = 30; // the small "p31market.com" line at the foot of scripture, prayer and blank cards
+
+  const ctx = document.createElement('canvas').getContext('2d');
+  const toData = (blob) => new Promise((r) => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(blob); });
+  const fontOf = (l, size) => `${l.italic ? 'italic ' : ''}${l.weight || 400} ${size}px "${l.font}"`;
+  const lengthOf = (doc) => Math.min(15, Math.max(8, videoLength(doc)));
+  // The cover is the video's own frame half a second before the end, long after every entrance has
+  // finished: schedule.mjs hands TikTok that moment (video_cover_timestamp_ms), and the cover JPG is the
+  // same frame, so review.html shows exactly what the profile grid will.
+  const coverTime = (seconds) => seconds - 0.5;
+  /** When the last entrance (and a typewriter's lingering caret) is over. */
+  const settledAt = (doc) => Math.max(0, ...doc.layers.filter((l) => !l.hidden && (l.anim || 'rise') !== 'none')
+    .map((l) => (l.delay ?? 0) + animLength(l) * (l.anim === 'type' ? 1.6 : 1)));
+
+  /** Each visible layer's inked area: its box, or for a button the pill drawn behind the words. */
+  function areas(doc) {
+    const boxes = layout(ctx, doc);
+    return doc.layers.filter((l) => !l.hidden).map((l) => {
+      const b = boxes[l.id];
+      if (l.type === 'text' && l.bg) {
+        const m = b.text; const pad = (l.bgPad ?? 0.35) * m.size;
+        ctx.font = fontOf(l, m.size);
+        if ('letterSpacing' in ctx) ctx.letterSpacing = `${(l.spacing || 0) * m.size / 100}px`;
+        const widest = Math.max(...m.lines.map((s) => ctx.measureText(s.str).width));
+        const x0 = l.align === 'center' ? b.x + b.w / 2 - widest / 2 : l.align === 'right' ? b.x + b.w - widest : b.x;
+        return { l, x: x0 - pad, y: b.y - pad * 0.7, w: widest + pad * 2, h: b.h + pad * 1.4 };
+      }
+      return { l, x: b.x, y: b.y, w: b.w, h: b.h };
+    });
+  }
+  const extent = (list) => list.reduce((e, a) => ({ top: Math.min(e.top, a.y), bottom: Math.max(e.bottom, a.y + a.h), left: Math.min(e.left, a.x), right: Math.max(e.right, a.x + a.w) }), { top: Infinity, bottom: -Infinity, left: Infinity, right: -Infinity });
+
+  /**
+   * A layer that would run under TikTok's buttons, brought back inside. Left-aligned text keeps its left
+   * edge; centred text gives up the same width on both sides, so it stays centred on the card (and over
+   * a fill-in-the-blank's line, which sits at the middle of the card).
+   */
+  function keepLeftOfButtons(l) {
+    if (l.x + l.w <= INNER.right) return l;
+    if (l.type === 'text' && l.align === 'center') {
+      const middle = l.x + l.w / 2; const half = Math.min(middle - l.x, INNER.right - middle);
+      return { ...l, x: Math.round(middle - half), w: Math.floor(half * 2) };
+    }
+    return { ...l, w: INNER.right - l.x };
+  }
+
+  /**
+   * The post as a TikTok-safe 9:16 document: the template in story size with the handle taken off (TikTok
+   * shows the username itself; a quote's script line carries the post's own words instead), every layer
+   * kept left of TikTok's buttons, the block centred in the safe band (its main text shrunk if it would
+   * not fit), an optional footer just above the caption area, then the motion preset.
+   */
+  async function make(spec) {
+    const s = styleOf(spec.style);
+    let doc = fromWords({ template: spec.template, size: 'story', style: spec.style, pattern: spec.pattern, seed: spec.seed, words: { ...spec.words, handle: '' } });
+    const handle = doc.layers.find((l) => l.name === 'Handle');
+    // A fill-in-the-blank whose words carry their own blank ("and ______ it") does not need the template's
+    // line under them as well: the line goes, and the ask moves up under the words.
+    const line = doc.layers.find((l) => l.name === 'Blank');
+    const ownBlank = line && /_{3,}/.test(spec.words.headline || '');
+    doc.layers = doc.layers
+      .filter((l) => l !== handle || (l.pin && spec.script))
+      .filter((l) => !(ownBlank && l === line))
+      .map((l) => (ownBlank && l.pin?.to === line.id ? { ...l, pin: { ...l.pin, to: line.pin.to, gap: 56 } } : l))
+      .map((l) => (l === handle ? { ...l, text: spec.script } : l))
+      .map(keepLeftOfButtons);
+    const mainId = (doc.layers.find((l) => l.type === 'text' && l.anchor === 'middle') || doc.layers.find((l) => l.name === 'Headline'))?.id;
+    const mainOf = () => doc.layers.find((l) => l.id === mainId);
+    if (spec.footer) {
+      const align = mainOf()?.align || 'center'; const x = align === 'center' ? W - INNER.right : 112;
+      doc.layers.push({ id: 'footer', type: 'text', name: 'Footer', role: 'soft', text: spec.footer, x, y: 0, w: INNER.right - x,
+        font: 'Montserrat', weight: 800, size: 24, spacing: 30, upper: true, align, color: s.soft, opacity: 0.85, anim: 'fade' });
+    }
+    await prepare(doc);
+    // The engine's fit shrinks text that runs too tall, but breaks a single word wider than the box across
+    // two lines ("COLLABORATIO / N"). Start such a layer small enough for its longest word.
+    doc.layers = doc.layers.map((l) => {
+      if (l.type !== 'text' || !l.fit) return l;
+      const words = String(l.text || '').replace(/\*/g, '').split(/\s+/).map((w) => (l.upper ? w.toUpperCase() : w));
+      let size = l.size;
+      const widest = () => {
+        ctx.font = fontOf(l, size);
+        if ('letterSpacing' in ctx) ctx.letterSpacing = `${(l.spacing || 0) * size / 100}px`;
+        return Math.max(...words.map((w) => ctx.measureText(w).width));
+      };
+      while (size > 40 && widest() > l.w) size -= 2;
+      return size === l.size ? l : { ...l, size };
+    });
+    const block = () => extent(areas(doc).filter((a) => a.l.name !== 'Footer'));
+    const bandTop = INNER.top; const bandBottom = INNER.bottom - (spec.footer ? FOOTER_H + 60 : 0);
+    for (let i = 0; i < 30; i += 1) {
+      const e = block(); const over = (e.bottom - e.top) - (bandBottom - bandTop);
+      if (over <= 0 || !mainOf()?.fit) break;
+      doc.layers = doc.layers.map((l) => (l.id === mainId ? { ...l, h: Math.max(200, l.h - Math.max(20, over)) } : l));
+    }
+    const e = block();
+    const shift = Math.round((bandTop + bandBottom) / 2 - (e.top + e.bottom) / 2);
+    doc.layers = doc.layers.map((l) => {
+      if (l.name === 'Footer') return { ...l, y: Math.round(INNER.bottom - FOOTER_H) };
+      return l.pin ? l : { ...l, y: l.y + shift }; // pinned layers follow the layer they are pinned to
+    });
+    doc = applyMotion(doc, spec.motion);
+    return { ...doc, music: { track: spec.music, volume: 0.8 }, motion: { ...doc.motion, camera: 'push', intro: 'draw' } };
+  }
+
+  /** Where the finished layout sits, and anything outside the safe area (after the camera's push-in). */
+  window.check = async (spec) => {
+    const doc = await make(spec);
+    const list = areas(doc);
+    const end = (v, c) => c + (v - c) * ZOOM; // where a point is on the last frame
+    const bad = list.flatMap((a) => {
+      const box = { top: end(a.y, H / 2), bottom: end(a.y + a.h, H / 2), left: end(a.x, W / 2), right: end(a.x + a.w, W / 2) };
+      return [
+        box.top < SAFE.top && `top ${Math.round(box.top)} < ${SAFE.top}`,
+        box.bottom > SAFE.bottom && `bottom ${Math.round(box.bottom)} > ${SAFE.bottom}`,
+        box.right > SAFE.right && `right ${Math.round(box.right)} > ${SAFE.right}`,
+        box.left < SAFE.left && `left ${Math.round(box.left)} < ${SAFE.left}`,
+      ].filter(Boolean).map((o) => `${a.l.name}: ${o}`);
+    });
+    const e = extent(list); const boxes = layout(ctx, doc);
+    const seconds = lengthOf(doc); const settled = settledAt(doc);
+    if (coverTime(seconds) < settled + 0.3) bad.push(`cover frame at ${coverTime(seconds)} s comes before the entrances finish (${settled.toFixed(1)} s)`);
+    return {
+      bad, extent: { top: Math.round(e.top), bottom: Math.round(e.bottom), left: Math.round(e.left), right: Math.round(e.right) },
+      sizes: Object.fromEntries(doc.layers.filter((l) => l.type === 'text').map((l) => [l.name, boxes[l.id].text.size])),
+      seconds, coverMs: Math.round(coverTime(seconds) * 1000), settled: Math.round(settled * 10) / 10,
+    };
+  };
+
+  /** The cover: the video's frame at coverTime, as a JPEG data URL. */
+  window.cover = async (spec) => {
+    const doc = await make(spec);
+    const seconds = lengthOf(doc);
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    drawDesign(c.getContext('2d'), doc, coverTime(seconds), { length: seconds });
+    return toData(await new Promise((r, no) => c.toBlob((b) => (b ? r(b) : no(new Error('Could not draw the cover.'))), 'image/jpeg', 0.92)));
+  };
+
+  /** The video with its music, 8 to 15 seconds (as long as the words need): { data, type, seconds, audio }. */
+  window.video = async (spec) => {
+    const doc = await make(spec);
+    const seconds = lengthOf(doc);
+    const audio = await renderTrack(spec.music, seconds, { seed: spec.seed });
+    const out = await renderVideo(doc, { seconds, audio });
+    return { data: await toData(out.blob), type: out.type, seconds, audio: levels(audio) };
+  };
+
+  /** Small frames of the animation at the given times (checks that the entrances read well). */
+  window.frames = async (spec, times) => {
+    const doc = await make(spec);
+    const big = document.createElement('canvas'); const sm = document.createElement('canvas');
+    big.width = W; big.height = H; sm.width = 216; sm.height = 384;
+    return times.map((t) => { drawDesign(big.getContext('2d'), doc, t, { length: lengthOf(doc) }); sm.getContext('2d').drawImage(big, 0, 0, sm.width, sm.height); return sm.toDataURL('image/jpeg', 0.85); });
+  };
+
+  window.ready = true;
+</script>
+</body>
+</html>

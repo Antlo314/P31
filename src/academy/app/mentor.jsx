@@ -15,6 +15,10 @@ import { toLocalInput, fromLocalInput, useRoster } from './helpers';
 import { AttendanceModal, CallReportModal, GoLiveModal, MentorPulse, StudentFilesPanel, StudentNotes, StudentProgressPanel, StudentTasksPanel } from './teach';
 import { startViewAs } from './viewAs';
 import { IntakeModal, MentorAgreements } from './agreements';
+import { PROGRAMS as PUBLIC_PROGRAMS } from '../content';
+
+// Programs with a public /mentorship page (Couples has none yet, so its mentors share /mentorship).
+const PUBLIC_PAGE = new Set(Object.keys(PUBLIC_PROGRAMS));
 
 const daysFromNow = (d) => new Date(Date.now() + d * 86400e3).toISOString();
 const STATUS_PILL = { active: 'ds-pill--green', past_due: 'ds-pill--red', canceled: '', expired: '' };
@@ -59,7 +63,7 @@ export const MentorOverview = () => {
             <ul className="ds-list">{newCalls.slice(0, 5).map((c) => (
               <li key={c.id} className="ds-row"><PhoneCall size={18} /><div><strong>{c.full_name}</strong><small>{c.preferred_times || 'No times given'} · {fmtDate(c.created_at)}</small></div></li>
             ))}</ul>
-          ) : <p className="ds-muted">No new requests. Share {window.location.origin}/mentorship/{program.slug} to invite people.</p>}
+          ) : <p className="ds-muted">No new requests. Share {window.location.origin}{PUBLIC_PAGE.has(program.slug) ? `/mentorship/${program.slug}` : '/mentorship'} to invite people.</p>}
         </article>
       </div>
     </>
@@ -184,7 +188,7 @@ export const MentorCalls = () => {
             </article>
           ))}
         </div>
-      ) : <DashEmpty Icon={PhoneCall} title="No requests here">New intro-call requests from {window.location.host}/mentorship/{program.slug} show up here.</DashEmpty>}
+      ) : <DashEmpty Icon={PhoneCall} title="No requests here">New intro-call requests from {window.location.host}{PUBLIC_PAGE.has(program.slug) ? `/mentorship/${program.slug}` : '/mentorship'} show up here.</DashEmpty>}
       {invite && <InviteModal prefill={invite} onClose={() => setInvite(null)} onCreated={calls.reload} />}
       {intake && <IntakeModal prefill={intake} onClose={() => setIntake(null)} onCreated={calls.reload} />}
     </>

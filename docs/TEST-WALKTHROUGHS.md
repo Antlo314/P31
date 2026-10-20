@@ -334,7 +334,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 **What should happen**
 
 - Within a minute each person gets a confirmation email with a PDF of exactly what they sent (signed forms include the drawn signature).
-- ceo@p31market.com receives every team notification, with the same PDF attached; the usual team mailboxes still receive theirs.
+- ceo@p31market.com receives every team notification except signed coaching forms (those go only to founder@thep31collective.org and the client), with the same PDF attached; the usual team mailboxes still receive theirs.
 - Each entry is in Systems (applications, vendor forms) or the mentor console (intro calls).
 
 **Afterwards:** Delete the TEST rows in Systems.
@@ -370,12 +370,12 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 1. In the mentor console → Intro calls, press “Send the three agreements” on a request (or Agreements → Send the agreements) with a TEST email you can read.
 2. Open the email that arrives and follow the link. Sign the Business Coaching Agreement (pick a package), then the Confidentiality Agreement, then the Client Safety & Emergency Contact form.
-3. Check the TEST inbox and the team inbox (members@ and ceo@p31market.com).
+3. Check the TEST inbox and founder@thep31collective.org (and members@ and ceo@p31market.com, which should get nothing).
 
 **What should happen**
 
 - The forms must be signed in that order; the page refuses to skip ahead and remembers what is already signed if you leave and come back.
-- Each signed form arrives at the team and ceo@ with a PDF of every word agreed to and the signature; the client gets her own copy with a link to the next form.
+- Each signed form arrives at founder@thep31collective.org with a PDF of every word agreed to and the signature; the client gets her own copy with a link to the next form. members@ and ceo@p31market.com get nothing.
 - Agreements in the mentor console shows three green checks and the package chosen; the intro-call request moves to Scheduled.
 
 **Afterwards:** Delete the TEST client from Agreements (that removes her signed forms too).

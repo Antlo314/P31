@@ -5,6 +5,7 @@
 // exactly the ones an admin switches on for the email they sign in with (team_access.tools).
 import { Clapperboard, Megaphone, Mail, GraduationCap, Users, ClipboardList, CalendarDays, Receipt, Store, Film } from 'lucide-react';
 import { DAVINCI_ON } from './features';
+import { PROGRAM_SLUGS, programName } from './programs';
 
 export const DASHBOARDS = [
   {
@@ -25,7 +26,8 @@ export const DASHBOARDS = [
   {
     id: 'classroom', label: 'Classroom', short: 'Classroom', site: 'collective', Icon: GraduationCap,
     blurb: 'The mentorship consoles: students, lessons and videos, sessions and recordings, grading, intro calls and enrollment invites.',
-    opens: [{ to: '/academy/business/teach', label: 'Business Mentorship console' }, { to: '/academy/faith/teach', label: 'Faith Mentorship console' }],
+    // One mentor console per program (src/lib/programs.js).
+    opens: PROGRAM_SLUGS.map((slug) => ({ to: `/academy/${slug}/teach`, label: `${programName(slug)} console` })),
     systems: ['/systems/academy'], tour: 'classroom',
   },
   {

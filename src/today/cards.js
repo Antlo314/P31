@@ -24,6 +24,26 @@ export const when = (iso) => {
   return `${day} · ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
 };
 
+// One read of the Studio inbox (both Zernio workspaces) for the cards on a page: each site's DM card
+// counts only the conversations of the accounts that answer for it.
+let inboxRead = null;
+const studioInbox = () => {
+  if (!inboxRead || Date.now() - inboxRead.at > 30e3) inboxRead = { at: Date.now(), p: studio('inbox') };
+  return inboxRead.p;
+};
+const PLATFORM = { instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok' };
+const BRAND = { market: 'Marketplace', collective: 'Collective', both: 'Both brands' };
+
+/** Unread DMs for one site. Conversations without a site come from an older function that read the Market's key only. */
+const dmCard = (inbox, site) => {
+  const unread = (inbox?.conversations || []).filter((c) => (c.site || 'market') === site && c.unread > 0);
+  return {
+    key: site === 'market' ? 'dms-market' : 'dms', site, Icon: Inbox, title: site === 'market' ? 'Unread Market DMs' : 'Unread Collective DMs',
+    count: unread.reduce((n, c) => n + c.unread, 0), to: `/studio/inbox?brand=${site}`, cta: 'Open messages', empty: 'No unread DMs.',
+    items: unread.map((c) => ({ key: `${c.accountId}:${c.id}`, title: c.name || c.username || 'Someone', sub: `${PLATFORM[c.platform] || c.platform}${c.accountUsername ? ` to @${c.accountUsername}` : ''} · ${c.last || 'New message'}` })),
+  };
+};
+
 export async function mentorCards(slug) {
   const { data: prog } = await supabase.from('academy_programs').select('id').eq('slug', slug).maybeSingle();
   if (!prog) return [];
@@ -61,16 +81,20 @@ export async function mentorCards(slug) {
   ].filter(Boolean);
 }
 
-/** p31market.com: orders, vendor applications, shops waiting for review, and the signed forms waiting on the team. */
-export async function marketCards() {
-  const [orders, vendors, curators, agreements, registrations, volunteers] = await Promise.all([
+/**
+ * p31market.com: orders, vendor applications, shops waiting for review, the signed forms waiting on
+ * the team, and the Market's unread DMs when this person can read them. The DMs come from Zernio,
+ * which is slower than the rest, so a page that shows them elsewhere (or not at all) passes dms: false.
+ */
+export async function marketCards({ dms = true } = {}) {
+  const [[inbox], [orders, vendors, curators, agreements, registrations, volunteers]] = await Promise.all([Promise.allSettled(dms ? [studioInbox()] : []), Promise.all([
     supabase.from('orders').select('id, product_name, buyer_name, created_at', { count: 'exact' }).eq('fulfillment_status', 'new').order('created_at', { ascending: false }).limit(4),
     supabase.from('vendor_applications').select('id, full_name, business_name, created_at', { count: 'exact' }).eq('status', 'new').order('created_at', { ascending: false }).limit(4),
     supabase.from('curator_data').select('id, business_name, created_at', { count: 'exact' }).eq('status', 'pending').order('created_at', { ascending: false }).limit(4),
     supabase.from('vendor_agreements').select('id, business_name, created_at', { count: 'exact' }).eq('status', 'new').order('created_at', { ascending: false }).limit(4),
     supabase.from('vendor_registrations').select('id, business_name, event_label, created_at', { count: 'exact' }).eq('status', 'new').order('created_at', { ascending: false }).limit(4),
     supabase.from('volunteer_signups').select('id, first_name, last_name, created_at', { count: 'exact' }).eq('status', 'new').order('created_at', { ascending: false }).limit(4),
-  ]);
+  ])]);
   const forms = [agreements, registrations, volunteers].every((x) => !x.error) && {
     key: 'forms', site: 'market', Icon: FileSignature, title: 'Vendor forms', to: '/systems/forms', cta: 'Open vendor forms', empty: 'No new agreements, registrations or volunteers.',
     count: (agreements.count ?? 0) + (registrations.count ?? 0) + (volunteers.count ?? 0),
@@ -94,6 +118,7 @@ export async function marketCards() {
       items: (curators.data || []).map((c) => ({ key: c.id, title: c.business_name || 'New shop', sub: `Applied ${ago(c.created_at)}` })),
     },
     forms,
+    inbox?.status === 'fulfilled' && dmCard(inbox.value, 'market'),
   ].filter(Boolean);
 }
 
@@ -102,7 +127,7 @@ export async function collectiveCards() {
   const [apps, mail, inbox, posts] = await Promise.allSettled([
     supabase.from('collective_applications').select('id, full_name, city_state, created_at', { count: 'exact' }).eq('status', 'new').order('created_at', { ascending: false }).limit(4),
     supabase.from('email_threads').select('id, contact_name, contact_email, subject, needs_human, last_message_at', { count: 'exact' }).eq('status', 'needs_reply').order('last_message_at', { ascending: false }).limit(4),
-    studio('inbox'),
+    studioInbox(),
     studio('posts'),
   ]);
   const out = [];
@@ -119,20 +144,15 @@ export async function collectiveCards() {
       items: (mail.value.data || []).map((m) => ({ key: m.id, title: `${m.needs_human ? '⚑ ' : ''}${m.contact_name || m.contact_email}`, sub: `${m.subject} · ${ago(m.last_message_at)}` })),
     });
   }
-  if (inbox.status === 'fulfilled') {
-    const unread = (inbox.value?.conversations || []).filter((c) => c.unread > 0);
-    out.push({
-      key: 'dms', site: 'collective', Icon: Inbox, title: 'Unread DMs', count: unread.reduce((n, c) => n + c.unread, 0), to: '/studio/inbox', cta: 'Open messages', empty: 'No unread DMs.',
-      items: unread.map((c) => ({ key: c.id, title: c.name || c.username || 'Someone', sub: `${c.platform} · ${c.last || 'New message'}` })),
-    });
-  }
+  if (inbox.status === 'fulfilled') out.push(dmCard(inbox.value, 'collective'));
   if (posts.status === 'fulfilled') {
     const until = Date.now() + 2 * 864e5;
     const next = (posts.value?.scheduled || []).filter((p) => p.scheduledFor && new Date(p.scheduledFor) <= until)
       .sort((a, b) => new Date(a.scheduledFor) - new Date(b.scheduledFor));
     out.push({
       key: 'posts', site: 'collective', Icon: CalendarClock, title: 'Posts going out', count: next.length, to: '/studio/calendar', cta: 'Open the calendar', empty: 'Nothing scheduled for the next two days.',
-      items: next.map((p) => ({ key: p.id, title: (p.content || p.title || 'Post').replace(/\s+/g, ' ').slice(0, 80), sub: when(p.scheduledFor) })),
+      // The Studio posts for both brands, so each one says which.
+      items: next.map((p) => ({ key: p.id, title: (p.content || p.title || 'Post').replace(/\s+/g, ' ').slice(0, 80), sub: `${when(p.scheduledFor)}${BRAND[p.site] ? ` · ${BRAND[p.site]}` : ''}` })),
     });
   }
   return out;
@@ -158,19 +178,20 @@ export async function healthCards() {
 
 /** Everything Systems reports on Today: market, then collective (minus the Studio inboxes, which the Studio section shows), then health. */
 export async function systemsCards() {
-  const [m, c, h] = await Promise.all([marketCards(), collectiveCards(), healthCards()]);
+  const [m, c, h] = await Promise.all([marketCards({ dms: false }), collectiveCards(), healthCards()]);
   return [...m, ...c.filter((x) => x.key === 'applications'), ...h];
 }
 
-/** A team member's Systems cards: only the ones her dashboards open (pages = her Systems paths). */
+/** A team member's Systems cards: only the ones her dashboards open (pages = her Systems paths; the DMs open in the Studio). */
 export async function teamCards(pages) {
-  const [m, c] = await Promise.all([marketCards(), collectiveCards()]);
+  const [m, c] = await Promise.all([marketCards({ dms: false }), collectiveCards()]);
   return [...m, ...c.filter((x) => x.key === 'applications')].filter((x) => pages.some((p) => x.to.startsWith(p)));
 }
 
+/** The Content Studio's cards: both sites' unread DMs, emails to answer, and the posts going out. */
 export async function studioCards() {
-  const c = await collectiveCards();
-  return c.filter((x) => x.key !== 'applications');
+  const [c, [inbox]] = await Promise.all([collectiveCards(), Promise.allSettled([studioInbox()])]);
+  return [...c.filter((x) => x.key !== 'applications'), ...(inbox.status === 'fulfilled' ? [dmCard(inbox.value, 'market')] : [])];
 }
 
 export async function davinciCards() {

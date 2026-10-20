@@ -1,0 +1,72 @@
+{
+  "tt01-apply": {
+    "seconds": 12,
+    "coverMs": 11500,
+    "at": "2026-10-20T15:34:55.292Z"
+  },
+  "tt02-fine-linen": {
+    "seconds": 9,
+    "coverMs": 8500,
+    "at": "2026-10-20T15:34:59.406Z"
+  },
+  "tt03-strength-honour": {
+    "seconds": 10,
+    "coverMs": 9500,
+    "at": "2026-10-20T15:35:04.632Z"
+  },
+  "tt04-storefront": {
+    "seconds": 12,
+    "coverMs": 11500,
+    "at": "2026-10-20T15:35:08.565Z"
+  },
+  "tt05-fruit-of-her-hands": {
+    "seconds": 11,
+    "coverMs": 10500,
+    "at": "2026-10-20T15:35:13.506Z"
+  },
+  "tt06-luncheon": {
+    "seconds": 12,
+    "coverMs": 11500,
+    "at": "2026-10-20T15:35:18.261Z"
+  },
+  "tt07-build-together": {
+    "seconds": 8,
+    "coverMs": 7500,
+    "at": "2026-10-20T15:35:19.850Z"
+  },
+  "tt08-friday-prayer": {
+    "seconds": 9,
+    "coverMs": 8500,
+    "at": "2026-10-20T15:35:21.697Z"
+  },
+  "tt09-growing-in": {
+    "seconds": 9,
+    "coverMs": 8500,
+    "at": "2026-10-20T15:35:26.305Z"
+  },
+  "tt10-gift-makes-room": {
+    "seconds": 9,
+    "coverMs": 8500,
+    "at": "2026-10-20T15:35:31.331Z"
+  },
+  "tt11-two-ways": {
+    "seconds": 13,
+    "coverMs": 12500,
+    "at": "2026-10-20T15:35:37.399Z"
+  },
+  "tt12-vision": {
+    "seconds": 9,
+    "coverMs": 8500,
+    "at": "2026-10-20T15:35:42.766Z"
+  },
+  "tt13-merch": {
+    "seconds": 11,
+    "coverMs": 10500,
+    "at": "2026-10-20T15:35:50.451Z"
+  },
+  "tt14-out-of-the-dms": {
+    "seconds": 8,
+    "coverMs": 7500,
+    "at": "2026-10-20T15:35:52.915Z"
+  }
+}

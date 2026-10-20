@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase';
 import SignatureField from '../../components/SignatureField';
 import { todayLong } from '../../lib/forms';
 import { CONTACT_EMAIL } from '../../lib/academy';
-import { FORMS, ORDER, PACKAGES, GOOGLE_FORMS, COACHING_TERMS_VERSION, packagePrice } from '../../../supabase/functions/_shared/coaching-text.js';
+import { FORMS, ORDER, PACKAGES, GOOGLE_FORMS, COACHING_TERMS_VERSION, packagePrice, packagesFor } from '../../../supabase/functions/_shared/coaching-text.js';
 import mark from '../../assets/academy/collective-mark.webp';
 import './coaching.css';
 
@@ -16,8 +16,8 @@ const STEP = {
 };
 const FRIENDLY = /^(Please|This link|Clients must|Unknown)/;
 
-/** One agreement, section by section, word for word. */
-const AgreementText = ({ doc, prices }) => (
+/** One agreement, section by section, word for word (section 5 lists the packages of her program). */
+const AgreementText = ({ doc, prices, packages }) => (
   <div className="cf-terms">
     {doc.tagline && <p className="cf-tagline">{doc.tagline}</p>}
     {doc.intro.map((p) => <p key={p}>{p}</p>)}
@@ -30,13 +30,13 @@ const AgreementText = ({ doc, prices }) => (
         {s.items2 && <ul>{s.items2.map((i) => <li key={i}>{i}</li>)}</ul>}
         {s.packages && (
           <div className="cf-packages">
-            {PACKAGES.map((p) => (
+            {packages.map((p) => (
               <div key={p.key} className="cf-package">
                 <small>{p.key}</small>
                 <strong>{p.name}</strong>
                 <b>{packagePrice(p.key, prices)}</b>
                 <span>{p.cadence}</span>
-                <p>{p.detail}</p>
+                {p.detail && <p>{p.detail}</p>}
               </div>
             ))}
           </div>
@@ -52,8 +52,8 @@ const AgreementText = ({ doc, prices }) => (
 /**
  * /coaching/forms/:token — a new private-coaching client's three forms, signed in order on one
  * private page: the Business Coaching Agreement, the Confidentiality Agreement, then the Client
- * Safety & Emergency Contact form. The link comes from a mentor; each signed form is emailed to
- * the team with a PDF copy to the client.
+ * Safety & Emergency Contact form. The link comes from a mentor; each signed form is emailed, with
+ * its PDF, to the client and to founder@thep31collective.org only (join-notify).
  */
 const CoachingForms = () => {
   const { token } = useParams();
@@ -84,6 +84,8 @@ const CoachingForms = () => {
 
   const signed = useMemo(() => intake?.signed || {}, [intake]);
   const prices = useMemo(() => Object.fromEntries((intake?.packages || []).map((p) => [p.key, p.price_cents])), [intake]);
+  // Couples Private Mentorship (v58) has its own two packages; business and faith clients pick a business Option.
+  const packages = packagesFor(intake?.program_slug);
   const current = ORDER.find((k) => !signed[k]) || null;
   const doc = current ? FORMS[current] : null;
 
@@ -91,7 +93,7 @@ const CoachingForms = () => {
     e.preventDefault();
     setError('');
     if (!f.full_name.trim().includes(' ')) return setError('Please enter your full name (first and last).');
-    if (current === 'coaching' && !f.package) return setError('Please select your business coaching package.');
+    if (current === 'coaching' && !f.package) return setError('Please select your coaching package.');
     if (current !== 'safety' && !f.agreed) return setError(`Please confirm you have read and agree to the ${doc.title}.`);
     setBusy(true);
     const answers = {
@@ -133,9 +135,10 @@ const CoachingForms = () => {
   // Step 3 of the enrollment workflow: completion is requested within 48 hours of the invitation.
   const dueBy = intake.created_at ? new Date(new Date(intake.created_at).getTime() + 48 * 3600e3) : null;
   const dueText = dueBy && dueBy > new Date() ? dueBy.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : null;
-  // Step 5: choose the program and tier. Business Coaching options match the agreement's packages.
+  // Step 5: choose the program and tier. The tier with her agreement package is chosen for her
+  // (package keys are unique across programs).
   const plans = intake.plans || [];
-  const agreed = plans.find((p) => p.program === 'business' && p.package === signed.coaching?.package);
+  const agreed = plans.find((p) => p.package === signed.coaching?.package);
   const chosenId = plan || intake.chosen_plan || agreed?.id || '';
   const choose = async () => {
     if (!chosenId) return setPlanError('Choose a program and plan.');
@@ -144,13 +147,27 @@ const CoachingForms = () => {
     if (err || !data) { setGoing(false); return setPlanError(FRIENDLY.test(err?.message || '') || /already enrolled/.test(err?.message || '') ? err.message : 'We could not open checkout just now. Please try again in a moment.'); }
     navigate(`/enroll/${data}`);
   };
-  const tierName = (p) => (p.program === 'business'
-    ? (PACKAGES.find((x) => x.key === p.package) ? `${p.package} — ${PACKAGES.find((x) => x.key === p.package).name}` : p.label)
-    : p.label.replace(/^Faith Mentorship:s*/, ''));
-  const tierNote = (p) => (p.program !== 'business' ? 'Private faith mentorship'
-    : PACKAGES.find((x) => x.key === p.package)?.cadence || (p.billing === 'six_months' ? '6-month commitment, paid up front' : 'Business Coaching'));
+  const dollars = (c) => `$${(c / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+  // A 6-month tier saves against six months of its monthly tier ('Option 1 6M' and 'Option 1'), worked
+  // out here from the prices on this private page; no price or saving is written in the code.
+  const saving = (p) => {
+    const monthly = p.billing === 'six_months' && plans.find((x) => x.program === p.program && x.billing === 'month' && x.package === String(p.package).replace(/ 6M$/, ''));
+    return monthly ? 6 * monthly.price_cents - p.price_cents : 0;
+  };
+  const tierName = (p) => {
+    const pkg = PACKAGES.find((x) => x.key === p.package);
+    if (p.program === 'business') return pkg ? `${p.package} — ${pkg.name}` : p.label;
+    if (p.program === 'couples') return p.label.replace(/^Couples Private Mentorship:?\s*/, '');
+    return p.label.replace(/^Faith Mentorship:\s*/, '');
+  };
+  const tierNote = (p) => {
+    if (p.program === 'faith') return 'Private faith mentorship';
+    if (p.billing === 'six_months') return `6-month commitment, paid up front${saving(p) > 0 ? ` · you save ${dollars(saving(p))}` : ''}`;
+    return packagesFor(p.program).find((x) => x.key === p.package)?.cadence || (p.program === 'couples' ? 'Couples Private Mentorship' : 'Business Coaching');
+  };
   const PER = { week: '/week', month: '/month', six_months: ' for 6 months', one_time: '' };
-  const priceText = (p) => `$${(p.price_cents / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}${PER[p.billing] ?? ''}`;
+  const priceText = (p) => `${dollars(p.price_cents)}${PER[p.billing] ?? ''}`;
+  const GROUPS = [['business', 'Business Coaching'], ['faith', 'Private Faith Mentorship'], ['couples', 'Couples Private Mentorship']];
   return (
     <div className="cf">
       <header className="cf-head">
@@ -197,13 +214,13 @@ const CoachingForms = () => {
         <div className="cf-card">
           <p className="cf-stepline">Step 5 · Your program and plan</p>
           <h2>Choose your program and plan</h2>
-          <p className="cf-sub">Monthly, billed securely by Stripe. Your agreement package is chosen for you; pick another if your mentor agreed one with you.</p>
-          {['business', 'faith'].map((prog) => {
+          <p className="cf-sub">{plans.some((p) => p.billing === 'six_months') ? 'Monthly, or a 6-month commitment paid up front' : 'Monthly'}, billed securely by Stripe. Your agreement package is chosen for you; pick another if your mentor agreed one with you.</p>
+          {GROUPS.map(([prog, legend]) => {
             const list = plans.filter((p) => p.program === prog);
             if (!list.length) return null;
             return (
               <fieldset className="cf-field" key={prog}>
-                <legend>{prog === 'business' ? 'Business Coaching' : 'Private Faith Mentorship'}</legend>
+                <legend>{legend}</legend>
                 <div className="cf-options">
                   {list.map((p) => (
                     <label key={p.id} className={`cf-option ${chosenId === p.id ? 'is-on' : ''}`}>
@@ -227,13 +244,13 @@ const CoachingForms = () => {
           <p className="cf-stepline">Form {ORDER.indexOf(current) + 1} of 3</p>
           <h2>{doc.title}</h2>
           <p className="cf-sub">{doc.subtitle}</p>
-          <AgreementText doc={doc} prices={prices} />
+          <AgreementText doc={doc} prices={prices} packages={packages} />
 
           {current === 'coaching' && (
             <fieldset className="cf-field">
-              <legend>Select your business coaching package *</legend>
+              <legend>Select your coaching package *</legend>
               <div className="cf-options">
-                {PACKAGES.map((p) => (
+                {packages.map((p) => (
                   <label key={p.key} className={`cf-option ${f.package === p.key ? 'is-on' : ''}`}>
                     <input type="radio" name="package" value={p.key} checked={f.package === p.key} onChange={set('package')} required />
                     <span><b>{p.key}</b> — {p.name}<small>{packagePrice(p.key, prices)} · {p.cadence}</small></span>

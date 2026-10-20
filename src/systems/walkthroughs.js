@@ -91,12 +91,12 @@ export const SYSTEMS_CHAPTERS = {
   'sys:academy': {
     title: 'Mentorship: prices, curriculum, videos, sessions', group: 'Collective', site: 'collective', minutes: 4, dash: 'classroom',
     steps: [
-      { to: '/systems/academy', targets: nav('/systems/academy'), title: 'The mentorships', body: 'Business and Faith-Based Mentorship: their private prices, mentors, members, Studio seats and intro calls, and now each program’s curriculum, videos and sessions.' },
+      { to: '/systems/academy', targets: nav('/systems/academy'), title: 'The mentorships', body: 'Business, Faith-Based and Couples Private Mentorship: their private prices, mentors, members, Studio seats and intro calls, and now each program’s curriculum, videos and sessions.' },
       { to: '/systems/academy', targets: tour('tab-plans'), title: 'Plans and prices', body: 'Prices are never public. A plan with a price is offered on the private enrollment link a mentor sends after an intro call.' },
       { to: '/systems/academy', targets: tour('tab-curriculum'), act: 'click', title: 'Curriculum & videos', body: 'Build modules and lessons for a program. Each lesson can carry a video link (YouTube, Vimeo, Loom) or an uploaded video file that students stream inside the lesson. Publish when ready.' },
       { to: '/systems/academy', targets: tour('academy-editor'), title: 'Modules, lessons, downloads', body: 'Add a module, add lessons under it, reorder, publish or unpublish, and attach worksheets and slides to the library.' },
       { to: '/systems/academy', targets: tour('tab-sessions'), act: 'click', title: 'Sessions & recordings', body: 'Schedule group sessions (live room, Zoom or a pasted link), add notes afterwards, and attach the recording as a link or an uploaded file.' },
-      { to: '/systems/academy', targets: tour('tab-mentors'), act: 'click', title: 'Mentors and members', body: 'Add a mentor by email, enroll someone manually, end access, and see every intro-call request. Anyone with the Classroom dashboard is a mentor of every program.' },
+      { to: '/systems/academy', targets: tour('tab-mentors'), act: 'click', title: 'Mentors and members', body: 'Add a mentor by email, enroll someone manually (a couples client’s partner is enrolled here as Complimentary, with their own account), end access, and see every intro-call request. Anyone with the Classroom dashboard is a mentor of every program.' },
     ],
   },
   'sys:crm': {
@@ -188,6 +188,7 @@ export const OTHER_CHAPTERS = [
   { id: 'studio-email', title: 'Email inbox', group: 'Other dashboards', site: 'collective', minutes: 2, dash: 'emails', href: '/studio/email?tour=studio-email', blurb: 'members@ and vendor@, with drafted replies you approve and send.' },
   { id: 'mentor-business', title: 'Mentor console: Business Mentorship', group: 'Other dashboards', site: 'collective', minutes: 3, dash: 'classroom', href: '/academy/business/teach?tour=mentor-business', blurb: 'Students, inbox, gradebook, assignments, quizzes, curriculum, sessions, intro calls, invites.' },
   { id: 'mentor-faith', title: 'Mentor console: Faith Mentorship', group: 'Other dashboards', site: 'collective', minutes: 3, dash: 'classroom', href: '/academy/faith/teach?tour=mentor-faith', blurb: 'The same console for the Faith-Based Mentorship.' },
+  { id: 'mentor-couples', title: 'Mentor console: Couples Private Mentorship', group: 'Other dashboards', site: 'collective', minutes: 3, dash: 'classroom', href: '/academy/couples/teach?tour=mentor-couples', blurb: 'The same console for the Couples Private Mentorship.' },
   { id: 'classroom-business', title: 'A student’s classroom', group: 'Other dashboards', site: 'collective', minutes: 2, dash: 'classroom', href: '/academy/business?tour=classroom-business', blurb: 'What a student sees: lessons, assignments, sessions, the member line, progress.' },
   { id: 'gather', title: 'The Gathering', group: 'Other dashboards', site: 'both', minutes: 2, dash: 'team', href: '/gather/the-gathering?tour=gather', blurb: 'Channels by audience, the Daily Word, threads, reactions, @mentions, search, members and direct messages.' },
   { id: 'curator-studio', title: 'Curator Studio: what a vendor sees', group: 'Other dashboards', site: 'market', minutes: 3, dash: 'shops', href: '/dashboard/identity?tour=curator-studio', blurb: 'The vendor’s own studio: shop setup, products, orders, marketing, her storefront plan and the community.' },

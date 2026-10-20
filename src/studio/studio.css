@@ -191,3 +191,36 @@
 .ap-panel .fc-spin { animation: ap-panel-spin 0.9s linear infinite; }
 @keyframes ap-panel-spin { to { transform: rotate(360deg); } }
 @media (max-width: 520px) { .ap-mix label { grid-template-columns: 1fr 44px; } .ap-mix label span { grid-column: 1 / -1; } }
+
+/* Post plans (Plans.jsx). Prefix: pp- */
+.pp-bar { margin-bottom: 14px; }
+.pp-bar__title { display: grid; gap: 2px; }
+.pp-bar__title h2 { margin: 0; font-family: var(--font-heading); font-weight: 400; font-size: 1.35rem; }
+.pp-acct, .pp-alert, .pp-ok { display: flex; gap: 8px; align-items: flex-start; margin: 0; font-size: 0.9rem; overflow-wrap: anywhere; }
+.pp-acct svg, .pp-alert svg, .pp-ok svg { flex: none; margin-top: 3px; }
+.pp-acct { color: #7be0b8; }
+.pp-alert { padding: 10px 12px; border-radius: 12px; background: rgba(255, 184, 107, 0.12); color: #ffd3a3; }
+.pp-ok { color: #7be0b8; font-weight: 700; }
+.pp-label { align-items: flex-start; }
+.pp-label input { margin-top: 2px; flex: none; }
+.pp-label span { display: grid; gap: 2px; }
+.pp-label small { color: var(--ds-ink-3); font-size: 0.8rem; }
+.pp-counts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pp-all { margin-left: auto; }
+.pp-list { display: grid; gap: 14px; }
+.ds-card.pp-post { grid-template-columns: 200px minmax(0, 1fr); gap: 16px; align-items: start; }
+.pp-video { width: 100%; aspect-ratio: 9 / 16; border-radius: 12px; background: #000; object-fit: cover; display: block; }
+.pp-body { display: grid; gap: 8px; min-width: 0; }
+.pp-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.pp-head strong { display: inline-flex; align-items: center; gap: 6px; }
+.pp-cap { margin: 0; }
+.pp-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.88rem; line-height: 1.45; color: var(--ds-ink-2); display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+.pp-step { margin: 0; display: flex; align-items: center; gap: 6px; }
+.pp-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.pp-spin { animation: pp-spin 0.9s linear infinite; vertical-align: -2px; }
+@keyframes pp-spin { to { transform: rotate(360deg); } }
+@media (max-width: 700px) {
+  .ds-card.pp-post { grid-template-columns: minmax(0, 1fr); }
+  .pp-video { max-width: 260px; justify-self: center; }
+  .pp-all { margin-left: 0; width: 100%; justify-content: center; }
+}

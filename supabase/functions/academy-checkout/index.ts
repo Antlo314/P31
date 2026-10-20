@@ -8,6 +8,8 @@
 // Body: { token }  →  { url } | { already: true } | { error }
 //       { action: 'sync' }  →  copies each plan's price and billing from its Stripe Payment Link (v54);
 //                              no sign-in needed, it only reads Stripe. Run daily by job p31-plan-sync.
+//                              It answers with counts only ({ synced, missing, links_on_account }): plan
+//                              names and prices go to the function log, never to the caller.
 // Plans with a Stripe Payment Link (Melanie's own links, v54) are charged with the product and price
 // behind that link, so every sale shows under her products in Stripe and she sets the price there.
 import Stripe from 'npm:stripe@17.7.0';
@@ -82,7 +84,9 @@ Deno.serve(async (req) => {
         else missing.push(p.label);
       } catch (e) { missing.push(`${p.label}: ${(e as Error).message}`); }
     }
-    return json({ synced, missing, links_on_account: links.size });
+    // Anyone can call this, so the details (plan names and prices) stay in the function log.
+    console.log('academy-checkout sync', JSON.stringify({ source: raw?.source || '', synced, missing, links_on_account: links.size }));
+    return json({ synced: synced.length, missing: missing.length, links_on_account: links.size });
   }
   const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
   const { data: userData } = await admin.auth.getUser(token);
@@ -105,8 +109,9 @@ Deno.serve(async (req) => {
   // deno-lint-ignore no-explicit-any
   const plan = invite.plan as any; const program = invite.program as any;
   if (!plan?.is_active || !plan?.price_cents) return json({ error: 'This plan isn’t available yet — please contact your mentor.' }, 409);
-  // Enrollment workflow step 4: Faith Mentorship and Business Coaching need all three forms signed before checkout.
-  if (['business', 'faith'].includes(program?.slug)) {
+  // Enrollment workflow step 4: Faith Mentorship, Business Coaching and Couples Private Mentorship (v58)
+  // need all three forms signed before checkout.
+  if (['business', 'faith', 'couples'].includes(program?.slug)) {
     const { data: intakes } = await admin.from('coaching_intakes').select('id, token').ilike('email', invite.email).neq('status', 'revoked');
     let signed = false; let formsToken = '';
     for (const i of intakes || []) {

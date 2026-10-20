@@ -26,6 +26,19 @@ export const PACKAGES = [
   { key: 'Option 4', name: 'VIP Hybrid Private Mentorship & Business Coaching', cadence: 'Weekly | 90 minutes', detail: 'Four private sessions monthly, integrating business strategy, development, personal growth, and discipleship with comprehensive action planning, accountability, and priority support.' },
 ];
 
+/**
+ * Couples Private Mentorship (v58): the two monthly packages a couples client picks in section 5.
+ * The 6-month commitments are chosen at step 5, as with Business Coaching. No prices here either:
+ * Melanie sets them in Stripe and the daily sync copies them into academy_plans.
+ */
+export const COUPLES_PACKAGES = [
+  { key: 'Couples Bi-Weekly', name: 'Couples Private Mentorship', cadence: 'Bi-Weekly | 90 minutes', detail: '' },
+  { key: 'Couples Weekly', name: 'Couples Private Mentorship', cadence: 'Weekly | 90 minutes', detail: '' },
+];
+
+/** The section 5 packages for a program: couples has its own; business and faith clients pick a business Option. */
+export const packagesFor = (slug) => (slug === 'couples' ? COUPLES_PACKAGES : PACKAGES);
+
 export const COACHING = {
   kind: 'coaching',
   title: 'P31 Business Coaching Agreement',
@@ -219,8 +232,8 @@ export const packagePrice = (key, prices = {}) => {
   return `$${(c / 100).toLocaleString('en-US', { minimumFractionDigits: c % 100 ? 2 : 0 })}/month`;
 };
 
-/** The agreement as sections for the PDF copy (the same words as the page). */
-export function pdfSections(doc, answers = {}, prices = {}) {
+/** The agreement as sections for the PDF copy (the same words as the page); packages from packagesFor(slug). */
+export function pdfSections(doc, answers = {}, prices = {}, packages = PACKAGES) {
   const out = [];
   if (doc.tagline) out.push({ paragraph: doc.tagline });
   for (const p of doc.intro || []) out.push({ paragraph: p });
@@ -231,13 +244,13 @@ export function pdfSections(doc, answers = {}, prices = {}) {
     if (s.items) parts.push({ bullets: s.items });
     for (const p of s.paras2 || []) parts.push({ paragraph: p });
     if (s.items2) parts.push({ bullets: s.items2 });
-    if (s.packages) parts.push({ bullets: PACKAGES.map((p) => `${p.key} — ${p.name}: ${packagePrice(p.key, prices)}, ${p.cadence}. ${p.detail}`) });
+    if (s.packages) parts.push({ bullets: packages.map((p) => `${p.key} — ${p.name}: ${packagePrice(p.key, prices)}, ${p.cadence}.${p.detail ? ` ${p.detail}` : ''}`) });
     for (const p of s.after || []) parts.push({ paragraph: p });
     // The first part carries the heading; the rest follow it.
     if (parts.length) { out.push({ heading: sec.heading, ...parts[0] }); out.push(...parts.slice(1)); } else out.push(sec);
   }
   if (doc.kind === 'coaching' && answers.package) {
-    const p = PACKAGES.find((x) => x.key === answers.package);
+    const p = packages.find((x) => x.key === answers.package);
     out.push({ heading: 'Selected package', rows: [['Package', p ? `${p.key} — ${p.name}` : answers.package], ['Investment', packagePrice(answers.package, prices)], ['Sessions', p?.cadence || '']] });
   }
   if (doc.coachNote) out.push({ paragraph: doc.coachNote });

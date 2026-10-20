@@ -1,12 +1,14 @@
 // The classroom walkthrough for students: opens the first time they step into their classroom.
+import { PROGRAM_SLUGS, programName, hasFeature } from '../../lib/programs';
+
 const at = (to) => [`.ds-nav a[href="${to}"]`, `.ds-tabs a[href="${to}"]`, '.ds-tabs button.ds-tab'];
 
 const classroomTour = (slug) => {
   const base = `/academy/${slug}`;
-  const faith = slug === 'faith';
+  const memberLine = slug === 'business';
   return [
     {
-      title: `Welcome to your ${faith ? 'Faith-Based' : 'Business'} Mentorship classroom`,
+      title: `Welcome to your ${programName(slug)} classroom`,
       body: 'This is your private space with Melanie JC: lessons, live sessions, your work and a direct line to your mentor. Here’s a one-minute tour.',
     },
     {
@@ -31,12 +33,12 @@ const classroomTour = (slug) => {
     },
     {
       to: `${base}/messages`, targets: at(`${base}/messages`),
-      title: faith ? 'A private line to your mentor' : 'Your member line',
+      title: memberLine ? 'Your member line' : 'A private line to your mentor',
       body: 'Questions, wins and prayer requests between sessions, with files and photos. Only you and your mentor see it.',
     },
-    faith
-      ? { to: `${base}/journal`, targets: at(`${base}/journal`), title: 'Your journal', body: 'Prayers, gratitude and reflections, kept private to you. Your tasks from each session live under My tasks.' }
-      : { to: `${base}/goals`, targets: at(`${base}/goals`), title: 'Goals and action plans', body: 'Set the goals you’re working toward. After each session your mentor writes an action plan with clear next steps.' },
+    // One step for the program's own pages, from the same features as its menu (src/lib/programs.js).
+    hasFeature(slug, 'journal') && { to: `${base}/journal`, targets: at(`${base}/journal`), title: 'Your journal', body: 'Prayers, gratitude and reflections, kept private to you. Your tasks from each session live under My tasks.' },
+    hasFeature(slug, 'goals') && { to: `${base}/goals`, targets: at(`${base}/goals`), title: 'Goals and action plans', body: 'Set the goals you’re working toward. After each session your mentor writes an action plan with clear next steps.' },
     {
       to: `${base}/progress`, targets: at(`${base}/progress`),
       title: 'Progress and your certificate',
@@ -46,16 +48,19 @@ const classroomTour = (slug) => {
       title: 'You’re all set',
       body: 'Replay this walkthrough any time from the ? button at the top. Welcome. We’re glad you’re here.',
     },
-  ];
+  ].filter(Boolean);
 };
 
+// One walkthrough per program, keyed by slug.
+const bySlug = (make) => Object.fromEntries(PROGRAM_SLUGS.map((slug) => [slug, make(slug)]));
+
 // Built once, so the walkthrough keeps the same steps from render to render.
-export const CLASSROOM_TOURS = { business: classroomTour('business'), faith: classroomTour('faith') };
+export const CLASSROOM_TOURS = bySlug(classroomTour);
 
 // The mentor console walkthrough (mentors, admins and the Classroom dashboard).
 const mentorTour = (slug) => {
   const t = `/academy/${slug}/teach`;
-  const name = slug === 'faith' ? 'Faith-Based Mentorship' : 'Business Mentorship';
+  const name = programName(slug);
   return [
     { title: `The ${name} console`, body: 'Everything for running the program: students, their work, the curriculum and videos, sessions, intro calls and enrollment. A two-minute tour.' },
     { to: t, targets: at(t), title: 'Overview', body: 'Active students, new intro-call requests, unread messages and work waiting for feedback, with what is coming up. “Go live now” opens a live room at once.' },
@@ -68,4 +73,4 @@ const mentorTour = (slug) => {
     { title: 'That is the console', body: 'Replay this any time from the ? button. Admins can also edit the curriculum, videos and sessions from Systems → Mentorship.' },
   ];
 };
-export const MENTOR_TOURS = { business: mentorTour('business'), faith: mentorTour('faith') };
+export const MENTOR_TOURS = bySlug(mentorTour);

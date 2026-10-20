@@ -3,17 +3,17 @@ import { Database, CheckCircle2, CircleAlert, Copy, Check, ExternalLink, Refresh
 import { dbStatus, pending } from '../../lib/dbStatus';
 
 // The scripts themselves, loaded only when one is waiting (so the copy is exact and instant).
+// Every file listed here ships with the public site, so a script with mentorship prices or Stripe
+// Payment Links (v47, v49, v55, v58) is never listed: those show only the command to run them.
 const SQL = {
+  'storefront_v57_dm_handoffs.sql': () => import('../../../storefront_v57_dm_handoffs.sql?raw'),
   'storefront_v56_dm_agent.sql': () => import('../../../storefront_v56_dm_agent.sql?raw'),
-  'storefront_v55_stripe_payment_links.sql': () => import('../../../storefront_v55_stripe_payment_links.sql?raw'),
   'storefront_v54_admin_products.sql': () => import('../../../storefront_v54_admin_products.sql?raw'),
   'storefront_v53_shop_addons.sql': () => import('../../../storefront_v53_shop_addons.sql?raw'),
   'storefront_v52_enrollment_flow.sql': () => import('../../../storefront_v52_enrollment_flow.sql?raw'),
   'storefront_v51_merch_photos.sql': () => import('../../../storefront_v51_merch_photos.sql?raw'),
   'storefront_v50_merch.sql': () => import('../../../storefront_v50_merch.sql?raw'),
-  'storefront_v49_new_pricing.sql': () => import('../../../storefront_v49_new_pricing.sql?raw'),
   'storefront_v48_shop_emails.sql': () => import('../../../storefront_v48_shop_emails.sql?raw'),
-  'storefront_v47_coaching_forms.sql': () => import('../../../storefront_v47_coaching_forms.sql?raw'),
   'storefront_v46_autopilot.sql': () => import('../../../storefront_v46_autopilot.sql?raw'),
   'storefront_v45_watchdog.sql': () => import('../../../storefront_v45_watchdog.sql?raw'),
   'storefront_v44_design_studio.sql': () => import('../../../storefront_v44_design_studio.sql?raw'),

@@ -220,3 +220,35 @@
   .sh-all-prod-row .sh-row__meta { grid-column: 1 / -1; justify-content: flex-start; }
 }
 
+
+/* Systems → Social accounts (SocialAccounts.jsx): the two Zernio accounts and Carla's webhook */
+.sa-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
+.sa-actions .spin { animation: adm-spin 1s linear infinite; }
+.sa-results { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 0.88rem; }
+.sa-results li { padding: 10px 12px; border-radius: 12px; background: rgba(123, 224, 184, 0.08); color: #a6ecd0; }
+.sa-results li.sa-bad { background: rgba(255, 138, 138, 0.1); color: #ffb4b4; }
+.sa-note { margin: 0; font-size: 0.84rem; }
+.sa-ws { margin-bottom: 16px; }
+.sa-ws__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
+.sa-ws__head .sys-muted { font-size: 0.75rem; letter-spacing: 0.04em; }
+.sa-accts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.sa-acct { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; align-items: start; padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.035); border: 1px solid rgba(255, 255, 255, 0.07); }
+.sa-acct__icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: rgba(155, 113, 178, 0.2); color: #E3D0EA; }
+.sa-acct__main { display: grid; gap: 4px; min-width: 0; }
+.sa-acct__top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.sa-acct__top strong { overflow-wrap: anywhere; }
+.sa-acct__main small { display: flex; gap: 6px; align-items: flex-start; font-size: 0.82rem; line-height: 1.45; color: rgba(246, 241, 251, 0.75); }
+.sa-acct__main small svg { flex: none; margin-top: 3px; }
+.sa-acct__main small.sa-bad, .sa-problems li { color: #ffb4b4; }
+.sa-acct__main small.sa-id { font-size: 0.7rem; color: rgba(246, 241, 251, 0.4); overflow-wrap: anywhere; }
+.sa-problems { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 0.9rem; }
+.sa-problems li { display: flex; gap: 6px; align-items: flex-start; }
+.sa-problems li svg, .sa-good svg { flex: none; margin-top: 3px; }
+.sa-good { display: flex; gap: 6px; margin: 0; color: #9FD6B4; font-size: 0.9rem; }
+.sa-hook { display: grid; gap: 3px; padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.12); }
+.sa-hook p { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; font-size: 0.9rem; }
+.sa-hook small { font-size: 0.82rem; color: rgba(246, 241, 251, 0.72); overflow-wrap: anywhere; }
+.sa-fails summary { cursor: pointer; font-size: 0.84rem; color: #F2CE4D; margin-top: 4px; }
+.sa-fails ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 3px; font-size: 0.8rem; color: rgba(246, 241, 251, 0.75); overflow-wrap: anywhere; }
+.sa-ws .sys-alert { display: flex; gap: 8px; align-items: flex-start; font-size: 0.88rem; }
+.sa-ws .sys-alert svg { flex: none; margin-top: 3px; }

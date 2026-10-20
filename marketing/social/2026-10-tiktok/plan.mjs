@@ -1,257 +1,185 @@
-// P31 Marketplace TikTok Launch Campaign: 15 short-form posts designed for TikTok (9:16 vertical Story/Reel format)
-// Paired with P31's original Web Audio music tracks and kinetic animations.
-// All posts include call-to-action triggers (VENDOR, STOREFRONT, EVENT) connected to Carla.
+// Proverbs 31 Marketplace on TikTok: 14 short videos, one a day, Fri Oct 23 – Thu Nov 5 2026 (Eastern).
+// Weekdays alternate 12:30 PM and 7:30 PM, Saturdays 1:00 PM, Sundays 4:00 PM. Each one is a Design studio
+// card in 9:16 (template, colour style, pattern, motion preset) with one of the studio's own music tracks,
+// drawn by build.mjs and scheduled by schedule.mjs. The TikTok is the Market's, although it sits in the
+// Collective's Zernio workspace, so every word here is Market only.
+// House rules for the copy: facts as the live site states them (storefront: up to 10 products, free for
+// 3 months, then $14.99 a month plus 5% per sale, Stripe checkout; booths: apply once, acceptance and
+// event details by email), the Business and Leadership Luncheon is the only event with a date, venue or
+// tickets, KJV scripture word for word, a real link or a genuine question as the call to action, no
+// "comment X and we'll DM you" (TikTok can't start a DM), no engagement bait, 3 to 5 hashtags.
+// No handle on the cards: TikTok shows the username over the video.
+// promo: true marks the posts whose whole point is a P31 offer (a booth, a storefront, Luncheon tickets,
+// merch). schedule.mjs --brand-label sends those with TikTok's "Your brand" disclosure; it is the user's call.
 
 export const CALENDAR = '2026-10-tiktok';
 export const TIMEZONE = 'America/New_York';
 
-export const POSTS = [
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** "Fri Oct 23 · 12:30 PM" from a local Eastern "2026-10-23T12:30:00" (no time zone maths needed). */
+export function labelOf(when) {
+  const [d, t] = when.split('T');
+  const [y, m, day] = d.split('-').map(Number);
+  const [hh, mm] = t.split(':').map(Number);
+  const wd = WEEKDAYS[new Date(Date.UTC(y, m - 1, day)).getUTCDay()];
+  return `${wd} ${MONTHS[m - 1]} ${day} · ${(hh % 12) || 12}:${String(mm).padStart(2, '0')} ${hh < 12 ? 'AM' : 'PM'}`;
+}
+
+const POSTS_RAW = [
   {
-    id: 'tt01-calling-makers',
-    when: '2026-10-19T12:30:00',
-    label: 'Mon Oct 19 · 12:30 PM',
-    template: 'invite',
-    style: 'plum',
-    music: 'golden-hour',
-    motion: 'editorial',
-    theme: 'Calling Atlanta Makers (Vendor Recruitment)',
+    id: 'tt01-apply', when: '2026-10-23T12:30:00', theme: 'Booths at the seasonal Atlanta markets', promo: true,
+    template: 'invite', style: 'plum', pattern: 'topo', music: 'golden-hour', motion: 'editorial',
     words: {
-      eyebrow: 'Calling Atlanta Makers',
+      eyebrow: 'Calling Atlanta makers',
       headline: 'Your gifts deserve room to grow.',
-      body: 'Now selecting 15 faith-driven women artisans & brands for our upcoming seasonal pop-up market in Metro Atlanta.',
-      button: 'Apply to exhibit with us',
-      handle: '@proverbs31market',
+      body: 'Apply for a booth at our seasonal Atlanta markets, a faith-centered marketplace for women-led brands and artisans.',
+      button: 'Apply at p31market.com/apply',
     },
-    caption: 'Your gift was never meant to stay hidden in your kitchen or craft room. ✨ Proverbs 31 Marketplace is accepting applications for our upcoming seasonal market in Metro Atlanta.\n\n💬 Comment VENDOR below and our assistant will DM you the curator application directly! 👇\n\n#P31Marketplace #AtlantaMakers #AtlantaPopUp #ShopSmallATL #WomenWhoBuild #FaithBasedBusiness #AtlantaVendors',
+    caption: 'Your gift was never meant to stay hidden in your kitchen or your craft room. ✨\n\nProverbs 31 Marketplace is a curated marketplace for women creatives, artisans and visionaries, online at p31market.com and at our seasonal markets in Atlanta.\n\nWant a booth at a P31 Market? Apply once at p31market.com/apply. Acceptance and event details are emailed to you.\n\nWhat do you make? Tell us in the comments 👇\n\n#P31Marketplace #AtlantaMakers #WomenOwnedBusiness #ShopSmallATL',
   },
   {
-    id: 'tt02-virtual-storefront',
-    when: '2026-10-19T19:00:00',
-    label: 'Mon Oct 19 · 7:00 PM',
-    template: 'quote',
-    style: 'night',
-    music: 'boss-moves',
-    motion: 'pop',
-    theme: 'Stop Selling in DMs (Storefront Launch)',
+    id: 'tt02-fine-linen', when: '2026-10-24T13:00:00', theme: 'Saturday Bible fill-in-the-blank (Proverbs 31:24)',
+    template: 'blank', style: 'thistle', pattern: 'waves', music: 'bright-open', motion: 'gentle',
     words: {
-      headline: 'Stop selling only in DMs. Open your virtual storefront.',
-      handle: '@proverbs31market',
+      eyebrow: 'Fill in the blank · KJV',
+      headline: 'She maketh fine linen, and ______\u00A0it', // a no-break space keeps "it" with the blank
+      ask: 'Proverbs 31:24 · your answer below',
     },
-    caption: 'Why are you still sending CashApp tags back and forth in DMs? 🛍️ Give your brand the luxury experience it deserves with an official online storefront on p31market.com.\n\n💬 Comment STOREFRONT below and we’ll DM you the registration link!\n\n#P31Marketplace #OnlineBoutique #VirtualStorefront #SmallBusinessTips #BlackWomenInBusiness #AtlantaSmallBusiness',
+    footer: 'p31market.com',
+    caption: 'Saturday Bible challenge 🧵 No peeking!\n\n“She maketh fine linen, and ______ it; and delivereth girdles unto the merchant.” Proverbs 31:24 (KJV)\n\nThe woman in Proverbs 31 worked with her hands and traded with the merchants. She is the woman this marketplace is named for.\n\nWhat is the missing word? Drop your answer in the comments 👇\n\n#P31Marketplace #Proverbs31Woman #BibleChallenge #FaithAndBusiness',
   },
   {
-    id: 'tt03-fruit-of-her-hands',
-    when: '2026-10-20T12:30:00',
-    label: 'Tue Oct 20 · 12:30 PM',
-    template: 'scripture',
-    style: 'ivory',
-    music: 'sunday-keys',
-    motion: 'words',
-    theme: 'Proverbs 31:31 Anchor Scripture',
-    words: {
-      verse: 'Give her of the fruit of her hands; and let her own works praise her in the gates.',
-      reference: 'Proverbs 31:31',
-      handle: '@proverbs31market',
-    },
-    caption: 'The verse our entire marketplace was built on. 💜 A luxury space where faith, craftsmanship, and purpose align. Want to experience the market in person?\n\n💬 Type AMEN and comment EVENT for upcoming pop-up dates & ticket details!\n\n#Proverbs31Woman #KingdomEntrepreneur #ChristianEntrepreneurs #FaithInBusiness #P31Marketplace',
+    id: 'tt03-strength-honour', when: '2026-10-25T16:00:00', theme: 'Sunday scripture (Proverbs 31:25)',
+    template: 'scripture', style: 'gold', pattern: 'topo', music: 'worship-rise', motion: 'spoken',
+    words: { verse: 'Strength and honour are her clothing; and she shall rejoice in time to come.', reference: 'Proverbs 31:25' },
+    footer: 'p31market.com',
+    caption: 'Whatever this week holds, remember what you are clothed in. 🕊️\n\n“Strength and honour are her clothing; and she shall rejoice in time to come.” Proverbs 31:25 (KJV)\n\nThis verse is also on our Strength & Honour tees, crewnecks, totes and journals at p31market.com/merch.\n\nWhich do you need to put on this week: strength, or honour? 👇\n\n#P31Marketplace #Proverbs31Woman #SundayScripture #KJV',
   },
   {
-    id: 'tt04-curator-opportunity',
-    when: '2026-10-20T20:30:00',
-    label: 'Tue Oct 20 · 8:30 PM',
-    template: 'invite',
-    style: 'lavender',
-    music: 'lofi-grind',
-    motion: 'slide',
-    theme: 'Curator Vetting & Opportunity',
+    id: 'tt04-storefront', when: '2026-10-26T19:30:00', theme: 'The virtual storefront and its terms', promo: true,
+    template: 'invite', style: 'royal', pattern: 'rings', music: 'boss-moves', motion: 'bold',
     words: {
-      eyebrow: 'Curator Opportunity',
-      headline: 'Excellence is our standard. Purpose is our foundation.',
-      body: 'Handmade skincare, candles, jewelry, apparel, and artisan food. Join our curated collective of women who build.',
-      button: 'Become a curator',
-      handle: '@proverbs31market',
+      eyebrow: 'Virtual storefront',
+      headline: 'Sell online all year on p31market.com.',
+      body: 'Up to 10 products or services, secure Stripe checkout and P31 marketing. Free for 3 months, then $14.99 a month. 5% per sale.',
+      button: 'Start at p31market.com/storefront',
     },
-    caption: 'Excellence is a form of worship. That’s why 100% of our curators are hand-selected for craft, story, and heart. 👑\n\n💬 Comment CURATOR to apply for a booth at our next Atlanta market showcase!\n\n#AtlantaVendor #WomenOwnedBusiness #ArtisanMarket #SupportBlackWomen #HandcraftedLuxury',
+    caption: 'Your products deserve a home online, not just a DM thread. 🛍️\n\nA P31 virtual storefront gives you:\n• your own storefront link on p31market.com\n• up to 10 products or services\n• secure checkout through Stripe\n• P31 marketing: SEO, Google, Meta and social\n• web support for your storefront\n\nThere’s no monthly fee for your first 3 months; after that it’s $14.99 a month if you keep your storefront. A 5% fee applies to each sale.\n\nRead the terms and sign up at p31market.com/storefront. Within 7 to 10 days you’ll get a link to set up your shop.\n\nWhat would you sell first? 👇\n\n#P31Marketplace #VirtualStorefront #WomenOwnedBusiness #ShopSmall',
   },
   {
-    id: 'tt05-business-blank',
-    when: '2026-10-21T12:30:00',
-    label: 'Wed Oct 21 · 12:30 PM',
-    template: 'blank',
-    style: 'thistle',
-    music: 'worship-rise',
-    motion: 'gentle',
-    theme: 'Faith & Business Growth Prompt',
-    words: {
-      eyebrow: 'Faith & Business Check',
-      headline: 'This season, God is expanding my business in the area of',
-      ask: 'Drop your answer in the comments 👇',
-      handle: '@proverbs31market',
-    },
-    caption: 'Speak it into the atmosphere! Whether it’s inventory, visibility, sales, or peace of mind, declare what God is doing in your business.\n\n💬 Drop your answer below! (And comment EVENT to connect with us in person!)\n\n#KingdomBuilders #ChristianBusinessOwner #FaithDriven #SmallBizCommunity #P31Marketplace',
+    id: 'tt05-fruit-of-her-hands', when: '2026-10-27T12:30:00', theme: 'The verse the Marketplace is built on (Proverbs 31:31)',
+    template: 'scripture', style: 'ivory', pattern: 'arches', music: 'sunday-keys', motion: 'spoken',
+    words: { verse: 'Give her of the fruit of her hands; and let her own works praise her in the gates.', reference: 'Proverbs 31:31' },
+    footer: 'p31market.com',
+    caption: 'The verse this marketplace was built on. 💜\n\n“Give her of the fruit of her hands; and let her own works praise her in the gates.” Proverbs 31:31 (KJV)\n\nProverbs 31 Marketplace was made so the work of women’s hands can be seen, shopped and celebrated: online at p31market.com and at our seasonal markets in Atlanta.\n\nWhat is the work of your hands? 👇\n\n#P31Marketplace #Proverbs31Woman #ChristianEntrepreneur #FaithAndBusiness',
   },
   {
-    id: 'tt06-market-day-hype',
-    when: '2026-10-21T19:00:00',
-    label: 'Wed Oct 21 · 7:00 PM',
-    template: 'invite',
-    style: 'plum',
-    music: 'bright-open',
-    motion: 'editorial',
-    theme: 'Atlanta Market Day Experience',
+    id: 'tt06-luncheon', when: '2026-10-28T19:30:00', theme: 'Business and Leadership Luncheon, Dec 19', promo: true,
+    template: 'invite', style: 'dusk', pattern: 'topo', music: 'sunday-best', motion: 'editorial',
     words: {
-      eyebrow: 'Atlanta Market Day',
-      headline: 'Shop 7 luxury artisan categories under one roof.',
-      body: 'Art, wellness, handcrafted fashion, gourmet treats, and literature. Live music, high ambiance, pure fellowship.',
-      button: 'Reserve your tickets',
-      handle: '@proverbs31market',
+      eyebrow: 'Saturday, December 19 · 1:30 PM',
+      headline: 'Business & Leadership Luncheon',
+      body: 'Faith, business and leadership over a seated meal at The Four Event Center, Atlanta. Seating is limited.',
+      button: 'Tickets on Eventbrite',
     },
-    caption: 'Forget chaotic, cramped markets. P31 Marketplace is an experience: shop hand-selected women-owned brands while enjoying live music and fellowship. 🎶✨\n\n💬 Comment EVENT to get tickets & venue location sent directly to your DMs!\n\n#AtlantaEvents #GwinnettEvents #SugarloafATL #AtlantaWeekend #ShopLocalATL #AtlantaPopUp',
+    caption: 'Save the date ✨\n\nThe Proverbs 31 Business & Leadership Luncheon is Saturday, December 19, 2026, at 1:30 PM at The Four Event Center in Atlanta.\n\nAn afternoon where faith meets business and leadership: a seated meal, light networking and a room full of women building what God put in their hands. Business owners, women about to start, and anyone still deciding are all welcome.\n\nSeating is limited. Tickets are on Eventbrite: search “Proverbs 31 Business Leadership Luncheon”.\n\nWhat is one question you’d love to ask a room full of women leaders? 👇\n\n#P31Marketplace #BusinessLuncheon #WomenInLeadership #AtlantaEvents',
   },
   {
-    id: 'tt07-collaboration-sisterhood',
-    when: '2026-10-22T12:30:00',
-    label: 'Thu Oct 22 · 12:30 PM',
-    template: 'quote',
-    style: 'gold',
-    music: 'golden-hour',
-    motion: 'spoken',
-    theme: 'Collaboration Over Competition',
-    words: {
-      headline: 'Collaboration over competition. Sisterhood in commerce.',
-      handle: '@proverbs31market',
-    },
-    caption: 'Building a business was never meant to be a lonely journey. When you join P31 Marketplace as a vendor, you join an active family of women who pray, build, and prosper together. 💜\n\n💬 Comment VENDOR if you’re ready to stop doing business alone!\n\n#SisterhoodInBusiness #WomenSupportingWomen #P31Community #AtlantaSmallBusiness #FaithAndBusiness',
+    id: 'tt07-build-together', when: '2026-10-29T12:30:00', theme: 'Collaboration over competition',
+    template: 'quote', style: 'gold', pattern: 'dots', music: 'golden-hour', motion: 'spoken',
+    words: { headline: 'Collaboration over competition. We build better together.' },
+    script: 'Proverbs 31 Marketplace',
+    caption: 'Building a business was never meant to be lonely. 💜\n\nEvery P31 virtual storefront comes with a community chat with other Proverbs 31 women creatives, and our markets put makers side by side. The woman at the next table is not your competition.\n\n“Two are better than one; because they have a good reward for their labour.” Ecclesiastes 4:9 (KJV)\n\nWhat is one thing another business owner taught you? 👇\n\n#P31Marketplace #WomenWhoBuild #WomenSupportingWomen #FaithAndBusiness',
   },
   {
-    id: 'tt08-gifts-make-room',
-    when: '2026-10-22T20:00:00',
-    label: 'Thu Oct 22 · 8:00 PM',
-    template: 'scripture',
-    style: 'night',
-    music: 'sunday-keys',
-    motion: 'words',
-    theme: 'Proverbs 18:16 Gifts Make Room',
-    words: {
-      verse: 'A man’s gift maketh room for him, and bringeth him before great men.',
-      reference: 'Proverbs 18:16',
-      handle: '@proverbs31market',
-    },
-    caption: 'When God gives you a gift, He also prepares the room for it. You don’t have to force doors open—walk in excellence and let Him position you. ✨\n\n💬 Comment STOREFRONT to showcase your products on our global marketplace!\n\n#WhereHerGiftsMakeRoom #Proverbs1816 #KingdomWealth #AtlantaEntrepreneurs #FaithQuotes',
+    id: 'tt08-friday-prayer', when: '2026-10-30T19:30:00', theme: 'A Friday prayer for women in business',
+    template: 'prayer', style: 'ivory', pattern: 'blobs', music: 'still-waters', motion: 'gentle',
+    words: { intro: 'Dear God,', headline: 'Bless the work of my hands and align every business decision with Your Kingdom purpose.' },
+    footer: 'p31market.com',
+    caption: 'A prayer for every woman building something with her hands. 🙏🏾\n\nDear God, bless the work of my hands and align every business decision with Your Kingdom purpose. Amen.\n\nWhat decision are you praying over this weekend? 👇\n\n#P31Marketplace #BusinessPrayer #ChristianWomenInBusiness #FaithAndBusiness',
   },
   {
-    id: 'tt09-entrepreneur-prayer',
-    when: '2026-10-23T12:30:00',
-    label: 'Fri Oct 23 · 12:30 PM',
-    template: 'prayer',
-    style: 'ivory',
-    music: 'still-waters',
-    motion: 'gentle',
-    theme: 'Friday Prayer for Founders',
-    words: {
-      intro: 'Dear God,',
-      headline: 'Bless the work of my hands and align every business decision with Your Kingdom purpose.',
-      handle: '@proverbs31market',
-    },
-    caption: 'A prayer for every woman entrepreneur walking by faith this weekend. May He grant you wisdom, favor, and fruitful hands.\n\n💬 Type AMEN to claim this! (Comment EVENT for our next community gathering details)\n\n#BusinessPrayer #ChristianWomen #FaithfulEntrepreneur #PrayerWorks #P31Marketplace',
+    id: 'tt09-growing-in', when: '2026-10-31T13:00:00', theme: 'Finish the sentence: what God is growing',
+    template: 'blank', style: 'blush', pattern: 'topo', music: 'worship-rise', motion: 'gentle',
+    words: { eyebrow: 'Finish the sentence', headline: 'This season, God is growing my business in', ask: 'Your answer in the comments' },
+    footer: 'p31market.com',
+    caption: 'Finish the sentence: This season, God is growing my business in ______.\n\nVisibility, sales, boldness, systems, peace of mind… name it and write it down.\n\n“And the LORD answered me, and said, Write the vision, and make it plain upon tables, that he may run that readeth it.” Habakkuk 2:2 (KJV)\n\nDrop yours below 👇\n\n#P31Marketplace #ChristianBusinessOwner #WomenWhoBuild #FaithAndBusiness',
   },
   {
-    id: 'tt10-storefront-features',
-    when: '2026-10-23T18:30:00',
-    label: 'Fri Oct 23 · 6:30 PM',
-    template: 'invite',
-    style: 'plum',
-    music: 'boss-moves',
-    motion: 'pop',
-    theme: 'Virtual Storefront Value Proposition',
-    words: {
-      eyebrow: 'Virtual Storefront',
-      headline: 'Your products deserve a luxury online home.',
-      body: 'Custom storefront URL, verified badge, automated customer ordering, and marketplace community exposure.',
-      button: 'Register your storefront',
-      handle: '@proverbs31market',
-    },
-    caption: 'Expand your reach beyond your personal followers. Open your virtual storefront on P31 Marketplace and let shoppers browse your products 24/7! 📦\n\n💬 Comment STOREFRONT to get the setup details sent right to your DMs!\n\n#ShopSmall #OnlineShop #VirtualStorefront #AtlantaMakers #ECommerceForWomen',
+    id: 'tt10-gift-makes-room', when: '2026-11-01T16:00:00', theme: 'Sunday scripture (Proverbs 18:16)',
+    template: 'scripture', style: 'plum', pattern: 'topo', music: 'sunday-keys', motion: 'spoken',
+    words: { verse: 'A man’s gift maketh room for him, and bringeth him before great men.', reference: 'Proverbs 18:16' },
+    footer: 'p31market.com',
+    caption: 'When God gives you a gift, He makes room for it. ✨ You don’t have to force every door. Keep showing up with excellence.\n\n“A man’s gift maketh room for him, and bringeth him before great men.” Proverbs 18:16 (KJV)\n\nIt’s the verse behind our motto: where her gifts make room.\n\nWhat gift has God been asking you to stop hiding? 👇\n\n#P31Marketplace #Proverbs1816 #ChristianEntrepreneur #FaithAndBusiness',
   },
   {
-    id: 'tt11-dont-shrink-vision',
-    when: '2026-10-24T13:00:00',
-    label: 'Sat Oct 24 · 1:00 PM',
-    template: 'quote',
-    style: 'royal',
-    music: 'lofi-grind',
-    motion: 'editorial',
-    theme: 'Bold Vision for Women Who Build',
+    id: 'tt11-two-ways', when: '2026-11-02T12:30:00', theme: 'Two ways to become a curator', promo: true,
+    template: 'invite', style: 'royal', pattern: 'waves', music: 'lofi-grind', motion: 'editorial',
     words: {
-      headline: 'Don’t shrink your vision to fit people who don’t understand your calling.',
-      handle: '@proverbs31market',
+      eyebrow: 'Two ways to become a curator',
+      headline: 'A booth at our markets. A storefront online.',
+      body: 'Vend at our seasonal Atlanta markets, or open a virtual storefront on p31market.com. Many curators do both.',
+      button: 'Start at p31market.com/apply',
     },
-    caption: 'God gave the vision to YOU, not them. Keep building, keep refining, and keep showing up in excellence. 👑\n\n💬 Tag a sister who is building her brand! Comment VENDOR to exhibit with us at our next market.\n\n#WomenWhoBuild #BoldFaith #MelanieJC #AtlantaBusiness #KingdomMinds',
+    caption: 'Two ways to become a P31 curator 👇\n\n1. Vend at a P31 Market: a booth at our seasonal Atlanta markets. Apply once at p31market.com/apply, and acceptance and event details are emailed to you.\n\n2. Open a virtual storefront: your own storefront on p31market.com with up to 10 products or services, P31 marketing and support. Free for your first 3 months. Start at p31market.com/storefront.\n\nMany curators do both. Start with either, and the team will help with the other.\n\nBooth, storefront, or both: which fits you right now? 👇\n\n#P31Marketplace #AtlantaVendors #WomenOwnedBusiness #ShopSmallATL',
   },
   {
-    id: 'tt12-fine-linen-quiz',
-    when: '2026-10-24T20:30:00',
-    label: 'Sat Oct 24 · 8:30 PM',
-    template: 'blank',
-    style: 'thistle',
-    music: 'bright-open',
-    motion: 'slide',
-    theme: 'Proverbs 31:24 Quiz',
-    words: {
-      eyebrow: 'Bible Fill-in-the-Blank',
-      headline: 'She maketh fine linen, and ______ it; and delivereth girdles unto the merchant.',
-      ask: 'Proverbs 31:24 (Drop your guess!)',
-      handle: '@proverbs31market',
-    },
-    caption: 'Saturday Bible challenge! Did you know the Proverbs 31 woman was an active manufacturer and merchant? 🧵\n\n💬 Drop your guess in the comments without looking it up! (And comment VENDOR to join our marketplace merchants!)\n\n#BibleTrivia #Proverbs31Woman #BiblicalBusiness #ChristianWomenEntrepreneurs',
+    id: 'tt12-vision', when: '2026-11-03T19:30:00', theme: 'Don’t shrink your vision',
+    template: 'quote', style: 'amethyst', pattern: 'topo', music: 'sunday-best', motion: 'typed',
+    words: { headline: 'Don’t shrink your vision to fit people who don’t understand your calling.' },
+    script: 'Where her gifts make room',
+    caption: 'God gave the vision to you. Keep building, keep refining, keep showing up. 👑\n\nWhen you’re ready to put your work in front of more people, there is room for it at P31: a booth at our seasonal Atlanta markets (p31market.com/apply) or a virtual storefront (p31market.com/storefront).\n\nWhat is the vision you refuse to shrink? 👇\n\n#P31Marketplace #WomenWhoBuild #ChristianEntrepreneur #FaithAndBusiness',
   },
   {
-    id: 'tt13-strength-and-honour',
-    when: '2026-10-25T16:00:00',
-    label: 'Sun Oct 25 · 4:00 PM',
-    template: 'scripture',
-    style: 'gold',
-    music: 'worship-rise',
-    motion: 'words',
-    theme: 'Sunday Encouragement (Proverbs 31:25)',
+    id: 'tt13-merch', when: '2026-11-04T12:30:00', theme: 'P31 Merch', promo: true,
+    template: 'invite', style: 'lilac', pattern: 'topo', music: 'bright-open', motion: 'bold',
     words: {
-      verse: 'Strength and honour are her clothing; and she shall rejoice in time to come.',
-      reference: 'Proverbs 31:25',
-      handle: '@proverbs31market',
+      eyebrow: 'P31 Merch',
+      headline: 'Wear the word.',
+      body: 'Proverbs 31 on tees, hoodies, mugs, totes and journals. Every piece is printed for you when you order.',
+      button: 'Shop p31market.com/merch',
     },
-    caption: 'Whatever season you are walking through, remember what you are clothed in. Step into this new week with divine confidence. 🕊️\n\n💬 Type AMEN! Comment EVENT to connect with our family at our upcoming market gatherings.\n\n#SundayBlessing #StrengthAndHonour #Proverbs31 #AtlantaChurch #ChristianLiving',
+    caption: 'Wear the word. 👕☕📓\n\nP31 Merch puts Proverbs 31 on tees, crewnecks, hoodies, mugs, totes, stickers, journals and hats, in designs like Strength & Honour, Her Merchandise Is Good and Where Her Gifts Make Room.\n\nEvery piece is printed for you when you order, so nothing sits in a warehouse, and every purchase supports Proverbs 31 Marketplace.\n\nBrowse them all at p31market.com/merch. Which design would you wear first? 👇\n\n#P31Marketplace #Proverbs31Woman #FaithApparel #ChristianMerch',
   },
   {
-    id: 'tt14-hand-selected-curators',
-    when: '2026-10-26T12:30:00',
-    label: 'Mon Oct 26 · 12:30 PM',
-    template: 'invite',
-    style: 'plum',
-    music: 'golden-hour',
-    motion: 'editorial',
-    theme: 'Curator Excellence & Vetting',
-    words: {
-      eyebrow: 'Hand-Selected Curators',
-      headline: 'Every booth is vetted for craft, story, and excellence.',
-      body: 'Pop-up market booth, online storefront, booth design coaching, and live promotional features.',
-      button: 'Apply at p31market.com',
-      handle: '@proverbs31market',
-    },
-    caption: 'When people walk into a P31 Market, they feel the difference immediately. Curated elegance, intentional craftsmanship, and a warm atmosphere. ✨\n\n💬 Comment VENDOR to submit your brand for consideration!\n\n#PopUpAtlanta #AtlantaArtisans #CuratedMarket #HandmadeAtlanta #WomenEntrepreneurs',
-  },
-  {
-    id: 'tt15-open-doors',
-    when: '2026-10-26T20:00:00',
-    label: 'Mon Oct 26 · 8:00 PM',
-    template: 'quote',
-    style: 'night',
-    music: 'sunday-best',
-    motion: 'pop',
-    theme: 'Kingdom Favor & Open Doors',
-    words: {
-      headline: 'God is opening doors no man can shut. Walk through in excellence.',
-      handle: '@proverbs31market',
-    },
-    caption: 'Your season of elevation is here. Don’t look back, don’t hesitate, and don’t doubt what He put in your hands. 💜\n\n💬 Comment EVENT for our next market tickets or STOREFRONT to open your virtual shop!\n\n#OpenDoors #KingdomFavor #P31Marketplace #FaithOverFear #AtlantaBusinessWomen',
+    id: 'tt14-out-of-the-dms', when: '2026-11-05T19:30:00', theme: 'Stop selling only in your DMs', promo: true,
+    template: 'quote', style: 'dusk', pattern: 'rings', music: 'boss-moves', motion: 'bold',
+    words: { headline: 'Stop selling only in your DMs. Open a storefront.' },
+    script: 'p31market.com/storefront',
+    caption: 'Still sending payment tags back and forth in your DMs? 🛍️\n\nA P31 virtual storefront gives your customers one link to browse and secure checkout through Stripe, with up to 10 products or services and P31 marketing behind you.\n\nNo monthly fee for your first 3 months, then $14.99 a month if you keep it. A 5% fee applies to each sale. Read the terms and sign up at p31market.com/storefront.\n\nWhat is the hardest part of selling through DMs? 👇\n\n#P31Marketplace #VirtualStorefront #SmallBusinessTips #WomenOwnedBusiness',
   },
 ];
+
+export const POSTS = POSTS_RAW.map((p, i) => ({ ...p, seed: 11 + i * 17, label: labelOf(p.when) }));
+
+// Words that must never appear on a Market TikTok (Collective wording, DM promises, bait, handles).
+const BANNED = [
+  [new RegExp([
+    /\b(we('|’)ll|we will|will|we('|’)d|to) (DM|inbox|message) you\b/, // "we'll DM you", "our assistant will message you"
+    /\bDM(s|'d|’d|ed)? you\b/, // "DMs you", "DM'd you"
+    /\b(send|sent|sending|message|messaging) you (a |an |the )?(DM|direct message|private message|message)\b/, // "we will send you a DM"
+    /\b(sent|send|straight|right|slide) (to|in|into) your (DMs?|inbox)\b/, /\bcheck your (DMs?|inbox|messages)\b/,
+  ].map((r) => r.source).join('|'), 'i'), 'promises a DM'],
+  // "Comment VENDOR", "comment “SELL” below", "type YES": the keyword is in capitals, the verb in any case.
+  [/\b([Cc]omment|COMMENT|[Tt]ype|TYPE|[Rr]eply|REPLY|[Dd]rop|DROP) ["“'‘]?[A-Z]{3,}\b/, 'comment-a-keyword call to action'],
+  [/\btag (a|your)\b|\bshare (this )?if\b|\bshare with\b/i, 'engagement bait'],
+  [/collective|mentorship|mentor\b|gathering|NEBA|thep31collective/i, 'Collective wording'],
+  [/@\w/, 'a handle'],
+  [/klarna|afterpay|cash ?app|venmo/i, 'a payment method the shops do not take'],
+];
+
+/** What is wrong with a post's copy (empty when it is fine): length, hashtags, house rules. */
+export function problems(p) {
+  const out = [];
+  const tags = p.caption.match(/#\w+/g) || [];
+  if ([...p.caption].length > 2200) out.push(`caption is ${[...p.caption].length} characters (TikTok allows 2,200)`);
+  if (tags.length < 3 || tags.length > 5) out.push(`${tags.length} hashtags (want 3 to 5)`);
+  if (!tags.includes('#P31Marketplace')) out.push('no #P31Marketplace');
+  const card = Object.values(p.words).concat(p.script || [], p.footer || []).join(' ');
+  for (const [re, why] of BANNED) {
+    if (re.test(p.caption)) out.push(`caption: ${why}`);
+    if (re.test(card)) out.push(`card: ${why}`);
+  }
+  return out;
+}

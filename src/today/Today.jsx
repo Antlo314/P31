@@ -6,6 +6,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useRoles, dashboardsFor, isTeam, hasTool } from '../lib/roles';
 import { dashboardsOf, systemsPagesFor } from '../lib/dashboards';
+import { programName, programShort } from '../lib/programs';
 import { useIsPhone } from '../lib/device';
 import { DAVINCI_ON } from '../lib/features';
 import { mentorCards, systemsCards, teamCards, studioCards, davinciCards } from './cards';
@@ -18,7 +19,6 @@ import mark from '../assets/academy/collective-mark.webp';
 import './today.css';
 
 const ICON = { mentor: Presentation, studio: Clapperboard, systems: ShieldCheck, curator: Store, davinci: Film, gather: MessagesSquare };
-const PROGRAM = { business: 'Business Mentorship', faith: 'Faith-Based Mentorship' };
 
 const TODAY_TOUR = [
   { title: 'Today: your home', body: 'One page that gathers every dashboard you run and shows what needs you. A one-minute tour.' },
@@ -32,7 +32,7 @@ const TODAY_TOUR = [
 const sourcesFor = (roles) => {
   const pages = systemsPagesFor(dashboardsOf(roles));
   return [
-    ...(roles.mentor || []).map((slug) => ({ key: `mentor-${slug}`, title: PROGRAM[slug] || slug, to: `/academy/${slug}/teach`, load: () => mentorCards(slug) })),
+    ...(roles.mentor || []).map((slug) => ({ key: `mentor-${slug}`, title: programName(slug), to: `/academy/${slug}/teach`, load: () => mentorCards(slug) })),
     ...(roles.operator || roles.admin ? [{ key: 'systems', title: 'Systems', to: '/systems', load: systemsCards, sites: true }]
       : pages.length ? [{ key: 'systems', title: 'Systems', to: '/systems', load: () => teamCards(pages), sites: true }] : []),
     ...(roles.studio ? [{ key: 'studio', title: 'Content Studio', to: '/studio', load: studioCards }] : []),
@@ -71,8 +71,8 @@ const Today = () => {
   const nav = [
     { to: '/today', label: 'Today', Icon: Sun, end: true },
     ...dashboardsFor(roles).filter((d) => d.kind !== 'student').map((d) => ({
-      to: d.to, label: d.kind === 'mentor' ? `${(PROGRAM[d.program] || d.title).replace(' Mentorship', '')} console` : d.title, Icon: ICON[d.kind] || LayoutDashboard,
-      short: d.kind === 'mentor' ? (d.program === 'faith' ? 'Faith' : 'Business') : d.kind === 'studio' ? 'Studio' : d.kind === 'curator' ? 'My shop' : d.title,
+      to: d.to, label: d.kind === 'mentor' ? `${programShort(d.program, d.title)} console` : d.title, Icon: ICON[d.kind] || LayoutDashboard,
+      short: d.kind === 'mentor' ? programShort(d.program, d.title) : d.kind === 'studio' ? 'Studio' : d.kind === 'curator' ? 'My shop' : d.title,
     })),
     { to: '/systems/walkthroughs', label: 'Walkthroughs', Icon: Compass, short: 'Learn' },
   ];

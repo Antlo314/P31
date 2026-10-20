@@ -15,10 +15,14 @@ import { storefrontEvent } from '../_shared/storefront-billing.ts';
 import { sendEmail, layout, esc } from '../_shared/email.ts';
 
 const SITE = 'https://www.thep31collective.org';
+// One booking link for every program's sessions (a 1-hour event); Couples Private Mentorship (v58)
+// sessions are 90 minutes, so a 90-minute link from Melanie would replace it for couples.
 const SESSIONS = 'https://calendly.com/purposefullydriven7/privatementorship';
 const MEMBERS = 'members@thep31collective.org';
 const teamTo = () => [...new Set([...(Deno.env.get('INTRO_NOTIFY_TO') || `${MEMBERS},founder@thep31collective.org`).split(',').map((s) => s.trim()).filter(Boolean), 'ceo@p31market.com'])];
 const money = (c: number) => `$${(c / 100).toFixed(c % 100 ? 2 : 0)}`;
+// When the next charge comes, by the plan's billing (the 6-month commitments renew every 6 months).
+const RENEWS: Record<string, string> = { week: ', then weekly on this day', month: ', then monthly on this date', six_months: ', then every 6 months on this date' };
 
 const GRACE_DAYS = 3; // renewals can land a little after the period ends
 const env = (k: string) => Deno.env.get(k) || '';
@@ -87,7 +91,7 @@ Deno.serve(async (req) => {
             await sendEmail(email, `Welcome to the ${prog?.title || 'P31 Collective'}: you are enrolled`, layout('You are enrolled', `<p>Hi ${esc(first)},</p>
 <p>Your enrollment in the <b>${esc(prog?.title || 'program')}</b> is confirmed. Welcome.</p>
 <p style="margin:12px 0 4px"><b>Your plan</b></p>
-<p style="margin:0 0 12px">${esc(plan?.label || '')}<br>${paid} paid today${plan?.billing === 'month' ? ', then monthly on this date' : ''}. Stripe sends your card receipt separately.</p>
+<p style="margin:0 0 12px">${esc(plan?.label || '')}<br>${paid} paid today${s.mode === 'subscription' ? RENEWS[plan?.billing || ''] || '' : ''}. Stripe sends your card receipt separately.</p>
 <p style="margin:16px 0 4px"><b>Your first steps</b></p>
 <ol style="margin:6px 0 14px;padding-left:20px;line-height:1.6">
 <li><b>Open your classroom:</b> your sessions, lessons, notes and messages with your mentor live there.</li>

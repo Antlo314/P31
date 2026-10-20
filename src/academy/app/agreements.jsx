@@ -5,20 +5,25 @@ import { fmtDate, fmtDateTime, CONTACT_EMAIL } from '../../lib/academy';
 import { DashHead, DashEmpty } from '../../apps/DashShell';
 import { useAcademy, useRows, write } from './data';
 import { Modal } from './ui';
-import { ORDER, PACKAGES, packagePrice } from '../../../supabase/functions/_shared/coaching-text.js';
+import { ORDER, PACKAGES, COUPLES_PACKAGES, packagePrice } from '../../../supabase/functions/_shared/coaching-text.js';
 
 const daysFromNow = (d) => new Date(Date.now() + d * 86400e3).toISOString();
 const LABEL = { coaching: 'Coaching Agreement', confidentiality: 'Confidentiality', safety: 'Safety & Emergency' };
 const STATUS = { sent: 'Link sent', in_progress: 'Signing', complete: 'All signed', checkout: 'Choosing plan / at checkout', enrolled: 'Enrolled', revoked: 'Revoked' };
 const SIGNED = ['complete', 'checkout', 'enrolled'];
+// Every section 5 package by key (keys are unique across programs), for the signed-form views.
+const packageName = (key) => [...PACKAGES, ...COUPLES_PACKAGES].find((p) => p.key === key)?.name;
 
 /**
  * Send a new private-coaching client her three forms: the link is created here and emailed by
  * the site (join-notify); the mentor can also copy it or send it from her own mailbox.
+ * The program (this console's by default) decides her packages: a Couples Private Mentorship
+ * intake (v58) gets the couples packages and plans, any other the business and faith ones.
  */
 export const IntakeModal = ({ prefill = {}, onClose, onCreated }) => {
   const { program } = useAcademy();
-  const [form, setForm] = useState({ email: prefill.email || '', full_name: prefill.full_name || '', days: 7 });
+  const programs = useRows(() => supabase.from('academy_programs').select('id, slug, title').eq('is_active', true).order('sort_order'), []);
+  const [form, setForm] = useState({ email: prefill.email || '', full_name: prefill.full_name || '', days: 7, program_id: program?.id || '' });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [link, setLink] = useState('');
@@ -28,7 +33,7 @@ export const IntakeModal = ({ prefill = {}, onClose, onCreated }) => {
     e.preventDefault();
     setBusy(true); setError('');
     const { data, error: err } = await write(supabase.from('coaching_intakes').insert({
-      email: form.email.trim().toLowerCase(), full_name: form.full_name.trim() || null, program_id: program?.id || null,
+      email: form.email.trim().toLowerCase(), full_name: form.full_name.trim() || null, program_id: form.program_id || program?.id || null,
       inquiry_id: prefill.inquiry_id || null, expires_at: daysFromNow(Number(form.days)),
     }).select('token').single());
     setBusy(false);
@@ -52,11 +57,16 @@ export const IntakeModal = ({ prefill = {}, onClose, onCreated }) => {
             <button className="k-btn k-btn--plum" onClick={copy}>{copied ? <><Check size={16} /> Copied</> : <><Copy size={16} /> Copy link</>}</button>
             <a className="k-btn k-btn--gold" href={mailto}><Mail size={16} /> Email it from my mailbox too</a>
           </div>
-          <p className="ds-muted">Each signed form is emailed to the team and ceo@p31market.com, with a PDF copy to her. Progress shows under Agreements.</p>
+          <p className="ds-muted">Each signed form is emailed, with its PDF, to her and to founder@thep31collective.org only. Progress shows under Agreements.</p>
         </div>
       ) : (
         <form className="ds-form" onSubmit={create}>
-          <p className="ds-muted">In this order: the Business Coaching Agreement (she picks her package there), the Confidentiality Agreement, then the Client Safety &amp; Emergency Contact form. Then she chooses her program and plan (Business Coaching or Faith Mentorship) and pays by secure checkout. The page shows package prices only to the person with the link.</p>
+          <p className="ds-muted">In this order: the Business Coaching Agreement (she picks her package there), the Confidentiality Agreement, then the Client Safety &amp; Emergency Contact form. Then she chooses her plan and pays by secure checkout: Business Coaching or Faith Mentorship, or for Couples Private Mentorship the couples plans. The page shows package prices only to the person with the link.</p>
+          {programs.data.length > 1 && (
+            <label className="k-field"><span>Program</span>
+              <select value={form.program_id} onChange={(e) => setForm({ ...form, program_id: e.target.value })}>{programs.data.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}</select>
+            </label>
+          )}
           <div className="k-row">
             <label className="k-field"><span>Her email</span><input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></label>
             <label className="k-field"><span>Her name</span><input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></label>
@@ -100,7 +110,7 @@ export const MentorAgreements = () => {
 
   return (
     <>
-      <DashHead eyebrow={`${program.title} · Mentor`} title="Coaching" accent="agreements" lead="The three forms every private-coaching client signs, in order: the Business Coaching Agreement, the Confidentiality Agreement, then Client Safety & Emergency Contact. Send the link after the intro call; each signed form is emailed to the team with a PDF copy to her."
+      <DashHead eyebrow={`${program.title} · Mentor`} title="Coaching" accent="agreements" lead="The three forms every private-coaching client signs, in order: the Business Coaching Agreement, the Confidentiality Agreement, then Client Safety & Emergency Contact. Send the link after the intro call; each signed form is emailed with a PDF copy to her and to founder@thep31collective.org."
         actions={<button className="k-btn k-btn--gold" onClick={() => setOpen(true)}><FileCheck2 size={16} /> Send the agreements</button>} />
       {missing && <p className="k-error">Run storefront_v47_coaching_forms.sql (Systems → Health) to switch this on.</p>}
       {intakes.data.length ? (
@@ -164,7 +174,7 @@ The Proverbs 31 Collective`)}`}><Mail size={16} /> Email it</a>
         <Modal title={`${LABEL[view.kind]}: ${view.full_name}`} onClose={() => setView(null)}>
           <div className="ds-form">
             <p><b>Signed as</b> {view.signed_name} on {fmtDate(view.signed_on)} · {view.intake.email}</p>
-            {view.package && <p><b>Package:</b> {view.package} — {PACKAGES.find((p) => p.key === view.package)?.name} ({packagePrice(view.package, prices)})</p>}
+            {view.package && <p><b>Package:</b> {view.package}{packageName(view.package) ? ` — ${packageName(view.package)}` : ''} ({packagePrice(view.package, prices)})</p>}
             {view.kind === 'safety' && (
               <ul className="ds-list">
                 <li className="ds-row"><div><strong>Emergency contact</strong><small>{view.answers?.emergency_contact}</small></div></li>
@@ -174,7 +184,7 @@ The Proverbs 31 Collective`)}`}><Mail size={16} /> Email it</a>
               </ul>
             )}
             {view.signature ? <img src={view.signature} alt="Signature" style={{ maxWidth: 320, background: '#fff', borderRadius: 10, border: '1px solid #ddd' }} /> : <p className="ds-muted">Typed signature only.</p>}
-            <p className="ds-muted">The full signed agreement was emailed as a PDF to her and to the team when she signed.</p>
+            <p className="ds-muted">The full signed agreement was emailed as a PDF to her and to founder@thep31collective.org when she signed.</p>
           </div>
         </Modal>
       )}

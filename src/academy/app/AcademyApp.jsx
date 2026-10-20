@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import {
   Home, BookOpen, CalendarDays, ClipboardCheck, MessageCircle, Target, Upload, Library, CreditCard, Heart,
@@ -10,7 +10,8 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useRoles } from '../../lib/roles';
 import { CONTACT_EMAIL } from '../../lib/academy';
-import { PROGRAMS } from '../content';
+import { PROGRAMS as PUBLIC_PAGES } from '../content';
+import { isProgram, programName, hasFeature } from '../../lib/programs';
 import DashShell, { DashEmpty } from '../../apps/DashShell';
 import { AcademyContext } from './data';
 import {
@@ -33,8 +34,7 @@ import Tour, { TourButton } from '../../components/Tour';
 import { CLASSROOM_TOURS, MENTOR_TOURS } from './classroomTour';
 import './classroom.css';
 
-const NAMES = { business: 'Business Mentorship', faith: 'Faith Mentorship' };
-
+// The menu and the routes both come from the program's features (src/lib/programs.js).
 const studentNav = (slug) => {
   const base = `/academy/${slug}`;
   const core = [
@@ -47,14 +47,13 @@ const studentNav = (slug) => {
     { to: `${base}/discussions`, label: 'Discussions', Icon: MessagesSquare },
     { to: `${base}/progress`, label: 'Progress', Icon: TrendingUp },
   ];
-  const extra = slug === 'business' ? [
-    { to: `${base}/plans`, label: 'Action plans', Icon: ClipboardCheck },
-    { to: `${base}/goals`, label: 'Goals', Icon: Target },
-    { to: `${base}/work`, label: 'Submit work', Icon: Upload },
-  ] : [
-    { to: `${base}/plans`, label: 'My tasks', Icon: ClipboardCheck },
-    { to: `${base}/journal`, label: 'Journal', Icon: Heart },
-  ];
+  const goals = hasFeature(slug, 'goals');
+  const extra = [
+    { to: `${base}/plans`, label: goals ? 'Action plans' : 'My tasks', Icon: ClipboardCheck },
+    goals && { to: `${base}/goals`, label: 'Goals', Icon: Target },
+    hasFeature(slug, 'work') && { to: `${base}/work`, label: 'Submit work', Icon: Upload },
+    hasFeature(slug, 'journal') && { to: `${base}/journal`, label: 'Journal', Icon: Heart },
+  ].filter(Boolean);
   return [...core, ...extra,
     { to: `${base}/library`, label: 'Library', Icon: Library },
     { to: `${base}/billing`, label: 'Billing', Icon: CreditCard },
@@ -93,7 +92,7 @@ const NoAccess = ({ entry, slug }) => (
         : 'Classrooms open after an intro call and enrollment. If you’ve already enrolled, sign in with the email you used.'}</p>
       <div className="k-actions" style={{ justifyContent: 'center' }}>
         {entry ? <a className="k-btn k-btn--gold" href={`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('My mentorship access')}`}>Email {CONTACT_EMAIL}</a>
-          : <Link className="k-btn k-btn--gold" to={`/mentorship/${slug}`}>About this mentorship</Link>}
+          : PUBLIC_PAGES[slug] && <Link className="k-btn k-btn--gold" to={`/mentorship/${slug}`}>About this mentorship</Link>}
         <Link className="k-btn k-btn--ghost" to="/portal?choose">My dashboards</Link>
       </div>
     </div>
@@ -105,7 +104,14 @@ const AcademyApp = () => {
   const { pathname } = useLocation();
   const { signOut } = useAuth();
   const { status, roles, user } = useRoles();
-  const [program, setProgram] = useState({ id: null, slug, title: NAMES[slug] || 'Mentorship' });
+  // The program's database row (academy_programs, by slug). A program listed in src/lib/programs.js
+  // opens at once and fills in its id when the row arrives; any other slug waits for its row.
+  const [found, setFound] = useState({ slug: null, row: null, failed: false });
+  const looked = found.slug === slug;
+  const listed = isProgram(slug);
+  const program = useMemo(() => (!roles.preview && looked && found.row) || { id: null, slug, title: programName(slug, 'Mentorship') }, [roles.preview, looked, found.row, slug]);
+  // A listed program whose row isn't in the database yet: the console opens, but nothing can be saved.
+  const unset = listed && looked && !found.row && !found.failed && !roles.preview;
   const [counts, setCounts] = useState({ newCalls: 0, unread: 0, toGrade: 0 });
   const teach = /\/teach(\/|$)/.test(pathname);
   const isMentor = !!(roles.admin || roles.mentor?.includes(slug));
@@ -129,9 +135,11 @@ const AcademyApp = () => {
   useEffect(() => (readOnly ? installPreviewGuard(() => setBlockedAt(Date.now())) : undefined), [readOnly]);
 
   useEffect(() => {
-    if (!PROGRAMS[slug] || roles.preview) return;
+    if (roles.preview || !/^[a-z0-9-]+$/.test(slug || '')) return undefined;
+    let live = true;
     supabase.from('academy_programs').select('id, slug, title').eq('slug', slug).maybeSingle()
-      .then(({ data }) => data && setProgram(data));
+      .then(({ data, error }) => live && setFound({ slug, row: data || null, failed: !!error }));
+    return () => { live = false; };
   }, [slug, roles.preview]);
 
   // Badges for the mentor menu: new intro calls, unread messages, work to grade.
@@ -148,7 +156,9 @@ const AcademyApp = () => {
     }));
   }, [isMentor, program.id, pathname]);
 
-  if (!PROGRAMS[slug]) return <Navigate to="/portal?choose" replace />;
+  // Unknown slugs go back to the portal: not listed, and no database row (dev previews load none).
+  if (!listed && (roles.preview || !/^[a-z0-9-]+$/.test(slug || '') || (looked && !found.row))) return <Navigate to="/portal?choose" replace />;
+  if (!listed && !looked) return <div className="ds" aria-busy="true" />;
   if (status === 'loading') return <div className="ds" aria-busy="true" />;
   if (status === 'signed-out') return <Navigate to={`/portal?next=${encodeURIComponent(pathname)}`} replace />;
   if (teach && !isMentor) return <Navigate to={`/academy/${slug}`} replace />;
@@ -167,8 +177,11 @@ const AcademyApp = () => {
     : previewing ? <div className="ds-banner"><GraduationCap size={18} /> <span>Student preview: {frameWho === 'new' ? <>what <strong>a new student</strong> sees</> : <><strong>{frameStudent?.name || 'student'}</strong>’s classroom</>}. Actions are turned off.</span></div>
     : viewAs ? <div className="ds-banner"><GraduationCap size={18} /> You’re seeing <strong>{viewAs.name}</strong>’s dashboard, exactly as they see it (read-only).
         <button className="k-link" style={{ background: 'none', border: 0, cursor: 'pointer', font: 'inherit' }} onClick={() => stopViewAs(slug, `/academy/${slug}/teach/students/${viewAs.id}`)}>Exit</button></div>
+    : unset && isMentor ? <div className="ds-banner"><Lock size={18} /> {program.title} isn’t set up in the database yet, so nothing here can be saved. It opens fully once its database update has run.</div>
     : !teach && isMentor && !entry ? <div className="ds-banner"><GraduationCap size={18} /> You’re viewing the student classroom. <Link to={`/academy/${slug}/teach`} className="k-link">Back to mentor console</Link></div>
     : null;
+  const classroomSteps = listed ? CLASSROOM_TOURS[slug] : null;
+  const mentorSteps = listed ? MENTOR_TOURS[slug] : null;
 
   return (
     <AcademyContext.Provider value={{
@@ -178,8 +191,8 @@ const AcademyApp = () => {
       <DashShell
         theme="light"
         variant={slug}
-        tools={<>{teach && isMentor && <StudentPreview />}{studentTour && <TourButton id={`classroom-${slug}`} />}{mentorTour && <TourButton id={`mentor-${slug}`} />}<InstallApp />{!roles.preview && !previewing && <NotificationBell userId={user?.id} />}</>}
-        brand={{ to: teach ? `/academy/${slug}/teach` : `/academy/${slug}`, mark, title: 'P31 Collective', subtitle: `${NAMES[slug]}${teach ? ' · Mentor' : ''}` }}
+        tools={<>{teach && isMentor && <StudentPreview />}{studentTour && classroomSteps && <TourButton id={`classroom-${slug}`} />}{mentorTour && mentorSteps && <TourButton id={`mentor-${slug}`} />}<InstallApp />{!roles.preview && !previewing && <NotificationBell userId={user?.id} />}</>}
+        brand={{ to: teach ? `/academy/${slug}/teach` : `/academy/${slug}`, mark, title: 'P31 Collective', subtitle: `${program.title}${teach ? ' · Mentor' : ''}` }}
         nav={nav}
         account={{ name: previewing ? (frameStudent?.name || 'New student') : user?.user_metadata?.full_name || user?.email || (roles.preview ? 'Preview' : ''), role: teach ? 'Mentor' : 'Member' }}
         onSignOut={signOut}
@@ -195,9 +208,9 @@ const AcademyApp = () => {
           <Route path="library" element={<StudentLibrary />} />
           <Route path="billing" element={<StudentBilling />} />
           <Route path="plans" element={<StudentPlans />} />
-          {slug === 'business' && <Route path="goals" element={<StudentGoals />} />}
-          {slug === 'business' && <Route path="work" element={<StudentWork />} />}
-          {slug === 'faith' && <Route path="journal" element={<StudentJournal />} />}
+          {hasFeature(slug, 'goals') && <Route path="goals" element={<StudentGoals />} />}
+          {hasFeature(slug, 'work') && <Route path="work" element={<StudentWork />} />}
+          {hasFeature(slug, 'journal') && <Route path="journal" element={<StudentJournal />} />}
           <Route path="assignments" element={<StudentAssignments />} />
           <Route path="assignments/:assignmentId" element={<StudentAssignment />} />
           <Route path="quizzes" element={<StudentQuizzes />} />
@@ -226,8 +239,9 @@ const AcademyApp = () => {
           <Route path="teach/discussions/:threadId" element={<DiscussionThread />} />
           <Route path="*" element={<DashEmpty Icon={BookOpen} title="Page not found" action={<Link to={`/academy/${slug}`} className="k-btn k-btn--ghost">Back to your classroom</Link>} />} />
         </Routes>
-        {studentTour && <Tour id={`classroom-${slug}`} steps={CLASSROOM_TOURS[slug] || CLASSROOM_TOURS.business} user={user} autoStart={!isMentor} />}
-        {mentorTour && <Tour id={`mentor-${slug}`} steps={MENTOR_TOURS[slug] || MENTOR_TOURS.business} user={user} autoStart={false} />}
+        {/* Each program has its own walkthrough; a program without one gets none, never another program's paths. */}
+        {studentTour && classroomSteps && <Tour id={`classroom-${slug}`} steps={classroomSteps} user={user} autoStart={!isMentor} />}
+        {mentorTour && mentorSteps && <Tour id={`mentor-${slug}`} steps={mentorSteps} user={user} autoStart={false} />}
       </DashShell>
     </AcademyContext.Provider>
   );

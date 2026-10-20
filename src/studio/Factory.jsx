@@ -17,6 +17,9 @@ const defaultMix = () => Object.fromEntries(Object.entries(TYPES).map(([k, t]) =
 const timeLabel = (t) => { const [h, m] = t.split(':').map(Number); return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`; };
 const dayLabel = (d) => new Date(`${d}T12:00:00`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 const missingTable = (msg = '') => /does not exist|schema cache|column/i.test(msg);
+// Zernio posts come back from both workspaces; only a Market Instagram or Facebook post takes a day here
+// (Collective and TikTok posts never do). A post with no site came from the one-workspace function: the Market's.
+const marketFeedPost = (p) => (p.platforms || []).some((x) => (x.site || p.site || 'market') === 'market' && (x.platform === 'instagram' || x.platform === 'facebook'));
 
 /**
  * Content Studio → Auto-create: choose the kinds of posts, the look, how many days and the times;
@@ -52,7 +55,7 @@ const StudioFactory = () => {
     (data || []).forEach((r) => { if (r.status !== 'skipped') { dates.add(r.post_date); if (r.source_key) keys.add(r.source_key); } });
     try {
       const z = await studio('posts');
-      (z?.scheduled || []).forEach((p) => { if (p.scheduledFor) dates.add(isoDate(new Date(new Date(p.scheduledFor).toLocaleString('en-US', { timeZone: 'America/New_York' })))); });
+      (z?.scheduled || []).forEach((p) => { if (p.scheduledFor && marketFeedPost(p)) dates.add(isoDate(new Date(new Date(p.scheduledFor).toLocaleString('en-US', { timeZone: 'America/New_York' })))); });
     } catch { /* Zernio unreachable: plan from the Planner alone */ }
     setTaken({ dates, keys });
   }, []);

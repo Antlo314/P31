@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CalendarClock, PenSquare, MessagesSquare, MessageCircle, Clapperboard, Lock, Mail, CalendarRange, Wand2, Palette } from 'lucide-react';
+import { LayoutDashboard, CalendarClock, PenSquare, MessagesSquare, MessageCircle, Clapperboard, Lock, Mail, CalendarRange, Wand2, Palette, ListVideo } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useRoles } from '../lib/roles';
 import { dashboardsOf } from '../lib/dashboards';
@@ -9,6 +9,7 @@ import { StudioOverview, StudioCalendar, StudioCompose, StudioInbox, StudioComme
 import StudioEmail from './Email';
 import StudioPlanner from './Planner';
 import StudioFactory from './Factory';
+import StudioPlans from './Plans';
 // The Design studio carries its own fonts and music engine, so it loads only when opened.
 const StudioDesign = lazy(() => import('./design/Designer'));
 import { supabase } from '../lib/supabase';
@@ -26,11 +27,12 @@ const NAV = [
   { to: '/studio/autocreate', label: 'Auto-create', Icon: Wand2 },
   { to: '/studio/calendar', label: 'Calendar', Icon: CalendarClock },
   { to: '/studio/compose', label: 'Create post', Icon: PenSquare },
+  { to: '/studio/plans', label: 'Post plans', Icon: ListVideo },
   { to: '/studio/inbox', label: 'Messages', Icon: MessagesSquare },
   { to: '/studio/comments', label: 'Comments', Icon: MessageCircle },
   { to: '/studio/create', label: 'Creative tools', Icon: Clapperboard },
 ];
-const PAGES = { '': StudioOverview, email: StudioEmail, planner: StudioPlanner, design: StudioDesign, autocreate: StudioFactory, calendar: StudioCalendar, compose: StudioCompose, inbox: StudioInbox, comments: StudioComments, create: StudioCreate };
+const PAGES = { '': StudioOverview, email: StudioEmail, planner: StudioPlanner, design: StudioDesign, autocreate: StudioFactory, calendar: StudioCalendar, compose: StudioCompose, plans: StudioPlans, inbox: StudioInbox, comments: StudioComments, create: StudioCreate };
 
 // Which Studio pages a person gets: the Content creator dashboard (and admins, Studio seats) open
 // everything; Social media manager opens the overview, messages and comments; Emails opens the inbox.

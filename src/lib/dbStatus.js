@@ -1,11 +1,19 @@
 // Which database scripts have landed, checked from the site itself. Every script leaves something
 // behind (a table, a column, a function); asking for it shows whether it is there:
 //   a missing table or column comes back as an error code (42P01 / PGRST205, 42703),
-//   a missing function as PGRST202. Only read-only checks are used.
+//   a missing function as PGRST202; a row a script adds (['row', table, [column, value]]) by reading it.
+//   Only read-only checks are used.
+// No prices here: this file is part of the public site, and mentorship prices are private.
 // From v42 on, each script also records itself in schema_versions (with the date it ran).
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 58, file: 'storefront_v58_couples_mentorship.sql', title: 'Couples Private Mentorship', what: 'Couples Private Mentorship becomes its own program, with its four plans (bi-weekly or weekly 90-minute sessions, monthly or a 6-month commitment) on Melanie’s Stripe Payment Links. A couples client signs the three forms with the couples packages, chooses a couples plan and checks out.',
+    expect: 'couples_program true · couples_plans 4 · couples_linked 4 · functions_ready true · version_recorded true',
+    checks: [['row', 'academy_programs', ['slug', 'couples']]] },
+  { v: 57, file: 'storefront_v57_dm_handoffs.sql', title: 'DM hand-offs by brand', what: 'Each question Carla passes to the team (Studio > Messages) shows whether it came in for the Marketplace or the Collective, and an info request from a DM keeps the email address the person gave.',
+    expect: 'site_ready true · email_ready true · lead_ready true · market_rows_tagged true · version_recorded true',
+    checks: [['column', 'dm_handoffs', 'site']] },
   { v: 56, file: 'storefront_v56_dm_agent.sql', title: 'Smarter DM assistant', what: 'Carla answers each message once, never repeats herself, and lists every question she passes to the team under Studio > Messages.',
     expect: 'claims_ready true · handoffs_ready true',
     checks: [['table', 'dm_handoffs']] },
@@ -28,7 +36,7 @@ export const SCRIPTS = [
     expect: 'orders_ready true · mockups_ready true · bucket_ready true',
     checks: [['table', 'merch_orders'], ['table', 'merch_mockups']] },
   { v: 49, file: 'storefront_v49_new_pricing.sql', title: 'New pricing', what: 'October 2026 prices: the four business coaching packages and three faith mentorship packages, monthly; the earlier single monthly plans retired for new clients.',
-    expect: 'business_prices 27500/37500/49500/65000 · faith_prices 17500/23500/31000 · old_plans_retired true',
+    expect: 'business_prices (four prices) · faith_prices (three prices) · old_plans_retired true',
     checks: [['column', 'academy_plans', 'package']] },
   { v: 48, file: 'storefront_v48_shop_emails.sql', title: 'Shop emails', what: 'The team is emailed when a new shop signs up, and the vendor is emailed the moment her shop is approved.',
     expect: 'signup_column true · live_column true',
@@ -67,6 +75,8 @@ async function probe([kind, a, b]) {
   // A normal read, not head: true (supabase-js reports a head request to a missing table as success).
   if (kind === 'table') { const { error } = await supabase.from(a).select('*').limit(1); return !missing(error); }
   if (kind === 'column') { const { error } = await supabase.from(a).select(b).limit(1); return !missing(error); }
+  // A row the script adds (e.g. a program): there only once the script has run.
+  if (kind === 'row') { const { data, error } = await supabase.from(a).select(b[0]).eq(b[0], b[1]).limit(1); return !error && !!data?.length; }
   // A function with arguments is called with harmless ones; `exists` means any answer but "missing" counts.
   if (kind === 'rpc') { const { error } = await supabase.rpc(a, b || undefined); return !missing(error); }
   return false;

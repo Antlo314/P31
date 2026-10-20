@@ -1,649 +1,255 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>P31 Marketplace — TikTok Campaign Preview</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=League+Spartan:wght@700;800;900&family=Montserrat:wght@400;600;700;800&family=Yellowtail&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #140d16;
-      --card-bg: #211524;
-      --plum: #3d1c3a;
-      --gold: #C5A059;
-      --gold-hi: #e8c682;
-      --lavender: #d8c2e6;
-      --text: #f6edf8;
-      --muted: #a692a8;
-      --accent: #9a4892;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Montserrat', system-ui, sans-serif;
-      padding: 32px 20px 80px;
-      line-height: 1.5;
-    }
-    header {
-      max-width: 1200px;
-      margin: 0 auto 36px;
-      text-align: center;
-    }
-    header h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 3rem;
-      font-weight: 700;
-      color: var(--gold-hi);
-      margin-bottom: 8px;
-    }
-    header p {
-      color: var(--muted);
-      font-size: 1.1rem;
-      max-width: 650px;
-      margin: 0 auto 16px;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(197, 160, 89, 0.15);
-      border: 1px solid var(--gold);
-      color: var(--gold-hi);
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 28px;
-      max-width: 1300px;
-      margin: 0 auto;
-    }
-    .post-card {
-      background: var(--card-bg);
-      border: 1px solid rgba(216, 194, 230, 0.12);
-      border-radius: 20px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-      transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-    .post-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(197, 160, 89, 0.4);
-    }
-    .tiktok-viewport {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 9 / 16;
-      background: #190a1f;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 32px 24px;
-      overflow: hidden;
-    }
-    .style-plum { background: linear-gradient(145deg, #2a1127, #130712); }
-    .style-night { background: linear-gradient(145deg, #180f1c, #09030c); }
-    .style-ivory { background: linear-gradient(145deg, #f7f1e6, #ded2bf); color: #221326; }
-    .style-lavender { background: linear-gradient(145deg, #442142, #291026); }
-    .style-thistle { background: linear-gradient(145deg, #371d34, #1b0a1a); }
-    .style-gold { background: linear-gradient(145deg, #2d2011, #160e06); }
-    .style-royal { background: linear-gradient(145deg, #2b1138, #110419); }
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P31 Market TikTok review</title>
+<style>
+:root{--bg:#f6f1f8;--card:#fff;--ink:#2a1526;--soft:#6b5868;--plum:#742D9B;--line:#e6dcea}
+@media (prefers-color-scheme:dark){:root{--bg:#1a1019;--card:#261823;--ink:#f3eaf6;--soft:#c4b3c2;--plum:#cfa6e6;--line:#3a2836}}
+*{box-sizing:border-box}body{font:14px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:24px 16px}
+h1{font-weight:650;font-size:22px;margin:0 0 4px}.lead{color:var(--soft);margin:0 0 16px;max-width:70ch}
+.bar{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:20px}.bar a{color:var(--plum)}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:20px}
+.c{background:var(--card);border-radius:14px;padding:14px;box-shadow:0 1px 3px #0002}
+.m{display:grid;grid-template-columns:1fr 1fr;gap:10px}.m video,.m img{width:100%;aspect-ratio:9/16;border-radius:8px;background:#000;display:block;object-fit:cover}
+.f{position:relative}.safe .f::after{content:"";position:absolute;inset:12% 13.9% 21.9% 0;border:2px dashed #ff3b6b;border-radius:8px;pointer-events:none}
+.t{font-weight:700;margin:12px 0 0;font-size:16px}.k{color:var(--plum);font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin:2px 0 8px}
+.w{font-size:13px;color:var(--soft);margin:0 0 8px}.w b{color:var(--ink);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.05em;margin-right:4px}
+pre{white-space:pre-wrap;font:13px/1.5 system-ui,sans-serif;background:var(--bg);padding:10px;border-radius:8px;margin:0}
+small{color:var(--soft)}
+</style></head><body>
+<h1>Proverbs 31 Marketplace on TikTok · 14 posts · Fri Oct 23 · 12:30 PM to Thu Nov 5 · 7:30 PM ET</h1>
+<p class="lead">Nothing is scheduled yet. Play each video to hear its music. The cover is what TikTok shows on the profile grid: the video's own frame half a second before the end. Times are Eastern; clocks go back on Sunday, November 1, and Zernio handles that. Posts marked “P31 offer” can carry TikTok's “Your brand” label if you choose (schedule.mjs --brand-label).</p>
+<div class="bar"><label><input type="checkbox" id="safe"> Show TikTok's safe area on the covers (username and caption sit below the line, buttons to the right)</label><a href="out/contact-sheet.jpg">Contact sheet</a></div>
+<div class="g">
+<article class="c" id="tt01-apply">
+<div class="m"><video controls preload="metadata" playsinline poster="out/tt01-apply-cover.jpg?v=mvguigg5" src="out/tt01-apply.mp4?v=mvguigg5"></video><div class="f"><img src="out/tt01-apply-cover.jpg?v=mvguigg5" alt="Cover of tt01-apply" loading="lazy"></div></div>
+<p class="t">Fri Oct 23 · 12:30 PM ET</p>
+<p class="k">invite · plum · golden-hour · editorial · 12 s · h264/aac · 2.3 MB · cover at 11.5 s · P31 offer</p>
+<p class="w"><b>eyebrow</b> Calling Atlanta makers<br><b>headline</b> Your gifts deserve room to grow.<br><b>body</b> Apply for a booth at our seasonal Atlanta markets, a faith-centered marketplace for women-led brands and artisans.<br><b>button</b> Apply at p31market.com/apply</p>
+<pre>Your gift was never meant to stay hidden in your kitchen or your craft room. ✨
 
-    /* Subtle animated background particle glow */
-    .viewport-glow {
-      position: absolute;
-      width: 250px;
-      height: 250px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(197, 160, 89, 0.2) 0%, transparent 70%);
-      top: 20%;
-      left: 10%;
-      pointer-events: none;
-      animation: floatGlow 6s ease-in-out infinite alternate;
-    }
-    @keyframes floatGlow {
-      0% { transform: scale(1) translate(0, 0); opacity: 0.3; }
-      100% { transform: scale(1.3) translate(20px, 30px); opacity: 0.7; }
-    }
+Proverbs 31 Marketplace is a curated marketplace for women creatives, artisans and visionaries, online at p31market.com and at our seasonal markets in Atlanta.
 
-    .tt-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 2;
-    }
-    .tt-logo {
-      font-family: 'Yellowtail', cursive;
-      font-size: 1.5rem;
-      color: var(--gold);
-    }
-    .style-ivory .tt-logo { color: #8e6c28; }
-    .tt-pill {
-      font-size: 0.7rem;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      border-radius: 6px;
-      background: rgba(197, 160, 89, 0.2);
-      color: var(--gold-hi);
-    }
-    .style-ivory .tt-pill { background: rgba(0,0,0,0.08); color: #432b13; }
+Want a booth at a P31 Market? Apply once at p31market.com/apply. Acceptance and event details are emailed to you.
 
-    .tt-content {
-      z-index: 2;
-      text-align: left;
-      margin: auto 0;
-    }
-    .tt-eyebrow {
-      font-size: 0.8rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--gold);
-      margin-bottom: 12px;
-      animation: fadeIn 1s ease forwards;
-    }
-    .style-ivory .tt-eyebrow { color: #8a6422; }
-    .tt-headline {
-      font-family: 'League Spartan', sans-serif;
-      font-weight: 900;
-      text-transform: uppercase;
-      font-size: 2.1rem;
-      line-height: 0.98;
-      letter-spacing: -0.01em;
-      margin-bottom: 16px;
-    }
-    .anim-pop .tt-headline { animation: popScale 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-    .anim-editorial .tt-headline { animation: slideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    .anim-words .tt-headline { animation: wordFade 1.2s ease forwards; }
-    .anim-slide .tt-headline { animation: slideInLeft 0.8s ease forwards; }
-    .anim-gentle .tt-headline { animation: fadeIn 1.2s ease forwards; }
+What do you make? Tell us in the comments 👇
 
-    .tt-verse {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-size: 1.8rem;
-      line-height: 1.2;
-      margin-bottom: 14px;
-    }
-    .tt-body {
-      font-size: 0.95rem;
-      line-height: 1.4;
-      color: var(--lavender);
-      margin-bottom: 20px;
-    }
-    .style-ivory .tt-body { color: #453247; }
-    .tt-btn {
-      display: inline-block;
-      background: var(--gold);
-      color: #1a0b1c;
-      font-weight: 800;
-      font-size: 0.8rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      padding: 10px 18px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(197, 160, 89, 0.3);
-      animation: pulseBtn 3s infinite;
-    }
-    @keyframes pulseBtn {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.03); }
-    }
+#P31Marketplace #AtlantaMakers #WomenOwnedBusiness #ShopSmallATL</pre>
+<small>465 characters · tt01-apply</small>
+</article>
+<article class="c" id="tt02-fine-linen">
+<div class="m"><video controls preload="metadata" playsinline poster="out/tt02-fine-linen-cover.jpg?v=mvguigg5" src="out/tt02-fine-linen.mp4?v=mvguigg5"></video><div class="f"><img src="out/tt02-fine-linen-cover.jpg?v=mvguigg5" alt="Cover of tt02-fine-linen" loading="lazy"></div></div>
+<p class="t">Sat Oct 24 · 1:00 PM ET</p>
+<p class="k">blank · thistle · bright-open · gentle · 9.01 s · h264/aac · 1.3 MB · cover at 8.5 s</p>
+<p class="w"><b>eyebrow</b> Fill in the blank · KJV<br><b>headline</b> She maketh fine linen, and ______ it<br><b>ask</b> Proverbs 31:24 · your answer below<br><b>footer</b> p31market.com</p>
+<pre>Saturday Bible challenge 🧵 No peeking!
 
-    .tt-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 2;
-    }
-    .tt-handle {
-      font-family: 'Yellowtail', cursive;
-      font-size: 1.35rem;
-      color: var(--gold);
-    }
-    .style-ivory .tt-handle { color: #8e6c28; }
+“She maketh fine linen, and ______ it; and delivereth girdles unto the merchant.” Proverbs 31:24 (KJV)
 
-    /* Post details */
-    .post-body {
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      flex: 1;
-    }
-    .post-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.82rem;
-      color: var(--muted);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 10px;
-    }
-    .audio-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: rgba(197, 160, 89, 0.08);
-      border: 1px solid rgba(197, 160, 89, 0.25);
-      border-radius: 10px;
-      padding: 8px 14px;
-    }
-    .audio-info {
-      font-size: 0.84rem;
-      color: var(--gold-hi);
-      font-weight: 600;
-    }
-    .play-btn {
-      background: var(--gold);
-      border: none;
-      color: #1a0b1c;
-      font-weight: 800;
-      font-size: 0.75rem;
-      padding: 5px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: background 0.15s ease;
-    }
-    .play-btn:hover { background: #dfbb72; }
-    .play-btn.playing { background: #ff4757; color: #fff; }
+The woman in Proverbs 31 worked with her hands and traded with the merchants. She is the woman this marketplace is named for.
 
-    .trigger-tag {
-      display: inline-block;
-      align-self: flex-start;
-      background: rgba(154, 72, 146, 0.25);
-      border: 1px solid var(--accent);
-      color: #ffbaf9;
-      font-size: 0.75rem;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 6px;
-    }
-    .caption-box {
-      font-size: 0.84rem;
-      color: #e2d3e5;
-      background: rgba(0, 0, 0, 0.25);
-      padding: 12px;
-      border-radius: 10px;
-      white-space: pre-wrap;
-      max-height: 140px;
-      overflow-y: auto;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
+What is the missing word? Drop your answer in the comments 👇
 
-    /* Keyframes */
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: translateX(0); } }
-    @keyframes popScale { 0% { opacity: 0; transform: scale(0.85); } 100% { opacity: 1; transform: scale(1); } }
-    @keyframes wordFade { 0% { opacity: 0; filter: blur(6px); } 100% { opacity: 1; filter: blur(0); } }
-  </style>
-</head>
-<body>
+#P31Marketplace #Proverbs31Woman #BibleChallenge #FaithAndBusiness</pre>
+<small>399 characters · tt02-fine-linen</small>
+</article>
+<article class="c" id="tt03-strength-honour">
+<div class="m"><video controls preload="metadata" playsinline poster="out/tt03-strength-honour-cover.jpg?v=mvguigg5" src="out/tt03-strength-honour.mp4?v=mvguigg5"></video><div class="f"><img src="out/tt03-strength-honour-cover.jpg?v=mvguigg5" alt="Cover of tt03-strength-honour" loading="lazy"></div></div>
+<p class="t">Sun Oct 25 · 4:00 PM ET</p>
+<p class="k">scripture · gold · worship-rise · spoken · 10.01 s · h264/aac · 1.52 MB · cover at 9.5 s</p>
+<p class="w"><b>verse</b> Strength and honour are her clothing; and she shall rejoice in time to come.<br><b>reference</b> Proverbs 31:25<br><b>footer</b> p31market.com</p>
+<pre>Whatever this week holds, remember what you are clothed in. 🕊️
 
-<header>
-  <div class="badge">TikTok Campaign · P31 Marketplace</div>
-  <h1>15 High-Growth TikTok Reels</h1>
-  <p>Paired with P31's original Web Audio music tracks, kinetic motion presets, and automated trigger links for Carla.</p>
-</header>
+“Strength and honour are her clothing; and she shall rejoice in time to come.” Proverbs 31:25 (KJV)
 
-<div class="grid" id="grid"></div>
+This verse is also on our Strength &amp; Honour tees, crewnecks, totes and journals at p31market.com/merch.
 
-<script>
-const POSTS = [
-  {
-    id: 'tt01-calling-makers',
-    label: 'Mon Oct 19 · 12:30 PM',
-    style: 'plum',
-    musicKey: 'golden-hour',
-    musicTitle: 'Golden Hour (Neo-Soul Keys)',
-    bpm: 88,
-    motion: 'editorial',
-    trigger: 'COMMENT VENDOR',
-    eyebrow: 'Calling Atlanta Makers',
-    headline: 'Your gifts deserve room to grow.',
-    body: 'Now selecting 15 faith-driven women artisans & brands for our upcoming seasonal pop-up market in Metro Atlanta.',
-    button: 'Apply to exhibit with us',
-    caption: 'Your gift was never meant to stay hidden in your kitchen or craft room. ✨ Proverbs 31 Marketplace is accepting applications for our upcoming seasonal market in Metro Atlanta.\n\n💬 Comment VENDOR below and our assistant will DM you the curator application directly! 👇\n\n#P31Marketplace #AtlantaMakers #AtlantaPopUp #ShopSmallATL #WomenWhoBuild #FaithBasedBusiness'
-  },
-  {
-    id: 'tt02-virtual-storefront',
-    label: 'Mon Oct 19 · 7:00 PM',
-    style: 'night',
-    musicKey: 'boss-moves',
-    musicTitle: 'Boss Moves (Confident Trap Bounce)',
-    bpm: 140,
-    motion: 'pop',
-    trigger: 'COMMENT STOREFRONT',
-    eyebrow: 'Virtual Storefront',
-    headline: 'Stop selling only in DMs. Open your virtual storefront.',
-    body: 'Give your brand the luxury experience it deserves with an official online storefront on p31market.com.',
-    button: 'Register your storefront',
-    caption: 'Why are you still sending CashApp tags back and forth in DMs? 🛍️ Give your brand the luxury experience it deserves with an official online storefront on p31market.com.\n\n💬 Comment STOREFRONT below and we’ll DM you the registration link!\n\n#P31Marketplace #OnlineBoutique #VirtualStorefront #SmallBusinessTips'
-  },
-  {
-    id: 'tt03-fruit-of-her-hands',
-    label: 'Tue Oct 20 · 12:30 PM',
-    style: 'ivory',
-    musicKey: 'sunday-keys',
-    musicTitle: 'Sunday Keys (Warm Gospel Piano)',
-    bpm: 72,
-    motion: 'words',
-    trigger: 'COMMENT EVENT',
-    eyebrow: 'Scripture of the Day',
-    verse: '“Give her of the fruit of her hands; and let her own works praise her in the gates.”',
-    body: 'Proverbs 31:31 · King James Version',
-    button: 'Join the marketplace',
-    caption: 'The verse our entire marketplace was built on. 💜 A luxury space where faith, craftsmanship, and purpose align. Want to experience the market in person?\n\n💬 Type AMEN and comment EVENT for upcoming pop-up dates & ticket details!\n\n#Proverbs31Woman #KingdomEntrepreneur #ChristianEntrepreneurs #FaithInBusiness'
-  },
-  {
-    id: 'tt04-curator-opportunity',
-    label: 'Tue Oct 20 · 8:30 PM',
-    style: 'lavender',
-    musicKey: 'lofi-grind',
-    musicTitle: 'Lo-Fi Grind (Laid-Back Beat)',
-    bpm: 82,
-    motion: 'slide',
-    trigger: 'COMMENT CURATOR',
-    eyebrow: 'Curator Opportunity',
-    headline: 'Excellence is our standard. Purpose is our foundation.',
-    body: 'Handmade skincare, candles, jewelry, apparel, and artisan food. Join our curated collective of women who build.',
-    button: 'Apply to be a curator',
-    caption: 'Excellence is a form of worship. That’s why 100% of our curators are hand-selected for craft, story, and heart. 👑\n\n💬 Comment CURATOR to apply for a booth at our next Atlanta market showcase!\n\n#AtlantaVendor #WomenOwnedBusiness #ArtisanMarket #SupportBlackWomen'
-  },
-  {
-    id: 'tt05-business-blank',
-    label: 'Wed Oct 21 · 12:30 PM',
-    style: 'thistle',
-    musicKey: 'worship-rise',
-    musicTitle: 'Worship Rise (Pads & Piano Swell)',
-    bpm: 64,
-    motion: 'gentle',
-    trigger: 'COMMENT JOIN',
-    eyebrow: 'Faith & Business Check',
-    headline: 'This season, God is expanding my business in the area of',
-    body: 'Answer in the comments below 👇',
-    button: 'Speak it into existence',
-    caption: 'Speak it into the atmosphere! Whether it’s inventory, visibility, sales, or peace of mind, declare what God is doing in your business.\n\n💬 Drop your answer below! (And comment EVENT to connect with us in person!)\n\n#KingdomBuilders #ChristianBusinessOwner #FaithDriven #SmallBizCommunity'
-  },
-  {
-    id: 'tt06-market-day-hype',
-    label: 'Wed Oct 21 · 7:00 PM',
-    style: 'plum',
-    musicKey: 'bright-open',
-    musicTitle: 'Bright & Open (Upbeat Feel-Good)',
-    bpm: 116,
-    motion: 'editorial',
-    trigger: 'COMMENT EVENT',
-    eyebrow: 'Atlanta Market Day',
-    headline: 'Shop 7 luxury artisan categories under one roof.',
-    body: 'Art, wellness, handcrafted fashion, gourmet treats, and literature. Live music, high ambiance, pure fellowship.',
-    button: 'Reserve your tickets',
-    caption: 'Forget chaotic, cramped markets. P31 Marketplace is an experience: shop hand-selected women-owned brands while enjoying live music and fellowship. 🎶✨\n\n💬 Comment EVENT to get tickets & venue location sent directly to your DMs!\n\n#AtlantaEvents #GwinnettEvents #SugarloafATL #AtlantaWeekend #ShopLocalATL'
-  },
-  {
-    id: 'tt07-collaboration-sisterhood',
-    label: 'Thu Oct 22 · 12:30 PM',
-    style: 'gold',
-    musicKey: 'golden-hour',
-    musicTitle: 'Golden Hour (Neo-Soul Keys)',
-    bpm: 88,
-    motion: 'spoken',
-    trigger: 'COMMENT VENDOR',
-    eyebrow: 'Sisterhood In Commerce',
-    headline: 'Collaboration over competition. Sisterhood in commerce.',
-    body: 'When you join P31 Marketplace, you join an active family of women who pray, build, and prosper together.',
-    button: 'Join the family',
-    caption: 'Building a business was never meant to be a lonely journey. When you join P31 Marketplace as a vendor, you join an active family of women who pray, build, and prosper together. 💜\n\n💬 Comment VENDOR if you’re ready to stop doing business alone!\n\n#SisterhoodInBusiness #WomenSupportingWomen #P31Community'
-  },
-  {
-    id: 'tt08-gifts-make-room',
-    label: 'Thu Oct 22 · 8:00 PM',
-    style: 'night',
-    musicKey: 'sunday-keys',
-    musicTitle: 'Sunday Keys (Warm Gospel Piano)',
-    bpm: 72,
-    motion: 'words',
-    trigger: 'COMMENT STOREFRONT',
-    eyebrow: 'Scripture Spotlight',
-    verse: '“A man’s gift maketh room for him, and bringeth him before great men.”',
-    body: 'Proverbs 18:16 · King James Version',
-    button: 'Open your storefront',
-    caption: 'When God gives you a gift, He also prepares the room for it. You don’t have to force doors open—walk in excellence and let Him position you. ✨\n\n💬 Comment STOREFRONT to showcase your products on our global marketplace!\n\n#WhereHerGiftsMakeRoom #Proverbs1816 #KingdomWealth #AtlantaEntrepreneurs'
-  },
-  {
-    id: 'tt09-entrepreneur-prayer',
-    label: 'Fri Oct 23 · 12:30 PM',
-    style: 'ivory',
-    musicKey: 'still-waters',
-    musicTitle: 'Still Waters (Reflective Piano)',
-    bpm: 66,
-    motion: 'gentle',
-    trigger: 'COMMENT EVENT',
-    eyebrow: 'Founder’s Prayer',
-    headline: 'Bless the work of my hands and align every business decision with Your Kingdom purpose.',
-    body: 'A prayer for every woman entrepreneur walking by faith this weekend.',
-    button: 'Type Amen',
-    caption: 'A prayer for every woman entrepreneur walking by faith this weekend. May He grant you wisdom, favor, and fruitful hands.\n\n💬 Type AMEN to claim this! (Comment EVENT for our next community gathering details)\n\n#BusinessPrayer #ChristianWomen #FaithfulEntrepreneur #PrayerWorks'
-  },
-  {
-    id: 'tt10-storefront-features',
-    label: 'Fri Oct 23 · 6:30 PM',
-    style: 'plum',
-    musicKey: 'boss-moves',
-    musicTitle: 'Boss Moves (Confident Trap Bounce)',
-    bpm: 140,
-    motion: 'pop',
-    trigger: 'COMMENT STOREFRONT',
-    eyebrow: 'Virtual Storefront',
-    headline: 'Your products deserve a luxury online home.',
-    body: 'Custom storefront URL, verified badge, automated customer ordering, and marketplace community exposure.',
-    button: 'Claim your shop',
-    caption: 'Expand your reach beyond your personal followers. Open your virtual storefront on P31 Marketplace and let shoppers browse your products 24/7! 📦\n\n💬 Comment STOREFRONT to get the setup details sent right to your DMs!\n\n#ShopSmall #OnlineShop #VirtualStorefront #AtlantaMakers'
-  },
-  {
-    id: 'tt11-dont-shrink-vision',
-    label: 'Sat Oct 24 · 1:00 PM',
-    style: 'royal',
-    musicKey: 'lofi-grind',
-    musicTitle: 'Lo-Fi Grind (Laid-Back Beat)',
-    bpm: 82,
-    motion: 'editorial',
-    trigger: 'COMMENT VENDOR',
-    eyebrow: 'Word For Founders',
-    headline: 'Don’t shrink your vision to fit people who don’t understand your calling.',
-    body: 'God gave the vision to you. Keep building, keep refining, and keep showing up in excellence.',
-    button: 'Stand bold',
-    caption: 'God gave the vision to YOU, not them. Keep building, keep refining, and keep showing up in excellence. 👑\n\n💬 Tag a sister who is building her brand! Comment VENDOR to exhibit with us at our next market.\n\n#WomenWhoBuild #BoldFaith #MelanieJC #AtlantaBusiness'
-  },
-  {
-    id: 'tt12-fine-linen-quiz',
-    label: 'Sat Oct 24 · 8:30 PM',
-    style: 'thistle',
-    musicKey: 'bright-open',
-    musicTitle: 'Bright & Open (Upbeat Feel-Good)',
-    bpm: 116,
-    motion: 'slide',
-    trigger: 'COMMENT VENDOR',
-    eyebrow: 'Bible Fill-in-the-Blank',
-    headline: 'She maketh fine linen, and ______ it; and delivereth girdles unto the merchant.',
-    body: 'Proverbs 31:24 (Drop your guess below!)',
-    button: 'Answer in comments',
-    caption: 'Saturday Bible challenge! Did you know the Proverbs 31 woman was an active manufacturer and merchant? 🧵\n\n💬 Drop your guess in the comments without looking it up! (And comment VENDOR to join our marketplace merchants!)\n\n#BibleTrivia #Proverbs31Woman #BiblicalBusiness'
-  },
-  {
-    id: 'tt13-strength-and-honour',
-    label: 'Sun Oct 25 · 4:00 PM',
-    style: 'gold',
-    musicKey: 'worship-rise',
-    musicTitle: 'Worship Rise (Pads & Piano)',
-    bpm: 64,
-    motion: 'words',
-    trigger: 'COMMENT EVENT',
-    eyebrow: 'Sunday Blessing',
-    verse: '“Strength and honour are her clothing; and she shall rejoice in time to come.”',
-    body: 'Proverbs 31:25 · King James Version',
-    button: 'Clothed in strength',
-    caption: 'Whatever season you are walking through, remember what you are clothed in. Step into this new week with divine confidence. 🕊️\n\n💬 Type AMEN! Comment EVENT to connect with our family at our upcoming market gatherings.\n\n#SundayBlessing #StrengthAndHonour #Proverbs31 #ChristianLiving'
-  },
-  {
-    id: 'tt14-hand-selected-curators',
-    label: 'Mon Oct 26 · 12:30 PM',
-    style: 'plum',
-    musicKey: 'golden-hour',
-    musicTitle: 'Golden Hour (Neo-Soul Keys)',
-    bpm: 88,
-    motion: 'editorial',
-    trigger: 'COMMENT VENDOR',
-    eyebrow: 'Hand-Selected Curators',
-    headline: 'Every booth is vetted for craft, story, and excellence.',
-    body: 'Pop-up market booth, online storefront, booth design coaching, and live promotional features.',
-    button: 'Apply at p31market.com',
-    caption: 'When people walk into a P31 Market, they feel the difference immediately. Curated elegance, intentional craftsmanship, and a warm atmosphere. ✨\n\n💬 Comment VENDOR to submit your brand for consideration!\n\n#PopUpAtlanta #AtlantaArtisans #CuratedMarket #HandmadeAtlanta'
-  },
-  {
-    id: 'tt15-open-doors',
-    label: 'Mon Oct 26 · 8:00 PM',
-    style: 'night',
-    musicKey: 'sunday-best',
-    musicTitle: 'Sunday Best (Organ & Celebration)',
-    bpm: 104,
-    motion: 'pop',
-    trigger: 'COMMENT EVENT',
-    eyebrow: 'Kingdom Favor',
-    headline: 'God is opening doors no man can shut. Walk through in excellence.',
-    body: 'Your season of elevation is here. Don’t look back and don’t doubt what He put in your hands.',
-    button: 'Walk through',
-    caption: 'Your season of elevation is here. Don’t look back, don’t hesitate, and don’t doubt what He put in your hands. 💜\n\n💬 Comment EVENT for our next market tickets or STOREFRONT to open your virtual shop!\n\n#OpenDoors #KingdomFavor #P31Marketplace #FaithOverFear'
-  }
-];
+Which do you need to put on this week: strength, or honour? 👇
 
-// Synth audio player using Web Audio API to play P31 chord voicings
-let audioCtx = null;
-let currentOscs = [];
-let playingId = null;
+#P31Marketplace #Proverbs31Woman #SundayScripture #KJV</pre>
+<small>387 characters · tt03-strength-honour</small>
+</article>
+<article class="c" id="tt04-storefront">
+<div class="m"><video controls preload="metadata" playsinline poster="out/tt04-storefront-cover.jpg?v=mvguigg5" src="out/tt04-storefront.mp4?v=mvguigg5"></video><div class="f"><img src="out/tt04-storefront-cover.jpg?v=mvguigg5" alt="Cover of tt04-storefront" loading="lazy"></div></div>
+<p class="t">Mon Oct 26 · 7:30 PM ET</p>
+<p class="k">invite · royal · boss-moves · bold · 12 s · h264/aac · 3.54 MB · cover at 11.5 s · P31 offer</p>
+<p class="w"><b>eyebrow</b> Virtual storefront<br><b>headline</b> Sell online all year on p31market.com.<br><b>body</b> Up to 10 products or services, secure Stripe checkout and P31 marketing. Free for 3 months, then $14.99 a month. 5% per sale.<br><b>button</b> Start at p31market.com/storefront</p>
+<pre>Your products deserve a home online, not just a DM thread. 🛍️
 
-function stopAudio() {
-  currentOscs.forEach(o => {
-    try { o.stop(); o.disconnect(); } catch(e){}
-  });
-  currentOscs = [];
-  if (playingId) {
-    const btn = document.getElementById(`btn-${playingId}`);
-    if (btn) { btn.textContent = '▶ Play Music'; btn.classList.remove('playing'); }
-    playingId = null;
-  }
-}
+A P31 virtual storefront gives you:
+• your own storefront link on p31market.com
+• up to 10 products or services
+• secure checkout through Stripe
+• P31 marketing: SEO, Google, Meta and social
+• web support for your storefront
 
-function playTrack(id, key) {
-  if (playingId === id) {
-    stopAudio();
-    return;
-  }
-  stopAudio();
-  playingId = id;
-  const btn = document.getElementById(`btn-${id}`);
-  if (btn) { btn.textContent = '⏹ Stop Music'; btn.classList.add('playing'); }
+There’s no monthly fee for your first 3 months; after that it’s $14.99 a month if you keep your storefront. A 5% fee applies to each sale.
 
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+Read the terms and sign up at p31market.com/storefront. Within 7 to 10 days you’ll get a link to set up your shop.
 
-  const now = audioCtx.currentTime;
-  const master = audioCtx.createGain();
-  master.gain.setValueAtTime(0.18, now);
-  master.connect(audioCtx.destination);
+What would you sell first? 👇
 
-  // Chords based on mood key
-  const progressions = {
-    'golden-hour': [[60, 64, 67, 71], [62, 65, 69, 72], [65, 69, 72, 76], [67, 71, 74, 77]], // Neo-soul maj9/m7
-    'boss-moves': [[48, 55, 60], [46, 53, 58], [44, 51, 56], [43, 50, 55]], // Minor trap root-5th
-    'sunday-keys': [[53, 57, 60, 65], [58, 62, 65, 69], [55, 58, 62, 67], [52, 55, 59, 64]], // Gospel turnaround
-    'worship-rise': [[57, 60, 64, 69], [53, 57, 60, 65], [60, 64, 67, 72], [55, 59, 62, 67]], // Contemporary praise
-    'bright-open': [[60, 64, 67], [65, 69, 72], [67, 71, 74], [65, 69, 72]], // Upbeat pop
-    'lofi-grind': [[62, 65, 69, 72], [67, 71, 74, 77], [60, 64, 67, 71], [65, 69, 72, 76]], // Lo-fi 2-5-1
-    'still-waters': [[53, 60, 64], [57, 60, 65], [52, 59, 64], [50, 57, 62]], // Warm open acoustic
-    'sunday-best': [[60, 64, 67], [65, 69, 72], [67, 71, 75], [60, 64, 67]] // Celebration
-  };
+#P31Marketplace #VirtualStorefront #WomenOwnedBusiness #ShopSmall</pre>
+<small>640 characters · tt04-storefront</small>
+</article>
+<article class="c" id="tt05-fruit-of-her-hands">
+<div class="m"><video controls preload="metadata" playsinline poster="out/tt05-fruit-of-her-hands-cover.jpg?v=mvguigg5" src="out/tt05-fruit-of-her-hands.mp4?v=mvguigg5"></video><div class="f"><img src="out/tt05-fruit-of-her-hands-cover.jpg?v=mvguigg5" alt="Cover of tt05-fruit-of-her-hands" loading="lazy"></div></div>
+<p class="t">Tue Oct 27 · 12:30 PM ET</p>
+<p class="k">scripture · ivory · sunday-keys · spoken · 11.01 s · h264/aac · 1.39 MB · cover at 10.5 s</p>
+<p class="w"><b>verse</b> Give her of the fruit of her hands; and let her own works praise her in the gates.<br><b>reference</b> Proverbs 31:31<br><b>footer</b> p31market.com</p>
+<pre>The verse this marketplace was built on. 💜
 
-  const chords = progressions[key] || progressions['golden-hour'];
-  const beatLen = 1.4;
+“Give her of the fruit of her hands; and let her own works praise her in the gates.” Proverbs 31:31 (KJV)
 
-  chords.forEach((chord, i) => {
-    chord.forEach(midi => {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      const freq = 440 * Math.pow(2, (midi - 69) / 12);
-      osc.type = key === 'boss-moves' ? 'sawtooth' : key === 'worship-rise' ? 'triangle' : 'sine';
-      osc.frequency.setValueAtTime(freq, now + i * beatLen);
+Proverbs 31 Marketplace was made so the work of women’s hands can be seen, shopped and celebrated: online at p31market.com and at our seasonal markets in Atlanta.
 
-      gain.gain.setValueAtTime(0, now + i * beatLen);
-      gain.gain.linearRampToValueAtTime(0.2, now + i * beatLen + 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + (i + 1) * beatLen);
+What is the work of your hands? 👇
 
-      osc.connect(gain);
-      gain.connect(master);
+#P31Marketplace #Proverbs31Woman #ChristianEntrepreneur #FaithAndBusiness</pre>
+<small>423 characters · tt05-fruit-of-her-hands</small>
+</article>
+<article class="c" id="tt06-luncheon">
+<div class="m"><video controls preload="metadata" playsinline poster="out/tt06-luncheon-cover.jpg?v=mvguigg5" src="out/tt06-luncheon.mp4?v=mvguigg5"></video><div class="f"><img src="out/tt06-luncheon-cover.jpg?v=mvguigg5" alt="Cover of tt06-luncheon" loading="lazy"></div></div>
+<p class="t">Wed Oct 28 · 7:30 PM ET</p>
+<p class="k">invite · dusk · sunday-best · editorial · 12 s · h264/aac · 2.54 MB · cover at 11.5 s · P31 offer</p>
+<p class="w"><b>eyebrow</b> Saturday, December 19 · 1:30 PM<br><b>headline</b> Business &amp; Leadership Luncheon<br><b>body</b> Faith, business and leadership over a seated meal at The Four Event Center, Atlanta. Seating is limited.<br><b>button</b> Tickets on Eventbrite</p>
+<pre>Save the date ✨
 
-      osc.start(now + i * beatLen);
-      osc.stop(now + (i + 1) * beatLen);
-      currentOscs.push(osc);
-    });
-  });
+The Proverbs 31 Business &amp; Leadership Luncheon is Saturday, December 19, 2026, at 1:30 PM at The Four Event Center in Atlanta.
 
-  setTimeout(() => {
-    if (playingId === id) stopAudio();
-  }, chords.length * beatLen * 1000);
-}
+An afternoon where faith meets business and leadership: a seated meal, light networking and a room full of women building what God put in their hands. Business owners, women about to start, and anyone still deciding are all welcome.
 
-const grid = document.getElementById('grid');
-grid.innerHTML = POSTS.map((p, idx) => `
-  <article class="post-card">
-    <div class="tiktok-viewport style-${p.style} anim-${p.motion}">
-      <div class="viewport-glow"></div>
-      <div class="tt-header">
-        <span class="tt-logo">Proverbs 31</span>
-        <span class="tt-pill">TikTok 9:16</span>
-      </div>
-      <div class="tt-content">
-        <div class="tt-eyebrow">${p.eyebrow}</div>
-        ${p.verse ? `<div class="tt-verse">${p.verse}</div>` : ''}
-        ${p.headline ? `<div class="tt-headline">${p.headline}</div>` : ''}
-        <div class="tt-body">${p.body}</div>
-        <div class="tt-btn">${p.button}</div>
-      </div>
-      <div class="tt-footer">
-        <span class="tt-handle">@proverbs31market</span>
-        <span style="font-size:0.75rem; color:var(--gold); font-weight:700;">#${idx+1} of 15</span>
-      </div>
-    </div>
-    <div class="post-body">
-      <div class="post-meta">
-        <strong>${p.label}</strong>
-        <span>Motion: <em>${p.motion}</em></span>
-      </div>
-      <div class="audio-bar">
-        <span class="audio-info">🎵 ${p.musicTitle}</span>
-        <button class="play-btn" id="btn-${p.id}" onclick="playTrack('${p.id}', '${p.musicKey}')">▶ Play Music</button>
-      </div>
-      <span class="trigger-tag">Carla Trigger: ${p.trigger}</span>
-      <div class="caption-box">${p.caption}</div>
-    </div>
-  </article>
-`).join('');
-</script>
+Seating is limited. Tickets are on Eventbrite: search “Proverbs 31 Business Leadership Luncheon”.
 
-</body>
-</html>
+What is one question you’d love to ask a room full of women leaders? 👇
+
+#P31Marketplace #BusinessLuncheon #WomenInLeadership #AtlantaEvents</pre>
+<small>617 characters · tt06-luncheon</small>
+</article>
+<article class="c" id="tt07-build-together">
+<div class="m"><video controls preload="metadata" playsinline poster="out/tt07-build-together-cover.jpg?v=mvguigg5" src="out/tt07-build-together.mp4?v=mvguigg5"></video><div class="f"><img src="out/tt07-build-together-cover.jpg?v=mvguigg5" alt="Cover of tt07-build-together" loading="lazy"></div></div>
+<p class="t">Thu Oct 29 · 12:30 PM ET</p>
+<p class="k">quote · gold · golden-hour · spoken · 8.01 s · h264/aac · 1.12 MB · cover at 7.5 s</p>
+<p class="w"><b>headline</b> Collaboration over competition. We build better together.<br><b>script line</b> Proverbs 31 Marketplace</p>
+<pre>Building a business was never meant to be lonely. 💜
+
+Every P31 virtual storefront comes with a community chat with other Proverbs 31 women creatives, and our markets put makers side by side. The woman at the next table is not your competition.
+
+“Two are better than one; because they have a good reward for their labour.” Ecclesiastes 4:9 (KJV)
+
+What is one thing another business owner taught you? 👇
+
+#P31Marketplace #WomenWhoBuild #WomenSupportingWomen #FaithAndBusiness</pre>
+<small>472 characters · tt07-build-together</small>
+</article>
+<article class="c" id="tt08-friday-prayer">
+<div class="m"><video controls preload="metadata" playsinline poster="out/tt08-friday-prayer-cover.jpg?v=mvguigg5" src="out/tt08-friday-prayer.mp4?v=mvguigg5"></video><div class="f"><img src="out/tt08-friday-prayer-cover.jpg?v=mvguigg5" alt="Cover of tt08-friday-prayer" loading="lazy"></div></div>
+<p class="t">Fri Oct 30 · 7:30 PM ET</p>
+<p class="k">prayer · ivory · still-waters · gentle · 9.01 s · h264/aac · 1.29 MB · cover at 8.5 s</p>
+<p class="w"><b>intro</b> Dear God,<br><b>headline</b> Bless the work of my hands and align every business decision with Your Kingdom purpose.<br><b>footer</b> p31market.com</p>
+<pre>A prayer for every woman building something with her hands. 🙏🏾
+
+Dear God, bless the work of my hands and align every business decision with Your Kingdom purpose. Amen.
+
+What decision are you praying over this weekend? 👇
+
+#P31Marketplace #BusinessPrayer #ChristianWomenInBusiness #FaithAndBusiness</pre>
+<small>296 characters · tt08-friday-prayer</small>
+</article>
+<article class="c" id="tt09-growing-in">
+<div class="m"><video controls preload="metadata" playsinline poster="out/tt09-growing-in-cover.jpg?v=mvguigg5" src="out/tt09-growing-in.mp4?v=mvguigg5"></video><div class="f"><img src="out/tt09-growing-in-cover.jpg?v=mvguigg5" alt="Cover of tt09-growing-in" loading="lazy"></div></div>
+<p class="t">Sat Oct 31 · 1:00 PM ET</p>
+<p class="k">blank · blush · worship-rise · gentle · 9.01 s · h264/aac · 1.66 MB · cover at 8.5 s</p>
+<p class="w"><b>eyebrow</b> Finish the sentence<br><b>headline</b> This season, God is growing my business in<br><b>ask</b> Your answer in the comments<br><b>footer</b> p31market.com</p>
+<pre>Finish the sentence: This season, God is growing my business in ______.
+
+Visibility, sales, boldness, systems, peace of mind… name it and write it down.
+
+“And the LORD answered me, and said, Write the vision, and make it plain upon tables, that he may run that readeth it.” Habakkuk 2:2 (KJV)
+
+Drop yours below 👇
+
+#P31Marketplace #ChristianBusinessOwner #WomenWhoBuild #FaithAndBusiness</pre>
+<small>386 characters · tt09-growing-in</small>
+</article>
+<article class="c" id="tt10-gift-makes-room">
+<div class="m"><video controls preload="metadata" playsinline poster="out/tt10-gift-makes-room-cover.jpg?v=mvguigg5" src="out/tt10-gift-makes-room.mp4?v=mvguigg5"></video><div class="f"><img src="out/tt10-gift-makes-room-cover.jpg?v=mvguigg5" alt="Cover of tt10-gift-makes-room" loading="lazy"></div></div>
+<p class="t">Sun Nov 1 · 4:00 PM ET</p>
+<p class="k">scripture · plum · sunday-keys · spoken · 9.01 s · h264/aac · 1.29 MB · cover at 8.5 s</p>
+<p class="w"><b>verse</b> A man’s gift maketh room for him, and bringeth him before great men.<br><b>reference</b> Proverbs 18:16<br><b>footer</b> p31market.com</p>
+<pre>When God gives you a gift, He makes room for it. ✨ You don’t have to force every door. Keep showing up with excellence.
+
+“A man’s gift maketh room for him, and bringeth him before great men.” Proverbs 18:16 (KJV)
+
+It’s the verse behind our motto: where her gifts make room.
+
+What gift has God been asking you to stop hiding? 👇
+
+#P31Marketplace #Proverbs1816 #ChristianEntrepreneur #FaithAndBusiness</pre>
+<small>398 characters · tt10-gift-makes-room</small>
+</article>
+<article class="c" id="tt11-two-ways">
+<div class="m"><video controls preload="metadata" playsinline poster="out/tt11-two-ways-cover.jpg?v=mvguigg5" src="out/tt11-two-ways.mp4?v=mvguigg5"></video><div class="f"><img src="out/tt11-two-ways-cover.jpg?v=mvguigg5" alt="Cover of tt11-two-ways" loading="lazy"></div></div>
+<p class="t">Mon Nov 2 · 12:30 PM ET</p>
+<p class="k">invite · royal · lofi-grind · editorial · 13 s · h264/aac · 2.41 MB · cover at 12.5 s · P31 offer</p>
+<p class="w"><b>eyebrow</b> Two ways to become a curator<br><b>headline</b> A booth at our markets. A storefront online.<br><b>body</b> Vend at our seasonal Atlanta markets, or open a virtual storefront on p31market.com. Many curators do both.<br><b>button</b> Start at p31market.com/apply</p>
+<pre>Two ways to become a P31 curator 👇
+
+1. Vend at a P31 Market: a booth at our seasonal Atlanta markets. Apply once at p31market.com/apply, and acceptance and event details are emailed to you.
+
+2. Open a virtual storefront: your own storefront on p31market.com with up to 10 products or services, P31 marketing and support. Free for your first 3 months. Start at p31market.com/storefront.
+
+Many curators do both. Start with either, and the team will help with the other.
+
+Booth, storefront, or both: which fits you right now? 👇
+
+#P31Marketplace #AtlantaVendors #WomenOwnedBusiness #ShopSmallATL</pre>
+<small>591 characters · tt11-two-ways</small>
+</article>
+<article class="c" id="tt12-vision">
+<div class="m"><video controls preload="metadata" playsinline poster="out/tt12-vision-cover.jpg?v=mvguigg5" src="out/tt12-vision.mp4?v=mvguigg5"></video><div class="f"><img src="out/tt12-vision-cover.jpg?v=mvguigg5" alt="Cover of tt12-vision" loading="lazy"></div></div>
+<p class="t">Tue Nov 3 · 7:30 PM ET</p>
+<p class="k">quote · amethyst · sunday-best · typed · 9.01 s · h264/aac · 1.33 MB · cover at 8.5 s</p>
+<p class="w"><b>headline</b> Don’t shrink your vision to fit people who don’t understand your calling.<br><b>script line</b> Where her gifts make room</p>
+<pre>God gave the vision to you. Keep building, keep refining, keep showing up. 👑
+
+When you’re ready to put your work in front of more people, there is room for it at P31: a booth at our seasonal Atlanta markets (p31market.com/apply) or a virtual storefront (p31market.com/storefront).
+
+What is the vision you refuse to shrink? 👇
+
+#P31Marketplace #WomenWhoBuild #ChristianEntrepreneur #FaithAndBusiness</pre>
+<small>397 characters · tt12-vision</small>
+</article>
+<article class="c" id="tt13-merch">
+<div class="m"><video controls preload="metadata" playsinline poster="out/tt13-merch-cover.jpg?v=mvguigg5" src="out/tt13-merch.mp4?v=mvguigg5"></video><div class="f"><img src="out/tt13-merch-cover.jpg?v=mvguigg5" alt="Cover of tt13-merch" loading="lazy"></div></div>
+<p class="t">Wed Nov 4 · 12:30 PM ET</p>
+<p class="k">invite · lilac · bright-open · bold · 11.01 s · h264/aac · 1.81 MB · cover at 10.5 s · P31 offer</p>
+<p class="w"><b>eyebrow</b> P31 Merch<br><b>headline</b> Wear the word.<br><b>body</b> Proverbs 31 on tees, hoodies, mugs, totes and journals. Every piece is printed for you when you order.<br><b>button</b> Shop p31market.com/merch</p>
+<pre>Wear the word. 👕☕📓
+
+P31 Merch puts Proverbs 31 on tees, crewnecks, hoodies, mugs, totes, stickers, journals and hats, in designs like Strength &amp; Honour, Her Merchandise Is Good and Where Her Gifts Make Room.
+
+Every piece is printed for you when you order, so nothing sits in a warehouse, and every purchase supports Proverbs 31 Marketplace.
+
+Browse them all at p31market.com/merch. Which design would you wear first? 👇
+
+#P31Marketplace #Proverbs31Woman #FaithApparel #ChristianMerch</pre>
+<small>482 characters · tt13-merch</small>
+</article>
+<article class="c" id="tt14-out-of-the-dms">
+<div class="m"><video controls preload="metadata" playsinline poster="out/tt14-out-of-the-dms-cover.jpg?v=mvguigg5" src="out/tt14-out-of-the-dms.mp4?v=mvguigg5"></video><div class="f"><img src="out/tt14-out-of-the-dms-cover.jpg?v=mvguigg5" alt="Cover of tt14-out-of-the-dms" loading="lazy"></div></div>
+<p class="t">Thu Nov 5 · 7:30 PM ET</p>
+<p class="k">quote · dusk · boss-moves · bold · 8.01 s · h264/aac · 2.4 MB · cover at 7.5 s · P31 offer</p>
+<p class="w"><b>headline</b> Stop selling only in your DMs. Open a storefront.<br><b>script line</b> p31market.com/storefront</p>
+<pre>Still sending payment tags back and forth in your DMs? 🛍️
+
+A P31 virtual storefront gives your customers one link to browse and secure checkout through Stripe, with up to 10 products or services and P31 marketing behind you.
+
+No monthly fee for your first 3 months, then $14.99 a month if you keep it. A 5% fee applies to each sale. Read the terms and sign up at p31market.com/storefront.
+
+What is the hardest part of selling through DMs? 👇
+
+#P31Marketplace #VirtualStorefront #SmallBusinessTips #WomenOwnedBusiness</pre>
+<small>515 characters · tt14-out-of-the-dms</small>
+</article>
+</div>
+<script>const b=document.getElementById('safe');b.onchange=()=>document.body.classList.toggle('safe',b.checked);</script>
+</body></html>

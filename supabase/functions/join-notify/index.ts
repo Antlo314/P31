@@ -8,7 +8,9 @@
 //   • Volunteer acknowledgments (p31market.com/volunteer)   → email outreach@ + a copy to the volunteer
 //   • Survey invitations (v38): businesses that said "I'm in for the next market" get invited when a market announces its date
 //   • Mentorship intro-call requests (v43)                   → email members@ + a copy to the person
-// Every team email also goes to ceo@p31market.com, and every person who submits gets their copy
+//   • Private coaching forms (v47): the enrollment link goes to the mentee; each signed form goes to
+//     founder@ and to the mentee's own copy, and to nobody else (no members@, no ceo@)
+// Every other team email also goes to ceo@p31market.com, and every person who submits gets their copy
 // with a PDF of what they sent attached (the team email carries the same PDF).
 // Every page calls it right after someone submits, and the scheduler calls it every 10 minutes (v38),
 // so nothing waits on a visitor's browser. Calling it again sends nothing new.
@@ -23,7 +25,7 @@
 //   VENDOR_SHEET_TAB                      or: the vendor tab's name, when vendors live in the Collective spreadsheet
 // Deploy: supabase functions deploy join-notify --no-verify-jwt
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { FORMS as COACHING_FORMS, PACKAGES, pdfSections, packagePrice, GOOGLE_FORMS } from '../_shared/coaching-text.js';
+import { FORMS as COACHING_FORMS, packagesFor, pdfSections, packagePrice, GOOGLE_FORMS } from '../_shared/coaching-text.js';
 import { sendEmail, layout, esc, emailConfigured } from '../_shared/email.ts';
 import { formPdf, toBase64, type PdfSpec, type PdfSection } from '../_shared/form-pdf.ts';
 
@@ -147,6 +149,8 @@ type Flow = {
   pdf?: (a: Row) => PdfSpec;
   /** Not a team email (the invitation goes to a vendor): no CEO copy. */
   external?: boolean;
+  /** Private (signed coaching forms): only the people in `to`, no CEO copy. */
+  noCeo?: boolean;
   /** The column that marks the email as sent (default notified_at). */
   column?: string;
   /** Rows of any age (default: only rows created in the last two days). */
@@ -452,7 +456,9 @@ ${a.again === 'in' ? `<p>You said you are in for the next market. The team will 
 ];
 
 // Private coaching intake (v47): the link email, then each of the three signed forms.
-const COACHING_TEAM = () => list('INTRO_NOTIFY_TO', [MEMBERS_EMAIL, 'founder@thep31collective.org']);
+// A signed form goes to the founder only (plus the mentee's own copy): no members@, no ceo@.
+// Deliberately not INTRO_NOTIFY_TO, which intro calls and the enrollment notice share.
+const COACHING_TEAM = () => ['founder@thep31collective.org'];
 const COLLECTIVE_SITE = 'https://www.thep31collective.org';
 // Coaching clients write back to the founder.
 const COACHING_REPLY = 'founder@thep31collective.org';
@@ -462,16 +468,21 @@ FLOWS.push({
   name: 'intake',
   external: true,
   table: 'coaching_intakes',
-  fields: 'id, token, email, full_name, created_at, expires_at',
+  fields: 'id, token, email, full_name, program_id, created_at, expires_at',
   scope: (q) => q.neq('status', 'revoked'),
   to: (a) => [a.email],
   replyTo: () => COACHING_REPLY,
   from: () => env('COLLECTIVE_EMAIL_FROM') || undefined,
-  subject: () => 'P31 Private Mentorship and Business Coaching Enrollment',
+  // Couples Private Mentorship (v58) has its own plans; every other intake chooses Business Coaching or Faith Mentorship.
+  enrich: async (admin, a) => {
+    const { data } = a.program_id ? await admin.from('academy_programs').select('slug').eq('id', a.program_id).maybeSingle() : { data: null };
+    return { ...a, slug: data?.slug || '' };
+  },
+  subject: (a) => (a.slug === 'couples' ? 'P31 Couples Private Mentorship Enrollment' : 'P31 Private Mentorship and Business Coaching Enrollment'),
   email: (a) => layout('Before we begin', `<p>Hi ${esc(String(a.full_name || '').split(' ')[0] || 'there')},</p>
 <p>It was a joy speaking with you, and you are approved to enroll. Here is your private enrollment link. <b>Please complete your enrollment within 48 hours.</b></p>
 <p style="margin:14px 0 6px"><b>Your setup guide</b></p>
-<ol style="margin:0 0 14px;padding-left:20px;line-height:1.6"><li>Sign the three required forms, in order: the <b>Business Coaching Agreement</b>, the <b>Confidentiality Agreement</b> and the <b>Client Safety &amp; Emergency Contact form</b>.</li><li>Choose your program (Business Coaching or Private Faith Mentorship) and your plan.</li><li>Create your member login and pay by secure Stripe checkout.</li><li>Watch for your welcome email: your classroom, session scheduling and community access.</li></ol>
+<ol style="margin:0 0 14px;padding-left:20px;line-height:1.6"><li>Sign the three required forms, in order: the <b>Business Coaching Agreement</b>, the <b>Confidentiality Agreement</b> and the <b>Client Safety &amp; Emergency Contact form</b>.</li><li>${a.slug === 'couples' ? 'Choose your Couples Private Mentorship plan.' : 'Choose your program (Business Coaching or Private Faith Mentorship) and your plan.'}</li><li>Create your member login and pay by secure Stripe checkout.</li><li>Watch for your welcome email: your classroom, session scheduling and community access.</li></ol>
 ${button(`${COLLECTIVE_SITE}/coaching/forms/${a.token}`, 'Start my enrollment')}
 <p style="margin-top:18px">Each form takes a few minutes and you receive a PDF copy as you sign. Your enrollment is final once your payment is confirmed. The link works until ${esc(longDate(String(a.expires_at).slice(0, 10)))}.</p>
 <p>Questions? Reply to this email or write to ${mail(COACHING_REPLY)}.</p>`, COLLECTIVE_FOOT, 'THE PROVERBS 31 COLLECTIVE'),
@@ -486,19 +497,21 @@ for (const kind of COACHING_ORDER) {
     table: 'coaching_forms',
     fields: 'id, intake_id, kind, email, full_name, package, answers, signature, signed_name, signed_on, terms_version, created_at',
     scope: (q) => q.eq('kind', kind),
+    noCeo: true,
     to: COACHING_TEAM,
     from: () => env('COLLECTIVE_EMAIL_FROM') || undefined,
     enrich: async (admin, a) => {
       const { data } = await admin.from('coaching_forms').select('kind').eq('intake_id', a.intake_id);
-      const { data: i } = await admin.from('coaching_intakes').select('token').eq('id', a.intake_id).maybeSingle();
+      const { data: i } = await admin.from('coaching_intakes').select('token, program:academy_programs(slug)').eq('id', a.intake_id).maybeSingle();
       // Package prices live only in academy_plans (v47).
       const { data: plans } = await admin.from('academy_plans').select('package, price_cents').not('package', 'is', null);
       const prices = Object.fromEntries((plans || []).map((p: Row) => [p.package, p.price_cents]));
-      return { ...a, signedKinds: (data || []).map((x: Row) => x.kind), token: i?.token || '', prices };
+      // Section 5 lists the couples packages for a couples intake (v58), the business Options otherwise.
+      return { ...a, signedKinds: (data || []).map((x: Row) => x.kind), token: i?.token || '', prices, packages: packagesFor(i?.program?.slug || '') };
     },
     subject: (a) => `${COACHING_LABEL[kind]} signed: ${a.full_name}${a.package ? ` (${a.package})` : ''}`,
     email: (a) => {
-      const pkg = PACKAGES.find((p) => p.key === a.package);
+      const pkg = (a.packages || packagesFor('')).find((p: Row) => p.key === a.package);
       const left = COACHING_ORDER.filter((k) => !a.signedKinds.includes(k));
       return layout(`${COACHING_LABEL[kind]}: ${a.full_name}`, intro(a, `signed the ${COACHING_LABEL[kind]}`) + table(
         tr('Name', esc(a.full_name)) + tr('Email', mail(a.email)) + tr('Signed as', esc(a.signed_name)) + tr('Date signed', esc(longDate(a.signed_on)))
@@ -522,7 +535,7 @@ ${next ? `<p><b>Next:</b> the ${esc(COACHING_LABEL[next])}. ${button(`${COLLECTI
       intro: doc.subtitle,
       sections: [
         { heading: 'Client', rows: [['Name', a.full_name], ['Email', a.email], ...(kind === 'safety' ? [['Emergency contact', a.answers?.emergency_contact], ['Residential address', a.answers?.address], ['Best contact number', a.answers?.phone], ['Date of birth', a.answers?.date_of_birth ? longDate(a.answers.date_of_birth) : '']] : []), ['Terms version', a.terms_version]] as [string, string][] },
-        ...(pdfSections(doc, { package: a.package }, a.prices) as PdfSection[]),
+        ...(pdfSections(doc, { package: a.package }, a.prices, a.packages || packagesFor('')) as PdfSection[]),
         { paragraph: `The same form on Google, kept as a fallback: ${GOOGLE_FORMS[kind]}` },
       ],
       signature: a.signature, signedName: a.signed_name, signedOn: a.signed_on,
@@ -668,7 +681,7 @@ Deno.serve(async (req) => {
               files = [{ filename: `${slug}-${String(a.id).slice(0, 8)}.pdf`, content: toBase64(await formPdf(spec)) }];
             } catch (e) { console.error(`join-notify ${f.name} pdf`, e); }
           }
-          const to = f.external ? f.to(a) : withCeo(f.to(a));
+          const to = f.external || f.noCeo ? f.to(a) : withCeo(f.to(a));
           // Shared inboxes (members@) get the email but never the PDF copy.
           const plain = files ? to.filter((e) => NO_PDF().includes(e.toLowerCase())) : [];
           const withPdf = to.filter((e) => !plain.includes(e));

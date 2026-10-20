@@ -3,6 +3,7 @@ import { supabase } from './supabase';
 import { useAuth } from '../context/AuthContext';
 import { DAVINCI_ON } from './features';
 import { DASH, ALL_DASHBOARD_IDS, dashboardsOf, systemsPagesFor } from './dashboards';
+import { PROGRAM_SLUGS, programName } from './programs';
 
 const EMPTY = { signed_in: false, admin: false, operator: false, curator: false, studio: false, tools: [], mentor: [], student: [] };
 
@@ -28,8 +29,8 @@ const previewRoles = (r) => {
     admin: kind === 'admin',
     studio: kind === 'studio' || kind === 'admin' || tools.includes('studio'),
     tools,
-    mentor: kind === 'mentor' ? [program] : kind === 'admin' || tools.includes('classroom') ? ['business', 'faith'] : [],
-    student: kind === 'student' ? [{ program, title: program === 'faith' ? 'Faith-Based Mentorship' : 'Business Mentorship', status: 'active', has_access: true }] : [],
+    mentor: kind === 'mentor' ? [program] : kind === 'admin' || tools.includes('classroom') ? PROGRAM_SLUGS : [],
+    student: kind === 'student' ? [{ program, title: programName(program), status: 'active', has_access: true }] : [],
     preview: true,
   };
 };
@@ -61,18 +62,16 @@ export const isTeam = (roles) => !!(roles.admin || roles.operator || roles.studi
 /** Team tools this person was given (admins have every tool). */
 export const hasTool = (roles, tool) => !!(roles.admin || roles.tools?.includes(tool));
 
-const PROGRAM_NAMES = { business: 'Business Mentorship', faith: 'Faith-Based Mentorship' };
-
 /** Every dashboard this person may open, most specific first. */
 export function dashboardsFor(roles) {
   const out = [];
   const mine = dashboardsOf(roles);
   (roles.student || []).forEach((s) => out.push({
-    to: `/academy/${s.program}`, kind: 'student', title: s.title || PROGRAM_NAMES[s.program] || s.program,
+    to: `/academy/${s.program}`, kind: 'student', title: s.title || programName(s.program),
     note: s.has_access ? 'Your classroom' : 'Your access has ended — renew to continue', locked: !s.has_access,
   }));
   (roles.mentor || []).forEach((slug) => out.push({
-    to: `/academy/${slug}/teach`, kind: 'mentor', program: slug, title: PROGRAM_NAMES[slug] || slug,
+    to: `/academy/${slug}/teach`, kind: 'mentor', program: slug, title: programName(slug),
     note: 'Mentor console · lessons, assignments, grading, messages',
   }));
   const studioish = roles.studio || mine.includes('social') || mine.includes('emails');

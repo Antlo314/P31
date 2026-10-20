@@ -145,6 +145,9 @@ button.ds-row { width: 100%; font: inherit; text-align: left; cursor: pointer; }
 .ds--dark .ds-pill--gold { color: var(--gold-hi); }
 .ds-pill--green { background: rgba(23, 166, 115, 0.14); color: #4F6B2E; }
 .ds-pill--red { background: #fdecec; color: #b42318; }
+/* On dark, `.ds--dark .ds-pill` would turn green and red into plain pills: keep their colour, lightened to read. */
+.ds--dark .ds-pill--green { background: rgba(23, 166, 115, 0.2); color: #9FE3C2; }
+.ds--dark .ds-pill--red { background: rgba(240, 68, 56, 0.2); color: #FFB4AB; }
 
 .ds-tabs-inline { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 16px; }
 .ds-tabs-inline button {

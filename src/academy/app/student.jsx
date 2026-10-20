@@ -12,8 +12,16 @@ import Thread from './Thread';
 import { useAcademy, useNow, useRows, write } from './data';
 import { DueSoon } from './learn';
 import { openCalendly } from '../../lib/calendly';
+import { hasFeature } from '../../lib/programs';
 
 const isBusiness = (p) => p?.slug === 'business';
+// What each program's classroom shows (src/lib/programs.js): the verse card, or goals and next steps.
+const has = (p, feature) => hasFeature(p?.slug, feature);
+// The Sessions page lead: only what is true of that program's sessions.
+const SESSIONS_LEAD = {
+  business: 'Private 60-minute sessions, conducted virtually. Join links appear here.',
+  couples: 'Private 90-minute sessions with your mentor. Join links appear here.',
+};
 // Live-class recordings: fresh links from daily-room (they expire after a few hours).
 const watchRecording = async (s) => {
   const tab = window.open('', '_blank');
@@ -110,7 +118,7 @@ export const StudentHome = () => {
       <DashHead eyebrow={program.title} title={first ? 'Welcome back,' : 'Welcome'} accent={first || 'back'} lead="Everything for your mentorship, in one place." />
 
       <div className="ds-grid ds-grid--2">
-        {!isBusiness(program) && (
+        {has(program, 'verse') && (
           <article className="ds-card ds-card--night" style={{ gridColumn: '1 / -1' }}>
             <p className="k-eyebrow" style={{ margin: 0 }}>Today’s verse</p>
             <p style={{ fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: '1.35rem', lineHeight: 1.35, color: '#fff' }}>“{verse}”</p>
@@ -134,7 +142,7 @@ export const StudentHome = () => {
             : total ? <p className="ds-muted">All caught up — well done.</p> : <p className="ds-muted">Lessons will appear as your mentor releases them.</p>}
         </article>
 
-        {isBusiness(program) && (
+        {has(program, 'goals') && (
           <article className="ds-card">
             <div className="ds-card__head"><h2><ClipboardCheck size={18} /> Next steps</h2><Link to="plans" className="k-link">Action plans</Link></div>
             {items.data.length ? (
@@ -304,7 +312,7 @@ export const StudentSessions = () => {
   const past = sessions.data.filter((s) => sessionEnd(s) <= new Date()).reverse();
   return (
     <>
-      <DashHead eyebrow={program.title} title="Your" accent="sessions" lead={isBusiness(program) ? 'Private 60-minute sessions, conducted virtually. Join links appear here.' : 'Gatherings and one-on-one time with your mentor.'}
+      <DashHead eyebrow={program.title} title="Your" accent="sessions" lead={SESSIONS_LEAD[program.slug] || 'Gatherings and one-on-one time with your mentor.'}
         actions={<button className="k-btn k-btn--gold" onClick={() => bookSession(user)}><CalendarPlus size={16} /> Book a private session</button>} />
       {upcoming.length ? <div className="ds-grid ds-grid--2">{upcoming.map((s) => <SessionCard key={s.id} s={s} />)}</div>
         : <DashEmpty Icon={CalendarDays} title="No upcoming sessions">Your mentor will schedule your next session here. Need to reschedule? Send a message.</DashEmpty>}

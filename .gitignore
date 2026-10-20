@@ -37,6 +37,7 @@ supabase/.temp/
 src/dev/demo-studio.json
 marketing/social/2026-10-13-quotes/reels/
 marketing/brand/market/.build/
+marketing/social/2026-10-tiktok/out/*.mp4
 
 .vercel
 .env*.local

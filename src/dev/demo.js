@@ -13,6 +13,20 @@ const SAMPLE_POST = { id: 'demo-scheduled-1', title: 'Sample scheduled post', co
   scheduledFor: new Date(Date.now() + 2 * 864e5).toISOString(), publishedAt: null, media: [{ type: 'image', url: '/og-image.jpg', thumbnail: null, altText: 'Sample photo' }],
   platforms: [{ platform: 'instagram', status: 'scheduled', customContent: '', firstComment: 'Save your seat: link in bio' }, { platform: 'facebook', status: 'scheduled', customContent: '' }] };
 if (!studio.posts.scheduled?.length) studio.posts.scheduled = [SAMPLE_POST];
+// The connected accounts in both Zernio workspaces (studio-zernio `accounts`): the TikTok sits in the
+// Collective's workspace but answers for the Marketplace. Ids match the sample DMs and comments.
+const ACCOUNT = { picture: null, followers: null, active: true, status: null, needsReconnection: false, tokenExpiresAt: null, profileUrl: null };
+const DEMO_ACCOUNTS = [
+  { ...ACCOUNT, id: 'ig', platform: 'instagram', username: 'proverbs31market', displayName: 'Proverbs 31 Marketplace', workspace: 'market', site: 'market' },
+  { ...ACCOUNT, id: 'fb', platform: 'facebook', username: '', displayName: 'Proverbs 31 Marketplace', workspace: 'market', site: 'market' },
+  { ...ACCOUNT, id: 'ig-c', platform: 'instagram', username: 'the.p31collective', displayName: 'The P31 Collective', workspace: 'collective', site: 'collective' },
+  { ...ACCOUNT, id: 'tt', platform: 'tiktok', username: 'p31marketplace', displayName: 'Proverbs 31 Marketplace', workspace: 'collective', site: 'market' },
+];
+// Posts "scheduled" in this demo session, by title (Studio → Post plans finds them by title). One
+// plan post starts out scheduled so the page shows each state. Nothing here reaches Zernio.
+const demoMade = new Map([['P31 TikTok · tt01-apply', { id: 'demo-tt01', title: 'P31 TikTok · tt01-apply', content: 'Sample caption.', status: 'scheduled', isDraft: false,
+  scheduledFor: '2026-10-23T16:30:00.000Z', publishedAt: null, timezone: 'America/New_York', workspace: 'collective', site: 'market', media: [],
+  platforms: [{ platform: 'tiktok', accountId: 'tt', workspace: 'collective', site: 'market', accountUsername: 'p31marketplace', status: 'scheduled' }] }]]);
 
 let now = 0; // set when the demo client starts, so nothing runs at import time
 const iso = (mins) => new Date(now + mins * 60000).toISOString();
@@ -575,6 +589,27 @@ const rpc = {
   academy_verify_certificate: () => [{ recipient_name: 'Keisha Monroe', title: 'Certificate of Completion', program_title: 'Business Mentorship', issued_at: day(-10) }],
 };
 
+// Systems → Social accounts (watchdog socialSetup and connectWebhooks): both Zernio accounts and Carla's
+// webhooks as samples. The Collective one has no webhook yet, so the page shows a problem to fix.
+const demoSocialSetup = () => {
+  const acct = (a, extra = {}) => ({ id: a.id, platform: a.platform, username: a.username, displayName: a.displayName, site: a.site, active: true, needsReconnection: false, tokenExpiresAt: null,
+    tiktokAccountType: null, integrationLane: null, health: null, carlaListening: null, bothKeys: false, ...extra });
+  const ws = (workspace, label, keyName, accounts, webhookIds, problems) => ({ workspace, label, keyName, keySet: true, accountsOk: true, accountsError: null, accounts,
+    webhooksOk: true, webhooksError: null, webhookIds, problems, automations: { total: 0, active: 0 }, workflows: { total: 0, active: 0 }, automationsError: null, collisions: [] });
+  const of = (w) => DEMO_ACCOUNTS.filter((a) => a.workspace === w);
+  return {
+    checkedAt: iso(0), carlaUrl: 'https://example.supabase.co/functions/v1/dm-agent', carlaList: false, sharedTeam: false,
+    secrets: { ZERNIO_WEBHOOK_SECRET: true, ZERNIO_COLLECTIVE_WEBHOOK_SECRET: false },
+    workspaces: [
+      ws('market', 'Marketplace', 'ZERNIO_API_KEY', of('market').map((a) => acct(a, a.platform === 'facebook' ? { tokenExpiresAt: day(12) } : {})), ['wh-m'], []),
+      ws('collective', 'Collective', 'ZERNIO_COLLECTIVE_API_KEY', of('collective').map((a) => acct(a, a.platform === 'tiktok' ? { tiktokAccountType: 'business', integrationLane: 'business', health: 'healthy' } : {})), [],
+        ['No webhook sends its messages and comments to Carla']),
+    ],
+    webhooks: [{ id: 'wh-m', name: 'Carla (dm-agent)', workspaces: ['market'], events: ['message.received', 'message.sent', 'comment.received', 'review.new'], isActive: true, missingEvents: [],
+      accountIds: [], accounts: [], profileCount: 0, lastFiredAt: iso(-20), failureCount: 0, hasSecret: null, secretMatches: null, secretName: null, failures: [], failuresError: null }],
+  };
+};
+
 const fns = {
   // A shopper's order request (Cash App / Venmo shops): the order number and the total, as order-request returns them.
   merch: (b) => (b.action === 'order' ? { status: b.ref === 'M0000000' ? 'expired' : 'paid', paid: b.ref !== 'M0000000' } : { error: 'Demo: merch checkout is off.' }),
@@ -585,7 +620,10 @@ const fns = {
   'google-place': (b) => (b.action === 'connect' ? { place: db.curator_data.find((c) => c.id === 'u-cu')?.google_place } : { ok: true }),
   'studio-zernio': (b) => {
     if (b.action === 'overview') return studio.overview;
-    if (b.action === 'posts') return studio.posts;
+    if (b.action === 'accounts') return { accounts: DEMO_ACCOUNTS, notes: [] };
+    if (b.action === 'posts') return { ...studio.posts, scheduled: [...(studio.posts.scheduled || []), ...demoMade.values()] };
+    // Uploads go to a data: link, which takes any PUT inside the browser: a demo upload never leaves this computer.
+    if (b.action === 'presign') return { uploadUrl: 'data:text/plain,demo-upload', publicUrl: `https://media.example.com/demo/${encodeURIComponent(b.filename || 'upload')}` };
     if (b.action === 'inbox') return { conversations: [
       { id: 'cv1', accountId: 'ig', platform: 'instagram', name: 'Sample Follower', username: 'sample.follower', last: 'When is the next market? 😍', updatedAt: iso(-30), unread: 1 },
       { id: 'cv2', accountId: 'fb', platform: 'facebook', name: 'Sample Vendor', last: 'How do I become a curator?', updatedAt: iso(-200), unread: 0 },
@@ -601,7 +639,17 @@ const fns = {
       { id: 'demo-audio-2', title: 'Another Sample', artist: 'Sample Band', type: 'music', durationMs: 28000, artwork: null, preview: null },
     ] };
     if (b.action === 'limit') return { used: 3, total: 100, windowSeconds: 86400 };
-    if (b.action === 'create') return { post: { id: 'demo-post', scheduledFor: b.scheduledFor, status: 'scheduled', platforms: (b.platforms || []).map((p) => ({ platform: p, status: 'scheduled' })) } };
+    if (b.action === 'create') {
+      const chosen = (b.accountIds || []).map((id) => DEMO_ACCOUNTS.find((a) => a.id === id)).filter(Boolean);
+      const post = { id: `demo-${(b.title || 'post').replace(/\W+/g, '-').toLowerCase()}`, title: b.title || '', content: b.content || '', status: 'scheduled', isDraft: false,
+        scheduledFor: b.scheduledFor ? new Date(b.scheduledFor).toISOString() : iso(60), publishedAt: null, timezone: b.timezone || 'America/New_York', media: b.media || [],
+        workspace: chosen[0]?.workspace || 'market', site: chosen[0]?.site || 'market',
+        platforms: chosen.length ? chosen.map((a) => ({ platform: a.platform, accountId: a.id, workspace: a.workspace, site: a.site, accountUsername: a.username, status: 'scheduled' }))
+          : (b.platforms || []).map((p) => ({ platform: p, status: 'scheduled' })) };
+      // Kept by title, so the same post asked for twice (this stub runs more than once per call) is one post.
+      if (b.title) demoMade.set(b.title, post);
+      return { post, posts: [post], ids: [post.id] };
+    }
     // Editing a post: load it, save it (or send it now), retry, Facebook caption and take-down.
     const all = [...(studio.posts.scheduled || []), ...(studio.posts.recent || [])];
     const found = all.find((p) => p.id === b.postId) || all[0] || SAMPLE_POST;
@@ -631,6 +679,14 @@ const fns = {
     if (b.action === 'update') return { item: { ...items.find((i) => i.id === b.item), ...(b.remove != null ? { status: b.remove ? 'removed' : 'pending' } : {}), ...(b.caption_ig ? { caption_ig: b.caption_ig } : {}) } };
     if (b.action === 'finish') return { scheduled: 0 };
     return { error: '(Demo) Approving uploads and schedules the posts on the real site.' };
+  },
+  watchdog: (b) => {
+    if (b.action === 'socialSetup') return demoSocialSetup();
+    if (b.action === 'connectWebhooks') {
+      const note = '(Demo) On the real site this sets up or completes the webhook to Carla, then sends Zernio’s test message. Nothing was changed.';
+      return { results: ['market', 'collective'].map((workspace) => ({ workspace, ok: true, action: 'none', note })), setup: demoSocialSetup() };
+    }
+    return {};
   },
   'studio-autocreate': (b) => ({ ok: true, drafted: 18, month: b.month, start: `${b.month}-12` }),
   'email-send': (b) => (b.action === 'redraft'

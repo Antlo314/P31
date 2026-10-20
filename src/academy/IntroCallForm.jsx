@@ -3,7 +3,7 @@ import { ArrowRight, CheckCircle2, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { CONTACT_EMAIL } from '../lib/academy';
 
-const PROGRAM_OPTIONS = [['business', 'Business mentorship'], ['faith', 'Faith-based mentorship'], ['', 'Not sure yet']];
+const PROGRAM_OPTIONS = [['business', 'Business mentorship'], ['faith', 'Faith-based mentorship'], ['couples', 'Couples mentorship'], ['', 'Not sure yet']];
 
 // The only public way into the mentorships: request an intro call.
 const IntroCallForm = ({ program = '' }) => {
