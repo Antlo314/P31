@@ -129,7 +129,7 @@ export const StudentHome = () => {
         <article className="ds-card">
           <div className="ds-card__head"><h2><CalendarDays size={18} /> Next session</h2><Link to="sessions" className="k-link">All</Link></div>
           {next ? <SessionCard s={next} compact /> : <p className="ds-muted">No session scheduled yet — book one, or your mentor will add it here.</p>}
-          <button className="k-btn k-btn--ghost k-btn--sm" style={{ justifySelf: 'start' }} onClick={() => bookSession(user)}><CalendarPlus size={15} /> Book a private session</button>
+          <button className="k-btn k-btn--ghost k-btn--sm" style={{ justifySelf: 'start' }} data-preview-ok onClick={() => bookSession(user)}><CalendarPlus size={15} /> Book a private session</button>
         </article>
 
         <DueSoon />
@@ -313,7 +313,7 @@ export const StudentSessions = () => {
   return (
     <>
       <DashHead eyebrow={program.title} title="Your" accent="sessions" lead={SESSIONS_LEAD[program.slug] || 'Gatherings and one-on-one time with your mentor.'}
-        actions={<button className="k-btn k-btn--gold" onClick={() => bookSession(user)}><CalendarPlus size={16} /> Book a private session</button>} />
+        actions={<button className="k-btn k-btn--gold" data-preview-ok onClick={() => bookSession(user)}><CalendarPlus size={16} /> Book a private session</button>} />
       {upcoming.length ? <div className="ds-grid ds-grid--2">{upcoming.map((s) => <SessionCard key={s.id} s={s} />)}</div>
         : <DashEmpty Icon={CalendarDays} title="No upcoming sessions">Your mentor will schedule your next session here. Need to reschedule? Send a message.</DashEmpty>}
       {past.length > 0 && <section className="ds-section"><h2>Past sessions</h2><div className="ds-grid ds-grid--2">{past.map((s) => <SessionCard key={s.id} s={s} />)}</div></section>}
