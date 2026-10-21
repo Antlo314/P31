@@ -53,7 +53,7 @@ const AgreementText = ({ doc, prices, packages }) => (
  * /coaching/forms/:token — a new private-coaching client's three forms, signed in order on one
  * private page: the Business Coaching Agreement, the Confidentiality Agreement, then the Client
  * Safety & Emergency Contact form. The link comes from a mentor; each signed form is emailed, with
- * its PDF, to the client and to founder@thep31collective.org only (join-notify).
+ * its PDF, to the client and to founder@thep31collective.org; the safety form also to members@ (join-notify).
  */
 const CoachingForms = () => {
   const { token } = useParams();

@@ -334,7 +334,7 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 **What should happen**
 
 - Within a minute each person gets a confirmation email with a PDF of exactly what they sent (signed forms include the drawn signature).
-- ceo@p31market.com receives every team notification except signed coaching forms (those go only to founder@thep31collective.org and the client), with the same PDF attached; the usual team mailboxes still receive theirs.
+- ceo@p31market.com receives every team notification except signed coaching forms and the enrollment notice (those go to founder@thep31collective.org, plus members@ for the safety form, and the client), with the same PDF attached; the usual team mailboxes still receive theirs.
 - Each entry is in Systems (applications, vendor forms) or the mentor console (intro calls).
 
 **Afterwards:** Delete the TEST rows in Systems.
@@ -370,12 +370,12 @@ Step-by-step test runs for every function on Proverbs 31 Marketplace and The P31
 
 1. In the mentor console → Intro calls, press “Send the three agreements” on a request (or Agreements → Send the agreements) with a TEST email you can read.
 2. Open the email that arrives and follow the link. Sign the Business Coaching Agreement (pick a package), then the Confidentiality Agreement, then the Client Safety & Emergency Contact form.
-3. Check the TEST inbox and founder@thep31collective.org (and members@ and ceo@p31market.com, which should get nothing).
+3. Check the TEST inbox and founder@thep31collective.org (members@ should get only the safety form; ceo@p31market.com should get nothing).
 
 **What should happen**
 
 - The forms must be signed in that order; the page refuses to skip ahead and remembers what is already signed if you leave and come back.
-- Each signed form arrives at founder@thep31collective.org with a PDF of every word agreed to and the signature; the client gets her own copy with a link to the next form. members@ and ceo@p31market.com get nothing.
+- Each signed form arrives at founder@thep31collective.org with a PDF of every word agreed to and the signature, and the safety form also at members@thep31collective.org; the client gets her own copy with a link to the next form. ceo@p31market.com gets nothing.
 - Agreements in the mentor console shows three green checks and the package chosen; the intro-call request moves to Scheduled.
 
 **Afterwards:** Delete the TEST client from Agreements (that removes her signed forms too).

@@ -151,6 +151,8 @@ type Flow = {
   external?: boolean;
   /** Private (signed coaching forms): only the people in `to`, no CEO copy. */
   noCeo?: boolean;
+  /** Every inbox in `to` gets the PDF, members@ included (the signed coaching forms). */
+  pdfToAll?: boolean;
   /** The column that marks the email as sent (default notified_at). */
   column?: string;
   /** Rows of any age (default: only rows created in the last two days). */
@@ -456,9 +458,11 @@ ${a.again === 'in' ? `<p>You said you are in for the next market. The team will 
 ];
 
 // Private coaching intake (v47): the link email, then each of the three signed forms.
-// A signed form goes to the founder only (plus the mentee's own copy): no members@, no ceo@.
-// Deliberately not INTRO_NOTIFY_TO, which intro calls and the enrollment notice share.
-const COACHING_TEAM = () => ['founder@thep31collective.org'];
+// Who gets each signed form, with the PDF (plus the mentee's own copy); never ceo@:
+//   Business Coaching Agreement and Confidentiality Agreement: the founder
+//   Client Safety & Emergency Contact form: members@ and the founder
+// Deliberately not INTRO_NOTIFY_TO, which intro calls share.
+const COACHING_TEAM = (kind: string) => (kind === 'safety' ? [MEMBERS_EMAIL, 'founder@thep31collective.org'] : ['founder@thep31collective.org']);
 const COLLECTIVE_SITE = 'https://www.thep31collective.org';
 // Coaching clients write back to the founder.
 const COACHING_REPLY = 'founder@thep31collective.org';
@@ -498,7 +502,8 @@ for (const kind of COACHING_ORDER) {
     fields: 'id, intake_id, kind, email, full_name, package, answers, signature, signed_name, signed_on, terms_version, created_at',
     scope: (q) => q.eq('kind', kind),
     noCeo: true,
-    to: COACHING_TEAM,
+    pdfToAll: true,
+    to: () => COACHING_TEAM(kind),
     from: () => env('COLLECTIVE_EMAIL_FROM') || undefined,
     enrich: async (admin, a) => {
       const { data } = await admin.from('coaching_forms').select('kind').eq('intake_id', a.intake_id);
@@ -682,8 +687,8 @@ Deno.serve(async (req) => {
             } catch (e) { console.error(`join-notify ${f.name} pdf`, e); }
           }
           const to = f.external || f.noCeo ? f.to(a) : withCeo(f.to(a));
-          // Shared inboxes (members@) get the email but never the PDF copy.
-          const plain = files ? to.filter((e) => NO_PDF().includes(e.toLowerCase())) : [];
+          // Shared inboxes (members@) get the email but not the PDF copy, unless the flow sends it to all.
+          const plain = files && !f.pdfToAll ? to.filter((e) => NO_PDF().includes(e.toLowerCase())) : [];
           const withPdf = to.filter((e) => !plain.includes(e));
           const replyTo = (f.replyTo ? f.replyTo(a) : a.email) || undefined;
           const res = withPdf.length

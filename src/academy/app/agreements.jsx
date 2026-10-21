@@ -57,7 +57,7 @@ export const IntakeModal = ({ prefill = {}, onClose, onCreated }) => {
             <button className="k-btn k-btn--plum" onClick={copy}>{copied ? <><Check size={16} /> Copied</> : <><Copy size={16} /> Copy link</>}</button>
             <a className="k-btn k-btn--gold" href={mailto}><Mail size={16} /> Email it from my mailbox too</a>
           </div>
-          <p className="ds-muted">Each signed form is emailed, with its PDF, to her and to founder@thep31collective.org only. Progress shows under Agreements.</p>
+          <p className="ds-muted">Each signed form is emailed, with its PDF, to her and to founder@thep31collective.org (the safety form also to members@thep31collective.org). Progress shows under Agreements.</p>
         </div>
       ) : (
         <form className="ds-form" onSubmit={create}>
@@ -110,7 +110,7 @@ export const MentorAgreements = () => {
 
   return (
     <>
-      <DashHead eyebrow={`${program.title} · Mentor`} title="Coaching" accent="agreements" lead="The three forms every private-coaching client signs, in order: the Business Coaching Agreement, the Confidentiality Agreement, then Client Safety & Emergency Contact. Send the link after the intro call; each signed form is emailed with a PDF copy to her and to founder@thep31collective.org."
+      <DashHead eyebrow={`${program.title} · Mentor`} title="Coaching" accent="agreements" lead="The three forms every private-coaching client signs, in order: the Business Coaching Agreement, the Confidentiality Agreement, then Client Safety & Emergency Contact. Send the link after the intro call; each signed form is emailed with a PDF copy to her and to founder@thep31collective.org, and the safety form also to members@thep31collective.org."
         actions={<button className="k-btn k-btn--gold" onClick={() => setOpen(true)}><FileCheck2 size={16} /> Send the agreements</button>} />
       {missing && <p className="k-error">Run storefront_v47_coaching_forms.sql (Systems → Health) to switch this on.</p>}
       {intakes.data.length ? (
@@ -184,7 +184,7 @@ The Proverbs 31 Collective`)}`}><Mail size={16} /> Email it</a>
               </ul>
             )}
             {view.signature ? <img src={view.signature} alt="Signature" style={{ maxWidth: 320, background: '#fff', borderRadius: 10, border: '1px solid #ddd' }} /> : <p className="ds-muted">Typed signature only.</p>}
-            <p className="ds-muted">The full signed agreement was emailed as a PDF to her and to founder@thep31collective.org when she signed.</p>
+            <p className="ds-muted">The full signed form was emailed as a PDF to her and to founder@thep31collective.org (the safety form also to members@thep31collective.org) when she signed.</p>
           </div>
         </Modal>
       )}

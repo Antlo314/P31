@@ -18,8 +18,8 @@ const SITE = 'https://www.thep31collective.org';
 // One booking link for every program's sessions (a 1-hour event); Couples Private Mentorship (v58)
 // sessions are 90 minutes, so a 90-minute link from Melanie would replace it for couples.
 const SESSIONS = 'https://calendly.com/purposefullydriven7/privatementorship';
-const MEMBERS = 'members@thep31collective.org';
-const teamTo = () => [...new Set([...(Deno.env.get('INTRO_NOTIFY_TO') || `${MEMBERS},founder@thep31collective.org`).split(',').map((s) => s.trim()).filter(Boolean), 'ceo@p31market.com'])];
+// The new-enrollment notice goes to the founder only (no members@, no ceo@).
+const teamTo = () => ['founder@thep31collective.org'];
 const money = (c: number) => `$${(c / 100).toFixed(c % 100 ? 2 : 0)}`;
 // When the next charge comes, by the plan's billing (the 6-month commitments renew every 6 months).
 const RENEWS: Record<string, string> = { week: ', then weekly on this day', month: ', then monthly on this date', six_months: ', then every 6 months on this date' };
