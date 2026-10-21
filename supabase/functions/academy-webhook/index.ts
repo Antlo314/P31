@@ -15,9 +15,11 @@ import { storefrontEvent } from '../_shared/storefront-billing.ts';
 import { sendEmail, layout, esc } from '../_shared/email.ts';
 
 const SITE = 'https://www.thep31collective.org';
-// One booking link for every program's sessions (a 1-hour event); Couples Private Mentorship (v58)
-// sessions are 90 minutes, so a 90-minute link from Melanie would replace it for couples.
+// Session booking: 60 minutes for most plans; 90 minutes for Couples Private Mentorship and the two
+// Hybrid Business Coaching options (Option 2 and Option 4). Same rule as src/lib/calendly.js sessionKind.
 const SESSIONS = 'https://calendly.com/purposefullydriven7/privatementorship';
+const SESSIONS_90 = 'https://calendly.com/p31collectiveofficial/30min';
+const sessionsFor = (slug?: string, pkg?: string) => (slug === 'couples' || pkg === 'Option 2' || pkg === 'Option 4' ? SESSIONS_90 : SESSIONS);
 // The new-enrollment notice goes to the founder only (no members@, no ceo@).
 const teamTo = () => ['founder@thep31collective.org'];
 const money = (c: number) => `$${(c / 100).toFixed(c % 100 ? 2 : 0)}`;
@@ -79,7 +81,7 @@ Deno.serve(async (req) => {
         try {
           const [{ data: prog }, { data: plan }, { data: profile }] = await Promise.all([
             db.from('academy_programs').select('title, slug').eq('id', m.program_id).maybeSingle(),
-            db.from('academy_plans').select('label, price_cents, billing').eq('id', m.plan_id).maybeSingle(),
+            db.from('academy_plans').select('label, price_cents, billing, package').eq('id', m.plan_id).maybeSingle(),
             db.from('profiles').select('full_name').eq('id', m.user_id).maybeSingle(),
           ]);
           const email = s.customer_details?.email || '';
@@ -99,7 +101,7 @@ Deno.serve(async (req) => {
 <li><b>Join the community:</b> The Gathering, the members' chat, is in your portal, with your P31 Collective member benefits and P31 vendor savings.</li>
 </ol>
 <p><a href="${classroom}" style="display:inline-block;background:#3A1C36;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Open my classroom</a>&nbsp;
-<a href="${SESSIONS}" style="display:inline-block;background:#D9A93A;color:#21101E;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Book my first session</a></p>
+<a href="${sessionsFor(prog?.slug, plan?.package)}" style="display:inline-block;background:#D9A93A;color:#21101E;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Book my first session</a></p>
 <p>Questions? Reply to this email or write to founder@thep31collective.org.</p>`, 'thep31collective.org · The P31 Collective by NEBA', 'THE PROVERBS 31 COLLECTIVE'), 'founder@thep31collective.org');
           }
           await sendEmail(teamTo(), `New enrollment: ${name || email} (${prog?.title || 'program'}, ${plan?.label || ''})`, layout('New enrollment', `<p><b>${esc(name || email)}</b> (${esc(email)}) paid ${paid} and is enrolled in the <b>${esc(prog?.title || '')}</b>.</p>

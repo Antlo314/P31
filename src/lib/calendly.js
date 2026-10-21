@@ -10,8 +10,13 @@ export const CALENDLY = {
   },
   session: {
     url: 'https://calendly.com/purposefullydriven7/privatementorship',
-    label: 'Private Mentorship Session',
-    length: '1 hour',
+    label: 'Private Mentorship & Business Coaching Session',
+    length: '60 min',
+  },
+  session90: {
+    url: 'https://calendly.com/p31collectiveofficial/30min',
+    label: 'Couples Private Mentorship & Hybrid Business Coaching Session',
+    length: '90 min',
   },
   connect: {
     url: 'https://calendly.com/mjeffers031/connectcall',
@@ -19,6 +24,11 @@ export const CALENDLY = {
     length: '30 min',
   },
 };
+
+// 90-minute sessions: Couples Private Mentorship, and the two Hybrid Business Coaching options.
+const LONG_PACKAGES = ['Option 2', 'Option 4'];
+export const sessionKind = (programSlug, planPackage) =>
+  (programSlug === 'couples' || LONG_PACKAGES.includes(planPackage) ? 'session90' : 'session');
 
 let loading = null;
 export function loadCalendly() {

@@ -11,7 +11,7 @@ import RichText from '../RichText';
 import Thread from './Thread';
 import { useAcademy, useNow, useRows, write } from './data';
 import { DueSoon } from './learn';
-import { openCalendly } from '../../lib/calendly';
+import { openCalendly, sessionKind } from '../../lib/calendly';
 import { hasFeature } from '../../lib/programs';
 
 const isBusiness = (p) => p?.slug === 'business';
@@ -38,7 +38,19 @@ const joinSession = async (s) => {
   if (tab) tab.location = url; else window.location.href = url;
 };
 // Private 1-hour sessions (Calendly), with the member's details filled in.
-const bookSession = (user) => openCalendly('session', { name: user?.user_metadata?.full_name || '', email: user?.email || '', source: 'classroom' });
+// Couples and Hybrid Business Coaching book the 90-minute calendar; everyone else the 60-minute one.
+const useBookSession = () => {
+  const { program, user } = useAcademy();
+  const [pkg, setPkg] = useState(null);
+  useEffect(() => {
+    if (!user?.id || !program?.id) return undefined;
+    let live = true;
+    supabase.from('academy_enrollments').select('plan:academy_plans(package)').eq('program_id', program.id).eq('user_id', user.id).maybeSingle()
+      .then(({ data }) => { if (live) setPkg(data?.plan?.package || null); });
+    return () => { live = false; };
+  }, [program?.id, user?.id]);
+  return () => openCalendly(sessionKind(program?.slug, pkg), { name: user?.user_metadata?.full_name || '', email: user?.email || '', source: 'classroom' });
+};
 const sessionEnd = (s) => new Date(new Date(s.starts_at).getTime() + (s.duration_minutes || 60) * 60000);
 
 // Only this student's sessions (mentors can read every session, which matters in "See their dashboard").
@@ -92,6 +104,7 @@ const SessionCard = ({ s, compact }) => {
 // ── Home ─────────────────────────────────────────────────────
 export const StudentHome = () => {
   const { program, user } = useAcademy();
+  const bookSession = useBookSession();
   const first = (user?.user_metadata?.full_name || '').split(' ')[0];
   const sessions = useSessions(program, user);
   const lessons = useLessons(program);
@@ -129,7 +142,7 @@ export const StudentHome = () => {
         <article className="ds-card">
           <div className="ds-card__head"><h2><CalendarDays size={18} /> Next session</h2><Link to="sessions" className="k-link">All</Link></div>
           {next ? <SessionCard s={next} compact /> : <p className="ds-muted">No session scheduled yet — book one, or your mentor will add it here.</p>}
-          <button className="k-btn k-btn--ghost k-btn--sm" style={{ justifySelf: 'start' }} data-preview-ok onClick={() => bookSession(user)}><CalendarPlus size={15} /> Book a private session</button>
+          <button className="k-btn k-btn--ghost k-btn--sm" style={{ justifySelf: 'start' }} data-preview-ok onClick={bookSession}><CalendarPlus size={15} /> Book a private session</button>
         </article>
 
         <DueSoon />
@@ -307,13 +320,14 @@ export const StudentLesson = () => {
 // ── Sessions ─────────────────────────────────────────────────
 export const StudentSessions = () => {
   const { program, user } = useAcademy();
+  const bookSession = useBookSession();
   const sessions = useSessions(program, user);
   const upcoming = sessions.data.filter((s) => sessionEnd(s) > new Date());
   const past = sessions.data.filter((s) => sessionEnd(s) <= new Date()).reverse();
   return (
     <>
       <DashHead eyebrow={program.title} title="Your" accent="sessions" lead={SESSIONS_LEAD[program.slug] || 'Gatherings and one-on-one time with your mentor.'}
-        actions={<button className="k-btn k-btn--gold" data-preview-ok onClick={() => bookSession(user)}><CalendarPlus size={16} /> Book a private session</button>} />
+        actions={<button className="k-btn k-btn--gold" data-preview-ok onClick={bookSession}><CalendarPlus size={16} /> Book a private session</button>} />
       {upcoming.length ? <div className="ds-grid ds-grid--2">{upcoming.map((s) => <SessionCard key={s.id} s={s} />)}</div>
         : <DashEmpty Icon={CalendarDays} title="No upcoming sessions">Your mentor will schedule your next session here. Need to reschedule? Send a message.</DashEmpty>}
       {past.length > 0 && <section className="ds-section"><h2>Past sessions</h2><div className="ds-grid ds-grid--2">{past.map((s) => <SessionCard key={s.id} s={s} />)}</div></section>}

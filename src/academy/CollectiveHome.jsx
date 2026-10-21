@@ -172,7 +172,7 @@ const CollectiveHome = () => {
           </article>
           <article className="cp-call">
             <Video size={22} />
-            <small>{CALENDLY.session.length} · active mentees</small>
+            <small>{CALENDLY.session.length} or {CALENDLY.session90.length} · active mentees</small>
             <h3>Private Mentorship Session</h3>
             <p>Already enrolled? Schedule your one-on-one session from your classroom, where your details are filled in for you.</p>
             <Link to="/portal" className="cp-btn cp-btn--line"><Lock size={16} /> Sign in to schedule</Link>
