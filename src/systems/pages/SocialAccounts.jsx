@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Instagram, Facebook, RefreshCw, Loader2, CheckCircle2, AlertTriangle, ShieldAlert, Plug, KeyRound, Webhook } from 'lucide-react';
+import { Instagram, Facebook, RefreshCw, Loader2, CheckCircle2, AlertTriangle, ShieldAlert, Plug, KeyRound, Webhook, MessageCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { fmtDateTime } from '../../lib/academy';
 
@@ -81,6 +81,53 @@ const Hook = ({ h }) => (
   </div>
 );
 
+// Carla's switches per brand (app_settings 'carla'); anything not saved yet is on.
+const SWITCHES = [
+  ['market', 'dms', 'Marketplace DMs', 'Instagram @proverbs31market, the Facebook page and TikTok direct messages, including the “Tell me more” email flow.'],
+  ['market', 'comments', 'Marketplace comments', 'Public replies under Marketplace Instagram, Facebook and TikTok posts.'],
+  ['collective', 'dms', 'Collective DMs', 'Instagram @the.p31collective direct messages.'],
+  ['collective', 'comments', 'Collective comments', 'Public replies under @the.p31collective posts.'],
+];
+
+/** Admins choose where Carla answers by herself; with a switch off, those messages wait for the team. */
+const AutoReplies = () => {
+  const [vals, setVals] = useState(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    supabase.from('app_settings').select('value').eq('key', 'carla').maybeSingle().then(({ data, error: err }) => {
+      if (err) setError(err.message);
+      setVals(data?.value || {});
+    });
+  }, []);
+  const flip = async (site, kind) => {
+    const on = vals?.[site]?.[kind] !== false;
+    const value = { ...vals, [site]: { ...vals?.[site], [kind]: !on } };
+    setVals(value); setError('');
+    const { error: err } = await supabase.from('app_settings').upsert({ key: 'carla', value, updated_at: new Date().toISOString() });
+    if (err) { setError(`Not saved: ${err.message}`); setVals(vals); }
+  };
+  return (
+    <section className="sys-card">
+      <h2><MessageCircle size={18} /> Carla’s auto-replies</h2>
+      <p className="sys-muted">Choose where Carla answers by herself. With a switch off she stays quiet there and the team replies from the Instagram, Facebook or TikTok app (or Zernio); the messages still show in the Studio. Changes take effect within a minute.</p>
+      {error && <p className="sys-error" role="alert">{error}</p>}
+      {vals && (
+        <ul className="sys-list">
+          {SWITCHES.map(([site, kind, label, note]) => {
+            const on = vals[site]?.[kind] !== false;
+            return (
+              <li key={site + kind}>
+                <span><strong>{label}</strong><br /><small className="sys-muted">{note}</small></span>
+                <button type="button" className={`sys-chip ${on ? 'is-on' : ''}`} aria-pressed={on} onClick={() => flip(site, kind)}>{on ? 'Carla answers' : 'Team answers'}</button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+};
+
 /**
  * Systems → Social accounts: the two Zernio accounts (one key each) behind P31's socials, the brand
  * each profile answers for, and whether Carla gets their DMs and comments. Reading is safe; only
@@ -152,6 +199,8 @@ const SocialAccounts = () => {
         {setup?.secrets && !setup.secrets.ZERNIO_WEBHOOK_SECRET && <p className="sys-alert">The ZERNIO_WEBHOOK_SECRET secret is not set in Supabase. Carla checks every delivery against it, so add it before connecting.</p>}
         {setup?.secrets?.ZERNIO_WEBHOOK_SECRET && !setup.secrets.ZERNIO_COLLECTIVE_WEBHOOK_SECRET && <p className="sys-muted sa-note">The Collective account’s webhook signs with the same secret as the Marketplace’s (ZERNIO_COLLECTIVE_WEBHOOK_SECRET is not set, which is fine).</p>}
       </section>
+
+      <AutoReplies />
 
       {(setup?.workspaces || []).map((w) => {
         const hooks = (w.webhookIds || []).map((id) => hookById[id]).filter(Boolean);

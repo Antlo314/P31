@@ -19,6 +19,8 @@
 //   supabase secrets set GEMINI_API_KEY=...   (and/or ANTHROPIC_API_KEY=sk-ant-...)
 //   supabase secrets set DM_AGENT_ENABLED=true   (anything else = off; the kill switch for DMs)
 //   COMMENT_AGENT_ENABLED=true   public replies under our Instagram, Facebook and TikTok posts
+//   Per brand, admins switch DM and comment auto-replies on or off in Systems > Social accounts
+//   (app_settings 'carla'); the secrets above stay the master switches.
 //   REVIEW_AGENT_ENABLED=true    thank-you replies to 4–5★ Google reviews (Marketplace)
 //   optional: DM_AGENT_DRY_RUN=true          write replies to the logs, send nothing
 //   optional: DM_AGENT_ACCOUNT_IDS=id1,id2   extra Zernio account ids to answer for. Every Instagram,
@@ -755,6 +757,19 @@ MODE: GOOGLE REVIEW. ${name} left us a ${r.rating}-star review on Google${r.text
   return { reply, handoff: out.handoff, handoff_reason: out.handoff_reason };
 }
 
+// ── The admin switches (Systems > Social accounts) ──
+// app_settings 'carla' = { market: { dms, comments }, collective: { dms, comments } }; anything missing is on.
+// With a switch off, Carla stays quiet there and a person answers; a team reply still pauses her as usual.
+let switches: { at: number; value: Record<string, Record<string, boolean>> } | null = null;
+async function carlaOn(site: Site, kind: 'dms' | 'comments') {
+  if (!switches || Date.now() - switches.at > 30_000) {
+    const { data, error } = await admin().from('app_settings').select('value').eq('key', 'carla').maybeSingle();
+    if (error) console.warn('dm-agent: could not read the auto-reply switches, leaving them on —', error.message);
+    switches = { at: Date.now(), value: (data?.value as Record<string, Record<string, boolean>>) || {} };
+  }
+  return switches.value?.[site]?.[kind] !== false;
+}
+
 /**
  * Everything after the 200: is the account ours, which brand it speaks for, then the right handler.
  * Ours = connected in either Zernio workspace, or listed in DM_AGENT_ACCOUNT_IDS; never one in DM_AGENT_SKIP_ACCOUNT_IDS.
@@ -785,6 +800,11 @@ async function route(evt: any) {
     return;
   }
   const ctx = await contextFor(evt);
+  const kind = job === 'comment' ? 'comments' : job === 'dm' ? 'dms' : null;
+  if (kind && !(await carlaOn(ctx.site, kind))) {
+    console.log(`dm-agent: ${evt.event} on ${ourAccount(ctx)} left for the team — ${BRAND[ctx.site]} ${kind === 'dms' ? 'DM' : 'comment'} auto-replies are off`);
+    return;
+  }
 
   if (job === 'comment') await handleComment(evt, ctx);
   else if (job === 'review') await handleReview(evt);
