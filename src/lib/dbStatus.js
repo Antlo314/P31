@@ -8,6 +8,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 60, file: 'storefront_v60_couples_two_signers.sql', title: 'Couples: two signers, one payment', what: 'A couples enrollment sends each partner their own link; both sign all three forms, then either one chooses the plan and pays once for both, and both are enrolled.',
+    expect: 'couple_column true · functions_ready true · enroll_trigger true · version_recorded true',
+    checks: [['column', 'coaching_intakes', 'couple_id']] },
   { v: 59, file: 'storefront_v59_faith_six_months.sql', title: 'Faith 6-Month plans', what: 'The two Private Faith-Based Mentorship 6-Month Commitments from the October 2026 pricing sheet (bi-weekly and weekly), on Melanie’s Stripe Payment Links, offered on the private forms page.',
     expect: 'faith_six_month_plans 2 · faith_six_month_linked 2 · package_keys_unique true · version_recorded true',
     checks: [['row', 'academy_plans', ['package', 'Faith 2 6M']]] },

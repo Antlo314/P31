@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowRight, Check, CheckCircle2, Lock, ShieldCheck, FileSignature, HeartPulse, Loader2, ExternalLink } from 'lucide-react';
+import { ArrowRight, Check, CheckCircle2, Lock, ShieldCheck, FileSignature, HeartPulse, Loader2, ExternalLink, CreditCard, Clock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import SignatureField from '../../components/SignatureField';
 import { todayLong } from '../../lib/forms';
@@ -14,7 +14,7 @@ const STEP = {
   confidentiality: { Icon: Lock, short: 'Confidentiality' },
   safety: { Icon: HeartPulse, short: 'Safety & Emergency' },
 };
-const FRIENDLY = /^(Please|This link|Clients must|Unknown)/;
+const FRIENDLY = /^(Please|This link|Clients must|Unknown|Payment opens|Your partner)/;
 
 /** One agreement, section by section, word for word (section 5 lists the packages of her program). */
 const AgreementText = ({ doc, prices, packages }) => (
@@ -132,6 +132,9 @@ const CoachingForms = () => {
 
   const first = (intake.full_name || f.full_name || '').split(' ')[0];
   const done = !current;
+  // Couples (v60): the partner on the other link, and whether both have signed.
+  const partners = intake.partners || [];
+  const partnerNames = partners.map((p) => (p.full_name || 'your partner').split(' ')[0]).join(' and ');
   // Step 3 of the enrollment workflow: completion is requested within 48 hours of the invitation.
   const dueBy = intake.created_at ? new Date(new Date(intake.created_at).getTime() + 48 * 3600e3) : null;
   const dueText = dueBy && dueBy > new Date() ? dueBy.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : null;
@@ -180,6 +183,7 @@ const CoachingForms = () => {
             : done
               ? 'Your three forms are on file (a PDF copy of each is in your email). One last step: choose your program and plan, then secure checkout.'
               : 'Three forms, signed in order, then you choose your plan and check out. Each form is emailed to you as a PDF once you sign it.'}</p>
+          {partners.length > 0 && !intake.enrolled && <p className="cf-due">Couples mentorship: you and {partnerNames} each sign all three forms on your own private link. One payment covers you both, and it opens once you have both signed.</p>}
           {!done && dueText && <p className="cf-due">Please complete your enrollment within 48 hours, by <b>{dueText}</b>.</p>}
         </div>
       </header>
@@ -209,6 +213,19 @@ const CoachingForms = () => {
           <h2>You are enrolled</h2>
           <p>Welcome to the P31 Collective. Sign in from the member portal for your classroom, your sessions and The Gathering.</p>
           <Link to="/portal" className="k-btn k-btn--gold">Open the member portal <ArrowRight size={16} /></Link>
+        </div>
+      ) : done && partners.length > 0 && intake.partner_paying ? (
+        <div className="cf-card cf-card--center">
+          <span className="k-icon" style={{ margin: '0 auto' }}><CreditCard size={26} /></span>
+          <h2>{partnerNames} is completing payment</h2>
+          <p>Your forms are signed. {partnerNames} has started checkout for you both, so there is nothing more for you to pay. Once the payment comes through you will both be enrolled; watch your email.</p>
+        </div>
+      ) : done && partners.length > 0 && !intake.couple_ready ? (
+        <div className="cf-card cf-card--center">
+          <span className="k-icon" style={{ margin: '0 auto' }}><Clock size={26} /></span>
+          <h2>Waiting for {partnerNames}</h2>
+          <p>Thank you, your three forms are signed. Payment opens once {partnerNames} has signed all three on their own link{partners.map((p) => ` (${Math.min(p.signed, 3)} of 3 signed so far)`).join('')}. Come back to this page then, or {partnerNames} can choose the plan and pay for you both.</p>
+          <button type="button" className="k-btn k-btn--ghost" onClick={() => window.location.reload()}>Check again</button>
         </div>
       ) : done ? (
         <div className="cf-card">

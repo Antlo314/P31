@@ -112,15 +112,27 @@ Deno.serve(async (req) => {
   // Enrollment workflow step 4: Faith Mentorship, Business Coaching and Couples Private Mentorship (v58)
   // need all three forms signed before checkout.
   if (['business', 'faith', 'couples'].includes(program?.slug)) {
-    const { data: intakes } = await admin.from('coaching_intakes').select('id, token').ilike('email', invite.email).neq('status', 'revoked');
-    let signed = false; let formsToken = '';
+    const { data: intakes } = await admin.from('coaching_intakes').select('*').ilike('email', invite.email).neq('status', 'revoked');
+    const allSigned = async (id: string) => {
+      const { data: forms } = await admin.from('coaching_forms').select('kind').eq('intake_id', id);
+      return new Set((forms || []).map((f: { kind: string }) => f.kind)).size >= 3;
+    };
+    let signed: Any = null; let formsToken = '';
     for (const i of intakes || []) {
-      const { data: forms } = await admin.from('coaching_forms').select('kind').eq('intake_id', i.id);
-      if (new Set((forms || []).map((f: { kind: string }) => f.kind)).size >= 3) { signed = true; break; }
+      if (await allSigned(i.id)) { signed = i; break; }
       formsToken ||= i.token;
     }
     if (!signed) {
       return json({ error: 'Please complete your three enrollment forms first (Business Coaching Agreement, Confidentiality Agreement, Client Safety & Emergency).', forms: formsToken ? `/coaching/forms/${formsToken}` : null }, 409);
+    }
+    // Couples (v60): both partners sign all three forms before the one payment.
+    if (signed.couple_id) {
+      const { data: pair } = await admin.from('coaching_intakes').select('id').eq('couple_id', signed.couple_id).neq('status', 'revoked');
+      for (const p of pair || []) {
+        if (!(await allSigned(p.id))) {
+          return json({ error: 'Payment opens once both partners have signed all three forms.', forms: `/coaching/forms/${signed.token}` }, 409);
+        }
+      }
     }
   }
 

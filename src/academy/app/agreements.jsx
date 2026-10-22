@@ -23,27 +23,38 @@ const packageName = (key) => [...PACKAGES, ...COUPLES_PACKAGES].find((p) => p.ke
 export const IntakeModal = ({ prefill = {}, onClose, onCreated }) => {
   const { program } = useAcademy();
   const programs = useRows(() => supabase.from('academy_programs').select('id, slug, title').eq('is_active', true).order('sort_order'), []);
-  const [form, setForm] = useState({ email: prefill.email || '', full_name: prefill.full_name || '', days: 7, program_id: program?.id || '' });
+  const [form, setForm] = useState({ email: prefill.email || '', full_name: prefill.full_name || '', days: 7, program_id: program?.id || '', partner_email: '', partner_name: '' });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [link, setLink] = useState('');
-  const [copied, setCopied] = useState(false);
+  const [partnerLink, setPartnerLink] = useState('');
+  const [copied, setCopied] = useState('');
+  // Couples (v60): each partner gets their own link and signs all three forms; one pays, once both have signed.
+  const chosen = programs.data.find((p) => p.id === (form.program_id || program?.id));
+  const couples = (chosen?.slug || program?.slug) === 'couples';
 
   const create = async (e) => {
     e.preventDefault();
     setBusy(true); setError('');
-    const { data, error: err } = await write(supabase.from('coaching_intakes').insert({
-      email: form.email.trim().toLowerCase(), full_name: form.full_name.trim() || null, program_id: form.program_id || program?.id || null,
-      inquiry_id: prefill.inquiry_id || null, expires_at: daysFromNow(Number(form.days)),
-    }).select('token').single());
+    if (couples && form.partner_email.trim().toLowerCase() === form.email.trim().toLowerCase()) {
+      setBusy(false);
+      return setError('Each partner needs their own email address.');
+    }
+    const base = { program_id: form.program_id || program?.id || null, inquiry_id: prefill.inquiry_id || null, expires_at: daysFromNow(Number(form.days)) };
+    const couple = couples ? { couple_id: crypto.randomUUID() } : {};
+    const rows = [{ ...base, ...couple, email: form.email.trim().toLowerCase(), full_name: form.full_name.trim() || null }];
+    if (couples) rows.push({ ...base, ...couple, email: form.partner_email.trim().toLowerCase(), full_name: form.partner_name.trim() || null });
+    const { data, error: err } = await write(supabase.from('coaching_intakes').insert(rows).select('token, email'));
     setBusy(false);
-    if (err) return setError(/does not exist|schema cache/.test(err) ? 'Run storefront_v47_coaching_forms.sql first (Systems → Health).' : err);
-    setLink(`${window.location.origin}/coaching/forms/${data.token}`);
+    if (err) return setError(/couple_id/.test(err) ? 'Run storefront_v60_couples_two_signers.sql first (Systems → Health).' : /does not exist|schema cache/.test(err) ? 'Run storefront_v47_coaching_forms.sql first (Systems → Health).' : err);
+    const linkFor = (email) => `${window.location.origin}/coaching/forms/${data.find((r) => r.email === email)?.token}`;
+    setLink(linkFor(rows[0].email));
+    if (couples) setPartnerLink(linkFor(rows[1].email));
     // The site emails her the link on its own; this just hurries it along.
     supabase.functions.invoke('join-notify', { body: {} }).catch(() => {});
     onCreated?.();
   };
-  const copy = async () => { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1500); };
+  const copy = async (text, which) => { await navigator.clipboard.writeText(text); setCopied(which); setTimeout(() => setCopied(''), 1500); };
   const mailto = `mailto:${encodeURIComponent(form.email)}?subject=${encodeURIComponent('Your P31 coaching agreements')}&body=${encodeURIComponent(
     `Hi ${form.full_name.split(' ')[0] || 'there'},\n\nIt was a joy speaking with you. Before we begin, here is your private link to the three forms we go over with every client, signed in order: the Business Coaching Agreement, the Confidentiality Agreement, and the Client Safety & Emergency Contact form.\n\n${link}\n\nEach takes a few minutes; you can come back to the same link to finish later. You'll receive a PDF copy of each one once it's signed.\n\nQuestions? Reply here or email ${CONTACT_EMAIL}.\n\nWith love,\nThe Proverbs 31 Collective`)}`;
 
@@ -51,11 +62,17 @@ export const IntakeModal = ({ prefill = {}, onClose, onCreated }) => {
     <Modal title="Send the three agreements" onClose={onClose}>
       {link ? (
         <div className="ds-form">
-          <p>Her private link is ready and has been emailed to <strong>{form.email}</strong>. She is asked to finish within 48 hours; the link keeps working for {form.days} days. After the three forms she chooses her program and plan on the same page and checks out on Stripe, and her welcome email goes out once the payment is confirmed.</p>
-          <div className="ds-row"><Link2 size={18} /><div><strong style={{ fontSize: '0.85rem', overflowWrap: 'anywhere' }}>{link}</strong></div></div>
+          {partnerLink ? (
+            <p>Two private links are ready, one for each partner, and each has been emailed: <strong>{form.email}</strong> and <strong>{form.partner_email}</strong>. Each partner signs all three forms on their own link. Payment opens only once both have signed; then either one chooses the plan and pays once for both. The links keep working for {form.days} days.</p>
+          ) : (
+            <p>Her private link is ready and has been emailed to <strong>{form.email}</strong>. She is asked to finish within 48 hours; the link keeps working for {form.days} days. After the three forms she chooses her program and plan on the same page and checks out on Stripe, and her welcome email goes out once the payment is confirmed.</p>
+          )}
+          <div className="ds-row"><Link2 size={18} /><div>{partnerLink && <small className="ds-muted">{form.full_name || form.email}</small>}<strong style={{ display: 'block', fontSize: '0.85rem', overflowWrap: 'anywhere' }}>{link}</strong></div></div>
+          {partnerLink && <div className="ds-row"><Link2 size={18} /><div><small className="ds-muted">{form.partner_name || form.partner_email}</small><strong style={{ display: 'block', fontSize: '0.85rem', overflowWrap: 'anywhere' }}>{partnerLink}</strong></div></div>}
           <div className="k-actions">
-            <button className="k-btn k-btn--plum" onClick={copy}>{copied ? <><Check size={16} /> Copied</> : <><Copy size={16} /> Copy link</>}</button>
-            <a className="k-btn k-btn--gold" href={mailto}><Mail size={16} /> Email it from my mailbox too</a>
+            <button className="k-btn k-btn--plum" onClick={() => copy(link, 'one')}>{copied === 'one' ? <><Check size={16} /> Copied</> : <><Copy size={16} /> {partnerLink ? 'Copy first link' : 'Copy link'}</>}</button>
+            {partnerLink && <button className="k-btn k-btn--plum" onClick={() => copy(partnerLink, 'two')}>{copied === 'two' ? <><Check size={16} /> Copied</> : <><Copy size={16} /> Copy partner link</>}</button>}
+            {!partnerLink && <a className="k-btn k-btn--gold" href={mailto}><Mail size={16} /> Email it from my mailbox too</a>}
           </div>
           <p className="ds-muted">Each signed form is emailed, with its PDF, to her and to founder@thep31collective.org (the safety form also to members@thep31collective.org). Progress shows under Agreements.</p>
         </div>
@@ -71,11 +88,20 @@ export const IntakeModal = ({ prefill = {}, onClose, onCreated }) => {
             <label className="k-field"><span>Her email</span><input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></label>
             <label className="k-field"><span>Her name</span><input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></label>
           </div>
+          {couples && (
+            <>
+              <p className="ds-muted">Couples: both partners sign all three forms, each on their own link. One payment covers both, and it opens only after both have signed.</p>
+              <div className="k-row">
+                <label className="k-field"><span>Partner email</span><input required type="email" value={form.partner_email} onChange={(e) => setForm({ ...form, partner_email: e.target.value })} /></label>
+                <label className="k-field"><span>Partner name</span><input value={form.partner_name} onChange={(e) => setForm({ ...form, partner_name: e.target.value })} /></label>
+              </div>
+            </>
+          )}
           <label className="k-field"><span>Link valid for</span>
             <select value={form.days} onChange={(e) => setForm({ ...form, days: e.target.value })}>{[7, 14, 30, 60].map((d) => <option key={d} value={d}>{d} days</option>)}</select>
           </label>
           {error && <p className="k-error">{error}</p>}
-          <button className="k-btn k-btn--gold" disabled={busy}><Send size={16} /> {busy ? 'Creating…' : 'Create and email the link'}</button>
+          <button className="k-btn k-btn--gold" disabled={busy}><Send size={16} /> {busy ? 'Creating…' : couples ? 'Create and email both links' : 'Create and email the link'}</button>
         </form>
       )}
     </Modal>
@@ -122,6 +148,13 @@ export const MentorAgreements = () => {
               <article key={i.id} className="ds-card">
                 <div className="ds-card__head"><h3>{i.full_name || i.email}</h3><span className={`ds-pill ${SIGNED.includes(i.status) ? 'ds-pill--green' : i.status === 'revoked' || expired ? 'ds-pill--red' : 'ds-pill--gold'}`}>{expired && !SIGNED.includes(i.status) ? 'Link expired' : STATUS[i.status] || i.status}</span></div>
                 <p className="ds-muted">{i.email} · sent {fmtDateTime(i.created_at)}{i.notified_at ? '' : ' · email on its way'}</p>
+                {(() => {
+                  // Couples (v60): the two partners sign separately; payment waits for both.
+                  const partner = i.couple_id && intakes.data.find((x) => x.couple_id === i.couple_id && x.id !== i.id);
+                  if (!partner) return null;
+                  const theirs = Object.keys(byIntake[partner.id] || {}).length;
+                  return <p className="ds-muted"><strong>Couple</strong> with {partner.full_name || partner.email}: {theirs >= 3 ? 'they have signed all three' : `they have signed ${theirs} of 3, so payment waits for them`}.</p>;
+                })()}
                 <ul className="ds-list">
                   {ORDER.map((k, n) => {
                     const f = done[k];
