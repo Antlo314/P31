@@ -104,6 +104,27 @@ Deno.serve(async (req) => {
 <a href="${sessionsFor(prog?.slug, plan?.package)}" style="display:inline-block;background:#D9A93A;color:#21101E;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Book my first session</a></p>
 <p>Questions? Reply to this email or write to founder@thep31collective.org.</p>`, 'thep31collective.org · The P31 Collective by NEBA', 'THE PROVERBS 31 COLLECTIVE'), 'founder@thep31collective.org');
           }
+          // Couples (v60/v61): the partner who did not pay is enrolled too (the database copies the access
+          // as soon as they sign in), so they get their own welcome with the classroom and session links.
+          if (m.invite_id) {
+            const { data: payer } = await db.from('coaching_intakes').select('couple_id, email').eq('invite_id', m.invite_id).maybeSingle();
+            if (payer?.couple_id) {
+              const { data: partners } = await db.from('coaching_intakes').select('email, full_name').eq('couple_id', payer.couple_id).neq('status', 'revoked');
+              for (const p of (partners || []).filter((x) => x.email && x.email.toLowerCase() !== String(payer.email || email).toLowerCase())) {
+                const pFirst = String(p.full_name || '').split(' ')[0] || 'there';
+                await sendEmail(p.email, `Welcome to the ${prog?.title || 'P31 Collective'}: you are enrolled`, layout('You are enrolled', `<p>Hi ${esc(pFirst)},</p>
+<p>${esc(first === 'there' ? 'Your partner' : first)} completed the payment for you both, so your enrollment in the <b>${esc(prog?.title || 'program')}</b> is confirmed. Welcome.</p>
+<p style="margin:16px 0 4px"><b>Your first steps</b></p>
+<ol style="margin:6px 0 14px;padding-left:20px;line-height:1.6">
+<li><b>Sign in with this email address</b> (${esc(p.email)}) at the member portal. New here? Choose Create account there with this same email, and your classroom opens on its own.</li>
+<li><b>Book your sessions</b> together with Melanie JC on the calendar below.</li>
+</ol>
+<p><a href="${SITE}/portal" style="display:inline-block;background:#3A1C36;color:#fff;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Open the member portal</a>&nbsp;
+<a href="${sessionsFor(prog?.slug, plan?.package)}" style="display:inline-block;background:#D9A93A;color:#21101E;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:700">Book a session</a></p>
+<p>Questions? Reply to this email or write to founder@thep31collective.org.</p>`, 'thep31collective.org · The P31 Collective by NEBA', 'THE PROVERBS 31 COLLECTIVE'), 'founder@thep31collective.org').catch((e) => console.error('academy-webhook partner welcome', e));
+              }
+            }
+          }
           await sendEmail(teamTo(), `New enrollment: ${name || email} (${prog?.title || 'program'}, ${plan?.label || ''})`, layout('New enrollment', `<p><b>${esc(name || email)}</b> (${esc(email)}) paid ${paid} and is enrolled in the <b>${esc(prog?.title || '')}</b>.</p>
 <p>Plan: ${esc(plan?.label || '')}</p><p>She has been sent her welcome email with the classroom link and the session calendar. Next: her first session.</p>
 <p><a href="${SITE}/academy/${prog?.slug || 'business'}/teach/agreements" style="color:#3A1C36">Open in the mentor console</a></p>`, 'thep31collective.org · The P31 Collective by NEBA', 'THE PROVERBS 31 COLLECTIVE'), email || undefined);

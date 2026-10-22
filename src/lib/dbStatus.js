@@ -8,6 +8,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 61, file: 'storefront_v61_couples_partner_access.sql', title: 'Couples: partner access', what: 'The partner who did not pay gets the same classroom access automatically (on sign-in), and it follows the paid enrollment: renewed, past due, canceled or ended.',
+    expect: 'partner_source true · functions_ready true · mirror_trigger true · version_recorded true',
+    checks: [['rpc', 'academy_claim_partner']] },
   { v: 60, file: 'storefront_v60_couples_two_signers.sql', title: 'Couples: two signers, one payment', what: 'A couples enrollment sends each partner their own link; both sign all three forms, then either one chooses the plan and pays once for both, and both are enrolled.',
     expect: 'couple_column true · functions_ready true · enroll_trigger true · version_recorded true',
     checks: [['column', 'coaching_intakes', 'couple_id']] },

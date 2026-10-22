@@ -44,6 +44,14 @@ export function useRoles() {
   const load = useCallback(async () => {
     if (preview) return setState({ status: 'ready', roles: previewRoles(preview) });
     if (!user) return setState({ status: 'signed-out', roles: EMPTY });
+    // Couples mentorship (v61): a partner whose partner paid is enrolled on sign-in (once per session).
+    const claimed = `p31-partner-claim:${user.id}`;
+    try {
+      if (!sessionStorage.getItem(claimed)) {
+        sessionStorage.setItem(claimed, '1');
+        await supabase.rpc('academy_claim_partner');
+      }
+    } catch { /* not run yet (v61) or storage blocked: nothing to claim */ }
     const { data, error } = await supabase.rpc('my_roles');
     setState({ status: 'ready', roles: error || !data ? { ...EMPTY, signed_in: true } : { ...EMPTY, ...data } });
   }, [user, preview]);

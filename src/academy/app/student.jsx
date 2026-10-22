@@ -618,7 +618,9 @@ export const StudentBilling = () => {
           {e.status === 'past_due' && <p className="k-error">Your last payment didn’t go through. Update your card to keep your access.</p>}
           {e.source === 'stripe' && e.stripe_customer_id
             ? <button className="k-btn k-btn--plum" onClick={manage} disabled={busy} style={{ justifySelf: 'start' }}><CreditCard size={18} /> {busy ? 'Opening…' : 'Manage card & receipts'}</button>
-            : <p className="ds-muted">Questions about your membership? Email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>}
+            : e.source === 'partner'
+              ? <p className="ds-muted">Your partner’s payment covers your couples membership, so there’s nothing for you to manage here. Questions? Email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
+              : <p className="ds-muted">Questions about your membership? Email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>}
           {error && <p className="k-error">{error}</p>}
         </article>
       ) : <DashEmpty Icon={CreditCard} title="Membership details">Your membership details will appear here. Questions? Email {CONTACT_EMAIL}.</DashEmpty>}
