@@ -5,6 +5,7 @@ import { fetchUpcomingEvents, parseEventDate, showDate, showMonth, monthLabel, t
 import { CALENDLY, openCalendly } from '../lib/calendly';
 import { marketHome } from '../lib/site';
 import { JOIN_PATH } from '../lib/academy';
+import { formatMonthly, useSiteInfo } from '../lib/siteInfo';
 import { PROGRAMS } from './content';
 import { MELANIE, AVATARS } from '../lib/teamPhotos';
 import JoinCollective from '../components/JoinCollective';
@@ -35,6 +36,7 @@ const Typed = ({ text, delay = 0, speed = 28 }) => {
 const CollectiveHome = () => {
   // null while market_events loads: the Upcoming section is drawn from the first paint and only fills in, so nothing below jumps.
   const [events, setEvents] = useState(null);
+  const info = useSiteInfo(); // Instagram link and membership price: Systems > Site info
   useEffect(() => {
     let live = true;
     fetchUpcomingEvents().then((rows) => { if (live) setEvents(rows); }, () => { if (live) setEvents([]); });
@@ -82,12 +84,12 @@ const CollectiveHome = () => {
             </details>
             <div className="cp-voice__links">
               <button type="button" className="cp-textlink" onClick={() => openCalendly('connect', { source: 'meet-melanie' })}><Handshake size={16} /> Connect with Melanie JC</button>
-              <a className="cp-textlink" href="https://www.instagram.com/the.p31collective" target="_blank" rel="noreferrer"><Instagram size={16} /> Follow along</a>
+              <a className="cp-textlink" href={info.collectiveInstagram} target="_blank" rel="noreferrer"><Instagram size={16} /> Follow along</a>
             </div>
           </div>
         </div>
         <Link to="/join" className="cp-card">
-          <small>Membership · $27/month</small>
+          <small>Membership · {formatMonthly(info.membershipMonthly)}/month</small>
           <h2>Monthly gatherings, a sisterhood, and room to grow.</h2>
           <span className="cp-more">Learn more <ArrowUpRight size={18} /></span>
           <span className="cp-star" aria-hidden="true">✳</span>
@@ -98,7 +100,7 @@ const CollectiveHome = () => {
       <section className="cp-up" id="upcoming" aria-busy={events === null}>
         <div className="cp-up__media">
           <img src={partner} alt="" loading="lazy" decoding="async" />
-          <a className="cp-play" href="https://www.instagram.com/the.p31collective" target="_blank" rel="noreferrer" aria-label="Watch the Collective on Instagram"><Play size={24} fill="currentColor" /></a>
+          <a className="cp-play" href={info.collectiveInstagram} target="_blank" rel="noreferrer" aria-label="Watch the Collective on Instagram"><Play size={24} fill="currentColor" /></a>
         </div>
         <div className="cp-up__body">
           <div className="cp-up__band"><h2>Upcoming</h2></div>

@@ -13,6 +13,7 @@ import './Navbar.css';
 
 import logoPath from '../assets/web/p31-market-mark-192.webp';
 import { JOIN_PATH } from '../lib/academy';
+import { useSiteInfo } from '../lib/siteInfo';
 
 
 const TikTok = ({ size = 18 }) => (
@@ -51,6 +52,7 @@ const Navbar = () => {
   const isCurator = !!roles.curator;
   const { count, openCart } = useCart();
   const { pathname } = useLocation();
+  const info = useSiteInfo();
   const [scrolled, setScrolled] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
@@ -227,9 +229,9 @@ const Navbar = () => {
           </ul>
 
           <div className="sheet__social">
-            <a href="https://www.instagram.com/proverbs31market" target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram size={18} /></a>
-            <a href="https://www.facebook.com/share/1LEtAu9AJD/?mibextid=wwXIfr" target="_blank" rel="noreferrer" aria-label="Facebook"><Facebook size={18} /></a>
-            <a href="https://www.tiktok.com/@p31marketplace" target="_blank" rel="noreferrer" aria-label="TikTok"><TikTok /></a>
+            <a href={info.marketInstagram} target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram size={18} /></a>
+            <a href={info.marketFacebook} target="_blank" rel="noreferrer" aria-label="Facebook"><Facebook size={18} /></a>
+            <a href={info.marketTiktok} target="_blank" rel="noreferrer" aria-label="TikTok"><TikTok /></a>
           </div>
         </div>
       </div>

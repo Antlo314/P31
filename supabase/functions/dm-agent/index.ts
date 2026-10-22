@@ -61,6 +61,7 @@ import { personaFor } from './persona.ts';
 import { KNOWLEDGE, KNOWLEDGE_DATE } from './knowledge.ts';
 import { EMAIL_THANKS, isRude, pickTrigger, publicReply, type Pick } from './triggers.ts';
 import { sendEmail, layout } from '../_shared/email.ts';
+import { recipients } from '../_shared/notify.ts';
 import { siteFor, zernioAccount, zernioAccounts, zernioFor, ZernioError, type Site } from '../_shared/zernio.ts';
 
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
@@ -195,8 +196,9 @@ async function handoff(db: ReturnType<typeof admin>, site: Site, row: Record<str
 
 // Email the team when something needs a person (needs RESEND_API_KEY), in the brand's own colors.
 async function notifyTeam(site: Site, subject: string, title: string, html: string) {
-  const to = env('DM_AGENT_NOTIFY_EMAIL');
-  if (!to || env('DM_AGENT_DRY_RUN') === 'true') return;
+  // A list saved in Systems > Email recipients ('carla') wins over DM_AGENT_NOTIFY_EMAIL.
+  const to = await recipients('carla', env('DM_AGENT_NOTIFY_EMAIL') ? [env('DM_AGENT_NOTIFY_EMAIL')] : []);
+  if (!to.length || env('DM_AGENT_DRY_RUN') === 'true') return;
   await sendEmail(to, subject, site === 'collective'
     ? layout(title, html, 'thep31collective.org · The P31 Collective by NEBA', 'THE PROVERBS 31 COLLECTIVE')
     : layout(title, html));

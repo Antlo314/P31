@@ -11,11 +11,10 @@ import groupImg from '../assets/web/p31_community_impact_editorial_1776544076592
 import visionaryVid from '../assets/web/visionary.mp4';
 import visionaryPoster from '../assets/web/visionary-poster.webp';
 import { EMAIL } from '../lib/team';
-
-const DONATE_URL = 'https://www.paypal.com/donate/?hosted_button_id=WY2ZX3TXDMF5Y';
+import { telOf, useSiteInfo } from '../lib/siteInfo';
 
 const WAYS = [
-  { Icon: HandCoins, title: 'Financial giving', tone: 'night', body: 'Your contribution helps us host markets, expand resources and sustain the vision.', cta: 'Give now', href: DONATE_URL },
+  { Icon: HandCoins, title: 'Financial giving', tone: 'night', body: 'Your contribution helps us host markets, expand resources and sustain the vision.', cta: 'Give now', donate: true },
   { Icon: Gift, title: 'In-kind giving', tone: 'gold', body: 'Event space, tables and tents, artisan products, or services like photography and marketing.', cta: 'Offer resources', type: 'In-Kind' },
   { Icon: TrendingUp, title: 'Strategic partnership', body: 'Businesses and organizations collaborating at scale to expand our reach and impact.', cta: 'Collaborate', type: 'Strategic' },
   { Icon: HandHeart, title: 'Volunteer', body: 'Serve at a market — welcome guests, support curators, help the day run beautifully.', cta: 'Volunteer', to: '/volunteer' },
@@ -24,6 +23,7 @@ const TYPES = [['Financial', 'Financial'], ['In-Kind', 'In-kind'], ['Strategic',
 const blankForm = { full_name: '', email: '', phone: '', partnership_type: 'Strategic', message: '', trap: '' };
 
 const Partner = () => {
+  const info = useSiteInfo(); // donate link and phone: Systems > Site info
   const [form, setForm] = useState(blankForm);
   const [state, setState] = useState('idle'); // idle | sending | done | error
   const [errMsg, setErrMsg] = useState('');
@@ -99,8 +99,8 @@ const Partner = () => {
               <span className="k-icon"><w.Icon size={22} /></span>
               <h3>{w.title}</h3>
               <p>{w.body}</p>
-              {w.href ? (
-                <a href={w.href} target="_blank" rel="noreferrer" className={`k-btn k-btn--sm ${w.tone === 'night' ? 'k-btn--gold' : 'k-btn--plum'}`} style={{ justifySelf: 'start', marginTop: 8 }}>
+              {w.donate ? (
+                <a href={info.donateUrl} target="_blank" rel="noreferrer" className={`k-btn k-btn--sm ${w.tone === 'night' ? 'k-btn--gold' : 'k-btn--plum'}`} style={{ justifySelf: 'start', marginTop: 8 }}>
                   {w.cta} <ArrowUpRight size={16} />
                 </a>
               ) : w.to ? (
@@ -135,7 +135,7 @@ const Partner = () => {
             <div className="k-contact" data-reveal-group>
               <a href={`mailto:${EMAIL.grants}`}><Mail size={18} /> {EMAIL.grants} <small>· grants &amp; partnerships</small></a>
               <a href={`mailto:${EMAIL.founder}`}><Mail size={18} /> {EMAIL.founder} <small>· Melanie JC</small></a>
-              <a href="tel:14705622852"><Phone size={18} /> 1 (470) 562-2852</a>
+              <a href={`tel:${telOf(info.phone)}`}><Phone size={18} /> {info.phone}</a>
             </div>
             <div className="k-actions" data-reveal>
               <button type="button" className="k-btn k-btn--plum" onClick={() => openCalendly('connect', { source: 'partner-page' })}><CalendarDays size={18} /> Book a 30-min connect call</button>

@@ -60,9 +60,99 @@ const Academy = () => {
     if (cents !== null && (Number.isNaN(cents) || cents < 50)) return fail('Enter a price of at least $0.50, or leave it blank to hide the plan.');
     const { error: err } = await supabase.from('academy_plans').update({
       // A plan with a Stripe Payment Link takes its price from Stripe (v55); only availability changes here.
-      ...(plan.stripe_payment_link ? {} : { price_cents: cents }), is_active: form.active, access_days: plan.billing === 'one_time' ? Number(form.days) || 30 : null, updated_at: new Date().toISOString(),
+      // Days of access are edited here only for pay-as-you-go; other plans keep theirs (6-month plans keep a 183-day fallback).
+      ...(plan.stripe_payment_link ? {} : { price_cents: cents }), is_active: form.active, access_days: plan.billing === 'one_time' ? Number(form.days) || 30 : plan.access_days ?? null, updated_at: new Date().toISOString(),
     }).eq('id', plan.id);
     if (err) fail(err); else done(`${plan.label} saved.`);
+  };
+
+  // v62: copy one plan's price and billing from its Stripe Payment Link now (admin-only action of academy-checkout).
+  const syncPlanNow = async (plan) => {
+    setMsg(''); setError('');
+    const { data, error: err } = await supabase.functions.invoke('academy-checkout', { body: { action: 'syncPlan', planId: plan.id } });
+    let m = data?.error;
+    if (err) { try { m = (await err.context?.json?.())?.error || err.message; } catch { m = err.message; } }
+    if (data?.ok) {
+      done(`${plan.label}: ${money(data.price_cents)} ${BILLING[data.billing]?.label?.toLowerCase() || data.billing}, copied from Stripe${data.changed ? ' (the price changed)' : ''}.`);
+      return true;
+    }
+    fail(m || 'The Stripe sync did not answer. Try again in a minute.'); load();
+    return false;
+  };
+
+  const planUse = async (plan) => {
+    const count = async (table) => {
+      const { count: n, error: err } = await supabase.from(table).select('id', { count: 'exact', head: true }).eq('plan_id', plan.id);
+      return err ? 0 : n || 0;
+    };
+    const [enrollments, invites, intakes] = await Promise.all([count('academy_enrollments'), count('academy_invites'), count('coaching_intakes')]);
+    return { enrollments, invites, intakes, total: enrollments + invites + intakes };
+  };
+
+  const deletePlan = async (plan) => {
+    const use = await planUse(plan);
+    if (use.total > 0) {
+      const used = `${plan.label} is used by ${use.enrollments} enrollment(s), ${use.invites} invite(s) and ${use.intakes} coaching intake(s), so it can’t be deleted.`;
+      if (!plan.is_active) return fail(`${used} It is already unavailable.`);
+      if (!window.confirm(`${used}\n\nMark it unavailable instead? Mentors stop seeing it; existing members keep their access.`)) return;
+      const { error: err } = await supabase.from('academy_plans').update({ is_active: false, updated_at: new Date().toISOString() }).eq('id', plan.id);
+      return err ? fail(err) : done(`${plan.label} is now unavailable.`);
+    }
+    if (!window.confirm(`Delete ${plan.label}? It has never been used. This can’t be undone.`)) return;
+    const { data, error: err } = await supabase.from('academy_plans').delete().eq('id', plan.id).select('id');
+    if (err) return fail(err);
+    if (!data?.length) return fail('Nothing was deleted. Run storefront_v62_plans_admin.sql in Supabase so admins can delete plans.');
+    done(`${plan.label} deleted.`);
+  };
+
+  const editPlan = async (plan, f) => {
+    const invalid = planProblem(f, plans, plan.id);
+    if (invalid) { fail(invalid); return false; }
+    const link = cleanLink(f.link);
+    const linkChanged = link !== (plan.stripe_payment_link || '');
+    const { error: err } = await supabase.from('academy_plans').update({
+      label: f.label.trim(), package: f.package.trim() || null, billing: f.billing, stripe_payment_link: link || null,
+      access_days: f.days === '' ? null : Number(f.days), is_active: f.active, updated_at: new Date().toISOString(),
+      ...(linkChanged ? { stripe_price_id: null, price_synced_at: null } : {}),
+    }).eq('id', plan.id);
+    if (err) { fail(err.code === '23505' ? 'That package key is already used by another plan.' : err); return false; }
+    if (linkChanged && link) await syncPlanNow({ ...plan, label: f.label.trim() });
+    else done(`${f.label.trim()} saved.`);
+    return true;
+  };
+
+  const addPlan = async (f) => {
+    const invalid = planProblem(f, plans, null, true);
+    if (invalid) { fail(invalid); return false; }
+    if (!f.program) { fail('Choose a program.'); return false; }
+    const link = cleanLink(f.link);
+    const { data, error: err } = await supabase.from('academy_plans').insert({
+      program_id: f.program, label: f.label.trim(), package: f.package.trim(), billing: f.billing, price_cents: null,
+      access_days: f.days === '' ? null : Number(f.days), is_active: f.active, stripe_payment_link: link || null,
+    }).select('*').single();
+    if (err) {
+      fail(/row-level security/i.test(err.message) ? 'Run storefront_v62_plans_admin.sql in Supabase so admins can add plans.'
+        : err.code === '23505' ? 'A plan with that package key (or the same program, billing and package) already exists.' : err);
+      return false;
+    }
+    if (link) await syncPlanNow(data);
+    else done(`${data.label} added. It has no price yet: set one in its row (or paste a Payment Link) before mentors can offer it.`);
+    return true;
+  };
+
+  const addProgram = async (f) => {
+    const slug = f.slug.trim().toLowerCase();
+    if (!/^[a-z0-9-]+$/.test(slug)) { fail('The slug may use only lowercase letters, numbers and hyphens (e.g. marriage-mentorship).'); return false; }
+    if (!f.title.trim()) { fail('Give the program a title.'); return false; }
+    const { error: err } = await supabase.from('academy_programs').insert({ slug, title: f.title.trim(), sort_order: Number(f.sort) || 0, is_active: false });
+    if (err) { fail(err.code === '23505' ? `A program with the slug “${slug}” already exists.` : err); return false; }
+    done(`${f.title.trim()} added (hidden). Write its public page text, then Show it.`);
+    return true;
+  };
+
+  const saveProgram = async (p, patch, text) => {
+    const { error: err } = await supabase.from('academy_programs').update(patch).eq('id', p.id);
+    if (err) fail(err); else done(text);
   };
 
   const progName = (id) => programs.find((p) => p.id === id)?.title || 'Not sure yet';
@@ -90,10 +180,19 @@ const Academy = () => {
         ))}
       </div>
 
+      {tab === 'plans' && (
+        <>
+          <ProgramsCard programs={programs} onAdd={addProgram} onSave={saveProgram} />
+          <AddPlan programs={programs} onAdd={addPlan} />
+        </>
+      )}
       {tab === 'plans' && programs.map((p) => (
         <section key={p.id} className="sys-card sys-form" style={{ marginBottom: 14 }}>
-          <h2>{p.title}</h2>
-          {plans.filter((pl) => pl.program_id === p.id).sort((a, b) => ORDER.indexOf(a.billing) - ORDER.indexOf(b.billing) || (a.price_cents ?? 0) - (b.price_cents ?? 0)).map((pl) => <PlanRow key={pl.id} plan={pl} onSave={savePlan} />)}
+          <h2>{p.title}{p.is_active === false && <span className="sys-muted"> · hidden</span>}</h2>
+          {plans.filter((pl) => pl.program_id === p.id).sort((a, b) => ORDER.indexOf(a.billing) - ORDER.indexOf(b.billing) || (a.price_cents ?? 0) - (b.price_cents ?? 0)).map((pl) => (
+            <PlanRow key={`${pl.id}-${pl.updated_at}`} plan={pl} onSave={savePlan} onEdit={editPlan} onDelete={deletePlan} onSync={syncPlanNow} />
+          ))}
+          {!plans.some((pl) => pl.program_id === p.id) && <p className="sys-muted">No plans yet. Use “Add a plan” above.</p>}
           <p className="sys-muted">A plan with no price is hidden from mentors’ invite options.</p>
         </section>
       ))}
@@ -196,8 +295,125 @@ const Academy = () => {
   );
 };
 
-const PlanRow = ({ plan, onSave }) => {
+// v62: plans and programs are managed here without SQL. A Payment Link must be one of Melanie's
+// Stripe links (https://buy.stripe.com/...); its price and billing are copied by the academy-checkout sync.
+const LINK_RE = /^https:\/\/buy\.stripe\.com\/[A-Za-z0-9_]+$/;
+const cleanLink = (s) => String(s || '').trim().replace(/[?#].*$/, '').replace(/\/+$/, '');
+function planProblem(f, plans, selfId, isNew = false) {
+  if (!f.label.trim()) return 'Give the plan a label (what members and mentors see).';
+  const pkg = f.package.trim();
+  if (isNew && !pkg) return 'Give the plan a package key (e.g. Option 5 or Faith 5 6M). The coaching forms look plans up by it.';
+  if (pkg.length > 20) return 'The package key can be at most 20 characters.';
+  if (pkg && plans.some((p) => p.id !== selfId && (p.package || '').toLowerCase() === pkg.toLowerCase())) return `The package key “${pkg}” is already used by another plan.`;
+  if (!BILLING[f.billing]) return 'Choose how the plan is billed.';
+  if (f.days !== '' && !(Number.isInteger(Number(f.days)) && Number(f.days) > 0)) return 'Days of access must be a whole number above 0, or blank.';
+  if (f.billing === 'one_time' && f.days === '') return 'A pay-as-you-go plan needs days of access.';
+  const link = cleanLink(f.link);
+  if (link && !LINK_RE.test(link)) return 'The Payment Link must look like https://buy.stripe.com/… (copy it from Stripe → Payment Links).';
+  return '';
+}
+const planForm = (plan) => ({
+  label: plan?.label || '', package: plan?.package || '', billing: plan?.billing || 'month', link: plan?.stripe_payment_link || '',
+  days: plan?.access_days != null ? String(plan.access_days) : '', active: plan ? plan.is_active : true,
+});
+
+const PlanFields = ({ f, setF }) => (
+  <div className="sys-row" style={{ flexWrap: 'wrap', gap: 10, alignItems: 'flex-end' }}>
+    <label className="sys-field" style={{ flex: '2 1 260px' }}><span>Label</span><input value={f.label} onChange={(e) => setF({ ...f, label: e.target.value })} placeholder="Coaching Option 5: …" /></label>
+    <label className="sys-field" style={{ width: 170 }}><span>Package key ({f.package.trim().length}/20)</span><input value={f.package} maxLength={20} onChange={(e) => setF({ ...f, package: e.target.value })} placeholder="Option 5" /></label>
+    <label className="sys-field" style={{ width: 170 }}><span>Billing</span>
+      <select value={f.billing} onChange={(e) => setF({ ...f, billing: e.target.value, days: e.target.value === 'one_time' && f.days === '' ? '30' : f.days })}>
+        {ORDER.map((b) => <option key={b} value={b}>{BILLING[b].label}</option>)}
+      </select>
+    </label>
+    <label className="sys-field" style={{ width: 140 }}><span>Days of access{f.billing === 'one_time' ? '' : ' (optional)'}</span><input type="number" min="1" value={f.days} onChange={(e) => setF({ ...f, days: e.target.value })} placeholder={f.billing === 'six_months' ? '183' : ''} /></label>
+    <label className="sys-field" style={{ flex: '2 1 300px' }}><span>Stripe Payment Link</span><input type="url" value={f.link} onChange={(e) => setF({ ...f, link: e.target.value })} placeholder="https://buy.stripe.com/…" /></label>
+    <label className="sys-chip" style={{ cursor: 'pointer' }}><input type="checkbox" checked={f.active} onChange={(e) => setF({ ...f, active: e.target.checked })} /> Available</label>
+  </div>
+);
+
+const AddPlan = ({ programs, onAdd }) => {
+  const [open, setOpen] = useState(false);
+  const [f, setF] = useState({ ...planForm(null), program: '' });
+  const program = f.program || programs[0]?.id || '';
+  if (!open) return <button className="sys-btn sys-btn--gold sys-btn--sm" style={{ marginBottom: 14 }} onClick={() => setOpen(true)}><Plus size={14} /> Add a plan</button>;
+  return (
+    <form className="sys-card sys-form" style={{ marginBottom: 14 }} onSubmit={async (e) => { e.preventDefault(); if (await onAdd({ ...f, program })) { setF({ ...planForm(null), program }); setOpen(false); } }}>
+      <h2><Plus size={18} /> Add a plan</h2>
+      <p className="sys-muted">Paste the plan’s Stripe Payment Link and its price and billing are copied from Stripe as soon as you add it (and again every day). Without a link, set a price in the plan’s row afterwards.</p>
+      <label className="sys-field" style={{ maxWidth: 320 }}><span>Program</span>
+        <select required value={program} onChange={(e) => setF({ ...f, program: e.target.value })}>
+          {programs.map((p) => <option key={p.id} value={p.id}>{p.title}{p.is_active === false ? ' (hidden)' : ''}</option>)}
+        </select>
+      </label>
+      <PlanFields f={f} setF={setF} />
+      <p className="sys-muted" style={{ fontSize: '0.8rem' }}>Package keys: at most 20 characters, different from every other plan in every program.</p>
+      <div className="sys-row" style={{ gap: 10 }}>
+        <button className="sys-btn sys-btn--gold sys-btn--sm"><Plus size={14} /> Add plan</button>
+        <button type="button" className="sys-btn sys-btn--ghost sys-btn--sm" onClick={() => setOpen(false)}>Cancel</button>
+      </div>
+    </form>
+  );
+};
+
+const ProgramsCard = ({ programs, onAdd, onSave }) => {
+  const [f, setF] = useState({ slug: '', title: '', sort: '' });
+  const [edit, setEdit] = useState(null);
+  const nextSort = Math.max(0, ...programs.map((p) => p.sort_order || 0)) + 1;
+  return (
+    <section className="sys-card sys-form" style={{ marginBottom: 14 }}>
+      <h2><GraduationCap size={18} /> Programs</h2>
+      <ul className="sys-list">
+        {programs.map((p) => (
+          <li key={p.id} className="sys-result">
+            {edit?.id === p.id ? (
+              <form className="sys-row" style={{ flexWrap: 'wrap', gap: 10, alignItems: 'flex-end', flex: 1 }} onSubmit={(e) => { e.preventDefault(); if (!edit.title.trim()) return; onSave(p, { title: edit.title.trim(), sort_order: Number(edit.sort) || 0 }, `${edit.title.trim()} saved.`); setEdit(null); }}>
+                <label className="sys-field" style={{ flex: '1 1 240px' }}><span>Title</span><input required value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} /></label>
+                <label className="sys-field" style={{ width: 110 }}><span>Sort order</span><input type="number" value={edit.sort} onChange={(e) => setEdit({ ...edit, sort: e.target.value })} /></label>
+                <button className="sys-btn sys-btn--gold sys-btn--sm">Save</button>
+                <button type="button" className="sys-btn sys-btn--ghost sys-btn--sm" onClick={() => setEdit(null)}>Cancel</button>
+              </form>
+            ) : (
+              <>
+                <div className="sys-result__main"><h3>{p.title}</h3><div className="sys-result__meta"><span>/{p.slug}</span><span>order {p.sort_order}</span><span>{p.is_active === false ? 'hidden' : 'shown'}</span></div></div>
+                <button className="sys-btn sys-btn--ghost sys-btn--sm" onClick={() => setEdit({ id: p.id, title: p.title, sort: String(p.sort_order ?? 0) })}>Rename</button>
+                <button className="sys-btn sys-btn--ghost sys-btn--sm" onClick={() => onSave(p, { is_active: p.is_active === false }, p.is_active === false ? `${p.title} is shown.` : `${p.title} is hidden.`)}>{p.is_active === false ? 'Show' : 'Hide'}</button>
+              </>
+            )}
+          </li>
+        ))}
+      </ul>
+      <form onSubmit={async (e) => { e.preventDefault(); if (await onAdd({ ...f, sort: f.sort === '' ? String(nextSort) : f.sort })) setF({ slug: '', title: '', sort: '' }); }}>
+        <div className="sys-row" style={{ flexWrap: 'wrap', gap: 10, alignItems: 'flex-end' }}>
+          <label className="sys-field" style={{ width: 200 }}><span>Slug (a-z, 0-9, -)</span><input required pattern="[a-z0-9-]+" value={f.slug} onChange={(e) => setF({ ...f, slug: e.target.value.toLowerCase() })} placeholder="marriage" /></label>
+          <label className="sys-field" style={{ flex: '1 1 240px' }}><span>Title</span><input required value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Marriage Mentorship" /></label>
+          <label className="sys-field" style={{ width: 110 }}><span>Sort order</span><input type="number" value={f.sort} onChange={(e) => setF({ ...f, sort: e.target.value })} placeholder={String(nextSort)} /></label>
+          <button className="sys-btn sys-btn--gold sys-btn--sm"><Plus size={14} /> Add program</button>
+        </div>
+      </form>
+      <p className="sys-muted">A new program starts hidden. Before you Show it, its public page text (tagline, description and the mentorship page copy) needs writing; ask the developer, since that text lives in the site. Hiding a program removes it from public lists; members keep their access.</p>
+    </section>
+  );
+};
+
+const PlanRow = ({ plan, onSave, onEdit, onDelete, onSync }) => {
   const [form, setForm] = useState({ price: plan.price_cents ? (plan.price_cents / 100).toString() : '', active: plan.is_active, days: plan.access_days || 30 });
+  const [editing, setEditing] = useState(false);
+  const [ef, setEf] = useState(() => planForm(plan));
+  const [busy, setBusy] = useState(false);
+  const run = async (fn) => { setBusy(true); try { await fn(); } finally { setBusy(false); } };
+  if (editing) {
+    return (
+      <form className="sys-card" style={{ margin: '6px 0' }} onSubmit={(e) => { e.preventDefault(); run(async () => { if (await onEdit(plan, ef)) setEditing(false); }); }}>
+        <PlanFields f={ef} setF={setEf} />
+        <p className="sys-muted" style={{ fontSize: '0.8rem' }}>A new Payment Link is synced from Stripe when you save. When Stripe bills weekly, monthly or every 6 months, the sync sets Billing to match.</p>
+        <div className="sys-row" style={{ gap: 10 }}>
+          <button className="sys-btn sys-btn--gold sys-btn--sm" disabled={busy}>Save plan</button>
+          <button type="button" className="sys-btn sys-btn--ghost sys-btn--sm" onClick={() => { setEditing(false); setEf(planForm(plan)); }}>Cancel</button>
+        </div>
+      </form>
+    );
+  }
   return (
     <div className="sys-row" style={{ flexWrap: 'wrap', alignItems: 'flex-end', gap: 10 }}>
       <label className="sys-field" style={{ minWidth: 150 }}><span>{plan.label}{BILLING[plan.billing]?.per ? ` (per ${BILLING[plan.billing].per})` : ''}</span>
@@ -208,8 +424,11 @@ const PlanRow = ({ plan, onSave }) => {
         <label className="sys-field" style={{ width: 130 }}><span>Days of access</span><input type="number" min="1" value={form.days} onChange={(e) => setForm({ ...form, days: e.target.value })} /></label>
       )}
       <label className="sys-chip" style={{ cursor: 'pointer' }}><input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} /> Available</label>
-      <span className="sys-muted">Now: {plan.price_cents ? money(plan.price_cents) : 'not priced'}</span>
+      <span className="sys-muted">Now: {plan.price_cents ? money(plan.price_cents) : 'not priced'}{plan.package ? ` · ${plan.package}` : ''}</span>
       <button className="sys-btn sys-btn--gold sys-btn--sm" onClick={() => onSave(plan, form)}>Save</button>
+      <button className="sys-btn sys-btn--ghost sys-btn--sm" onClick={() => setEditing(true)}>Edit</button>
+      {plan.stripe_payment_link && <button className="sys-btn sys-btn--ghost sys-btn--sm" disabled={busy} onClick={() => run(() => onSync(plan))}>{busy ? 'Syncing…' : 'Sync price from Stripe now'}</button>}
+      <button className="sys-icon-btn" disabled={busy} onClick={() => run(() => onDelete(plan))} aria-label={`Delete ${plan.label}`} title="Delete (only a plan never used)"><Trash2 size={16} /></button>
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { DEFAULTS as SITE_DEFAULTS } from './siteInfo';
 
 export const CONTACT_EMAIL = 'members@thep31collective.org';
 
@@ -124,6 +125,7 @@ export const verseOfTheDay = (date = new Date()) => {
 };
 
 // "Join P31 Collective": the membership application lives at /join on thep31collective.org.
-// The original Google Form stays linked from that page as a fallback.
+// The original Google Form stays linked from that page as a fallback (editable in Systems > Site info;
+// this is its default, and /join reads the live value with useSiteInfo()).
 export const JOIN_PATH = '/join';
-export const JOIN_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfBZkXVjzeqjq_h5k0Np3ueFZbiYzp19ettlL5CF5uBHYjBTw/viewform?pli=1';
+export const JOIN_FORM_URL = SITE_DEFAULTS.joinFormUrl;

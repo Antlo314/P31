@@ -1,25 +1,35 @@
 // Calendly scheduling for the Collective. The widget script loads only when a
 // calendar is actually shown or opened, and every booking is logged for the CRM.
 import { supabase } from './supabase';
+import { DEFAULTS, getSiteInfo, isCalendlyUrl, loadSiteInfo } from './siteInfo';
+
+// The links themselves are site info (Systems > Site info), so an admin can change them without a deploy.
+// Only https://calendly.com/ links are used; anything else falls back to the default.
+const LINK_KEYS = { intro: 'calendlyIntro', session: 'calendlySession', session90: 'calendlySession90', connect: 'calendlyConnect' };
+const linkFor = (kind) => {
+  const key = LINK_KEYS[kind];
+  const saved = getSiteInfo()[key];
+  return isCalendlyUrl(saved) ? saved : DEFAULTS[key];
+};
 
 export const CALENDLY = {
   intro: {
-    url: 'https://calendly.com/nebamentorship/neba-mentorship-intro-call',
+    get url() { return linkFor('intro'); },
     label: 'Private Mentorship Intro Call',
     length: '30 min',
   },
   session: {
-    url: 'https://calendly.com/purposefullydriven7/privatementorship',
+    get url() { return linkFor('session'); },
     label: 'Private Mentorship & Business Coaching Session',
     length: '60 min',
   },
   session90: {
-    url: 'https://calendly.com/p31collectiveofficial/30min',
+    get url() { return linkFor('session90'); },
     label: 'Couples Private Mentorship & Hybrid Business Coaching Session',
     length: '90 min',
   },
   connect: {
-    url: 'https://calendly.com/mjeffers031/connectcall',
+    get url() { return linkFor('connect'); },
     label: 'Connect / Collab Call with Melanie JC',
     length: '30 min',
   },
@@ -67,6 +77,8 @@ export function calendlyUrl(kind, { name, email, source } = {}) {
 export async function openCalendly(kind, details = {}) {
   watchBookings();
   pending = { kind, ...details };
+  // Use the saved booking link if it arrives quickly; the default otherwise.
+  await Promise.race([loadSiteInfo(), new Promise((r) => { setTimeout(r, 800); })]);
   const url = calendlyUrl(kind, details);
   try {
     const C = await loadCalendly();

@@ -1,7 +1,4 @@
-import {
-  LayoutGrid, Megaphone, Radar, Clapperboard, ImagePlus, Film, Settings, CalendarDays, Mail, Receipt, GraduationCap, Users, UserPlus,
-  Activity, Sparkles, Store, KeyRound, ClipboardList, Inbox, FileSignature, MessagesSquare, Compass, History, AtSign,
-} from 'lucide-react';
+import { LayoutGrid, Megaphone, Radar, Clapperboard, ImagePlus, Film, Settings, CalendarDays, Mail, Receipt, GraduationCap, Users, UserPlus, Activity, Sparkles, Store, KeyRound, ClipboardList, Inbox, FileSignature, MessagesSquare, Compass, History, AtSign, MailCheck, Globe, Contact } from 'lucide-react';
 import { DAVINCI_ON } from '../lib/features';
 
 // The two sites the team runs, and the console's rooms, sorted by site.
@@ -50,6 +47,9 @@ export const SYSTEMS_GROUPS = [
   {
     id: 'team', site: 'both', label: 'Team', sub: 'people, help & health', items: [
       { to: '/systems/team', label: 'Team & dashboards', short: 'Team', Icon: KeyRound, site: 'both', dash: 'admin', blurb: 'Who is on the team, which dashboards each login opens, and the site admins.' },
+      { to: '/systems/team-directory', label: 'Team directory', short: 'Directory', Icon: Contact, site: 'both', dash: 'admin', blurb: 'The people on both sites’ Team sections: names, roles, emails, order and photos.' },
+      { to: '/systems/email-recipients', label: 'Email recipients', short: 'Emails', Icon: MailCheck, site: 'both', dash: 'admin', blurb: 'Who gets each team email: applications, vendor forms, coaching forms, enrollments, Carla hand-offs, alerts and the CEO copy.' },
+      { to: '/systems/site-info', label: 'Site info', short: 'Site info', Icon: Globe, site: 'both', dash: 'admin', blurb: 'Phone, hours, social, booking, donate and podcast links, and the membership price both sites show. No deploy needed.' },
       { to: '/systems/activity', label: 'Activity', Icon: History, site: 'both', dash: 'admin', blurb: 'Who changed what: shops, dashboards, admins, vendor forms, markets, enrollments, campaigns and settings.' },
       { to: '/systems/walkthroughs', label: 'Walkthroughs', short: 'Learn', Icon: Compass, site: 'both', dash: 'team', blurb: 'Animated walkthroughs of every function, and the test runs that prove each one works.' },
       { to: '/systems/health', label: 'Health', Icon: Activity, site: 'both', dash: 'admin', blurb: 'Whether the database has every update, and the errors visitors hit on either site.' },

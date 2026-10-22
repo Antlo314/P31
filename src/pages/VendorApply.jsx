@@ -5,12 +5,12 @@ import PageHeader from '../components/PageHeader';
 import CuratorPaths from './vendors/CuratorPaths';
 import { supabase } from '../lib/supabase';
 import { EMAIL } from '../lib/team';
+import { useSiteInfo } from '../lib/siteInfo';
 import { fetchUpcomingEvents, formatEventDate, showDate, showMonth, monthLabel } from '../lib/events';
 import '../academy/mentorship.css';
 import '../academy/join.css';
 
 // Word for word from the Proverbs 31 Market vendor interest form (Google Form kept as a backup).
-export const VENDOR_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSd01zHJUEqZV59puRf5YRrBsg05bT__mAsefYuy6bhQ5ef-oA/viewform';
 const CATEGORIES = [
   'Natural body care products', 'Apparel, Accessories, Jewelry (no on-site piercing)',
   'Wellness goods, Tea blends, Herbs (pre-packaged only)', 'Art, Painting, Photography',
@@ -41,6 +41,7 @@ const readSent = () => {
 const today = () => new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
 const VendorForm = () => {
+  const info = useSiteInfo();
   const [sent] = useState(readSent);
   const [f, setF] = useState(() => (sent ? { ...BLANK, full_name: sent.name || '' } : BLANK));
   const [state, setState] = useState(sent ? 'done' : 'idle'); // idle | sending | done
@@ -177,7 +178,7 @@ const VendorForm = () => {
       </button>
       <p className="k-fine jn-alt">
         <Mail size={13} /> Questions? <a href={`mailto:${EMAIL.vendors}`}>{EMAIL.vendors}</a>
-        {' · '}Having trouble? <a href={VENDOR_FORM_URL} target="_blank" rel="noopener noreferrer">Use the Google Form instead</a>
+        {' · '}Having trouble? <a href={info.vendorFormUrl} target="_blank" rel="noopener noreferrer">Use the Google Form instead</a>
       </p>
     </form>
   );

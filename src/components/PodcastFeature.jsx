@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowUpRight, Instagram, Facebook } from 'lucide-react';
 import { PODCAST } from '../lib/podcast';
+import { useSiteInfo } from '../lib/siteInfo';
 import emblem from '../assets/podcast/emblem.webp';
 import lotus from '../assets/podcast/lotus.webp';
 import './PodcastFeature.css';
@@ -13,6 +14,7 @@ import './PodcastFeature.css';
 const PodcastFeature = () => {
   // The shine's mask names the emblem URL; setting it only after the lazy <img> loads keeps the file out of the first screen.
   const [lit, setLit] = useState(false);
+  useSiteInfo(); // re-render when saved podcast links (Systems > Site info) arrive
   const listen = PODCAST.listen || PODCAST.platforms.find((p) => p.url)?.url;
   const { instagram: insta, facebook } = PODCAST.social;
   return (
@@ -60,11 +62,13 @@ const PodcastFeature = () => {
 
           <p className="pod__host" data-reveal="fade"><small>With</small><span>{PODCAST.host}</span></p>
 
-          <div className="pod__social" data-reveal="fade">
-            <span>Follow along</span>
-            <a href={insta.url} target="_blank" rel="noreferrer" aria-label={`Instagram ${insta.handle}`}><Instagram size={18} /> {insta.handle}</a>
-            <a href={facebook.url} target="_blank" rel="noreferrer" aria-label="The podcast on Facebook"><Facebook size={18} /> {facebook.handle}</a>
-          </div>
+          {(insta.url || facebook.url) && (
+            <div className="pod__social" data-reveal="fade">
+              <span>Follow along</span>
+              {insta.url && <a href={insta.url} target="_blank" rel="noreferrer" aria-label={`Instagram ${insta.handle}`}><Instagram size={18} /> {insta.handle}</a>}
+              {facebook.url && <a href={facebook.url} target="_blank" rel="noreferrer" aria-label="The podcast on Facebook"><Facebook size={18} /> {facebook.handle}</a>}
+            </div>
+          )}
 
           {listen && (
             <div className="k-actions pod__actions" data-reveal>

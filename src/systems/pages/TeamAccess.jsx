@@ -1,14 +1,32 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { KeyRound, Trash2, UserPlus, Copy, Check, ShieldCheck, User, Plus, Mail } from 'lucide-react';
+import { KeyRound, Trash2, UserPlus, Copy, Check, ShieldCheck, User, Plus, Mail, Send, Search, LifeBuoy } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { TEAM, memberByEmail } from '../../lib/team';
 import { DASHBOARDS, DASH, siteOfEmail, suggestDashboards } from '../../lib/dashboards';
 import { HEADSHOTS, PHOTO_BY_NAME } from '../../lib/teamPhotos';
+import { useTeamPhotoByName } from '../../lib/teamDirectory';
 import { COLLECTIVE_URL } from '../../lib/seo';
 import { SITES } from '../nav';
 
 const EMAIL_OK = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const EMPTY = { full_name: '', email: '', role_title: '', tools: [] };
+
+// Login help (systems-admin): look up an account, email an invite or a password reset.
+// The link goes straight to the person's inbox; it never comes back to this page.
+const loginHelp = async (body) => {
+  const { data, error } = await supabase.functions.invoke('systems-admin', { body });
+  if (error) {
+    const fromServer = await error.context?.json?.().catch(() => null);
+    return { error: fromServer?.error || 'The login-help service isn’t reachable yet. Deploy the systems-admin function.' };
+  }
+  return data || { error: 'No answer from the login-help service.' };
+};
+const siteFor = (site) => (site === 'market' ? 'market' : 'collective');
+const clock = () => new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+const sendWords = (kind) => (kind === 'sendInvite' ? 'an invite (a link to confirm the email and choose a password)' : 'a password-reset link');
+const accountWords = (r) => (!r.exists ? 'No account with this email yet.'
+  : r.confirmed ? `Has an account, email confirmed${r.last_sign_in ? `, last signed in ${new Date(r.last_sign_in).toLocaleDateString()}` : ', never signed in'}.`
+    : 'Has an account, but the email is not confirmed yet.');
 
 const inviteText = (row) => {
   const names = (row.tools || []).map((t) => DASH[t]?.label).filter(Boolean);
@@ -32,6 +50,9 @@ const TeamAccess = () => {
   const [copied, setCopied] = useState('');
   const [saving, setSaving] = useState(false);
   const [v41, setV41] = useState(true);
+  const [sending, setSending] = useState({}); // email -> { busy, ok, err } for the card buttons
+  const [helper, setHelper] = useState({ email: '', site: 'collective', busy: false, result: null, ok: '', err: '' });
+  const dirPhotos = useTeamPhotoByName(); // photos uploaded in Systems > Team directory
 
   const load = () => Promise.all([
     supabase.from('team_access').select('*').order('created_at'),
@@ -99,6 +120,36 @@ const TeamAccess = () => {
     try { await navigator.clipboard.writeText(inviteText(row)); setCopied(row.email); setTimeout(() => setCopied(''), 2500); } catch { setError('Couldn’t copy. Select the text manually.'); }
   };
 
+  // Card buttons: an invite (no account, or not confirmed) or a password reset (any account).
+  const sendFor = async (row, kind) => {
+    if (!window.confirm(`Email ${sendWords(kind)} to ${row.email}?`)) return;
+    setSending((m) => ({ ...m, [row.email]: { busy: true } }));
+    const name = row.full_name || memberByEmail(row.email)?.name || '';
+    const r = await loginHelp({ action: kind, email: row.email, name, site: siteFor(row.site || siteOfEmail(row.email)) });
+    setSending((m) => ({ ...m, [row.email]: r.error ? { err: r.error } : { ok: `${kind === 'sendInvite' ? 'Invite' : 'Reset link'} emailed at ${clock()}.` } }));
+    if (!r.error) load();
+  };
+
+  // Help someone sign in: anyone at all (mentee, vendor, teammate).
+  const lookUp = async (e) => {
+    e?.preventDefault();
+    const email = helper.email.trim().toLowerCase();
+    if (!EMAIL_OK.test(email)) return setHelper({ ...helper, err: 'Enter the full email address, like name@example.com.', ok: '', result: null });
+    setHelper({ ...helper, busy: true, err: '', ok: '', result: null });
+    const r = await loginHelp({ action: 'lookup', email });
+    setHelper((h) => ({ ...h, busy: false, result: r.error ? null : { ...r, email }, err: r.error || '' }));
+  };
+  const helperSend = async (kind) => {
+    const email = helper.result?.email;
+    if (!email || !window.confirm(`Email ${sendWords(kind)} to ${email}?`)) return;
+    setHelper((h) => ({ ...h, busy: true, err: '', ok: '' }));
+    const r = await loginHelp({ action: kind, email, site: helper.site });
+    if (r.error) return setHelper((h) => ({ ...h, busy: false, err: r.error }));
+    const again = await loginHelp({ action: 'lookup', email });
+    setHelper((h) => ({ ...h, busy: false, ok: `${kind === 'sendInvite' ? 'Invite' : 'Reset link'} emailed to ${email} at ${clock()}.`, result: again.error ? h.result : { ...again, email } }));
+    load();
+  };
+
   // People: every login grouped by name, in directory order, plus directory people who have no login yet.
   const people = useMemo(() => {
     const byName = new Map();
@@ -127,11 +178,36 @@ const TeamAccess = () => {
       {msg && <p className="sys-ok"><Check size={16} /> {msg}</p>}
       {!v41 && rows.length > 0 && <p className="sys-alert">Dashboards beyond Content Studio and DaVinci need storefront_v41_team_dashboards.sql. Run it in Supabase, then reload.</p>}
 
+      <section className="sys-card" data-tour="team-login-help">
+        <h2><LifeBuoy size={18} /> Help someone sign in</h2>
+        <p className="sys-muted">For anyone: a teammate, a mentee, a vendor. Look up the email, then send a password reset, or an invite if there is no account yet. The site emails the link straight to them; it opens the P31 sign-in page, where they choose a password.</p>
+        <form className="sys-row" onSubmit={lookUp}>
+          <label className="sys-field sys-grow"><span>Their email</span><input type="email" value={helper.email} onChange={(e) => setHelper({ ...helper, email: e.target.value, result: null, ok: '', err: '', site: siteOfEmail(e.target.value) === 'market' ? 'market' : helper.site })} placeholder="name@example.com" /></label>
+          <label className="sys-field"><span>Email from</span>
+            <select value={helper.site} onChange={(e) => setHelper({ ...helper, site: e.target.value })}>
+              <option value="collective">The Collective</option>
+              <option value="market">The Market</option>
+            </select>
+          </label>
+          <button className="sys-btn sys-btn--ghost" style={{ alignSelf: 'end' }} disabled={helper.busy}><Search size={15} /> {helper.busy && !helper.result ? 'Looking…' : 'Look up'}</button>
+        </form>
+        {helper.result && (
+          <div className="sys-row sys-row--center" style={{ gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+            <span><strong>{helper.result.email}</strong> <span className="sys-muted">{accountWords(helper.result)}</span></span>
+            {helper.result.exists && <button type="button" className="sys-btn sys-btn--gold sys-btn--sm" disabled={helper.busy} onClick={() => helperSend('sendReset')}><KeyRound size={14} /> Send password reset</button>}
+            {!helper.result.confirmed && <button type="button" className="sys-btn sys-btn--ghost sys-btn--sm" disabled={helper.busy} onClick={() => helperSend('sendInvite')}><Send size={14} /> {helper.result.exists ? 'Resend invite' : 'Send invite'}</button>}
+          </div>
+        )}
+        {helper.busy && helper.result && <p className="sys-muted" role="status" style={{ marginTop: 8 }}>Sending…</p>}
+        {helper.err && <p className="sys-alert" role="alert" style={{ marginTop: 8 }}>{helper.err}</p>}
+        {helper.ok && <p className="sys-ok" role="status" style={{ marginTop: 8 }}><Check size={16} /> {helper.ok}</p>}
+      </section>
+
       <section className="sys-card" data-tour="team-people">
         <h2><KeyRound size={18} /> The team, login by login</h2>
         <div className="tm-people">
           {people.map((p) => {
-            const photo = (p.photo && HEADSHOTS[p.photo]) || PHOTO_BY_NAME[p.name];
+            const photo = dirPhotos[p.name] || (p.photo && HEADSHOTS[p.photo]) || PHOTO_BY_NAME[p.name];
             const missing = (p.person?.emails || []).filter((e) => !p.logins.some((r) => r.email === e));
             return (
               <article key={p.name} className="tm-person">
@@ -144,6 +220,7 @@ const TeamAccess = () => {
                       const st = status[r.email];
                       const site = r.site || siteOfEmail(r.email);
                       const admin = adminEmails.has(r.email);
+                      const sendState = sending[r.email] || {};
                       return (
                         <div key={r.email} className="tm-login">
                           <div className="tm-login__top">
@@ -154,10 +231,17 @@ const TeamAccess = () => {
                               {!st ? '' : st.confirmed ? `Active${st.last_sign_in ? ` · signed in ${new Date(st.last_sign_in).toLocaleDateString()}` : ''}` : st.has_account ? 'Account made · email not confirmed yet' : 'No account yet'}
                             </span>
                             <span className="tm-login__actions">
+                              {st && !st.confirmed && <button type="button" className="sys-btn sys-btn--gold sys-btn--sm" disabled={sendState.busy} onClick={() => sendFor(r, 'sendInvite')}><Send size={14} /> {st.has_account ? 'Resend invite' : 'Send invite'}</button>}
+                              {st?.has_account && <button type="button" className="sys-btn sys-btn--ghost sys-btn--sm" disabled={sendState.busy} onClick={() => sendFor(r, 'sendReset')}><KeyRound size={14} /> Send password reset</button>}
                               <button type="button" className="sys-btn sys-btn--ghost sys-btn--sm" onClick={() => copy(r)}>{copied === r.email ? <><Check size={14} /> Copied</> : <><Copy size={14} /> Sign-up steps</>}</button>
                               <button type="button" className="sys-icon-btn" onClick={() => remove(r)} aria-label={`Remove ${r.email}`}><Trash2 size={15} /></button>
                             </span>
                           </div>
+                          {(sendState.busy || sendState.ok || sendState.err) && (
+                            <p className={sendState.err ? 'sys-alert' : 'sys-muted'} role={sendState.err ? 'alert' : 'status'} style={{ margin: '4px 0', fontSize: '0.82rem' }}>
+                              {sendState.busy ? 'Sending…' : sendState.err || <><Check size={13} /> {sendState.ok}</>}
+                            </p>
+                          )}
                           {admin ? <p className="sys-muted" style={{ margin: 0, fontSize: '0.82rem' }}>Every dashboard, as a site admin.</p> : (
                             <div className="sys-chips tm-chips" role="group" aria-label={`Dashboards for ${r.email}`} data-tour="team-dashboards">
                               {DASHBOARDS.map((d) => (

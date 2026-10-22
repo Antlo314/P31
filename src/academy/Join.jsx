@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ArrowRight, CheckCircle2, Mail, Sparkles, CalendarHeart, BadgePercent, Mic, Store, HeartHandshake, Users, Star } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { supabase } from '../lib/supabase';
-import { JOIN_FORM_URL } from '../lib/academy';
+import { formatMonthly, useSiteInfo } from '../lib/siteInfo';
 import { EMAIL } from '../lib/team';
 import mark from '../assets/academy/collective-mark.webp';
 import './mentorship.css';
@@ -51,6 +51,7 @@ const readSent = () => {
 };
 
 const JoinForm = () => {
+  const info = useSiteInfo(); // the Google Form fallback link: Systems > Site info
   const [sent] = useState(readSent);
   const [f, setF] = useState(() => (sent ? { ...BLANK, full_name: sent.name || '' } : BLANK));
   const [state, setState] = useState(sent ? 'done' : 'idle'); // idle | sending | done
@@ -204,13 +205,19 @@ const JoinForm = () => {
       </button>
       <p className="k-fine jn-alt">
         <Mail size={13} /> Questions? <a href={`mailto:${EMAIL.members}`}>{EMAIL.members}</a>
-        {' · '}Having trouble? <a href={JOIN_FORM_URL} target="_blank" rel="noopener noreferrer">Use the Google Form instead</a>
+        {' · '}Having trouble? <a href={info.joinFormUrl} target="_blank" rel="noopener noreferrer">Use the Google Form instead</a>
       </p>
     </form>
   );
 };
 
 // /join — the P31 Collective membership application.
+// The membership price shown here is site info (Systems > Site info); the Stripe price is set in Stripe.
+const MonthlyPrice = () => {
+  const { membershipMonthly } = useSiteInfo();
+  return <strong>{formatMonthly(membershipMonthly)}<small>/month</small></strong>;
+};
+
 const Join = () => (
   <div className="k-page">
     <PageHeader
@@ -232,7 +239,7 @@ const Join = () => (
             your journey, the P31 Collective was created with you in mind.
           </p>
           <div className="jn-price" data-reveal>
-            <strong>$27<small>/month</small></strong>
+            <MonthlyPrice />
             <span>No long-term commitment. You may cancel at any time with no cancellation fees. We simply ask for a minimum of 7 days’
               courtesy notice prior to your next billing date.</span>
           </div>

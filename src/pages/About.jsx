@@ -7,7 +7,8 @@ import { openJoin } from '../lib/join';
 
 import editorialImg from '../assets/web/p31_partner_hero_editorial.webp';
 import gatherImg from '../assets/web/p31_community_impact_editorial_1776544076592.webp';
-import { EMAIL, OFFICE } from '../lib/team';
+import { EMAIL } from '../lib/team';
+import { telOf, useSiteInfo } from '../lib/siteInfo';
 import TeamDirectory from '../components/TeamDirectory';
 
 
@@ -23,6 +24,16 @@ const STEPS = [
   ['Open your shop', 'Your storefront, studio tools and orders — all in your P31 dashboard.'],
   ['Gather', 'Meet your customers at our seasonal markets in Atlanta and beyond.'],
 ];
+
+// Phone and mailing address are site info (Systems > Site info).
+const PhoneLink = () => {
+  const { phone } = useSiteInfo();
+  return <a href={`tel:${telOf(phone)}`}><Phone size={18} /> {phone}</a>;
+};
+const Mailing = () => {
+  const info = useSiteInfo();
+  return <div><MapPin size={18} /> Atlanta, GA — touring · mail: {info.mailingLine1}, {info.mailingLine2}</div>;
+};
 
 const About = () => (
   <div className="k-page">
@@ -118,10 +129,10 @@ const About = () => (
           <p className="k-lede" data-reveal>Questions about markets, curating or partnering — we’d love to hear from you.</p>
         </div>
         <div className="k-contact" data-reveal-group>
-          <a href="tel:14705622852"><Phone size={18} /> 1 (470) 562-2852</a>
+          <PhoneLink />
           <a href={`mailto:${EMAIL.community}`}><Mail size={18} /> {EMAIL.community}</a>
           <a href={`mailto:${EMAIL.vendors}`}><Mail size={18} /> {EMAIL.vendors} <small>· curator &amp; vendor help</small></a>
-          <div><MapPin size={18} /> Atlanta, GA — touring · mail: {OFFICE.mailing.join(', ')}</div>
+          <Mailing />
         </div>
       </div>
     </section>

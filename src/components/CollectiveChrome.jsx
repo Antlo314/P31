@@ -5,7 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { useRoles } from '../lib/roles';
 import { isFlushRoute } from '../lib/routes';
 import { marketHome } from '../lib/site';
-import { EMAIL, OFFICE } from '../lib/team';
+import { EMAIL } from '../lib/team';
+import { telOf, useSiteInfo } from '../lib/siteInfo';
 import mark from '../assets/academy/collective-mark.webp';
 import './Navbar.css';
 import './Footer.css';
@@ -89,52 +90,56 @@ export const CollectiveNav = () => {
   );
 };
 
-export const CollectiveFooter = () => (
-  <footer className="ft k-dark cl-ft">
-    <div className="ft__inner">
-      <div className="ft__grid">
-        <div className="ft__brand">
-          <Link to="/" className="ft__logo">
-            <img src={mark} alt="" className="cl-ft__mark" />
-            <span><strong>The Proverbs 31 Collective</strong><small>Mentorship &amp; team</small></span>
-          </Link>
-          <p>Private business and faith-based mentorship for faith-driven women — for the business you’re building and the woman you’re becoming.</p>
-          <JoinCollective className="k-btn k-btn--gold k-btn--sm cl-ft__join" size={16} />
-          <div className="ft__social">
-            <a href="https://www.instagram.com/the.p31collective" target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram size={18} /></a>
-            <a href="https://www.facebook.com/share/1LEtAu9AJD/?mibextid=wwXIfr" target="_blank" rel="noreferrer" aria-label="Facebook"><Facebook size={18} /></a>
+// Phone, mailing address and social links are site info (Systems > Site info).
+export const CollectiveFooter = () => {
+  const info = useSiteInfo();
+  return (
+    <footer className="ft k-dark cl-ft">
+      <div className="ft__inner">
+        <div className="ft__grid">
+          <div className="ft__brand">
+            <Link to="/" className="ft__logo">
+              <img src={mark} alt="" className="cl-ft__mark" />
+              <span><strong>The Proverbs 31 Collective</strong><small>Mentorship &amp; team</small></span>
+            </Link>
+            <p>Private business and faith-based mentorship for faith-driven women — for the business you’re building and the woman you’re becoming.</p>
+            <JoinCollective className="k-btn k-btn--gold k-btn--sm cl-ft__join" size={16} />
+            <div className="ft__social">
+              <a href={info.collectiveInstagram} target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram size={18} /></a>
+              <a href={info.collectiveFacebook} target="_blank" rel="noreferrer" aria-label="Facebook"><Facebook size={18} /></a>
+            </div>
+          </div>
+          <nav className="ft__col" aria-label="Academy">
+            <h4>Academy</h4>
+            <Link to="/academy">The P31 Academy</Link>
+            <Link to="/mentorship/business">Business mentorship</Link>
+            <Link to="/mentorship/faith">Faith-based mentorship</Link>
+            <Link to="/portal">Classroom sign in</Link>
+            <Link to="/verify">Verify a certificate</Link>
+          </nav>
+          <nav className="ft__col" aria-label="Systems">
+            <h4>Systems</h4>
+            <Link to="/systems">P31 Systems</Link>
+            <Link to="/studio">Content Studio</Link>
+            <Link to="/systems/sign-in">Team sign in</Link>
+          </nav>
+          <div className="ft__col">
+            <h4>Contact</h4>
+            <a href={`mailto:${EMAIL.members}`}><Mail size={15} /> <span>{EMAIL.members.split('@')[0]}@<wbr />{EMAIL.members.split('@')[1]}</span></a>
+            <a href={`mailto:${EMAIL.support}`}><Mail size={15} /> <span>{EMAIL.support.split('@')[0]}@<wbr />{EMAIL.support.split('@')[1]}</span></a>
+            <a href={`tel:${telOf(info.phone)}`}><Phone size={15} /> {info.phone}</a>
+            <span><MapPin size={15} /> {info.mailingLine1}, {info.mailingLine2}</span>
+            <Link to="/#team"><Users size={15} /> Meet the team</Link>
+            <a href={marketHome()}><ArrowUpRight size={15} /> Proverbs 31 Marketplace</a>
           </div>
         </div>
-        <nav className="ft__col" aria-label="Academy">
-          <h4>Academy</h4>
-          <Link to="/academy">The P31 Academy</Link>
-          <Link to="/mentorship/business">Business mentorship</Link>
-          <Link to="/mentorship/faith">Faith-based mentorship</Link>
-          <Link to="/portal">Classroom sign in</Link>
-          <Link to="/verify">Verify a certificate</Link>
-        </nav>
-        <nav className="ft__col" aria-label="Systems">
-          <h4>Systems</h4>
-          <Link to="/systems">P31 Systems</Link>
-          <Link to="/studio">Content Studio</Link>
-          <Link to="/systems/sign-in">Team sign in</Link>
-        </nav>
-        <div className="ft__col">
-          <h4>Contact</h4>
-          <a href={`mailto:${EMAIL.members}`}><Mail size={15} /> <span>{EMAIL.members.split('@')[0]}@<wbr />{EMAIL.members.split('@')[1]}</span></a>
-          <a href={`mailto:${EMAIL.support}`}><Mail size={15} /> <span>{EMAIL.support.split('@')[0]}@<wbr />{EMAIL.support.split('@')[1]}</span></a>
-          <a href={`tel:${OFFICE.tel}`}><Phone size={15} /> {OFFICE.phone}</a>
-          <span><MapPin size={15} /> {OFFICE.mailing.join(', ')}</span>
-          <Link to="/#team"><Users size={15} /> Meet the team</Link>
-          <a href={marketHome()}><ArrowUpRight size={15} /> Proverbs 31 Marketplace</a>
+        <div className="ft__bottom">
+          <span>© {new Date().getFullYear()} The P31 Collective by NEBA · a Proverbs 31 Marketplace ministry</span>
+          <span className="ft__bottom-links">
+            <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Back to top <ArrowUp size={14} /></button>
+          </span>
         </div>
       </div>
-      <div className="ft__bottom">
-        <span>© {new Date().getFullYear()} The P31 Collective by NEBA · a Proverbs 31 Marketplace ministry</span>
-        <span className="ft__bottom-links">
-          <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Back to top <ArrowUp size={14} /></button>
-        </span>
-      </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};

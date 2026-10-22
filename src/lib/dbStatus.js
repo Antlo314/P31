@@ -8,6 +8,15 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 64, file: 'storefront_v64_team_directory.sql', title: 'Team directory', what: 'The team shown on both sites (names, roles, emails, order, photos) becomes editable in Systems → Team directory, with a photo bucket.',
+    expect: 'table_ready true · rls_on true · seeded true · bucket_ready true · photo_policies true · version_recorded true',
+    checks: [['table', 'team_directory']] },
+  { v: 63, file: 'storefront_v63_site_public.sql', title: 'Site info', what: 'Phone, hours, social, booking, donate and podcast links and the membership price become editable in Systems → Site info; visitors can read only that one setting.',
+    expect: 'public_read_policy true · anon_select_grant true · site_public_row true · version_recorded true',
+    checks: [['row', 'app_settings', ['key', 'site_public']]] },
+  { v: 62, file: 'storefront_v62_plans_admin.sql', title: 'Plans admin', what: 'Admins can add and delete mentorship plans in Systems → Mentorship → Plans; a plan in use cannot be deleted; package keys stay unique and short.',
+    expect: 'insert_policy true · delete_policy true · delete_guard true · package_length true · package_unique true · version_recorded true',
+    checks: [] },
   { v: 61, file: 'storefront_v61_couples_partner_access.sql', title: 'Couples: partner access', what: 'The partner who did not pay gets the same classroom access automatically (on sign-in), and it follows the paid enrollment: renewed, past due, canceled or ended.',
     expect: 'partner_source true · functions_ready true · mirror_trigger true · version_recorded true',
     checks: [['rpc', 'academy_claim_partner']] },

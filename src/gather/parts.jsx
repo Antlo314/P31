@@ -3,14 +3,16 @@ import { CornerUpLeft, MessageSquareText, SmilePlus, Pencil, Trash2, Pin, PinOff
 import { REACTIONS, timeOf, dayOf, ago, deviceNotify, setDeviceNotify } from './api';
 import { badgesFor, initials } from './badges';
 import { mentionPattern, mentions, mentionAt, suggestPeople, snippet } from './mentions';
-import { PHOTO_BY_NAME } from '../lib/teamPhotos';
+import { useTeamPhotoByName } from '../lib/teamDirectory';
 import mark from '../assets/academy/collective-mark.webp';
 
 // ── People ───────────────────────────────────────────────
 export const Avatar = ({ person, size = 40, onClick }) => {
   // The team's headshots stand in until someone uploads her own picture (team and overseers only,
-  // so a member cannot borrow a team photo by using the same name).
-  const src = person?.avatar_url || ((person?.roles?.team || person?.roles?.admin) ? PHOTO_BY_NAME[person?.name] : null);
+  // so a member cannot borrow a team photo by using the same name). Photos uploaded in the team
+  // directory (Systems) come first, then the bundled ones.
+  const teamPhotos = useTeamPhotoByName();
+  const src = person?.avatar_url || ((person?.roles?.team || person?.roles?.admin) ? teamPhotos[person?.name] : null);
   const inner = src
     ? <img src={src} alt="" loading="lazy" />
     : <span>{initials(person?.name)}</span>;

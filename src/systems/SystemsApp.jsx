@@ -36,14 +36,18 @@ const Shops = lazy(() => import('./pages/Shops'));
 const Walkthroughs = lazy(() => import('./pages/Walkthroughs'));
 const Activity = lazy(() => import('./pages/Activity'));
 const SocialAccounts = lazy(() => import('./pages/SocialAccounts'));
+const EmailRecipients = lazy(() => import('./pages/EmailRecipients'));
+const SiteInfo = lazy(() => import('./pages/SiteInfo'));
+const TeamDirectoryAdmin = lazy(() => import('./pages/TeamDirectoryAdmin'));
 
 // Every Systems page by its path segment. Team members see only the ones their dashboards unlock.
 const PAGES = {
   orders: Orders, vendors: VendorApplications, forms: Forms, events: Events, shops: Shops, campaigns: Campaigns,
   applications: Applications, academy: Academy, crm: Crm, social: Social, growth: Growth, photos: Photos, clips: Clips, 'pro-edit': ProEdit,
   team: TeamAccess, activity: Activity, health: Health, settings: SettingsPage, walkthroughs: Walkthroughs, 'social-accounts': SocialAccounts,
+  'email-recipients': EmailRecipients, 'site-info': SiteInfo, 'team-directory': TeamDirectoryAdmin,
 };
-const ADMIN_PAGES = ['team', 'activity', 'health', 'settings', 'social-accounts'];
+const ADMIN_PAGES = ['team', 'activity', 'health', 'settings', 'social-accounts', 'email-recipients', 'site-info', 'team-directory'];
 
 const readFolded = (key) => { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; } };
 

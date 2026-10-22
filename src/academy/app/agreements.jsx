@@ -11,6 +11,13 @@ const daysFromNow = (d) => new Date(Date.now() + d * 86400e3).toISOString();
 const LABEL = { coaching: 'Coaching Agreement', confidentiality: 'Confidentiality', safety: 'Safety & Emergency' };
 const STATUS = { sent: 'Link sent', in_progress: 'Signing', complete: 'All signed', checkout: 'Choosing plan / at checkout', enrolled: 'Enrolled', revoked: 'Revoked' };
 const SIGNED = ['complete', 'checkout', 'enrolled'];
+// join-notify only emails intakes created in the last two days, so the site can resend only those;
+// older ones are offered as an email from the mentor's own mailbox.
+const SITE_RESEND_MS = 47 * 3600e3;
+const tooOldForSite = (i) => Date.now() - new Date(i.created_at).getTime() > SITE_RESEND_MS;
+const openMail = (href) => window.location.assign(href);
+const formsMailto = (email, fullName, link) => `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent('Your P31 coaching agreements')}&body=${encodeURIComponent(
+  `Hi ${(fullName || '').split(' ')[0] || 'there'},\n\nIt was a joy speaking with you. Before we begin, here is your private link to the three forms we go over with every client, signed in order: the Business Coaching Agreement, the Confidentiality Agreement, and the Client Safety & Emergency Contact form.\n\n${link}\n\nEach takes a few minutes; you can come back to the same link to finish later. You'll receive a PDF copy of each one once it's signed.\n\nQuestions? Reply here or email ${CONTACT_EMAIL}.\n\nWith love,\nThe Proverbs 31 Collective`)}`;
 // Every section 5 package by key (keys are unique across programs), for the signed-form views.
 const packageName = (key) => [...PACKAGES, ...COUPLES_PACKAGES].find((p) => p.key === key)?.name;
 
@@ -55,8 +62,7 @@ export const IntakeModal = ({ prefill = {}, onClose, onCreated }) => {
     onCreated?.();
   };
   const copy = async (text, which) => { await navigator.clipboard.writeText(text); setCopied(which); setTimeout(() => setCopied(''), 1500); };
-  const mailto = `mailto:${encodeURIComponent(form.email)}?subject=${encodeURIComponent('Your P31 coaching agreements')}&body=${encodeURIComponent(
-    `Hi ${form.full_name.split(' ')[0] || 'there'},\n\nIt was a joy speaking with you. Before we begin, here is your private link to the three forms we go over with every client, signed in order: the Business Coaching Agreement, the Confidentiality Agreement, and the Client Safety & Emergency Contact form.\n\n${link}\n\nEach takes a few minutes; you can come back to the same link to finish later. You'll receive a PDF copy of each one once it's signed.\n\nQuestions? Reply here or email ${CONTACT_EMAIL}.\n\nWith love,\nThe Proverbs 31 Collective`)}`;
+  const mailto = formsMailto(form.email, form.full_name, link);
 
   return (
     <Modal title="Send the three agreements" onClose={onClose}>
@@ -131,7 +137,29 @@ export const MentorAgreements = () => {
   const byIntake = forms.data.reduce((m, f) => ({ ...m, [f.intake_id]: { ...(m[f.intake_id] || {}), [f.kind]: f } }), {});
   const missing = intakes.error && /does not exist|schema cache/.test(intakes.error);
   const revoke = async (i) => { if (window.confirm(`Revoke ${i.full_name || i.email}'s link? She will need a new one.`)) { await write(supabase.from('coaching_intakes').update({ status: 'revoked' }).eq('id', i.id)); intakes.reload(); } };
-  const renew = async (i) => { await write(supabase.from('coaching_intakes').update({ status: i.status === 'revoked' ? 'sent' : i.status, expires_at: daysFromNow(30) }).eq('id', i.id)); intakes.reload(); };
+  const [resent, setResent] = useState({}); // intake id -> what happened
+  // Resend the site's email: clear notified_at so join-notify sends it again, then nudge join-notify.
+  const resend = async (i, ask = true) => {
+    const who = i.full_name || i.email;
+    if (tooOldForSite(i)) {
+      if (window.confirm(`The site can only resend this email in the first two days after the link was created. Open an email to ${i.email} with her forms link from your own mailbox instead?`)) {
+        openMail(formsMailto(i.email, i.full_name, `${window.location.origin}/coaching/forms/${i.token}`));
+      }
+      return;
+    }
+    if (ask && !window.confirm(`Email ${who} her forms link again?`)) return;
+    setResent((m) => ({ ...m, [i.id]: 'Sending\u2026' }));
+    const { error } = await write(supabase.from('coaching_intakes').update({ notified_at: null }).eq('id', i.id));
+    if (error) return setResent((m) => ({ ...m, [i.id]: error }));
+    await supabase.functions.invoke('join-notify', { body: {} }).catch(() => {});
+    setResent((m) => ({ ...m, [i.id]: `Email on its way again to ${i.email}.` }));
+    intakes.reload();
+  };
+  const renew = async (i) => {
+    const { error } = await write(supabase.from('coaching_intakes').update({ status: i.status === 'revoked' ? 'sent' : i.status, expires_at: daysFromNow(30) }).eq('id', i.id));
+    intakes.reload();
+    if (!error && window.confirm(`Renewed for 30 days. Email ${i.full_name || i.email} her forms link again?`)) resend({ ...i, status: i.status === 'revoked' ? 'sent' : i.status }, false);
+  };
   const remove = async (i) => { if (window.confirm(`Delete ${i.full_name || i.email} and every form she signed? This cannot be undone.`)) { await write(supabase.from('coaching_intakes').delete().eq('id', i.id)); intakes.reload(); forms.reload(); } };
 
   return (
@@ -170,10 +198,12 @@ export const MentorAgreements = () => {
                 <div className="k-actions">
                   {['complete', 'checkout'].includes(i.status) && done.coaching?.package && <button type="button" className="k-btn k-btn--gold k-btn--sm" onClick={() => sendPayment(i, done.coaching.package)}><CreditCard size={14} /> Send payment link ({done.coaching.package})</button>}
                   <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => navigator.clipboard.writeText(`${window.location.origin}/coaching/forms/${i.token}`)}><Copy size={14} /> Copy her forms link</button>
+                  {i.status !== 'revoked' && !SIGNED.includes(i.status) && !expired && <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => resend(i)}><Mail size={14} /> Resend the email</button>}
                   {(expired || i.status === 'revoked') && <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => renew(i)}><RotateCcw size={14} /> Renew for 30 days</button>}
                   {i.status !== 'revoked' && !SIGNED.includes(i.status) && !expired && <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => revoke(i)}>Revoke link</button>}
                   <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => remove(i)}><Trash2 size={14} /> Delete</button>
                 </div>
+                {resent[i.id] && <p className="ds-muted" role="status">{resent[i.id]}</p>}
               </article>
             );
           })}

@@ -13,6 +13,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { stripeFor, webhookSecrets, verifyEvent } from '../_shared/stripe.ts';
 import { storefrontEvent } from '../_shared/storefront-billing.ts';
 import { sendEmail, layout, esc } from '../_shared/email.ts';
+import { recipients } from '../_shared/notify.ts';
 
 const SITE = 'https://www.thep31collective.org';
 // Session booking: 60 minutes for most plans; 90 minutes for Couples Private Mentorship and the two
@@ -20,8 +21,9 @@ const SITE = 'https://www.thep31collective.org';
 const SESSIONS = 'https://calendly.com/purposefullydriven7/privatementorship';
 const SESSIONS_90 = 'https://calendly.com/p31collectiveofficial/30min';
 const sessionsFor = (slug?: string, pkg?: string) => (slug === 'couples' || pkg === 'Option 2' || pkg === 'Option 4' ? SESSIONS_90 : SESSIONS);
-// The new-enrollment notice goes to the founder only (no members@, no ceo@).
-const teamTo = () => ['founder@thep31collective.org'];
+// The new-enrollment notice goes to the founder only (no members@, no ceo@),
+// unless Systems > Email recipients has a list saved for 'enrollment'.
+const teamTo = () => recipients('enrollment', ['founder@thep31collective.org']);
 const money = (c: number) => `$${(c / 100).toFixed(c % 100 ? 2 : 0)}`;
 // When the next charge comes, by the plan's billing (the 6-month commitments renew every 6 months).
 const RENEWS: Record<string, string> = { week: ', then weekly on this day', month: ', then monthly on this date', six_months: ', then every 6 months on this date' };
@@ -125,7 +127,7 @@ Deno.serve(async (req) => {
               }
             }
           }
-          await sendEmail(teamTo(), `New enrollment: ${name || email} (${prog?.title || 'program'}, ${plan?.label || ''})`, layout('New enrollment', `<p><b>${esc(name || email)}</b> (${esc(email)}) paid ${paid} and is enrolled in the <b>${esc(prog?.title || '')}</b>.</p>
+          await sendEmail(await teamTo(), `New enrollment: ${name || email} (${prog?.title || 'program'}, ${plan?.label || ''})`, layout('New enrollment', `<p><b>${esc(name || email)}</b> (${esc(email)}) paid ${paid} and is enrolled in the <b>${esc(prog?.title || '')}</b>.</p>
 <p>Plan: ${esc(plan?.label || '')}</p><p>She has been sent her welcome email with the classroom link and the session calendar. Next: her first session.</p>
 <p><a href="${SITE}/academy/${prog?.slug || 'business'}/teach/agreements" style="color:#3A1C36">Open in the mentor console</a></p>`, 'thep31collective.org · The P31 Collective by NEBA', 'THE PROVERBS 31 COLLECTIVE'), email || undefined);
         } catch (e) { console.error('academy-webhook enrollment emails', e); }

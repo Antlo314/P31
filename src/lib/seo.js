@@ -2,6 +2,11 @@
 // (applyMeta on route change) and the build step (scripts/prerender.mjs),
 // which bakes them into static HTML so search engines and link previews see them.
 // www is the host Vercel serves; the bare domain redirects here.
+// Contact and social links come from the site info defaults (src/lib/siteInfo.js), the one copy in the code.
+// This file is read at build time, so edits made in Systems > Site info reach search engines on the next deploy.
+import { DEFAULTS as SITE } from './siteInfo.js';
+
+const e164Dashed = (p) => { const d = p.replace(/\D/g, '').replace(/^1(?=\d{10}$)/, ''); return `+1-${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`; };
 export const SITE_URL = 'https://www.p31market.com';
 export const SITE_NAME = 'Proverbs 31 Marketplace';
 // The mentorships, member portal and classrooms live on their own domain
@@ -14,14 +19,15 @@ export const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg?v=3`;
 // The business as Google knows it — the Google Business Profile and socials,
 // linked from structured data so search ties the site to the listing.
 export const BUSINESS = {
-  phone: '+1-470-562-2852',
+  phone: e164Dashed(SITE.phone),
   email: 'outreach@p31market.com',
   founder: 'Melanie JC',
   googleMaps: 'https://maps.google.com/maps?cid=13044396625073029690',
   sameAs: [
-    'https://www.instagram.com/proverbs31market',
-    'https://www.facebook.com/profile.php?id=61586620469891',
-    'https://www.tiktok.com/@p31marketplace',
+    SITE.marketInstagram,
+    // Until v63 this was https://www.facebook.com/profile.php?id=61586620469891; now the footer link (siteInfo.js).
+    SITE.marketFacebook,
+    SITE.marketTiktok,
     'https://maps.google.com/maps?cid=13044396625073029690',
   ],
   areaServed: ['Atlanta, GA', 'Gwinnett County, GA', 'Fulton County, GA', 'Duluth, GA', 'Lawrenceville, GA',

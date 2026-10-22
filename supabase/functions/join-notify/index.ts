@@ -20,6 +20,8 @@
 //   COLLECTIVE_EMAIL_FROM                 optional sender for Collective emails
 //   MARKET_EMAIL_FROM                     optional sender for marketplace emails
 //   JOIN_NOTIFY_TO, VENDOR_NOTIFY_TO, VOLUNTEER_NOTIFY_TO, FEEDBACK_NOTIFY_TO   optional comma lists; defaults below
+//   (Systems > Email recipients saves a list per flow in app_settings 'notify', keyed by the flow name;
+//    a saved list wins over these, and its ceo_copy switch turns the CEO copy off. Nothing saved = these.)
 //   JOIN_SHEET_URL, JOIN_SHEET_TOKEN      Apps Script web app for the Collective sheet (tools/google-sheet-intake.gs)
 //   VENDOR_SHEET_URL                      Apps Script web app in the vendor sheet (same script); token defaults to JOIN_SHEET_TOKEN
 //   VENDOR_SHEET_TAB                      or: the vendor tab's name, when vendors live in the Collective spreadsheet
@@ -28,6 +30,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { FORMS as COACHING_FORMS, packagesFor, pdfSections, packagePrice, GOOGLE_FORMS } from '../_shared/coaching-text.js';
 import { sendEmail, layout, esc, emailConfigured } from '../_shared/email.ts';
 import { formPdf, toBase64, type PdfSpec, type PdfSection } from '../_shared/form-pdf.ts';
+import { recipients, ceoCopy, PRIVATE_DOMAINS } from '../_shared/notify.ts';
 
 const env = (k: string) => Deno.env.get(k) || '';
 const list = (k: string, fallback: string[]) => {
@@ -686,7 +689,10 @@ Deno.serve(async (req) => {
               files = [{ filename: `${slug}-${String(a.id).slice(0, 8)}.pdf`, content: toBase64(await formPdf(spec)) }];
             } catch (e) { console.error(`join-notify ${f.name} pdf`, e); }
           }
-          const to = f.external || f.noCeo ? f.to(a) : withCeo(f.to(a));
+          // The team list saved in Systems > Email recipients, else the default above (the signed coaching
+          // forms only ever go to team mailboxes); ceo@ is added unless the CEO-copy switch is off.
+          const team = f.external ? f.to(a) : await recipients(f.name, f.to(a), f.noCeo ? PRIVATE_DOMAINS : undefined);
+          const to = f.external || f.noCeo || !(await ceoCopy()) ? team : withCeo(team);
           // Shared inboxes (members@) get the email but not the PDF copy, unless the flow sends it to all.
           const plain = files && !f.pdfToAll ? to.filter((e) => NO_PDF().includes(e.toLowerCase())) : [];
           const withPdf = to.filter((e) => !plain.includes(e));

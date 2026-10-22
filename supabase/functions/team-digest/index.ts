@@ -6,11 +6,13 @@
 // only once per day (team_digests), so extra calls are harmless.
 // A team member can send themselves a test copy: POST { "test": true } while signed in.
 //
-// Secrets: RESEND_API_KEY, EMAIL_FROM (or MARKET_EMAIL_FROM), DIGEST_TO (comma list; default founder@),
+// Secrets: RESEND_API_KEY, EMAIL_FROM (or MARKET_EMAIL_FROM), DIGEST_TO (comma list; default founder@;
+//          a list saved in Systems > Email recipients as 'digest' wins),
 //          ZERNIO_API_KEY (optional: posts going out today)
 // Deploy: supabase functions deploy team-digest --no-verify-jwt
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { sendEmail, layout, esc, money, emailConfigured } from '../_shared/email.ts';
+import { recipients } from '../_shared/notify.ts';
 
 const env = (k: string) => Deno.env.get(k) || '';
 const cors = {
@@ -141,7 +143,7 @@ Deno.serve(async (req) => {
     await db.from('team_digests').update({ summary: { quiet: true } }).eq('day', day);
     return json({ ok: true, skipped: 'nothing to report' });
   }
-  const res = await sendEmail(list('DIGEST_TO', ['founder@thep31collective.org']), d.subject, d.html, 'founder@thep31collective.org', from);
+  const res = await sendEmail(await recipients('digest', list('DIGEST_TO', ['founder@thep31collective.org'])), d.subject, d.html, 'founder@thep31collective.org', from);
   if (!res.ok) { await db.from('team_digests').delete().eq('day', day); return json({ ok: false, error: 'email failed' }, 502); }
   await db.from('team_digests').update({ sent_at: new Date().toISOString(), summary: { total: d.total, posts: g.posts.length } }).eq('day', day);
   return json({ ok: true, sent: true, total: d.total });

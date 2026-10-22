@@ -22,11 +22,13 @@
 //                                  sends Zernio's test message, and returns the fresh setup
 // Secrets: SUPABASE_SERVICE_ROLE_KEY, ZERNIO_API_KEY, ZERNIO_COLLECTIVE_API_KEY, ZERNIO_WEBHOOK_SECRET,
 //          ZERNIO_COLLECTIVE_WEBHOOK_SECRET (optional; else the Collective webhook uses ZERNIO_WEBHOOK_SECRET),
-//          RESEND_API_KEY, EMAIL_FROM, OPS_ALERT_TO (comma list; falls back to DIGEST_TO, then ceo@p31market.com)
+//          RESEND_API_KEY, EMAIL_FROM, OPS_ALERT_TO (comma list; falls back to DIGEST_TO, then ceo@p31market.com;
+//          a list saved in Systems > Email recipients as 'watchdog' wins)
 // Webhook secrets are compared here and never returned.
 // Deploy: supabase functions deploy watchdog --no-verify-jwt
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { sendEmail, layout, esc, emailConfigured } from '../_shared/email.ts';
+import { recipients as savedRecipients } from '../_shared/notify.ts';
 import { zcall, zernioAccounts, siteFor, workspaceKeys, ZernioError, type Workspace, type Site } from '../_shared/zernio.ts';
 
 const env = (k: string) => Deno.env.get(k) || '';
@@ -40,7 +42,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 type Row = Record<string, any>;
 type Problem = { key: string; severity: 'warn' | 'fail'; area: string; title: string; detail?: string; fix?: string; link?: string; meta?: Row };
 
-const LATEST_DB = 61; // the newest storefront_vNN.sql in the repo
+const LATEST_DB = 64; // the newest storefront_vNN.sql in the repo
 const SYSTEMS = 'https://www.thep31collective.org/systems';
 const STUDIO = 'https://www.thep31collective.org/studio';
 const SOCIAL_SETUP = `${SYSTEMS}/social-accounts`;
@@ -50,7 +52,7 @@ const etParts = (d = new Date()) => Object.fromEntries(new Intl.DateTimeFormat('
 const etDate = (d = new Date()) => { const p = etParts(d); return `${p.year}-${p.month}-${p.day}`; };
 const etHour = (d = new Date()) => Number(etParts(d).hour) % 24;
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
-const recipients = () => (env('OPS_ALERT_TO') || env('DIGEST_TO') || 'ceo@p31market.com').split(',').map((s) => s.trim()).filter(Boolean);
+const recipients = () => savedRecipients('watchdog', (env('OPS_ALERT_TO') || env('DIGEST_TO') || 'ceo@p31market.com').split(',').map((s) => s.trim()).filter(Boolean));
 
 // ── Zernio: the two workspaces and the webhook to Carla ──────────────────────
 const WS_LABEL: Record<Workspace, string> = { market: 'Marketplace', collective: 'Collective' };
@@ -614,7 +616,7 @@ async function run(db: any, source: string) {
       <p style="margin:16px 0 0;font-size:12px;color:#74657A">All alerts: <a href="${SYSTEMS}/health" style="color:#3A1C36">Systems &gt; Health</a>. Snooze one there to stop these emails about it.</p>`;
     const subject = summaryDue ? `P31 system check: ${plural(awake.length, 'item')} open` : `P31 alert: ${urgent[0].title}${urgent.length > 1 ? ` (+${urgent.length - 1} more)` : ''}`;
     try {
-      await sendEmail(recipients(), subject, layout(summaryDue ? 'This morning\'s system check' : 'Something needs attention', body, 'Sent by the P31 watchdog, which checks both sites every hour.'));
+      await sendEmail(await recipients(), subject, layout(summaryDue ? 'This morning\'s system check' : 'Something needs attention', body, 'Sent by the P31 watchdog, which checks both sites every hour.'));
       emailed = summaryDue ? 'summary' : 'alert';
       const ids = list.map((a: Row) => a.id);
       if (ids.length) await db.from('ops_alerts').update({ notified_at: now }).in('id', ids);

@@ -7,10 +7,12 @@
 //   Studio button:   { month: 'YYYY-MM' } while signed in as Studio team → that month, from tomorrow
 //                    if it is the current month.
 // Secrets: ZERNIO_API_KEY (optional: skip days already booked there), RESEND_API_KEY,
-//          AUTOCREATE_TO (comma list; default marketing@ + founder@)
+//          AUTOCREATE_TO (comma list; default marketing@ + founder@; a list saved in
+//          Systems > Email recipients as 'autocreate' wins)
 // Deploy: supabase functions deploy studio-autocreate --no-verify-jwt
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { sendEmail, layout, esc, emailConfigured } from '../_shared/email.ts';
+import { recipients } from '../_shared/notify.ts';
 import { TYPES, DEFAULT_SLOTS, mergeLibrary } from '../_shared/factory/library.js';
 import { buildPlan } from '../_shared/factory/generate.js';
 
@@ -121,7 +123,7 @@ Deno.serve(async (req) => {
   if (emailConfigured()) {
     const label = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
     const sample = rows.slice(0, 6).map((r) => `<li>${esc(label(r.post_date))} · ${esc((TYPES as Row)[r.type]?.label || r.type)} · ${esc(String(r.hook || '').slice(0, 70))}</li>`).join('');
-    await sendEmail(list('AUTOCREATE_TO', ['marketing@p31market.com', 'founder@thep31collective.org']),
+    await sendEmail(await recipients('autocreate', list('AUTOCREATE_TO', ['marketing@p31market.com', 'founder@thep31collective.org'])),
       `${rows.length} posts drafted for ${monthName(month)}: ready for review`,
       layout(`${monthName(month)} is drafted`, `<p>Content Studio drafted <b>${rows.length} posts</b> for ${esc(label(start))} through ${esc(label(last))}, on every day that did not already have one, using your last Auto-create settings.</p>
 <ul style="padding-left:18px;line-height:1.6;color:#4E3A4B">${sample}</ul>

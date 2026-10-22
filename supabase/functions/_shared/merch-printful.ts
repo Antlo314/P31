@@ -4,6 +4,7 @@
 //   Optional: PRINTFUL_DRAFT_ORDERS=true keeps new orders as drafts to confirm by hand in Printful.
 //             MERCH_NOTIFY_TO (comma-separated) for the team email; default vendor@ and ceo@.
 import { sendEmail, layout, esc } from './email.ts';
+import { recipients } from './notify.ts';
 import { TYPES, itemById, itemName, printFile, variantFor, money, SITE } from './merch-catalog.js';
 
 const env = (k: string) => Deno.env.get(k) || '';
@@ -83,7 +84,8 @@ export async function fileFor(itemId: string, color: string) {
   return { item, type: t, file, options };
 }
 
-const notifyTo = () => (env('MERCH_NOTIFY_TO') || 'vendor@p31market.com,ceo@p31market.com').split(',').map((s) => s.trim()).filter(Boolean);
+// A list saved in Systems > Email recipients ('merch') wins; else MERCH_NOTIFY_TO, else vendor@ and ceo@.
+const notifyTo = () => recipients('merch', (env('MERCH_NOTIFY_TO') || 'vendor@p31market.com,ceo@p31market.com').split(',').map((s) => s.trim()).filter(Boolean));
 const FOOT = 'p31market.com · Where her gifts make room.';
 const itemsTable = (items: Any[]) => `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-top:1px solid #eee;font-size:14px">${items.map((l: Any) =>
   `<tr><td style="padding:8px 0;border-bottom:1px solid #eee">${esc(l.name)}<br><span style="color:#74657A;font-size:12px">${esc(l.color)}${l.size && l.size !== 'One size' ? ` · ${esc(l.size)}` : ''} · qty ${l.quantity}</span></td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${money(l.price_cents * l.quantity)}</td></tr>`).join('')}</table>`;
@@ -148,7 +150,7 @@ export async function placeMerchOrder(db: Any, session: Any) {
 <p style="margin-top:16px">Each piece is printed for you. Most orders ship in 2 to 7 business days; you will get a tracking email as soon as yours is on its way.</p>
 <p>Questions? Reply to this email.</p>`, FOOT), 'vendor@p31market.com').catch((e) => console.error('merch shopper email', e));
   }
-  await sendEmail(notifyTo(), `${status === 'failed' ? 'ACTION NEEDED: ' : ''}Merch order #${order.ref}: ${money(total)} (${esc(name)})`, layout(`Merch order #${order.ref}`, `<p><b>${esc(name)}</b> (${esc(email || '')}) paid ${money(total)} for P31 merch.</p>${list}${totals}
+  await sendEmail(await notifyTo(), `${status === 'failed' ? 'ACTION NEEDED: ' : ''}Merch order #${order.ref}: ${money(total)} (${esc(name)})`, layout(`Merch order #${order.ref}`, `<p><b>${esc(name)}</b> (${esc(email || '')}) paid ${money(total)} for P31 merch.</p>${list}${totals}
 <p style="margin-top:14px">${status === 'sent' ? `Sent to Printful (order ${esc(printfulId || '')}). Printful prints, ships and sends tracking.` : `<span style="color:#9a2f2f"><b>${esc(error || 'Not sent to Printful.')}</b></span>`}</p>
 <p style="font-size:13px;color:#74657A">Ship to: ${esc([name, addr.line1, addr.line2, addr.city, addr.state, addr.postal_code].filter(Boolean).join(', '))}</p>`, FOOT), email || undefined).catch((e) => console.error('merch team email', e));
 }
@@ -175,7 +177,7 @@ ${s.tracking_number ? `<p style="font-size:13px;color:#74657A">Tracking number $
     const status = body.type === 'order_canceled' ? 'cancelled' : 'failed';
     const reason = body.data?.reason || live.status || body.type;
     await db.from('merch_orders').update({ status, error: `Printful: ${reason}` }).eq('id', order.id);
-    await sendEmail(notifyTo(), `ACTION NEEDED: merch order #${order.ref} ${body.type.replace('order_', '').replace('_', ' ')}`, layout(`Merch order #${order.ref}`, `<p>Printful reports <b>${esc(body.type)}</b> for order #${esc(order.ref)} (${esc(order.name || '')}).</p><p>${esc(String(reason))}</p><p>Open the order in Printful to fix or refund it.</p>`, FOOT)).catch(() => {});
+    await sendEmail(await notifyTo(), `ACTION NEEDED: merch order #${order.ref} ${body.type.replace('order_', '').replace('_', ' ')}`, layout(`Merch order #${order.ref}`, `<p>Printful reports <b>${esc(body.type)}</b> for order #${esc(order.ref)} (${esc(order.name || '')}).</p><p>${esc(String(reason))}</p><p>Open the order in Printful to fix or refund it.</p>`, FOOT)).catch(() => {});
   }
   return { ok: true };
 }

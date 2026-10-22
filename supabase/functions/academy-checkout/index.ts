@@ -10,6 +10,8 @@
 //                              no sign-in needed, it only reads Stripe. Run daily by job p31-plan-sync.
 //                              It answers with counts only ({ synced, missing, links_on_account }): plan
 //                              names and prices go to the function log, never to the caller.
+//       { action: 'syncPlan', planId }  →  admins only (is_academy_admin with the caller's JWT, v62): syncs
+//                              that one plan now and answers { ok, price_cents, billing, changed }.
 // Plans with a Stripe Payment Link (Melanie's own links, v54) are charged with the product and price
 // behind that link, so every sale shows under her products in Stripe and she sets the price there.
 import Stripe from 'npm:stripe@17.7.0';
@@ -92,6 +94,29 @@ Deno.serve(async (req) => {
   const { data: userData } = await admin.auth.getUser(token);
   const user = userData?.user;
   if (!user) return json({ error: 'Please sign in to continue.' }, 401);
+
+  // Admins only (Systems → Mentorship → Plans): copy one plan's price from its Payment Link now and
+  // answer with the new price and billing. The caller is checked with their own JWT.
+  if (raw?.action === 'syncPlan') {
+    const asUser = createClient(env('SUPABASE_URL'), env('SUPABASE_ANON_KEY'), {
+      global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false },
+    });
+    const { data: isAdmin } = await asUser.rpc('is_academy_admin');
+    if (isAdmin !== true) return json({ error: 'Only a Mentorship admin can sync a plan.' }, 403);
+    if (!raw?.planId) return json({ error: 'Which plan?' }, 400);
+    if (!stripeKey('collective')) return json({ error: 'The Collective Stripe key is not set.' }, 503);
+    const { data: plan } = await admin.from('academy_plans').select('id, label, billing, price_cents, stripe_payment_link').eq('id', raw.planId).maybeSingle();
+    if (!plan) return json({ error: 'Plan not found.' }, 404);
+    if (!plan.stripe_payment_link) return json({ error: 'This plan has no Stripe Payment Link yet. Paste one, save, then sync.' }, 400);
+    let price: Stripe.Price | null = null;
+    try { price = await syncPlan(new Stripe(stripeKey('collective')), admin, plan); } catch (e) {
+      console.error('academy-checkout syncPlan', plan.id, e);
+      return json({ error: `Stripe: ${(e as Error).message}` }, 502);
+    }
+    if (!price) return json({ error: 'That link is not an active Payment Link on the Collective Stripe account (or it has no price).' }, 404);
+    console.log('academy-checkout syncPlan', JSON.stringify({ plan: plan.label, by: user.email, cents: price.unit_amount }));
+    return json({ ok: true, price_cents: price.unit_amount, billing: BILLING_OF(price) || plan.billing, billing_from_stripe: BILLING_OF(price), changed: price.unit_amount !== plan.price_cents });
+  }
 
   let body: { token?: string } = {};
   try { body = await req.json(); } catch { /* handled below */ }

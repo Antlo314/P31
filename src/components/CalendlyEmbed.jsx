@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CalendarDays } from 'lucide-react';
 import { CALENDLY, calendlyUrl, loadCalendly, watchBookings } from '../lib/calendly';
+import { useSiteInfo } from '../lib/siteInfo';
 import './CalendlyEmbed.css';
 
 /** An inline Calendly calendar that loads when it scrolls into view. */
 const CalendlyEmbed = ({ kind, name, email, source, height = 720 }) => {
   const ref = useRef(null);
   const [state, setState] = useState('idle'); // idle | loading | ready | error
+  useSiteInfo(); // re-render when a saved booking link (Systems > Site info) arrives
   const url = calendlyUrl(kind, { name, email, source });
 
   useEffect(() => {
