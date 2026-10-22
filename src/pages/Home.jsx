@@ -103,7 +103,8 @@ const Home = () => {
 
         <div className="h26-hero__inner">
           <div className="h26-hero__nextwrap">{nextEvent && (
-            <a href="#dates" className="k-chip k-chip--glass h26-hero__next" data-intro="0">
+            // The event's ticket link (Systems → Markets & events) when it has one, else its row below.
+            <a href={nextEvent.rsvp_url || '#dates'} {...(nextEvent.rsvp_url ? { target: '_blank', rel: 'noreferrer' } : {})} className="k-chip k-chip--glass h26-hero__next" data-intro="0">
               <span className="h26-pulse" aria-hidden="true" />
               Up next · {nextEvent.title} · {showDate(nextEvent) ? formatEventDate(nextEvent.event_date, { month: 'short', day: 'numeric' }) : showMonth(nextEvent) ? monthLabel(nextEvent) : 'Coming soon'}
               <ArrowRight size={13} />
