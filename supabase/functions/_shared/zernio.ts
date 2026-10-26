@@ -155,3 +155,37 @@ export async function zernioFor(accountId: string | null | undefined, path: stri
   }
   throw last || new ZernioError(0, path, { error: 'No Zernio key is set.' });
 }
+
+/**
+ * TikTok's required settings (Zernio passes them to TikTok): public unless the creator's account
+ * only allows narrower audiences; comments, duets and stitches allowed unless she switched them
+ * off in the TikTok app; the preview and consent confirmations TikTok asks every post for.
+ * The cover is the image when one was sent, otherwise the video's frame at coverMs. `brand` asks for
+ * TikTok's "Your brand" label (brand_organic), which goes on only when creator-info lists it for
+ * this account; `note` says when it was left off. Shared by studio-zernio and content-autopilot.
+ */
+export async function tiktokSettings(acct: ZAccount, video: boolean, coverUrl: string, caption: string, opts: { coverMs?: number | null; brand?: boolean } = {}) {
+  const info = await zcall(acct.workspace, `/accounts/${encodeURIComponent(acct.id)}/tiktok/creator-info?mediaType=${video ? 'video' : 'photo'}`).catch(() => null);
+  const levels: string[] = (info?.privacyLevels || []).map((l: any) => l?.value).filter(Boolean);
+  const privacy = !levels.length || levels.includes('PUBLIC_TO_EVERYONE') ? 'PUBLIC_TO_EVERYONE'
+    : ['FOLLOWER_OF_CREATOR', 'MUTUAL_FOLLOW_FRIENDS', 'SELF_ONLY'].find((l) => levels.includes(l)) || levels[0];
+  const allowed = (k: string) => info?.postingLimits?.interactionSettings?.[k]?.enabled !== false;
+  const labels: string[] = (info?.commercialContentTypes || []).map((x: any) => (typeof x === 'string' ? x : x?.value)).filter(Boolean);
+  const brand = !!opts.brand && labels.includes('brand_organic');
+  const note = opts.brand && !brand
+    ? `${info ? `TikTok doesn’t offer @${acct.username} the “Your brand” label` : `TikTok didn’t say whether @${acct.username} can use the “Your brand” label`}, so it was left off.`
+    : '';
+  const settings = {
+    privacy_level: privacy,
+    allow_comment: allowed('allow_comment'),
+    ...(video ? { allow_duet: allowed('allow_duet'), allow_stitch: allowed('allow_stitch') } : {}),
+    content_preview_confirmed: true,
+    express_consent_given: true,
+    ...(video && /^https:\/\//.test(coverUrl) ? { video_cover_image_url: coverUrl }
+      : video && opts.coverMs != null ? { video_cover_timestamp_ms: opts.coverMs } : {}),
+    ...(brand ? { commercialContentType: 'brand_organic' } : {}),
+    // A photo post's caption becomes a 90-character title; the description carries all of it.
+    ...(!video && caption ? { description: caption.slice(0, 4000) } : {}),
+  };
+  return { settings, note };
+}

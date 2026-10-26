@@ -252,3 +252,6 @@
 .sa-fails ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 3px; font-size: 0.8rem; color: rgba(246, 241, 251, 0.75); overflow-wrap: anywhere; }
 .sa-ws .sys-alert { display: flex; gap: 8px; align-items: flex-start; font-size: 0.88rem; }
 .sa-ws .sys-alert svg { flex: none; margin-top: 3px; }
+
+/* Systems > Posting schedule */
+.ps-actions .spin { animation: adm-spin 1s linear infinite; }

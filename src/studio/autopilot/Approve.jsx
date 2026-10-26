@@ -12,6 +12,10 @@ const TZ = 'America/New_York';
 const when = (iso) => new Date(iso).toLocaleString('en-US', { timeZone: TZ, weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 const dayName = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : '');
 const KIND = { quote: 'Quote', prayer: 'Prayer', scripture: 'Scripture', blank: 'Fill in the blank', curator: 'Curator invitation', mentorship: 'Mentorship invitation' };
+// Under a posting schedule (v65) each post names its brand and where it goes.
+const BRAND = { market: 'Marketplace', collective: 'Collective' };
+const PLATFORM = { instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok' };
+const where = (it) => (it.platforms?.length ? it.platforms : it.brand === 'collective' ? ['instagram'] : ['instagram', 'facebook']).map((p) => PLATFORM[p] || p).join(', ');
 
 async function call(body) {
   const { data, error } = await supabase.functions.invoke('content-autopilot', { body });
@@ -108,7 +112,7 @@ const Approve = () => {
             <p className="ap-eyebrow"><Sparkles size={14} /> Ready for your yes</p>
             <h1>{items.length} posts for {dayName(batch.first_day)} to {dayName(batch.last_day)}</h1>
             {batch.open
-              ? <p className="ap-muted">Nothing posts until you approve. Remove any post or change its caption, then tap Approve: each card is drawn and scheduled for its time on Instagram and Facebook.</p>
+              ? <p className="ap-muted">Nothing posts until you approve. Remove any post or change its caption, then tap Approve: each card is drawn and scheduled for its time on {items.some((it) => it.brand) ? 'the platforms shown on it' : 'Instagram and Facebook'}.</p>
               : <p className="ap-done">{batch.status === 'scheduled' ? <><CalendarCheck size={16} /> Approved{batch.decided_by ? ` by ${batch.decided_by}` : ''}: {batch.scheduled_count} posts scheduled.</> : batch.status === 'declined' ? 'Set aside. A new batch is drafted when the calendar needs it.' : 'This review link has expired. A new batch comes when the calendar needs it.'}</p>}
             {finished != null && <p className="ap-done"><CalendarCheck size={16} /> Done: {finished} posts scheduled. They are on the Studio calendar now.</p>}
           </section>
@@ -118,7 +122,7 @@ const Approve = () => {
               <li key={it.id} className={`ap-item is-${it.status}`}>
                 <div className="ap-card">{docs[it.id] && <Thumb doc={docs[it.id]} width={320} label={it.line} />}</div>
                 <div className="ap-body">
-                  <p className="ap-meta"><b>{when(it.post_at)}</b> · {KIND[it.kind] || it.kind}
+                  <p className="ap-meta"><b>{when(it.post_at)}</b> · {it.brand && <><b>{BRAND[it.brand] || it.brand}</b> ({where(it)}) · </>}{KIND[it.kind] || it.kind}
                     {it.status === 'scheduled' && <span className="ap-tag ap-tag--ok"><Check size={12} /> Scheduled</span>}
                     {it.status === 'removed' && <span className="ap-tag">Removed</span>}
                     {it.status === 'skipped' && <span className="ap-tag">Time passed</span>}
@@ -127,7 +131,7 @@ const Approve = () => {
                   {editing === it.id
                     ? <CaptionEditor value={it.caption_ig} onSave={(v) => saveCaption(it, v)} onCancel={() => setEditing(null)} />
                     : <p className="ap-caption">{it.caption_ig}</p>}
-                  {it.error && it.status === 'failed' && <p className="ap-error ap-error--sm">{it.error}</p>}
+                  {it.error && (it.status === 'failed' || (it.status === 'scheduled' && it.brand)) && <p className="ap-error ap-error--sm">{it.error}</p>}
                   {batch.open && it.status !== 'scheduled' && !busy && (
                     <div className="ap-tools">
                       {it.status !== 'removed' && editing !== it.id && <button type="button" onClick={() => setEditing(it.id)}><Pencil size={14} /> Edit caption</button>}

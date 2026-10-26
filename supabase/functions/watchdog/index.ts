@@ -30,6 +30,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { sendEmail, layout, esc, emailConfigured } from '../_shared/email.ts';
 import { recipients as savedRecipients } from '../_shared/notify.ts';
 import { zcall, zernioAccounts, siteFor, workspaceKeys, ZernioError, type Workspace, type Site } from '../_shared/zernio.ts';
+import { normalizeSchedule, streamActive, streamBuckets } from '../_shared/factory/schedule.js';
 
 const env = (k: string) => Deno.env.get(k) || '';
 const cors = {
@@ -42,7 +43,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 type Row = Record<string, any>;
 type Problem = { key: string; severity: 'warn' | 'fail'; area: string; title: string; detail?: string; fix?: string; link?: string; meta?: Row };
 
-const LATEST_DB = 64; // the newest storefront_vNN.sql in the repo
+const LATEST_DB = 65; // the newest storefront_vNN.sql in the repo
 const SYSTEMS = 'https://www.thep31collective.org/systems';
 const STUDIO = 'https://www.thep31collective.org/studio';
 const SOCIAL_SETUP = `${SYSTEMS}/social-accounts`;
@@ -254,7 +255,36 @@ async function checkPosts(db: any, healed: string[]): Promise<Problem[]> {
   if (waiting?.[0]) out.push({ key: `autopilot.waiting.${waiting[0].id}`, severity: 'warn', area: 'posts', title: 'Drafted posts are waiting for approval', detail: `The autopilot's batch starting ${new Date(`${waiting[0].first_day}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} needs a yes before any of it can go out.`, fix: 'Open the review link in the email, or Content Studio > Auto-create > Autopilot > Review.', link: `${STUDIO}/autocreate?tab=autopilot` });
   // Days ahead with nothing booked for the Marketplace (its Instagram, Facebook or TikTok). Skipped
   // while a workspace can't be read, so a hiccup never reads as an empty week.
-  if (!broken.length) {
+  // With a posting schedule (v65) the Marketplace's own weekdays and posts a day decide what is short.
+  const { data: auto } = await db.from('autopilot_settings').select('*').eq('id', 1).maybeSingle();
+  const schedule: Row | null = normalizeSchedule(auto?.schedule);
+  if (!broken.length && schedule) {
+    if (streamActive('market', schedule.market)) {
+      const perDay = Number(schedule.market.posts_per_day);
+      const seen = new Set<string>();
+      const entries = scheduled.filter((p) => p.scheduledFor && !seen.has(idOf(p)) && !!seen.add(idOf(p))).map((p) => ({
+        day: etDate(new Date(p.scheduledFor)), minutes: 0, workspace: p._workspace,
+        platforms: (p.platforms || []).map((x: Row) => String(x?.platform || '').toLowerCase()).filter(Boolean),
+      }));
+      const byDay: Map<string, number[]> = streamBuckets(entries, schedule).market;
+      const count = (d: string) => (byDay.get(d) || []).length;
+      const on = new Set<number>(schedule.market.days);
+      const next = Array.from({ length: 7 }, (_, i) => etDate(new Date(Date.now() + (i + 1) * 24 * HOUR)))
+        .filter((d) => on.has(new Date(`${d}T12:00:00Z`).getUTCDay()));
+      const short = next.filter((d) => count(d) < perDay);
+      const empty = short.filter((d) => count(d) === 0);
+      if (next.length && (short.length >= Math.min(3, next.length) || (next.length >= 2 && short.includes(next[0]) && short.includes(next[1])))) {
+        const label = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        const all = empty.length === short.length;
+        out.push({
+          key: 'posts.queue', severity: empty.length >= Math.min(5, next.length) && next.length >= 3 ? 'fail' : 'warn', area: 'posts',
+          title: all ? `${plural(empty.length, 'posting day')} of the next 7 ${empty.length === 1 ? 'has' : 'have'} no Marketplace post` : `${plural(short.length, 'posting day')} of the next 7 ${short.length === 1 ? 'has' : 'have'} fewer than ${perDay} Marketplace ${perDay === 1 ? 'post' : 'posts'}`,
+          detail: `The posting schedule asks for ${perDay} a day. ${short.map((d) => `${label(d)}: ${count(d)}`).join(', ')}.`,
+          fix: 'The autopilot drafts these for approval; check for a batch waiting in Content Studio > Auto-create > Autopilot, or fill the gaps with Auto-create.', link: `${STUDIO}/autocreate?tab=autopilot`,
+        });
+      }
+    }
+  } else if (!broken.length) {
     const accounts: { id: string; site: Site }[] = await zernioAccounts().then((c) => c.accounts).catch(() => []);
     const siteOf = (x: Row, w: Workspace) => accounts.find((a) => a.id === idOf(x.accountId))?.site || siteFor({ id: idOf(x.accountId), workspace: w, platform: x.platform });
     const seenPost = new Set<string>();

@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plane, Loader2, Check, Send, ExternalLink, AlertCircle } from 'lucide-react';
+import { Plane, Loader2, Check, Send, ExternalLink, AlertCircle, CalendarClock } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { normalizeSchedule, describeSchedule, marketPerDay, MAX_PER_DAY } from '../factory/schedule';
 
 const missing = (e) => /does not exist|schema cache|relation/i.test(e?.message || '');
 const MIX = [['quote', 'Bold quotes'], ['prayer', 'Prayers'], ['scripture', 'Scripture (KJV)'], ['blank', 'Fill in the blank'], ['curator', 'Curator invitations'], ['mentorship', 'Mentorship invitations']];
@@ -11,6 +12,8 @@ const day = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString('en-US', { 
 /**
  * Content Studio → Auto-create → Autopilot: keeps the calendar full with a person approving every
  * batch. Settings (how many a day, how far ahead, the mix, who approves) and the latest batches.
+ * The per-brand posting schedule (v65) is edited in Systems → Posting schedule; it is shown here,
+ * and while one is saved the single "Posts a day" box gives way to it.
  */
 const AutopilotPanel = () => {
   const [s, setS] = useState(null);
@@ -66,15 +69,19 @@ const AutopilotPanel = () => {
   }
   if (!s) return <p className="ds-muted">Loading…</p>;
   const total = MIX.reduce((a, [k]) => a + Number(s.mix?.[k] || 0), 0) || 1;
+  // v65 adds the schedule column (and allows up to 8 a day); a saved schedule replaces "Posts a day".
+  const v65 = 'schedule' in s;
+  const sched = normalizeSchedule(s.schedule);
+  const perDay = marketPerDay(s);
   return (
     <div className="fc-grid ap-panel">
       <section className="ds-card fc-card">
         <h2><Plane size={18} /> Autopilot</h2>
-        <p className="ds-muted">Every morning it looks at the calendar. When the next stretch has fewer than {s.posts_per_day} posts a day and starts within {s.lead_days} days, it drafts the next {s.days_per_batch} days in Melanie JC’s quote-card look, with captions and good times, and emails the approvers a review link. Nothing posts until someone approves.</p>
+        <p className="ds-muted">Every morning it looks at the calendar. When the next stretch has fewer than {sched ? 'the posting schedule asks for' : `${perDay} posts a day`} and starts within {s.lead_days} days, it drafts the next {s.days_per_batch} days in Melanie JC’s quote-card look, with captions and good times, and emails the approvers a review link. Nothing posts until someone approves.</p>
         <form className="ds-form" onSubmit={save}>
           <label className="fc-check"><input type="checkbox" checked={!!s.enabled} onChange={(e) => set('enabled', e.target.checked)} /> <span><b>Autopilot on</b><small>Off: it never drafts on its own (Draft a batch now still works).</small></span></label>
           <div className="fc-row3">
-            <label className="k-field"><span>Posts a day</span><select value={s.posts_per_day} onChange={(e) => set('posts_per_day', e.target.value)}>{[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}</option>)}</select></label>
+            {!sched && <label className="k-field"><span>Posts a day</span><select value={s.posts_per_day} onChange={(e) => set('posts_per_day', e.target.value)}>{Array.from({ length: v65 ? MAX_PER_DAY : 4 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}</option>)}</select></label>}
             <label className="k-field"><span>Days per batch</span><select value={s.days_per_batch} onChange={(e) => set('days_per_batch', e.target.value)}>{[7, 10, 14, 21, 28].map((n) => <option key={n} value={n}>{n}</option>)}</select></label>
             <label className="k-field"><span>Start drafting when it’s this close</span><select value={s.lead_days} onChange={(e) => set('lead_days', e.target.value)}>{[3, 5, 7, 10, 14].map((n) => <option key={n} value={n}>{n} days out</option>)}</select></label>
           </div>
@@ -87,6 +94,10 @@ const AutopilotPanel = () => {
                 </label>
               ))}
             </div>
+          </div>
+          <div className="k-field"><span><CalendarClock size={14} /> Posting schedule</span>
+            <ul className="ds-list">{describeSchedule(s).map((l) => <li key={l} className="ds-row"><small>{l}</small></li>)}</ul>
+            <small className="ds-muted">{v65 ? <>Posts a day per brand, the days, set times and platforms (Instagram, Facebook, TikTok, the Collective Instagram): <Link to="/systems/posting-schedule">Systems → Posting schedule <ExternalLink size={12} /></Link></> : <>Run <code>storefront_v65_posting_schedule.sql</code> for a schedule per brand (up to 8 a day, set times, TikTok and the Collective).</>}</small>
           </div>
           <label className="k-field"><span>Who approves (emails)</span><input className="k-input" value={s.approversText} onChange={(e) => set('approversText', e.target.value)} placeholder="ceo@p31market.com" /></label>
           <div className="fc-actions">

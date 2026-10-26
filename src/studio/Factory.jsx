@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Wand2, Sparkles, Check, Send, Trash2, RefreshCw, Loader2, CalendarDays, Clock, Palette, ListChecks, BookOpen, Plus, ChevronDown, ChevronUp, AlertCircle, Eye, Plane } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -9,6 +9,7 @@ import { TYPES, STYLES, DEFAULT_SLOTS, mergeLibrary } from './factory/library';
 import { buildPlan, isoDate, facebookText } from './factory/generate';
 import { FitCard } from './factory/Card';
 import { renderCard } from './factory/render';
+import { normalizeSchedule, marketPerDay, dayRange } from './factory/schedule';
 import AutopilotPanel from './autopilot/AutopilotPanel';
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -33,6 +34,9 @@ const StudioFactory = () => {
   const [library, setLibrary] = useState(() => mergeLibrary([]));
   const [libOk, setLibOk] = useState(null); // null unknown, true table present, false run v36
   const [taken, setTaken] = useState({ dates: new Set(), keys: new Set() });
+  // The posting schedule (v65), when one is saved: the Marketplace's posts a day and weekdays.
+  const [sched, setSched] = useState(null); // { perDay, days }
+  const cadenceDefaulted = useRef(false);
   const [best, setBest] = useState(null);
   const [plan, setPlan] = useState(null);
   const [seed, setSeed] = useState(1);
@@ -49,15 +53,30 @@ const StudioFactory = () => {
     if (err) { setLibOk(missingTable(err.message) ? false : null); setLibrary(mergeLibrary([])); return; }
     setLibOk(true); setLibrary(mergeLibrary(data || []));
   }, []);
+  // A day is taken once it has the Marketplace's posts a day (one, without a posting schedule).
+  // A Planner row that was scheduled is on Zernio too, so a day counts the larger of the two.
   const loadTaken = useCallback(async () => {
-    const dates = new Set(); const keys = new Set();
-    const { data } = await supabase.from('content_plan').select('post_date, source_key, status').gte('post_date', isoDate(new Date(Date.now() - 120 * 864e5)));
-    (data || []).forEach((r) => { if (r.status !== 'skipped') { dates.add(r.post_date); if (r.source_key) keys.add(r.source_key); } });
+    const planned = new Map(); const booked = new Map(); const keys = new Set();
+    const bump = (m, d) => m.set(d, (m.get(d) || 0) + 1);
+    const [{ data }, { data: auto }] = await Promise.all([
+      supabase.from('content_plan').select('post_date, source_key, status').gte('post_date', isoDate(new Date(Date.now() - 120 * 864e5))),
+      supabase.from('autopilot_settings').select('*').eq('id', 1).maybeSingle(),
+    ]);
+    (data || []).forEach((r) => { if (r.status !== 'skipped') { bump(planned, r.post_date); if (r.source_key) keys.add(r.source_key); } });
     try {
       const z = await studio('posts');
-      (z?.scheduled || []).forEach((p) => { if (p.scheduledFor && marketFeedPost(p)) dates.add(isoDate(new Date(new Date(p.scheduledFor).toLocaleString('en-US', { timeZone: 'America/New_York' })))); });
+      (z?.scheduled || []).forEach((p) => { if (p.scheduledFor && marketFeedPost(p)) bump(booked, isoDate(new Date(new Date(p.scheduledFor).toLocaleString('en-US', { timeZone: 'America/New_York' })))); });
     } catch { /* Zernio unreachable: plan from the Planner alone */ }
+    const schedule = normalizeSchedule(auto?.schedule);
+    const perDay = schedule ? Math.max(1, marketPerDay(auto)) : 1;
+    const dates = new Set([...new Set([...planned.keys(), ...booked.keys()])].filter((d) => Math.max(planned.get(d) || 0, booked.get(d) || 0) >= perDay));
     setTaken({ dates, keys });
+    setSched(schedule ? { perDay: marketPerDay(auto), days: schedule.market.days } : null);
+    // The first time, How often starts from the schedule's weekdays.
+    if (schedule && !cadenceDefaulted.current) {
+      cadenceDefaulted.current = true;
+      setSettings((x) => ({ ...x, cadence: schedule.market.days.length === 7 || !schedule.market.days.length ? 'daily' : schedule.market.days }));
+    }
   }, []);
   // Draft a whole month on the server (the same job the scheduler runs on the 20th).
   const months = useMemo(() => {
@@ -230,12 +249,13 @@ const StudioFactory = () => {
                 <select value={settings.days} onChange={(e) => set('days', Number(e.target.value))}>{[7, 14, 21, 30, 45, 60, 90].map((d) => <option key={d} value={d}>{d} days</option>)}</select>
               </label>
               <label className="k-field"><span>How often</span>
-                <select value={settings.cadence} onChange={(e) => set('cadence', e.target.value === 'daily' ? 'daily' : Number(e.target.value))}>
+                <select value={Array.isArray(settings.cadence) ? 'schedule' : settings.cadence} onChange={(e) => set('cadence', e.target.value === 'daily' ? 'daily' : e.target.value === 'schedule' ? sched.days : Number(e.target.value))}>
+                  {sched && sched.days.length > 0 && sched.days.length < 7 && <option value="schedule">Posting schedule ({dayRange(sched.days)})</option>}
                   <option value="daily">Every day</option><option value="5">5 a week</option><option value="4">4 a week</option><option value="3">3 a week</option><option value="2">2 a week</option>
                 </select>
               </label>
             </div>
-            <label className="fc-check"><input type="checkbox" checked={settings.skipTaken} onChange={(e) => set('skipTaken', e.target.checked)} /> Skip days that already have a post ({taken.dates.size} booked in the Planner and Zernio)</label>
+            <label className="fc-check"><input type="checkbox" checked={settings.skipTaken} onChange={(e) => set('skipTaken', e.target.checked)} /> Skip days that already have {sched?.perDay > 1 ? `${sched.perDay} posts (the posting schedule)` : 'a post'} ({taken.dates.size} booked in the Planner and Zernio)</label>
             <div className="k-field"><span>Post to</span><div className="k-segs">{['instagram', 'facebook'].map((p) => <button type="button" key={p} aria-pressed={settings.platforms.includes(p)} onClick={() => set('platforms', settings.platforms.includes(p) ? settings.platforms.filter((x) => x !== p) : [...settings.platforms, p])}>{p === 'instagram' ? 'Instagram' : 'Facebook'}</button>)}</div></div>
           </section>
 

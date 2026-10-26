@@ -7,14 +7,26 @@
 //   approvers a review link. Remind once after a day; a batch expires after a week.
 //   The review page (/approve/:id) draws each card in the browser and calls this function to
 //   upload it and schedule it through Zernio. Nothing posts until someone approves.
+//   Posting schedule (v65, autopilot_settings.schedule, set in Systems > Posting schedule): when it
+//   is set, the Marketplace and the Collective are planned as two streams, each with its own posts a
+//   day, weekdays, Eastern times and platforms, counted against its own Zernio workspace. Each draft
+//   carries its brand (Marketplace posts go to the Market Instagram/Facebook and, when chosen, the
+//   Market TikTok; Collective posts to the Collective Instagram with Collective hashtags and links,
+//   never curator invitations). With no schedule it plans exactly as before (posts_per_day, the
+//   good times, Market Instagram + Facebook). The planning itself is src/studio/factory/schedule.js.
 // Body: { source: 'cron' } | { action: 'draft' } (Studio team) |
 //       { action: 'get' | 'update' | 'presign' | 'schedule' | 'finish' | 'decline', batch, token?, ... }
 //       (the review link's token, or a signed-in Studio team member)
-// Secrets: SUPABASE_SERVICE_ROLE_KEY, ZERNIO_API_KEY, GEMINI_API_KEY (optional: captions and lines
+// Secrets: SUPABASE_SERVICE_ROLE_KEY, ZERNIO_API_KEY (+ ZERNIO_COLLECTIVE_API_KEY for Collective posts
+//          and the Market TikTok under a posting schedule), GEMINI_API_KEY (optional: captions and lines
 //          are written by Gemini when set, from the built-in library when not), RESEND_API_KEY, EMAIL_FROM
 // Deploy: supabase functions deploy content-autopilot --no-verify-jwt
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { sendEmail, layout, esc, emailConfigured } from '../_shared/email.ts';
+import { zcall, zernioAccounts, tiktokSettings, ZernioError, type Workspace, type ZAccount } from '../_shared/zernio.ts';
+import { normalizeSchedule, planLegacy, planSchedule, streamBuckets, streamActive, activePlatforms, joinWords, STREAMS as STREAM_INFO, STREAM_KEYS, PLATFORM_LABEL as PLATFORM_NAMES } from '../_shared/factory/schedule.js';
+const STREAMS = STREAM_INFO as Record<string, { key: string; label: string; platforms: string[] }>;
+const PLATFORM_LABEL = PLATFORM_NAMES as Record<string, string>;
 
 const env = (k: string) => Deno.env.get(k) || '';
 const cors = {
@@ -40,6 +52,15 @@ const TAGS: Record<string, string> = {
   curator: '#P31Marketplace #WomenOwnedBusiness #AtlantaMakers #ShopSmall #WomenWhoBuild #KingdomEntrepreneur',
   mentorship: '#P31Collective #KingdomEntrepreneur #WomenInBusiness #FaithAndBusiness #MentorshipMatters #P31Marketplace',
 };
+// Collective posts (under a posting schedule): its own hashtags, handle and link.
+const TAGS_COLLECTIVE: Record<string, string> = {
+  quote: '#P31Collective #Proverbs31Woman #FaithAndBusiness #KingdomWoman #ChristianWomenInBusiness #WomenOfFaith',
+  prayer: '#P31Collective #Proverbs31Woman #PrayerWorks #WomenOfFaith #KingdomWoman #FaithOverFear',
+  scripture: '#P31Collective #Proverbs31 #ScriptureForToday #KJV #Proverbs31Woman #WomenOfFaith',
+  blank: '#P31Collective #WomenOfFaith #FaithAndBusiness #KingdomWoman #ChristianWomenInBusiness',
+  mentorship: '#P31Collective #KingdomEntrepreneur #WomenInBusiness #FaithAndBusiness #MentorshipMatters #ChristianMentorship',
+};
+const HANDLE_COLLECTIVE = '@the.p31collective';
 const LOOKS = ['lilac', 'plum', 'olive', 'thistle', 'lilac', 'gold', 'green', 'amethyst', 'lilac', 'ivory', 'royal', 'sage', 'lilac', 'blush', 'dusk'];
 const PATTERNS = ['topo', 'topo', 'topo', 'waves', 'topo', 'topo', 'rings', 'topo', 'topo', 'arches', 'topo', 'topo', 'blobs', 'topo', 'dots'];
 // The CEO's own card and the October collection, so the autopilot never repeats them.
@@ -85,7 +106,6 @@ function etToUtc(day: string, hm: string) {
   const asEt = Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day), Number(p.hour) % 24, Number(p.minute));
   return new Date(guess.getTime() + (guess.getTime() - asEt));
 }
-const addDays = (day: string, n: number) => { const d = new Date(`${day}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const weekday = (day: string) => new Date(`${day}T12:00:00Z`).getUTCDay();
 const nice = (day: string) => new Date(`${day}T12:00:00Z`).toLocaleDateString('en-US', { timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric' });
 const rand = (seed: number) => { let s = seed >>> 0 || 1; return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; }; };
@@ -108,33 +128,59 @@ async function scheduledPosts(): Promise<Row[]> {
   return all.filter((p) => p.scheduledFor);
 }
 
-// ── Planning: which days need posts, and at what times ──
-const SLOTS: Record<string, string[]> = { wk: ['12:30', '19:30', '15:00', '21:00', '09:00'], sat: ['13:00', '20:00', '16:00', '10:30'], sun: ['13:00', '19:30', '16:00', '09:30'] };
-function planSlots(posts: Row[], s: Row, force: boolean) {
+// ── Planning: which days need posts, and at what times (src/studio/factory/schedule.js) ──
+/** No posting schedule: the original plan (posts_per_day, the good times), from the Market workspace. */
+function planSlots(posts: Row[], s: Row, force: boolean): Row {
   const byDay = new Map<string, number[]>();
   for (const p of posts) { const d = new Date(p.scheduledFor); const k = etDate(d); byDay.set(k, [...(byDay.get(k) || []), minutesOf(d)]); }
-  const today = etDate(new Date());
-  let first: string | null = null;
-  for (let i = 1; i <= 60; i += 1) { const d = addDays(today, i); if ((byDay.get(d) || []).length < s.posts_per_day) { first = d; break; } }
-  if (!first) return { first: null, slots: [] as { day: string; hm: string }[], reason: 'The next two months are full.' };
-  const lead = Math.round((new Date(`${first}T12:00:00Z`).getTime() - new Date(`${today}T12:00:00Z`).getTime()) / DAY);
-  if (!force && lead > s.lead_days) return { first, slots: [], reason: `The calendar is full until ${nice(first)} (more than ${s.lead_days} days away).` };
-  const slots: { day: string; hm: string }[] = [];
-  for (let i = 0; i < s.days_per_batch; i += 1) {
-    const day = addDays(first, i);
-    const taken = [...(byDay.get(day) || [])];
-    const wd = weekday(day);
-    const opts = wd === 6 ? SLOTS.sat : wd === 0 ? SLOTS.sun : SLOTS.wk;
-    for (let n = taken.length; n < s.posts_per_day; n += 1) {
-      const hm = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
-      const pick = opts.find((t) => taken.every((x) => Math.abs(x - hm(t)) >= 150))
-        || [...opts].sort((a, b) => Math.min(...taken.map((x) => Math.abs(x - hm(b))), 1e9) - Math.min(...taken.map((x) => Math.abs(x - hm(a))), 1e9))[0];
-      taken.push(hm(pick));
-      slots.push({ day, hm: pick });
+  return planLegacy({ byDay, today: etDate(new Date()), settings: s, force });
+}
+
+/** One workspace's scheduled posts as { day, minutes, workspace, platforms } (null when it can't be read). */
+async function bookedIn(workspace: Workspace): Promise<Row[] | null> {
+  try {
+    const all: Row[] = [];
+    for (let page = 1; page <= 10; page += 1) {
+      const r = await zcall(workspace, `/posts?status=scheduled&limit=100&page=${page}`);
+      all.push(...(r.posts || []));
+      if (page >= (r.pagination?.pages || 1)) break;
     }
+    return all.filter((p) => p.scheduledFor).map((p) => {
+      const d = new Date(p.scheduledFor);
+      return { day: etDate(d), minutes: minutesOf(d), workspace, platforms: (p.platforms || []).map((x: Row) => String(x?.platform || '').toLowerCase()).filter(Boolean) };
+    });
+  } catch (e) {
+    console.warn(`content-autopilot: could not read the ${workspace} schedule`, (e as Error).message);
+    return null;
   }
-  slots.sort((a, b) => (a.day + a.hm).localeCompare(b.day + b.hm));
-  return { first, slots, reason: '' };
+}
+/** The workspace a Marketplace stream is counted in: its Instagram/Facebook, or the TikTok's when that is all it posts to. */
+const marketWorkspace = (st: Row): Workspace => (st?.platforms?.instagram || st?.platforms?.facebook ? 'market' : 'collective');
+
+/** With a posting schedule: each brand stream planned against its own posts. */
+async function planScheduled(s: Row, schedule: Row, force: boolean): Promise<Row> {
+  const homes: Record<string, Workspace> = { market: marketWorkspace(schedule.market), collective: 'collective' };
+  const active = STREAM_KEYS.filter((k: string) => streamActive(k, schedule[k]));
+  const lists = new Map<Workspace, Row[] | null>();
+  for (const k of active) if (!lists.has(homes[k])) lists.set(homes[k], await bookedIn(homes[k]));
+  const buckets: Row = streamBuckets([...lists.values()].flatMap((l) => l || []), schedule);
+  const byStream: Row = {};
+  for (const k of active) if (lists.get(homes[k])) byStream[k] = buckets[k];
+  return planSchedule({ byStream, today: etDate(new Date()), settings: s, schedule, force });
+}
+
+/** Kinds per brand: the Marketplace from the mix, the Collective from the mix without curator invitations. */
+function kindsByBrand(slots: Row[], mix: Row) {
+  const kinds: string[] = slots.map(() => 'quote');
+  for (const key of STREAM_KEYS) {
+    const idx = slots.map((x, i) => (x.brand === key ? i : -1)).filter((i) => i >= 0);
+    if (!idx.length) continue;
+    let m: Row = key === 'collective' ? { ...mix, curator: 0 } : mix;
+    if (!Object.values(m).some((v) => Number(v) > 0)) m = { quote: 1 };
+    const ks = planKinds(idx.map((i) => slots[i] as { day: string }), m);
+    idx.forEach((i, j) => { kinds[i] = ks[j] || 'quote'; });
+  }
+  return kinds;
 }
 
 /** Kinds for N posts from the mix, spread evenly, scripture on Sundays where it fits. */
@@ -277,8 +323,8 @@ async function writeBatch(db: any, kinds: string[]) {
   return { items, writer };
 }
 
-const captionsFor = (it: Row) => {
-  const tags = TAGS[it.kind] || TAGS.quote;
+const captionsFor = (it: Row, brand: string | null = null) => {
+  const tags = brand === 'collective' ? TAGS_COLLECTIVE[it.kind] || TAGS_COLLECTIVE.quote : TAGS[it.kind] || TAGS.quote;
   const url = it.link ? LINKS[it.link as keyof typeof LINKS] : '';
   const base = String(it.caption).replace(/#\w+/g, '').trim();
   return {
@@ -295,9 +341,11 @@ async function draft(db: any, source: string, force = false) {
   if (!s.enabled && !force) return { skipped: 'The autopilot is switched off.' };
   const { data: open } = await db.from('autopilot_batches').select('id, created_at').eq('status', 'awaiting').gt('expires_at', new Date().toISOString()).limit(1);
   if (open?.[0]) return { skipped: 'A batch is already waiting for approval.', batch: open[0].id };
-  const plan = planSlots(await scheduledPosts(), s, force);
+  // A posting schedule plans each brand on its own; without one, the original single plan.
+  const schedule: Row | null = normalizeSchedule(s.schedule);
+  const plan = schedule ? await planScheduled(s, schedule, force) : planSlots(await scheduledPosts(), s, force);
   if (!plan.slots.length) return { skipped: plan.reason };
-  const kinds = planKinds(plan.slots, s.mix || {});
+  const kinds = schedule ? kindsByBrand(plan.slots, s.mix || {}) : planKinds(plan.slots, s.mix || {});
   const { items, writer } = await writeBatch(db, kinds);
   const token = `${crypto.randomUUID()}${crypto.randomUUID()}`.replace(/-/g, '');
   const { data: batch, error } = await db.from('autopilot_batches').insert({
@@ -305,15 +353,21 @@ async function draft(db: any, source: string, force = false) {
   }).select().single();
   if (error) throw new Error(error.message);
   const seed0 = Math.floor(Math.random() * 1000);
-  const rows = items.map((it, i) => ({
-    batch_id: batch.id, position: i, post_at: etToUtc(plan.slots[i].day, plan.slots[i].hm).toISOString(),
-    kind: it.kind, template: it.template, words: it.words, line: it.line,
-    style: LOOKS[(seed0 + i) % LOOKS.length], pattern: PATTERNS[(seed0 + i * 7) % PATTERNS.length], seed: 101 + seed0 + i * 37,
-    ...captionsFor(it),
-  }));
+  const rows = items.map((it, i) => {
+    // Under a schedule each post carries its brand and platforms; a Collective card shows the Collective handle.
+    const brand: string | null = schedule ? plan.slots[i].brand : null;
+    return {
+      batch_id: batch.id, position: i, post_at: etToUtc(plan.slots[i].day, plan.slots[i].hm).toISOString(),
+      kind: it.kind, template: it.template, words: brand === 'collective' ? { ...it.words, handle: HANDLE_COLLECTIVE } : it.words, line: it.line,
+      style: LOOKS[(seed0 + i) % LOOKS.length], pattern: PATTERNS[(seed0 + i * 7) % PATTERNS.length], seed: 101 + seed0 + i * 37,
+      ...captionsFor(it, brand),
+      ...(brand && schedule ? { brand, platforms: activePlatforms(brand, schedule[brand]) } : {}),
+    };
+  });
   const { error: e2 } = await db.from('autopilot_items').insert(rows);
   if (e2) { await db.from('autopilot_batches').delete().eq('id', batch.id); throw new Error(e2.message); }
   await emailBatch(db, batch, rows, token, s.approvers, false);
+  if (schedule) return { batch: batch.id, posts: rows.length, writer, first: batch.first_day, last: batch.last_day, notes: plan.notes || [] };
   return { batch: batch.id, posts: rows.length, writer, first: batch.first_day, last: batch.last_day };
 }
 
@@ -324,7 +378,10 @@ async function emailBatch(db: any, batch: Row, rows: Row[], token: string | null
   const link = token ? `https://www.thep31collective.org/approve/${batch.id}?t=${token}` : `https://www.thep31collective.org/approve/${batch.id}`;
   const counts = rows.reduce((m: Row, r: Row) => ({ ...m, [r.kind]: (m[r.kind] || 0) + 1 }), {});
   const NAMES: Row = { quote: 'quotes', prayer: 'prayers', scripture: 'scriptures', blank: 'fill in the blanks', curator: 'curator invitations', mentorship: 'mentorship invitations' };
-  const body = `<p style="margin:0 0 12px;color:#4E3A4B;font-size:15px">${reminder ? 'A reminder: these' : 'The calendar has room, so I drafted'} <b>${rows.length} posts</b> for ${esc(nice(batch.first_day))} to ${esc(nice(batch.last_day))}, in your quote-card look: ${Object.entries(counts).map(([k, n]) => `${n} ${NAMES[k] || k}`).join(', ')}.</p>
+  // Under a posting schedule, how many are for each brand.
+  const perBrand = STREAM_KEYS.map((k: string) => [k, rows.filter((r: Row) => r.brand === k).length] as [string, number]).filter(([, n]) => n > 0);
+  const brandNote = perBrand.length ? ` (${perBrand.map(([k, n]) => `${n} for the ${STREAMS[k].label}`).join(', ')})` : '';
+  const body = `<p style="margin:0 0 12px;color:#4E3A4B;font-size:15px">${reminder ? 'A reminder: these' : 'The calendar has room, so I drafted'} <b>${rows.length} posts</b>${brandNote} for ${esc(nice(batch.first_day))} to ${esc(nice(batch.last_day))}, in your quote-card look: ${Object.entries(counts).map(([k, n]) => `${n} ${NAMES[k] || k}`).join(', ')}.</p>
     <ul style="margin:0 0 14px;padding-left:18px;color:#2A1526;font-size:14px;line-height:1.6">${rows.slice(0, 8).map((r: Row) => `<li>${esc(r.line || '')}</li>`).join('')}${rows.length > 8 ? `<li>and ${rows.length - 8} more</li>` : ''}</ul>
     <p style="margin:0 0 18px"><a href="${link}" style="display:inline-block;background:#3A1C36;color:#F2CE4D;padding:14px 22px;border-radius:999px;text-decoration:none;font-weight:bold">Review and approve</a></p>
     <p style="margin:0;color:#74657A;font-size:13px">Nothing posts until you approve. On the page you can remove any post or change its caption first. This link works until ${new Date(batch.expires_at || Date.now() + 7 * DAY).toLocaleDateString('en-US', { timeZone: TZ, month: 'long', day: 'numeric' })}.</p>`;
@@ -349,6 +406,73 @@ async function daily(db: any) {
     await emailBatch(db, b, rows || [], token, s?.approvers || [], true);
   }
   return draft(db, 'cron');
+}
+
+// ── Scheduling a branded post (posting schedule) ──
+/** zcall, with Zernio's answer as a message for the review page. */
+async function zws(workspace: Workspace, path: string, init: RequestInit = {}) {
+  try {
+    return await zcall(workspace, path, init);
+  } catch (e) {
+    if (e instanceof ZernioError) throw new UserError(e.message || `Zernio could not complete that (${e.status}).`);
+    throw e;
+  }
+}
+/** Where a branded post goes (a row without platforms: the brand's usual ones). */
+const platformsOf = (it: Row): string[] => (Array.isArray(it.platforms) && it.platforms.length ? it.platforms : it.brand === 'collective' ? ['instagram'] : ['instagram', 'facebook']);
+/** The workspace a branded post is uploaded with and posted from first. */
+const homeWorkspace = (it: Row): Workspace => (it.brand === 'collective' ? 'collective' : platformsOf(it).some((p) => p === 'instagram' || p === 'facebook') ? 'market' : 'collective');
+
+/**
+ * One approved branded post: the brand's accounts for its platforms (Marketplace: the Market
+ * Instagram and Facebook, and the Market TikTok when chosen; Collective: the Collective Instagram),
+ * one Zernio post per workspace they live in, each with that workspace's key. A platform that is not
+ * connected is left off and noted; the post counts as scheduled when any part of it was.
+ */
+// deno-lint-ignore no-explicit-any
+async function scheduleBranded(db: any, it: Row) {
+  const { accounts } = await zernioAccounts();
+  const label = STREAMS[it.brand]?.label || it.brand;
+  const chosen: ZAccount[] = [];
+  const missing: string[] = [];
+  for (const p of platformsOf(it)) {
+    const a = accounts.find((x) => x.platform === p && x.site === it.brand);
+    if (a) chosen.push(a);
+    else missing.push(PLATFORM_LABEL[p] || p);
+  }
+  if (!chosen.length) throw new UserError(`The ${label} ${joinWords(missing)} ${missing.length === 1 ? 'is' : 'are'} not connected in Zernio.`);
+  const w = it.words || {};
+  const alt = [w.intro, w.eyebrow, w.headline, w.verse, w.reference, w.body].filter(Boolean).join(' ').slice(0, 900);
+  const groups = new Map<Workspace, Row[]>();
+  for (const a of chosen) {
+    const entry: Row = { platform: a.platform, accountId: a.id, customContent: a.platform === 'facebook' ? it.caption_fb : it.caption_ig };
+    // TikTok takes the card as a photo post, with the same settings Studio posts send.
+    if (a.platform === 'tiktok') entry.platformSpecificData = { tiktokSettings: (await tiktokSettings(a, false, '', String(it.caption_ig || ''))).settings };
+    groups.set(a.workspace, [...(groups.get(a.workspace) || []), entry]);
+  }
+  const home = homeWorkspace(it);
+  let scheduled = 0;
+  const ids: string[] = [];
+  const problems: string[] = [];
+  for (const [ws, platforms] of [...groups.entries()].sort(([a], [b]) => Number(b === home) - Number(a === home))) {
+    try {
+      const out = await zcall(ws, '/posts', {
+        method: 'POST', headers: { 'Idempotency-Key': ws === home ? `autopilot-${it.id}` : `autopilot-${it.id}-${ws}` },
+        body: JSON.stringify({ title: `P31 autopilot · ${label} · ${it.kind} · ${String(it.line || '').slice(0, 60)}`, content: it.caption_ig, mediaItems: [{ type: 'image', url: it.media_url, altText: alt }], platforms, scheduledFor: etLocal(new Date(it.post_at)), timezone: TZ }),
+      });
+      scheduled += 1;
+      const id = out.post?._id || out.post?.id || out._id || out.id || null;
+      if (id) ids.push(String(id));
+    } catch (e) {
+      problems.push(`${joinWords(platforms.map((p) => PLATFORM_LABEL[p.platform] || p.platform))}: ${(e as Error).message}`);
+    }
+  }
+  if (missing.length) problems.push(`${joinWords(missing)} ${missing.length === 1 ? 'is' : 'are'} not connected, so it was left off.`);
+  const patch = scheduled
+    ? { status: 'scheduled', zernio_post_id: ids.join(',') || null, error: problems.join(' ').slice(0, 300) || null }
+    : { status: 'failed', error: problems.join(' ').slice(0, 300) || 'Zernio did not take it.' };
+  const { data } = await db.from('autopilot_items').update(patch).eq('id', it.id).select().single();
+  return data;
 }
 
 // ── Review actions (the link's token, or a Studio team member) ──
@@ -394,7 +518,9 @@ async function review(db: any, req: Request, b: Row) {
       if (!open) throw new UserError('This batch is no longer open.');
       const it = await item();
       const size = Math.max(1, Math.min(15_000_000, Number(b.size) || 0));
-      const { uploadUrl, publicUrl } = await zernio('/media/presign', { method: 'POST', body: JSON.stringify({ filename: `p31-autopilot-${it.id.slice(0, 8)}.jpg`, contentType: 'image/jpeg', size }) });
+      const presign = { method: 'POST', body: JSON.stringify({ filename: `p31-autopilot-${it.id.slice(0, 8)}.jpg`, contentType: 'image/jpeg', size }) };
+      // A branded post (posting schedule) uploads with the key of the workspace it posts from first.
+      const { uploadUrl, publicUrl } = it.brand ? await zws(homeWorkspace(it), '/media/presign', presign) : await zernio('/media/presign', presign);
       await db.from('autopilot_items').update({ media_url: publicUrl }).eq('id', it.id);
       return { uploadUrl };
     }
@@ -408,6 +534,7 @@ async function review(db: any, req: Request, b: Row) {
         const { data } = await db.from('autopilot_items').update({ status: 'skipped', error: 'Its time had already passed.' }).eq('id', it.id).select().single();
         return { item: data };
       }
+      if (it.brand) return { item: await scheduleBranded(db, it) };
       const { accounts = [] } = await zernio('/accounts');
       const ig = accounts.find((a: Row) => a.platform === 'instagram');
       const fb = accounts.find((a: Row) => a.platform === 'facebook');

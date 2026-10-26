@@ -8,6 +8,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 65, file: 'storefront_v65_posting_schedule.sql', title: 'Posting schedule', what: 'Systems → Posting schedule: posts a day (up to 8), weekdays, set times and platforms for the Marketplace and the Collective; the autopilot drafts each brand on its own.',
+    expect: 'schedule_column true · schedule_checked true · posts_per_day_up_to_8 true · items_brand true · version_recorded true',
+    checks: [['column', 'autopilot_settings', 'schedule']] },
   { v: 64, file: 'storefront_v64_team_directory.sql', title: 'Team directory', what: 'The team shown on both sites (names, roles, emails, order, photos) becomes editable in Systems → Team directory, with a photo bucket.',
     expect: 'table_ready true · rls_on true · seeded true · bucket_ready true · photo_policies true · version_recorded true',
     checks: [['table', 'team_directory']] },

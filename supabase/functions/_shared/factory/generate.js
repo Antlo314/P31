@@ -57,7 +57,7 @@ const PILLAR = { fill: 'Faith & encouragement', amen: 'Faith & encouragement', p
 
 /**
  * Build the plan.
- *   start: 'YYYY-MM-DD'; days: how many days to cover; cadence: 'daily' | number per week
+ *   start: 'YYYY-MM-DD'; days: how many days to cover; cadence: 'daily' | number per week | [weekdays, Sunday = 0]
  *   mix: { fill: 40, prompt: 15, ... } percent shares (0 turns a type off)
  *   style: card style id; platforms: ['instagram','facebook']
  *   slots: { 0..6: [hours] } Eastern hours per weekday; skipDates: Set of 'YYYY-MM-DD' already taken
@@ -71,10 +71,12 @@ export function buildPlan({ start, days = 30, cadence = 'daily', mix, style = 'n
   // Which days get a post.
   const dates = [];
   const first = new Date(`${start}T12:00:00`);
-  const perWeek = cadence === 'daily' ? 7 : Math.max(1, Math.min(7, Number(cadence) || 5));
+  // A list of weekdays (the posting schedule's days, Sunday = 0) is used as given.
+  const weekdays = Array.isArray(cadence) ? cadence.map(Number).filter((d) => Number.isInteger(d) && d >= 0 && d <= 6) : null;
+  const perWeek = weekdays ? weekdays.length : cadence === 'daily' ? 7 : Math.max(1, Math.min(7, Number(cadence) || 5));
   const prefer = [2, 4, 6, 1, 3, 5, 0]; // Tue, Thu, Sat, Mon, Wed, Fri, Sun
-  const allowed = new Set(perWeek === 7 ? [0, 1, 2, 3, 4, 5, 6] : prefer.slice(0, perWeek));
-  if (perWeek < 7 && mix.amen > 0 && !allowed.has(0)) { allowed.delete(prefer[perWeek - 1]); allowed.add(0); } // keep a Sunday for the Sunday word
+  const allowed = new Set(weekdays || (perWeek === 7 ? [0, 1, 2, 3, 4, 5, 6] : prefer.slice(0, perWeek)));
+  if (!weekdays && perWeek < 7 && mix.amen > 0 && !allowed.has(0)) { allowed.delete(prefer[perWeek - 1]); allowed.add(0); } // keep a Sunday for the Sunday word
   for (let i = 0; i < days; i++) {
     const d = new Date(first); d.setDate(first.getDate() + i);
     const key = isoDate(d);

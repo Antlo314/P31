@@ -6,6 +6,9 @@
 //   Scheduler (v38): the 20th of each month → next month, once (a second call that month does nothing).
 //   Studio button:   { month: 'YYYY-MM' } while signed in as Studio team → that month, from tomorrow
 //                    if it is the current month.
+//   Posting schedule (v65, Systems > Posting schedule): when it is set, only the Marketplace's
+//   weekdays get drafts, a day counts as taken once it has the Marketplace's posts a day, and nothing
+//   is drafted while the Marketplace stream is off. Without one, any post takes a day, as before.
 // Secrets: ZERNIO_API_KEY (optional: skip days already booked there), RESEND_API_KEY,
 //          AUTOCREATE_TO (comma list; default marketing@ + founder@; a list saved in
 //          Systems > Email recipients as 'autocreate' wins)
@@ -15,6 +18,7 @@ import { sendEmail, layout, esc, emailConfigured } from '../_shared/email.ts';
 import { recipients } from '../_shared/notify.ts';
 import { TYPES, DEFAULT_SLOTS, mergeLibrary } from '../_shared/factory/library.js';
 import { buildPlan } from '../_shared/factory/generate.js';
+import { normalizeSchedule, streamActive } from '../_shared/factory/schedule.js';
 
 const env = (k: string) => Deno.env.get(k) || '';
 const cors = {
@@ -35,12 +39,13 @@ const nextMonth = (today: string) => { const [y, m] = today.split('-').map(Numbe
 const list = (k: string, fallback: string[]) => { const v = env(k).split(',').map((s) => s.trim()).filter(Boolean); return v.length ? v : fallback; };
 const defaultMix = () => Object.fromEntries(Object.entries(TYPES).map(([k, t]) => [k, (t as Row).share]));
 
-async function zernioDates(): Promise<Set<string>> {
-  const out = new Set<string>();
+/** Posts already booked on Zernio (the Market workspace), counted per Eastern day. */
+async function zernioCounts(): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
   if (!env('ZERNIO_API_KEY')) return out;
   try {
     const res = await fetch('https://zernio.com/api/v1/posts?status=scheduled&limit=100&sortBy=scheduled-asc', { headers: { Authorization: `Bearer ${env('ZERNIO_API_KEY')}` } });
-    if (res.ok) ((await res.json()).posts || []).forEach((p: Row) => { if (p.scheduledFor) out.add(etDate(new Date(p.scheduledFor))); });
+    if (res.ok) ((await res.json()).posts || []).forEach((p: Row) => { if (p.scheduledFor) { const d = etDate(new Date(p.scheduledFor)); out.set(d, (out.get(d) || 0) + 1); } });
   } catch { /* plan from the Planner alone */ }
   return out;
 }
@@ -79,26 +84,38 @@ Deno.serve(async (req) => {
     if (done?.length) return json({ ok: true, skipped: `${month} was already drafted` });
   }
 
+  // The posting schedule, when one is set: the Marketplace's weekdays and posts a day.
+  const { data: auto } = await db.from('autopilot_settings').select('*').eq('id', 1).maybeSingle();
+  const schedule: Row | null = normalizeSchedule(auto?.schedule);
+  if (schedule && !streamActive('market', schedule.market)) {
+    return json({ ok: true, drafted: 0, note: 'Marketplace posts are switched off in Systems > Posting schedule, so nothing was drafted.' });
+  }
+  const perDay = schedule ? Number(schedule.market.posts_per_day) : 1;
+
   // The team's last choices (mix, look, cadence, times), else the Studio defaults.
   const { data: lastSeries } = await db.from('content_series').select('settings').order('created_at', { ascending: false }).limit(1);
   const prev: Row = lastSeries?.[0]?.settings || {};
   const settings = {
     mix: prev.mix && Object.values(prev.mix).some((v) => Number(v) > 0) ? prev.mix : defaultMix(),
     style: prev.style || 'night',
-    cadence: prev.cadence || 'daily',
+    cadence: schedule ? (schedule.market.days.length === 7 ? 'daily' : schedule.market.days) : prev.cadence || 'daily',
     platforms: Array.isArray(prev.platforms) && prev.platforms.length ? prev.platforms : ['instagram', 'facebook'],
     slots: prev.slots && typeof prev.slots === 'object' ? prev.slots : DEFAULT_SLOTS,
   };
 
   // What is taken already: Planner rows (and the library items they used) plus Zernio's schedule.
-  const [{ data: libRows }, { data: planRows }, zDates] = await Promise.all([
+  // A day is taken once it has the Marketplace's posts a day (one, without a posting schedule).
+  const [{ data: libRows }, { data: planRows }, zCounts] = await Promise.all([
     db.from('content_library').select('*').order('created_at'),
     db.from('content_plan').select('post_date, source_key, status').gte('post_date', addDays(today, -120)),
-    zernioDates(),
+    zernioCounts(),
   ]);
-  const skipDates = new Set<string>(zDates);
+  // A Planner row that was scheduled is on Zernio too, so a day counts the larger of the two.
+  const planned = new Map<string, number>();
   const usedKeys = new Set<string>();
-  (planRows || []).forEach((r: Row) => { if (r.status !== 'skipped') { skipDates.add(r.post_date); if (r.source_key) usedKeys.add(r.source_key); } });
+  (planRows || []).forEach((r: Row) => { if (r.status !== 'skipped') { planned.set(r.post_date, (planned.get(r.post_date) || 0) + 1); if (r.source_key) usedKeys.add(r.source_key); } });
+  const skipDates = new Set<string>([...new Set([...zCounts.keys(), ...planned.keys()])]
+    .filter((d) => Math.max(zCounts.get(d) || 0, planned.get(d) || 0) >= perDay));
 
   const rows: Row[] = buildPlan({
     start, days, cadence: settings.cadence, mix: settings.mix, style: settings.style, platforms: settings.platforms,
