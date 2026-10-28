@@ -164,17 +164,27 @@ export async function zernioFor(accountId: string | null | undefined, path: stri
  * TikTok's "Your brand" label (brand_organic), which goes on only when creator-info lists it for
  * this account; `note` says when it was left off. Shared by studio-zernio and content-autopilot.
  */
-export async function tiktokSettings(acct: ZAccount, video: boolean, coverUrl: string, caption: string, opts: { coverMs?: number | null; brand?: boolean } = {}) {
-  const info = await zcall(acct.workspace, `/accounts/${encodeURIComponent(acct.id)}/tiktok/creator-info?mediaType=${video ? 'video' : 'photo'}`).catch(() => null);
+export async function tiktokSettings(acct: ZAccount, video: boolean, coverUrl: string, caption: string, opts: { coverMs?: number | null; brand?: boolean; music?: unknown } = {}) {
+  const wanted = tiktokMusicSettings(opts.music, video);
+  const [info, lane] = await Promise.all([
+    zcall(acct.workspace, `/accounts/${encodeURIComponent(acct.id)}/tiktok/creator-info?mediaType=${video ? 'video' : 'photo'}`).catch(() => null),
+    wanted ? tiktokLane(acct) : Promise.resolve(null),
+  ]);
   const levels: string[] = (info?.privacyLevels || []).map((l: any) => l?.value).filter(Boolean);
   const privacy = !levels.length || levels.includes('PUBLIC_TO_EVERYONE') ? 'PUBLIC_TO_EVERYONE'
     : ['FOLLOWER_OF_CREATOR', 'MUTUAL_FOLLOW_FRIENDS', 'SELF_ONLY'].find((l) => levels.includes(l)) || levels[0];
   const allowed = (k: string) => info?.postingLimits?.interactionSettings?.[k]?.enabled !== false;
   const labels: string[] = (info?.commercialContentTypes || []).map((x: any) => (typeof x === 'string' ? x : x?.value)).filter(Boolean);
   const brand = !!opts.brand && labels.includes('brand_organic');
-  const note = opts.brand && !brand
-    ? `${info ? `TikTok doesn’t offer @${acct.username} the “Your brand” label` : `TikTok didn’t say whether @${acct.username} can use the “Your brand” label`}, so it was left off.`
-    : '';
+  const notes: string[] = [];
+  if (opts.brand && !brand) {
+    notes.push(`${info ? `TikTok doesn’t offer @${acct.username} the “Your brand” label` : `TikTok didn’t say whether @${acct.username} can use the “Your brand” label`}, so it was left off.`);
+  }
+  // A developer-app connection fails a post with a commercial track at publish time, so the track
+  // is left off up front (the post keeps its own sound). An unknown lane keeps the track.
+  const music = wanted && lane !== 'developer' ? wanted : null;
+  if (wanted && !music) notes.push(`The TikTok track was left off (the post keeps its own sound): @${acct.username} is on TikTok’s developer app, and trending music needs the TikTok for Business app. Reconnect it in Zernio.`);
+  const note = notes.join(' ');
   const settings = {
     privacy_level: privacy,
     allow_comment: allowed('allow_comment'),
@@ -186,6 +196,88 @@ export async function tiktokSettings(acct: ZAccount, video: boolean, coverUrl: s
     ...(brand ? { commercialContentType: 'brand_organic' } : {}),
     // A photo post's caption becomes a 90-character title; the description carries all of it.
     ...(!video && caption ? { description: caption.slice(0, 4000) } : {}),
+    ...(music || {}),
   };
   return { settings, note };
+}
+
+// ── Trending music ───────────────────────────────────────────────────────────
+
+/** One track as the Studio shows it, the same shape for TikTok and Instagram. */
+export type MusicTrack = {
+  id: string; title: string; artist: string | null; durationMs: number | null; previewUrl: string | null;
+  explicit: boolean; platform: 'tiktok' | 'instagram'; artwork: string | null; genres: string[]; rank: number | null;
+};
+
+const int = (v: unknown, lo: number, hi: number, fallback: number) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.max(lo, Math.min(hi, Math.round(n))) : fallback;
+};
+
+/** Neither catalog has an explicit flag today; a flag Zernio adds later, or "explicit" in the title, still counts. */
+export const isExplicit = (t: any) => t?.explicit === true || t?.isExplicit === true || /\bexplicit\b/i.test(String(t?.title || t?.name || ''));
+
+/**
+ * The Studio's TikTok track choice {id, volume, start?, end?, originalVolume} as tiktokSettings
+ * fields (Zernio docs, TikTok "Locations & music"): musicSoundInfo.musicSoundId always; the track
+ * volume, trim points and the video's own sound volume only on video posts (TikTok ignores them on
+ * photos). Nothing usable → null, and the post is sent exactly as before.
+ */
+export function tiktokMusicSettings(m: unknown, video: boolean): Record<string, unknown> | null {
+  if (!m || typeof m !== 'object') return null;
+  const c = m as Record<string, unknown>;
+  const id = String(c.id ?? '').trim();
+  if (!/^[\w-]{1,64}$/.test(id)) return null;
+  if (!video) return { musicSoundInfo: { musicSoundId: id } };
+  const info: Record<string, unknown> = { musicSoundId: id, musicSoundVolume: int(c.volume, 0, 100, 50) };
+  const start = c.start == null ? 0 : int(c.start, 0, 600_000, 0);
+  const end = c.end == null ? 0 : int(c.end, 0, 600_000, 0);
+  if (start > 0) info.musicSoundStart = start;
+  if (end > start) info.musicSoundEnd = end;
+  // Left out, TikTok mutes the video's own sound under the track (its API default is 0).
+  return { musicSoundInfo: info, videoOriginalSoundVolume: int(c.originalVolume, 0, 100, 0) };
+}
+
+/** Which TikTok lane an account is on ('business' | 'developer'), from GET /accounts/{id}/health; null when unknown. */
+export async function tiktokLane(acct: ZAccount): Promise<string | null> {
+  const h = await zcall(acct.workspace, `/accounts/${encodeURIComponent(acct.id)}/health`).catch(() => null);
+  const lane = h?.integrationLane;
+  return lane === 'business' || lane === 'developer' ? lane : null;
+}
+
+/**
+ * TikTok's 100 trending Commercial Music Library tracks for an account
+ * (GET /accounts/{id}/tiktok/commercial-music, TikTok for Business app connections only). The list
+ * has no search, so `q` filters it here by title, artist and genre. The id is the track's clip id
+ * (what Zernio says to send as musicSoundId), else the full-track id; never the commercial music id.
+ * A failure is not thrown: it comes back as a `note` with no tracks, so posts go out with their own sound.
+ */
+export async function tiktokTrending(acct: ZAccount, q = ''): Promise<{ tracks: MusicTrack[]; note?: string }> {
+  try {
+    const out = await zcall(acct.workspace, `/accounts/${encodeURIComponent(acct.id)}/tiktok/commercial-music`);
+    let tracks: MusicTrack[] = (Array.isArray(out?.tracks) ? out.tracks : []).map((t: any): MusicTrack | null => {
+      const id = String(t?.clip?.id || t?.id || '');
+      if (!id) return null;
+      const sec = Number(t?.clip?.id ? (t.clip.durationSec ?? t.durationSec) : t.durationSec);
+      return {
+        id, title: String(t.name || t.title || 'Untitled'), artist: t.artist ? String(t.artist) : null,
+        durationMs: Number.isFinite(sec) && sec > 0 ? sec * 1000 : null,
+        previewUrl: t?.clip?.previewUrl || t.previewUrl || null, explicit: isExplicit(t), platform: 'tiktok',
+        artwork: t.thumbnailUrl || null, genres: Array.isArray(t.genres) ? t.genres.map(String) : [],
+        rank: Number.isFinite(Number(t.rank)) ? Number(t.rank) : null,
+      };
+    }).filter(Boolean) as MusicTrack[];
+    tracks.sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9));
+    const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+    if (words.length) tracks = tracks.filter((t) => words.every((w) => `${t.title} ${t.artist || ''} ${t.genres.join(' ')}`.toLowerCase().includes(w)));
+    if (!tracks.length && !words.length) return { tracks, note: 'TikTok has no trending commercial tracks for this account right now, so posts go out with our own music.' };
+    return { tracks };
+  } catch (e) {
+    const lane = await tiktokLane(acct);
+    if (lane === 'developer') {
+      return { tracks: [], note: `Trending TikTok music needs @${acct.username} connected through the TikTok for Business app (it is on TikTok’s older developer app). Reconnect it in Zernio to use trending tracks. Until then posts go out with our own music.` };
+    }
+    const said = e instanceof ZernioError ? String(e.body?.error || e.body?.message || e.status || '') : (e as Error).message;
+    return { tracks: [], note: `Trending TikTok music couldn’t be loaded just now${said ? ` (${said})` : ''}, so posts go out with our own music. TikTok only offers it to accounts connected through the TikTok for Business app.` };
+  }
 }

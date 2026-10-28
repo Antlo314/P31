@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { DashHead, DashEmpty } from '../apps/DashShell';
 import SoundPicker from './SoundPicker';
+import MusicChoice from './MusicPicker';
+import { trendingMusic, autoPick, tiktokMusicField } from './music';
 import Handoffs from './Handoffs';
 import { postPack } from './ai';
 import { studio, uploadMedia, bestSlotsET, nextOccurrence, fmtET } from './api';
@@ -306,6 +308,7 @@ const fieldsFromPost = (p) => {
     firstComment: ig?.firstComment || '',
     media: p.media.map((m) => ({ type: m.type, url: m.url, thumbnail: m.thumbnail, altText: m.altText || '', name: m.url.split('/').pop() })),
     audio: ig?.audioId ? { id: ig.audioId, title: 'the track already on it' } : null,
+    tiktokMusic: tt?.tiktokMusic || null,
     when: p.scheduledFor ? toETInput(p.scheduledFor) : '',
   };
 };
@@ -349,6 +352,15 @@ export const StudioCompose = () => {
   const [videoVolume, setVideoVolume] = useState(copy?.videoVolume ?? 100);
   const [editing, setEditing] = useState(null); // the post being edited, once loaded
   const isReel = media.length === 1 && media[0].type === 'video';
+  // Trending music, looked up ahead of time for a video: TikTok's trending commercial tracks and
+  // Instagram's trending audio, with the top suitable track suggested (./musicPick.js). ttChoice:
+  // undefined = the suggestion, null = no track, else {track, volume, originalVolume}. An Instagram
+  // track the team picked or removed (igTouched) is never replaced by a suggestion.
+  const [ttChoice, setTtChoice] = useState(copy && 'ttMusic' in copy ? copy.ttMusic : undefined);
+  const [igTouched, setIgTouched] = useState(!!copy?.audioTouched);
+  const [ttList, setTtList] = useState(null);
+  const [igList, setIgList] = useState(null);
+  const [videoSecs, setVideoSecs] = useState(null);
 
   const chosen = useMemo(() => (picked
     ? accounts.filter((a) => picked.includes(a.id))
@@ -365,6 +377,38 @@ export const StudioCompose = () => {
   // A saved post stays in its own Zernio workspace; the others are for a copy.
   const lockWs = editId ? (editing?.workspace || wsParam || null) : null;
 
+  // The trending lists for the chosen TikTok and Instagram accounts (read once per page session).
+  const ttAcctId = chosen.find((a) => a.platform === 'tiktok')?.id || '';
+  const igAcctId = chosen.find((a) => a.platform === 'instagram')?.id || '';
+  const wantTT = isReel && hasTT && !!ttAcctId;
+  const wantIG = isReel && hasIG && !!igAcctId;
+  useEffect(() => {
+    if (!wantTT) return undefined;
+    let live = true;
+    trendingMusic('tiktok', { accountId: ttAcctId }).then((m) => live && setTtList({ ...m, accountId: ttAcctId }));
+    return () => { live = false; };
+  }, [wantTT, ttAcctId]);
+  useEffect(() => {
+    if (!wantIG) return undefined;
+    let live = true;
+    trendingMusic('instagram', { accountId: igAcctId }).then((m) => live && setIgList({ ...m, accountId: igAcctId }));
+    return () => { live = false; };
+  }, [wantIG, igAcctId]);
+  const ttNow = !hasTT ? null : !ttAcctId ? (accountsQ.loading ? null : { tracks: [], note: 'Trending TikTok music shows once the TikTok account is connected in Zernio.' })
+    : ttList?.accountId === ttAcctId ? ttList : null;
+  const igNow = igList?.accountId === igAcctId ? igList : null;
+  // (A pick over at most 100 tracks: cheap enough to work out on every render.)
+  const ttAuto = autoPick(ttNow?.tracks, { seconds: videoSecs });
+  const igAuto = autoPick(igNow?.tracks, { seconds: videoSecs });
+  // A saved post shows its own music (a suggestion is only for new posts and copies).
+  const ttPicked = ttChoice !== undefined ? ttChoice
+    : !editId && ttAuto ? { track: ttAuto, volume: 50, originalVolume: videoVolume === 0 ? 0 : 50, auto: true } : null;
+  // A saved track's name comes from the trending list when it is still there.
+  const ttMusic = ttPicked?.track && ttNow?.tracks?.length
+    ? { ...ttPicked, track: ttNow.tracks.find((t) => t.id === ttPicked.track.id) || ttPicked.track } : ttPicked;
+  const audioEff = audio || (!igTouched && !editId && igAuto ? { id: igAuto.id, title: igAuto.title, artist: igAuto.artist, previewUrl: igAuto.previewUrl, auto: true } : null);
+  const pickAudio = (v) => { setAudio(v); setIgTouched(true); };
+
   // Editing: load the post and fill every field from it.
   useEffect(() => {
     if (!editId) return undefined;
@@ -376,6 +420,8 @@ export const StudioCompose = () => {
       setPicked(f.accountIds); setFallback(f.platforms.length ? f.platforms : ['instagram', 'facebook']);
       setContent(f.content); setSplit(f.split); setFbContent(f.fbContent); setTtSplit(f.ttSplit); setTtContent(f.ttContent);
       setFirstComment(f.firstComment); setMedia(f.media); setAudio(f.audio); setWhen(f.when); setBusy('');
+      setIgTouched(true);
+      setTtChoice(f.tiktokMusic ? { track: { id: f.tiktokMusic.id, title: 'the track already on it' }, volume: f.tiktokMusic.volume, originalVolume: f.tiktokMusic.originalVolume, start: f.tiktokMusic.start, end: f.tiktokMusic.end } : null);
     }, (err) => { if (live) { setError(err.message); setBusy(''); } });
     return () => { live = false; };
   }, [editId, wsParam]);
@@ -385,8 +431,9 @@ export const StudioCompose = () => {
     ...target(), content, fbContent: split ? fbContent : undefined, ttContent: hasTT && ttSplit ? ttContent : undefined,
     scheduledFor: when, timezone: 'America/New_York',
     media: media.map(({ type, url, altText, thumbnail }) => ({ type, url, altText, thumbnail })),
-    audioId: isReel && audio ? audio.id : undefined, firstComment: !isReel && firstComment ? firstComment : undefined,
-    ...(isReel && audio ? { audioVolume: 100, videoVolume } : {}), coverUrl: isReel && cover ? cover : undefined,
+    audioId: isReel && audioEff ? audioEff.id : undefined, firstComment: !isReel && firstComment ? firstComment : undefined,
+    ...(isReel && audioEff ? { audioVolume: 100, videoVolume } : {}), coverUrl: isReel && cover ? cover : undefined,
+    tiktokMusic: hasTT && isReel ? tiktokMusicField(ttMusic) : undefined,
   });
   const postNow = async () => {
     if (!window.confirm('Send this post right now instead of at its scheduled time?')) return;
@@ -403,7 +450,8 @@ export const StudioCompose = () => {
   };
   const duplicate = () => {
     setEditing(null); setWhen('');
-    navigate('/studio/compose', { state: { copy: { accountIds: target().accountIds, platforms: plats, content, split, fbContent, ttSplit, ttContent, firstComment, media, audio, coverUrl: cover, videoVolume } } });
+    const ttMusicCopy = ttMusic ? { track: ttMusic.track, volume: ttMusic.volume, originalVolume: ttMusic.originalVolume, start: ttMusic.start, end: ttMusic.end } : null;
+    navigate('/studio/compose', { state: { copy: { accountIds: target().accountIds, platforms: plats, content, split, fbContent, ttSplit, ttContent, firstComment, media, audio: audioEff ? { id: audioEff.id, title: audioEff.title, artist: audioEff.artist } : null, audioTouched: true, ttMusic: ttMusicCopy, coverUrl: cover, videoVolume } } });
   };
 
   // Hook, captions, hashtags and a first comment from the writing helper.
@@ -540,7 +588,7 @@ export const StudioCompose = () => {
               <div className="st-media">
                 {media.map((m, i) => (
                   <figure key={m.url}>
-                    {m.type === 'video' ? <video src={m.preview || m.url} muted playsInline /> : <img src={m.preview || m.url} alt="" />}
+                    {m.type === 'video' ? <video src={m.preview || m.url} muted playsInline preload="metadata" onLoadedMetadata={(e) => { const d = e.currentTarget.duration; setVideoSecs(Number.isFinite(d) && d > 0 ? d : null); }} /> : <img src={m.preview || m.url} alt="" />}
                     <input className="k-input" placeholder="Alt text (describe it)" value={m.altText || ''} onChange={(e) => setMedia(media.map((x, j) => (j === i ? { ...x, altText: e.target.value } : x)))} />
                     <button type="button" className="ds-icon-btn" onClick={() => setMedia(media.filter((_, j) => j !== i))} aria-label="Remove"><X size={14} /></button>
                   </figure>
@@ -548,11 +596,21 @@ export const StudioCompose = () => {
               </div>
             )}
             {isReel && hasIG && (
-              <div className="k-field"><span>Instagram audio {audio ? `· ${audio.title}` : ''}</span>
-                {showSound ? <SoundPicker compact value={audio} onChange={setAudio} /> : <button type="button" className="k-btn k-btn--ghost k-btn--sm" onClick={() => setShowSound(true)}>{audio ? 'Change track' : 'Pick a trending track'}</button>}
+              <div className="k-field"><span>Instagram audio</span>
+                <MusicChoice platform="instagram" label="Instagram" value={audioEff ? { track: { ...audioEff, title: audioEff.title || 'Untitled' } } : null} auto={!!audioEff?.auto}
+                  list={wantIG ? igNow : { tracks: [] }} onChange={(v) => pickAudio(v?.track ? { id: v.track.id, title: v.track.title, artist: v.track.artist } : null)}
+                  onOpen={() => setShowSound((o) => !o)} noneText="no track (the reel’s own sound)" noneAction="Remove" disabled={!!goneOut} />
+                {showSound && <SoundPicker compact value={audioEff} onChange={pickAudio} />}
               </div>
             )}
-            {isReel && hasIG && audio && (
+            {isReel && hasTT && (
+              <div className="k-field"><span>TikTok music</span>
+                <MusicChoice platform="tiktok" label="TikTok" value={ttMusic} auto={!!ttMusic?.auto} list={ttNow}
+                  load={(q) => trendingMusic('tiktok', { accountId: ttAcctId, q })} onChange={(v) => setTtChoice(v ? { ...v, auto: false } : null)}
+                  volumes noneText="no trending track (the video’s own sound)" noneAction="Remove" originalLabel="The video’s own sound" disabled={!!goneOut} />
+              </div>
+            )}
+            {isReel && hasIG && audioEff && (
               <div className="k-field"><span>The reel’s own sound on Instagram</span>
                 <div className="k-segs">{[[0, 'Off'], [25, 'Quiet'], [100, 'Full']].map(([v, l]) => <button type="button" key={v} aria-pressed={videoVolume === v} onClick={() => setVideoVolume(v)}>{l}</button>)}</div>
               </div>

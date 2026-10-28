@@ -26,7 +26,16 @@
 //            TikTok offers it to that account (otherwise left off, and `note` says so).
 //            idempotencyKey (Studio → Post plans sends the post's title): Zernio answers a repeat of
 //            the same post within 24 hours with the first one instead of making a second.
+//            tiktokMusic {id, volume 0-100, start?, end?, originalVolume 0-100} (from `music`): a trending
+//            Commercial Music Library track on the TikTok entry (tiktokSettings.musicSoundInfo, and
+//            videoOriginalSoundVolume on a video). Left off when absent, and left off (with a `note`) when
+//            the TikTok account is on TikTok's developer app, which fails such a post at publish time.
 //   audio    {q?, type?: music|original_sound}  → Instagram catalog audio (trending when q is empty)
+//   music    {platform: tiktok|instagram, accountId?, q?} → trending music, one shape for both:
+//            {platform, trending, tracks: [{id, title, artist, durationMs, previewUrl, explicit, platform,
+//            artwork, genres, rank}], note?}. TikTok: the account's 100 trending commercial tracks
+//            (Business app connections only; `q` filters that list). Instagram: the catalog audio above.
+//            When music can't be had, `note` says why and `tracks` is empty (never an error).
 //   limit                                        → Instagram publishing quota for the rolling day
 //   get      {postId, workspace?}              one post with everything the editor needs
 //   update   {postId, workspace?, ...the create fields}  replaces the whole post (media, captions,
@@ -43,7 +52,7 @@
 //   postComments {postId, accountId}
 // Without a workspace, a post is found by asking each workspace for it (GET /posts/{id}).
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { zcall, zernioAccounts, zernioFor, siteFor, workspaceKeys, tiktokSettings, ZernioError, type Workspace, type Site, type ZAccount } from '../_shared/zernio.ts';
+import { zcall, zernioAccounts, zernioFor, siteFor, workspaceKeys, tiktokSettings, tiktokTrending, isExplicit, ZernioError, type Workspace, type Site, type ZAccount, type MusicTrack } from '../_shared/zernio.ts';
 
 const PLATFORMS = ['instagram', 'facebook', 'tiktok'];
 const LABEL: Record<string, string> = { instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok' };
@@ -132,6 +141,19 @@ const unique = <T>(rows: T[], id: (r: T) => string) => {
 
 // ── Posts ────────────────────────────────────────────────────────────────────
 
+/** The trending track saved on a TikTok entry, in the Studio's tiktokMusic shape (null without one). */
+const musicOf = (tt: any) => {
+  const m = tt?.musicSoundInfo || tt?.music_sound_info;
+  const id = m?.musicSoundId || m?.music_sound_id;
+  if (!id) return null;
+  const n = (v: unknown) => (v == null || !Number.isFinite(Number(v)) ? null : Number(v));
+  const original = n(tt.videoOriginalSoundVolume ?? tt.video_original_sound_volume);
+  return {
+    id: String(id), volume: n(m.musicSoundVolume ?? m.music_sound_volume) ?? 50,
+    start: n(m.musicSoundStart ?? m.music_sound_start), end: n(m.musicSoundEnd ?? m.music_sound_end), originalVolume: original ?? 0,
+  };
+};
+
 const slimPost = (p: any, workspace: Workspace, byId: Map<string, ZAccount>) => {
   const platforms = (p.platforms || []).map((x: any) => {
     const accountId = x.accountId?._id || x.accountId;
@@ -140,6 +162,7 @@ const slimPost = (p: any, workspace: Workspace, byId: Map<string, ZAccount>) => 
       status: x.status, url: x.platformPostUrl || x.url || null, error: x.errorMessage || x.error || null,
       customContent: x.customContent || '', firstComment: x.platformSpecificData?.firstComment || '',
       audioId: x.platformSpecificData?.audioConfiguration?.audioId || null,
+      tiktokMusic: x.platform === 'tiktok' ? musicOf(x.platformSpecificData?.tiktokSettings || p.tiktokSettings) : null,
       shareToFeed: x.platformSpecificData?.shareToFeed !== false,
     };
   });
@@ -254,7 +277,7 @@ async function buildPosts(b: any, within?: Workspace, notes: string[] = []) {
       if (!isReel && String(b.firstComment || '').trim()) extra.firstComment = String(b.firstComment).trim().slice(0, 2200);
     }
     if (p === 'tiktok') {
-      const tt = await tiktokSettings(acct, videos === 1, coverUrl, String(custom || content).trim(), { coverMs, brand: b.tiktokBrand === true });
+      const tt = await tiktokSettings(acct, videos === 1, coverUrl, String(custom || content).trim(), { coverMs, brand: b.tiktokBrand === true, music: b.tiktokMusic });
       extra.tiktokSettings = tt.settings;
       if (tt.note) notes.push(tt.note);
     }
@@ -290,6 +313,31 @@ async function idempotencyKey(b: any, workspace: Workspace, body: any) {
   const what = new TextEncoder().encode(JSON.stringify([body.content, body.scheduledFor || 'now', body.timezone || '', body.platforms]));
   const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', what))].slice(0, 6).map((n) => n.toString(16).padStart(2, '0')).join('');
   return `studio-${key}-${workspace}-${hash}`;
+}
+
+/** Instagram catalog audio for an account (the Marketplace's by default): trending when q is empty. */
+async function instagramAudio(b: any) {
+  const { accounts } = await ourAccounts();
+  const ig = accounts.find((a) => a.platform === 'instagram' && (b.accountId ? a.id === b.accountId : a.site === 'market'));
+  if (!ig) throw new UserError('Instagram isn’t connected in Zernio.');
+  const q = String(b.q || '').trim().slice(0, 80);
+  const type = b.type === 'original_sound' ? 'original_sound' : 'music';
+  try {
+    const out = await zcall(ig.workspace, `/accounts/${encodeURIComponent(ig.id)}/instagram/audio?audioType=${type}${q ? `&q=${encodeURIComponent(q)}` : ''}`);
+    return {
+      trending: !q,
+      audio: (out.audio || []).map((a: any) => ({
+        id: a.audioId, title: a.title, artist: a.displayArtist || a.igUsername || null, type: a.audioType, durationMs: a.durationInMs,
+        artwork: a.coverArtworkThumbnailUrl || a.profilePictureUrl || null, preview: a.downloadUrl || null, adsEligible: a.isAdsEligible ?? null,
+      })),
+    };
+  } catch (err) {
+    const msg = messageOf(err);
+    if (/facebook|login|permission|not supported/i.test(msg) || (err instanceof ZernioError && err.status === 403)) {
+      throw new UserError('Trending audio needs the Instagram account reconnected in Zernio with “Facebook Login” (Zernio → Accounts → Instagram → Reconnect).');
+    }
+    throw err;
+  }
 }
 
 // ── Actions ──────────────────────────────────────────────────────────────────
@@ -412,28 +460,29 @@ async function handle(action: string, b: any) {
 
     // Instagram catalog audio: trending when there is no search, otherwise a search. Needs the
     // Instagram account connected to Zernio through Facebook Login (Meta's rule, not ours).
-    case 'audio': {
-      const { accounts } = await ourAccounts();
-      const ig = accounts.find((a) => a.platform === 'instagram' && (b.accountId ? a.id === b.accountId : a.site === 'market'));
-      if (!ig) throw new UserError('Instagram isn’t connected in Zernio.');
+    case 'audio':
+      return instagramAudio(b);
+
+    // Trending music for a post, TikTok or Instagram, in one shape (Studio → Post plans, the composer,
+    // the autopilot review page). Never an error: no music comes back as a note.
+    case 'music': {
       const q = String(b.q || '').trim().slice(0, 80);
-      const type = b.type === 'original_sound' ? 'original_sound' : 'music';
-      try {
-        const out = await zcall(ig.workspace, `/accounts/${encodeURIComponent(ig.id)}/instagram/audio?audioType=${type}${q ? `&q=${encodeURIComponent(q)}` : ''}`);
-        return {
-          trending: !q,
-          audio: (out.audio || []).map((a: any) => ({
-            id: a.audioId, title: a.title, artist: a.displayArtist || a.igUsername || null, type: a.audioType, durationMs: a.durationInMs,
-            artwork: a.coverArtworkThumbnailUrl || a.profilePictureUrl || null, preview: a.downloadUrl || null, adsEligible: a.isAdsEligible ?? null,
-          })),
-        };
-      } catch (err) {
-        const msg = messageOf(err);
-        if (/facebook|login|permission|not supported/i.test(msg) || (err instanceof ZernioError && err.status === 403)) {
-          throw new UserError('Trending audio needs the Instagram account reconnected in Zernio with “Facebook Login” (Zernio → Accounts → Instagram → Reconnect).');
+      if (b.platform === 'instagram') {
+        try {
+          const out = await instagramAudio({ accountId: b.accountId, q, type: 'music' });
+          const tracks: MusicTrack[] = out.audio.filter((a: any) => a.id).map((a: any) => ({
+            id: String(a.id), title: a.title || 'Untitled', artist: a.artist || null, durationMs: a.durationMs ?? null, previewUrl: a.preview || null,
+            explicit: isExplicit(a), platform: 'instagram', artwork: a.artwork || null, genres: [], rank: null,
+          }));
+          return { platform: 'instagram', trending: !q, tracks };
+        } catch (err) {
+          return { platform: 'instagram', trending: !q, tracks: [], note: `Trending Instagram audio isn’t available: ${messageOf(err)}` };
         }
-        throw err;
       }
+      const { accounts } = await ourAccounts();
+      const tt = accounts.find((a) => a.platform === 'tiktok' && (b.accountId ? a.id === String(b.accountId) : a.site === 'market'));
+      if (!tt) return { platform: 'tiktok', trending: !q, tracks: [], note: 'TikTok isn’t connected in Zernio, so there is no trending TikTok music to pick from.' };
+      return { platform: 'tiktok', trending: !q, ...(await tiktokTrending(tt, q)) };
     }
 
     case 'limit': {

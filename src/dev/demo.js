@@ -28,6 +28,24 @@ const demoMade = new Map([['P31 TikTok · tt01-apply', { id: 'demo-tt01', title:
   scheduledFor: '2026-10-23T16:30:00.000Z', publishedAt: null, timezone: 'America/New_York', workspace: 'collective', site: 'market', media: [],
   platforms: [{ platform: 'tiktok', accountId: 'tt', workspace: 'collective', site: 'market', accountUsername: 'p31marketplace', status: 'scheduled' }] }]]);
 
+// Trending music (studio-zernio and content-autopilot `music`): SAMPLE tracks, not real songs. The
+// preview plays a plan video's own sound so the play button can be tried.
+const DEMO_PREVIEW = '/social/tiktok-2026-10/tt01-apply.mp4';
+const demoTracks = (platform) => [
+  { id: `${platform}-demo-1`, title: 'Sample Party Anthem (Explicit)', artist: 'Sample Artist', durationMs: 30000, previewUrl: null, explicit: true, genres: ['pop'], rank: 1 },
+  { id: `${platform}-demo-2`, title: 'Sample Short Loop', artist: 'Sample Producer', durationMs: 6000, previewUrl: DEMO_PREVIEW, explicit: false, genres: ['pop'], rank: 2 },
+  { id: `${platform}-demo-3`, title: 'Sample Rise Up', artist: 'Sample Choir', durationMs: 30000, previewUrl: DEMO_PREVIEW, explicit: false, genres: ['gospel'], rank: 3 },
+  { id: `${platform}-demo-4`, title: 'Sample Summer Drive', artist: 'Sample Band', durationMs: 25000, previewUrl: null, explicit: false, genres: ['dance'], rank: 4 },
+  { id: `${platform}-demo-5`, title: 'Sample Acoustic Morning', artist: 'Sample Guitarist', durationMs: 20000, previewUrl: DEMO_PREVIEW, explicit: false, genres: ['folk'], rank: 5 },
+  { id: `${platform}-demo-6`, title: 'Sample Slow Jam', artist: 'Sample Singer', durationMs: 28000, previewUrl: null, explicit: false, genres: ['r&b', 'soul'], rank: 6 },
+  { id: `${platform}-demo-7`, title: 'Sample Hype Beat', artist: 'Sample DJ', durationMs: 15000, previewUrl: null, explicit: false, genres: ['hip hop'], rank: 7 },
+].map((t) => ({ ...t, platform, artwork: null }));
+const demoMusic = (b, platform = b.platform === 'instagram' ? 'instagram' : 'tiktok') => {
+  const words = String(b.q || '').toLowerCase().split(/\s+/).filter(Boolean);
+  const tracks = demoTracks(platform).filter((t) => words.every((w) => `${t.title} ${t.artist} ${t.genres.join(' ')}`.toLowerCase().includes(w)));
+  return { platform, trending: !words.length, tracks };
+};
+
 let now = 0; // set when the demo client starts, so nothing runs at import time
 const iso = (mins) => new Date(now + mins * 60000).toISOString();
 const day = (d, h = 19, m = 0) => { const x = new Date(now + d * 864e5); x.setHours(h, m, 0, 0); return x.toISOString(); };
@@ -639,6 +657,7 @@ const fns = {
       { id: 'demo-audio-2', title: 'Another Sample', artist: 'Sample Band', type: 'music', durationMs: 28000, artwork: null, preview: null },
     ] };
     if (b.action === 'limit') return { used: 3, total: 100, windowSeconds: 86400 };
+    if (b.action === 'music') return demoMusic(b);
     if (b.action === 'create') {
       const chosen = (b.accountIds || []).map((id) => DEMO_ACCOUNTS.find((a) => a.id === id)).filter(Boolean);
       const post = { id: `demo-${(b.title || 'post').replace(/\W+/g, '-').toLowerCase()}`, title: b.title || '', content: b.content || '', status: 'scheduled', isDraft: false,
@@ -669,15 +688,16 @@ const fns = {
   'shop-broadcast': (b) => ({ ok: true, sent: b.test ? 1 : 3, test: !!b.test }),
   'content-autopilot': (b) => {
     const items = [
-      { id: 'ai1', position: 0, post_at: day(20), kind: 'quote', template: 'quote', words: { headline: 'Faithful in small things. Ready for big rooms.' }, line: 'Faithful in small things. Ready for big rooms.', style: 'lilac', pattern: 'topo', seed: 111, status: 'pending', caption_ig: 'Sample caption: the small things are training for the big rooms.\n\nWhat small thing is God asking you to be faithful in?\n\n#P31Marketplace', caption_fb: 'Sample caption' },
+      { id: 'ai1', brand: 'market', platforms: ['instagram', 'facebook', 'tiktok'], position: 0, post_at: day(20), kind: 'quote', template: 'quote', words: { headline: 'Faithful in small things. Ready for big rooms.' }, line: 'Faithful in small things. Ready for big rooms.', style: 'lilac', pattern: 'topo', seed: 111, status: 'pending', caption_ig: 'Sample caption: the small things are training for the big rooms.\n\nWhat small thing is God asking you to be faithful in?\n\n#P31Marketplace', caption_fb: 'Sample caption' },
       { id: 'ai2', position: 1, post_at: day(21), kind: 'scripture', template: 'scripture', words: { verse: 'Commit thy works unto the LORD, and thy thoughts shall be established.', reference: 'Proverbs 16:3' }, line: 'Proverbs 16:3', style: 'ivory', pattern: 'topo', seed: 148, status: 'pending', caption_ig: 'Sample scripture caption.\n\nWhat work are you committing to Him this week?', caption_fb: 'Sample' },
-      { id: 'ai3', position: 2, post_at: day(22), kind: 'curator', template: 'invite', words: { eyebrow: 'Open a virtual storefront', headline: 'Your shop deserves a beautiful home.', body: 'A storefront on p31market.com with up to 10 products or services, P31 marketing and support. Free for your first 3 months.', button: 'Start at p31market.com/storefront', brand: 'market' }, line: 'Your shop deserves a beautiful home.', style: 'plum', pattern: 'topo', seed: 185, status: 'pending', caption_ig: 'Sample invitation caption. Start your storefront: link in bio', caption_fb: 'Sample' },
+      { id: 'ai3', brand: 'market', platforms: ['instagram', 'facebook', 'tiktok'], position: 2, post_at: day(22), kind: 'curator', template: 'invite', words: { eyebrow: 'Open a virtual storefront', headline: 'Your shop deserves a beautiful home.', body: 'A storefront on p31market.com with up to 10 products or services, P31 marketing and support. Free for your first 3 months.', button: 'Start at p31market.com/storefront', brand: 'market' }, line: 'Your shop deserves a beautiful home.', style: 'plum', pattern: 'topo', seed: 185, status: 'pending', caption_ig: 'Sample invitation caption. Start your storefront: link in bio', caption_fb: 'Sample' },
       { id: 'ai4', position: 3, post_at: day(23), kind: 'prayer', template: 'prayer', words: { intro: 'Dear God,', headline: 'Teach my hands to build what pleases You.' }, line: 'Teach my hands to build what pleases You.', style: 'dusk', pattern: 'waves', seed: 222, status: 'pending', caption_ig: 'Sample prayer caption. If this is your prayer today, comment Amen.', caption_fb: 'Sample' },
     ];
     if (b.action === 'get') return { batch: { id: 'demo-batch', status: 'awaiting', open: true, first_day: day(20).slice(0, 10), last_day: day(33).slice(0, 10), expires_at: day(7), scheduled_count: 0 }, items, who: 'Studio team' };
     if (b.action === 'draft') return { batch: 'demo-batch', posts: 22, first: day(20).slice(0, 10), last: day(33).slice(0, 10), writer: 'gemini' };
     if (b.action === 'update') return { item: { ...items.find((i) => i.id === b.item), ...(b.remove != null ? { status: b.remove ? 'removed' : 'pending' } : {}), ...(b.caption_ig ? { caption_ig: b.caption_ig } : {}) } };
     if (b.action === 'finish') return { scheduled: 0 };
+    if (b.action === 'music') return demoMusic(b, 'tiktok');
     return { error: '(Demo) Approving uploads and schedules the posts on the real site.' };
   },
   watchdog: (b) => {

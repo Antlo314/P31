@@ -15,15 +15,19 @@
 //   never curator invitations). With no schedule it plans exactly as before (posts_per_day, the
 //   good times, Market Instagram + Facebook). The planning itself is src/studio/factory/schedule.js.
 // Body: { source: 'cron' } | { action: 'draft' } (Studio team) |
-//       { action: 'get' | 'update' | 'presign' | 'schedule' | 'finish' | 'decline', batch, token?, ... }
+//       { action: 'get' | 'update' | 'presign' | 'schedule' | 'finish' | 'decline' | 'music', batch, token?, ... }
 //       (the review link's token, or a signed-in Studio team member)
+//       music {brand?}: the brand's TikTok trending Commercial Music Library tracks (see studio-zernio
+//       `music`), for the review page to pick a track for each TikTok card.
+//       schedule {item, tiktokMusic?: {id}}: a branded post going to TikTok carries that track
+//       (tiktokSettings.musicSoundInfo); without it, exactly as before.
 // Secrets: SUPABASE_SERVICE_ROLE_KEY, ZERNIO_API_KEY (+ ZERNIO_COLLECTIVE_API_KEY for Collective posts
 //          and the Market TikTok under a posting schedule), GEMINI_API_KEY (optional: captions and lines
 //          are written by Gemini when set, from the built-in library when not), RESEND_API_KEY, EMAIL_FROM
 // Deploy: supabase functions deploy content-autopilot --no-verify-jwt
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { sendEmail, layout, esc, emailConfigured } from '../_shared/email.ts';
-import { zcall, zernioAccounts, tiktokSettings, ZernioError, type Workspace, type ZAccount } from '../_shared/zernio.ts';
+import { zcall, zernioAccounts, tiktokSettings, tiktokTrending, ZernioError, type Workspace, type ZAccount } from '../_shared/zernio.ts';
 import { normalizeSchedule, planLegacy, planSchedule, streamBuckets, streamActive, activePlatforms, joinWords, STREAMS as STREAM_INFO, STREAM_KEYS, PLATFORM_LABEL as PLATFORM_NAMES } from '../_shared/factory/schedule.js';
 const STREAMS = STREAM_INFO as Record<string, { key: string; label: string; platforms: string[] }>;
 const PLATFORM_LABEL = PLATFORM_NAMES as Record<string, string>;
@@ -430,7 +434,7 @@ const homeWorkspace = (it: Row): Workspace => (it.brand === 'collective' ? 'coll
  * connected is left off and noted; the post counts as scheduled when any part of it was.
  */
 // deno-lint-ignore no-explicit-any
-async function scheduleBranded(db: any, it: Row) {
+async function scheduleBranded(db: any, it: Row, music?: unknown) {
   const { accounts } = await zernioAccounts();
   const label = STREAMS[it.brand]?.label || it.brand;
   const chosen: ZAccount[] = [];
@@ -444,10 +448,16 @@ async function scheduleBranded(db: any, it: Row) {
   const w = it.words || {};
   const alt = [w.intro, w.eyebrow, w.headline, w.verse, w.reference, w.body].filter(Boolean).join(' ').slice(0, 900);
   const groups = new Map<Workspace, Row[]>();
+  const notes: string[] = [];
   for (const a of chosen) {
     const entry: Row = { platform: a.platform, accountId: a.id, customContent: a.platform === 'facebook' ? it.caption_fb : it.caption_ig };
     // TikTok takes the card as a photo post, with the same settings Studio posts send.
-    if (a.platform === 'tiktok') entry.platformSpecificData = { tiktokSettings: (await tiktokSettings(a, false, '', String(it.caption_ig || ''))).settings };
+    // A trending track chosen on the review page rides along (left off, and noted, on a developer-app connection).
+    if (a.platform === 'tiktok') {
+      const tt = await tiktokSettings(a, false, '', String(it.caption_ig || ''), { music });
+      entry.platformSpecificData = { tiktokSettings: tt.settings };
+      if (tt.note) notes.push(tt.note);
+    }
     groups.set(a.workspace, [...(groups.get(a.workspace) || []), entry]);
   }
   const home = homeWorkspace(it);
@@ -468,6 +478,7 @@ async function scheduleBranded(db: any, it: Row) {
     }
   }
   if (missing.length) problems.push(`${joinWords(missing)} ${missing.length === 1 ? 'is' : 'are'} not connected, so it was left off.`);
+  if (scheduled) problems.push(...notes);
   const patch = scheduled
     ? { status: 'scheduled', zernio_post_id: ids.join(',') || null, error: problems.join(' ').slice(0, 300) || null }
     : { status: 'failed', error: problems.join(' ').slice(0, 300) || 'Zernio did not take it.' };
@@ -534,7 +545,7 @@ async function review(db: any, req: Request, b: Row) {
         const { data } = await db.from('autopilot_items').update({ status: 'skipped', error: 'Its time had already passed.' }).eq('id', it.id).select().single();
         return { item: data };
       }
-      if (it.brand) return { item: await scheduleBranded(db, it) };
+      if (it.brand) return { item: await scheduleBranded(db, it, b.tiktokMusic) };
       const { accounts = [] } = await zernio('/accounts');
       const ig = accounts.find((a: Row) => a.platform === 'instagram');
       const fb = accounts.find((a: Row) => a.platform === 'facebook');
@@ -557,6 +568,14 @@ async function review(db: any, req: Request, b: Row) {
         const { data } = await db.from('autopilot_items').update({ status: 'failed', error: (e as Error).message.slice(0, 300) }).eq('id', it.id).select().single();
         return { item: data };
       }
+    }
+    case 'music': {
+      // Read-only: the trending TikTok tracks for the brand's TikTok (the Marketplace's by default).
+      const { accounts } = await zernioAccounts();
+      const brand = b.brand === 'collective' ? 'collective' : 'market';
+      const tt = accounts.find((a) => a.platform === 'tiktok' && a.site === brand);
+      if (!tt) return { platform: 'tiktok', trending: true, tracks: [], note: 'TikTok isn’t connected in Zernio, so there is no trending TikTok music to pick from.' };
+      return { platform: 'tiktok', trending: !b.q, ...(await tiktokTrending(tt, String(b.q || '').trim().slice(0, 80))) };
     }
     case 'finish': {
       const { data: items } = await db.from('autopilot_items').select('status').eq('batch_id', batch.id);

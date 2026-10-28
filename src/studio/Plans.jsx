@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, CalendarClock, Check, Clock, Download, Loader2, RefreshCw, Send } from 'lucide-react';
+import { AlertTriangle, CalendarClock, Check, Clock, Download, Loader2, Music2, RefreshCw, Send } from 'lucide-react';
 import { DashHead } from '../apps/DashShell';
 import { studio, uploadMedia, fmtET } from './api';
+import { trendingMusic, spreadPicks, trackName, tiktokMusicField, MUSIC_DEFAULTS } from './music';
+import MusicChoice from './MusicPicker';
 
 /**
  * Content Studio → Post plans (/studio/plans): sets of finished posts made ahead of time (video, cover,
@@ -10,6 +12,11 @@ import { studio, uploadMedia, fmtET } from './api';
  * → public/social/tiktok-2026-10/plan.json. The team watches each one, can change a caption, and
  * schedules them on the plan's account through studio-zernio (which holds the Zernio keys). A post is
  * found in Zernio by its title, so nothing is scheduled twice.
+ * Music (TikTok plans): TikTok's trending tracks are read once, and every post gets one picked ahead of
+ * time (./musicPick.js: not explicit, long enough, P31 moods first, spread so no two posts in a row
+ * share one). Change picks another, "Use our original music" keeps the video's own; each choice is
+ * kept in this browser (localStorage, per plan and post) until it is scheduled. With no trending
+ * music (developer-app connection, an error), posts go out with their own music as before.
  */
 const PLANS = ['tiktok-2026-10'];
 const PLATFORM = { tiktok: 'TikTok', instagram: 'Instagram', facebook: 'Facebook' };
@@ -23,6 +30,26 @@ const ZSTATUS = {
 const at = (u) => `@${String(u || '').replace(/^@/, '')}`;
 const mb = (n) => `${(n / 1e6).toFixed(1)} MB`;
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+
+// The team's music choice per post, kept in this browser: {mode: 'track', track, volume, originalVolume} or {mode: 'original'}.
+const musicKey = (folder, id) => `p31.planMusic.${folder}.${id}`;
+function readMusic(folder, posts) {
+  const out = {};
+  for (const p of posts) {
+    try {
+      const v = JSON.parse(window.localStorage.getItem(musicKey(folder, p.id)) || 'null');
+      if (v?.mode === 'original') out[p.id] = null;
+      else if (v?.mode === 'track' && v.track?.id) out[p.id] = { track: v.track, volume: v.volume ?? MUSIC_DEFAULTS.volume, originalVolume: v.originalVolume ?? MUSIC_DEFAULTS.originalVolume };
+    } catch { /* storage off or unreadable: the auto-pick stands */ }
+  }
+  return out;
+}
+function saveMusic(folder, id, v) {
+  try {
+    if (v === undefined) window.localStorage.removeItem(musicKey(folder, id));
+    else window.localStorage.setItem(musicKey(folder, id), JSON.stringify(v === null ? { mode: 'original' } : { mode: 'track', track: v.track, volume: v.volume, originalVolume: v.originalVolume }));
+  } catch { /* storage off: the choice lasts until the page is closed */ }
+}
 
 /** A local time in a time zone ("2026-10-23T12:30:00", America/New_York) as a real instant, daylight saving included. */
 function instantOf(local, tz) {
@@ -63,16 +90,18 @@ const StudioPlans = () => {
   const [batch, setBatch] = useState(null); // { done, total } while scheduling
   const running = useRef(false);
   const [now, setNow] = useState(() => Date.now());
+  const [music, setMusic] = useState(null); // trending {tracks, note} for the plan's account (null while loading)
+  const [musicChoice, setMusicChoice] = useState({}); // post id → {track, volume, originalVolume}, or null for our own music
 
   // The plan's posts, from the files publish.mjs put on the site.
   useEffect(() => {
     let live = true;
-    Promise.resolve().then(() => { if (live) { setPlan(null); setPlanError(''); setCaptions({}); setProgress({}); setConfirm(null); } });
+    Promise.resolve().then(() => { if (live) { setPlan(null); setPlanError(''); setCaptions({}); setProgress({}); setConfirm(null); setMusicChoice({}); } });
     fetch(`/social/${folder}/plan.json`, { cache: 'no-cache' })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((p) => {
         if (!Array.isArray(p?.posts)) throw new Error('no posts');
-        if (live) setPlan(p);
+        if (live) { setPlan(p); setMusicChoice(readMusic(folder, p.posts)); }
       })
       .catch(() => live && setPlanError(`The plan “${folder}” isn’t on the site yet. Run its publish.mjs, deploy, then reload this page.`));
     return () => { live = false; };
@@ -100,6 +129,35 @@ const StudioPlans = () => {
   const tz = plan?.timezone || 'America/New_York';
   const candidates = useMemo(() => (accounts?.accounts || []).filter((a) => a.platform === plan?.platform && a.site === plan?.site), [accounts, plan]);
   const account = candidates.find((a) => a.id === picked) || (candidates.length === 1 ? candidates[0] : null);
+
+  // Trending TikTok music for the plan's account, read once (kept for the page session).
+  const tiktokPlan = plan?.platform === 'tiktok';
+  const accountId = account?.id || '';
+  useEffect(() => {
+    if (!tiktokPlan || !accountId) return undefined;
+    let live = true;
+    Promise.resolve().then(() => live && setMusic(null));
+    trendingMusic('tiktok', { accountId }).then((m) => live && setMusic(m));
+    return () => { live = false; };
+  }, [tiktokPlan, accountId]);
+  const searchMusic = useCallback((q) => trendingMusic('tiktok', { accountId, q }), [accountId]);
+  // No account to read music for: say so instead of "looking…".
+  const accountsKnown = !!(accounts || accountsError);
+  const musicList = useMemo(() => (!tiktokPlan ? null : accountId ? music
+    : accountsKnown ? { tracks: [], note: 'Trending TikTok music shows once the TikTok account is connected. Posts go out with our own music.' } : null), [tiktokPlan, accountId, music, accountsKnown]);
+  // A track for every post, picked ahead of time and spread out; the team's own choices stay as they are.
+  const autos = useMemo(() => {
+    if (!musicList?.tracks?.length || !plan) return {};
+    const fixed = Object.fromEntries(Object.entries(musicChoice).map(([id, v]) => [id, v?.track?.id || null]));
+    return spreadPicks(musicList.tracks, plan.posts.map((p) => ({ id: p.id, seconds: p.seconds })), { fixed });
+  }, [musicList, plan, musicChoice]);
+  const chosenMusic = (id) => (Object.prototype.hasOwnProperty.call(musicChoice, id) ? musicChoice[id]
+    : autos[id] ? { track: autos[id], ...MUSIC_DEFAULTS, auto: true } : null);
+  const setChosenMusic = (id, v) => {
+    const clean = v === undefined || v === null ? v : { track: v.track, volume: v.volume ?? MUSIC_DEFAULTS.volume, originalVolume: v.originalVolume ?? MUSIC_DEFAULTS.originalVolume };
+    setMusicChoice((s) => { const n = { ...s }; if (clean === undefined) delete n[id]; else n[id] = clean; return n; });
+    saveMusic(folder, id, clean);
+  };
   // A workspace Zernio couldn't read: its posts are missing from the list, so "already there" can't be trusted.
   const blind = !!account && (posts?.notes || []).some((n) => n.workspace === account.workspace);
   const rows = useMemo(() => (plan?.posts || []).map((p) => {
@@ -148,12 +206,15 @@ const StudioPlans = () => {
         mark(id, { step: `Uploading the video (${mb(file.size)})…` });
         const url = await uploadMedia(file, p.video);
         mark(id, { step: 'Scheduling…' });
+        const tiktokMusic = plan.platform === 'tiktok' ? tiktokMusicField(chosenMusic(id)) : undefined;
         const out = await studio('create', {
           accountIds: [account.id], content: caption, media: [{ type: 'video', url }],
           scheduledFor: p.when.slice(0, 16), timezone: tz, title: p.title,
           coverMs: p.coverMs, tiktokBrand: brandLabel && !!p.promo, idempotencyKey: p.title,
+          ...(tiktokMusic ? { tiktokMusic } : {}),
         });
         mark(id, { done: true, note: [out.note, out.warning].filter(Boolean).join(' ') });
+        saveMusic(folder, id, undefined); // scheduled: the choice now lives in Zernio
         made.push(p);
       } catch (err) {
         mark(id, { error: err.message });
@@ -221,6 +282,14 @@ const StudioPlans = () => {
           {postsError && <Problem onRetry={reload}>What’s already in Zernio couldn’t be checked, so scheduling waits: {postsError}</Problem>}
           {blind && <p className="pp-alert" role="status"><AlertTriangle size={15} /> <span>Zernio’s posts for this account couldn’t be read just now, so scheduling waits (nothing can be checked for doubles). Press Refresh in a minute.</span></p>}
 
+          {tiktokPlan && (
+            <p className={musicList?.tracks?.length ? 'pp-acct' : 'ds-muted'} role="status" style={{ margin: 0 }}>
+              <Music2 size={15} /> <span>{!musicList ? 'Looking up TikTok’s trending music…'
+                : musicList.tracks.length ? `Trending TikTok music: ${plural(musicList.tracks.length, 'track')} found, and each post below has one picked ahead of time (nothing explicit, long enough for the video, spread out). Change any, or use our original music.`
+                  : musicList.note || 'No trending TikTok music right now, so posts go out with our own music.'}</span>
+            </p>
+          )}
+
           {plan.platform === 'tiktok' && promos > 0 && (
             <label className="fc-check pp-label"><input type="checkbox" checked={brandLabel} onChange={(e) => setBrandLabel(e.target.checked)} disabled={!!batch} />
               <span>Label offer posts as “Your brand” (TikTok promotion label)<small>TikTok asks posts that promote your own business to say so. It applies to the {plural(promos, 'post')} marked P31 offer, and is left off if TikTok doesn’t offer it to this account.</small></span>
@@ -269,6 +338,26 @@ const StudioPlans = () => {
                     <textarea rows={7} maxLength={2200} value={caption} disabled={!!batch} onChange={(e) => setCaptions((c) => ({ ...c, [p.id]: e.target.value }))} />
                   </label>
                 ) : <p className="pp-text">{p.z?.content || caption}</p>}
+                {tiktokPlan && (p.state === 'ready' || p.state === 'checking') && (() => {
+                  const m = chosenMusic(p.id);
+                  const own = Object.prototype.hasOwnProperty.call(musicChoice, p.id);
+                  const stale = own && m?.track && musicList?.tracks?.length && !musicList.tracks.some((t) => t.id === m.track.id);
+                  return (
+                    <MusicChoice platform="tiktok" value={m} auto={!!m?.auto} list={musicList} load={searchMusic} showNote={false}
+                      onChange={(v) => setChosenMusic(p.id, v)} disabled={!!batch} volumes originalLabel="Our music under it"
+                      extra={(own || stale) && !batch ? (
+                        <small className="ds-muted">{stale ? 'This track is no longer in TikTok’s trending list; it may not attach. ' : ''}
+                          {musicList?.tracks?.length ? <button type="button" className="k-link" onClick={() => setChosenMusic(p.id, undefined)}>Back to the auto-pick</button> : null}
+                        </small>
+                      ) : null} />
+                  );
+                })()}
+                {tiktokPlan && p.z && (() => {
+                  const tm = (p.z.platforms || []).find((x) => x.platform === 'tiktok')?.tiktokMusic;
+                  if (!tm) return null;
+                  const t = musicList?.tracks?.find((x) => x.id === tm.id);
+                  return <small className="ds-muted"><Music2 size={13} style={{ verticalAlign: '-2px' }} /> Music: {t ? trackName(t) : 'a trending TikTok track'} ({tm.volume}%)</small>;
+                })()}
                 {p.prog?.step && <p className="ds-muted pp-step" role="status"><Loader2 size={14} className="pp-spin" /> {p.prog.step}</p>}
                 {p.prog?.error && <p className="k-error" role="alert">{p.prog.error}</p>}
                 {p.prog?.done && <p className="pp-ok" role="status"><Check size={14} /> {p.prog.note || `Scheduled for ${fmtET(new Date(p.at).toISOString())} ET. It goes out by itself.`}</p>}

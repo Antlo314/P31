@@ -5,6 +5,8 @@ import { supabase } from '../../lib/supabase';
 import Thumb from '../design/Thumb';
 import { fromWords } from '../design/templates';
 import { renderStill } from '../design/export';
+import MusicChoice from '../MusicPicker';
+import { trendingMusic, spreadPicks } from '../music';
 import logo from '../../assets/academy/collective-mark.webp';
 import './approve.css';
 
@@ -15,7 +17,10 @@ const KIND = { quote: 'Quote', prayer: 'Prayer', scripture: 'Scripture', blank: 
 // Under a posting schedule (v65) each post names its brand and where it goes.
 const BRAND = { market: 'Marketplace', collective: 'Collective' };
 const PLATFORM = { instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok' };
-const where = (it) => (it.platforms?.length ? it.platforms : it.brand === 'collective' ? ['instagram'] : ['instagram', 'facebook']).map((p) => PLATFORM[p] || p).join(', ');
+const platformsOf = (it) => (it.platforms?.length ? it.platforms : it.brand === 'collective' ? ['instagram'] : ['instagram', 'facebook']);
+const where = (it) => platformsOf(it).map((p) => PLATFORM[p] || p).join(', ');
+// A branded post going to TikTok can carry a trending track (TikTok photo posts play music; Instagram photos cannot).
+const toTikTok = (it) => !!it.brand && platformsOf(it).includes('tiktok');
 
 async function call(body) {
   const { data, error } = await supabase.functions.invoke('content-autopilot', { body });
@@ -32,6 +37,8 @@ async function call(body) {
  * /approve/:batchId?t=… — the autopilot's review page (from the email, or the Studio). Each drafted
  * post with its card, time and caption; remove any or change a caption; Approve draws every card
  * in this browser, uploads it and schedules it. Nothing posts until then.
+ * TikTok cards get a trending TikTok track picked ahead of time (spread out, nothing explicit), which
+ * can be changed or left off; it goes with the post when it is scheduled.
  */
 const Approve = () => {
   const { batchId } = useParams();
@@ -45,6 +52,8 @@ const Approve = () => {
   const [finished, setFinished] = useState(null);
   const [declining, setDeclining] = useState(false);
   const [note, setNote] = useState('');
+  const [music, setMusic] = useState(null); // trending TikTok {tracks, note}, read once when a card goes to TikTok
+  const [musicChoice, setMusicChoice] = useState({}); // item id → track, or null for no music
 
   const base = useMemo(() => ({ batch: batchId, token }), [batchId, token]);
   const load = useCallback(async () => {
@@ -52,6 +61,23 @@ const Approve = () => {
     catch (e) { setError(e.message); }
   }, [base]);
   useEffect(() => { Promise.resolve().then(load); }, [load]);
+
+  // Trending TikTok music, through this function (the review link works without a Studio sign-in).
+  const tiktokBrand = items.find(toTikTok)?.brand || '';
+  const loadMusic = useCallback((params) => call({ ...base, action: 'music', brand: tiktokBrand, ...params }), [base, tiktokBrand]);
+  useEffect(() => {
+    if (!tiktokBrand) return undefined;
+    let live = true;
+    trendingMusic('tiktok', { load: loadMusic, scope: `approve-${batchId}-${tiktokBrand}` }).then((m) => live && setMusic(m));
+    return () => { live = false; };
+  }, [tiktokBrand, loadMusic, batchId]);
+  const searchMusic = useCallback((q) => trendingMusic('tiktok', { q, load: loadMusic, scope: `approve-${batchId}-${tiktokBrand}` }), [loadMusic, batchId, tiktokBrand]);
+  const autos = useMemo(() => {
+    if (!music?.tracks?.length) return {};
+    const fixed = Object.fromEntries(Object.entries(musicChoice).map(([id, t]) => [id, t?.id || null]));
+    return spreadPicks(music.tracks, items.filter(toTikTok).map((it) => ({ id: it.id })), { fixed });
+  }, [music, items, musicChoice]);
+  const trackFor = (id) => (Object.prototype.hasOwnProperty.call(musicChoice, id) ? musicChoice[id] : autos[id] || null);
 
   const docs = useMemo(() => Object.fromEntries(items.map((it) => [it.id, fromWords({ template: it.template, style: it.style, pattern: it.pattern, seed: it.seed, words: it.words })])), [items]);
   const live = items.filter((it) => it.status === 'pending' || it.status === 'failed');
@@ -81,7 +107,8 @@ const Approve = () => {
         const { uploadUrl } = await call({ ...base, action: 'presign', item: it.id, size: blob.size });
         const put = await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: blob });
         if (!put.ok) throw new Error('The card did not upload.');
-        const { item } = await call({ ...base, action: 'schedule', item: it.id });
+        const track = toTikTok(it) ? trackFor(it.id) : null;
+        const { item } = await call({ ...base, action: 'schedule', item: it.id, ...(track ? { tiktokMusic: { id: track.id } } : {}) });
         set(it.id, item);
         if (item.status !== 'scheduled') failed += 1;
       } catch (e) { failed += 1; set(it.id, { status: 'failed', error: e.message }); }
@@ -131,6 +158,16 @@ const Approve = () => {
                   {editing === it.id
                     ? <CaptionEditor value={it.caption_ig} onSave={(v) => saveCaption(it, v)} onCancel={() => setEditing(null)} />
                     : <p className="ap-caption">{it.caption_ig}</p>}
+                  {toTikTok(it) && it.status !== 'scheduled' && it.status !== 'removed' && (() => {
+                    const track = trackFor(it.id);
+                    const own = Object.prototype.hasOwnProperty.call(musicChoice, it.id);
+                    return (
+                      <MusicChoice platform="tiktok" label="TikTok music" value={track ? { track } : null} auto={!own && !!track} list={music} load={searchMusic}
+                        onChange={(v) => setMusicChoice((s) => ({ ...s, [it.id]: v?.track || null }))} disabled={!batch.open || busy}
+                        noneText="none" noneAction="No music"
+                        extra={track && platformsOf(it).includes('instagram') ? <small className="ap-muted" style={{ fontSize: '0.8rem' }}>The track plays on TikTok only: Instagram photo posts can’t carry music.</small> : null} />
+                    );
+                  })()}
                   {it.error && (it.status === 'failed' || (it.status === 'scheduled' && it.brand)) && <p className="ap-error ap-error--sm">{it.error}</p>}
                   {batch.open && it.status !== 'scheduled' && !busy && (
                     <div className="ap-tools">
