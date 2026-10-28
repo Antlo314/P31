@@ -68,5 +68,75 @@
     "seconds": 8,
     "coverMs": 7500,
     "at": "2026-10-20T15:35:52.915Z"
+  },
+  "tt15-next-market": {
+    "seconds": 11,
+    "coverMs": 10500,
+    "at": "2026-10-28T13:33:46.577Z"
+  },
+  "tt16-shop-small": {
+    "seconds": 8,
+    "coverMs": 7500,
+    "at": "2026-10-28T13:33:49.137Z"
+  },
+  "tt17-busy-season-prayer": {
+    "seconds": 8,
+    "coverMs": 7500,
+    "at": "2026-10-28T13:33:51.757Z"
+  },
+  "tt18-luncheon-five-weeks": {
+    "seconds": 12,
+    "coverMs": 11500,
+    "at": "2026-10-28T13:33:56.014Z"
+  },
+  "tt19-commit-thy-works": {
+    "seconds": 9,
+    "coverMs": 8500,
+    "at": "2026-10-28T13:33:59.086Z"
+  },
+  "tt20-one-link": {
+    "seconds": 12,
+    "coverMs": 11500,
+    "at": "2026-10-28T13:34:07.018Z"
+  },
+  "tt21-proudest": {
+    "seconds": 9,
+    "coverMs": 8500,
+    "at": "2026-10-28T13:34:13.949Z"
+  },
+  "tt22-not-afraid-of-the-snow": {
+    "seconds": 13,
+    "coverMs": 12500,
+    "at": "2026-10-28T13:34:19.796Z"
+  },
+  "tt23-luncheon-one-month": {
+    "seconds": 8,
+    "coverMs": 7500,
+    "at": "2026-10-28T13:34:24.065Z"
+  },
+  "tt24-thankful-prayer": {
+    "seconds": 8,
+    "coverMs": 7500,
+    "at": "2026-10-28T13:34:27.104Z"
+  },
+  "tt25-openeth-her-mouth": {
+    "seconds": 9,
+    "coverMs": 8500,
+    "at": "2026-10-28T13:34:30.899Z"
+  },
+  "tt26-enter-his-gates": {
+    "seconds": 11,
+    "coverMs": 10500,
+    "at": "2026-10-28T13:34:35.929Z"
+  },
+  "tt27-grateful": {
+    "seconds": 8,
+    "coverMs": 7500,
+    "at": "2026-10-28T13:34:40.231Z"
+  },
+  "tt28-shop-small-weekend": {
+    "seconds": 11,
+    "coverMs": 10500,
+    "at": "2026-10-28T13:34:43.555Z"
   }
 }
