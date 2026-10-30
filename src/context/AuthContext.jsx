@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext({});
@@ -9,6 +9,9 @@ export const AuthProvider = ({ children }) => {
   const [curatorData, setCuratorData] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  // Whose data is loaded: a token refresh or a tab coming back into focus re-sends "signed in" for the
+  // same person, and reloading then would replace what a vendor is typing with the last saved copy.
+  const loadedFor = useRef(null);
 
   useEffect(() => {
     if (!supabase) {
@@ -19,17 +22,21 @@ export const AuthProvider = ({ children }) => {
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchUserData(session.user.id);
+      if (session?.user) { loadedFor.current = session.user.id; fetchUserData(session.user.id); }
       else setLoading(false);
     });
 
     // Listen for changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
+        // Only a different person (or a profile change) needs a reload.
+        if (loadedFor.current === session.user.id && event !== 'USER_UPDATED') return;
+        loadedFor.current = session.user.id;
         fetchUserData(session.user.id);
       }
       else {
+        loadedFor.current = null;
         setProfile(null);
         setCuratorData(null);
         setIsAdmin(false);
@@ -65,8 +72,9 @@ export const AuthProvider = ({ children }) => {
       }
         
       await adminCheck;
-      setProfile(profileData || null);
-      setCuratorData(cData || null);
+      // Keep the same object when nothing changed, so screens built from it are not reset.
+      setProfile((prev) => (JSON.stringify(prev) === JSON.stringify(profileData || null) ? prev : profileData || null));
+      setCuratorData((prev) => (JSON.stringify(prev) === JSON.stringify(cData || null) ? prev : cData || null));
     } catch (error) {
       console.error('Unexpected error fetching user data:', error);
     } finally {

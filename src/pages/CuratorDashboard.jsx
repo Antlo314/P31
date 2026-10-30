@@ -138,9 +138,13 @@ const CuratorDashboard = () => {
     shopAnnouncement: '',
     customTitle: ''
   });
+  // The shop details form never loses what she typed: a reload of her saved shop only fills in the
+  // fields she has not changed, and unsaved changes are kept in this browser until she saves.
+  const savedForm = React.useRef(null);
+  const draftKey = user?.id ? `p31.shopDraft.${user.id}` : null;
   useEffect(() => {
     if (curatorData) {
-      setEditData({
+      const next = {
         businessName: curatorData.business_name || '',
         tagline: curatorData.tagline || '',
         bio: curatorData.bio || '',
@@ -156,9 +160,39 @@ const CuratorDashboard = () => {
         themePreference: curatorData.theme_preference || 'classic_gold',
         shopAnnouncement: curatorData.shop_announcement || '',
         customTitle: curatorData.custom_title || ''
+      };
+      const before = savedForm.current;
+      savedForm.current = next;
+      setEditData((prev) => {
+        let base = next;
+        if (before) {
+          // Fields she changed since the last load stay as she typed them, unless the saved copy
+          // changed too (she just saved it), in which case the saved value wins.
+          base = Object.fromEntries(Object.keys(next).map((k) => [k, prev[k] !== before[k] && next[k] === before[k] ? prev[k] : next[k]]));
+        } else if (draftKey) {
+          try {
+            const draft = JSON.parse(localStorage.getItem(draftKey) || 'null');
+            if (draft && typeof draft === 'object') base = { ...next, ...draft };
+          } catch { /* no draft */ }
+        }
+        return base;
       });
     }
-  }, [curatorData]);
+  }, [curatorData, draftKey]);
+  const shopDirty = !!savedForm.current && Object.keys(savedForm.current).some((k) => editData[k] !== savedForm.current[k]);
+  useEffect(() => {
+    if (!draftKey) return;
+    try {
+      if (shopDirty) localStorage.setItem(draftKey, JSON.stringify(editData));
+      else localStorage.removeItem(draftKey);
+    } catch { /* storage blocked: the form still works */ }
+  }, [editData, shopDirty, draftKey]);
+  useEffect(() => {
+    if (!shopDirty) return undefined;
+    const warn = (e) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [shopDirty]);
 
   const [linkCopied, setLinkCopied] = useState(false);
   const copyShopLink = () => {
