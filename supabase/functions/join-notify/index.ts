@@ -489,7 +489,7 @@ FLOWS.push({
   },
   subject: (a) => (a.slug === 'couples' ? 'P31 Couples Private Mentorship Enrollment' : 'P31 Private Mentorship and Business Coaching Enrollment'),
   email: (a) => layout('Before we begin', `<p>Hi ${esc(String(a.full_name || '').split(' ')[0] || 'there')},</p>
-<p>It was a joy speaking with you, and you are approved to enroll. Here is your private enrollment link. <b>Please complete your enrollment within 48 hours.</b></p>
+<p>I appreciate the transparency and intentionality you brought to our intro call. As we prepare to begin this mentorship journey, I look forward to the work ahead. Here is your enrollment link. <b>This link is time-sensitive for 48 hours.</b></p>
 <p style="margin:14px 0 6px"><b>Your setup guide</b></p>
 <ol style="margin:0 0 14px;padding-left:20px;line-height:1.6"><li>Sign the three required forms, in order: the <b>${coachingLabel('coaching', a.slug)}</b>${a.slug === 'couples' ? ' (each partner signs on their own link)' : ''}, the <b>Confidentiality Agreement</b> and the <b>Client Safety &amp; Emergency Contact form</b>.</li><li>${a.slug === 'couples' ? 'Choose your Couples Private Mentorship plan.' : 'Choose your program (Business Coaching or Private Faith Mentorship) and your plan.'}</li><li>Create your member login and pay by secure Stripe checkout.</li><li>Watch for your welcome email: your classroom, session scheduling and community access.</li></ol>
 ${button(`${COLLECTIVE_SITE}/coaching/forms/${a.token}`, 'Start my enrollment')}
