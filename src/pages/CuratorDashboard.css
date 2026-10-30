@@ -312,6 +312,10 @@
 .modal-content {
   border: 1px solid var(--metallic-gold);
   animation: modalIn 0.5s var(--ease-fluid);
+  /* A long form scrolls inside the window instead of running off the screen (the page behind stays put). */
+  max-height: calc(100dvh - 4rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 @keyframes modalIn {

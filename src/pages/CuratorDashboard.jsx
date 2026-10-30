@@ -289,7 +289,8 @@ const CuratorDashboard = () => {
       const { url } = await invokePayment('stripe-connect');
       window.location.href = url;
     } catch (err) {
-      setStripeMsg(`Stripe did not open just now. Please try again in a minute; if it keeps happening, email ${EMAIL.vendors}. (${err.message})`);
+      // A plain message from our side (Connect not switched on) is shown as it is; anything else gets the retry advice.
+      setStripeMsg(/not switched on yet/.test(err.message || '') ? err.message : `Stripe did not open just now. Please try again in a minute; if it keeps happening, email ${EMAIL.vendors}. (${err.message})`);
       setStripeLoading(false);
     }
   };

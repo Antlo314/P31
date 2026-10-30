@@ -75,6 +75,11 @@ Deno.serve(async (req) => {
     return json({ url: link.url });
   } catch (err) {
     console.error('stripe-connect error:', err);
-    return json({ error: (err as Error).message || 'Failed to start Stripe onboarding.' }, 500);
+    const msg = (err as Error).message || '';
+    // P31's own Stripe account has not switched on Connect yet: nothing the vendor can fix, so say so plainly.
+    if (/signed up for Connect|dashboard\.stripe\.com\/connect/i.test(msg)) {
+      return json({ error: 'Card payments for P31 shops are not switched on yet on our side. The P31 team has been told; please try again in a day or two. Everything else in your shop works in the meantime.', code: 'connect_off' }, 503);
+    }
+    return json({ error: msg || 'Failed to start Stripe onboarding.' }, 500);
   }
 });
