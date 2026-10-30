@@ -8,6 +8,7 @@ import { supabase } from '../../lib/supabase';
 import { SITE_URL } from '../../lib/seo';
 import { PROMO_LOOKS, PROMO_SIZES, drawPromo, drawSign, loadImage, downloadCanvas } from './promoCard';
 import './Marketing.css';
+import { useDraftState } from '../../lib/vendorForms';
 
 const money = (n) => `$${Number(n).toFixed(Number(n) % 1 ? 2 : 0)}`;
 const slugOf = (c) => c?.slug || c?.id || '';
@@ -233,7 +234,8 @@ const blankMail = { subject: '', body: '', product_id: '' };
 const Followers = ({ curator, products, user }) => {
   const [subs, setSubs] = useState([]);
   const [mails, setMails] = useState([]);
-  const [form, setForm] = useState(blankMail);
+  // The email she is writing is kept in this browser until it is sent (switching tabs or a reload keeps it).
+  const [form, setForm] = useDraftState(`p31.draft.shopEmail.${user.id}`, blankMail);
   const [goal, setGoal] = useState('');
   const [busy, setBusy] = useState('');
   const [msg, setMsg] = useState('');

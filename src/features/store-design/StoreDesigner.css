@@ -58,3 +58,6 @@
 .sd-prev__price { height: 6px; width: 40%; margin-top: 6px; border-radius: 3px; }
 .sd-prev__about { height: 40px; margin: 6px 12px; border-radius: 8px; border: 1px solid; }
 .sd-prev__btn { height: 18px; width: 50%; margin: 6px auto 0; }
+.sd-save { min-height: 48px; }
+.sd-note { margin: 0; font-size: 0.84rem; color: var(--on-surface-variant, #555); }
+.sd-undo { background: none; border: 0; padding: 4px 0; font: inherit; font-weight: 700; font-size: 0.86rem; color: var(--dark-plum, #3A1C36); text-decoration: underline; cursor: pointer; justify-self: start; }

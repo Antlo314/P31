@@ -809,7 +809,7 @@ const Shops = () => {
                 <div>
                   <p className="sys-eyebrow">Status</p>
                   <div className="sys-chips">
-                    {STATUSES.filter(([v]) => v !== 'draft').map(([v, l]) => <button key={v} type="button" className={`sys-chip ${sel.status === v ? 'is-on' : ''}`} disabled={busy} onClick={() => patch(sel, { status: v }, `${sel.business_name} is now ${l.toLowerCase()}.`)}>{l}</button>)}
+                    {STATUSES.filter(([v]) => v !== 'draft').map(([v, l]) => <button key={v} type="button" className={`sys-chip ${sel.status === v ? 'is-on' : ''}`} disabled={busy} onClick={() => patch(sel, v === 'approved' ? { status: v, is_paid: true, is_published: true } : { status: v }, `${sel.business_name} is now ${l.toLowerCase()}.`)}>{l}</button>)}
                   </div>
                   <p className="sys-muted" style={{ margin: '6px 0 0', fontSize: '0.82rem' }}>Approved shops are live on the site. Paused shops are hidden until approved again; the vendor keeps her studio. Needs changes sends her back to edit, with your note.</p>
                 </div>

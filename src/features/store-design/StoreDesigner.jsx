@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Check, ExternalLink, Palette, Save } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { readDraft, writeDraft, clearDraft, friendlyError, useLeaveWarning } from '../../lib/vendorForms';
 import { STORE_TEMPLATES, ACCENTS, resolveDesign } from './templates';
 import './StoreDesigner.css';
 
@@ -52,15 +53,27 @@ const Preview = ({ d, name, products }) => {
 };
 
 const StoreDesigner = ({ curator, products = [], onSaved }) => {
-  const [d, setD] = useState(() => resolveDesign(curator?.store_design));
+  // Unpublished choices are kept in this browser, so leaving the tab or reloading does not undo them.
+  const draftKey = curator?.id ? `p31.designDraft.${curator.id}` : null;
+  const [saved, setSaved] = useState(() => resolveDesign(curator?.store_design));
+  const [d, setD] = useState(() => {
+    const draft = readDraft(draftKey);
+    return draft && typeof draft === 'object' ? resolveDesign(draft) : resolveDesign(curator?.store_design);
+  });
   const [state, setState] = useState('idle');
+  const dirty = JSON.stringify(d) !== JSON.stringify(saved);
+  React.useEffect(() => { if (dirty) writeDraft(draftKey, d); else clearDraft(draftKey); }, [d, dirty, draftKey]);
+  useLeaveWarning(dirty);
 
   const pickTemplate = (t) => setD({ ...d, template: t.id, ...t.defaults });
 
   const save = async () => {
+    if (!curator?.id) { setState('error:Save your shop details first (Identity tab), then publish a design.'); return; }
     setState('saving');
-    const { error } = await supabase.from('curator_data').update({ store_design: d }).eq('id', curator.id);
-    if (error) return setState(`error:${error.message}`);
+    const { data, error } = await supabase.from('curator_data').update({ store_design: d }).eq('id', curator.id).select('id');
+    if (error || !data?.length) return setState(`error:${friendlyError(error || 'permission denied', 'Your design did not save.')}`);
+    setSaved(d);
+    clearDraft(draftKey);
     setState('saved');
     onSaved?.();
     setTimeout(() => setState('idle'), 2500);
@@ -73,8 +86,8 @@ const StoreDesigner = ({ curator, products = [], onSaved }) => {
           <h3>Template</h3>
           <div className="sd-templates">
             {STORE_TEMPLATES.map((t) => (
-              <button key={t.id} className={`sd-tpl ${d.template === t.id ? 'is-on' : ''}`} onClick={() => pickTemplate(t)} aria-pressed={d.template === t.id}>
-                <span className="sd-tpl__sw">{t.preview.map((c) => <i key={c} style={{ background: c }} />)}</span>
+              <button type="button" key={t.id} className={`sd-tpl ${d.template === t.id ? 'is-on' : ''}`} onClick={() => pickTemplate(t)} aria-pressed={d.template === t.id}>
+                <span className="sd-tpl__sw">{t.preview.map((c, i) => <i key={`${c}-${i}`} style={{ background: c }} />)}</span>
                 <strong>{t.name}</strong>
                 <span>{t.blurb}</span>
               </button>
@@ -86,7 +99,7 @@ const StoreDesigner = ({ curator, products = [], onSaved }) => {
           <h3><Palette size={16} /> Accent colour</h3>
           <div className="sd-accents">
             {ACCENTS.map((c) => (
-              <button key={c} className={`sd-accent ${d.accent === c ? 'is-on' : ''}`} style={{ background: c }} onClick={() => setD({ ...d, accent: c })} aria-label={`Accent ${c}`} />
+              <button type="button" key={c} className={`sd-accent ${d.accent === c ? 'is-on' : ''}`} style={{ background: c }} onClick={() => setD({ ...d, accent: c })} aria-label={`Accent ${c}`} />
             ))}
             <label className="sd-accent sd-accent--custom" aria-label="Custom colour">
               <input type="color" value={d.accent} onChange={(e) => setD({ ...d, accent: e.target.value })} />
@@ -99,7 +112,7 @@ const StoreDesigner = ({ curator, products = [], onSaved }) => {
             <h3>{LABELS[key]}</h3>
             <div className="sd-seg">
               {opts.map(([v, label]) => (
-                <button key={v} className={d[key] === v ? 'is-on' : ''} onClick={() => setD({ ...d, [key]: v })}>{label}</button>
+                <button type="button" key={v} className={d[key] === v ? 'is-on' : ''} onClick={() => setD({ ...d, [key]: v })}>{label}</button>
               ))}
             </div>
           </section>
@@ -118,10 +131,12 @@ const StoreDesigner = ({ curator, products = [], onSaved }) => {
 
       <aside className="sd-side">
         <Preview d={d} name={curator?.business_name} products={products} />
-        <button className="btn-solid-gold sd-save" onClick={save} disabled={state === 'saving'}>
-          {state === 'saved' ? <><Check size={16} /> Saved</> : state === 'saving' ? 'Saving…' : <><Save size={16} /> Publish design</>}
+        <button type="button" className="btn-solid-gold sd-save" onClick={save} disabled={state === 'saving'}>
+          {state === 'saved' ? <><Check size={16} /> Saved</> : state === 'saving' ? 'Saving…' : <><Save size={16} /> Save and publish design</>}
         </button>
-        {state.startsWith('error:') && <p className="sd-error">{state.slice(6)}</p>}
+        <p className="sd-note" role="status">{state.startsWith('error:') ? '' : dirty ? 'You have changes that are not published yet. They are kept on this device until you publish.' : 'Your shop shows this design.'}</p>
+        {state.startsWith('error:') && <p className="sd-error" role="alert">{state.slice(6)}</p>}
+        {dirty && <button type="button" className="sd-undo" onClick={() => { setD(saved); clearDraft(draftKey); }}>Undo my changes</button>}
         {curator && (
           <a className="sd-view" href={`/${curator.slug || curator.id}`} target="_blank" rel="noreferrer">
             View my storefront <ExternalLink size={14} />

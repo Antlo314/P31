@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>How to set up and run your P31 storefront</title>
+<style>
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; src: url(../../public/fonts/NotoSerif-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Noto Serif'; font-weight: 400; font-style: italic; src: url(../../public/fonts/NotoSerif-400-italic.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 400; src: url(../../public/fonts/Manrope-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 600; src: url(../../public/fonts/Manrope-600.woff2) format('woff2'); }
+  @font-face { font-family: 'Manrope'; font-weight: 800; src: url(../../public/fonts/Manrope-800.woff2) format('woff2'); }
+  :root {
+    --plum: #3A1C36; --plum-3: #21101E; --thistle: #E3D0EA; --thistle-3: #F8F3FA;
+    --amethyst: #9B71B2; --gold: #D9A93A; --gold-2: #F2CE4D; --green: #374126;
+    --ink: #2A1526; --ink-2: #4E3A4B; --dim: #74657A; --line: #E3D0EA;
+  }
+  @page { size: Letter; margin: 0.7in 0.7in 0.75in; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: Manrope, sans-serif; font-size: 10pt; line-height: 1.55; color: var(--ink); background: #fff; }
+  h1, h2, h3 { font-family: 'Noto Serif', Georgia, serif; font-weight: 400; color: var(--plum); }
+  h1 { font-size: 26pt; line-height: 1.12; margin: 0 0 10px; }
+  h2 { font-size: 13.5pt; margin: 16px 0 6px; break-after: avoid; }
+  h3 { font-size: 11pt; margin: 10px 0 4px; break-after: avoid; }
+  p { margin: 0 0 7px; }
+  ul, ol { margin: 4px 0 9px; padding-left: 18px; }
+  li { margin: 2px 0; }
+  code, pre { font-family: Consolas, 'Courier New', monospace; }
+  code { font-size: 7.8pt; background: var(--thistle-3); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; word-break: break-all; }
+  pre { font-size: 8pt; background: var(--plum-3); color: #f7f1fc; border-radius: 8px; padding: 9px 12px; white-space: pre-wrap; word-break: break-all; margin: 5px 0 9px; }
+  strong, b { font-weight: 800; }
+  em { font-family: 'Noto Serif', Georgia, serif; font-style: italic; }
+  .eyebrow { font-size: 8pt; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+  .lead { font-size: 11pt; color: var(--ink-2); }
+  .muted { color: var(--dim); }
+  .small { font-size: 8.4pt; }
+
+  .part { margin-top: 22px; }
+  .part-head + * { break-before: avoid; }
+  .cover + .part, .part.page { break-before: page; margin-top: 0; }
+  .part-head { background: var(--plum); color: #fff; border-radius: 16px; padding: 16px 22px; margin: 0 0 12px; position: relative; overflow: hidden; break-inside: avoid; break-after: avoid; }
+  .part-head::after { content: ''; position: absolute; right: -40px; bottom: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(242, 206, 77, 0.28), transparent 70%); }
+  .part-head .eyebrow { color: var(--gold-2); }
+  .part-head h1 { color: #fff; margin: 0 0 4px; font-size: 19pt; }
+  .part-head p { color: rgba(255, 255, 255, 0.84); margin: 0; max-width: 92%; }
+
+  .cover { height: 9.4in; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(70% 50% at 100% 0%, rgba(155, 113, 178, 0.35), transparent 70%), radial-gradient(60% 45% at 0% 100%, rgba(242, 206, 77, 0.18), transparent 70%), var(--plum-3); color: #fff; border-radius: 22px; padding: 46px 44px; position: relative; overflow: hidden; }
+  .cover img.mark { width: 92px; height: 92px; }
+  .cover h1 { color: #fff; font-size: 31pt; line-height: 1.08; margin: 18px 0 12px; max-width: 3.9in; }
+  .cover h1 em { color: var(--gold-2); }
+  .cover .lead { color: rgba(255, 255, 255, 0.86); font-size: 12pt; max-width: 5.8in; }
+  .cover .shot-hero { position: absolute; right: 40px; top: 46px; width: 2.05in; border-radius: 14px; border: 2px solid rgba(242, 206, 77, 0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+  .cover .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 30px; font-size: 9.3pt; color: rgba(255, 255, 255, 0.86); }
+  .cover .meta b { display: block; color: var(--gold-2); font-size: 7.6pt; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 3px; }
+  .cover .meta code { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); color: #fff; }
+
+  .note { border-left: 4px solid var(--gold); background: rgba(242, 206, 77, 0.1); border-radius: 0 10px 10px 0; padding: 9px 13px; margin: 8px 0 12px; break-inside: avoid; font-size: 9.2pt; }
+  .note.plum { border-color: var(--amethyst); background: var(--thistle-3); }
+  .note.red { border-color: #b04a4a; background: rgba(176, 74, 74, 0.07); }
+  .note p:last-child, .note ul:last-child { margin-bottom: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 8.6pt; }
+  th { text-align: left; font-size: 7.2pt; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; background: var(--plum); padding: 6px 8px; }
+  td { border-bottom: 1px solid var(--line); padding: 5px 8px; vertical-align: top; }
+  tr { break-inside: avoid; }
+  tr:nth-child(even) td { background: var(--thistle-3); }
+  .pill { display: inline-block; font-size: 6.8pt; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+  .ok { background: rgba(55, 65, 38, 0.12); color: var(--green); border: 1px solid rgba(55, 65, 38, 0.35); }
+  .new { background: rgba(155, 113, 178, 0.14); color: #6d4a82; border: 1px solid rgba(155, 113, 178, 0.4); }
+  .wait { background: rgba(217, 169, 58, 0.14); color: #7a5c12; border: 1px solid rgba(217, 169, 58, 0.55); }
+  .you { background: rgba(176, 74, 74, 0.08); color: #9a2f2f; border: 1px solid rgba(176, 74, 74, 0.35); }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; }
+  .four { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-items: start; }
+  .shot { display: block; width: 100%; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 5px 16px rgba(58, 28, 54, 0.12); }
+  .phone img.shot { max-height: 3.4in; object-fit: cover; object-position: top; }
+  figure { margin: 0 0 6px; break-inside: avoid; }
+  figcaption { font-size: 7.9pt; color: var(--dim); margin-top: 4px; line-height: 1.35; }
+  .step { display: grid; grid-template-columns: 26px 1fr; gap: 10px; break-inside: avoid; margin: 10px 0 4px; }
+  .step > b { width: 24px; height: 24px; border-radius: 50%; background: var(--plum); color: #fff; font-size: 9pt; display: grid; place-items: center; }
+  .step h3 { margin: 2px 0 2px; }
+  .step p { margin: 0; color: var(--ink-2); }
+  .steps { counter-reset: s; list-style: none; padding-left: 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 28px; margin: 7px 0; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 19px; height: 19px; border-radius: 50%; background: var(--plum); color: #fff; font-size: 8pt; font-weight: 800; display: grid; place-items: center; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <img class="shot-hero" src="storefront/setup-p-checklist.png" alt="">
+  <div>
+    <img class="mark" src="../../marketing/brand/market/p31-market-mark-transparent.png" alt="" style="width:auto;height:92px">
+    <p class="eyebrow" style="color: var(--gold-2); margin-top: 26px;">Proverbs 31 Marketplace · For our vendors</p>
+    <h1>How to set up and run your <em>P31 storefront</em></h1>
+    <p class="lead" style="max-width: 3.9in">Six steps from a new account to a shop that takes orders, shown on a phone and on a computer. Take them in any order; your studio keeps track.</p>
+  </div>
+  <div class="meta">
+    <div><b>Where</b>Sign in at <code>p31market.com/login</code>. Your studio opens on the Identity page with your setup list.</div>
+    <div><b>What it costs</b>Free for 3 months, then $14.99 a month, plus 5% of each sale. Up to 10 products.</div>
+    <div><b>How you are paid</b>Shoppers pay by card or Apple Pay through Stripe. The money goes to your bank.</div>
+    <div><b>Help</b>Email <code>vendor@p31market.com</code>, or write to the team from Concierge in your studio.</div>
+  </div>
+</section>
+
+<section class="part">
+  <div class="part-head">
+    <p class="eyebrow">Before you start</p>
+    <h1>Your studio and your setup list</h1>
+    <p>The setup list at the top of your studio shows what is done and what is next. Each line has a button that takes you to the right place.</p>
+  </div>
+  <div class="two">
+    <figure class="phone"><img class="shot" src="storefront/setup-p-checklist.png" alt=""><figcaption>On a phone: each line ticks itself as you go; where your shop stands shows under the list.</figcaption></figure>
+    <div>
+      <ol class="steps">
+        <li><b>Shop name and shop link</b>: what shoppers see, and your web address.</li>
+        <li><b>Logo and banner photo</b>: your look at the top of the shop.</li>
+        <li><b>About your shop</b>: a few lines about you and what you make.</li>
+        <li><b>Your first product</b>: a photo, a name and a price.</li>
+        <li><b>Get paid: connect Stripe</b>: so shoppers can pay you.</li>
+        <li><b>Read and sign the Storefront Agreement</b>.</li>
+      </ol>
+      <div class="note plum"><p><b>A short tour opens the first time you sign in.</b> It walks through each part of the studio in about two minutes. See it again any time with <b>Show me around</b> under your setup list.</p></div>
+      <div class="note"><p><b>Nothing you type is lost.</b> If your phone reloads the page, you switch apps, or the connection drops, what you typed is kept on that device until you press Save.</p></div>
+    </div>
+  </div>
+  <figure style="margin-top:10px"><img class="shot" src="storefront/setup-d-home.png" alt="" style="max-height:2.7in;object-fit:cover;object-position:top"><figcaption>On a computer: the menu on the left, the setup list across the top, your shop details below.</figcaption></figure>
+</section>
+
+<section class="part page">
+  <div class="part-head">
+    <p class="eyebrow">Step 1 and step 3</p>
+    <h1>Your shop name, link and story</h1>
+    <p>Identity page, under <b>Your shop details</b>.</p>
+  </div>
+  <div class="three">
+    <figure class="phone"><img class="shot" src="storefront/setup-p-details.png" alt=""><figcaption>Shop name and shop link. The link fills in from your name.</figcaption></figure>
+    <figure class="phone"><img class="shot" src="storefront/setup-p-unsaved.png" alt=""><figcaption>Changes not saved yet: the Save button stays at the bottom of the screen.</figcaption></figure>
+    <figure class="phone"><img class="shot" src="storefront/setup-p-saved.png" alt=""><figcaption>After Save: “Saved. Your shop details are up to date.”</figcaption></figure>
+  </div>
+  <ol class="steps">
+    <li>Type your <b>shop name</b>. Your <b>shop link</b> fills in from it (for example <code>p31market.com/luxe-candles</code>). You can change it: small letters, numbers and dashes.</li>
+    <li>Add a one-line <b>tagline</b> and a few lines <b>about your shop</b>. The AI button can write a first draft from your notes.</li>
+    <li>Add your city, Instagram and the email shoppers can write to (all optional).</li>
+    <li>Press <b>Save shop details</b>. Fields marked <b>*</b> are the only ones you need.</li>
+  </ol>
+  <div class="note red"><p><b>“That shop link is already taken”</b> means another shop uses it. Add your city or a word, for example <code>luxe-candles-atl</code>, and save again.</p></div>
+</section>
+
+<section class="part page">
+  <div class="part-head">
+    <p class="eyebrow">Step 2 and step 4</p>
+    <h1>Your logo, banner and products</h1>
+    <p>Storefront page. Phone photos are perfect; they are resized for you.</p>
+  </div>
+  <div class="three">
+    <figure class="phone"><img class="shot" src="storefront/setup-p-photos.png" alt=""><figcaption>Tap the wide box for your banner, the square one for your logo. They save as soon as they upload.</figcaption></figure>
+    <figure class="phone"><img class="shot" src="storefront/setup-p-product.png" alt=""><figcaption>Add product: tap the circle for photos, then a name and a price.</figcaption></figure>
+    <figure class="phone"><img class="shot" src="storefront/setup-p-product-2.png" alt=""><figcaption>Optional extras: description, options like size or scent, a sale price.</figcaption></figure>
+  </div>
+  <ol class="steps">
+    <li>Tap <b>Add product</b>. Pick a template if one fits (it fills in a starting description and options).</li>
+    <li>Tap the circle to add photos, up to 10. The first one is the main photo.</li>
+    <li>Fill in the <b>product name</b> and <b>price</b> (needed), then anything else you like.</li>
+    <li>Press <b>Save product</b>. To take a product down for a while, edit it and untick <b>Visible in my storefront</b>.</li>
+  </ol>
+  <div class="note"><p><b>iPhone photo will not upload?</b> Some iPhone photos are saved in a format (HEIC) that some browsers cannot open. Take a screenshot of the photo and upload the screenshot, or set iPhone Settings &gt; Camera &gt; Formats to <b>Most Compatible</b>.</p></div>
+</section>
+
+<section class="part page">
+  <div class="part-head">
+    <p class="eyebrow">Step 5</p>
+    <h1>Get paid: connect Stripe</h1>
+    <p>Storefront page, under <b>Card payments (Stripe)</b>. About five minutes; have your bank details and ID handy.</p>
+  </div>
+  <figure><img class="shot" src="storefront/setup-d-stripe.png" alt=""><figcaption>When Stripe is ready the label reads “Ready: taking payments”.</figcaption></figure>
+  <ol class="steps">
+    <li>Tap <b>Connect with Stripe</b>. You go to Stripe’s own site; sign in or create a free account there.</li>
+    <li>Fill in your details and your bank account. Stripe brings you back to your studio when you finish.</li>
+    <li>If it says <b>Not finished</b>, tap <b>Finish Stripe setup</b> and complete what Stripe asks for, then <b>Refresh status</b>.</li>
+  </ol>
+  <p>Shoppers then pay by card, Apple Pay and more right on your shop. Stripe sends your money to your bank on its usual payout schedule; <b>Open my Stripe dashboard</b> shows every payment and payout.</p>
+</section>
+
+<section class="part page">
+  <div class="part-head">
+    <p class="eyebrow">Step 6, and going live</p>
+    <h1>The agreement, approval and your live shop</h1>
+    <p>The last line of your setup list opens the Storefront Agreement: the fees, the benefits and your part, word for word. Sign it with your finger on a phone.</p>
+  </div>
+  <table>
+    <tr><th style="width:32%">What your setup list says</th><th>What it means</th></tr>
+    <tr><td><span class="pill wait">Waiting for P31 to approve</span></td><td>The P31 team is reviewing your shop. Keep setting up; only you can see your shop until it is approved. You get an email when it is live.</td></tr>
+    <tr><td><span class="pill ok">Your shop is live</span></td><td>Shoppers can find your shop in the directory and at your link. Share it everywhere.</td></tr>
+    <tr><td><span class="pill you">P31 asked for a few changes</span></td><td>Read the team’s note, make the changes, then tap <b>Send my shop for review again</b>.</td></tr>
+    <tr><td><span class="pill you">Your shop is paused</span></td><td>Hidden from shoppers for now; your products and settings are kept. Email vendor@p31market.com.</td></tr>
+  </table>
+  <figure><img class="shot" src="storefront/setup-d-shop.png" alt=""><figcaption>A finished shop (the sample shop Myrrh &amp; Mercy, made up for this guide).</figcaption></figure>
+</section>
+
+<section class="part page">
+  <div class="part-head">
+    <p class="eyebrow">Running your shop</p>
+    <h1>Your look, orders and your plan</h1>
+    <p>Store Design, Orders and Plan &amp; billing in the menu.</p>
+  </div>
+  <div class="two">
+    <figure><img class="shot" src="storefront/setup-d-design.png" alt=""><figcaption>Store Design: pick a template and a colour, then <b>Save and publish design</b>.</figcaption></figure>
+    <figure><img class="shot" src="storefront/setup-d-orders.png" alt=""><figcaption>Orders: what to send and where. Mark it shipped and the shopper gets an email.</figcaption></figure>
+  </div>
+  <div class="two" style="margin-top:8px">
+    <figure><img class="shot" src="storefront/setup-d-billing.png" alt=""><figcaption>Plan &amp; billing: free months left, and the monthly plan when you are ready.</figcaption></figure>
+    <div>
+      <h3>Good habits</h3>
+      <ul>
+        <li>Check <b>Orders</b> every day while your shop is new.</li>
+        <li>Use <b>Marketing</b> for a product link, a QR code and a promo picture to share.</li>
+        <li><b>Discounts</b> makes codes like WELCOME10 for checkout.</li>
+        <li>Keep your products up to date: hide sold-out items or mark them Sold out.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="part page">
+  <div class="part-head">
+    <p class="eyebrow">Questions</p>
+    <h1>Frequently asked</h1>
+  </div>
+  <h3>What does it cost?</h3>
+  <p>Your storefront is free for the first 3 months from approval. After that it is $14.99 a month, and P31 keeps 5% of each sale. We email you before anything is charged, and you can cancel with two weeks’ notice.</p>
+  <h3>How many products can I list?</h3>
+  <p>Up to 10. To swap one out, hide or delete an old one. More product slots can be added under Add-ons &amp; Featured.</p>
+  <h3>How and when do I get paid?</h3>
+  <p>Through Stripe. Shoppers pay by card or Apple Pay on your shop; P31 keeps its 5%, and the rest goes to your bank account on Stripe’s payout schedule. You can see every payment in your Stripe dashboard.</p>
+  <h3>What does “Waiting for P31 to approve” mean?</h3>
+  <p>The P31 team reviews every new shop. While you wait you can finish your setup; your shop stays private (only you see it) until it is approved, and you get an email when it goes live.</p>
+  <h3>I typed my details and they disappeared.</h3>
+  <p>Your studio now keeps what you type on your device until you press Save, and warns you before you leave with unsaved changes. If something still goes missing, sign out and back in, then email us what happened.</p>
+  <h3>My photo will not upload.</h3>
+  <p>Try a screenshot of the photo, or a different photo. Very large photos are made smaller for you. If it still fails, email the photo to vendor@p31market.com and we will add it.</p>
+  <h3>Who do I contact?</h3>
+  <p>Email <b>vendor@p31market.com</b>, or open <b>Concierge</b> in your studio menu to write to the P31 team.</p>
+</section>
+
+</body>
+</html>

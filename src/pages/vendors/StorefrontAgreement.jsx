@@ -8,8 +8,11 @@ import { submitForm, readSent, markSent, clearSent, todayLong, todayISO, signedI
 import { AGREEMENT, AGREEMENT_CONFIRM, AGREEMENT_VERSION } from './formText';
 import { Chips, NameRow, ContactRow, Prefilled, Done, HelpLine, Trap } from './FormBits';
 import CuratorPaths from './CuratorPaths';
+import { useDraftState, useLeaveWarning, clearDraft } from '../../lib/vendorForms';
 
 const SENT_KEY = 'p31_agreement_sent';
+// Her answers so far, kept in this browser until she sends them (the signature itself is not kept).
+const DRAFT_KEY = 'p31.draft.storefrontAgreement';
 const BLANK = {
   business_name: '', first_name: '', last_name: '', email: '', phone: '',
   street: '', line2: '', city: '', state: '', zip: '', country: 'United States',
@@ -32,7 +35,7 @@ export const AgreementText = ({ compact = false }) => (
 
 const AgreementForm = () => {
   const [sent] = useState(() => readSent(SENT_KEY));
-  const [f, setF] = useState(BLANK);
+  const [f, setF, discardDraft, restored] = useDraftState(DRAFT_KEY, BLANK, { skip: ['trap'] });
   const [sig, setSig] = useState(null);
   const [who, setWho] = useState(null);
   const [state, setState] = useState(sent ? 'done' : 'idle'); // idle | sending | done
@@ -40,6 +43,8 @@ const AgreementForm = () => {
   const [justSent, setJustSent] = useState(false);
   const set = (k) => (e) => setF((x) => ({ ...x, [k]: e.target.value }));
   const fullName = `${f.first_name} ${f.last_name}`.trim();
+  const typed = JSON.stringify({ ...f, trap: '' }) !== JSON.stringify(BLANK) || !!sig;
+  useLeaveWarning(typed && state !== 'done');
 
   useEffect(() => {
     signedInContact().then((w) => {
@@ -47,7 +52,7 @@ const AgreementForm = () => {
       setWho(w);
       setF((x) => ({ ...x, email: x.email || w.email, first_name: x.first_name || w.first_name, last_name: x.last_name || w.last_name, business_name: x.business_name || w.business_name }));
     });
-  }, []);
+  }, [setF]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -63,11 +68,12 @@ const AgreementForm = () => {
         terms_version: AGREEMENT_VERSION, source: 'agreement page', trap: f.trap,
       });
     } catch (err) { setError(err.message); setState('idle'); return; }
+    clearDraft(DRAFT_KEY);
     markSent(SENT_KEY, { name: f.first_name, business: f.business_name, email: f.email, hasAccount: !!who?.curator });
     setJustSent(true);
     setState('done');
   };
-  const startOver = () => { clearSent(SENT_KEY); setF(BLANK); setSig(null); setState('idle'); };
+  const startOver = () => { clearSent(SENT_KEY); discardDraft(BLANK); setSig(null); setState('idle'); };
 
   if (state === 'done') {
     const d = justSent ? { name: f.first_name, business: f.business_name, email: f.email, hasAccount: !!who?.curator } : sent;
@@ -85,6 +91,7 @@ const AgreementForm = () => {
   return (
     <form className="k-form jn-form" onSubmit={submit}>
       <Prefilled who={who} />
+      {restored && <p className="k-fine" role="status">We kept what you typed earlier on this device{sig ? '' : ' (please sign again at the bottom)'}. <button type="button" className="jn-again" onClick={() => { discardDraft(BLANK); setSig(null); }}>Clear the form</button></p>}
       <label className="k-field"><span>Business Name *</span><input required autoComplete="organization" value={f.business_name} onChange={set('business_name')} /></label>
       <NameRow f={f} set={set} />
       <ContactRow f={f} set={set} />

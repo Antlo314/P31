@@ -760,6 +760,9 @@ class Query {
   then(ok, fail) { return Promise.resolve(this.run()).then(ok, fail); }
 }
 
+// Demo uploads stay in this browser tab: path -> object URL.
+const demoFiles = new Map();
+
 export function demoClient(mode) {
   now = Date.now();
   db = makeDb();
@@ -782,8 +785,8 @@ export function demoClient(mode) {
     },
     channel: () => { const ch = { on: () => ch, subscribe: () => ch }; return ch; },
     removeChannel: () => {},
-    storage: { from: () => ({ upload: async () => ({ error: null }), remove: async () => ({ error: null }),
+    storage: { from: () => ({ upload: async (path, file) => { try { demoFiles.set(path, URL.createObjectURL(file)); } catch { /* not a file */ } return { data: { path }, error: null }; }, remove: async () => ({ error: null }),
       list: async (folder = '') => ({ data: folder.endsWith('/music') ? [{ name: '1700000000000-Sample_Track.mp3' }] : [], error: null }), createSignedUrl: async () => ({ data: { signedUrl: '#' }, error: null }),
-      createSignedUrls: async (paths) => ({ data: paths.map((path) => ({ path, signedUrl: '/og-image.jpg' })), error: null }), getPublicUrl: () => ({ data: { publicUrl: '#' } }) }) },
+      createSignedUrls: async (paths) => ({ data: paths.map((path) => ({ path, signedUrl: '/og-image.jpg' })), error: null }), getPublicUrl: (path) => ({ data: { publicUrl: demoFiles.get(path) || '#' } }) }) },
   };
 }

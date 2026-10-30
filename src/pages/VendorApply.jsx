@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import { EMAIL } from '../lib/team';
 import { useSiteInfo } from '../lib/siteInfo';
 import { fetchUpcomingEvents, formatEventDate, showDate, showMonth, monthLabel } from '../lib/events';
+import { useDraftState, useLeaveWarning, clearDraft } from '../lib/vendorForms';
 import '../academy/mentorship.css';
 import '../academy/join.css';
 
@@ -32,6 +33,8 @@ const BLANK = {
 
 // After applying, this device shows the confirmation (not a blank form) for 30 days.
 const SENT_KEY = 'p31_vendor_sent';
+// What she has typed so far, kept in this browser until she sends it (a phone reload never wipes it).
+const DRAFT_KEY = 'p31.draft.vendorApply';
 const readSent = () => {
   try {
     const v = JSON.parse(localStorage.getItem(SENT_KEY) || 'null');
@@ -43,8 +46,10 @@ const today = () => new Date().toLocaleDateString('en-US', { month: 'long', day:
 const VendorForm = () => {
   const info = useSiteInfo();
   const [sent] = useState(readSent);
-  const [f, setF] = useState(() => (sent ? { ...BLANK, full_name: sent.name || '' } : BLANK));
+  const [f, setF, discardDraft, restored] = useDraftState(DRAFT_KEY, BLANK, { skip: ['trap'] });
   const [state, setState] = useState(sent ? 'done' : 'idle'); // idle | sending | done
+  const typed = JSON.stringify({ ...f, trap: '' }) !== JSON.stringify(BLANK);
+  useLeaveWarning(typed && state !== 'done');
   const [error, setError] = useState('');
   const doneRef = useRef(null);
   const justSent = useRef(false);
@@ -88,13 +93,14 @@ const VendorForm = () => {
     // Hand it to the team: an email and a row in P31's Google Sheet (each sent once).
     supabase.functions.invoke('join-notify', { body: {} }).catch(() => {});
     try { localStorage.setItem(SENT_KEY, JSON.stringify({ name: f.full_name.split(' ')[0], at: Date.now() })); } catch { /* private mode */ }
+    clearDraft(DRAFT_KEY);
     justSent.current = true;
     setState('done');
   };
 
   const startOver = () => {
     try { localStorage.removeItem(SENT_KEY); } catch { /* private mode */ }
-    setF(BLANK);
+    discardDraft(BLANK);
     setState('idle');
   };
 
@@ -103,7 +109,7 @@ const VendorForm = () => {
       <div className="k-success jn-done" ref={doneRef} tabIndex={-1} role="status" aria-live="polite">
         <span className="k-icon"><CheckCircle2 size={28} /></span>
         <h3>Your vendor application is in</h3>
-        <p>Thank you, {f.full_name.split(' ')[0] || 'friend'}. Official acceptance and event details will be emailed to you.</p>
+        <p>Thank you, {f.full_name.split(' ')[0] || sent?.name || 'friend'}. Official acceptance and event details will be emailed to you.</p>
         <p className="k-fine">Questions in the meantime? Email <a href={`mailto:${EMAIL.vendors}`}>{EMAIL.vendors}</a>.</p>
         <button type="button" className="jn-again" onClick={startOver}>Applying for another brand? Start a new application</button>
       </div>
@@ -112,6 +118,7 @@ const VendorForm = () => {
 
   return (
     <form className="k-form jn-form" onSubmit={submit}>
+      {restored && typed && <p className="k-fine" role="status">We kept what you typed earlier on this device. <button type="button" className="jn-again" onClick={() => discardDraft(BLANK)}>Clear the form</button></p>}
       <fieldset className="k-field jn-group">
         <legend className="vp-verse">
           <em>“Give her of the fruit of her hands; And let her own works praise her in the gates.”</em> <small>Proverbs 31:31 KJV</small>

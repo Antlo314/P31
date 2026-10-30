@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { ShieldCheck, User, Mail, Lock, ArrowRight, KeyRound } from 'lucide-react';
+import { friendlyError, slugify } from '../lib/vendorForms';
 import './Login.css';
 
 const Onboarding = () => {
@@ -23,7 +24,7 @@ const Onboarding = () => {
       setStep(2);
       setError('');
     } else {
-      setError('Invalid Access Token. Please verify with your Matriarch.');
+      setError(rpcError ? friendlyError(rpcError, 'We could not check that code.') : 'That access code is not right. Check it with the person who invited you, or email vendor@p31market.com.');
     }
   };
 
@@ -45,23 +46,19 @@ const Onboarding = () => {
       // Note: Supabase often handles profile creation via triggers, 
       // but we'll do manual inserts for the specific curator data here.
       const userId = authData.user.id;
-      const initialSlug = formData.fullName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      const initialSlug = slugify(formData.fullName);
 
       const { error: profileError } = await supabase
         .from('profiles')
         .insert([{ id: userId, full_name: formData.fullName, email: formData.email }]);
 
-      if (profileError) throw profileError;
+      if (profileError && profileError.code !== '23505') throw profileError;
 
-      const { error: curatorError } = await supabase
-        .from('curator_data')
-        .insert([{
-          id: userId,
-          business_name: `${formData.fullName}'s Sanctuary`,
-          slug: initialSlug
-        }]);
-
-      if (curatorError) throw curatorError;
+      // Her shop, with a link made from her name; if that link is taken she picks one in her studio.
+      const shop = { id: userId, business_name: `${formData.fullName.trim()}'s shop` };
+      let { error: curatorError } = await supabase.from('curator_data').insert([initialSlug ? { ...shop, slug: initialSlug } : shop]);
+      if (curatorError && initialSlug && /slug/i.test(curatorError.message || '')) ({ error: curatorError } = await supabase.from('curator_data').insert([shop]));
+      if (curatorError && curatorError.code !== '23505') throw curatorError;
 
       // Holders of the access token are vetted — unlock the studio so they
       // can build their store immediately. The database re-checks the code.
@@ -70,7 +67,7 @@ const Onboarding = () => {
 
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message);
+      setError(friendlyError(err, 'Your studio was not created.'));
     } finally {
       setLoading(false);
     }
@@ -94,7 +91,7 @@ const Onboarding = () => {
           <span className="lg__badge">{step === 1 ? <ShieldCheck size={22} /> : <KeyRound size={22} />}</span>
           {step === 1 && (
             <form onSubmit={handlePasswordCheck} className="lg__form">
-              <h2 className="k-h2 lg__title">Elite <em>access</em></h2>
+              <h2 className="k-h2 lg__title">Your <em>invitation</em></h2>
               <p className="lg__sub">Enter your access code to begin.</p>
               <label className="lg__field">
                 <span>Access code</span>

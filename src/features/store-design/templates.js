@@ -35,7 +35,7 @@ export const STORE_TEMPLATES = [
   },
 ];
 
-export const ACCENTS = ['#3A1C36', '#9B71B2', '#D9A93A', '#8A6D1A', '#374126', '#17A673', '#B83C6E', '#3A1C36', '#111111', '#F2CE4D'];
+export const ACCENTS = ['#3A1C36', '#9B71B2', '#D9A93A', '#8A6D1A', '#374126', '#17A673', '#B83C6E', '#111111', '#F2CE4D'];
 
 export const DEFAULT_DESIGN = { template: 'atelier', ...STORE_TEMPLATES[0].defaults, showAbout: true, showTestimonials: true };
 

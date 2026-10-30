@@ -22,6 +22,8 @@ import GrowPanel from '../features/dashboard/GrowPanel';
 import Tour from '../components/Tour';
 import { CURATOR_TOUR, CURATOR_TOUR_ID } from '../features/dashboard/studioTour';
 import { PRODUCT_TEMPLATES, PRODUCT_BADGES, applyTemplate } from '../features/marketing/productTemplates';
+import { friendlyError, slugify, uploadShopImage, readDraft, writeDraft, clearDraft } from '../lib/vendorForms';
+import { EMAIL } from '../lib/team';
 import './CuratorDashboard.css';
 
 const PhotoStudio = lazy(() => import('../features/photo-studio/PhotoStudio'));
@@ -157,7 +159,7 @@ const CuratorDashboard = () => {
         publicEmail: curatorData.public_email || '',
         bannerUrl: curatorData.banner_url || '',
         logoUrl: curatorData.logo_url || '',
-        themePreference: curatorData.theme_preference || 'classic_gold',
+        themePreference: ({ midnight_obsidian: 'obsidian_dark', botanical_green: 'botanical_sage' })[curatorData.theme_preference] || curatorData.theme_preference || 'classic_gold',
         shopAnnouncement: curatorData.shop_announcement || '',
         customTitle: curatorData.custom_title || ''
       };
@@ -196,7 +198,7 @@ const CuratorDashboard = () => {
 
   const [linkCopied, setLinkCopied] = useState(false);
   const copyShopLink = () => {
-    const fullUrl = `${window.location.origin}/${editData.slug}`;
+    const fullUrl = `${window.location.origin}/${curatorData?.slug || ''}`;
     navigator.clipboard.writeText(fullUrl);
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
@@ -279,19 +281,22 @@ const CuratorDashboard = () => {
     }
   };
 
+  const [stripeMsg, setStripeMsg] = useState('');
   const handleStripeConnect = async () => {
     setStripeLoading(true);
+    setStripeMsg('');
     try {
       const { url } = await invokePayment('stripe-connect');
       window.location.href = url;
     } catch (err) {
-      alert('Stripe Connect Error: ' + err.message);
+      setStripeMsg(`Stripe did not open just now. Please try again in a minute; if it keeps happening, email ${EMAIL.vendors}. (${err.message})`);
       setStripeLoading(false);
     }
   };
 
   const syncStripeStatus = async (openDashboard = false) => {
     setStripeSyncing(true);
+    setStripeMsg('');
     try {
       const status = await invokePayment(
         'stripe-account-status',
@@ -300,7 +305,7 @@ const CuratorDashboard = () => {
       await fetchUserData(user.id);
       if (openDashboard && status.dashboardUrl) window.open(status.dashboardUrl, '_blank');
     } catch (err) {
-      alert('Stripe Status Error: ' + err.message);
+      setStripeMsg(`We could not check your Stripe account just now. Please try again in a minute. (${err.message})`);
     } finally {
       setStripeSyncing(false);
     }
@@ -458,7 +463,7 @@ const CuratorDashboard = () => {
       if (error) throw error;
       fetchEvents();
     } catch (err) {
-      alert('RSVP Error: ' + err.message);
+      alert(friendlyError(err, 'Your RSVP did not go through.'));
     }
   };
 
@@ -551,146 +556,107 @@ const CuratorDashboard = () => {
     }
   };
 
+  // Writes shop fields and proves they landed: an update that matches no row (her shop record was
+  // never created, e.g. sign-up waited on an email confirmation) creates the record instead of
+  // pretending to save.
+  const persistShop = async (fields) => {
+    const { data, error } = await supabase.from('curator_data').update(fields).eq('id', user.id).select('id');
+    if (error) throw error;
+    if (data && data.length) return;
+    const meta = user.user_metadata || {};
+    const { data: prof } = await supabase.from('profiles').select('id').eq('id', user.id).maybeSingle();
+    if (!prof) {
+      const { error: pErr } = await supabase.from('profiles').insert([{ id: user.id, full_name: meta.full_name || '', email: user.email }]);
+      if (pErr && pErr.code !== '23505') throw pErr;
+    }
+    const { error: insErr } = await supabase.from('curator_data').insert([{ id: user.id, business_name: meta.business_name || 'My shop', ...fields }]);
+    if (insErr) throw insErr;
+  };
+
+  // A note beside the save button: { tone: 'ok' | 'error', text }.
+  const [shopMsg, setShopMsg] = useState(null);
+  const sayShop = (tone, text) => {
+    setShopMsg({ tone, text });
+    if (tone === 'ok') setTimeout(() => setShopMsg((m) => (m?.text === text ? null : m)), 4000);
+  };
+
   const handleSave = async (e) => {
-    e.preventDefault();
+    e?.preventDefault?.();
+    const slug = slugify(editData.slug);
+    if (!editData.businessName.trim()) { sayShop('error', 'Please give your shop a name first.'); return; }
+    if (editData.slug && !slug) { sayShop('error', 'Your shop link needs at least one letter or number.'); return; }
     setFormLoading(true);
+    setShopMsg(null);
 
     try {
-      const { error } = await supabase
-        .from('curator_data')
-        .update({
-          business_name: editData.businessName,
-          tagline: editData.tagline,
-          bio: editData.bio,
-          location: editData.location,
-          instagram: editData.instagram,
-          facebook: editData.facebook,
-          website: editData.website,
-          phone: editData.phone,
-          public_email: editData.publicEmail,
-          banner_url: editData.bannerUrl,
-          logo_url: editData.logoUrl,
-          theme_preference: editData.themePreference,
-          shop_announcement: editData.shopAnnouncement,
-          custom_title: editData.customTitle,
-          slug: editData.slug.toLowerCase().replace(/[^a-z0-9-]/g, '')
-        })
-        .eq('id', user.id);
-
-      if (error) throw error;
-      
+      await persistShop({
+        business_name: editData.businessName.trim(),
+        tagline: editData.tagline,
+        bio: editData.bio,
+        location: editData.location,
+        instagram: editData.instagram,
+        facebook: editData.facebook,
+        website: editData.website === 'https://' ? '' : editData.website,
+        phone: editData.phone,
+        public_email: editData.publicEmail,
+        banner_url: editData.bannerUrl,
+        logo_url: editData.logoUrl,
+        theme_preference: editData.themePreference,
+        shop_announcement: editData.shopAnnouncement,
+        custom_title: editData.customTitle,
+        // Empty stays empty (null), so two new shops never collide on a blank link.
+        slug: slug || null
+      });
+      if (slug !== editData.slug) setEditData((d) => ({ ...d, slug }));
       await fetchUserData(user.id);
-      alert('Sanctuary Identity Updated Successfully.');
+      sayShop('ok', 'Saved. Your shop details are up to date.');
     } catch (err) {
-      alert('Error updating profile: ' + err.message);
+      sayShop('error', friendlyError(err, 'Your shop details did not save.'));
     } finally {
       setFormLoading(false);
     }
   };
 
+  const [photoBusy, setPhotoBusy] = useState(''); // 'avatar' | 'banner' | 'logo'
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
+    e.target.value = '';
     if (!file) return;
-
+    setPhotoBusy('avatar');
     try {
-      setFormLoading(true);
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
-
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: publicUrl })
-        .eq('id', user.id);
-
+      const publicUrl = await uploadShopImage(user.id, file, 'avatar', { maxSide: 800 });
+      const { error: updateError } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
       if (updateError) throw updateError;
-      
       await fetchUserData(user.id);
-      alert('Digital Portrait Updated.');
+      sayShop('ok', 'Your photo is updated.');
     } catch (err) {
-      alert('Error uploading image: ' + err.message);
+      sayShop('error', friendlyError(err, 'Your photo did not upload.'));
     } finally {
-      setFormLoading(false);
+      setPhotoBusy('');
     }
   };
 
-  const handleBannerUpload = async (e) => {
+  // Banner and logo save straight away (no need to press Save), and show in the form.
+  const uploadLook = async (e, kind) => {
     const file = e.target.files[0];
+    e.target.value = '';
     if (!file) return;
-
+    setPhotoBusy(kind);
+    setShopMsg(null);
     try {
-      setFormLoading(true);
-      const fileExt = file.name.split('.').pop();
-      const fileName = `banner-${user.id}-${Math.random()}.${fileExt}`;
-      const filePath = fileName;
-
-      const { error: uploadError } = await supabase.storage
-        .from('banners')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage.from('banners').getPublicUrl(filePath);
-
-      const { error: updateError } = await supabase
-        .from('curator_data')
-        .update({ banner_url: publicUrl })
-        .eq('id', user.id);
-
-      if (updateError) throw updateError;
-      
+      const publicUrl = await uploadShopImage(user.id, file, kind, kind === 'logo' ? { maxSide: 1000, keepPng: true } : { maxSide: 2400 });
+      await persistShop(kind === 'logo' ? { logo_url: publicUrl } : { banner_url: publicUrl });
       await fetchUserData(user.id);
-      setEditData(prev => ({ ...prev, bannerUrl: publicUrl }));
-      alert('Sanctuary Banner Updated.');
+      setEditData((prev) => ({ ...prev, [kind === 'logo' ? 'logoUrl' : 'bannerUrl']: publicUrl }));
+      sayShop('ok', kind === 'logo' ? 'Logo saved.' : 'Banner saved.');
     } catch (err) {
-      alert('Error uploading banner: ' + err.message);
+      sayShop('error', friendlyError(err, kind === 'logo' ? 'Your logo did not upload.' : 'Your banner did not upload.'));
     } finally {
-      setFormLoading(false);
+      setPhotoBusy('');
     }
   };
-
-  const handleLogoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      setFormLoading(true);
-      const fileExt = file.name.split('.').pop();
-      const fileName = `logo-${user.id}-${Math.random()}.${fileExt}`;
-      const filePath = fileName;
-
-      const { error: uploadError } = await supabase.storage
-        .from('logos')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage.from('logos').getPublicUrl(filePath);
-
-      const { error: updateError } = await supabase
-        .from('curator_data')
-        .update({ logo_url: publicUrl })
-        .eq('id', user.id);
-
-      if (updateError) throw updateError;
-      
-      await fetchUserData(user.id);
-      setEditData(prev => ({ ...prev, logoUrl: publicUrl }));
-      alert('Boutique Logo Updated.');
-    } catch (err) {
-      alert('Error uploading logo: ' + err.message);
-    } finally {
-      setFormLoading(false);
-    }
-  };
+  const handleBannerUpload = (e) => uploadLook(e, 'banner');
+  const handleLogoUpload = (e) => uploadLook(e, 'logo');
 
   const handlePostAnnouncement = async (e) => {
     e.preventDefault();
@@ -720,29 +686,74 @@ const CuratorDashboard = () => {
     }
   };
 
+  // ── Product form: never loses what she typed ──
+  // The open product (new, or the one being edited) is copied to this browser as she types, so a
+  // reload (phones can reload the page while the Photos app is open) brings it back.
+  const productDraftKey = user?.id ? `p31.productDraft.${user.id}` : null;
+  const productBase = React.useRef(BLANK_PRODUCT);
+  const [productMsg, setProductMsg] = useState('');
+  const [productRestored, setProductRestored] = useState(false);
+  const productDirty = isProductModalOpen && JSON.stringify(productForm) !== JSON.stringify(productBase.current);
+  useEffect(() => {
+    if (!productDraftKey || !isProductModalOpen) return;
+    if (productDirty) writeDraft(productDraftKey, { id: editingProduct?.id ?? null, form: productForm, at: Date.now() });
+  }, [productForm, productDirty, isProductModalOpen, editingProduct, productDraftKey]);
+  useEffect(() => {
+    if (!productDirty) return undefined;
+    const warn = (e) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [productDirty]);
+  // A product she was typing before the page reloaded (kept 14 days).
+  const [savedProductDraft, setSavedProductDraft] = useState(null);
+  useEffect(() => {
+    const d = readDraft(productDraftKey);
+    if (d && d.form && Date.now() - (d.at || 0) < 14 * 864e5) setSavedProductDraft(d);
+    else if (d) clearDraft(productDraftKey);
+  }, [productDraftKey]);
+
+  const openProduct = (p = null) => {
+    const base = p ? productToForm(p) : BLANK_PRODUCT;
+    const draft = savedProductDraft || readDraft(productDraftKey);
+    const useDraft = draft?.form && (draft.id ?? null) === (p?.id ?? null);
+    productBase.current = base;
+    setEditingProduct(p);
+    setProductForm(useDraft ? { ...base, ...draft.form } : base);
+    setProductRestored(!!useDraft);
+    setSavedProductDraft(null);
+    setProductMsg('');
+    setIsProductModalOpen(true);
+  };
+  const resumeProductDraft = () => {
+    const d = savedProductDraft;
+    if (!d) return;
+    const p = d.id != null ? products.find((x) => x.id === d.id) : null;
+    if (d.id != null && !p) { clearDraft(productDraftKey); setSavedProductDraft(null); return; }
+    openProduct(p);
+  };
+  const closeProduct = ({ force = false } = {}) => {
+    if (!force && productDirty && !window.confirm('Close without saving? What you typed for this product will be lost.')) return;
+    clearDraft(productDraftKey);
+    setIsProductModalOpen(false);
+    setEditingProduct(null);
+    setProductForm(BLANK_PRODUCT);
+    productBase.current = BLANK_PRODUCT;
+    setProductRestored(false);
+    setProductMsg('');
+  };
+
   const handleProductImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // 1. Client-side Validation (Supabase Free Tier Optimization)
-    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
-    if (file.size > MAX_SIZE) {
-      alert('Photos must be under 5 MB. Try a smaller one, or tidy it up in the Photo Studio first.');
-      return;
-    }
-
-    if (!file.type.startsWith('image/')) {
-      alert('Only visual artifacts (images) can be uploaded to the boutique.');
-      return;
-    }
-
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (!files.length) return;
     setProductImageLoading(true);
+    setProductMsg('');
     try {
-      await uploadProductImage(file, file.name.split('.').pop());
-      alert('Portrait successfully uploaded to the collective.');
+      const room = Math.max(0, 10 - (productForm.image_urls?.length || 0));
+      for (const file of files.slice(0, room)) await uploadProductImage(file);
+      if (files.length > room) setProductMsg('A product can have up to 10 photos; the extra ones were left out.');
     } catch (err) {
-      console.error('Upload failure:', err);
-      alert('Architectural Error: ' + err.message);
+      setProductMsg(friendlyError(err, 'The photo did not upload.'));
     } finally {
       setProductImageLoading(false);
     }
@@ -750,18 +761,8 @@ const CuratorDashboard = () => {
 
   // Shared by the file picker and Photo Studio. Adds the image to the product
   // being edited (as the main image if there isn't one yet).
-  const uploadProductImage = async (fileOrBlob, ext) => {
-    const filePath = `${user.id}-${Date.now()}-${Math.floor(Math.random() * 1000)}.${ext}`;
-    const { error: uploadError } = await supabase.storage
-      .from('products')
-      .upload(filePath, fileOrBlob, { cacheControl: '3600', upsert: false, contentType: fileOrBlob.type || undefined });
-    if (uploadError) {
-      if (uploadError.message.includes('bucket not found')) {
-        throw new Error('The products repository has not been initialized. Please contact the Master Architect.');
-      }
-      throw uploadError;
-    }
-    const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(filePath);
+  const uploadProductImage = async (fileOrBlob) => {
+    const publicUrl = await uploadShopImage(user.id, fileOrBlob, 'product', { maxSide: 2000, keepPng: fileOrBlob.type === 'image/png' });
     setProductForm(prev => ({
       ...prev,
       image_url: prev.image_url || publicUrl,
@@ -772,73 +773,79 @@ const CuratorDashboard = () => {
 
   // Photo Studio result -> image on the product being edited.
   const usePhotoInProduct = async (blob) => {
-    await uploadProductImage(blob, blob.type === 'image/png' ? 'png' : 'jpg');
+    await uploadProductImage(blob);
     setPhotoStudioOpen(false);
   };
 
   // Photo Studio result from the Studio tab -> start a new product with it.
   const startProductFromPhoto = async (blob) => {
-    setEditingProduct(null);
-    setProductForm(BLANK_PRODUCT);
-    await uploadProductImage(blob, blob.type === 'image/png' ? 'png' : 'jpg');
+    openProduct(null);
+    await uploadProductImage(blob);
     setActiveTab('storefront');
-    setIsProductModalOpen(true);
   };
 
   const saveProduct = async (e) => {
     e.preventDefault();
-    
+    setProductMsg('');
+    if (!productForm.name.trim()) { setProductMsg('Please give the product a name.'); return; }
     const priceNum = parseFloat(productForm.price);
     if (!Number.isFinite(priceNum) || priceNum <= 0) {
-      alert('Please set a valid price greater than $0.');
+      setProductMsg('Please set a price, for example 25 or 25.00.');
       return;
     }
     if (priceNum < 0.5 && !productForm.external_url) {
-      alert('Card checkout requires a minimum price of $0.50. Set a higher price or add an external purchase link.');
+      setProductMsg('Card checkout needs a price of at least $0.50. Set a higher price, or add a link to where it is sold.');
       return;
     }
+    if (productImageLoading) { setProductMsg('One moment: a photo is still uploading.'); return; }
     setFormLoading(true);
     try {
       const row = formToProduct(productForm);
       const targetCuratorId = (reviewingCurator && isAdmin) ? reviewingCurator.id : user.id;
-      const { error } = editingProduct
-        ? await supabase.from('products').update(row).eq('id', editingProduct.id)
-        : await supabase.from('products').insert([{ ...row, curator_id: targetCuratorId, sort_order: products.length }]);
+      const { data, error } = editingProduct
+        ? await supabase.from('products').update(row).eq('id', editingProduct.id).select('id')
+        : await supabase.from('products').insert([{ ...row, curator_id: targetCuratorId, sort_order: products.length }]).select('id');
       if (error) throw error;
-      setIsProductModalOpen(false);
-      setEditingProduct(null);
-      setProductForm(BLANK_PRODUCT);
+      if (!data || !data.length) throw new Error('permission denied');
+      closeProduct({ force: true });
       if (reviewingCurator && isAdmin) {
         openReviewer(reviewingCurator);
       }
       fetchProducts();
     } catch (err) {
-      alert('Error saving product: ' + err.message);
+      setProductMsg(friendlyError(err, 'The product did not save.'));
     } finally {
       setFormLoading(false);
     }
   };
 
+  const [productListMsg, setProductListMsg] = useState('');
   const deleteProduct = async (id) => {
-    if (window.confirm('Remove this artisan item from your boutique?')) {
-      await supabase.from('products').delete().eq('id', id);
-      fetchProducts();
+    if (!window.confirm('Delete this product from your shop? This cannot be undone. (To take it down for now, edit it and untick "Visible in my storefront" instead.)')) return;
+    setProductListMsg('');
+    const { data, error } = await supabase.from('products').delete().eq('id', id).select('id');
+    if (error || !data?.length) {
+      setProductListMsg(error ? friendlyError(error, 'The product was not deleted.') : 'The product was not deleted. It may have orders attached; hide it instead (edit it and untick "Visible in my storefront").');
     }
+    fetchProducts();
   };
 
   const submitForApproval = async () => {
     try {
-      await supabase.from('curator_data').update({ status: 'pending' }).eq('id', user.id);
+      const { data, error } = await supabase.from('curator_data').update({ status: 'pending' }).eq('id', user.id).select('status');
+      if (error) throw error;
+      if (!data?.length || data[0].status !== 'pending') throw new Error('permission denied');
       await fetchUserData(user.id);
-      alert('Thank you! Your shop is with the P31 team for review. You will get an email as soon as it is live.');
+      sayShop('ok', 'Sent. Your shop is with the P31 team for review; you will get an email when it is live.');
     } catch (err) {
-      alert('Error: ' + err.message);
+      sayShop('error', friendlyError(err, 'Your shop was not sent for review.'));
     }
   };
 
   const approveVendor = async (id, feedback = '') => {
     await supabase.from('curator_data').update({ 
       status: 'approved', 
+      is_paid: true,
       is_published: true,
       admin_feedback: feedback 
     }).eq('id', id);
@@ -860,10 +867,12 @@ const CuratorDashboard = () => {
 
   const saveTestimonial = async (e) => {
     e.preventDefault();
-    await supabase.from('testimonials').insert([{
+    const { error } = await supabase.from('testimonials').insert([{
       ...testimonialForm,
       curator_id: user.id
     }]);
+    // On failure keep the modal and what she typed.
+    if (error) { alert(friendlyError(error, 'The testimonial did not save.')); return; }
     setIsTestimonialModalOpen(false);
     setTestimonialForm({ customer_name: '', content: '', rating: 5 });
     fetchTestimonials();
@@ -949,6 +958,18 @@ const CuratorDashboard = () => {
     }
   };
 
+    // From the setup list: open the tab, then bring the right part into view.
+  const goToStep = (tab, target) => {
+    if (target === 'add-product') { setActiveTab('storefront'); openProduct(null); return; }
+    setActiveTab(tab);
+    setTimeout(() => {
+      const el = target && document.getElementById(target);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) el.focus({ preventScroll: true });
+    }, 200);
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
@@ -964,32 +985,18 @@ const CuratorDashboard = () => {
     return (
       <div className="dashboard-loading flex-center">
         <div className="loader-ring"></div>
-        <p className="font-label text-gold animate-pulse mt-4">Initializing Studio...</p>
+        <p className="font-label text-gold animate-pulse mt-4">Opening your studio…</p>
       </div>
     );
   }
 
   if (!user) {
-    return <div className="dashboard-container flex-center">Redirecting to Login...</div>;
+    return <div className="dashboard-container flex-center">Taking you to sign in…</div>;
   }
 
-  // PAYMENT GATING Logic (Bypassed for Admins)
-  if (curatorData && !curatorData.is_paid && !isAdmin) {
-    return (
-      <div className="dashboard-container payment-gate">
-        <div className="gate-content glass-card shadow-lg text-center">
-          <ShieldAlert size={64} className="text-gold mb-4" />
-          <h1 className="font-headline text-primary">Establishment Pending</h1>
-          <p className="gate-message">
-            Check your email for onboarding message and payment link.
-          </p>
-          <div className="divider-thistle my-4"></div>
-          <p className="text-sm opacity-70">Once your early registration fee is verified, your full sanctuary controls will be unlocked.</p>
-          <button onClick={handleSignOut} className="btn-outline-primary mt-6">Return to Public Site</button>
-        </div>
-      </div>
-    );
-  }
+  // A shop waiting for approval is set up here too: it stays private (the database shows unapproved
+  // shops only to their owner) until the P31 team approves it, and the checklist says so. The old
+  // "Establishment Pending" wall pointed to a payment link that no longer exists.
 
   return (
     <div className={`dashboard-container ${editData.themePreference || 'classic_gold'}`}>
@@ -1029,6 +1036,10 @@ const CuratorDashboard = () => {
               </div>
             )}
 
+                        {!isAdmin && (
+              <SetupChecklist curator={curatorData} products={products} onGo={goToStep} onSubmit={submitForApproval} />
+            )}
+
             {/* Identity Stats Overview */}
             <div className="stats-row mb-8">
               <div className="stat-pill glass-card">
@@ -1040,7 +1051,7 @@ const CuratorDashboard = () => {
                 <span className="stat-value text-gold">{myStats.clicks}</span>
               </div>
               <div className="stat-pill glass-card">
-                <span className="stat-label">Live Products</span>
+                <span className="stat-label">Products</span>
                 <span className="stat-value text-gold">{products.length}</span>
               </div>
             </div>
@@ -1049,7 +1060,7 @@ const CuratorDashboard = () => {
               <section className="dashboard-card glass-card">
                 <h2 className="card-title text-gold">
                   <User size={20} /> Your shop details
-                  <HelpTip title="Setting Up Your Identity">
+                                    <HelpTip title="Your shop details">
                     <p>This page is your shop's "front door." Here's what each part means:</p>
                     <ol>
                       <li><strong>Business Name</strong> — the name customers see at the top of your shop.</li>
@@ -1061,53 +1072,64 @@ const CuratorDashboard = () => {
                   </HelpTip>
                 </h2>
 
-                {/* Digital Portrait Section */}
+                                {/* Her photo (shown beside her name in chat and on her shop) */}
                 <div className="avatar-upload-section">
-                  <div className="avatar-preview-wrapper" onClick={() => document.getElementById('avatar-input').click()}>
-                    <img src={profile?.avatar_url || 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200'} alt="Profile" />
+                  <label htmlFor="avatar-input" className="avatar-preview-wrapper" aria-label="Change your photo">
+                    {photoBusy === 'avatar' ? <Loader2 className="animate-spin text-gold" /> : profile?.avatar_url
+                      ? <img src={profile.avatar_url} alt="Your photo" />
+                      : <span className="avatar-initial" aria-hidden="true">{(profile?.full_name || editData.businessName || '?').trim().charAt(0).toUpperCase()}</span>}
                     <div className="avatar-overlay">
                       <Camera size={24} />
                     </div>
-                  </div>
+                  </label>
                   <input type="file" id="avatar-input" hidden accept="image/*" onChange={handleImageUpload} />
                   <div className="avatar-meta">
                     <h4 className="text-primary font-bold">{profile?.full_name}</h4>
-                    <p className="text-xs opacity-60">Owner of {editData.businessName || 'your new shop'}</p>
+                    <p className="text-xs opacity-60">Owner of {editData.businessName || 'your new shop'} · tap the circle to add your photo</p>
                   </div>
                 </div>
                 
                 <form onSubmit={handleSave} className="premium-form dashboard-form" data-tour="identity-form">
+                                    <p className="help-text form-required-note">Fields marked <span className="req">*</span> are needed. Everything else is optional.</p>
                   <div className="form-group">
-                    <label>Business Name</label>
-                    <input 
-                      type="text" 
+                    <label htmlFor="shop-name">Shop name <span className="req">*</span></label>
+                    <input
+                      id="shop-name"
+                      type="text"
                       value={editData.businessName}
                       onChange={handleBusinessNameChange}
+                      autoComplete="organization"
                       required
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>Shop link (p31market.com/your-shop)</label>
+                                        <label htmlFor="shop-link">Shop link <span className="req">*</span></label>
                      <div className="input-with-prefix">
                        <span className="url-prefix text-olive">p31market.com/</span>
-                       <input 
-                         type="text" 
+                                              <input
+                         id="shop-link"
+                         type="text"
                          placeholder="e.g. luxe-candles"
                          value={editData.slug}
-                         onChange={(e) => setEditData({...editData, slug: e.target.value})}
-                         pattern="[a-zA-Z0-9-]+"
+                         autoCapitalize="none"
+                         autoCorrect="off"
+                         spellCheck={false}
+                         // Spaces become dashes and capitals become small letters as she types.
+                         onChange={(e) => setEditData({...editData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')})}
                        />
                        <button 
                          type="button" 
                          onClick={copyShopLink} 
                          className="slug-copy-btn"
-                         title="Copy Shop Link"
+                                                  title="Copy shop link"
+                         aria-label="Copy shop link"
+                         disabled={!curatorData?.slug}
                        >
                          {linkCopied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
                        </button>
                      </div>
-                    <p className="help-text">Letters, numbers, and hyphens only.</p>
+                                        <p className="help-text">{editData.slug ? <>Your shop&apos;s address: <strong>p31market.com/{editData.slug}</strong>. Small letters, numbers and dashes.</> : 'Your shop web address, made from your shop name. Small letters, numbers and dashes.'}</p>
                   </div>
 
                   <div className="form-group">
@@ -1122,7 +1144,7 @@ const CuratorDashboard = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Tagline</label>
+                                        <label>Tagline (one short line)</label>
                     <input 
                       type="text" 
                       value={editData.tagline}
@@ -1134,8 +1156,9 @@ const CuratorDashboard = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Your story</label>
+                                        <label>About your shop (your story)</label>
                     <textarea 
+                      id="shop-about"
                       rows="4" 
                       value={editData.bio}
                                             onChange={(e) => setEditData({...editData, bio: e.target.value})}
@@ -1213,19 +1236,19 @@ const CuratorDashboard = () => {
                   </div>
 
                 <div className="form-divider-label">
-                  <Sparkles size={16} /> Theme and announcement
+                  <Sparkles size={16} /> Studio colours and shop announcement
                 </div>
 
                 <div className="form-group">
-                  <label>Theme</label>
+                  <label>Studio colours (only you see these)</label>
                   <select 
                     value={editData.themePreference}
                     onChange={(e) => setEditData({...editData, themePreference: e.target.value})}
                     className="premium-select"
                   >
-                    <option value="classic_gold">Classic P31 Gold</option>
-                    <option value="midnight_obsidian">Midnight Obsidian (High Contrast)</option>
-                    <option value="botanical_green">Botanical Forest (Green Accent)</option>
+                    <option value="classic_gold">P31 gold (light)</option>
+                    <option value="obsidian_dark">Dark</option>
+                    <option value="botanical_sage">Sage green</option>
                   </select>
                 </div>
 
@@ -1237,27 +1260,32 @@ const CuratorDashboard = () => {
                     value={editData.shopAnnouncement}
                     onChange={(e) => setEditData({...editData, shopAnnouncement: e.target.value})}
                   />
-                  <p className="help-text">Appears as a prominent banner at the top of your shop.</p>
+                  <p className="help-text">Optional. Shows as a strip across the top of your shop.</p>
                 </div>
 
-                <button type="submit" className="btn-solid-gold mt-8" disabled={formLoading}>
-                  {formLoading ? 'Saving…' : 'Save shop details'}
-                </button>
-                  
-                  {editData.slug && (
-                    <Link to={`/${editData.slug}`} target="_blank" className="view-live-link text-gold">
-                      View Live Storefront <ExternalLink size={14} />
+                <div className={`shop-savebar ${shopDirty ? 'is-dirty' : ''}`}>
+                  <button type="submit" className="btn-solid-gold" disabled={formLoading}>
+                    {formLoading ? 'Saving…' : <><Save size={16} /> Save shop details</>}
+                  </button>
+                  <span className={`shop-savebar__note ${shopMsg?.tone === 'error' ? 'is-error' : ''}`} role="status" aria-live="polite">
+                    {shopMsg ? shopMsg.text : shopDirty ? 'You have changes that are not saved yet. They are kept on this device until you save.' : curatorData ? 'All changes saved.' : ''}
+                  </span>
+                </div>
+
+                  {curatorData?.slug && (
+                    <Link to={`/${curatorData.slug}`} target="_blank" className="view-live-link text-gold">
+                      {curatorData.status === 'approved' ? 'View my shop' : 'Preview my shop (only you can see it until it is approved)'} <ExternalLink size={14} />
                     </Link>
                   )}
                 </form>
 
-                {/* Architectural Guidance Alert */}
+                {/* A note from the P31 team */}
                 {curatorData?.admin_feedback && curatorData?.status !== 'approved' && (
                   <div className="admin-feedback-alert glass-card mt-8" style={{ background: 'rgba(58, 28, 54, 0.05)', borderColor: 'var(--metallic-gold)' }}>
                     <div className="flex items-start gap-3">
                       <ShieldAlert className="text-gold mt-1" size={20} />
                       <div>
-                        <h4 className="font-bold text-primary">Architectural Guidance</h4>
+                                                <h4 className="font-bold text-primary">A note from the P31 team</h4>
                         <p className="text-sm italic mt-1 opacity-80">"{curatorData.admin_feedback}"</p>
                       </div>
                     </div>
@@ -1266,7 +1294,7 @@ const CuratorDashboard = () => {
               </section>
 
               <div className="dashboard-sidebar-panels">
-                <SetupChecklist curator={curatorData} editData={editData} products={products} onGo={setActiveTab} />
+                
                 <MyMarkets />
                 <section className="dashboard-card status-card glass-card">
                   <h3 className="card-title text-forest"><Sparkles size={18} /> Market Status</h3>
@@ -1375,7 +1403,7 @@ const CuratorDashboard = () => {
                               onClick={() => handleRSVP(event.id)}
                               className="btn-solid-gold w-full py-2 text-[10px] font-bold"
                             >
-                              Confirm Exhibit Space
+                                                            Count me in
                             </button>
                           )}
                         </div>
@@ -1386,44 +1414,25 @@ const CuratorDashboard = () => {
                 </section>
 
                 <section className="dashboard-card glass-card">
-                  <h2 className="card-title text-gold"><Sparkles size={20} /> Atmospheric Themes</h2>
-                  <p className="text-xs opacity-60 mb-6">Choose the visual frequency of your sanctuary.</p>
-                  <div className="theme-grid grid grid-cols-3 gap-4">
-                    {['classic_gold', 'obsidian_dark', 'botanical_sage'].map(t => (
-                      <div 
-                        key={t}
-                        onClick={() => setEditData({...editData, themePreference: t})}
-                        className={`theme-swatch p-4 rounded-xl border-2 transition-all cursor-pointer ${editData.themePreference === t ? 'border-gold bg-gold-glow' : 'border-thistle hover:border-gold'}`}
-                      >
-                        <div className={`swatch-preview h-12 w-full rounded-md mb-2 ${t}`}></div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider block text-center">
-                          {t.replace('_', ' ')}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-                <section className="dashboard-card glass-card">
-                  <h2 className="card-title text-gold"><QrCode size={20} /> Share Your Sanctuary</h2>
+                  <h2 className="card-title text-gold"><QrCode size={20} /> Share your shop</h2>
                   <div className="qr-share-layout flex flex-col items-center gap-6 py-8">
                     <div className="qr-container p-6 bg-white rounded-2xl shadow-xl border-4 border-gold">
-                      {editData.slug ? (
+                      {curatorData?.slug ? (
                         <QRCodeSVG 
                           id="sanctuary-qr"
-                          value={`${window.location.origin}/${editData.slug}`} 
+                          value={`${window.location.origin}/${curatorData?.slug}`} 
                           size={200}
                           level="H"
                           includeMargin={true}
                         />
                       ) : (
-                        <div className="flex-center h-48 w-48 text-gray-400 italic">Add your shop link first</div>
+                        <div className="flex-center h-48 w-48 text-gray-400 italic">Save your shop link first</div>
                       )}
                     </div>
                     <div className="text-center">
-                      <p className="text-sm opacity-70 mb-6">Display this code at physical markets to bridge your digital and physical influence.</p>
+                      <p className="text-sm opacity-70 mb-6">Print this code for your table at markets: phones scan it and open your shop.</p>
                       <button 
-                        disabled={!editData.slug}
+                        disabled={!curatorData?.slug}
                         onClick={() => {
                           const svg = document.getElementById('sanctuary-qr');
                           if (!svg) return;
@@ -1437,7 +1446,7 @@ const CuratorDashboard = () => {
                             ctx.drawImage(img, 0, 0);
                             const pngFile = canvas.toDataURL("image/png");
                             const downloadLink = document.createElement("a");
-                            downloadLink.download = `${editData.slug}-qr-code.png`;
+                            downloadLink.download = `${curatorData?.slug || "shop"}-qr-code.png`;
                             downloadLink.href = pngFile;
                             downloadLink.click();
                           };
@@ -1445,7 +1454,7 @@ const CuratorDashboard = () => {
                         }}
                         className="btn-outline-primary flex items-center gap-2"
                       >
-                        <Download size={18} /> Download Brand QR
+                        <Download size={18} /> Download QR code
                       </button>
                     </div>
                   </div>
@@ -1474,17 +1483,14 @@ const CuratorDashboard = () => {
                 <p>Your products, your banner and logo, and how you get paid.</p>
               </div>
               <div className="flex-center gap-4">
-                {editData.slug && (
-                  <Link to={`/${editData.slug}`} target="_blank" className="btn-outline-primary flex-center gap-2">
-                    <ExternalLink size={16} /> View Store
+                {curatorData?.slug && (
+                  <Link to={`/${curatorData.slug}`} target="_blank" className="btn-outline-primary flex-center gap-2">
+                    <ExternalLink size={16} /> {curatorData.status === 'approved' ? 'View my shop' : 'Preview my shop'}
                   </Link>
                 )}
-                <button 
-                  onClick={() => {
-                    setEditingProduct(null);
-                                        setProductForm(BLANK_PRODUCT);
-                    setIsProductModalOpen(true);
-                  }}
+                <button
+                  type="button"
+                  onClick={() => openProduct(null)}
                   className="btn-solid-gold flex-center gap-2"
                   data-tour="add-product"
                 >
@@ -1492,6 +1498,17 @@ const CuratorDashboard = () => {
                 </button>
               </div>
             </header>
+
+            {savedProductDraft && !isProductModalOpen && (
+              <div className="draft-resume glass-card" role="status">
+                <span><strong>You were adding a product{savedProductDraft.form?.name ? `: ${savedProductDraft.form.name}` : ''}.</strong> What you typed is kept.</span>
+                <span className="draft-resume__btns">
+                  <button type="button" className="btn-solid-gold btn-sm" onClick={resumeProductDraft}>Continue</button>
+                  <button type="button" className="btn-outline-primary btn-sm" onClick={() => { if (window.confirm('Throw away the product you were typing?')) { clearDraft(productDraftKey); setSavedProductDraft(null); } }}>Discard</button>
+                </span>
+              </div>
+            )}
+            {productListMsg && <p className="form-msg is-error" role="alert">{productListMsg}</p>}
 
             {/* Nudge: shoppers can only pay once Stripe card payments are live */}
             {!curatorData?.stripe_charges_enabled && (
@@ -1512,7 +1529,7 @@ const CuratorDashboard = () => {
             )}
 
             {/* Storefront Aesthetic & Payment Manager */}
-            <section className="storefront-aesthetics glass-card mb-8" data-tour="aesthetics">
+            <section className="storefront-aesthetics glass-card mb-8" data-tour="aesthetics" id="shop-photos">
               <div className="flex-between mb-6">
                 <h2 className="card-title text-gold m-0">
                   <Sparkles size={20} /> Banner, logo and payments
@@ -1523,44 +1540,44 @@ const CuratorDashboard = () => {
                       <li>Click either box to upload from your phone or computer.</li>
                       <li>Scroll down to add <strong>how customers pay you</strong> — tap the ? next to that section for a walkthrough.</li>
                     </ol>
-                    <p className="helptip-note">Always press <strong>Save Settings</strong> (top right of this box) after making changes.</p>
+                    <p className="helptip-note">Your banner and logo save on their own as soon as they upload.</p>
                   </HelpTip>
                 </h2>
-                <button onClick={handleSave} className="btn-solid-gold btn-sm" disabled={formLoading}>
-                  <Save size={14} /> {formLoading ? 'Saving...' : 'Save Settings'}
-                </button>
+                <span className="text-xs opacity-60">Photos save on their own</span>
               </div>
 
               <div className="aesthetics-grid mb-8">
                 <div className="aesthetic-upload">
-                  <label className="text-xs font-bold uppercase tracking-wider opacity-60 mb-2 block">Shop Banner</label>
-                  <div className="banner-preview-wrapper" onClick={() => document.getElementById('banner-input').click()}>
-                    {editData.bannerUrl ? <img src={editData.bannerUrl} alt="Banner" /> : <div className="banner-placeholder"><Camera size={32} /><p>Upload Banner</p></div>}
+                  <span className="text-xs font-bold uppercase tracking-wider opacity-60 mb-2 block">Shop banner (wide photo)</span>
+                  <label htmlFor="banner-input" className="banner-preview-wrapper" aria-label="Upload your shop banner">
+                    {photoBusy === 'banner' ? <div className="banner-placeholder"><Loader2 size={28} className="animate-spin" /><p>Uploading…</p></div> : editData.bannerUrl ? <img src={editData.bannerUrl} alt="Banner" /> : <div className="banner-placeholder"><Camera size={32} /><p>Tap to add a banner</p></div>}
                     <div className="upload-overlay"><Camera size={24} /></div>
-                  </div>
+                  </label>
                   <input type="file" id="banner-input" hidden accept="image/*" onChange={handleBannerUpload} />
                 </div>
                 <div className="aesthetic-upload logo-upload">
-                  <label className="text-xs font-bold uppercase tracking-wider opacity-60 mb-2 block">Shop Logo</label>
-                  <div className="logo-preview-wrapper" onClick={() => document.getElementById('logo-input').click()}>
-                    {editData.logoUrl ? <img src={editData.logoUrl} alt="Logo" /> : <div className="logo-placeholder"><Sparkles size={24} /></div>}
+                  <span className="text-xs font-bold uppercase tracking-wider opacity-60 mb-2 block">Shop logo (square)</span>
+                  <label htmlFor="logo-input" className="logo-preview-wrapper" aria-label="Upload your shop logo">
+                    {photoBusy === 'logo' ? <div className="logo-placeholder"><Loader2 size={22} className="animate-spin" /></div> : editData.logoUrl ? <img src={editData.logoUrl} alt="Logo" /> : <div className="logo-placeholder"><Camera size={22} /></div>}
                     <div className="upload-overlay"><Camera size={18} /></div>
-                  </div>
+                  </label>
                   <input type="file" id="logo-input" hidden accept="image/*" onChange={handleLogoUpload} />
                 </div>
               </div>
+              {shopMsg && <p className={`form-msg ${shopMsg.tone === 'error' ? 'is-error' : 'is-ok'}`} role="status">{shopMsg.text}</p>}
 
               <div className="divider-thistle mb-6"></div>
 
               {/* Stripe Connect — the only way shoppers pay: card checkout with direct payouts */}
               <div className="stripe-connect-panel" id="stripe-connect-section" data-tour="payments">
+                {stripeMsg && <p className="form-msg is-error" role="alert">{stripeMsg}</p>}
                 <div className="flex-between mb-4">
                   <h3 className="card-title text-gold m-0" style={{fontSize: '1rem'}}>
-                    <CreditCard size={18} /> Card Payments (Stripe)
+                    <CreditCard size={18} /> Card payments (Stripe)
                   </h3>
                   <span className={`stripe-status-pill ${curatorData?.stripe_charges_enabled ? 'live' : curatorData?.stripe_account_id ? 'pending' : 'off'}`}>
-                    {curatorData?.stripe_charges_enabled ? '● Live — Accepting Payments' :
-                     curatorData?.stripe_account_id ? '● Setup Incomplete' : '○ Not Connected'}
+                    {curatorData?.stripe_charges_enabled ? '● Ready: taking payments' :
+                     curatorData?.stripe_account_id ? '● Not finished' : '○ Not connected yet'}
                   </span>
                 </div>
 
@@ -1584,16 +1601,15 @@ const CuratorDashboard = () => {
                 {curatorData?.stripe_account_id && !curatorData?.stripe_charges_enabled && (
                   <>
                     <p className="text-sm opacity-70 mb-4">
-                      Your Stripe account was created but onboarding isn't finished. Complete it to start
-                      accepting card payments on your storefront.
+                      Your Stripe account is started but not finished. Tap Finish Stripe setup and complete what Stripe asks for; then shoppers can pay you.
                     </p>
                     <div className="flex gap-3 flex-wrap">
                       <button type="button" onClick={handleStripeConnect} disabled={stripeLoading} className="btn-solid-gold flex-center gap-2">
                         {stripeLoading ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}
-                        Finish Stripe Setup
+                        Finish Stripe setup
                       </button>
                       <button type="button" onClick={() => syncStripeStatus()} disabled={stripeSyncing} className="btn-outline-primary flex-center gap-2">
-                        <RefreshCw size={14} className={stripeSyncing ? 'animate-spin' : ''} /> Refresh Status
+                        <RefreshCw size={14} className={stripeSyncing ? 'animate-spin' : ''} /> Refresh status
                       </button>
                     </div>
                   </>
@@ -1602,13 +1618,12 @@ const CuratorDashboard = () => {
                 {curatorData?.stripe_charges_enabled && (
                   <>
                     <p className="text-sm opacity-70 mb-4">
-                      Your storefront is accepting card payments. Each product with a price now shows a native
-                      "Buy Now" checkout — payouts go {curatorData?.stripe_payouts_enabled ? 'directly to your bank account' : 'to your Stripe balance (add a bank account in Stripe to enable payouts)'}.
+                      Your shop is taking card payments: shoppers can buy any product that has a price. Your money goes {curatorData?.stripe_payouts_enabled ? 'straight to your bank account' : 'to your Stripe balance for now (add a bank account in Stripe so it can be paid out)'}.
                     </p>
                     <div className="flex gap-3 flex-wrap">
                       <button type="button" onClick={() => syncStripeStatus(true)} disabled={stripeSyncing} className="btn-solid-gold flex-center gap-2">
                         {stripeSyncing ? <Loader2 size={16} className="animate-spin" /> : <ExternalLink size={16} />}
-                        Open Stripe Dashboard
+                        Open my Stripe dashboard
                       </button>
                       <button type="button" onClick={() => setActiveTab('sales')} className="btn-outline-primary flex-center gap-2">
                         <DollarSign size={14} /> View Sales
@@ -1635,12 +1650,8 @@ const CuratorDashboard = () => {
                     <h3 className="font-headline">{p.name}</h3>
                     <p className="product-price text-gold">${p.price}</p>
                     <div className="product-actions flex-center gap-4 mt-4">
-                      <button onClick={() => {
-                        setEditingProduct(p);
-                                                setProductForm(productToForm(p));
-                        setIsProductModalOpen(true);
-                      }} className="icon-btn"><Settings size={16} /></button>
-                      <button onClick={() => deleteProduct(p.id)} className="icon-btn text-red"><Trash2 size={16} /></button>
+                      <button type="button" onClick={() => openProduct(p)} className="icon-btn" aria-label={`Edit ${p.name}`} title="Edit"><Settings size={16} /></button>
+                      <button type="button" onClick={() => deleteProduct(p.id)} className="icon-btn text-red" aria-label={`Delete ${p.name}`} title="Delete"><Trash2 size={16} /></button>
                     </div>
                   </div>
                 </div>
@@ -1648,8 +1659,8 @@ const CuratorDashboard = () => {
               {products.length === 0 && (
                 <div className="empty-boutique text-center py-20 opacity-50">
                   <ShoppingCart size={48} className="mx-auto mb-4" />
-                  <p className="font-headline">Your collection is empty.</p>
-                  <p className="text-sm">Begin by adding your first artisan artifact above.</p>
+                  <p className="font-headline">No products yet.</p>
+                  <p className="text-sm">Tap <strong>Add product</strong> above to list your first one. A phone photo is perfect.</p>
                 </div>
               )}
             </div>
@@ -1667,8 +1678,17 @@ const CuratorDashboard = () => {
             {/* Product Modal */}
             {isProductModalOpen && (
               <div className="modal-overlay flex-center">
-                <div className="modal-content glass-card shadow-2xl p-8 max-w-lg w-full">
-                  <h2 className="font-headline text-primary mb-6">{editingProduct ? 'Edit product' : 'New product'}</h2>
+                <div className="modal-content glass-card shadow-2xl p-8 max-w-lg w-full" role="dialog" aria-modal="true" aria-label={editingProduct ? 'Edit product' : 'New product'}>
+                  <div className="product-modal__head">
+                    <h2 className="font-headline text-primary m-0">{editingProduct ? 'Edit product' : 'New product'}</h2>
+                    <button type="button" className="icon-btn" onClick={() => closeProduct()} aria-label="Close"><X size={18} /></button>
+                  </div>
+                  {productRestored && (
+                    <p className="form-msg is-ok" role="status">We kept what you were typing.{' '}
+                      <button type="button" className="link-btn" onClick={() => { if (window.confirm('Start this product over? What you typed will be cleared.')) { clearDraft(productDraftKey); setProductForm(productBase.current); setProductRestored(false); } }}>Start over</button>
+                    </p>
+                  )}
+                  <p className="help-text form-required-note">Fields marked <span className="req">*</span> are needed.</p>
                   <form onSubmit={saveProduct} className="premium-form">
                     {!editingProduct && (
                       <div className="form-group product-templates">
@@ -1684,13 +1704,13 @@ const CuratorDashboard = () => {
                       </div>
                     )}
                     <div className="product-image-uploader mb-6">
-                      <div className="avatar-preview-wrapper bg-muted flex-center" onClick={() => document.getElementById('prod-img-input').click()}>
+                      <label htmlFor="prod-img-input" className="avatar-preview-wrapper bg-muted flex-center" aria-label="Add a product photo">
                         {productImageLoading ? <Loader2 className="animate-spin text-gold" /> : (
                           productForm.image_url ? <img src={productForm.image_url} alt="Main" /> : <Plus size={32} className="text-gold" />
                         )}
-                      </div>
-                                            <input type="file" id="prod-img-input" hidden accept="image/*" onChange={handleProductImageUpload} />
-                      <p className="help-text">Select the primary artifact portrait.</p>
+                      </label>
+                                            <input type="file" id="prod-img-input" hidden accept="image/*" multiple onChange={handleProductImageUpload} />
+                      <p className="help-text">{productImageLoading ? 'Uploading your photo…' : productForm.image_url ? 'Main photo. Tap it to add more (up to 10).' : 'Tap the circle to add photos from your phone or computer.'}</p>
                       <button type="button" className="btn-outline-primary flex-center gap-2 mt-2" onClick={() => setPhotoStudioOpen(true)}>
                         <Sparkles size={16} /> Remove background &amp; stage in Photo Studio
                       </button>
@@ -1699,40 +1719,40 @@ const CuratorDashboard = () => {
                     {productForm.image_urls?.length > 0 && (
                       <div className="form-group">
                         <label>Photos ({productForm.image_urls.length}/10)</label>
-                        <div className="flex gap-2 flex-wrap mt-2">
+                        <div className="product-thumbs">
                           {productForm.image_urls.map((url, i) => (
-                            <div key={i} className="relative w-16 h-16 rounded border border-thistle overflow-hidden group">
-                              <img src={url} className="w-full h-full object-cover" alt={`Gallery ${i}`} />
+                            <div key={i} className="product-thumb">
+                              <img src={url} alt={i === 0 ? "Main photo" : `Photo ${i + 1}`} />
                               <button 
                                 type="button"
-                                onClick={() => setProductForm(prev => ({
-                                  ...prev, 
-                                  image_urls: prev.image_urls.filter((_, idx) => idx !== i),
-                                  image_url: prev.image_url === url ? (prev.image_urls[1] || '') : prev.image_url
-                                }))}
-                                className="absolute inset-0 bg-red-500/80 text-white flex-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => setProductForm(prev => {
+                                  const rest = prev.image_urls.filter((_, idx) => idx !== i);
+                                  return { ...prev, image_urls: rest, image_url: prev.image_url === url ? (rest[0] || '') : prev.image_url };
+                                })}
+                                className="product-photo-remove"
+                                aria-label="Remove this photo"
                               >
                                 <Trash2 size={12} />
                               </button>
                             </div>
                           ))}
                           {productForm.image_urls.length < 10 && (
-                            <button type="button" onClick={() => document.getElementById('prod-img-input').click()} className="w-16 h-16 rounded border-2 border-dashed border-thistle flex-center text-gold hover:border-gold transition-colors">
+                            <label htmlFor="prod-img-input" className="product-thumb product-thumb--add" aria-label="Add another photo">
                               <Plus size={16} />
-                            </button>
+                            </label>
                           )}
                         </div>
                       </div>
                     )}
 
                     <div className="form-group">
-                      <label>Product name</label>
-                      <input type="text" value={productForm.name} onChange={e => setProductForm({...productForm, name: e.target.value})} required />
+                      <label htmlFor="prod-name">Product name <span className="req">*</span></label>
+                      <input id="prod-name" type="text" value={productForm.name} onChange={e => setProductForm({...productForm, name: e.target.value})} required />
                     </div>
                     <div className="form-row-grid">
                       <div className="form-group">
-                        <label>Price (USD)</label>
-                        <input type="number" step="0.01" min="0.50" placeholder="25.00" value={productForm.price} onChange={e => setProductForm({...productForm, price: e.target.value})} required />
+                        <label htmlFor="prod-price">Price in dollars <span className="req">*</span></label>
+                        <input id="prod-price" type="number" inputMode="decimal" step="0.01" min="0.50" placeholder="25.00" value={productForm.price} onChange={e => setProductForm({...productForm, price: e.target.value})} required />
                       </div>
                       <div className="form-group">
                         <label>Category</label>
@@ -1750,7 +1770,7 @@ const CuratorDashboard = () => {
                         </select>
                       </div>
                       <div className="form-group">
-                        <label>Availability Status</label>
+                        <label>Availability</label>
                         <select 
                           value={productForm.stock_status} 
                           onChange={e => setProductForm({...productForm, stock_status: e.target.value})}
@@ -1764,7 +1784,7 @@ const CuratorDashboard = () => {
                       </div>
                     </div>
                     <div className="form-group">
-                      <label>External Purchase URL (Optional)</label>
+                      <label>Sold on another website? Link (optional)</label>
                       <input
                         type="url"
                         placeholder="https://yourwebsite.com/product"
@@ -1849,9 +1869,10 @@ const CuratorDashboard = () => {
                       <input type="checkbox" checked={productForm.is_active} onChange={e => setProductForm({...productForm, is_active: e.target.checked})} />
                       Visible in my storefront
                     </label>
-                    <div className="flex-center gap-4 mt-8">
-                      <button type="button" onClick={() => setIsProductModalOpen(false)} className="btn-outline-primary flex-1">Cancel</button>
-                      <button type="submit" className="btn-solid-gold flex-1">Save product</button>
+                    {productMsg && <p className="form-msg is-error" role="alert">{productMsg}</p>}
+                    <div className="flex-center gap-4 mt-8 product-modal__actions">
+                      <button type="button" onClick={() => closeProduct()} className="btn-outline-primary flex-1">Cancel</button>
+                      <button type="submit" className="btn-solid-gold flex-1" disabled={formLoading || productImageLoading}>{formLoading ? 'Saving…' : productImageLoading ? 'Photo uploading…' : 'Save product'}</button>
                     </div>
                   </form>
                 </div>
@@ -1880,7 +1901,7 @@ const CuratorDashboard = () => {
               curator={curatorData}
               products={products}
               user={user}
-              onEditProduct={(p) => { setEditingProduct(p); setProductForm(productToForm(p)); setIsProductModalOpen(true); setActiveTab('storefront'); }}
+              onEditProduct={(p) => { openProduct(p); setActiveTab('storefront'); }}
             />
           } />
           <Route path="orders" element={

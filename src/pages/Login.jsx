@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { Mail, Lock, ArrowRight, Eye, EyeOff, Store, UserRound, Check } from 'lucide-react';
 import LazyVideo from '../components/LazyVideo';
 import { collectivePortal } from '../lib/site';
+import { friendlyError, slugify } from '../lib/vendorForms';
 import './Login.css';
 
 import curatorVid from '../assets/web/curator.mp4';
@@ -16,6 +17,7 @@ const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '', fullName: '', bizName: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,42 +36,53 @@ const Login = () => {
 
     try {
       if (isSignUp) {
-        // 1. Sign Up
+        // 1. Sign up. Her name and shop name ride along, so the shop can be created later if this
+        // first step has to wait for an email confirmation.
         const { data: signUpData, error: regError } = await supabase.auth.signUp({
-          email: formData.email,
+          email: formData.email.trim(),
           password: formData.password,
           options: {
             data: {
-              full_name: formData.fullName
+              full_name: formData.fullName.trim(),
+              business_name: formData.bizName.trim()
             }
           }
         });
 
         if (regError) throw regError;
 
+        // No session yet: the project asks new accounts to confirm their email first.
+        if (!signUpData.session) {
+          setNotice(`Almost there. We sent a link to ${formData.email.trim()}: open it to confirm your email, then come back and sign in. Your studio opens on your first sign-in.`);
+          setIsSignUp(false);
+          return;
+        }
+
         if (signUpData.user) {
           const userId = signUpData.user.id;
           
-          // Create profile
-          await supabase.from('profiles').insert([{ 
+          // Create profile (the shop record points at it)
+          const { error: pErr } = await supabase.from('profiles').insert([{ 
             id: userId, 
-            full_name: formData.fullName, 
-            email: formData.email 
+            full_name: formData.fullName.trim(), 
+            email: formData.email.trim() 
           }]);
+          if (pErr && pErr.code !== '23505') throw pErr;
           
-          // Create curator data
-          await supabase.from('curator_data').insert([{ 
-            id: userId, 
-            // Approval, payment and publishing are decided by the database
-            // (pre-approved vendors are unlocked automatically). See v16.
-            business_name: formData.bizName || 'My shop'
-          }]);
+          // Create the shop record with a link made from its name. Approval, payment and publishing
+          // are decided by the database (pre-approved vendors are unlocked automatically). See v16.
+          const shop = { id: userId, business_name: formData.bizName.trim() || 'My shop' };
+          const slug = slugify(formData.bizName);
+          let { error: cErr } = await supabase.from('curator_data').insert([slug ? { ...shop, slug } : shop]);
+          // That link is taken (or reserved): create the shop without one; she picks it in her studio.
+          if (cErr && slug && /slug/i.test(cErr.message || '')) ({ error: cErr } = await supabase.from('curator_data').insert([shop]));
+          if (cErr && cErr.code !== '23505') throw cErr;
         }
         navigate('/dashboard');
       } else {
         // 2. Standard Login
         const { error: authError } = await supabase.auth.signInWithPassword({
-          email: formData.email,
+          email: formData.email.trim(),
           password: formData.password
         });
 
@@ -77,9 +90,7 @@ const Login = () => {
         navigate(after);
       }
     } catch (err) {
-      setError(err.message === 'Invalid login credentials' 
-        ? 'Verification failed. Please check your credentials.' 
-        : err.message);
+      setError(friendlyError(err, isSignUp ? 'Your account was not created.' : 'You are not signed in yet.'));
     } finally {
       setLoading(false);
     }
@@ -137,13 +148,14 @@ const Login = () => {
             <label className="lg__field">
               <span>Password</span>
               <div className="lg__input"><Lock size={18} />
-                <input type={showPassword ? 'text' : 'password'} required autoComplete={isSignUp ? 'new-password' : 'current-password'} placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
+                <input type={showPassword ? 'text' : 'password'} required minLength={isSignUp ? 8 : undefined} autoComplete={isSignUp ? 'new-password' : 'current-password'} placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
                 <button type="button" className="lg__eye" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'}>
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </label>
 
+            {notice && <p className="k-fine lg__notice" role="status">{notice}</p>}
             {error && <p className="k-error" role="alert">{error}</p>}
 
             <button type="submit" className="k-btn k-btn--plum k-btn--lg k-btn--block" disabled={loading}>
