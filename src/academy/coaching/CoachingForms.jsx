@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase';
 import SignatureField from '../../components/SignatureField';
 import { todayLong } from '../../lib/forms';
 import { CONTACT_EMAIL } from '../../lib/academy';
-import { FORMS, ORDER, PACKAGES, GOOGLE_FORMS, COACHING_TERMS_VERSION, packagePrice, packagesFor } from '../../../supabase/functions/_shared/coaching-text.js';
+import { ORDER, PACKAGES, COACHING_TERMS_VERSION, packagePrice, packagesFor, formsFor, googleFormsFor } from '../../../supabase/functions/_shared/coaching-text.js';
 import mark from '../../assets/academy/collective-mark.webp';
 import './coaching.css';
 
@@ -32,9 +32,9 @@ const AgreementText = ({ doc, prices, packages }) => (
           <div className="cf-packages">
             {packages.map((p) => (
               <div key={p.key} className="cf-package">
-                <small>{p.key}</small>
+                <small>{p.label || p.key}</small>
                 <strong>{p.name}</strong>
-                <b>{packagePrice(p.key, prices)}</b>
+                <b>{packagePrice(p.key, prices, p)}</b>
                 <span>{p.cadence}</span>
                 {p.detail && <p>{p.detail}</p>}
               </div>
@@ -87,7 +87,9 @@ const CoachingForms = () => {
   // Couples Private Mentorship (v58) has its own two packages; business and faith clients pick a business Option.
   const packages = packagesFor(intake?.program_slug);
   const current = ORDER.find((k) => !signed[k]) || null;
-  const doc = current ? FORMS[current] : null;
+  // Couples Private Mentorship signs its own agreement first; every other program the Business Coaching Agreement.
+  const forms = formsFor(intake?.program_slug);
+  const doc = current ? forms[current] : null;
 
   const submit = async (e) => {
     e.preventDefault();
@@ -195,7 +197,7 @@ const CoachingForms = () => {
           return (
             <li key={k} className={`cf-step is-${state}`} aria-current={state === 'now' ? 'step' : undefined}>
               <span className="cf-step__n">{signed[k] ? <Check size={16} /> : i + 1}</span>
-              <span><Icon size={14} /> {short}</span>
+              <span><Icon size={14} /> {k === 'coaching' && intake?.program_slug === 'couples' ? 'Couples Agreement' : short}</span>
               {signed[k] && <small>Signed {new Date(`${signed[k].signed_on}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</small>}
             </li>
           );
@@ -265,12 +267,12 @@ const CoachingForms = () => {
 
           {current === 'coaching' && (
             <fieldset className="cf-field">
-              <legend>Select your coaching package *</legend>
+              <legend>{doc.choosePrompt || 'Select your coaching package'} *</legend>
               <div className="cf-options">
                 {packages.map((p) => (
                   <label key={p.key} className={`cf-option ${f.package === p.key ? 'is-on' : ''}`}>
                     <input type="radio" name="package" value={p.key} checked={f.package === p.key} onChange={set('package')} required />
-                    <span><b>{p.key}</b> — {p.name}<small>{packagePrice(p.key, prices)} · {p.cadence}</small></span>
+                    <span><b>{p.label || p.key}</b> — {p.name}<small>{packagePrice(p.key, prices, p)} · {p.cadence}</small></span>
                   </label>
                 ))}
               </div>
@@ -299,7 +301,7 @@ const CoachingForms = () => {
             <button className="k-btn k-btn--gold k-btn--lg k-btn--block" disabled={busy}>
               {busy ? <><Loader2 size={18} className="cf-spin" /> Saving…</> : <><ShieldCheck size={18} /> {ORDER.indexOf(current) < 2 ? `Sign and continue to form ${ORDER.indexOf(current) + 2}` : 'Sign and finish'}</>}
             </button>
-            <p className="k-fine cf-fallback">Trouble with this page? The same form is also on Google: <a href={GOOGLE_FORMS[current]} target="_blank" rel="noreferrer">open it there <ExternalLink size={12} /></a>, then let your mentor know.</p>
+            <p className="k-fine cf-fallback">Trouble with this page? The same form is also on Google: <a href={googleFormsFor(intake?.program_slug)[current]} target="_blank" rel="noreferrer">open it there <ExternalLink size={12} /></a>, then let your mentor know.</p>
           </div>
         </form>
       )}

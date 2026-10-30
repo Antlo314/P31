@@ -84,7 +84,9 @@ export const IntakeModal = ({ prefill = {}, onClose, onCreated }) => {
         </div>
       ) : (
         <form className="ds-form" onSubmit={create}>
-          <p className="ds-muted">In this order: the Business Coaching Agreement (she picks her package there), the Confidentiality Agreement, then the Client Safety &amp; Emergency Contact form. Then she chooses her plan and pays by secure checkout: Business Coaching or Faith Mentorship, or for Couples Private Mentorship the couples plans. The page shows package prices only to the person with the link.</p>
+          {couples
+            ? <p className="ds-muted">In this order: the Couples Private Mentorship Agreement (each partner picks the plan there), the Confidentiality Agreement, then the Client Safety &amp; Emergency Contact form. Then one partner chooses the plan and pays once for both by secure checkout. The page shows plan prices only to the people with the links.</p>
+            : <p className="ds-muted">In this order: the Business Coaching Agreement (she picks her package there), the Confidentiality Agreement, then the Client Safety &amp; Emergency Contact form. Then she chooses her plan and pays by secure checkout ({(chosen?.title || program?.title || 'Business Coaching or Faith Mentorship')}). The page shows package prices only to the person with the link.</p>}
           {programs.data.length > 1 && (
             <label className="k-field"><span>Program</span>
               <select value={form.program_id} onChange={(e) => setForm({ ...form, program_id: e.target.value })}>{programs.data.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}</select>

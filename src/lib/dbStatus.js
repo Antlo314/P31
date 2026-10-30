@@ -8,6 +8,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 66, file: 'storefront_v66_couples_agreement.sql', title: 'Couples agreement', what: 'Couples sign the Couples Private Mentorship Agreement and pick any of the four couples plans in it.',
+    expect: 'details_ready true · sign_ready true · version_recorded true',
+    checks: [] },
   { v: 65, file: 'storefront_v65_posting_schedule.sql', title: 'Posting schedule', what: 'Systems → Posting schedule: posts a day (up to 8), weekdays, set times and platforms for the Marketplace and the Collective; the autopilot drafts each brand on its own.',
     expect: 'schedule_column true · schedule_checked true · posts_per_day_up_to_8 true · items_brand true · version_recorded true',
     checks: [['column', 'autopilot_settings', 'schedule']] },

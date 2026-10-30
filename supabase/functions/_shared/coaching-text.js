@@ -27,13 +27,15 @@ export const PACKAGES = [
 ];
 
 /**
- * Couples Private Mentorship (v58): the two monthly packages a couples client picks in section 5.
- * The 6-month commitments are chosen at step 5, as with Business Coaching. No prices here either:
- * Melanie sets them in Stripe and the daily sync copies them into academy_plans.
+ * Couples Private Mentorship: the four plans in section 6 of the Couples agreement (v66: all four can
+ * be chosen in the agreement). No prices here either: Melanie sets them in Stripe and the daily sync
+ * copies them into academy_plans; the page fills them in from the private link.
  */
 export const COUPLES_PACKAGES = [
-  { key: 'Couples Bi-Weekly', name: 'Couples Private Mentorship', cadence: 'Bi-Weekly | 90 minutes', detail: '' },
-  { key: 'Couples Weekly', name: 'Couples Private Mentorship', cadence: 'Weekly | 90 minutes', detail: '' },
+  { key: 'Couples Bi-Weekly', label: 'Option 1', name: 'Biweekly Monthly Plan', cadence: 'Two (2) sessions per month | Ninety (90) minutes per session', detail: '' },
+  { key: 'Couples Weekly', label: 'Option 2', name: 'Weekly Monthly Plan', cadence: 'Four (4) sessions per month | Ninety (90) minutes per session', detail: '' },
+  { key: 'Couples Bi-Weekly 6M', label: 'Option 3', name: 'Biweekly Six-Month Commitment', cadence: 'Two (2) sessions per month | Ninety (90) minutes per session', detail: '', six: true, monthly: 'Couples Bi-Weekly' },
+  { key: 'Couples Weekly 6M', label: 'Option 4', name: 'Weekly Six-Month Commitment', cadence: 'Four (4) sessions per month | Ninety (90) minutes per session', detail: '', six: true, monthly: 'Couples Weekly' },
 ];
 
 /** The section 5 packages for a program: couples has its own; business and faith clients pick a business Option. */
@@ -133,6 +135,102 @@ export const COACHING = {
   ack: 'By entering your full name below, you acknowledge and agree to the above contract and are ready to begin.',
 };
 
+/** The Couples Private Mentorship Agreement, word for word from Melanie's Google Form (2026-10-30). */
+export const COUPLES_GOOGLE_FORM = 'https://docs.google.com/forms/d/e/1FAIpQLSdSk-95e4kitpqmbfqYbeN9Q2mS5K8zGQESfZf_bULjnaIvMg/viewform';
+export const COUPLES_AGREEMENT = {
+  kind: 'coaching',
+  title: 'Couples Private Mentorship Agreement',
+  subtitle: 'Mentor: Melanie JC',
+  intro: [
+    'This Couples Private Mentorship Agreement (“Agreement”) is entered into on the date signed below between Melanie Jeffers-Cameron (“Mentor”) and the undersigned individual (“Mentee”) for participation in Couples Private Mentorship. Sessions will be conducted virtually and/or in person, based on mutual arrangements.',
+    'Each partner is required to review, acknowledge, and sign this Agreement individually.',
+  ],
+  sections: [
+    { title: '1. Term & Commitment', items: [
+      'a. This Agreement becomes effective on the date signed and remains active for a minimum of four (4) months for standard monthly plans or six (6) months for plans designated as a six-month commitment.',
+      'b. Following the initial commitment period, mentorship may continue on a month-to-month basis, subject to the agreed-upon payment plan.',
+      'c. Each Mentee acknowledges that mentorship requires consistency, intentional participation, and a willingness to grow individually and collectively.',
+    ] },
+    { title: '2. Couples Mentorship Sessions', items: [
+      'a. The Mentor agrees to provide faith-based couples mentorship designed to strengthen communication, foster emotional and spiritual growth, encourage accountability, and support the development of a healthy, purposeful relationship.',
+      'b. Sessions will focus on areas including, but not limited to:',
+    ], items2: [
+      'Healthy communication and conflict resolution.',
+      'Emotional awareness, healing, and personal accountability.',
+      'Trust, forgiveness, and rebuilding relational foundations.',
+      'Spiritual growth and biblical relationship principles.',
+      'Establishing healthy boundaries and shared goals.',
+      'Strengthening unity, understanding, and intentional partnership.',
+    ], after: [
+      'c. All sessions will be scheduled in advance and will include both partners unless otherwise mutually arranged with the Mentor.',
+      'd. Each session will last ninety (90) minutes.',
+      'e. The Mentor may provide individual reflection assignments, shared exercises, or action plans to encourage progress between sessions.',
+    ] },
+    { title: '3. Responsibilities', paras: ['a. Mentor Responsibilities'], items: [
+      'i. Provide faith-based guidance, wisdom, and constructive feedback to support the couple’s individual and collective development.',
+      'ii. Facilitate a respectful, impartial environment where both partners have an opportunity to communicate openly.',
+      'iii. Encourage healthy communication, accountability, mutual respect, and spiritual maturity.',
+      'iv. Provide relevant biblical principles, resources, and practical tools to support relationship development.',
+      'v. Maintain professional boundaries and protect confidential information, subject to the confidentiality and safety provisions of this Agreement.',
+    ], paras2: ['b. Mentee Responsibilities'], items2: [
+      'i. Actively participate in scheduled sessions with honesty, respect, and a willingness to receive guidance.',
+      'ii. Take personal accountability for individual actions, behaviors, communication patterns, and areas requiring growth.',
+      'iii. Respect the other partner’s opportunity to express thoughts, feelings, and concerns without intimidation or retaliation.',
+      'iv. Complete agreed-upon assignments and implement practical guidance between sessions.',
+      'v. Maintain respectful communication with the Mentor and the other partner throughout the mentorship process.',
+      'vi. Understand that meaningful progress requires individual responsibility and mutual participation.',
+    ] },
+    { title: '4. Confidentiality & Individual Accountability', items: [
+      'a. Both partners are expected to respect the privacy of discussions and personal information shared during mentorship sessions.',
+      'b. Because this is a joint mentorship arrangement, information disclosed individually to the Mentor that materially affects the relationship or mentorship process may need to be addressed within a joint session. The Mentor will communicate this expectation and exercise appropriate discretion regarding sensitive disclosures.',
+      'c. The Mentor will not intentionally facilitate secrecy, manipulation, dishonesty, or behavior that undermines the integrity of the mentorship process.',
+      'd. Confidentiality is subject to applicable legal requirements and safety considerations, including circumstances involving suspected abuse, threats of serious harm, or other situations requiring disclosure by law.',
+      'e. Each Mentee acknowledges that personal growth and accountability are individual responsibilities, regardless of the other partner’s participation or progress.',
+    ] },
+    { title: '5. Termination', items: [
+      'a. Following the initial four-month commitment, either party may request termination with fourteen (14) days’ written notice.',
+      'b. For six-month commitment plans, the agreed-upon financial commitment remains in effect throughout the six-month term unless otherwise agreed upon in writing.',
+      'c. If either partner chooses to discontinue participation, the Mentor will assess whether the couples mentorship arrangement can appropriately continue.',
+      'd. The Mentor reserves the right to suspend or terminate services when continued participation becomes unsafe, inappropriate, or inconsistent with the purpose and boundaries of mentorship.',
+      'e. Any prepaid fees for unused sessions following an approved termination will be reviewed and refunded, where applicable, within fourteen (14) days, consistent with the selected payment agreement and applicable law.',
+    ] },
+    { title: '6. Cost & Schedule', paras: ['The following mentorship plans are available. All fees listed are per couple, not per individual.'], packages: true, after: [
+      'The selected mentorship plan includes both partners. Payment responsibility will be established at enrollment, and both partners acknowledge the selected arrangement.',
+    ] },
+    { title: '7. Payment Collection', items: [
+      'a. Monthly mentorship fees will be automatically charged to the authorized credit or debit card on file according to the established billing cycle.',
+      'b. Payments must remain current to maintain uninterrupted mentorship services.',
+      'c. If more than two (2) payments are returned or declined within a six-month period without a prior arrangement made at least seven (7) days in advance, any applicable grant award may be forfeited.',
+      'd. A $25 returned-payment fee may be assessed for each additional returned payment, to the extent permitted by law.',
+      'e. Any outstanding fees must be resolved within ten (10) days of notification. Failure to satisfy the outstanding balance may result in mentorship sessions being paused until the account is brought current.',
+      'f. Both partners acknowledge that the mentorship subscription covers their joint participation and does not create two separate monthly charges.',
+    ] },
+    { title: '8. Rescheduling, Cancellation & Late Policy', items: [
+      'a. Rescheduling or cancellation requests must be communicated at least twenty-four (24) hours before the scheduled session.',
+      'b. Failure to provide the required notice may result in forfeiture of the session, which will count as a completed session.',
+      'c. If either or both partners are more than fifteen (15) minutes late without prior communication, the session may be considered a no-show and counted as completed.',
+      'd. Both partners are expected to attend scheduled sessions. If one partner is unavailable, the Mentor must be notified in advance to determine whether the session should be rescheduled or conducted individually.',
+      'e. Missed sessions are not automatically transferable to another billing cycle.',
+    ] },
+    { title: '9. Nature & Limitations of Mentorship', items: [
+      'a. Couples Private Mentorship is a faith-based guidance and personal development service. It is not licensed marriage counseling, psychotherapy, mental health treatment, or a substitute for professional clinical services.',
+      'b. The Mentor does not guarantee reconciliation, marriage restoration, relationship continuation, or any specific outcome.',
+      'c. The Mentor may recommend professional counseling, medical assistance, or other specialized support when circumstances fall outside the appropriate scope of mentorship.',
+      'd. Participation is voluntary, and each Mentee remains responsible for their personal decisions and actions.',
+    ] },
+    { title: '10. Acknowledgment & Agreement', paras: ['By signing below, I acknowledge that:'], items: [
+      'I have read and understand the terms of this Couples Private Mentorship Agreement.',
+      'I understand that this agreement is being signed individually, although mentorship services are provided jointly to both partners.',
+      'I agree to participate respectfully, honestly, and intentionally.',
+      'I understand the financial commitment, scheduling policies, and confidentiality expectations.',
+      'I acknowledge that my individual growth, accountability, and participation are essential to the mentorship process.',
+    ] },
+  ],
+  coach: ['Melanie JC', 'Mentor', 'P31 Collective by NEBA'],
+  choosePrompt: 'Please indicate which payment schedule works best for you by choosing below.',
+  ack: 'By entering your full name below, you acknowledge and agree to the above contract and are ready to begin Couples Private Mentorship.',
+};
+
 export const CONFIDENTIALITY = {
   kind: 'confidentiality',
   title: 'P31 Business Coaching Confidentiality Agreement',
@@ -225,11 +323,26 @@ export const SAFETY = {
 
 export const FORMS = { coaching: COACHING, confidentiality: CONFIDENTIALITY, safety: SAFETY };
 
-/** "$325/month" from a plan price in cents (prices: { 'Option 2': 32500, ... }). */
-export const packagePrice = (key, prices = {}) => {
+/** The three forms for a program: Couples Private Mentorship signs its own agreement first (2026-10-30). */
+export const formsFor = (slug) => (slug === 'couples' ? { ...FORMS, coaching: COUPLES_AGREEMENT } : FORMS);
+/** The Google Form fallback for each step of a program. */
+export const googleFormsFor = (slug) => (slug === 'couples' ? { ...GOOGLE_FORMS, coaching: COUPLES_GOOGLE_FORM } : GOOGLE_FORMS);
+
+const usd = (c) => `$${(c / 100).toLocaleString('en-US', { minimumFractionDigits: c % 100 ? 2 : 0 })}`;
+/**
+ * "$325/month" from a plan price in cents (prices: { 'Option 2': 32500, ... }). A six-month package
+ * reads "$1,770 total commitment ($295 a month over six months) · Savings of $180", the saving worked
+ * out from its monthly plan.
+ */
+export const packagePrice = (key, prices = {}, pkg = null) => {
   const c = prices[key];
   if (c == null) return 'Price shared by your mentor';
-  return `$${(c / 100).toLocaleString('en-US', { minimumFractionDigits: c % 100 ? 2 : 0 })}/month`;
+  if (pkg?.six) {
+    const m = prices[pkg.monthly];
+    const save = m != null ? m * 6 - c : 0;
+    return `${usd(c)} total commitment (${usd(Math.round(c / 6))} a month over six months)${save > 0 ? ` · Savings of ${usd(save)}` : ''}`;
+  }
+  return `${usd(c)}/month`;
 };
 
 /** The agreement as sections for the PDF copy (the same words as the page); packages from packagesFor(slug). */
@@ -244,14 +357,14 @@ export function pdfSections(doc, answers = {}, prices = {}, packages = PACKAGES)
     if (s.items) parts.push({ bullets: s.items });
     for (const p of s.paras2 || []) parts.push({ paragraph: p });
     if (s.items2) parts.push({ bullets: s.items2 });
-    if (s.packages) parts.push({ bullets: packages.map((p) => `${p.key} — ${p.name}: ${packagePrice(p.key, prices)}, ${p.cadence}.${p.detail ? ` ${p.detail}` : ''}`) });
+    if (s.packages) parts.push({ bullets: packages.map((p) => `${p.label || p.key} — ${p.name}: ${packagePrice(p.key, prices, p)}, ${p.cadence}.${p.detail ? ` ${p.detail}` : ''}`) });
     for (const p of s.after || []) parts.push({ paragraph: p });
     // The first part carries the heading; the rest follow it.
     if (parts.length) { out.push({ heading: sec.heading, ...parts[0] }); out.push(...parts.slice(1)); } else out.push(sec);
   }
   if (doc.kind === 'coaching' && answers.package) {
     const p = packages.find((x) => x.key === answers.package);
-    out.push({ heading: 'Selected package', rows: [['Package', p ? `${p.key} — ${p.name}` : answers.package], ['Investment', packagePrice(answers.package, prices)], ['Sessions', p?.cadence || '']] });
+    out.push({ heading: 'Selected package', rows: [['Package', p ? `${p.label || p.key} — ${p.name}` : answers.package], ['Investment', packagePrice(answers.package, prices, p)], ['Sessions', p?.cadence || '']] });
   }
   if (doc.coachNote) out.push({ paragraph: doc.coachNote });
   if (doc.coach) out.push({ paragraph: doc.coach.join(', ') });
