@@ -1979,8 +1979,8 @@ const CuratorDashboard = () => {
               <header className="dashboard-header">
                 <div>
                   <span className="section-kicker">Promotions</span>
-                  <h1 className="font-headline">Discount codes</h1>
-                  <p className="text-muted">Shoppers enter these in their bag. Percent or dollar amounts, with optional minimums, limits and end dates.</p>
+                  <h1 className="font-headline">Promo codes</h1>
+                  <p className="text-muted">Make a code for a sale, a market or a social post. Shoppers type it in their bag before paying. Codes work only in your shop; set an end date for a limited-time offer. The discount comes off your sale.</p>
                 </div>
               </header>
               <DiscountsPanel curatorId={user.id} />

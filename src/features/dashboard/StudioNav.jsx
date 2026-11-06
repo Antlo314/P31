@@ -18,7 +18,7 @@ const GROUPS = [
   ] },
   { id: 'sell', label: 'Sell', items: [
     { id: 'orders', label: 'Orders', Icon: DollarSign, alias: ['sales'] },
-    { id: 'discounts', label: 'Discounts', Icon: Tag },
+    { id: 'discounts', label: 'Promo codes', Icon: Tag },
     { id: 'testimonials', label: 'Testimonials', Icon: Star },
   ] },
   { id: 'grow', label: 'Grow', items: [

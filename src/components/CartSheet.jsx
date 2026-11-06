@@ -95,7 +95,7 @@ const ShopGroup = ({ group, shop }) => {
 
       {!merch && (<form className="cs2-code" onSubmit={applyCode}>
         <Tag size={15} />
-        <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Discount code" aria-label="Discount code" />
+        <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Promo code" aria-label="Promo code" />
         <button>Apply</button>
       </form>)}
       {disc?.message && <p className={disc.ok ? 'cs2-ok' : 'cs2-err'}>{disc.ok ? `${disc.code} — ${disc.message}` : disc.message}</p>}

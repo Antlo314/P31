@@ -43,7 +43,8 @@ const DiscountsPanel = ({ curatorId }) => {
 
   const toggle = async (c) => {
     setCodes((list) => list.map((x) => (x.id === c.id ? { ...x, active: !x.active } : x)));
-    await supabase.from('discount_codes').update({ active: !c.active }).eq('id', c.id);
+    const { error: err } = await supabase.from('discount_codes').update({ active: !c.active }).eq('id', c.id);
+    if (err) { setError('That change did not save. Please try again.'); load(); }
   };
 
   const copy = async (c) => {
@@ -62,7 +63,7 @@ const DiscountsPanel = ({ curatorId }) => {
   return (
     <div className="dc">
       <form className="dc-form" onSubmit={create}>
-        <h3 style={{ margin: 0, display: 'flex', gap: 8, alignItems: 'center' }}><Tag size={18} /> New discount code</h3>
+        <h3 style={{ margin: 0, display: 'flex', gap: 8, alignItems: 'center' }}><Tag size={18} /> New promo code</h3>
         <div className="dc-row">
           <label>Code<input name="code" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} placeholder="WINTER15" maxLength={24} /></label>
           <label>Type
