@@ -14,6 +14,7 @@ import { stripeFor, webhookSecrets, verifyEvent } from '../_shared/stripe.ts';
 import { storefrontEvent } from '../_shared/storefront-billing.ts';
 import { placeMerchOrder } from '../_shared/merch-printful.ts';
 import { sendEmail, layout, itemsTable, money, esc } from '../_shared/email.ts';
+import { digitalItems, downloadButtons } from '../_shared/digital.ts';
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
@@ -101,6 +102,13 @@ Deno.serve(async (req) => {
             await admin.rpc('redeem_discount', { p_curator_id: order.curator_id, p_code: order.discount_code });
           }
 
+          // PDFs (digital products): the buyer's email carries the download buttons. An order of
+          // only PDFs has nothing to ship, so it is marked fulfilled straight away.
+          let downloads: Awaited<ReturnType<typeof digitalItems>> = [];
+          try { downloads = await digitalItems(admin, { ...order, product_id: meta.product_id }); } catch (e) { console.error('Digital lookup failed:', (e as Error).message); }
+          const allDigital = downloads.length > 0 && lines.every((l: { product_id: number }) => downloads.some((d) => d.product_id === Number(l.product_id)));
+          if (allDigital) await admin.from('orders').update({ fulfillment_status: 'fulfilled', fulfillment_method: 'digital' }).eq('id', order.id);
+
           try {
             const { data: curator } = await admin.from('curator_data').select('business_name, public_email').eq('id', order.curator_id).single();
             const { data: owner } = await admin.auth.admin.getUserById(order.curator_id);
@@ -110,12 +118,12 @@ Deno.serve(async (req) => {
             const table = itemsTable(lines, order.discount_amount || 0, order.amount_total || 0);
             if (curatorEmail) {
               await sendEmail(curatorEmail, `New paid order #${ref} — ${money(order.amount_total || 0)}`, layout('You made a sale!', `
-<p>${esc(order.buyer_name || 'A shopper')} just paid for an order.</p>${table}
+<p>${esc(order.buyer_name || 'A shopper')} just paid for an order.</p>${table}${downloads.length ? `<p>${allDigital ? 'This order is all PDFs: the buyer was emailed the download, so there is nothing to ship.' : 'The PDF items were emailed to the buyer automatically; ship the rest as usual.'}</p>` : ''}
 <p><a href="${appUrl}/dashboard/orders" style="display:inline-block;background:#3A1C36;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:bold">Fulfil this order</a></p>`), order.buyer_email || undefined);
             }
             if (order.buyer_email) {
               await sendEmail(order.buyer_email, `Your order from ${curator?.business_name || 'P31 Marketplace'} (#${ref})`, layout('Thank you for your order', `
-<p>Your payment went through. <strong>${esc(curator?.business_name || 'The shop')}</strong> will prepare your order and let you know when it ships.</p>${table}`), curatorEmail || undefined);
+<p>Your payment went through.${allDigital ? '' : ` <strong>${esc(curator?.business_name || 'The shop')}</strong> will prepare your order and let you know when it ships.`}</p>${table}${downloadButtons(downloads)}`), curatorEmail || undefined);
             }
           } catch (mailErr) {
             console.error('Order emails failed:', (mailErr as Error).message);

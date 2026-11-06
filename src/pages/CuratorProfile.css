@@ -340,3 +340,11 @@
 .sf-google__hours { margin-top: 10px; color: var(--sf-ink-2); font-size: 0.9rem; }
 .sf-google__hours summary { cursor: pointer; font-weight: 800; color: var(--sf-ink); }
 .sf-google__hours ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 2px; }
+
+/* Digital products (PDF) */
+.sf-digital { display: flex; align-items: flex-start; gap: 8px; margin: 10px 0; padding: 10px 12px; border-radius: 12px; background: rgba(227, 208, 234, 0.4); color: #3A1C36; font-size: 0.9rem; line-height: 1.4; }
+.sf-digital svg { flex-shrink: 0; margin-top: 2px; }
+.sf-toast .sf-downloads { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 10px; flex: none; }
+.sf-toast .sf-downloads small, small.sf-downloads { font-weight: 500; opacity: 0.85; }
+.sf-download { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px; background: #fff; color: #374126; text-decoration: none; font-weight: 700; max-width: 100%; overflow-wrap: anywhere; }
+.sf-download:hover { background: #E3D0EA; }

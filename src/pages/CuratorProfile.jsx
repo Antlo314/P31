@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft, Share2, ShoppingBag, Sparkles, Leaf, BadgeCheck, Instagram, Facebook, Globe, Mail, Phone, MapPin,
-  CreditCard, DollarSign, Send, Check, X, ShieldAlert, Star, Images, Store, Loader2, Minus, Plus, Heart, Bell, Link2,
+  CreditCard, DollarSign, Send, Check, X, ShieldAlert, Star, Images, Store, Loader2, Minus, Plus, Heart, Bell, Link2, FileDown,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { applyMeta, curatorMeta } from '../lib/seo';
@@ -26,6 +26,9 @@ const stockLabel = (p) => {
   if (p.stock_status === 'pre_order') return 'Pre-order';
   return null;
 };
+
+// A digital product: a PDF the buyer downloads after paying (v67).
+const isDigital = (p) => !!p?.digital_file_path;
 
 // A sale shows while the compare-at price is higher and the end time (if set) has not passed.
 const saleOn = (p) => Number(p.compare_at_price) > Number(p.price) && (!p.sale_ends_at || new Date(p.sale_ends_at) > new Date());
@@ -96,6 +99,28 @@ const CuratorProfile = () => {
   const [shared, setShared] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const purchaseStatus = searchParams.get('purchase'); // 'success' | 'cancelled' | null
+  const sessionId = searchParams.get('session_id');
+  // PDFs bought in this checkout: download buttons in the thank-you banner. The payment
+  // notice can take a few seconds to arrive, so it asks again a few times.
+  const [downloads, setDownloads] = useState([]);
+  const [downloadsWaiting, setDownloadsWaiting] = useState(false);
+  useEffect(() => {
+    if (purchaseStatus !== 'success' || !sessionId) return undefined;
+    let stop = false;
+    let tries = 0;
+    const ask = async () => {
+      tries += 1;
+      try {
+        const r = await invokePayment('digital-download', { session_id: sessionId });
+        if (stop) return;
+        if (r?.items?.length) { setDownloads(r.items); setDownloadsWaiting(false); return; }
+        if (r?.pending && tries < 8) { setDownloadsWaiting(true); setTimeout(ask, 2500); return; }
+      } catch { /* the email still has the links */ }
+      if (!stop) setDownloadsWaiting(false);
+    };
+    ask();
+    return () => { stop = true; };
+  }, [purchaseStatus, sessionId]);
 
   const dismissPurchaseBanner = () => {
     const next = new URLSearchParams(searchParams);
@@ -249,7 +274,7 @@ const CuratorProfile = () => {
   const groupsOf = (p) => (Array.isArray(p.variants) ? p.variants.filter((g) => g?.name && g.options?.length) : []);
   const missingOption = (p) => groupsOf(p).find((g) => !sel[g.name]);
   const soldOut = (p) => stockLabel(p) === 'Sold out';
-  const maxQty = (p) => Math.min(p.inventory ?? 20, 20);
+  const maxQty = (p) => (isDigital(p) ? 1 : Math.min(p.inventory ?? 20, 20));
 
   // Add to the site-wide bag (works for every shop — card or order request).
   const addToBag = (p) => {
@@ -296,6 +321,7 @@ const CuratorProfile = () => {
                   {tag && <span className={tag === 'Sold out' ? 'is-dark' : ''}>{tag}</span>}
                   {onSale && !tag && <span className="is-accent">Sale</span>}
                   {p.badge && !tag && <span className="is-badge">{p.badge}</span>}
+                  {isDigital(p) && <span className="is-badge">PDF</span>}
                 </div>
                 {p.image_urls?.length > 1 && <span className="sf-card__count"><Images size={12} /> {p.image_urls.length}</span>}
               </div>
@@ -331,6 +357,15 @@ const CuratorProfile = () => {
             {purchaseStatus === 'success'
               ? `Payment received — thank you for supporting ${curator.business_name}! Your receipt is on its way.`
               : 'Checkout was cancelled — your card was not charged.'}
+            {downloads.length > 0 && (
+              <span className="sf-downloads">
+                {downloads.map((d) => (
+                  <a key={d.product_id} href={d.url} className="sf-download"><FileDown size={16} /> Download {d.name}</a>
+                ))}
+                <small>The same link is in your email, so you can download it again later.</small>
+              </span>
+            )}
+            {downloadsWaiting && !downloads.length && <small className="sf-downloads">Getting your download ready…</small>}
           </span>
           <button onClick={dismissPurchaseBanner} aria-label="Dismiss"><X size={16} /></button>
         </div>
@@ -488,6 +523,7 @@ const CuratorProfile = () => {
                 {stockLabel(open) && <span className="sf-pill">{stockLabel(open)}</span>}
                 {!stockLabel(open) && open.badge && <span className="sf-pill">{open.badge}</span>}
               </p>
+              {isDigital(open) && <p className="sf-digital"><FileDown size={16} /> Digital download (PDF). You get it by email right after you pay; nothing is shipped.</p>}
               {open.inventory > 0 && open.inventory <= 5 && <p className="sf-low">Only {open.inventory} left</p>}
               {saleOn(open) && endsIn(open) && <p className="sf-ends">{endsIn(open)}</p>}
               {open.description && <p className="sf-desc">{open.description}</p>}
@@ -505,7 +541,7 @@ const CuratorProfile = () => {
                 </div>
               ))}
 
-              {!soldOut(open) && !open.external_url && (
+              {!soldOut(open) && !open.external_url && !isDigital(open) && (
                 <div className="sf-qty">
                   <span className="sf-opt__label">Quantity</span>
                   <div>

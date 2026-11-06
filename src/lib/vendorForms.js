@@ -178,3 +178,25 @@ export async function uploadShopImage(userId, file, kind = 'product', opts = {})
   if (error) throw new Error(friendlyError(error, 'The photo did not upload.'));
   return supabase.storage.from('products').getPublicUrl(path).data.publicUrl;
 }
+
+// ── PDFs for digital products (v67) ──────────────────────────
+// The file goes to the PRIVATE bucket digital-products, in a folder named after her account.
+// Buyers never see this address; after paying they get a download link by email.
+export const DIGITAL_MAX_MB = 50;
+export async function uploadDigitalFile(userId, file) {
+  if (!file) throw new Error('No file was picked.');
+  const name = String(file.name || 'file.pdf');
+  const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(name);
+  if (!isPdf) throw new Error('Please pick a PDF file. (Word or Pages files can be saved as PDF first: File > Save as / Export > PDF.)');
+  if (file.size > DIGITAL_MAX_MB * MB) throw new Error(`That PDF is over ${DIGITAL_MAX_MB} MB. Please make it smaller (for example, export it with "reduce file size") and try again.`);
+  const safe = name.replace(/\.pdf$/i, '').normalize('NFKD').replace(/[^\w-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'file';
+  const path = `${userId}/${Date.now()}-${safe}.pdf`;
+  const { error } = await supabase.storage.from('digital-products').upload(path, file, { cacheControl: '3600', upsert: false, contentType: 'application/pdf' });
+  if (error) {
+    if (/bucket not found/i.test(error.message || '')) throw new Error(`PDF uploads are being switched on. Please try again soon or email ${EMAIL.vendors}.`);
+    if (/maximum allowed size|too large|413/i.test(error.message || '')) throw new Error(`That PDF is over ${DIGITAL_MAX_MB} MB. Please make it smaller and try again.`);
+    throw new Error(friendlyError(error, 'The PDF did not upload.'));
+  }
+  return { path, name: name.replace(/[\\/]/g, '-').slice(0, 120), size: file.size };
+}
+

@@ -10,6 +10,7 @@ export type Line = {
   quantity: number;
   options: Record<string, string>;
   image_url: string | null;
+  digital?: boolean; // a PDF the buyer downloads after paying (nothing to ship)
 };
 
 export class CartError extends Error {}
@@ -21,7 +22,7 @@ export async function buildLines(admin: any, curatorId: string | null, items: Ca
   const ids = [...new Set(items.map((i) => Number(i.productId)).filter(Number.isFinite))];
   const { data: products, error } = await admin
     .from('products')
-    .select('id, curator_id, name, price, image_url, stock_status, inventory, is_active, variants')
+    .select('id, curator_id, name, price, image_url, stock_status, inventory, is_active, variants, digital_file_path')
     .in('id', ids);
   if (error) throw new CartError('Could not load products.');
 
@@ -35,7 +36,9 @@ export async function buildLines(admin: any, curatorId: string | null, items: Ca
     if (p.curator_id !== shop) throw new CartError('Each checkout can only include items from one shop.');
     if (p.stock_status === 'out_of_stock' || p.inventory === 0) throw new CartError(`${p.name} is sold out.`);
 
-    const quantity = Math.min(Math.max(parseInt(String(it.quantity ?? 1), 10) || 1, 1), 20);
+    const digital = !!p.digital_file_path;
+    // One download covers a digital product, so it is always bought once.
+    const quantity = digital ? 1 : Math.min(Math.max(parseInt(String(it.quantity ?? 1), 10) || 1, 1), 20);
     if (p.inventory != null && quantity > p.inventory) {
       throw new CartError(`Only ${p.inventory} of ${p.name} left.`);
     }
@@ -53,7 +56,9 @@ export async function buildLines(admin: any, curatorId: string | null, items: Ca
     const price_cents = Math.round(parseFloat(p.price) * 100);
     if (!Number.isFinite(price_cents) || price_cents <= 0) throw new CartError(`${p.name} doesn't have a valid price.`);
 
-    lines.push({ product_id: p.id, name: p.name, price_cents, quantity, options, image_url: p.image_url || null });
+    // The same PDF twice in one bag is still one purchase.
+    if (digital && lines.some((l) => l.product_id === p.id)) continue;
+    lines.push({ product_id: p.id, name: p.name, price_cents, quantity, options, image_url: p.image_url || null, ...(digital ? { digital: true } : {}) });
   }
 
   // Only approved shops can take orders (pending applications stay closed, even to hand-made requests).

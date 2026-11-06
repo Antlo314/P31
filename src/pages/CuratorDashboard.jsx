@@ -3,7 +3,7 @@ import { useNavigate, Link, useLocation, Routes, Route, Navigate } from 'react-r
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { fetchUpcomingEvents, formatEventDate } from '../lib/events';
-import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, ShieldCheck, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Calendar, Users, Search, DollarSign, RefreshCw, Megaphone } from 'lucide-react';
+import { User, Camera, Settings, Layout, ShoppingBag, MessageSquare, LogOut, Save, ExternalLink, ShieldAlert, ShieldCheck, Leaf, Sparkles, Instagram, Facebook, Globe, MapPin, Phone, Mail, Crown, Bell, Plus, Trash2, Send, Copy, Check, ShoppingCart, Loader2, CreditCard, X, QrCode, Download, Calendar, Users, Search, DollarSign, RefreshCw, Megaphone, FileText, Upload } from 'lucide-react';
 import { invokePayment } from '../lib/payments';
 import HelpTip from '../components/HelpTip';
 import { withEmails } from '../lib/people';
@@ -22,7 +22,7 @@ import GrowPanel from '../features/dashboard/GrowPanel';
 import Tour from '../components/Tour';
 import { CURATOR_TOUR, CURATOR_TOUR_ID } from '../features/dashboard/studioTour';
 import { PRODUCT_TEMPLATES, PRODUCT_BADGES, applyTemplate } from '../features/marketing/productTemplates';
-import { friendlyError, slugify, uploadShopImage, readDraft, writeDraft, clearDraft } from '../lib/vendorForms';
+import { friendlyError, slugify, uploadShopImage, uploadDigitalFile, DIGITAL_MAX_MB, readDraft, writeDraft, clearDraft } from '../lib/vendorForms';
 import { EMAIL } from '../lib/team';
 import './CuratorDashboard.css';
 
@@ -34,6 +34,8 @@ const BLANK_PRODUCT = {
   external_url: '', stock_status: 'in_stock',
   compare_at_price: '', inventory: '', sku: '', tags: '', is_active: true, variants: [],
   badge: '', is_featured: false, sale_ends_at: '',
+  // A PDF the buyer downloads after paying (v67). Empty = a regular product.
+  digital_file_path: '', digital_file_name: '', digital_file_size: null,
 };
 
 // Timestamp → value for a datetime-local input, in the maker's own time zone.
@@ -53,6 +55,7 @@ const productToForm = (p) => ({
   tags: (p.tags || []).join(', '), is_active: p.is_active !== false,
   variants: (Array.isArray(p.variants) ? p.variants : []).map((g) => ({ name: g.name, options: (g.options || []).join(', ') })),
   badge: p.badge || '', is_featured: !!p.is_featured, sale_ends_at: toLocalInput(p.sale_ends_at),
+  digital_file_path: p.digital_file_path || '', digital_file_name: p.digital_file_name || '', digital_file_size: p.digital_file_size ?? null,
 });
 
 const formToProduct = (f) => ({
@@ -63,6 +66,9 @@ const formToProduct = (f) => ({
   compare_at_price: f.compare_at_price === '' ? null : parseFloat(f.compare_at_price),
   inventory: f.inventory === '' ? null : parseInt(f.inventory, 10),
   sku: f.sku?.trim() || null,
+  digital_file_path: f.digital_file_path || null,
+  digital_file_name: f.digital_file_path ? (f.digital_file_name || null) : null,
+  digital_file_size: f.digital_file_path ? (f.digital_file_size ?? null) : null,
   tags: String(f.tags || '').split(',').map((t) => t.trim()).filter(Boolean),
   // Option groups: "Size" → "S, M, L" becomes { name: 'Size', options: ['S','M','L'] }.
   variants: (f.variants || [])
@@ -89,6 +95,7 @@ const CuratorDashboard = () => {
     const [productForm, setProductForm] = useState(BLANK_PRODUCT);
   const [photoStudioOpen, setPhotoStudioOpen] = useState(false);
   const [productImageLoading, setProductImageLoading] = useState(false);
+  const [productPdfLoading, setProductPdfLoading] = useState(false);
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [partnershipInquiries, setPartnershipInquiries] = useState([]);
   const [reviewingCurator, setReviewingCurator] = useState(null);
@@ -760,6 +767,27 @@ const CuratorDashboard = () => {
     }
   };
 
+  // A PDF for a digital product: uploaded to the private bucket; buyers get it by email after paying.
+  const handleProductPdf = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setProductPdfLoading(true);
+    setProductMsg('');
+    try {
+      const up = await uploadDigitalFile(user.id, file);
+      setProductForm((prev) => ({
+        ...prev,
+        digital_file_path: up.path, digital_file_name: up.name, digital_file_size: up.size,
+        stock_status: prev.stock_status === 'out_of_stock' ? 'in_stock' : prev.stock_status,
+      }));
+    } catch (err) {
+      setProductMsg(err.message || 'The PDF did not upload.');
+    } finally {
+      setProductPdfLoading(false);
+    }
+  };
+
   // Shared by the file picker and Photo Studio. Adds the image to the product
   // being edited (as the main image if there isn't one yet).
   const uploadProductImage = async (fileOrBlob) => {
@@ -799,6 +827,7 @@ const CuratorDashboard = () => {
       return;
     }
     if (productImageLoading) { setProductMsg('One moment: a photo is still uploading.'); return; }
+    if (productPdfLoading) { setProductMsg('One moment: the PDF is still uploading.'); return; }
     setFormLoading(true);
     try {
       const row = formToProduct(productForm);
@@ -1768,6 +1797,7 @@ const CuratorDashboard = () => {
                           <option value="Home">Home</option>
                           <option value="Art">Art</option>
                           <option value="Apparel">Apparel</option>
+                          <option value="Digital">Digital download</option>
                         </select>
                       </div>
                       <div className="form-group">
@@ -1784,6 +1814,33 @@ const CuratorDashboard = () => {
                         </select>
                       </div>
                     </div>
+                    <div className="form-group digital-file">
+                      <label htmlFor="prod-pdf">Digital download (PDF, optional)</label>
+                      {productForm.digital_file_path ? (
+                        <div className="digital-file__on">
+                          <FileText size={22} aria-hidden="true" />
+                          <div>
+                            <strong>{productForm.digital_file_name || 'Your PDF'}</strong>
+                            {productForm.digital_file_size ? <span> · {productForm.digital_file_size < 1048576 ? `${Math.max(1, Math.round(productForm.digital_file_size / 1024))} KB` : `${(productForm.digital_file_size / 1048576).toFixed(1)} MB`}</span> : null}
+                            <p className="help-text">Buyers get this PDF by email right after they pay. Nothing to ship.</p>
+                          </div>
+                          <div className="digital-file__acts">
+                            <label className="link-btn" htmlFor="prod-pdf">{productPdfLoading ? 'Uploading…' : 'Replace'}</label>
+                            <button type="button" className="link-btn text-red" onClick={() => { if (window.confirm('Take the PDF off this product? It becomes a regular product again.')) setProductForm((f) => ({ ...f, digital_file_path: '', digital_file_name: '', digital_file_size: null })); }}>Remove</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <label className="digital-file__pick" htmlFor="prod-pdf">
+                          <Upload size={18} aria-hidden="true" />
+                          <span>{productPdfLoading ? 'Uploading your PDF…' : 'Sell a PDF: tap to attach the file'}</span>
+                        </label>
+                      )}
+                      <input id="prod-pdf" type="file" accept="application/pdf,.pdf" onChange={handleProductPdf} disabled={productPdfLoading} hidden />
+                      {!productForm.digital_file_path && (
+                        <p className="help-text">For an e-book, guide, planner or printable. Up to {DIGITAL_MAX_MB} MB. The file stays private: only paying buyers can download it. Add a cover photo above so shoppers can see it.</p>
+                      )}
+                    </div>
+
                     <div className="form-group">
                       <label>Sold on another website? Link (optional)</label>
                       <input

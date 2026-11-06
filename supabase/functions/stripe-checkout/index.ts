@@ -60,6 +60,9 @@ Deno.serve(async (req) => {
     const feePercent = Number.isFinite(rawFeePercent) ? Math.min(Math.max(rawFeePercent, 0), 50) : 0;
     const applicationFee = feePercent > 0 ? Math.min(Math.round((total * feePercent) / 100), total - 1) : 0;
 
+    // A bag of only digital products (PDFs) has nothing to ship, so no address is asked for.
+    const allDigital = lines.every((l) => l.digital);
+
     const origin = (Deno.env.get('APP_URL') || req.headers.get('origin') || '').replace(/\/$/, '');
     const shopPath = `/${curator.slug || curator.id}`;
 
@@ -99,7 +102,7 @@ Deno.serve(async (req) => {
         application_fee: String(applicationFee),
       },
       phone_number_collection: { enabled: true },
-      shipping_address_collection: { allowed_countries: ['US'] },
+      ...(allDigital ? {} : { shipping_address_collection: { allowed_countries: ['US'] as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[] } }),
       success_url: `${origin}${shopPath}?purchase=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}${shopPath}?purchase=cancelled`,
     });
@@ -119,7 +122,7 @@ Deno.serve(async (req) => {
       discount_code: disc.ok ? disc.code : null,
       discount_amount: discount,
       application_fee: applicationFee,
-      fulfillment_method: 'ship',
+      fulfillment_method: allDigital ? 'digital' : 'ship',
     }, { onConflict: 'stripe_session_id' });
     if (orderErr) console.error('Pending order insert failed:', orderErr.message);
 

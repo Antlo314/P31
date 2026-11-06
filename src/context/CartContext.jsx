@@ -31,7 +31,8 @@ export const CartProvider = ({ children }) => {
     const key = lineKey(product.id, options);
     setItems((list) => {
       const found = list.find((l) => l.key === key);
-      const max = product.inventory ?? 20;
+      // A PDF (digital product) is bought once: one download covers it.
+      const max = product.digital_file_path ? 1 : (product.inventory ?? 20);
       if (found) return list.map((l) => (l.key === key ? { ...l, quantity: Math.min(l.quantity + quantity, max) } : l));
       return [...list, {
         key,

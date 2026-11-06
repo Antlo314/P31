@@ -71,3 +71,9 @@
 .ord-spin { animation: ord-spin 0.9s linear infinite; }
 @keyframes ord-spin { to { transform: rotate(360deg); } }
 .ord-link--danger { display: inline-flex; align-items: center; gap: 5px; color: #b04a4a; margin-left: 12px; }
+
+/* PDF (digital product) orders */
+.ord-digital { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: rgba(227, 208, 234, 0.35); font-size: 0.85rem; }
+.ord-digital > span { display: inline-flex; align-items: flex-start; gap: 6px; flex: 1 1 260px; }
+.ord-digital > span svg { flex-shrink: 0; margin-top: 2px; }
+.ord-digital small { flex-basis: 100%; opacity: 0.8; }

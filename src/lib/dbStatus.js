@@ -8,6 +8,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 67, file: 'storefront_v67_digital_products.sql', title: 'Digital products (PDF)', what: 'Shop owners attach a PDF to a product; it sits in a private bucket and buyers get a download link by email once they pay.',
+    expect: 'columns_ready true · bucket_ready true · bucket_private true · file_policies true · version_recorded true',
+    checks: [['column', 'products', 'digital_file_path']] },
   { v: 66, file: 'storefront_v66_couples_agreement.sql', title: 'Couples agreement', what: 'Couples sign the Couples Private Mentorship Agreement and pick any of the four couples plans in it.',
     expect: 'details_ready true · sign_ready true · version_recorded true',
     checks: [] },

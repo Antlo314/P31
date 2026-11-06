@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { RefreshCw, Download, Mail, Phone, Truck, Check, X, CreditCard, Send, MapPin, Package, StickyNote, Trash2 } from 'lucide-react';
+import { RefreshCw, Download, Mail, Phone, Truck, Check, X, CreditCard, Send, MapPin, Package, StickyNote, Trash2, FileDown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { invokePayment } from '../../lib/payments';
 import './Orders.css';
 
 const money = (cents) => `$${((cents || 0) / 100).toFixed(2)}`;
 const ref = (o) => String(o.id).slice(0, 8).toUpperCase();
-const METHOD = { ship: 'Ship', pickup: 'Local pickup', market: 'Market pickup' };
+const METHOD = { ship: 'Ship', pickup: 'Local pickup', market: 'Market pickup', digital: 'Digital download (PDF emailed)' };
 const FILTERS = [['open', 'Open'], ['new', 'New'], ['confirmed', 'Confirmed'], ['fulfilled', 'Fulfilled'], ['cancelled', 'Cancelled'], ['all', 'All']];
 
 const lines = (o) => (Array.isArray(o.items) && o.items.length
@@ -40,6 +41,18 @@ const OrdersPanel = ({ curatorId }) => {
   const [loading, setLoading] = useState(true);
   const [tracking, setTracking] = useState({});
   const [error, setError] = useState('');
+  const [resent, setResent] = useState({}); // order id -> 'sending' | message
+
+  // PDFs (digital products, v67): the buyer is emailed the download when they pay; this sends it again.
+  const resend = async (o) => {
+    setResent((m) => ({ ...m, [o.id]: 'sending' }));
+    try {
+      const r = await invokePayment('digital-download', { action: 'resend', orderId: o.id });
+      setResent((m) => ({ ...m, [o.id]: `Sent to ${r.sentTo}` }));
+    } catch (err) {
+      setResent((m) => ({ ...m, [o.id]: err.message || 'Not sent. Try again.' }));
+    }
+  };
 
   const load = async () => {
     let q = supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(500);
@@ -148,7 +161,7 @@ const OrdersPanel = ({ curatorId }) => {
               <ul className="ord-items">
                 {lines(o).map((l, i) => (
                   <li key={i}>
-                    <span>{l.quantity}× {l.name}{l.options && Object.keys(l.options).length ? <em> · {Object.entries(l.options).map(([k, v]) => `${k}: ${v}`).join(' · ')}</em> : null}</span>
+                    <span>{l.quantity}× {l.name}{l.digital ? <em> · PDF</em> : null}{l.options && Object.keys(l.options).length ? <em> · {Object.entries(l.options).map(([k, v]) => `${k}: ${v}`).join(' · ')}</em> : null}</span>
                     {l.price_cents != null && <span>{money(l.price_cents * l.quantity)}</span>}
                   </li>
                 ))}
@@ -165,6 +178,16 @@ const OrdersPanel = ({ curatorId }) => {
                 {o.buyer_note && <span><StickyNote size={14} /> “{o.buyer_note}”</span>}
                 {o.tracking_number && <span><Package size={14} /> Tracking {o.tracking_number}</span>}
               </div>
+
+              {st !== 'cancelled' && lines(o).some((l) => l.digital) && o.buyer_email && (
+                <div className="ord-digital">
+                  <span><FileDown size={14} /> {o.fulfillment_method === 'digital' ? 'PDF order: the buyer was emailed the download when they paid. Nothing to ship.' : 'The PDF items were emailed to the buyer when they paid.'}</span>
+                  <button className="ord-link" disabled={resent[o.id] === 'sending'} onClick={() => resend(o)}>
+                    {resent[o.id] === 'sending' ? 'Sending…' : 'Email the download again'}
+                  </button>
+                  {resent[o.id] && resent[o.id] !== 'sending' && <small>{resent[o.id]}</small>}
+                </div>
+              )}
 
               {st !== 'fulfilled' && st !== 'cancelled' && (
                 <div className="ord-actions">
