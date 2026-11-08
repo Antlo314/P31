@@ -8,6 +8,9 @@
 import { supabase } from './supabase';
 
 export const SCRIPTS = [
+  { v: 68, file: 'storefront_v68_shop_reviews.sql', title: 'Shop reviews', what: 'Shoppers leave a review on a shop page; it shows after the shop owner approves it in her dashboard.',
+    expect: 'source_ready true · submit_ready true · anon_can_submit true · version_recorded true',
+    checks: [['column', 'testimonials', 'source'], ['rpc', 'submit_shop_review']] },
   { v: 67, file: 'storefront_v67_digital_products.sql', title: 'Digital products (PDF)', what: 'Shop owners attach a PDF to a product; it sits in a private bucket and buyers get a download link by email once they pay.',
     expect: 'columns_ready true · bucket_ready true · bucket_private true · file_policies true · version_recorded true',
     checks: [['column', 'products', 'digital_file_path']] },

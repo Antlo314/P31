@@ -319,6 +319,28 @@ const CuratorDashboard = () => {
     }
   };
 
+  // Her Stripe dashboard, from the menu or the Storefront card. The tab is opened right away
+  // (Safari and phones block a new tab opened after waiting on the server), then sent to Stripe.
+  const openStripeDashboard = async () => {
+    const win = window.open('', '_blank');
+    try { if (win) win.document.write('<p style="font:16px system-ui;padding:24px;color:#3A1C36">Opening your Stripe dashboard...</p>'); } catch { /* cross-window write blocked */ }
+    setStripeSyncing(true);
+    setStripeMsg('');
+    try {
+      const status = await invokePayment('stripe-account-status', { action: 'dashboard' });
+      await fetchUserData(user.id);
+      if (!status.dashboardUrl) throw new Error('Finish setting up Stripe first (Storefront > Stripe payments), then the dashboard opens.');
+      if (win && !win.closed) { win.opener = null; win.location.href = status.dashboardUrl; }
+      else window.location.href = status.dashboardUrl;
+    } catch (err) {
+      if (win && !win.closed) win.close();
+      setStripeMsg(/Finish setting up/.test(err.message || '') ? err.message : `Your Stripe dashboard did not open just now. Please try again in a minute. (${err.message})`);
+      setActiveTab('storefront');
+    } finally {
+      setStripeSyncing(false);
+    }
+  };
+
   // Sync Stripe status when the vendor returns from Stripe onboarding
   useEffect(() => {
     if (!user) return;
@@ -519,8 +541,16 @@ const CuratorDashboard = () => {
   };
 
   const fetchTestimonials = async () => {
-    const { data } = await supabase.from('testimonials').select('*').eq('curator_id', user.id);
+    const { data } = await supabase.from('testimonials').select('*').eq('curator_id', user.id)
+      .order('created_at', { ascending: false });
     setTestimonials(data || []);
+  };
+
+  // A review a shopper left on her shop page (v68) shows only after she approves it.
+  const approveTestimonial = async (id) => {
+    const { error } = await supabase.from('testimonials').update({ is_approved: true }).eq('id', id);
+    if (error) { alert(friendlyError(error, 'The review was not approved.')); return; }
+    fetchTestimonials();
   };
 
   const fetchPrivateMessages = async () => {
@@ -909,8 +939,9 @@ const CuratorDashboard = () => {
   };
 
   const deleteTestimonial = async (id) => {
-    if (window.confirm('Remove this testimonial?')) {
-      await supabase.from('testimonials').delete().eq('id', id);
+    if (window.confirm('Remove this review? It cannot be brought back.')) {
+      const { error } = await supabase.from('testimonials').delete().eq('id', id);
+      if (error) alert(friendlyError(error, 'The review was not removed.'));
       fetchTestimonials();
     }
   };
@@ -1038,7 +1069,12 @@ const CuratorDashboard = () => {
           {isAdmin && <span className="admin-status-pill"><Crown size={12} /> Architect</span>}
         </div>
         
-        <StudioNav activeTab={activeTab} onSelect={setActiveTab} isAdmin={isAdmin} onSignOut={handleSignOut} />
+        <StudioNav
+          activeTab={activeTab} onSelect={setActiveTab} isAdmin={isAdmin} onSignOut={handleSignOut}
+          onAction={(id) => { if (id === 'stripe') openStripeDashboard(); }}
+          has={{ stripe: !!curatorData?.stripe_account_id }}
+          counts={{ testimonials: testimonials.filter((t) => !t.is_approved).length }}
+        />
       </aside>
 
       {/* Main Content Area */}
@@ -1651,7 +1687,7 @@ const CuratorDashboard = () => {
                       Your shop is taking card payments: shoppers can buy any product that has a price. Your money goes {curatorData?.stripe_payouts_enabled ? 'straight to your bank account' : 'to your Stripe balance for now (add a bank account in Stripe so it can be paid out)'}.
                     </p>
                     <div className="flex gap-3 flex-wrap">
-                      <button type="button" onClick={() => syncStripeStatus(true)} disabled={stripeSyncing} className="btn-solid-gold flex-center gap-2">
+                      <button type="button" onClick={openStripeDashboard} disabled={stripeSyncing} className="btn-solid-gold flex-center gap-2">
                         {stripeSyncing ? <Loader2 size={16} className="animate-spin" /> : <ExternalLink size={16} />}
                         Open my Stripe dashboard
                       </button>
@@ -2587,41 +2623,61 @@ const CuratorDashboard = () => {
           <Route path="testimonials" element={
             <div className="dashboard-view">
               <header className="dashboard-header">
-                <h1 className="font-headline text-primary">Customer <span className="text-gold">Voices</span></h1>
-                <p>Curate the testimonials that define your brand's reputation for excellence.</p>
+                <h1 className="font-headline text-primary">Customer <span className="text-gold">Reviews</span></h1>
+                <p>Shoppers can leave a review on your shop page. New reviews wait here until you approve them; only approved reviews show on your shop.</p>
               </header>
+
+              {testimonials.some((t) => !t.is_approved) && (
+                <section className="dashboard-card glass-card mb-8">
+                  <h2 className="card-title text-gold m-0 mb-4"><Bell size={20} /> Waiting for your OK ({testimonials.filter((t) => !t.is_approved).length})</h2>
+                  <div className="testimonials-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem'}}>
+                    {testimonials.filter((t) => !t.is_approved).map((t) => (
+                      <div key={t.id} className="testimonial-item p-6 bg-surface rounded-xl border border-thistle">
+                        <div className="flex gap-1 mb-3" aria-label={`${t.rating} out of 5 stars`}>
+                          {[...Array(t.rating || 0)].map((_, i) => <Sparkles key={i} size={12} className="text-gold" />)}
+                        </div>
+                        <p className="italic text-sm opacity-80 mb-3" style={{whiteSpace: 'pre-line'}}>"{t.content}"</p>
+                        <p className="font-bold text-xs text-primary mb-4">— {t.customer_name} · {new Date(t.created_at).toLocaleDateString()}</p>
+                        <div className="flex gap-3 flex-wrap">
+                          <button type="button" onClick={() => approveTestimonial(t.id)} className="btn-solid-gold btn-sm flex-center gap-2"><Check size={14} /> Approve</button>
+                          <button type="button" onClick={() => deleteTestimonial(t.id)} className="btn-outline-primary btn-sm flex-center gap-2"><Trash2 size={14} /> Remove</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               <section className="dashboard-card glass-card">
                 <div className="flex-between mb-8">
                   <h2 className="card-title text-gold m-0">
-                    <MessageSquare size={20} /> Artisan Testimonials
-                    <HelpTip title="Collecting Customer Praise">
-                      <p>Testimonials build trust — shops with reviews sell more. How to gather them:</p>
+                    <MessageSquare size={20} /> On your shop page
+                    <HelpTip title="Getting reviews">
+                      <p>Reviews build trust; shops with reviews sell more. Two ways to get them:</p>
                       <ol>
-                        <li>Text or DM a happy customer: <em>"Would you mind sharing a sentence or two about the [product] you bought? I'd love to feature it on my shop page."</em></li>
-                        <li>Click <strong>Add Voice</strong>, paste what they said, and add their first name.</li>
-                        <li>Pick a star rating and save — it appears on your public shop page.</li>
+                        <li>Send customers your shop link and ask them to tap <strong>Leave a review</strong> near the bottom of your shop page. You approve each one here before it shows.</li>
+                        <li>If someone sends you kind words by text or DM, tap <strong>Add a review</strong>, paste what they said, and add their first name.</li>
                       </ol>
-                      <p className="helptip-note">Even 2–3 short testimonials make a big difference. Keep them honest and in the customer's own words.</p>
+                      <p className="helptip-note">Keep them honest and in the customer's own words. Reviews show on your shop while "Show testimonials" is on in Store Design.</p>
                     </HelpTip>
                   </h2>
-                  <button onClick={() => setIsTestimonialModalOpen(true)} className="btn-solid-gold btn-sm"><Plus size={16} /> Add Voice</button>
+                  <button onClick={() => setIsTestimonialModalOpen(true)} className="btn-solid-gold btn-sm"><Plus size={16} /> Add a review</button>
                 </div>
 
                 <div className="testimonials-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem'}}>
-                  {testimonials.map(t => (
+                  {testimonials.filter((t) => t.is_approved).map(t => (
                     <div key={t.id} className="testimonial-item p-6 bg-surface rounded-xl border border-thistle relative">
-                      <button onClick={() => deleteTestimonial(t.id)} className="absolute top-2 right-2 text-red-500 opacity-40 hover:opacity-100"><Trash2 size={16} /></button>
+                      <button onClick={() => deleteTestimonial(t.id)} className="absolute top-2 right-2 text-red-500 opacity-40 hover:opacity-100" aria-label="Remove this review"><Trash2 size={16} /></button>
                       <div className="flex gap-1 mb-3">
-                        {[...Array(t.rating)].map((_, i) => <Sparkles key={i} size={12} className="text-gold" />)}
+                        {[...Array(t.rating || 0)].map((_, i) => <Sparkles key={i} size={12} className="text-gold" />)}
                       </div>
-                      <p className="italic text-sm opacity-80 mb-4">"{t.content}"</p>
-                      <p className="font-bold text-xs text-primary">— {t.customer_name}</p>
+                      <p className="italic text-sm opacity-80 mb-4" style={{whiteSpace: 'pre-line'}}>"{t.content}"</p>
+                      <p className="font-bold text-xs text-primary">— {t.customer_name}{t.source === 'customer' ? ' · left on your shop' : ''}</p>
                     </div>
                   ))}
-                  {testimonials.length === 0 && (
+                  {!testimonials.some((t) => t.is_approved) && (
                     <div className="col-span-full text-center py-20 opacity-40 italic">
-                      No testimonials added yet. Let your customers speak for your craftsmanship.
+                      No reviews showing yet. Share your shop link and ask happy customers to leave one.
                     </div>
                   )}
                 </div>
@@ -2630,7 +2686,7 @@ const CuratorDashboard = () => {
               {isTestimonialModalOpen && (
                 <div className="modal-overlay flex-center">
                   <form onSubmit={saveTestimonial} className="modal-content glass-card p-8 max-w-md w-full">
-                    <h2 className="font-headline text-2xl text-primary mb-6">Add Customer Voice</h2>
+                    <h2 className="font-headline text-2xl text-primary mb-6">Add a review</h2>
                     <div className="form-group mb-4">
                       <label>Customer Name</label>
                       <input 

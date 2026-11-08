@@ -79,6 +79,69 @@ const FollowBox = ({ curator }) => {
   );
 };
 
+// "Leave a review" (v68): a shopper's review waits until the shop owner approves it.
+const ReviewBox = ({ curator }) => {
+  const [openForm, setOpenForm] = useState(false);
+  const [form, setForm] = useState({ name: '', rating: 0, text: '', trap: '' });
+  const [state, setState] = useState('idle'); // idle | busy | done
+  const [msg, setMsg] = useState('');
+  const submit = async (e) => {
+    e.preventDefault();
+    setMsg('');
+    if (form.trap) { setState('done'); return; } // filled by bots only
+    if (!form.rating) { setMsg('Please pick 1 to 5 stars.'); return; }
+    setState('busy');
+    const { data, error } = await supabase.rpc('submit_shop_review', {
+      p_curator_id: curator.id, p_name: form.name, p_rating: form.rating, p_content: form.text,
+    });
+    if (error || !data?.ok) {
+      setState('idle');
+      setMsg(data?.message || 'Your review did not go through. Please try again in a minute.');
+      return;
+    }
+    setState('done');
+  };
+  if (state === 'done') {
+    return <p className="sf-follow__done sf-reviewbox__done" role="status"><Check size={18} /> Thank you! Your review goes up once {curator.business_name} has read it.</p>;
+  }
+  if (!openForm) {
+    return (
+      <button type="button" className="sf-btn sf-btn--soft sf-reviewbox__open" onClick={() => setOpenForm(true)}>
+        <Star size={17} /> Leave a review
+      </button>
+    );
+  }
+  return (
+    <form className="sf-reviewbox" onSubmit={submit}>
+      <p className="sf-reviewbox__title">Share your experience with {curator.business_name}</p>
+      <div className="sf-reviewbox__stars" role="radiogroup" aria-label="Your rating">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button key={n} type="button" role="radio" aria-checked={form.rating === n} aria-label={`${n} star${n > 1 ? 's' : ''}`}
+            className={n <= form.rating ? 'is-on' : ''} onClick={() => setForm({ ...form, rating: n })}>
+            <Star size={26} />
+          </button>
+        ))}
+      </div>
+      <label>Your name
+        <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} maxLength={60} required placeholder="First name is fine" autoComplete="given-name" />
+      </label>
+      <label>Your review
+        <textarea value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} maxLength={1200} required rows={4}
+          placeholder="What did you buy, and how did it bless you?" />
+      </label>
+      <input className="sf-reviewbox__trap" tabIndex={-1} autoComplete="off" aria-hidden="true" value={form.trap} onChange={(e) => setForm({ ...form, trap: e.target.value })} />
+      {msg && <p className="sf-low" role="alert">{msg}</p>}
+      <div className="sf-reviewbox__actions">
+        <button type="submit" className="sf-btn sf-btn--accent" disabled={state === 'busy'}>
+          {state === 'busy' ? <Loader2 size={18} className="sf-spin" /> : <Send size={17} />} Send review
+        </button>
+        <button type="button" className="sf-btn sf-btn--soft" onClick={() => { setOpenForm(false); setMsg(''); }}>Cancel</button>
+      </div>
+      <p className="sf-reviewbox__note">Reviews show on this page after the shop owner reads them.</p>
+    </form>
+  );
+};
+
 const CuratorProfile = () => {
   const { user } = useAuth();
   const { id: slug } = useParams();
@@ -181,7 +244,8 @@ const CuratorProfile = () => {
           .sort((a, b) => (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0) || (a.sort_order ?? 0) - (b.sort_order ?? 0)));
 
         const { data: testData } = await supabase
-          .from('testimonials').select('*').eq('curator_id', data.id).eq('is_approved', true);
+          .from('testimonials').select('id, customer_name, content, rating, created_at').eq('curator_id', data.id).eq('is_approved', true)
+          .order('created_at', { ascending: false });
         setTestimonials(testData || []);
       } catch (err) {
         console.error('Curator fetch error:', err);
@@ -432,10 +496,11 @@ const CuratorProfile = () => {
 
       {!design.productsFirst && productsSection}
 
-      {design.showTestimonials && testimonials.length > 0 && (
+      {design.showTestimonials && (testimonials.length > 0 || curator.status === 'approved') && (
         <section className="sf-reviews" data-reveal>
-          <p className="sf-eyebrow">Collector’s praise</p>
-          <div className="sf-reviews__rail">
+          <p className="sf-eyebrow">{testimonials.length > 0 ? 'Collector’s praise' : 'Reviews'}</p>
+          {testimonials.length === 0 && <p className="sf-reviews__empty">No reviews yet. Bought something here? Be the first to share.</p>}
+          {testimonials.length > 0 && <div className="sf-reviews__rail">
             {testimonials.map((t) => (
               <figure className="sf-review" key={t.id}>
                 <div className="sf-stars" aria-label={`${t.rating} out of 5`}>
@@ -445,7 +510,8 @@ const CuratorProfile = () => {
                 <figcaption>— {t.customer_name}</figcaption>
               </figure>
             ))}
-          </div>
+          </div>}
+          {curator.status === 'approved' && <ReviewBox curator={curator} />}
         </section>
       )}
 

@@ -77,3 +77,14 @@
 .ord-digital > span { display: inline-flex; align-items: flex-start; gap: 6px; flex: 1 1 260px; }
 .ord-digital > span svg { flex-shrink: 0; margin-top: 2px; }
 .ord-digital small { flex-basis: 100%; opacity: 0.8; }
+
+/* Promo codes: Edit and Delete beside Pause. On phones the buttons sit under the code. */
+.dc-item div:last-child { flex-wrap: wrap; justify-content: flex-end; }
+.dc-item button { display: inline-flex; align-items: center; gap: 5px; }
+.dc-item .dc-del { color: #9b2c2c; border-color: #e8c4c4; }
+.dc-item.is-editing { border-color: #9B71B2; box-shadow: 0 0 0 2px rgba(155, 113, 178, 0.25); }
+.dc-note { margin: 0; font-size: 0.85rem; font-weight: 700; color: #374126; }
+@media (max-width: 560px) {
+  .dc-item { grid-template-columns: 1fr; }
+  .dc-item div:last-child { justify-content: flex-start; }
+}

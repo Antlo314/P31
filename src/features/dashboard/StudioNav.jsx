@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   User, ShoppingBag, Palette, DollarSign, Tag, Star, Megaphone, Camera, BarChart3, Bell, MessageSquare,
-  HelpCircle, ExternalLink, Crown, ShieldCheck, ChevronDown, Menu, X, LogOut, CreditCard, Rocket,
+  HelpCircle, ExternalLink, Crown, ShieldCheck, ChevronDown, Menu, X, LogOut, CreditCard, Rocket, Landmark,
 } from 'lucide-react';
 import { startCuratorTour } from './studioTour';
 import './StudioNav.css';
@@ -19,7 +19,9 @@ const GROUPS = [
   { id: 'sell', label: 'Sell', items: [
     { id: 'orders', label: 'Orders', Icon: DollarSign, alias: ['sales'] },
     { id: 'discounts', label: 'Promo codes', Icon: Tag },
-    { id: 'testimonials', label: 'Testimonials', Icon: Star },
+    { id: 'testimonials', label: 'Reviews', Icon: Star },
+    // Opens her own Stripe dashboard in a new tab (shown once her Stripe account is set up).
+    { id: 'stripe', label: 'Stripe dashboard', Icon: Landmark, action: true, needs: 'stripe' },
   ] },
   { id: 'grow', label: 'Grow', items: [
     { id: 'grow', label: 'Add-ons & Featured', Icon: Rocket },
@@ -44,11 +46,16 @@ const readFolded = () => { try { return JSON.parse(localStorage.getItem(KEY)) ||
 
 const isOn = (item, activeTab) => item.id === activeTab || (item.alias || []).includes(activeTab);
 
-/** Grouped, foldable studio menu. onSelect(tabId) switches the page. */
-const StudioNav = ({ activeTab, onSelect, isAdmin, onSignOut }) => {
+/**
+ * Grouped, foldable studio menu. onSelect(tabId) switches the page; onAction(id) runs a menu
+ * button that is not a page (the Stripe dashboard). `has` turns on items that need something
+ * (has.stripe), `counts` puts a small number beside an item (reviews waiting).
+ */
+const StudioNav = ({ activeTab, onSelect, onAction, isAdmin, onSignOut, has = {}, counts = {} }) => {
   const [folded, setFolded] = useState(readFolded);
   const [open, setOpen] = useState(false); // phones: the whole menu
-  const groups = GROUPS.filter((g) => !g.admin || isAdmin);
+  const groups = GROUPS.filter((g) => !g.admin || isAdmin)
+    .map((g) => ({ ...g, items: g.items.filter((i) => !i.needs || has[i.needs]) }));
   const current = groups.flatMap((g) => g.items).find((i) => isOn(i, activeTab));
 
   useEffect(() => { try { localStorage.setItem(KEY, JSON.stringify(folded)); } catch { /* private mode */ } }, [folded]);
@@ -57,7 +64,9 @@ const StudioNav = ({ activeTab, onSelect, isAdmin, onSignOut }) => {
   // Picking a page closes the phone menu.
   const pick = (item) => {
     setOpen(false);
-    if (item.tour) startCuratorTour(); else onSelect(item.id);
+    if (item.tour) startCuratorTour();
+    else if (item.action) onAction?.(item.id);
+    else onSelect(item.id);
   };
 
   return (
@@ -83,6 +92,8 @@ const StudioNav = ({ activeTab, onSelect, isAdmin, onSignOut }) => {
                 return (
                   <button key={item.id} type="button" className={cls} onClick={() => pick(item)} data-tour={`nav-${item.id}`} aria-current={isOn(item, activeTab) ? 'page' : undefined}>
                     <Icon size={18} /> {item.label}
+                    {item.action && <ExternalLink size={13} className="sn__ext" aria-hidden="true" />}
+                    {counts[item.id] > 0 && <span className="sn__count" aria-label={`${counts[item.id]} waiting`}>{counts[item.id]}</span>}
                   </button>
                 );
               })}

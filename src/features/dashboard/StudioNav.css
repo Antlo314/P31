@@ -73,3 +73,11 @@
   .sc__list li { gap: 8px; padding: 8px; }
   .sc__go { padding: 0 10px; }
 }
+
+/* A menu button that opens another site (Stripe), and a small "waiting" number. */
+.sn .sn__ext { margin-left: auto; opacity: 0.55; flex: none; }
+.sn .sn__count {
+  margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
+  display: inline-grid; place-items: center; flex: none;
+  background: #9B71B2; color: #fff; font-size: 0.72rem; font-weight: 800; line-height: 1;
+}

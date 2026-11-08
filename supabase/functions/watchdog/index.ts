@@ -43,7 +43,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 type Row = Record<string, any>;
 type Problem = { key: string; severity: 'warn' | 'fail'; area: string; title: string; detail?: string; fix?: string; link?: string; meta?: Row };
 
-const LATEST_DB = 67; // the newest storefront_vNN.sql in the repo
+const LATEST_DB = 68; // the newest storefront_vNN.sql in the repo
 const SYSTEMS = 'https://www.thep31collective.org/systems';
 const STUDIO = 'https://www.thep31collective.org/studio';
 const SOCIAL_SETUP = `${SYSTEMS}/social-accounts`;

@@ -401,6 +401,7 @@ The P31 Collective`, attachments: [], created_at: day(-1) },
     { id: 1, curator_id: 'u-cu', customer_name: 'Tasha R.', rating: 5, content: 'The Fig & Myrrh candle makes my whole house feel like a deep breath. I have bought four now.', is_approved: true, created_at: day(-20) },
     { id: 2, curator_id: 'u-cu', customer_name: 'Denise M.', rating: 5, content: 'Ordered the gift set for my mother. The handwritten scripture card made her cry, in the best way.', is_approved: true, created_at: day(-12) },
     { id: 3, curator_id: 'u-cu', customer_name: 'Keisha W.', rating: 4, content: 'The body butter is the only thing that helps my hands in winter. Wish the jar were bigger!', is_approved: true, created_at: day(-5) },
+    { id: 4, curator_id: 'u-cu', customer_name: 'Monique J.', rating: 5, content: 'Found this shop at the fall market. The candle arrived beautifully wrapped. Thank you!', is_approved: false, source: 'customer', created_at: day(-1) },
   ],
   discount_codes: [],
   site_admins: [
