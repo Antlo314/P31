@@ -1,8 +1,11 @@
 // Supabase Edge Function: stripe-checkout
 // Public: creates a Stripe Checkout Session for a shopper's bag (one shop per
-// checkout). The charge is created on the platform account and transferred to
-// the vendor's connected account (destination charge); an optional
-// PLATFORM_FEE_PERCENT is kept by the platform.
+// checkout). DIRECT CHARGE: the card is charged on the vendor's own connected
+// account, so the sale (and Stripe's processing fee) is hers; Stripe takes
+// PLATFORM_FEE_PERCENT (5%) out of each charge as an application fee and sends it
+// to P31. P31 never holds the vendor's money.
+// The paid event arrives on the "connected accounts" webhook endpoint
+// (checkout.session.completed), whose signing secret is in MARKET_STRIPE_WEBHOOK_SECRET.
 // Accepts { items: [{ productId, quantity, options }], discountCode } — or the
 // older { productId, quantity } for a single item.
 // Deploy: supabase functions deploy stripe-checkout
@@ -66,9 +69,12 @@ Deno.serve(async (req) => {
     const origin = (Deno.env.get('APP_URL') || req.headers.get('origin') || '').replace(/\/$/, '');
     const shopPath = `/${curator.slug || curator.id}`;
 
-    // A one-off coupon carries the discount so Stripe's receipt shows it.
+    // Everything below is created on the vendor's account.
+    const onVendor = { stripeAccount: curator.stripe_account_id as string };
+
+    // A one-off coupon (on her account) carries the discount so Stripe's receipt shows it.
     const discounts = discount > 0
-      ? [{ coupon: (await stripe.coupons.create({ amount_off: discount, currency: 'usd', duration: 'once', name: disc.code || 'Discount' })).id }]
+      ? [{ coupon: (await stripe.coupons.create({ amount_off: discount, currency: 'usd', duration: 'once', name: disc.code || 'Discount' }, onVendor)).id }]
       : undefined;
 
     const session = await stripe.checkout.sessions.create({
@@ -90,9 +96,9 @@ Deno.serve(async (req) => {
       }),
       ...(discounts ? { discounts } : {}),
       payment_intent_data: {
-        transfer_data: { destination: curator.stripe_account_id },
+        // Stripe keeps this part of the charge for P31; the rest stays in her account.
         ...(applicationFee > 0 ? { application_fee_amount: applicationFee } : {}),
-        metadata: { curator_id: curator.id },
+        metadata: { curator_id: curator.id, application_fee: String(applicationFee) },
       },
       metadata: {
         curator_id: curator.id,
@@ -105,7 +111,7 @@ Deno.serve(async (req) => {
       ...(allDigital ? {} : { shipping_address_collection: { allowed_countries: ['US'] as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[] } }),
       success_url: `${origin}${shopPath}?purchase=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}${shopPath}?purchase=cancelled`,
-    });
+    }, onVendor);
 
     // Record the pending order now (full line items); the webhook marks it paid.
     const { error: orderErr } = await admin.from('orders').upsert({

@@ -6,7 +6,9 @@
 // The Market's Stripe account (MARKET_STRIPE_SECRET_KEY; see _shared/stripe.ts). Configure the endpoint with events:
 //   checkout.session.completed, invoice.paid, invoice.payment_failed,
 //   customer.subscription.updated, customer.subscription.deleted   (orders and storefront subscriptions)
-// and a second, "connected accounts" endpoint at the same address with account.updated (vendor payouts).
+// and a second, "connected accounts" endpoint at the same address with account.updated (vendor payouts)
+// AND checkout.session.completed: shop orders are direct charges on the vendor's account (stripe-checkout),
+// so their paid event comes from the connected account, not from P31's own account.
 // Each has its own signing secret: MARKET_STRIPE_WEBHOOK_SECRET holds both, comma-separated: whsec_aaa,whsec_bbb
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
