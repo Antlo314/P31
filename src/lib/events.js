@@ -8,8 +8,8 @@ export const showDate = (ev) => !!ev?.date_public;
 // the site then reads "December · date coming soon".
 export const showMonth = (ev) => !!ev && !ev.date_public && !!ev.month_public;
 export const monthLabel = (ev, opts = { month: 'long' }) => (ev?.event_date ? parseEventDate(ev.event_date).toLocaleDateString('en-US', opts) : '');
-/** What to call the outside link: ticketed events (Eventbrite) say so. */
-export const ticketLabel = (url) => (/eventbrite|ticket|tix/i.test(url || '') ? 'Get tickets' : 'RSVP');
+/** What to call the outside link: ticketed events (Eventbrite or a Stripe checkout link) say so. */
+export const ticketLabel = (url) => (/eventbrite|ticket|tix|buy\.stripe\.com/i.test(url || '') ? 'Get tickets' : 'RSVP');
 
 // Today's date as YYYY-MM-DD in the visitor's local time zone.
 const todayISO = () => {
