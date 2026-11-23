@@ -148,19 +148,3 @@
   .lp2__perks { display: none; }
 }
 
-/* Event invitation (EventPopup.jsx) — same card, ticket details instead of a form */
-.ep__facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.ep__facts li { display: flex; align-items: flex-start; gap: 10px; font-weight: 700; font-size: 0.95rem; color: rgba(255, 255, 255, 0.9); }
-.ep__facts svg { flex: none; margin-top: 2px; color: var(--gold-hi); }
-.ep__desc { margin: 0; font-size: 0.95rem; }
-.ep__actions { display: grid; gap: 6px; justify-items: center; margin-top: 4px; }
-.ep__later {
-  border: 0; background: none; cursor: pointer; padding: 8px 12px;
-  font: inherit; font-size: 0.88rem; font-weight: 700; color: rgba(244, 228, 193, 0.75);
-}
-.ep__later:hover { color: var(--lp-champagne); }
-/* Phones: date, place and the ticket button all above the fold. */
-@media (max-width: 759px) {
-  .ep__desc { display: none; }
-  .ep .lp2__main { gap: 14px; padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
-}

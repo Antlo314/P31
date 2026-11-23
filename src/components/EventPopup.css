@@ -1,0 +1,158 @@
+/* Event invitation (EventPopup.jsx) — styled after the Luncheon flyer:
+   blush paper, the flyer taped up at a tilt, a cream note pinned beside it,
+   rose type and a hand-drawn pink ring round the date.
+   Bottom sheet on phones, a two-part card on a computer. */
+.ep2 {
+  --ep-blush: #f4d5db;
+  --ep-blush-deep: #e9b9c4;
+  --ep-rose: #b4506c;
+  --ep-rose-deep: #93354f;
+  --ep-cream: #fbf6ee;
+  --ep-ink: #2f2b17;
+  --ep-ink-soft: #5d5741;
+  position: fixed; inset: 0; z-index: 510;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(58, 28, 54, 0.55);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+
+.ep2__panel {
+  position: relative; isolation: isolate;
+  width: 100%; max-height: 94dvh; overflow: hidden auto; overscroll-behavior: contain;
+  display: grid; justify-items: center; gap: 18px;
+  padding: 30px 18px calc(20px + env(safe-area-inset-bottom));
+  color: var(--ep-ink);
+  border-radius: 28px 28px 0 0;
+  /* Blush paper with soft light, like the flyer's backdrop */
+  background:
+    radial-gradient(70% 50% at 12% 0%, rgba(255, 255, 255, 0.65), transparent 70%),
+    radial-gradient(60% 60% at 100% 100%, rgba(214, 140, 160, 0.35), transparent 70%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 9px),
+    linear-gradient(160deg, #f8e1e5 0%, var(--ep-blush) 55%, var(--ep-blush-deep) 100%);
+  box-shadow: 0 -24px 70px -24px rgba(58, 28, 54, 0.6);
+}
+.ep2__grip { position: absolute; top: 9px; left: 50%; width: 42px; height: 5px; margin-left: -21px; border-radius: 999px; background: rgba(147, 53, 79, 0.35); }
+.ep2__close {
+  position: absolute; top: 14px; right: 14px; z-index: 5;
+  width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  border: 1px solid rgba(147, 53, 79, 0.25); background: rgba(251, 246, 238, 0.8); color: var(--ep-rose-deep);
+  transition: background 0.2s, transform 0.2s;
+}
+.ep2__close:hover { background: #fff; transform: rotate(90deg); }
+
+/* The flyer, taped up like a photo */
+.ep2__flyer {
+  position: relative; display: block; z-index: 1;
+  height: min(40dvh, 330px); aspect-ratio: 941 / 1672;
+  padding: 7px; background: #fff; border-radius: 4px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.04), 0 22px 40px -18px rgba(90, 30, 50, 0.55);
+  transform: rotate(-2deg);
+  transition: transform 0.35s cubic-bezier(.2, .8, .2, 1);
+}
+.ep2__flyer:hover { transform: rotate(0deg) scale(1.02); }
+.ep2__flyer img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 2px; }
+.ep2__tape {
+  position: absolute; top: -12px; left: 50%; z-index: 2; width: 92px; height: 26px; margin-left: -46px;
+  background: rgba(178, 160, 112, 0.55); transform-origin: left center; rotate: 3deg;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  -webkit-mask: linear-gradient(90deg, transparent 0 2px, #000 2px calc(100% - 2px), transparent 0), repeating-linear-gradient(0deg, #000 0 3px, transparent 3px 4px);
+  mask: linear-gradient(90deg, transparent 0 2px, #000 2px calc(100% - 2px), transparent 0);
+}
+
+/* The cream note */
+.ep2__note {
+  position: relative; width: 100%; max-width: 460px;
+  display: grid; gap: 12px;
+  padding: 22px 20px 16px;
+  background: var(--ep-cream);
+  border-radius: 6px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04), 0 18px 40px -22px rgba(90, 30, 50, 0.45);
+}
+.ep2__note > * { margin: 0; }
+.ep2__pin {
+  position: absolute; top: -9px; left: 50%; width: 20px; height: 20px; margin-left: -10px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f4dc9b, #b8913c 55%, #7c5d1f);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.28);
+}
+.ep2__eyebrow { display: flex; align-items: center; gap: 10px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.26em; text-transform: uppercase; color: var(--ep-ink); }
+.ep2__eyebrow i { flex: 1; height: 1px; background: rgba(47, 43, 23, 0.35); }
+.ep2__eyebrow b { font-size: 0.95rem; letter-spacing: 0; color: var(--ep-ink); font-weight: 400; }
+
+.ep2__title { display: grid; gap: 2px; line-height: 1.02; }
+.ep2__title-main {
+  font-family: var(--font-heading); font-style: italic; font-weight: 500;
+  font-size: clamp(1.7rem, 1.3rem + 1.6vw, 2.5rem); color: var(--ep-ink); letter-spacing: -0.01em;
+}
+.ep2__title-last {
+  font-family: var(--font-body, inherit); font-weight: 600; text-transform: uppercase;
+  font-size: clamp(1.05rem, 0.9rem + 0.7vw, 1.4rem); letter-spacing: 0.42em; color: var(--ep-rose);
+}
+
+.ep2__when { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; padding-top: 4px; border-top: 1px solid rgba(47, 43, 23, 0.18); }
+.ep2__date {
+  position: relative; display: inline-block; padding: 6px 16px;
+  font-family: var(--font-heading); font-style: italic; font-weight: 600;
+  font-size: clamp(1.6rem, 1.3rem + 1vw, 2.1rem); color: var(--ep-ink); white-space: nowrap;
+}
+.ep2__ring { position: absolute; inset: -2px -6px; width: calc(100% + 12px); height: calc(100% + 4px); overflow: visible; pointer-events: none; rotate: -3deg; }
+.ep2__ring ellipse { fill: none; stroke: #e28aa4; stroke-width: 2.4; stroke-linecap: round; }
+.ep2__day { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ep-ink-soft); }
+
+.ep2__facts { list-style: none; padding: 0; display: grid; gap: 10px; }
+.ep2__facts li { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; font-weight: 700; color: var(--ep-ink); }
+.ep2__facts li > span:last-child { display: grid; gap: 1px; }
+.ep2__facts small { font-size: 0.76rem; font-weight: 600; letter-spacing: 0.04em; color: var(--ep-ink-soft); }
+.ep2__dot { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: #f6cfd9; color: var(--ep-rose-deep); }
+
+.ep2__actions { display: grid; gap: 4px; justify-items: center; padding-top: 4px; }
+.ep2__cta {
+  width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 15px 24px; border-radius: 999px; text-decoration: none;
+  font-weight: 800; font-size: 1rem; letter-spacing: 0.02em; color: #fff;
+  background: linear-gradient(135deg, #c4607d, var(--ep-rose) 45%, var(--ep-rose-deep));
+  box-shadow: 0 12px 26px -12px rgba(147, 53, 79, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.ep2__cta:hover { transform: translateY(-1px); box-shadow: 0 16px 30px -12px rgba(147, 53, 79, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.25); }
+.ep2__cta:focus-visible, .ep2__later:focus-visible, .ep2__close:focus-visible, .ep2__flyer:focus-visible { outline: 3px solid rgba(180, 80, 108, 0.45); outline-offset: 3px; }
+.ep2__later { border: 0; background: none; cursor: pointer; padding: 8px 12px; font: inherit; font-size: 0.86rem; font-weight: 700; color: var(--ep-ink-soft); }
+.ep2__later:hover { color: var(--ep-rose-deep); }
+
+/* Phones: a smaller flyer, a tighter note, and the ticket button pinned to the
+   bottom of the sheet so it is always in view while the details scroll. */
+@media (max-width: 759px) {
+  .ep2__panel { gap: 16px; padding-bottom: 0; }
+  .ep2__flyer { height: min(34dvh, 290px); }
+  .ep2__note { gap: 10px; padding-bottom: 0; border-radius: 6px 6px 0 0; }
+  .ep2__dot { width: 30px; height: 30px; }
+  .ep2__actions {
+    position: sticky; bottom: 0; z-index: 2;
+    margin: 4px -20px 0; padding: 14px 20px calc(10px + env(safe-area-inset-bottom));
+    background: linear-gradient(rgba(251, 246, 238, 0), var(--ep-cream) 22%);
+  }
+}
+@media (max-width: 759px) and (max-height: 700px) {
+  .ep2__flyer { height: 26dvh; }
+}
+
+/* Computer: the flyer and the note side by side */
+@media (min-width: 760px) {
+  .ep2 { align-items: center; padding: 24px; }
+  .ep2__panel {
+    max-width: 900px; max-height: min(92dvh, 760px);
+    grid-template-columns: auto 1fr; align-items: center; justify-items: stretch; gap: 40px;
+    padding: 44px 48px 44px 52px; border-radius: 30px;
+    box-shadow: 0 40px 100px -30px rgba(40, 14, 36, 0.7);
+  }
+  .ep2__panel--plain { grid-template-columns: 1fr; max-width: 560px; }
+  .ep2__grip { display: none; }
+  .ep2__close { top: 18px; right: 18px; }
+  .ep2__flyer { height: min(72dvh, 600px); transform: rotate(-2.5deg); }
+  .ep2__note { max-width: none; padding: 34px 32px 22px; gap: 16px; }
+  .ep2__actions { justify-items: stretch; }
+  .ep2__later { justify-self: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ep2__flyer, .ep2__close, .ep2__cta { transition: none; }
+}
