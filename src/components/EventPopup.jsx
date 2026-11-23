@@ -69,6 +69,11 @@ const EventPopup = () => {
       // it, and the pink ring is drawn round the date.
       ctx = gsap.context(() => {
         const phone = window.innerWidth < 760;
+        // Draw the ring by its measured length (pathLength on an ellipse is
+        // ignored by some browsers, which left only a dot).
+        const ring = rootRef.current.querySelector('.ep2__ring ellipse');
+        const len = ring?.getTotalLength?.() || 420;
+        if (ring) gsap.set(ring, { strokeDasharray: len, strokeDashoffset: len });
         gsap.timeline({ defaults: { ease: 'expo.out' } })
           .fromTo(rootRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power1.out' })
           .fromTo(panelRef.current, phone ? { y: '100%' } : { y: 50, scale: 0.94, opacity: 0 },
@@ -76,7 +81,7 @@ const EventPopup = () => {
           .fromTo('.ep2__flyer', { rotate: phone ? 0 : -9, y: -24, opacity: 0 }, { rotate: phone ? 0 : -2.5, y: 0, opacity: 1, duration: 1.3, ease: 'elastic.out(1, 0.6)' }, 0.25)
           .fromTo('.ep2__tape', { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: 'power3.out' }, 0.8)
           .fromTo('.ep2__in', { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.07 }, 0.45)
-          .fromTo('.ep2__ring ellipse', { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.1, ease: 'power2.inOut' }, 0.9);
+          .to('.ep2__ring ellipse', { strokeDashoffset: 0, duration: 1.1, ease: 'power2.inOut' }, 0.9);
       }, rootRef);
     }
     return () => {
@@ -120,7 +125,7 @@ const EventPopup = () => {
             <span className="ep2__date">
               {shortDate}
               <svg className="ep2__ring" viewBox="0 0 200 70" preserveAspectRatio="none" aria-hidden="true">
-                <ellipse cx="100" cy="35" rx="96" ry="31" pathLength="1" strokeDasharray="1" />
+                <ellipse cx="100" cy="35" rx="96" ry="31" />
               </svg>
             </span>
             <span className="ep2__day">{day}</span>
