@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import LeadPopup from './components/LeadPopup';
+import EventPopup from './components/EventPopup';
 import CartSheet from './components/CartSheet';
 import OfferTicker from './components/OfferTicker';
 import AnnouncementBanner from './components/AnnouncementBanner';
@@ -199,6 +200,7 @@ function SiteRoutes() {
       </main>
       <Footer />
       <LeadPopup />
+      <EventPopup />
       <CartSheet />
     </div>
   );

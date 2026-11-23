@@ -65,9 +65,15 @@ export const TEST_RUNS = [
     cleanup: 'Leave it, or remove the row from Vendor forms.',
   },
   {
-    id: 'newsletter-popup', title: 'Marketplace pop-up (Follow the P31 Movement)', site: 'market', who: 'visitor', minutes: 2,
-    steps: ['Open p31market.com in a private window; wait for the pop-up or tap “Subscribe to our newsletter” in the footer.', 'Enter a first name and a real email, subscribe.'],
-    expect: ['“You’re subscribed” shows; the email is in Systems → People as a subscriber.', 'The pop-up does not return on that device.'],
+    id: 'event-popup', title: 'Marketplace opening pop-up (next event invitation)', site: 'market', who: 'visitor', minutes: 1,
+    steps: ['Open p31market.com in a private window and wait two seconds.'],
+    expect: ['The invitation to the next event with its date announced and a ticket link opens (Systems → Markets & events): title, day and time, venue, Get tickets.', 'Get tickets opens the ticket link in a new tab; Maybe later closes it, and it does not return in that visit.'],
+    cleanup: 'Nothing to clean up.',
+  },
+  {
+    id: 'newsletter-popup', title: 'Newsletter sign-up (Follow the P31 Movement)', site: 'market', who: 'visitor', minutes: 2,
+    steps: ['Open p31market.com in a private window and tap “Subscribe to our newsletter” (hero or footer). It no longer opens by itself.', 'Enter a first name and a real email, subscribe.'],
+    expect: ['“You’re subscribed” shows; the email is in Systems → People as a subscriber.'],
     cleanup: 'Unsubscribe from the link in any campaign, or leave it.',
   },
   {

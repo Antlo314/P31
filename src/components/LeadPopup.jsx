@@ -1,18 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { X, ArrowRight, Check, Phone } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
 import { gsap, reducedMotion } from '../lib/motion';
 import './LeadPopup.css';
 
 import { GROUP } from '../lib/teamPhotos';
 
-const QUIET = ['/login', '/register', '/dashboard', '/systems', '/onboarding-exclusive', '/unsubscribe', '/portal', '/enroll', '/academy', '/studio'];
-
 const LeadPopup = () => {
-  const { user } = useAuth();
-  const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', phone: '', trap: '' });
   const [withPhone, setWithPhone] = useState(false);
@@ -33,34 +27,9 @@ const LeadPopup = () => {
     try { sessionStorage.setItem('p31_lead_popup_seen', '1'); } catch { /* storage blocked */ }
   }, []);
 
-  // Wait for real interest — half the page, 30 seconds, or (on desktop) the
-  // cursor heading for the tab bar — and never interrupt people who signed up,
-  // are signed in, or are working.
-  useEffect(() => {
-    if (user || QUIET.some((r) => pathname.startsWith(r))) return undefined;
-    let seen = false;
-    try { seen = sessionStorage.getItem('p31_lead_popup_seen') || localStorage.getItem('p31_subscribed'); } catch { /* ignore */ }
-    if (seen) return undefined;
-
-    const started = Date.now();
-    const onScroll = () => {
-      const depth = (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight;
-      if (depth > 0.5) done();
-    };
-    const onLeave = (e) => { if (e.clientY <= 0 && Date.now() - started > 8000) done(); };
-    const timer = setTimeout(() => done(), 30000);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    document.addEventListener('mouseout', onLeave);
-    function done() { cleanup(); show(); }
-    function cleanup() {
-      clearTimeout(timer);
-      window.removeEventListener('scroll', onScroll);
-      document.removeEventListener('mouseout', onLeave);
-    }
-    return cleanup;
-  }, [pathname, user, show]);
-
-  // Anything on the site can open it (hero buttons, footer…).
+  // It no longer opens by itself (2026-11-23): the opening pop-up is the event
+  // invitation (EventPopup.jsx). The "Subscribe to our newsletter" buttons
+  // (hero, footer, About, Dates) open this one.
   useEffect(() => {
     const onJoin = () => {
       let subscribed = false;
